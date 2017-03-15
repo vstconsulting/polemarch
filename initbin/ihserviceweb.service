@@ -1,0 +1,17 @@
+[Unit]
+Description=The IHS HTTP Server
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+ExecStart=/opt/ihservice/httpd/apachectl start
+ExecReload=/opt/ihservice/httpd/apachectl graceful
+ExecStop=/opt/ihservice/httpd/apachectl stop
+PIDFile=/var/run/ihservice/web.pid
+User=ihs
+Group=ihs
+KillSignal=SIGCONT
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

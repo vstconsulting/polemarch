@@ -1,0 +1,8 @@
+include ihservice/README.md
+include ihservice/main/settings.ini
+include requirements.txt
+recursive-include etc *
+recursive-include ihservice/static *
+recursive-include ihservice/*/templates *
+recursive-include initbin *
+include Makefile

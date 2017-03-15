@@ -1,0 +1,19 @@
+[Unit]
+Description=The IHS worker Service
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+ExecStart=/opt/ihservice/bin/ihsctl worker -o /var/log/cloudns/worker.log -l WARNING \
+                                           -p /var/run/cloudns/worker.pid \
+                                           --start
+ExecReload=/opt/ihservice/bin/ihsctl worker -p /var/run/ihservice/worker.pid --restart
+ExecStop=/opt/ihservice/bin/ihsctl worker -p /var/run/ihservice/worker.pid --stop
+PIDFile=/var/run/ihservice/worker.pid
+User=ihs
+Group=ihs
+KillSignal=SIGCONT
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

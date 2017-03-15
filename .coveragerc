@@ -1,0 +1,16 @@
+[run]
+omit =
+    .tox/*
+    */main/management/daemon.py
+    */*/migrations/*
+    */main/wsgi.py
+    */manage.py
+    *cloudnsctl
+    *setup.py
+    test.py
+    upload_big.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    nocv

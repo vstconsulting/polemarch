@@ -1,0 +1,12 @@
+djangorestframework>=3.4, <4.0
+django-filter
+django-crispy-forms
+django-celery<=3.2.1
+celery==3.1.25
+configparser==3.5.0
+six
+sqlalchemy
+python-novaclient==7.1.0
+ansible>=2.1, <=2.2.1
+docker<=2.1
+boto3==1.4.4
