@@ -103,15 +103,6 @@ class service_lock(__LockAbstractDecorator):
         return super(service_lock, self).execute(func, *args, **kwargs)
 
 
-class CloudnsException(Exception):
-    def __init__(self, *args, **kwargs):
-        self.msg = (list(args)[0:1]+[""])[0]
-        super(CloudnsException, self).__init__(*args, **kwargs)
-
-    def __repr__(self):
-        return repr(self.msg)
-
-
 class assertRaises(object):
     def __init__(self, *args, **kwargs):
         self._verbose = kwargs.pop("verbose", False)
