@@ -34,7 +34,7 @@ config.read([CONFIG_FILE, os.path.join(BASE_DIR, 'main/settings.ini')])
 SECRET_KEY = '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config.getboolean("main", "debug", fallback=True)
+DEBUG = config.getboolean("main", "debug", fallback=False)
 
 EXCHANGE_DIR = config.get("worker", "exchange_dir", fallback="/tmp")
 

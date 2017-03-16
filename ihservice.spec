@@ -79,28 +79,27 @@ mkdir -p $RPM_BUILD_ROOT/var/run/%{name}
 mkdir -p $RPM_BUILD_ROOT/var/lock/%{name}
 mkdir -p $RPM_BUILD_ROOT/usr/bin
 install -m 755 %{name}/main/settings.ini $RPM_BUILD_ROOT/etc/%{name}/settings.ini.template
-install -m 755 initbin/%{name}web.service $RPM_BUILD_ROOT/etc/systemd/system/%{shortname}web.service
-install -m 755 initbin/%{name}worker.service $RPM_BUILD_ROOT/etc/systemd/system/%{shortname}worker.service
+install -m 755 initbin/%{shortname}web.service $RPM_BUILD_ROOT/etc/systemd/system/%{shortname}web.service
+install -m 755 initbin/%{shortname}worker.service $RPM_BUILD_ROOT/etc/systemd/system/%{shortname}worker.service
 
 %post
 sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl migrate > /dev/null 2>&1
-sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl runmodwsgi \
+sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl webserver \
                                           --setup-only --port=8080 \
-                                          --user %{name} --group %{name} \
+                                          --user %{shortname} --group %{shortname} \
                                           --server-root=/opt/%{name}/httpd \
-                                          --process-name=%{name} \
                                           --log-directory=/var/log/%{name} \
                                           --access-log \
                                           --pid-file=/var/run/%{name}/web.pid \
-                                          --compress-responses --processes=2\
                                           >/dev/null 2>&1
+/usr/bin/systemctl enable %{shortname}web.service > /dev/null 2>&1
+/usr/bin/systemctl enable %{shortname}worker.service > /dev/null 2>&1
+/usr/bin/systemctl daemon-reload > /dev/null 2>&1
+
 if [ "$1" = "1" ]; then
     chkconfig --add %{shortname}web
     chkconfig --add %{shortname}worker
 fi
-/usr/bin/systemctl enable %{shortname}web.service > /dev/null 2>&1
-/usr/bin/systemctl enable %{shortname}worker.service > /dev/null 2>&1
-/usr/bin/systemctl daemon-reload > /dev/null 2>&1
 
 %preun
 /usr/bin/systemctl disable %{shortname}web.service > /dev/null 2>&1

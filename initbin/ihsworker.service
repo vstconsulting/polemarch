@@ -1,5 +1,5 @@
 [Unit]
-Description=The IHS worker Service
+Description=The Infrastructure HEAT Service worker Service
 After=network.target remote-fs.target nss-lookup.target
 
 [Service]

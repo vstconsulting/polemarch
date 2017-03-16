@@ -1,5 +1,5 @@
 [Unit]
-Description=The IHS HTTP Server
+Description=The Infrastructure HEAT Service HTTP Server
 After=network.target remote-fs.target nss-lookup.target
 
 [Service]

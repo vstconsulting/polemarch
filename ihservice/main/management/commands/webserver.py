@@ -41,16 +41,70 @@ class Command(ServiceCommand):
             action='store_true',
             dest='setup-only',
             help='Setup service.')
+        parser.add_argument(
+            '--access-log',
+            action='store_true',
+            dest='access-log',
+            help='Flag indicating whether the web server access log'
+                 'should be enabled. Defaults to being disabled.')
+        parser.add_argument(
+            '--user',
+            action='store',
+            dest='user',
+            default='',
+            type=str,
+            help='When being run by the root user, the user that the'
+                 'WSGI application should be run as.')
+        parser.add_argument(
+            '--group',
+            action='store',
+            dest='group',
+            default='',
+            type=str,
+            help='When being run by the root user, the group that the'
+                 'WSGI application should be run as.')
+        parser.add_argument(
+            '--server-root',
+            action='store',
+            dest='server-root',
+            default='/tmp/ihserviceweb',
+            type=str,
+            help='Specify an alternate directory for where the generated'
+                 'web server configuration, startup files and logs will'
+                 'be stored. Defaults to directory /tmp/ihserviceweb.')
+        parser.add_argument(
+            '--log-directory',
+            action='store',
+            dest='log-directory',
+            default='',
+            type=str,
+            help='Specify an alternate directory for where the log files'
+                 'will be stored. Defaults to the server root directory.')
+        parser.add_argument(
+            '--pid-file',
+            action='store',
+            dest='pid-file',
+            default='',
+            type=str,
+            help='Specify an alternate file to be used to store the'
+                 'process ID for the root process of the web server.')
 
-    def _get_options(self, options):
-        options = ["runmodwsgi", '--port=' + options['port'],
+    def _get_options(self, kwargs):
+        options = ["runmodwsgi", '--port=' + kwargs['port'],
                    '--process-name=ihservice', '--compress-responses',
-                   '--processes=' + options['processes'], '--log-to-terminal',
+                   '--processes=' + kwargs['processes'],
                    '--python-path=' + os.path.join(settings.BASE_DIR, '..'),
-                   '--working-directory=' + options['workdir']]
-        if options.get("setup-only", False):
-            # TODO: Add options for setup apache settings
-            options += []
+                   '--working-directory=' + kwargs['workdir'],
+                   '--server-root=' + kwargs['server-root'],
+                   '--rotate-logs']
+        options += ['--access-log'] if kwargs['access-log'] else []
+        if kwargs.get("setup-only", False):
+            options += ['--setup-only']
+            for param in ['user', 'group', 'log-directory', 'pid-file']:
+                options += ["--{}={}".format(param, kwargs[param])] \
+                            if kwargs[param] else []
+        else:
+            options += ['--log-to-terminal']
         return options
 
     def handle(self, *args, **options):

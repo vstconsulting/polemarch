@@ -1,0 +1,31 @@
+{% load staticfiles %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    {% block head %}
+
+    {% block meta %}
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NONE,NOARCHIVE" />
+    {% endblock %}
+
+   <title>{% block title %}{% if name %}{{ name }} – {% endif %}Infrastructure HEAT Service{% endblock %}</title>
+
+    {% block styles %}{% endblock %}
+    {% block headscripts %}{% endblock %}
+
+    {% endblock %}
+</head>
+{% block body %}
+<body>
+
+    {% block body_content %}
+    {% endblock %}
+
+</body>
+{% endblock %}
+{% block footerscripts %}{% endblock %}
+</html>
