@@ -1,6 +1,6 @@
 PIP=pip
 PY=python
-LOC_TEST_ENVS = build,py27-django18-coverage,py34-django110-coverage,pep,flake
+LOC_TEST_ENVS = build,py27-django18-coverage,py34-django110-coverage,pep,flake,pylint
 ENVS = $(LOC_TEST_ENVS)
 TESTS =
 NAME = ihservice

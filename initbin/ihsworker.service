@@ -4,8 +4,8 @@ After=network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=forking
-ExecStart=/opt/ihservice/bin/ihsctl worker -o /var/log/cloudns/worker.log -l WARNING \
-                                           -p /var/run/cloudns/worker.pid \
+ExecStart=/opt/ihservice/bin/ihsctl worker -o /var/log/ihservice/worker.log -l WARNING \
+                                           -p /var/run/ihservice/worker.pid \
                                            --start
 ExecReload=/opt/ihservice/bin/ihsctl worker -p /var/run/ihservice/worker.pid --restart
 ExecStop=/opt/ihservice/bin/ihsctl worker -p /var/run/ihservice/worker.pid --stop

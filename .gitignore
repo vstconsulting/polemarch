@@ -10,7 +10,7 @@ build
 *egg-info
 dist
 env
-cloudns_app/cloudns/static
+ihservice/ihservice/static
 *.log
 *.pid
 *nbproject

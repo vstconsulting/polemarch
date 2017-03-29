@@ -1,0 +1,95 @@
+image: git.vst.lan/vst/tests:tox
+
+variables:
+  TESTS: "ihservice.main.tests"
+
+stages:
+  - build
+  - test
+  - code_standarts
+  - release
+
+
+.branch_tests_template: &branch_tests
+  stage: test
+  script:
+   - make test
+   - make build-clean
+   - coverage html
+   - make rpm RELEASE=${CI_BUILD_ID}
+  artifacts:
+    name: "coverage_branch(${CI_BUILD_REF_NAME})_${CI_BUILD_ID}"
+    expire_in: 1 hour
+    paths:
+    - htmlcov/
+    - dist/
+  except:
+    - master
+    - tags
+
+
+.tests_template: &tests_template
+  stage: test
+  only:
+   - master
+  script:
+   - make test ENVS=$CI_BUILD_NAME-install
+  dependencies:
+  - build_zip
+
+
+default_tests:
+  <<: *branch_tests
+
+
+build_zip:
+  stage: build
+  only:
+   - master
+  script:
+   - make rpm RELEASE=${CI_BUILD_ID}
+  artifacts:
+    expire_in: 20 minutes
+    paths:
+    - dist/
+
+py27-django18:
+  <<: *tests_template
+py27-django19:
+  <<: *tests_template
+py27-django110:
+  <<: *tests_template
+py34-django18:
+  <<: *tests_template
+py34-django19:
+  <<: *tests_template
+py34-django110:
+  <<: *tests_template
+
+pep8_checks:
+  stage: code_standarts
+  only:
+   - master
+  script:
+   - make test ENVS=pep,flake
+  allow_failure: true
+
+pylint_checks:
+  stage: code_standarts
+  only:
+   - master
+  script:
+   - make test ENVS=pylint
+  allow_failure: true
+
+release:
+  stage: release
+  only:
+   - tags
+  script:
+   - make rpm
+  allow_failure: false
+  artifacts:
+    name: "release-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
+    paths:
+    - dist/

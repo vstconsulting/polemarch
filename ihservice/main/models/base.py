@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-from ..utils import Paginator
+from ihservice.main.utils import Paginator
 
 
 class BaseManager(models.Manager):

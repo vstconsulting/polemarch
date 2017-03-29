@@ -11,7 +11,7 @@ from django.conf import settings
 from django.db import models
 
 from .base import BaseModel, BaseManager, BaseQuerySet
-from .. import exceptions as ex
+from ...main import exceptions as ex
 
 logger = logging.getLogger("ihservice")
 

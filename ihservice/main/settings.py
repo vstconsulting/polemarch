@@ -46,7 +46,6 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -58,8 +57,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'rest_framework',
     'rest_framework.authtoken',
-    'ihservice.api',
     'ihservice.main',
+    'ihservice.api',
 ]
 
 try:
@@ -113,7 +112,7 @@ try:
 except NoSectionError:
     __DB_SETTINGS = {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'db.ihservice.sqlite3'),
     }
 
 DATABASES = {
