@@ -24,6 +24,6 @@ class ModelsTestCase(TestCase):
         # Check update tasks list
         tasks.pop(4)
         result = sc.set_tasks(tasks)
+        self.assertEqual(sc.tasks.count(), len(tasks))
         self.assertEqual(result["created"], 0, result)
         self.assertEqual(result["updated"], len(tasks), result)
-        self.assertEqual(result["deleted"], 1, result)

@@ -47,7 +47,7 @@ class Scenario(BaseModel):
 
     @property
     def tasks(self):
-        return self.task_list.tasks()
+        return self.tasklist.tasks()
 
     def __unicode__(self):
         return self.name
@@ -63,17 +63,16 @@ class Scenario(BaseModel):
     def set_tasks(self, tids):
         tasks, created, all = self.__get_tasks_list(tids), 0, len(tids)
         for pr, task in tasks.items():
-            _, cr = self.task_list.update_or_create(task=task,
-                                                    defaults={"priority": pr})
+            _, cr = self.tasklist.update_or_create(task=task,
+                                                   defaults={"priority": pr})
             created += cr
-        deleted = self.task_list.exclude(task__id__in=tids).delete()
-        return dict(all=all, updated=all-created,
-                    created=created, deleted=deleted[0])
+        self.tasklist.exclude(task__id__in=tids).delete()
+        return dict(all=all, updated=all-created, created=created)
 
 
 class TaskListQuerySet(BaseQuerySet):
     def tasks(self):
-        return Task.objects.filter(task_list__in=self)
+        return Task.objects.filter(tasklist__in=self)
 
 
 class TaskListManager(BaseManager.from_queryset(TaskListQuerySet)):
@@ -88,7 +87,7 @@ class TaskList(BaseModel):
     priority  = models.PositiveIntegerField(default=0)
 
     class Meta:
-        default_related_name = "task_list"
+        default_related_name = "tasklist"
         ordering = ["scenario", "priority", "id"]
         unique_together = ["scenario", "task", "priority"]
 

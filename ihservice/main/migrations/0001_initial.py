@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'ordering': ['scenario', 'priority', 'id'],
-                'default_related_name': 'task_list',
+                'default_related_name': 'tasklist',
             },
         ),
         migrations.AlterUniqueTogether(
