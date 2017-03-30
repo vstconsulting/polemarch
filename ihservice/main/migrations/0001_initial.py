@@ -5,6 +5,19 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import django.db.models.deletion
 import uuid
+from django.contrib.auth.hashers import make_password
+
+
+def create_admin_user(apps, schema_editor):
+    User = apps.get_registered_model('auth', 'User')
+    admin = User(
+        username='admin',
+        email='admin@example.com',
+        password=make_password('admin'),
+        is_superuser=True,
+        is_staff=True
+    )
+    admin.save()
 
 
 class Migration(migrations.Migration):
@@ -18,11 +31,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Environment',
             fields=[
-                ('id', models.AutoField(max_length=20, primary_key=True, serialize=False)),
+                ('id', models.AutoField(max_length=20, primary_key=True,
+                                        serialize=False)),
                 ('name', models.CharField(max_length=40, unique=True)),
                 ('type', models.CharField(default='Default', max_length=20)),
-                ('key', models.CharField(blank=True, max_length=2048, null=True)),
-                ('_data', models.CharField(db_column='data', default='{}', max_length=2048)),
+                ('key',
+                 models.CharField(blank=True, max_length=2048, null=True)),
+                ('_data', models.CharField(db_column='data', default='{}',
+                                           max_length=2048)),
             ],
             options={
                 'abstract': False,
@@ -31,22 +47,31 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Host',
             fields=[
-                ('id', models.AutoField(max_length=20, primary_key=True, serialize=False)),
-                ('host', models.CharField(default=uuid.uuid1, max_length=64, unique=True)),
+                ('id', models.AutoField(max_length=20, primary_key=True,
+                                        serialize=False)),
+                ('host', models.CharField(default=uuid.uuid1, max_length=128,
+                                          unique=True)),
+                ('status', models.CharField(default='', max_length=12)),
                 ('auth_user', models.CharField(default='', max_length=64)),
-                ('auth_type', models.CharField(default='PASSWD', max_length=6)),
+                (
+                'auth_type', models.CharField(default='PASSWD', max_length=6)),
                 ('auth_data', models.CharField(default='', max_length=4096)),
-                ('nodeid', models.CharField(blank=True, max_length=256, null=True)),
-                ('environment', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='main.Environment')),
+                ('nodeid',
+                 models.CharField(blank=True, max_length=256, null=True)),
+                ('environment', models.ForeignKey(blank=True, null=True,
+                                                  on_delete=django.db.models.deletion.CASCADE,
+                                                  related_name='hosts',
+                                                  to='main.Environment')),
             ],
             options={
-                'abstract': False,
+                'default_related_name': 'hosts',
             },
         ),
         migrations.CreateModel(
             name='Scenario',
             fields=[
-                ('id', models.AutoField(max_length=20, primary_key=True, serialize=False)),
+                ('id', models.AutoField(max_length=20, primary_key=True,
+                                        serialize=False)),
                 ('name', models.CharField(max_length=100, unique=True)),
             ],
             options={
@@ -56,11 +81,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Task',
             fields=[
-                ('id', models.AutoField(max_length=20, primary_key=True, serialize=False)),
+                ('id', models.AutoField(max_length=20, primary_key=True,
+                                        serialize=False)),
                 ('name', models.CharField(max_length=100, unique=True)),
                 ('data', models.CharField(max_length=2048)),
                 ('group', models.BooleanField(default=False)),
-                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='main.Task')),
+                ('parent', models.ForeignKey(blank=True, null=True,
+                                             on_delete=django.db.models.deletion.CASCADE,
+                                             to='main.Task')),
             ],
             options={
                 'abstract': False,
@@ -69,10 +97,16 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TaskList',
             fields=[
-                ('id', models.AutoField(max_length=20, primary_key=True, serialize=False)),
+                ('id', models.AutoField(max_length=20, primary_key=True,
+                                        serialize=False)),
                 ('priority', models.PositiveIntegerField(default=0)),
-                ('scenario', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.Scenario')),
-                ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.Task')),
+                ('scenario',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                   related_name='tasklist',
+                                   to='main.Scenario')),
+                ('task',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                   related_name='tasklist', to='main.Task')),
             ],
             options={
                 'ordering': ['scenario', 'priority', 'id'],
@@ -83,4 +117,5 @@ class Migration(migrations.Migration):
             name='tasklist',
             unique_together=set([('scenario', 'task', 'priority')]),
         ),
+        migrations.RunPython(create_admin_user),
     ]

@@ -279,6 +279,50 @@ CREATE_INSTANCE_ATTEMPTS = config.getint("rpc", "create_instance_attempts", fall
 CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 
 
+# Integrations settings
+__INTEGRATIONS = {
+        "Default": {
+            "BACKEND": "ihservice.main.environments.default"
+        },
+        "OpenStack": {
+            "BACKEND": "ihservice.main.environments.openstack"
+        },
+        "Amazon": {
+            "BACKEND": "ihservice.main.environments.amazon",
+            "OPTIONS": {
+                "images": [('CentOS 7', 'ami-d2c924b2')],
+                "flavors": [
+                            ('t2.micro', 't2.micro'),
+                            ('t2.small', 't2.small'),
+                            ('t2.medium', 't2.medium'),
+                            ('t2.large', 't2.large'),
+                            ('t2.xlarge', 't2.xlarge'),
+                            ('t2.2xlarge', 't2.2xlarge'),
+                            ('m3.medium', 'm3.medium'),
+                            ('m3.large', 'm3.large'),
+                            ('m3.xlarge', 'm3.xlarge'),
+                            ('m3.2xlarge', 'm3.2xlarge'),
+                           ]
+            }
+        },
+        "Docker": {
+            "BACKEND": "ihservice.main.environments.dockera",
+            "OPTIONS": {
+                "images": ["vstconsulting/centos7-ssh-password"]
+            }
+        },
+}
+INTEGRATIONS = dict()
+__INTEG_ON = [item for item in config.get("main",
+                                          "integrations",
+                                          fallback="Default,OpenStack,"
+                                                   "Amazon").split(",")
+              if item != ""]
+for __integration in __INTEGRATIONS:
+    if __integration in __INTEG_ON:
+        INTEGRATIONS[__integration] = __INTEGRATIONS[__integration]
+
+
 if "test" in sys.argv:
     CELERY_ALWAYS_EAGER = True
 

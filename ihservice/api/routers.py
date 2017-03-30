@@ -13,6 +13,17 @@ class _AbstractRouter(routers.DefaultRouter):
         self.permission_classes = kwargs.pop("perms", None)
         super(_AbstractRouter, self).__init__(*args, **kwargs)
 
+    def get_default_base_name(self, viewset):
+        queryset = getattr(viewset, 'queryset', None)
+        model = getattr(viewset, 'model', None)
+        if queryset is None:
+            assert model is not None, \
+                '`base_name` argument not specified, and could ' \
+                'not automatically determine the name from the viewset, as ' \
+                'it does not have a `.queryset` or `.model` attribute.'
+            return model._meta.object_name.lower()
+        return super(_AbstractRouter, self).get_default_base_name(viewset)
+
 
 class APIRouter(_AbstractRouter):
     root_view_name = 'api-v1'

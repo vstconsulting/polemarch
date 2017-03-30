@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.conf.urls.static import static
 
 from . import views
+from ..api.urls import urls as api_urls
 
 admin.site.site_header = 'Infrastructure Heat Service'
 admin.site.site_title = "IHService"
@@ -22,4 +23,5 @@ urlpatterns = [
     url(r'^$', admin.site.urls),
 ]
 
+urlpatterns += api_urls
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

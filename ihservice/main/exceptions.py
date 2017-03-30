@@ -13,3 +13,15 @@ class UnknownIntegrationException(IHSException):
     def __init__(self, tp):
         msg = self._def_message.format(tp)
         super(UnknownIntegrationException, self).__init__(msg)
+
+
+class NodeFailedException(IHSException):
+    pass
+
+
+class NodeOfflineException(IHSException):
+    pass
+
+
+class AnsibleNotFoundException(IHSException):
+    pass

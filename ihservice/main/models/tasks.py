@@ -32,8 +32,7 @@ class Task(BaseModel):
 
 
 class ScenarioQuerySet(BaseQuerySet):
-    def update_tasks(self, tids):
-        pass
+    pass
 
 
 class ScenarioManager(BaseManager.from_queryset(ScenarioQuerySet)):
