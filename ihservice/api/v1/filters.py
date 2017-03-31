@@ -18,7 +18,8 @@ class HostFilter(filters.FilterSet):
     class Meta:
         model = models.Host
         fields = ('id',
-                  'host',
+                  'name',
+                  'address',
                   'auth_user',
                   'auth_type',)
 

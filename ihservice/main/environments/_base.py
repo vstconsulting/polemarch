@@ -112,11 +112,9 @@ class BaseCloudIntegration(BaseIntegration):
         raise ImplementationError("network_security_rules")
 
     def _wait_until_online(self, service):
-        sl = {"ok": dict(status="PEND", err=False),
-              "retcodes": {"other": {"status": "ERR",
-                                     "err": exceptions.NodeFailedException},
-                           4: {"status": "PEND",
-                               "err": exceptions.NodeOfflineException}}}
+        sl = {"ok": dict(err=False),
+              "retcodes": {"other": {"err": exceptions.NodeFailedException},
+                           4: {"err": exceptions.NodeOfflineException}}}
         for _ in range(getattr(settings, "CREATE_INSTANCE_ATTEMPTS")):
             try:
                 service.execute_playbook("ping.yml", status_logics=sl)

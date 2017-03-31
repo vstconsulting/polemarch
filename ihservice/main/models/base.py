@@ -5,11 +5,7 @@ from django.db import models
 from ihservice.main.utils import Paginator
 
 
-class BaseManager(models.Manager):
-    pass
-
-
-class BaseQuerySet(models.QuerySet):
+class BQuerySet(models.QuerySet):
 
     def paged(self, *args, **kwargs):
         return self.get_paginator(*args, **kwargs).items()
@@ -26,13 +22,27 @@ class BaseQuerySet(models.QuerySet):
         return getattr(self, tp_name)(**{field_name: field})
 
 
-class BaseModel(models.Model):
+class BManager(models.Manager.from_queryset(BQuerySet)):
+    # pylint: disable=no-member
+    pass
+
+
+class BModel(models.Model):
+    objects    = BManager()
     id         = models.AutoField(primary_key=True,
                                   max_length=20)
 
     def __init__(self, *args, **kwargs):
-        super(BaseModel, self).__init__(*args, **kwargs)
+        super(BModel, self).__init__(*args, **kwargs)
         self.no_signal = False
+
+    class Meta:
+        abstract = True
+
+
+class BGroupedModel(BModel):
+    parent     = models.ForeignKey('self', blank=True, null=True)
+    group      = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
