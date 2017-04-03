@@ -7,7 +7,6 @@ from django.core import exceptions as djexcs
 from rest_framework import exceptions, status, views
 from rest_framework.response import Response
 
-from ..main.utils import Lock
 from ..main import exceptions as mexcs
 
 logger = logging.getLogger("ihservice")

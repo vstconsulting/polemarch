@@ -1,4 +1,4 @@
-from ._base import BaseTestCase, json
+from ._base import BaseTestCase
 from ..models import Host
 
 
