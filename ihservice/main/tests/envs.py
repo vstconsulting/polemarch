@@ -44,8 +44,8 @@ class ApiEnvsTestCase(BaseTestCase):
         data['data'] = dict(user="cepreu", password="Bp78ADpmcSMzcpac",
                             url="https://mos.vst.lan:5000/v2.0",
                             project="cepreu", network=True)
-        self.result(client.post, "/api/v1/environments/", 400,
-                    data=json.dumps(data), content_type="application/json")
+        self.get_result("post", "/api/v1/environments/", 400,
+                        data=json.dumps(data))
         self._logout(client)
 
     def test_fields_serializer(self):

@@ -22,8 +22,13 @@ class ModelsTestCase(TestCase):
             self.assertEqual(task, Task.objects.get(id=tasks[counter]))
             counter += 1
         # Check update tasks list
-        tasks.pop(4)
+        tasks = [8, 3, 99, 1, 7, 33, 12, 83]
         result = sc.set_tasks(tasks)
+        # Check tasks that returns in needed order
+        counter = 0
+        for task in sc.tasks.all():
+            self.assertEqual(task, Task.objects.get(id=tasks[counter]))
+            counter += 1
         self.assertEqual(sc.tasks.count(), len(tasks))
-        self.assertEqual(result["created"], 0, result)
-        self.assertEqual(result["updated"], len(tasks), result)
+        self.assertEqual(result["created"], 6, result)
+        self.assertEqual(result["updated"], 2, result)

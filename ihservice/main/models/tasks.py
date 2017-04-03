@@ -127,6 +127,7 @@ class Scenario(_AbstractTask):
     @transaction.atomic
     def set_tasks(self, tids):
         tasks, cr, all = self.__get_tasks_list(tids), 0, len(tids)
+        # self.tasklist.all().delete()
         for pr, task in tasks.items():
             cr += self.tasklist.update_or_create(task=task,
                                                  defaults={"priority": pr})[1]
@@ -136,7 +137,10 @@ class Scenario(_AbstractTask):
 
 class TaskListQuerySet(BQuerySet):
     def tasks(self):
-        return Task.objects.filter(tasklist__in=self)
+        qs = Task.objects.filter(tasklist__in=self)
+        return qs.order_by("tasklist__scenario",
+                           "tasklist__priority",
+                           "tasklist__id")
 
 
 class TaskListManager(BManager.from_queryset(TaskListQuerySet)):

@@ -54,13 +54,8 @@ class UserViewSet(base.ModelViewSet):
 class HostViewSet(base.ModelViewSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
+    serializer_class_one = serializers.OneHostSerializer
     filter_class = filters.HostFilter
-
-    def get_serializer_class(self):
-        af = self.request.query_params.get("af", "")
-        if af == "y":
-            return serializers.FullHostSerializer
-        return super(HostViewSet, self).get_serializer_class()
 
 
 class EnvironmentViewSet(base.ModelViewSet):
@@ -75,3 +70,22 @@ class EnvironmentViewSet(base.ModelViewSet):
     @list_route(methods=['get'])
     def types(self, request):
         return Response(self.model.objects.get_integrations())
+
+
+class TaskViewSet(base.ModelViewSet):
+    model = serializers.models.Task
+    serializer_class = serializers.TaskSerializer
+    serializer_class_one = serializers.OneTaskSerializer
+    filter_class = filters.TaskFilter
+
+
+class ScenarioViewSet(base.ModelViewSet):
+    model = serializers.models.Scenario
+    serializer_class = serializers.ScenarioSerializer
+    serializer_class_one = serializers.OneScenarioSerializer
+    filter_class = filters.ScenarioFilter
+
+    @detail_route(methods=['post'])
+    def tasks(self, request, pk):
+        serializer = self.get_serializer(self.get_object())
+        return Response(serializer.set_tasks(request.data))

@@ -26,8 +26,6 @@ def ihservice_exception_handler(exc, context):
     elif isinstance(exc, mexcs.UnknownIntegrationException):
         return Response({"details": exc.msg},
                         status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-    elif isinstance(exc, Lock.AcquireLockException):
-        return Response({'details': str(exc)}, status=status.HTTP_423_LOCKED)
     elif not isinstance(exc, default_exc) and isinstance(exc, Exception):
         return Response({'details': str(sys.exc_info()[1]),
                          'error_type': sys.exc_info()[0].__class__.__name__},

@@ -1,12 +1,16 @@
 import json  # noqa: F401
 import random
 import string
+
+import six
 from django.test import TestCase
 from django.conf import settings
 from django.contrib.auth.models import User
 
 
 class BaseTestCase(TestCase):
+    std_codes = dict(get=200, post=201, patch=200, delete=204)
+
     def setUp(self):
         self.user = self._create_user()
         self.login_url = getattr(settings, 'LOGIN_URL', '/login/')
@@ -35,9 +39,24 @@ class BaseTestCase(TestCase):
     def result(self, request, url, code=200, *args, **kwargs):
         response = request(url, *args, **kwargs)
         self.assertRCode(response, code)
-        return json.loads(response.rendered_content.decode())
+        try:
+            return json.loads(response.rendered_content.decode())
+        except ValueError:
+            return None
 
     def assertRCode(self, resp, code=200):
         self.assertEqual(resp.status_code, code,
                          "{} != {}\n{}".format(resp.status_code, code,
                                                resp.rendered_content.decode()))
+
+    def get_result(self, rtype, url, code=None, *args, **kwargs):
+        client = self._login()
+        request = getattr(client, rtype)
+        if code is None:
+            code = self.std_codes.get(rtype, 200)
+        if kwargs.get("data", False):
+            if isinstance(kwargs["data"], six.string_types):
+                kwargs["content_type"] = "application/json"
+        result = self.result(request, url, code=code, *args, **kwargs)
+        self._logout(client)
+        return result

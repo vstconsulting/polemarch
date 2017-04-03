@@ -11,6 +11,7 @@ from django.conf import settings
 
 from .base import BModel, BManager, BQuerySet, BGroupedModel, models
 from ...main import exceptions as ex
+from ..validators import validate_hostname
 
 logger = logging.getLogger("ihservice")
 
@@ -110,11 +111,10 @@ class Host(BGroupedModel):
     objects = HostManager()
     address     = models.CharField(max_length=128,
                                    unique=True,
-                                   default=uuid.uuid1)
+                                   default=uuid.uuid1,
+                                   validators=[validate_hostname])
     name        = models.CharField(max_length=100,
                                    default="null")
-    status      = models.CharField(max_length=12,
-                                   default="")
     auth_user   = models.CharField(max_length=64,
                                    default="")
     auth_type   = models.CharField(max_length=6,
@@ -132,6 +132,10 @@ class Host(BGroupedModel):
         default_related_name = "hosts"
 
     def __unicode__(self):
+        return self.server_name
+
+    @property
+    def server_name(self):
         if not self.group:
             if self.name != "null":
                 return "{}({}@{})".format(self.name,

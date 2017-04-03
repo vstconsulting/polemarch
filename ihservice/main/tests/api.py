@@ -4,6 +4,8 @@ from django.contrib.auth.hashers import make_password
 from ihservice.main.utils import redirect_stdany
 from ._base import BaseTestCase, User, json
 from .envs import ApiEnvsTestCase
+from .tasks import ApiTasksTestCase
+from .hosts import ApiHostsTestCase
 from ..models import Task
 
 
@@ -162,7 +164,8 @@ class ApiUsersTestCase(BaseTestCase):
         self._logout(client)
 
 
-class APITestCase(ApiUsersTestCase, ApiEnvsTestCase):
+class APITestCase(ApiUsersTestCase, ApiEnvsTestCase, ApiTasksTestCase,
+                  ApiHostsTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
         for i in range(1, 101):
@@ -181,6 +184,8 @@ class APITestCase(ApiUsersTestCase, ApiEnvsTestCase):
         self.assertTrue(result.get('users', False))
         self.assertTrue(result.get('hosts', False))
         self.assertTrue(result.get('environments', False))
+        self.assertTrue(result.get('tasks', False))
+        self.assertTrue(result.get('scenarios', False))
 
     def test_api_router(self):
         client = self._login()
