@@ -19,7 +19,7 @@ class UserViewSet(base.ModelViewSet):
     def set_password(self, request, pk=None):
         user = self.get_object()
         if not self.request.user.is_superuser and user != request.user:
-            raise excepts.PermissionDenied
+            raise excepts.PermissionDenied  # pragma: no cover
         data = request.data
         user.set_password(data['password'])
         user.save()

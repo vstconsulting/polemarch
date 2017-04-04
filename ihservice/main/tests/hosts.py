@@ -1,4 +1,4 @@
-from ._base import BaseTestCase
+from ._base import BaseTestCase, json
 from ..models import Host
 
 
@@ -58,15 +58,32 @@ class ApiHostsTestCase(BaseTestCase):
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["address"][0],
                          "Invalid hostname or IP '__as--'.")
+        # Removing
+        base_url = "/api/v1/hosts/"
+        filter_url = "{}?address=".format(base_url)
+        filter_url += "127.0.1.1,127.0.1.4,127.0.1.3,127.0.1.4"
+        result = self.get_result("get", filter_url)
+        for host in result["results"]:
+            self.get_result("delete", base_url+"{}/".format(host["id"]))
+        removed_hosts = [i["id"] for i in result["results"]]
+        self.assertEqual(Host.objects.filter(id__in=removed_hosts).count(), 0)
 
     def test_filter_host(self):
         base_url = "/api/v1/hosts/"
         filter_url = "{}?address=127.0.0.1,127.0.0.2".format(base_url)
-        result = self.get_result("get", filter_url, 200)
+        result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 2)
 
         filter_url = "{}?address__not=127.0.0.3".format(base_url)
-        result = self.get_result("get", filter_url, 200)
+        result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 3, result)
+
+    def test_update_host(self):
+        url = "/api/v1/hosts/{}/".format(self.h1.id)
+        data = dict(auth_user="root")
+        self.get_result("patch", url, data=json.dumps(data))
+        result = self.get_result("get", url)
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(result["auth_user"], data["auth_user"], result)

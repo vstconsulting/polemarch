@@ -92,7 +92,7 @@ class TaskManager(BManager.from_queryset(TaskQuerySet)):
 
 class Task(_AbstractTask):
     objects = TaskManager()
-    data    = models.CharField(max_length=2048)
+    data    = models.CharField(max_length=2*1024*1024)
 
     def __unicode__(self):
         return self.name

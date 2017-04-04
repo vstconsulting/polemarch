@@ -96,19 +96,19 @@ sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl webserver \
 /usr/bin/systemctl enable %{shortname}worker.service > /dev/null 2>&1
 /usr/bin/systemctl daemon-reload > /dev/null 2>&1
 
-if [ "$1" = "1" ]; then
-    chkconfig --add %{shortname}web
-    chkconfig --add %{shortname}worker
-fi
+# if [ "$1" = "1" ]; then
+    # chkconfig --add %{shortname}web
+    # chkconfig --add %{shortname}worker
+# fi
 
 %preun
 /usr/bin/systemctl disable %{shortname}web.service > /dev/null 2>&1
 /usr/bin/systemctl disable %{shortname}worker.service > /dev/null 2>&1
 if [ "$1" = "0" ]; then
 	service %{shortname}web stop >/dev/null 2>&1
-	chkconfig --del %{shortname}web
+	# chkconfig --del %{shortname}web
 	service %{shortname}worker stop >/dev/null 2>&1
-	chkconfig --del %{shortname}worker
+	# chkconfig --del %{shortname}worker
 fi
 
 %prep

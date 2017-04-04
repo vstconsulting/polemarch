@@ -4,7 +4,7 @@ from ._base import BaseTestCase, json
 
 try:
     from unittest.mock import patch
-except ImportError:
+except ImportError:  # pragma: no cover
     from mock import patch
 
 
