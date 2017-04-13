@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'djcelery',
     'crispy_forms',
     'rest_framework',
     'rest_framework.authtoken',
@@ -200,18 +199,25 @@ STATICFILES_FINDERS = (
 
 # Celery settings
 
-CELERYD_HIJACK_ROOT_LOGGER = False
-BROKER_URL = config.get("rpc", "connection", fallback="sqla+sqlite:////tmp/sqlite.ampq").format(**__kwargs)
-CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
-BROKER_HEARTBEAT = config.getint("rpc", "heartbeat", fallback=10)
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
-CELERY_SEND_EVENTS = True
-TASKS_RESULTS_EXPIRY_DAYS = config.getint("rpc", "results_expiry_days", fallback=10)
+__broker_url = config.get("rpc", "connection", fallback="filesystem:///var/tmp").format(**__kwargs)
+if __broker_url.startswith("filesystem://"):
+    __broker_folder = __broker_url.split("://", 1)[1]
+    CELERY_BROKER_URL = "filesystem://"
+    CELERY_BROKER_TRANSPORT_OPTIONS = {
+        "data_folder_in": __broker_folder,
+        "data_folder_out": __broker_folder,
+        "data_folder_processed": __broker_folder,
+    }
+else:
+    CELERY_BROKER_URL = __broker_url  # pragma: no cover
 
-import djcelery
-os.environ.setdefault("CELERY_LOADER", "django")
-djcelery.setup_loader()
+CELERY_RESULT_BACKEND = config.get("rpc", "result_backend", fallback="file:///tmp").format(**__kwargs)
+CELERY_WORKER_CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+CELERY_BROKER_HEARTBEAT = config.getint("rpc", "heartbeat", fallback=10)
+CELERY_BEAT_SCHEDULER = 'ihservice.main.celery_beat_scheduler:SingletonPersistentScheduler'
+CELERY_ACCEPT_CONTENT = ['pickle', 'json']
+CELERY_RESULT_EXPIRES = config.getint("rpc", "results_expiry_days", fallback=10)
 
 # Some hacks with logs
 
@@ -324,6 +330,6 @@ for __integration in __INTEGRATIONS:
 
 
 if "test" in sys.argv:
-    CELERY_ALWAYS_EAGER = True
+    CELERY_TASK_ALWAYS_EAGER = True
 
 APACHE = False if ("webserver" in sys.argv) or ("runserver" in sys.argv) else True

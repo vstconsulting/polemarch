@@ -49,6 +49,7 @@ class Lock(object):
 
     TIMEOUT = 60*60*24
     GLOBAL = "global-deploy"
+    SCHEDULER = "celery-beat"
 
     class AcquireLockException(Exception):
         pass
