@@ -11,6 +11,7 @@ omit =
     upload_big.py
     ihservice/__init__.py
     ihservice/main/management/commands/webserver.py
+    *celery_beat_scheduler.py
 
 [report]
 exclude_lines =

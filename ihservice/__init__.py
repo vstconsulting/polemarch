@@ -4,7 +4,6 @@ def _main(settings="ihservice.main.settings"):
     # pylint: disable=unused-variable
     import os
     import sys
-    os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
     os.environ.setdefault('C_FORCE_ROOT', 'true')
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
 

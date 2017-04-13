@@ -4,11 +4,18 @@ After=network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=forking
-ExecStart=/opt/ihservice/bin/ihsctl worker -o /var/log/ihservice/worker.log -l WARNING \
-                                           -p /var/run/ihservice/worker.pid \
-                                           --start
-ExecReload=/opt/ihservice/bin/ihsctl worker -p /var/run/ihservice/worker.pid --restart
-ExecStop=/opt/ihservice/bin/ihsctl worker -p /var/run/ihservice/worker.pid --stop
+ExecStart=/opt/ihservice/bin/celery multi start worker -A ihservice.celery_app:app \
+                                  -B -f /var/log/ihservice/worker.log -l WARNING \
+                                  --pidfile=/var/run/ihservice/worker.pid \
+                                  --schedule=/var/run/ihservice/beat-schedule
+ExecReload=/opt/ihservice/bin/celery multi restart worker -A ihservice.celery_app:app \
+                                   -B -f /var/log/ihservice/worker.log -l WARNING \
+                                   --pidfile=/var/run/ihservice/worker.pid \
+                                   --schedule=/var/run/ihservice/beat-schedule
+ExecStop=/opt/ihservice/bin/celery multi stopwait worker -A ihservice.celery_app:app \
+                                 -B -f /var/log/ihservice/worker.log -l WARNING \
+                                 --pidfile=/var/run/ihservice/worker.pid \
+                                 --schedule=/var/run/ihservice/beat-schedule
 PIDFile=/var/run/ihservice/worker.pid
 User=ihs
 Group=ihs
