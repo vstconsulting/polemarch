@@ -10,7 +10,7 @@ from rest_framework.validators import ValidationError
 
 from ...main import exceptions
 
-logger = logging.getLogger("ihservice")
+logger = logging.getLogger("polemarch")
 
 
 class ImplementationError(NotImplementedError):

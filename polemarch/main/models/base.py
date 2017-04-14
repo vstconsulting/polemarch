@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-from ihservice.main.utils import Paginator
+from polemarch.main.utils import Paginator
 
 
 class BQuerySet(models.QuerySet):

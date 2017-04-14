@@ -3,12 +3,12 @@ import os
 from setuptools import find_packages, setup
 from setuptools.command.install import install
 
-import ihservice
+import polemarch
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-RMF = os.path.join(os.path.dirname(__file__), 'ihservice/README.md')
+RMF = os.path.join(os.path.dirname(__file__), 'polemarch/README.md')
 with open(RMF) as readme:
     README = readme.read()
 
@@ -24,12 +24,12 @@ class PostInstallCommand(install):
         # Does not migrate on pip installation
 
 setup(
-    name='ihservice',
-    version=ihservice.__version__,
+    name='polemarch',
+    version=polemarch.__version__,
     packages=find_packages(),
     include_package_data=True,
     license='MIT',
-    description='Infrasructure Heat Service for orcestration infrastructure.',
+    description='Polemarch is ansible based for orcestration infrastructure.',
     long_description=README,
     author='VST Consulting',
     author_email='sergey.k@vstconsulting.net',
@@ -44,7 +44,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
-    scripts=['ihsctl'],
+    scripts=['polemarchctl'],
     install_requires=[
         "django>=1.8,<1.11",
     ] + REQUIRES,

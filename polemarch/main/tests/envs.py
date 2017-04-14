@@ -59,8 +59,8 @@ class ApiEnvsTestCase(BaseTestCase):
                     data=json.dumps(data), content_type="application/json")
         self._logout(client)
 
-    @patch("ihservice.main.environments.default.Integration.rm_host")
-    @patch("ihservice.main.environments.default.Integration.rm")
+    @patch("polemarch.main.environments.default.Integration.rm_host")
+    @patch("polemarch.main.environments.default.Integration.rm")
     def test_clear_calls(self, rm, rm_serv):
         client = self._login()
         # Default environment

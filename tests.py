@@ -1,1 +1,1 @@
-from ihservice.main.tests import *
+from polemarch.main.tests import *

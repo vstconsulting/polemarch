@@ -11,7 +11,7 @@ import django
 from ... import __version__
 from ..utils import exception_with_traceback
 
-logger = logging.getLogger("ihservice")
+logger = logging.getLogger("polemarch")
 
 
 class CommandError(CommandErrorBase):

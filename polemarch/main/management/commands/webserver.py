@@ -9,7 +9,7 @@ from ..base import ServiceCommand
 
 
 class Command(ServiceCommand):
-    help = 'WebServer management cli'
+    help = 'Polemarch WebServer management cli'
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
@@ -91,7 +91,7 @@ class Command(ServiceCommand):
 
     def _get_options(self, kwargs):
         options = ["runmodwsgi", '--port=' + kwargs['port'],
-                   '--process-name=ihservice', '--compress-responses',
+                   '--process-name=polemarch', '--compress-responses',
                    '--processes=' + kwargs['processes'],
                    '--python-path=' + os.path.join(settings.BASE_DIR, '..'),
                    '--working-directory=' + kwargs['workdir'],

@@ -1,6 +1,6 @@
 #  pylint: disable=invalid-name
 """
-WSGI config for ihservice project.
+WSGI config for polemarch project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -15,6 +15,6 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
 os.environ.setdefault('C_FORCE_ROOT', 'true')
 os.environ.setdefault("DJANGO_SETTINGS_MODULE",
-                      "ihservice.main.settings")
+                      "polemarch.main.settings")
 
 application = get_wsgi_application()

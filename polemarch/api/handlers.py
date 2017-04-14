@@ -9,10 +9,10 @@ from rest_framework.response import Response
 
 from ..main import exceptions as mexcs
 
-logger = logging.getLogger("ihservice")
+logger = logging.getLogger("polemarch")
 
 
-def ihservice_exception_handler(exc, context):
+def polemarch_exception_handler(exc, context):
     # pylint: disable=too-many-return-statements
     logger.info(traceback.format_exc())
     default_exc = (exceptions.APIException, Http404, djexcs.PermissionDenied)

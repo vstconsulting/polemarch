@@ -1,6 +1,6 @@
 # Macros
-%define name ihservice
-%define shortname ihs
+%define name polemarch
+%define shortname polemarch
 %define file_permissions_user %{shortname}
 %define file_permissions_group %{shortname}
 %define venv_cmd virtualenv --no-site-packages

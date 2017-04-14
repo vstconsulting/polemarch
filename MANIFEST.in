@@ -1,8 +1,8 @@
-include ihservice/README.md
-include ihservice/main/settings.ini
+include polemarch/README.md
+include polemarch/main/settings.ini
 include requirements.txt
 recursive-include etc *
-recursive-include ihservice/static *
-recursive-include ihservice/*/templates *
+recursive-include polemarch/static *
+recursive-include polemarch/*/templates *
 recursive-include initbin *
 include Makefile

@@ -9,7 +9,7 @@ from django.db import transaction
 from .base import BModel, BManager, BQuerySet, BGroupedModel, models
 from ...main import exceptions as ex
 
-logger = logging.getLogger("ihservice")
+logger = logging.getLogger("polemarch")
 
 
 # Block of abstract models

@@ -13,7 +13,7 @@ from .base import BModel, BManager, BQuerySet, BGroupedModel, models
 from ...main import exceptions as ex
 from ..validators import validate_hostname
 
-logger = logging.getLogger("ihservice")
+logger = logging.getLogger("polemarch")
 
 
 def get_integrations():

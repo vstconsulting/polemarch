@@ -11,3 +11,4 @@ ansible>=2.1, <=2.2.1
 docker<=2.1
 boto3==1.4.4
 jsonfield==2.0.1
+mod-wsgi==4.5.14
