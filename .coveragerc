@@ -9,8 +9,8 @@ omit =
     *setup.py
     test.py
     upload_big.py
-    ihservice/__init__.py
-    ihservice/main/management/commands/webserver.py
+    polemarch/__init__.py
+    polemarch/main/management/commands/webserver.py
     *celery_beat_scheduler.py
 
 [report]

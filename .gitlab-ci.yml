@@ -1,7 +1,7 @@
 image: git.vst.lan/vst/tests:tox
 
 variables:
-  TESTS: "ihservice.main.tests"
+  TESTS: "polemarch.main.tests"
 
 stages:
   - build
