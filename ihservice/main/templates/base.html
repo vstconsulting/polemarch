@@ -1,31 +1,140 @@
 {% load staticfiles %}
 {% load i18n %}
-
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     {% block head %}
 
-    {% block meta %}
-        <meta charset="UTF-8">
+      {% block meta %}
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <meta name="robots" content="NONE,NOARCHIVE" />
+      {% endblock %}
+
+      <title>{% block title %}{% if name %}{{ name }} – {% endif %}GUI Dashboard{% endblock %}</title>
+
+      {% block style %}
+
+        {% block bootstrap_theme %} 
+        {% endblock %}  
+         
+        <!-- jQuery 2.2.3 -->
+        <script src="{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}"></script>
+        <!-- Bootstrap 3.3.6 -->
+        <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+        <!-- FastClick -->
+        <script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+        <!-- AdminLTE App -->
+        <script src="{% static 'js/app.js' %}"></script>
+      
+        
+        <!-- Bootstrap 3.3.6 -->
+        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="{% static 'dist/css/font-awesome.min.css' %}">
+        <!-- Ionicons -->
+        <link rel="stylesheet" href="{% static 'dist/css/ionicons.min.css' %}">
+        <!-- Theme style -->
+        <link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+        <!-- AdminLTE Skins. Choose a skin from the css/skins
+             folder instead of downloading all of them to reduce the load. -->
+        <link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+        <!-- iCheck -->
+        <link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
+        <!-- Morris chart -->
+        <link rel="stylesheet" href="{% static 'plugins/morris/morris.css' %}">
+        <!-- jvectormap -->
+        <link rel="stylesheet" href="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.css' %}">
+        <!-- Date Picker -->
+        <link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
+        <!-- Daterange picker -->
+        <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+        <!-- bootstrap wysihtml5 - text editor -->
+        <link rel="stylesheet" href="{% static 'plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css' %}">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+ 
+        <script type="text/javascript">
+            var hostname = window.location.host;
+            var server_status_types = '{{server_status_types|safe}}';
+
+            {% if user.is_authenticated %}
+                var is_authenticated = true
+            {% else %}
+                var is_authenticated = false
+            {% endif %}
+
+            {% if user.is_superuser %}
+                var is_superuser = true
+            {% else %}
+                var is_superuser = false
+            {% endif %}
+        </script>
+
+        {% block custom_style %}
+        {% endblock %}
+      {% endblock %}
+
     {% endblock %}
+  </head>
 
-   <title>{% block title %}{% if name %}{{ name }} – {% endif %}Infrastructure HEAT Service{% endblock %}</title>
-
-    {% block styles %}{% endblock %}
-    {% block headscripts %}{% endblock %}
-
-    {% endblock %}
-</head>
 {% block body %}
-<body>
+    <body class="hold-transition skin-black-light sidebar-mini {% block bodyclass %}{% endblock %}"> 
+    {% block navbar %}
+        <div class="wrapper" >
+            <header class="main-header">
+                <!-- Logo -->
+                <a href="#" class="logo">
+                  <!-- mini logo for sidebar mini 50x50 pixels -->
+                  <span class="logo-mini"><b>D</b>NS</span>
+                  <!-- logo for regular state and mobile devices -->
+                  <span class="logo-lg"><b>Cloud</b>NS</span>
+                </a>
 
-    {% block body_content %}
+                <!-- Header Navbar: style can be found in header.less -->
+                <nav class="navbar navbar-static-top">
+                    <!-- Sidebar toggle button-->
+                    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                        <span class="sr-only">Toggle navigation</span>
+                    </a>
+                    <!-- Navbar Right Menu -->
+                    <div class="navbar-custom-menu">
+                        <ul class="nav navbar-nav">
+                            {% include "menu.html" %}
+                        </ul>
+                    </div>
+                </nav>
+                <!-- Header Navbar: style can be found in header.less -->
+            </header>
+
+            <!-- Left side column. contains the logo and sidebar -->
+            <aside class="main-sidebar">
+                <!-- sidebar: style can be found in sidebar.less -->
+                <section class="sidebar">
+                    <!-- /.search form -->
+                    <!-- sidebar menu: : style can be found in sidebar.less -->
+                    <ul class="sidebar-menu"  id='left_sidebar'>
+                        {% block leftMenu %}
+                            {% include "leftMenu.html" %}
+                        {% endblock %}
+                    </ul>
+                </section>
+                <!-- /.sidebar -->
+            </aside>
+
+            <!-- Content Wrapper. Contains page content -->
+            <div class="content-wrapper" id='spajs-right-area'>
+                <!-- Main content -->
+                {% block content %}{% endblock %}
+            </div>
+        </div>
     {% endblock %}
 
-</body>
+    {% block script %}{% endblock %}
+    </body>
 {% endblock %}
-{% block footerscripts %}{% endblock %}
 </html>
