@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password
 from polemarch.main.utils import redirect_stdany
 from ._base import BaseTestCase, User, json
 from .envs import ApiEnvsTestCase
-from .hosts import ApiHostsTestCase
+from .hosts import ApiHostsTestCase, ApiGroupsTestCase
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -163,7 +163,7 @@ class ApiUsersTestCase(BaseTestCase):
 
 
 class APITestCase(ApiUsersTestCase, ApiEnvsTestCase,
-                  ApiHostsTestCase):
+                  ApiHostsTestCase, ApiGroupsTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 

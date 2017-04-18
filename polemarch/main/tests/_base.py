@@ -44,6 +44,9 @@ class BaseTestCase(TestCase):
         except ValueError:
             return None
 
+    def assertCount(self, list, count):
+        self.assertEqual(len(list), count)
+
     def assertRCode(self, resp, code=200):
         self.assertEqual(resp.status_code, code,
                          "{} != {}\n{}".format(resp.status_code, code,
