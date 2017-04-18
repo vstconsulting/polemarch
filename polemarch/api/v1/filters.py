@@ -24,19 +24,19 @@ class UserFilter(filters.FilterSet):
                   'email',)
 
 
-class HostFilter(filters.FilterSet):
-    address__not = filters.django_filters.CharFilter(method=extra_filter)
-    address      = filters.django_filters.CharFilter(method=extra_filter)
-
-    class Meta:
-        model = models.Host
-        fields = ('id',
-                  'name',
-                  'address',
-                  'auth_user',
-                  'auth_type',
-                  'group',
-                  'parent',)
+# class HostFilter(filters.FilterSet):
+#     address__not = filters.django_filters.CharFilter(method=extra_filter)
+#     address      = filters.django_filters.CharFilter(method=extra_filter)
+#
+#     class Meta:
+#         model = models.Host
+#         fields = ('id',
+#                   'name',
+#                   'address',
+#                   'auth_user',
+#                   'auth_type',
+#                   'group',
+#                   'parent',)
 
 
 class EnvironmentsFilter(filters.FilterSet):
@@ -46,20 +46,3 @@ class EnvironmentsFilter(filters.FilterSet):
                   'type',
                   'name',)
 
-
-class TaskFilter(filters.FilterSet):
-    class Meta:
-        model = models.Task
-        fields = ('id',
-                  'name',
-                  'group',
-                  'parent',)
-
-
-class ScenarioFilter(filters.FilterSet):
-    class Meta:
-        model = models.Scenario
-        fields = ('id',
-                  'name',
-                  'group',
-                  'parent',)

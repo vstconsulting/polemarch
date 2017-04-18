@@ -8,10 +8,13 @@ from importlib import import_module
 
 import six
 from django.conf import settings
+from django.contrib.contenttypes.fields import (GenericForeignKey,
+                                                GenericRelation)
+from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 
-from .base import BModel, BManager, BQuerySet, BGroupedModel, models
+from .base import BModel, BManager, BQuerySet, models
 from ...main import exceptions as ex
-from ..validators import validate_hostname
 
 logger = logging.getLogger("polemarch")
 
@@ -32,6 +35,23 @@ def get_integration(name):
 
 def get_integ_opts(name):
     return get_integrations().get(name, {}).get('OPTIONS', {})
+
+
+# Block of abstractions
+class _AbstractInventoryQuerySet(BQuerySet):
+    @transaction.atomic
+    def create(self, **kwargs):
+        variables = kwargs.pop("variables", {})
+        obj = super(_AbstractInventoryQuerySet, self).create(**kwargs)
+        for key, value in variables.items():
+            obj.variables.create(key=key, value=value)
+        return obj
+
+    def var_filter(self, **kwargs):
+        qs = self
+        for key, value in kwargs.items():
+            qs = qs.filter(variables__key=key, variables__value=value)
+        return qs
 
 
 # Block of models
@@ -97,7 +117,21 @@ class Environment(BModel):
         return self.integration.additionals()
 
 
-class HostQuerySet(BQuerySet):
+class Variable(BModel):
+    content_type   = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id      = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    key            = models.CharField(max_length=128)
+    value          = models.CharField(max_length=2*1024)
+
+    def __unicode__(self):
+        return "{}={}".format(self.key, self.value)
+
+    def __str__(self):
+        return self.__unicode__()
+
+
+class HostQuerySet(_AbstractInventoryQuerySet):
     # pylint: disable=no-member
     pass
 
@@ -107,23 +141,14 @@ class HostManager(BManager.from_queryset(HostQuerySet)):
     pass
 
 
-class Host(BGroupedModel):
+class Host(BModel):
     objects = HostManager()
-    address     = models.CharField(max_length=128,
-                                   unique=True,
-                                   default=uuid.uuid1,
-                                   validators=[validate_hostname])
-    name        = models.CharField(max_length=100,
-                                   default="null")
-    auth_user   = models.CharField(max_length=64,
-                                   default="")
-    auth_type   = models.CharField(max_length=6,
-                                   default="PASSWD")
-    auth_data   = models.CharField(max_length=4096,
-                                   default="")
-    nodeid      = models.CharField(max_length=256,
-                                   blank=True,
-                                   null=True)
+    name        = models.CharField(max_length=512,
+                                   default=uuid.uuid1)
+    type        = models.CharField(max_length=5,
+                                   default="HOST")
+    variables   = GenericRelation(Variable, related_query_name="variables",
+                                  object_id_field="object_id")
     environment = models.ForeignKey(Environment,
                                     blank=True,
                                     null=True)
@@ -132,18 +157,10 @@ class Host(BGroupedModel):
         default_related_name = "hosts"
 
     def __unicode__(self):
-        return self.server_name
+        return str(self.name)
 
-    @property
-    def server_name(self):
-        if not self.group:
-            if self.name != "null":
-                return "{}({}@{})".format(self.name,
-                                          self.auth_user,
-                                          self.address)
-            return "{}@{}".format(self.auth_user,
-                                  self.address)
-        return "{}".format(self.name)
+    def __str__(self):
+        return self.__unicode__()
 
     @property
     def integration(self):
@@ -152,3 +169,31 @@ class Host(BGroupedModel):
 
     def prepare(self):
         self.integration.prepare_service(self)
+
+
+class GroupQuerySet(_AbstractInventoryQuerySet):
+    # pylint: disable=no-member
+    pass
+
+
+class GroupManager(BManager.from_queryset(GroupQuerySet)):
+    # pylint: disable=no-member
+    pass
+
+
+class Group(BModel):
+    objects = HostManager()
+    name        = models.CharField(max_length=512,
+                                   default=uuid.uuid1)
+    hosts       = models.ManyToManyField(Host)
+    variables   = GenericRelation(Variable, related_query_name="variables",
+                                  object_id_field="object_id")
+
+    class Meta:
+        default_related_name = "groups"
+
+    def __unicode__(self):
+        return str(self.name)
+
+    def __str__(self):
+        return self.__unicode__()

@@ -109,95 +109,44 @@ class EnvironmentSerializer(serializers.ModelSerializer):
                   'hosts')
 
 
-class FullHostSerializer(serializers.ModelSerializer):
-    nodeid    = serializers.CharField(read_only=True)
-
-    class Meta:
-        model = models.Host
-        fields = ('id',
-                  'name',
-                  'address',
-                  'auth_user',
-                  'auth_type',
-                  'auth_data',
-                  'environment',
-                  'nodeid',
-                  'group',
-                  'parent',
-                  'url',)
-
-
-class HostSerializer(FullHostSerializer):
-    auth_data = serializers.CharField(write_only=True, required=False,
-                                      style={'input_type': 'password'})
-    environment = ModelRelatedField(required=False, model=models.Environment)
-
-    class Meta(FullHostSerializer.Meta):
-        model = models.Host
-        fields = ('id',
-                  'name',
-                  'address',
-                  'auth_user',
-                  'auth_type',
-                  'auth_data',
-                  'environment',
-                  'group',
-                  'parent',
-                  'url',)
-
-
-class OneHostSerializer(HostSerializer):
-
-    class Meta(FullHostSerializer.Meta):
-        pass
-
-
-class TaskSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Task
-        fields = ('id',
-                  'name',
-                  'group',
-                  'parent',
-                  'url',)
-
-
-class OneTaskSerializer(TaskSerializer):
-
-    class Meta:
-        model = models.Task
-        fields = ('id',
-                  'name',
-                  'group',
-                  'parent',
-                  'data',)
-
-
-class ScenarioSerializer(serializers.ModelSerializer):
-    tasks = TaskSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = models.Scenario
-        fields = ('id',
-                  'name',
-                  'tasks',
-                  'group',
-                  'parent',
-                  'url',)
-
-
-class OneScenarioSerializer(ScenarioSerializer):
-    tasks = OneTaskSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = models.Scenario
-        fields = ('id',
-                  'name',
-                  'tasks',
-                  'group',
-                  'parent',
-                  'url',)
-
-    def set_tasks(self, tasks):
-        return self.instance.set_tasks(tasks)
+# class FullHostSerializer(serializers.ModelSerializer):
+#     nodeid    = serializers.CharField(read_only=True)
+#
+#     class Meta:
+#         model = models.Host
+#         fields = ('id',
+#                   'name',
+#                   'address',
+#                   'auth_user',
+#                   'auth_type',
+#                   'auth_data',
+#                   'environment',
+#                   'nodeid',
+#                   'group',
+#                   'parent',
+#                   'url',)
+#
+#
+# class HostSerializer(FullHostSerializer):
+#     auth_data = serializers.CharField(write_only=True, required=False,
+#                                       style={'input_type': 'password'})
+#     environment = ModelRelatedField(required=False, model=models.Environment)
+#
+#     class Meta(FullHostSerializer.Meta):
+#         model = models.Host
+#         fields = ('id',
+#                   'name',
+#                   'address',
+#                   'auth_user',
+#                   'auth_type',
+#                   'auth_data',
+#                   'environment',
+#                   'group',
+#                   'parent',
+#                   'url',)
+#
+#
+# class OneHostSerializer(HostSerializer):
+#
+#     class Meta(FullHostSerializer.Meta):
+#         pass

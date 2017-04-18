@@ -4,9 +4,7 @@ from __future__ import unicode_literals
 import logging
 import subprocess
 
-from django.db import transaction
-
-from .base import BModel, BManager, BQuerySet, BGroupedModel, models
+# from .base import BModel, BManager, BQuerySet, BGroupedModel, models
 from ...main import exceptions as ex
 
 logger = logging.getLogger("polemarch")
@@ -70,94 +68,4 @@ class ExecuteStatusHandler:
         return result
 
 
-class _AbstractTask(BGroupedModel):
-    name    = models.CharField(max_length=100, unique=True)
-
-    class Meta:
-        abstract = True
-
-    def execute(self):
-        return True
-
-
 # Block of real models
-class TaskQuerySet(BQuerySet):
-    pass
-
-
-class TaskManager(BManager.from_queryset(TaskQuerySet)):
-    # pylint: disable=no-member
-    pass
-
-
-class Task(_AbstractTask):
-    objects = TaskManager()
-    data    = models.CharField(max_length=2*1024*1024)
-
-    def __unicode__(self):
-        return self.name
-
-
-class ScenarioQuerySet(BQuerySet):
-    pass
-
-
-class ScenarioManager(BManager.from_queryset(ScenarioQuerySet)):
-    # pylint: disable=no-member
-    pass
-
-
-class Scenario(_AbstractTask):
-    objects = ScenarioManager()
-
-    @property
-    def tasks(self):
-        return self.tasklist.tasks()
-
-    def __unicode__(self):
-        return self.name
-
-    def __get_tasks_list(self, tids):
-        counter, tasks, qs = 0, {}, Task.objects.filter(id__in=tids)
-        for i in tids:
-            tasks[counter] = qs.get(id=i)
-            counter += 1
-        return tasks
-
-    @transaction.atomic
-    def set_tasks(self, tids):
-        tasks, cr, all = self.__get_tasks_list(tids), 0, len(tids)
-        # self.tasklist.all().delete()
-        for pr, task in tasks.items():
-            cr += self.tasklist.update_or_create(task=task,
-                                                 defaults={"priority": pr})[1]
-        self.tasklist.exclude(task__id__in=tids).delete()
-        return dict(all=all, updated=all-cr, created=cr)
-
-
-class TaskListQuerySet(BQuerySet):
-    def tasks(self):
-        qs = Task.objects.filter(tasklist__in=self)
-        return qs.order_by("tasklist__scenario",
-                           "tasklist__priority",
-                           "tasklist__id")
-
-
-class TaskListManager(BManager.from_queryset(TaskListQuerySet)):
-    # pylint: disable=no-member
-    pass
-
-
-class TaskList(BModel):
-    objects   = TaskListManager()
-    scenario  = models.ForeignKey(Scenario)
-    task      = models.ForeignKey(Task)
-    priority  = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        default_related_name = "tasklist"
-        ordering = ["scenario", "priority", "id"]
-        unique_together = ["scenario", "task", "priority"]
-
-    def __unicode__(self):
-        return "{} - {}({})".format(self.scenario, self.task, self.priority)
