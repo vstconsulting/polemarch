@@ -1,0 +1,19 @@
+{% load i18n %}
+{% load staticfiles %}
+{% load rest_framework %}
+{% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+ 
+    {% if user.is_authenticated %} 
+    <li><a href="/help/"  ><i class="fa fa-info"></i> <span>Help</span></a></li>
+    <li><a href="/api/"><i class="glyphicon glyphicon-star"></i> <span>{% trans 'API' %}</span></a></li>
+    {% endif %}
+    
+    {% if user.is_active and user.is_staff %}
+    <!--<li><a href="/admin/"><i class="glyphicon glyphicon-cog"></i> <span>{% trans 'Settings' %}</span></a></li>-->
+    {% endif %}
+    {% if user.is_authenticated %}
+    <li><a href='{{ logout_url|default:"/logout/" }}'><i class="glyphicon glyphicon-user"></i> <span>Logout</span></a></li>
+    {% else %}
+    <li><a href='{{ login_url|default:"/login/" }}?next={{request.path}}'><i class="glyphicon glyphicon-user"></i> <span>Login</span></a></li>
+    {% endif %}
+    
