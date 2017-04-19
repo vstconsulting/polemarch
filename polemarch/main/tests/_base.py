@@ -48,11 +48,26 @@ class BaseTestCase(TestCase):
         self.assertEqual(len(list), count)
 
     def assertRCode(self, resp, code=200):
+        '''
+        Fail if response code is not equal. Message is response body.
+        :param resp: - response object
+        :param code: - expected code
+        :return: None
+        '''
         self.assertEqual(resp.status_code, code,
                          "{} != {}\n{}".format(resp.status_code, code,
                                                resp.rendered_content.decode()))
 
     def get_result(self, rtype, url, code=None, *args, **kwargs):
+        '''
+        Test request with returning result of request
+        :param rtype:  - request type (methods from Client class): get, post etc
+        :param url:    - requested url
+        :param code:   - expected return code from request.
+        :param args:   - extra-args for Client class
+        :param kwargs: - extra-kwargs for Client class
+        :return:       - result of request
+        '''
         client = self._login()
         request = getattr(client, rtype)
         if code is None:

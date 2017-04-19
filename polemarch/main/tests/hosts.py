@@ -132,31 +132,52 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
 
     def test_hosts_in_group(self):
         url = "/api/v1/groups/"  # URL to groups layer
-        data = [dict(name="hosted_group1"), dict(name="hosted_group2")]
+        data = [dict(name="hosted_group1"),
+                dict(name="hosted_group2"),
+                dict(name="hosted_group3"),
+                dict(name="hosted_group4",
+                     children=True)]
         gr_id = self.get_result("post", url, 201, data=data[0])["id"]
-        gr_url = url + "{}/".format(gr_id)  # URL to created group
-        gr_hosts_url = gr_url + "hosts/"    # URL to hosts list in group
+        gr_ch_id = self.get_result("post", url, 201, data=data[3])["id"]
         data = [dict(name="127.0.1.1", type="HOST", variables=self.vars),
                 dict(name="hostlocl", type="HOST", variables=self.vars3),
                 dict(name="127.0.1.[5:6]", type="RANGE", variables=self.vars2)]
-        results_id = self._create_hosts(data)
+        hosts_id = self._create_hosts(data)
+        groups_id = [self.get_result("post", url, 201, data=data[1])["id"],
+                     self.get_result("post", url, 201, data=data[2])["id"],
+                     gr_id]
 
-        def compare_list(rtype, code, hosts):
-            self.get_result(rtype, gr_hosts_url, code, data=hosts)
+        def compare_list(rtype, code, gr_id, entries, list_url):
+            gr_url = url + "{}/".format(gr_id)      # URL to created group
+            gr_lists_url = gr_url + list_url + "/"  # URL to list in group
+            self.get_result(rtype, gr_lists_url, code, data=entries)
             rhosts = self.get_result("get", gr_url)["hosts"]
-            self.assertCount(rhosts, len(hosts))
-            self.assertCount(set(rhosts).intersection(hosts), len(hosts))
+            self.assertCount(rhosts, len(entries))
+            self.assertCount(set(rhosts).intersection(entries), len(entries))
 
-        # Check empty group
-        self.assertCount(self.get_result("get", gr_url)["hosts"], 0)
+        # Test for group with hosts
         # Just put two hosts in group
-        compare_list("post", 200, results_id[0:2])
+        compare_list("post", 200, gr_id, hosts_id[0:2], "hosts")
         # Delete one of hosts in group
-        compare_list("delete", 204, [results_id[0]])
+        compare_list("delete", 204, gr_id, [hosts_id[0]], "hosts")
         # Full update list of hosts
-        compare_list("put", 200, results_id)
+        compare_list("put", 200, gr_id, hosts_id, "hosts")
+        # Error on operations with subgroups
+        compare_list("post", 409, gr_id, groups_id[0:2], "groups")
+        compare_list("delete", 409, gr_id, [groups_id[0]], "groups")
+        compare_list("put", 409, gr_id, groups_id, "groups")
 
-        #TODO: Наследуюемые группы.
+        # Test for group:children
+        # Just put two groups in group
+        compare_list("post", 200, gr_ch_id, groups_id[0:2], "groups")
+        # Delete one of groups in group
+        compare_list("delete", 204, gr_ch_id, [groups_id[0]], "groups")
+        # Full update groups of group
+        compare_list("put", 200, gr_ch_id, groups_id, "groups")
+        # Error on operations with hosts
+        compare_list("post", 409, gr_id, groups_id[0:2], "hosts")
+        compare_list("delete", 409, gr_id, [groups_id[0]], "hosts")
+        compare_list("put", 409, gr_id, groups_id, "hosts")
 
     def test_filter_group(self):
         base_url = "/api/v1/groups/"
@@ -177,3 +198,68 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         result = self.get_result("get", url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["variables"], data["variables"], result)
+
+
+class ApiInventoriesTestCase(_ApiGHBaseTestCase):
+    def setUp(self):
+        super(ApiInventoriesTestCase, self).setUp()
+        self.vars = dict(auth_user="centos")
+        self.vars2 = dict(ansible_port="2222")
+        self.vars3 = dict(ansible_ssh_pass="qwerty")
+        self.vars3.update(self.vars)
+        self.vars3.update(self.vars2)
+        inv1 = Inventories.objects.create(name="First inventory")
+        inv2 = Inventories.objects.create(name="Second inventory")
+
+    def test_create_delete_inventory(self):
+        url = "/api/v1/inventories/"
+        self._list_test(url, 2)
+        self._details_test(url+"{}/".format(self.inv1.id),
+                           name=self.inv1.name, hosts=[], groups=[])
+
+        data = [dict(name="Inv1", variables=self.vars),
+                dict(name="Inv2", variables=self.vars2),
+                dict(name="Inv3", variables=self.vars3), ]
+        results_id = self._mass_create(url, data)
+
+        for host_id in results_id:
+            self.get_result("delete", url + "{}/".format(host_id))
+        self.assertEqual(Host.objects.filter(id__in=results_id).count(), 0)
+
+    def test_hosts_in_group(self):
+        url = "/api/v1/inventories/"  # URL to groups layer
+
+        groups_data = [dict(name="one", variables=self.vars),
+                       dict(name="two", variables=self.vars2),
+                       dict(name="three", variables=self.vars3)]
+        hosts_data = [dict(name="127.0.1.1", type="HOST", variables=self.vars),
+                      dict(name="hostlocl", type="HOST", variables=self.vars3)]
+        groups_id = self._create_groups(groups_data)
+        hosts_id = self._create_hosts(hosts_data)
+
+        data = dict(name="Inv3", variables=self.vars3)
+        inv_id = self.get_result("post", url, 201, data=data)["id"]
+
+        def compare_list(rtype, code, gr_id, entries, list_url):
+            inv_url = url + "{}/".format(gr_id)      # URL to created group
+            gr_lists_url = inv_url + list_url + "/"  # URL to list in group
+            self.get_result(rtype, gr_lists_url, code, data=entries)
+            rhosts = self.get_result("get", inv_url)["hosts"]
+            self.assertCount(rhosts, len(entries))
+            self.assertCount(set(rhosts).intersection(entries), len(entries))
+
+        # Test hosts
+        # Just put two hosts in inventory
+        compare_list("post", 200, inv_id, hosts_id[0:2], "hosts")
+        # Delete one of hosts in inventory
+        compare_list("delete", 204, inv_id, [hosts_id[0]], "hosts")
+        # Full update list of inventory
+        compare_list("put", 200, inv_id, hosts_id, "hosts")
+
+        # Test groups
+        # Just put two groups in inventory
+        compare_list("post", 200, inv_id, groups_id[0:2], "groups")
+        # Delete one of groups in inventory
+        compare_list("delete", 204, inv_id, [groups_id[0]], "groups")
+        # Full update groups of inventory
+        compare_list("put", 200, inv_id, groups_id, "groups")
