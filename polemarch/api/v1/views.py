@@ -57,8 +57,12 @@ class HostViewSet(base.ModelViewSet):
     serializer_class_one = serializers.OneHostSerializer
     filter_class = filters.HostFilter
 
-    def create(self, request, *args, **kwargs):
-        return super(HostViewSet, self).create(request, *args, **kwargs)
+
+class GroupViewSet(base.ModelViewSet):
+    model = serializers.models.Group
+    serializer_class = serializers.GroupSerializer
+    serializer_class_one = serializers.OneGroupSerializer
+    filter_class = filters.GroupFilter
 
 
 class EnvironmentViewSet(base.ModelViewSet):

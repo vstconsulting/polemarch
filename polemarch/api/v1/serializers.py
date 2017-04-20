@@ -127,27 +127,29 @@ class VariableSerializer(serializers.ModelSerializer):
 
 
 class _WithVariablesSerializer(serializers.ModelSerializer):
-    def is_valid(self, raise_exception=False):
-        variables = self.initial_data.get("variables", None)
+    def __do_with_vars(self, method, *args, **kwargs):
+        variables = kwargs['validated_data'].pop("vars", None)
+        instance = method(*args, **kwargs)
         if variables is not None:
-            variables = json.loads(variables)
-        result = super(_WithVariablesSerializer, self).is_valid(raise_exception)
-        self._validated_data["variables"] = variables
-        return result
-
-    def create(self, validated_data):
-        variables = validated_data.pop("variables")
-        instance = super(_WithVariablesSerializer, self).create(validated_data)
-        instance.set_vars(variables)
+            if isinstance(variables, (six.string_types, six.text_type)):
+                variables = json.loads(variables)
+            instance.set_vars(variables)
         return instance
 
-    def save(self, **kwargs):
-        return super(_WithVariablesSerializer, self).save(**kwargs)
+    def create(self, validated_data):
+        method = super(_WithVariablesSerializer, self).create
+        return self.__do_with_vars(method, validated_data=validated_data)
+
+    def update(self, instance, validated_data):
+        method = super(_WithVariablesSerializer, self).update
+        return self.__do_with_vars(method, instance,
+                                   validated_data=validated_data)
 
 
 class HostSerializer(_WithVariablesSerializer):
-    environment = ModelRelatedField(required=False, model=models.Environment)
-    variables   = VariableSerializer(write_only=True, required=False, many=True)
+    vars = DictField(required=False, write_only=True)
+    environment = ModelRelatedField(required=False,
+                                    model=models.Environment)
 
     class Meta:
         model = models.Host
@@ -155,12 +157,12 @@ class HostSerializer(_WithVariablesSerializer):
                   'name',
                   'type',
                   'environment',
-                  'variables',
+                  'vars',
                   'url',)
 
 
 class OneHostSerializer(HostSerializer):
-    variables = VariableSerializer(required=False, many=True)
+    vars = DictField(required=False)
 
     class Meta:
         model = models.Host
@@ -168,47 +170,28 @@ class OneHostSerializer(HostSerializer):
                   'name',
                   'type',
                   'environment',
-                  'variables',
+                  'vars',
                   'url',)
 
-# class FullHostSerializer(serializers.ModelSerializer):
-#     nodeid    = serializers.CharField(read_only=True)
-#
-#     class Meta:
-#         model = models.Host
-#         fields = ('id',
-#                   'name',
-#                   'address',
-#                   'auth_user',
-#                   'auth_type',
-#                   'auth_data',
-#                   'environment',
-#                   'nodeid',
-#                   'group',
-#                   'parent',
-#                   'url',)
-#
-#
-# class HostSerializer(FullHostSerializer):
-#     auth_data = serializers.CharField(write_only=True, required=False,
-#                                       style={'input_type': 'password'})
-#     environment = ModelRelatedField(required=False, model=models.Environment)
-#
-#     class Meta(FullHostSerializer.Meta):
-#         model = models.Host
-#         fields = ('id',
-#                   'name',
-#                   'address',
-#                   'auth_user',
-#                   'auth_type',
-#                   'auth_data',
-#                   'environment',
-#                   'group',
-#                   'parent',
-#                   'url',)
-#
-#
-# class OneHostSerializer(HostSerializer):
-#
-#     class Meta(FullHostSerializer.Meta):
-#         pass
+
+class GroupSerializer(_WithVariablesSerializer):
+    vars = DictField(required=False, write_only=True)
+
+    class Meta:
+        model = models.Group
+        fields = ('id',
+                  'name',
+                  'vars',
+                  'url',)
+
+class OneGroupSerializer(HostSerializer):
+    vars  = DictField(required=False)
+    hosts = HostSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = models.Group
+        fields = ('id',
+                  'name',
+                  'hosts',
+                  'vars',
+                  'url',)

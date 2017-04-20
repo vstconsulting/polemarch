@@ -55,7 +55,7 @@ class Variable(BModel):
 class _AbstractInventoryQuerySet(BQuerySet):
     @transaction.atomic
     def create(self, **kwargs):
-        variables = kwargs.pop("variables", {})
+        variables = kwargs.pop("vars", {})
         obj = super(_AbstractInventoryQuerySet, self).create(**kwargs)
         for key, value in variables.items():
             obj.variables.create(key=key, value=value)
@@ -78,15 +78,11 @@ class _AbstractModel(BModel):
     class Meta:
         abstract = True
 
+    @transaction.atomic()
     def set_vars(self, variables):
+        self.variables.all().delete()
         for key, value in variables.items():
             self.variables.create(key=key, value=value)
-
-    def rm_vars(self, keys=None):
-        if keys is not None:
-            self.variables.filter(key__in=keys).delete()
-        else:
-            self.variables.all().delete()
 
     @property
     def vars(self):

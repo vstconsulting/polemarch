@@ -79,7 +79,7 @@ class BaseTestCase(TestCase):
         self._logout(client)
         return result
 
-    def _mass_create(self, url, data, *fields):
+    def mass_create(self, url, data, *fields):
         '''
         Mass creation objects in api-abstration
         :param url: - url to abstract layer
@@ -88,15 +88,17 @@ class BaseTestCase(TestCase):
         :return: - list of id by every resulted models
         '''
         results_id = []
+        counter = 0
         for dt in data:
-            result = self.get_result("post", url, 201, data=dt)
+            result = self.get_result("post", url, 201, data=json.dumps(dt))
             self.assertTrue(isinstance(result, dict))
             for field in fields:
-                self.assertEqual(result[field], data[0][field])
+                self.assertEqual(result[field], data[counter][field])
             results_id.append(result["id"])
+            counter += 1
         return results_id
 
-    def _list_test(self, url, count):
+    def list_test(self, url, count):
         '''
         Test for get list of models
         :param url: - url to abstract layer
@@ -107,7 +109,7 @@ class BaseTestCase(TestCase):
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], count)
 
-    def _details_test(self, url, **kwargs):
+    def details_test(self, url, **kwargs):
         '''
         Test for get details of model
         :param url: - url to abstract layer
@@ -119,3 +121,17 @@ class BaseTestCase(TestCase):
         self.assertTrue(isinstance(result, dict))
         for key, value in kwargs.items():
             self.assertEqual(result[key], value)
+
+    def _check_update(self, url, data, **fields):
+        '''
+        Test update instance of model
+        :param url: - url to instance
+        :param data: - update fields
+        :param fields: - checking resulted fields as named args
+        :return: None
+        '''
+        self.get_result("patch", url, data=json.dumps(data))
+        result = self.get_result("get", url)
+        self.assertTrue(isinstance(result, dict))
+        for field, value in fields.items():
+            self.assertEqual(result[field], value)

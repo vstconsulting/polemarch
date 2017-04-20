@@ -34,6 +34,16 @@ class HostFilter(filters.FilterSet):
                   'name',)
 
 
+class GroupFilter(filters.FilterSet):
+    name__not = filters.django_filters.CharFilter(method=extra_filter)
+    name      = filters.django_filters.CharFilter(method=extra_filter)
+
+    class Meta:
+        model = models.Group
+        fields = ('id',
+                  'name',)
+
+
 class EnvironmentsFilter(filters.FilterSet):
     class Meta:
         model = models.Environment

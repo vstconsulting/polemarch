@@ -25,23 +25,23 @@ class _ApiGHBaseTestCase(BaseTestCase):
         self.assertCount(set(rhosts).intersection(req_entries), len(res_entries))
 
     def _create_hosts(self, hosts):
-        return self._mass_create("/api/v1/hosts/", hosts,
-                                 "name", "type", "variables")
+        return self.mass_create("/api/v1/hosts/", hosts,
+                                 "name", "type", "vars")
 
     def _create_groups(self, groups):
-        return self._mass_create("/api/v1/groups/", groups,
-                                 "name", "variables")
+        return self.mass_create("/api/v1/groups/", groups,
+                                 "name", "vars")
 
     def _create_inventories(self, inventories):
-        return self._mass_create("/api/v1/inventories/", inventories,
-                                 "name", "variables")
+        return self.mass_create("/api/v1/inventories/", inventories,
+                                 "name", "vars")
 
     def _create_tasks(self, tasks):
-        return self._mass_create("/api/v1/tasks/", tasks,
+        return self.mass_create("/api/v1/tasks/", tasks,
                                  "inventory", "playbook")
 
     def _create_periodic_tasks(self, tasks):
-        return self._mass_create("/api/v1/periodic-tasks/", tasks,
+        return self.mass_create("/api/v1/periodic-tasks/", tasks,
                                  "task", "schedule", "type")
 
 
@@ -54,23 +54,23 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         self.vars3.update(self.vars)
         self.vars3.update(self.vars2)
         self.h1 = Host.objects.create(name="127.0.0.1",
-                                      type="HOST", variables=self.vars)
+                                      type="HOST", vars=self.vars)
         self.h2 = Host.objects.create(name="hostonlocal",
-                                      type="HOST", variables=self.vars3)
+                                      type="HOST", vars=self.vars3)
         self.h3 = Host.objects.create(name="127.0.0.[3:4]",
-                                      type="RANGE", variables=self.vars)
+                                      type="RANGE", vars=self.vars)
         self.h4 = Host.objects.create(name="127.0.0.[5:6]",
-                                      type="RANGE", variables=self.vars2)
+                                      type="RANGE", vars=self.vars2)
 
     def test_create_delete_host(self):
         url = "/api/v1/hosts/"
-        self._list_test(url, 4)
-        self._details_test(url+"{}/".format(self.h1.id), name=self.h1.name)
+        self.list_test(url, 4)
+        self.details_test(url + "{}/".format(self.h1.id), name=self.h1.name)
 
-        data = [dict(name="127.0.1.1", type="HOST", variables=self.vars),
-                dict(name="hostlocl", type="HOST", variables=self.vars3),
-                dict(name="127.0.1.[3:4]", type="RANGE", variables=self.vars),
-                dict(name="127.0.1.[5:6]", type="RANGE", variables=self.vars2)]
+        data = [dict(name="127.0.1.1", type="HOST", vars=self.vars),
+                dict(name="hostlocl", type="HOST", vars=self.vars3),
+                dict(name="127.0.1.[3:4]", type="RANGE", vars=self.vars),
+                dict(name="127.0.1.[5:6]", type="RANGE", vars=self.vars2)]
         results_id = self._create_hosts(data)
 
         for host_id in results_id:
@@ -91,11 +91,10 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
 
     def test_update_host(self):
         url = "/api/v1/hosts/{}/".format(self.h1.id)
-        data = dict(variables=dict(auth_user="ubuntu"))
-        self.get_result("patch", url, data=json.dumps(data))
-        result = self.get_result("get", url)
-        self.assertTrue(isinstance(result, dict))
-        self.assertEqual(result["vars"], data["vars"], result)
+        data1 = dict(vars=dict(auth_user="ubuntu"))
+        self._check_update(url, data1, vars=data1["vars"], name=self.h1.name)
+        data2 = dict(name="127.1.0.1")
+        self._check_update(url, data2, vars=data1["vars"], name=data2["name"])
 
 
 class ApiGroupsTestCase(_ApiGHBaseTestCase):
@@ -112,12 +111,12 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
 
     def test_create_delete_group(self):
         url = "/api/v1/groups/"
-        self._list_test(url, 3)
-        self._details_test(url+"{}/".format(self.gr1.id), name=self.gr1.name)
+        self.list_test(url, 3)
+        self.details_test(url + "{}/".format(self.gr1.id), name=self.gr1.name)
 
-        data = [dict(name="one", variables=self.vars),
-                dict(name="two", variables=self.vars2),
-                dict(name="three", variables=self.vars3)]
+        data = [dict(name="one", vars=self.vars),
+                dict(name="two", vars=self.vars2),
+                dict(name="three", vars=self.vars3)]
         results_id = self._create_groups(data)
 
         for host_id in results_id:
@@ -133,9 +132,9 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
                      children=True)]
         gr_id = self.get_result("post", url, 201, data=data[0])["id"]
         gr_ch_id = self.get_result("post", url, 201, data=data[3])["id"]
-        data = [dict(name="127.0.1.1", type="HOST", variables=self.vars),
-                dict(name="hostlocl", type="HOST", variables=self.vars3),
-                dict(name="127.0.1.[5:6]", type="RANGE", variables=self.vars2)]
+        data = [dict(name="127.0.1.1", type="HOST", vars=self.vars),
+                dict(name="hostlocl", type="HOST", vars=self.vars3),
+                dict(name="127.0.1.[5:6]", type="RANGE", vars=self.vars2)]
         hosts_id = self._create_hosts(data)
         groups_id = [self.get_result("post", url, 201, data=data[1])["id"],
                      self.get_result("post", url, 201, data=data[2])["id"],
@@ -179,23 +178,22 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
 
     def test_filter_group(self):
         base_url = "/api/v1/groups/"
-        filter_url = "{}?name=127.0.0.1,127.0.0.2".format(base_url)
+        filter_url = "{}?name=base_one,base_two".format(base_url)
         result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 2)
 
-        filter_url = "{}?name__not=127.0.0.3".format(base_url)
+        filter_url = "{}?name__not=base_three".format(base_url)
         result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
-        self.assertEqual(result["count"], 3, result)
+        self.assertEqual(result["count"], 2, result)
 
     def test_update_group(self):
         url = "/api/v1/groups/{}/".format(self.gr1.id)
-        data = dict(variables=dict(auth_user="ubuntu"))
-        self.get_result("patch", url, data=json.dumps(data))
-        result = self.get_result("get", url)
-        self.assertTrue(isinstance(result, dict))
-        self.assertEqual(result["variables"], data["variables"], result)
+        data1 = dict(vars=dict(auth_user="ubuntu"))
+        self._check_update(url, data1, vars=data1["vars"], name=self.gr1.name)
+        data2 = dict(name="new_group_name")
+        self._check_update(url, data2, vars=data1["vars"], name=data2["name"])
 
 
 class ApiInventoriesTestCase(_ApiGHBaseTestCase):
@@ -211,14 +209,14 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
 
     def test_create_delete_inventory(self):
         url = "/api/v1/inventories/"
-        self._list_test(url, 2)
-        self._details_test(url+"{}/".format(self.inv1.id),
-                           name=self.inv1.name, hosts=[], groups=[])
+        self.list_test(url, 2)
+        self.details_test(url + "{}/".format(self.inv1.id),
+                          name=self.inv1.name, hosts=[], groups=[])
 
-        data = [dict(name="Inv1", variables=self.vars),
-                dict(name="Inv2", variables=self.vars2),
-                dict(name="Inv3", variables=self.vars3), ]
-        results_id = self._mass_create(url, data, "name", "variables")
+        data = [dict(name="Inv1", vars=self.vars),
+                dict(name="Inv2", vars=self.vars2),
+                dict(name="Inv3", vars=self.vars3), ]
+        results_id = self.mass_create(url, data, "name", "vars")
 
         for host_id in results_id:
             self.get_result("delete", url + "{}/".format(host_id))
@@ -227,15 +225,15 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
     def test_hosts_in_inventory(self):
         url = "/api/v1/inventories/"  # URL to inventories layer
 
-        groups_data = [dict(name="one", variables=self.vars),
-                       dict(name="two", variables=self.vars2),
-                       dict(name="three", variables=self.vars3)]
-        hosts_data = [dict(name="127.0.1.1", type="HOST", variables=self.vars),
-                      dict(name="hostlocl", type="HOST", variables=self.vars3)]
+        groups_data = [dict(name="one", vars=self.vars),
+                       dict(name="two", vars=self.vars2),
+                       dict(name="three", vars=self.vars3)]
+        hosts_data = [dict(name="127.0.1.1", type="HOST", vars=self.vars),
+                      dict(name="hostlocl", type="HOST", vars=self.vars3)]
         groups_id = self._create_groups(groups_data)
         hosts_id = self._create_hosts(hosts_data)
 
-        data = dict(name="Inv3", variables=self.vars3)
+        data = dict(name="Inv3", vars=self.vars3)
         inv_id = self.get_result("post", url, 201, data=data)["id"]
 
         # Test hosts
@@ -274,11 +272,11 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
 
     def test_update_inventory(self):
         url = "/api/v1/inventories/{}/".format(self.inv1.id)
-        data = dict(variables=dict(auth_user="ubuntu"))
+        data = dict(vars=dict(auth_user="ubuntu"))
         self.get_result("patch", url, data=json.dumps(data))
         result = self.get_result("get", url)
         self.assertTrue(isinstance(result, dict))
-        self.assertEqual(result["variables"], data["variables"], result)
+        self.assertEqual(result["vars"], data["vars"], result)
 
 
 class ApiProjectsTestCase(_ApiGHBaseTestCase):
@@ -291,14 +289,14 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
 
     def test_create_delete_project(self):
         url = "/api/v1/projects/"
-        self._list_test(url, 2)
-        self._details_test(url+"{}/".format(self.prj1.id),
-                           name=self.prj1.name,
-                           repository="git@ex.us:dir/rep1.git")
+        self.list_test(url, 2)
+        self.details_test(url + "{}/".format(self.prj1.id),
+                          name=self.prj1.name,
+                          repository="git@ex.us:dir/rep1.git")
 
         data = [dict(name="Prj3", repository="git@ex.us:dir/rep3.git"),
                 dict(name="Prj4", repository="git@ex.us:dir/rep4.git")]
-        results_id = self._mass_create(url, data, "name", "repository")
+        results_id = self.mass_create(url, data, "name", "repository")
 
         for project_id in results_id:
             self.get_result("delete", url + "{}/".format(project_id))
@@ -307,9 +305,9 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
     def test_inventories_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer
 
-        inventories_data = [dict(name="Inv1", variables={}),
-                            dict(name="Inv2", variables={}),
-                            dict(name="Inv2", variables={})]
+        inventories_data = [dict(name="Inv1", vars={}),
+                            dict(name="Inv2", vars={}),
+                            dict(name="Inv2", vars={})]
         inventories_id = self._create_inventories(inventories_data)
 
         data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
@@ -329,7 +327,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
     def test_tasks_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer
 
-        inventories_data = [dict(name="Inv1", variables={})]
+        inventories_data = [dict(name="Inv1", vars={})]
         inventory_id = self._create_inventories(inventories_data)[0]
 
 
@@ -355,7 +353,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
     def test_periodic_tasks_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer
 
-        inventories_data = [dict(name="Inv1", variables={})]
+        inventories_data = [dict(name="Inv1", vars={})]
         inventory_id = self._create_inventories(inventories_data)[0]
         tasks_data = [dict(inventory=inventory_id, playbook="play1.yml")]
         tasks_id = self._create_tasks(tasks_data)
