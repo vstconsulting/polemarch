@@ -40,6 +40,10 @@ class _ApiGHBaseTestCase(BaseTestCase):
         return self._mass_create("/api/v1/tasks/", tasks,
                                  "inventory", "playbook")
 
+    def _create_periodic_tasks(self, tasks):
+        return self._mass_create("/api/v1/periodic-tasks/", tasks,
+                                 "task", "schedule", "type")
+
 
 class ApiHostsTestCase(_ApiGHBaseTestCase):
     def setUp(self):
@@ -311,10 +315,14 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
         prj_id = self.get_result("post", url, 201, data=data)["id"]
 
+        # Test inventories
+        # Just put two inventory in project
         self._compare_list(url, "post", 200, prj_id, inventories_id[0:2],
                            "inventories", inventories_id[0:2])
+        # Delete one of inventory in project
         self._compare_list(url, "delete", 204, prj_id, [inventories_id[0]],
                            "hosts", inventories_id[1:2])
+        # Full update list of project
         self._compare_list(url, "put", 200, prj_id, inventories_id, "hosts",
                            inventories_id)
 
@@ -333,9 +341,39 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
         prj_id = self.get_result("post", url, 201, data=data)["id"]
 
+        # Test tasks
+        # Just put two tasks in project
         self._compare_list(url, "post", 200, prj_id, tasks_id[0:2],
                            "inventories", tasks_id[0:2])
+        # Delete one of tasks in project
         self._compare_list(url, "delete", 204, prj_id, [tasks_id[0]],
                            "hosts", tasks_id[1:2])
+        # Full update tasks of project
         self._compare_list(url, "put", 200, prj_id, tasks_id, "hosts",
                            tasks_id)
+
+    def test_periodic_tasks_in_project(self):
+        url = "/api/v1/projects/"  # URL to projects layer
+
+        inventories_data = [dict(name="Inv1", variables={})]
+        inventory_id = self._create_inventories(inventories_data)[0]
+        tasks_data = [dict(inventory=inventory_id, playbook="play1.yml")]
+        tasks_id = self._create_tasks(tasks_data)
+        schedules_data = [dict(task=tasks_id[0], schedule="10", type="DELTA"),
+                          dict(task=tasks_id[0], schedule="5", type="DELTA"),
+                          dict(task=tasks_id[0], schedule="1", type="DELTA")]
+        schedules_id = self._create_periodic_tasks(schedules_data)
+
+        data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
+        prj_id = self.get_result("post", url, 201, data=data)["id"]
+
+        # Test tasks
+        # Just put two periodic tasks in project
+        self._compare_list(url, "post", 200, prj_id, schedules_id[0:2],
+                           "inventories", schedules_id[0:2])
+        # Delete one of periodic tasks in project
+        self._compare_list(url, "delete", 204, prj_id, [schedules_id[0]],
+                           "hosts", schedules_id[1:2])
+        # Full update periodic tasks of project
+        self._compare_list(url, "put", 200, prj_id, schedules_id, "hosts",
+                           schedules_id)
