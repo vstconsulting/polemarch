@@ -1,4 +1,5 @@
 # pylint: disable=no-member,unused-argument
+from __future__ import unicode_literals
 import json
 
 import six
@@ -108,6 +109,67 @@ class EnvironmentSerializer(serializers.ModelSerializer):
                   'data',
                   'hosts')
 
+
+class DictSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        return {item.key:item.value for item in data.all()}
+
+
+class VariableSerializer(serializers.ModelSerializer):
+    class Meta:
+        list_serializer_class = DictSerializer
+        model = models.Variable
+        fields = ('key',
+                  'value',)
+
+    def to_representation(self, instance):
+        return {instance.key: instance.value}
+
+
+class _WithVariablesSerializer(serializers.ModelSerializer):
+    def is_valid(self, raise_exception=False):
+        variables = self.initial_data.get("variables", None)
+        if variables is not None:
+            variables = json.loads(variables)
+        result = super(_WithVariablesSerializer, self).is_valid(raise_exception)
+        self._validated_data["variables"] = variables
+        return result
+
+    def create(self, validated_data):
+        variables = validated_data.pop("variables")
+        instance = super(_WithVariablesSerializer, self).create(validated_data)
+        instance.set_vars(variables)
+        return instance
+
+    def save(self, **kwargs):
+        return super(_WithVariablesSerializer, self).save(**kwargs)
+
+
+class HostSerializer(_WithVariablesSerializer):
+    environment = ModelRelatedField(required=False, model=models.Environment)
+    variables   = VariableSerializer(write_only=True, required=False, many=True)
+
+    class Meta:
+        model = models.Host
+        fields = ('id',
+                  'name',
+                  'type',
+                  'environment',
+                  'variables',
+                  'url',)
+
+
+class OneHostSerializer(HostSerializer):
+    variables = VariableSerializer(required=False, many=True)
+
+    class Meta:
+        model = models.Host
+        fields = ('id',
+                  'name',
+                  'type',
+                  'environment',
+                  'variables',
+                  'url',)
 
 # class FullHostSerializer(serializers.ModelSerializer):
 #     nodeid    = serializers.CharField(read_only=True)

@@ -24,19 +24,14 @@ class UserFilter(filters.FilterSet):
                   'email',)
 
 
-# class HostFilter(filters.FilterSet):
-#     address__not = filters.django_filters.CharFilter(method=extra_filter)
-#     address      = filters.django_filters.CharFilter(method=extra_filter)
-#
-#     class Meta:
-#         model = models.Host
-#         fields = ('id',
-#                   'name',
-#                   'address',
-#                   'auth_user',
-#                   'auth_type',
-#                   'group',
-#                   'parent',)
+class HostFilter(filters.FilterSet):
+    name__not = filters.django_filters.CharFilter(method=extra_filter)
+    name      = filters.django_filters.CharFilter(method=extra_filter)
+
+    class Meta:
+        model = models.Host
+        fields = ('id',
+                  'name',)
 
 
 class EnvironmentsFilter(filters.FilterSet):

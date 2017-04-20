@@ -21,8 +21,8 @@ class _ApiGHBaseTestCase(BaseTestCase):
         gr_lists_url = single_url + list_url + "/"  # URL to list in group
         self.get_result(rtype, gr_lists_url, code, data=req_entries)
         rhosts = self.get_result("get", single_url)["hosts"]
-        self.assertCount(rhosts, len(req_entries))
-        self.assertCount(set(rhosts).intersection(req_entries), len(req_entries))
+        self.assertCount(rhosts, len(res_entries))
+        self.assertCount(set(rhosts).intersection(req_entries), len(res_entries))
 
     def _create_hosts(self, hosts):
         return self._mass_create("/api/v1/hosts/", hosts,
@@ -60,7 +60,7 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
 
     def test_create_delete_host(self):
         url = "/api/v1/hosts/"
-        self._list_test(url, 3)
+        self._list_test(url, 4)
         self._details_test(url+"{}/".format(self.h1.id), name=self.h1.name)
 
         data = [dict(name="127.0.1.1", type="HOST", variables=self.vars),
@@ -75,12 +75,12 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
 
     def test_filter_host(self):
         base_url = "/api/v1/hosts/"
-        filter_url = "{}?name=127.0.0.1,127.0.0.2".format(base_url)
+        filter_url = "{}?name=127.0.0.1,hostonlocal".format(base_url)
         result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 2)
 
-        filter_url = "{}?name__not=127.0.0.3".format(base_url)
+        filter_url = "{}?name__not=127.0.0.1".format(base_url)
         result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 3, result)
@@ -91,7 +91,7 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         self.get_result("patch", url, data=json.dumps(data))
         result = self.get_result("get", url)
         self.assertTrue(isinstance(result, dict))
-        self.assertEqual(result["variables"], data["variables"], result)
+        self.assertEqual(result["vars"], data["vars"], result)
 
 
 class ApiGroupsTestCase(_ApiGHBaseTestCase):

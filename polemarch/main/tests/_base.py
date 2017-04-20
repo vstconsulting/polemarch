@@ -117,5 +117,5 @@ class BaseTestCase(TestCase):
         '''
         result = self.get_result("get", url)
         self.assertTrue(isinstance(result, dict))
-        for key, value in kwargs:
+        for key, value in kwargs.items():
             self.assertEqual(result[key], value)

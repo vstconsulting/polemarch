@@ -50,12 +50,15 @@ class UserViewSet(base.ModelViewSet):
         self.perform_update(serializer)
         return Response(serializer.data)
 
-#
-# class HostViewSet(base.ModelViewSet):
-#     model = serializers.models.Host
-#     serializer_class = serializers.HostSerializer
-#     serializer_class_one = serializers.OneHostSerializer
-#     filter_class = filters.HostFilter
+
+class HostViewSet(base.ModelViewSet):
+    model = serializers.models.Host
+    serializer_class = serializers.HostSerializer
+    serializer_class_one = serializers.OneHostSerializer
+    filter_class = filters.HostFilter
+
+    def create(self, request, *args, **kwargs):
+        return super(HostViewSet, self).create(request, *args, **kwargs)
 
 
 class EnvironmentViewSet(base.ModelViewSet):

@@ -78,6 +78,20 @@ class _AbstractModel(BModel):
     class Meta:
         abstract = True
 
+    def set_vars(self, variables):
+        for key, value in variables.items():
+            self.variables.create(key=key, value=value)
+
+    def rm_vars(self, keys=None):
+        if keys is not None:
+            self.variables.filter(key__in=keys).delete()
+        else:
+            self.variables.all().delete()
+
+    @property
+    def vars(self):
+        return dict(self.variables.all().values_list('key', 'value'))
+
 
 # Block of models
 class EnvironmentManager(BManager.from_queryset(BQuerySet)):
