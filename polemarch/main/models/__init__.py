@@ -5,7 +5,7 @@ import json
 from django.db.models import signals
 from django.dispatch import receiver
 
-from .hosts import Host, Group, Variable, Environment
+from .hosts import Host, Group, Inventory, Variable, Environment
 from ..validators import validate_hostname
 
 

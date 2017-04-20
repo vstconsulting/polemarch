@@ -38,6 +38,20 @@ def get_integ_opts(name):
 
 
 # Block of abstractions
+class Variable(BModel):
+    content_type   = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id      = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    key            = models.CharField(max_length=128)
+    value          = models.CharField(max_length=2*1024)
+
+    def __unicode__(self):
+        return "{}={}".format(self.key, self.value)
+
+    def __str__(self):
+        return self.__unicode__()
+
+
 class _AbstractInventoryQuerySet(BQuerySet):
     @transaction.atomic
     def create(self, **kwargs):
@@ -52,6 +66,17 @@ class _AbstractInventoryQuerySet(BQuerySet):
         for key, value in kwargs.items():
             qs = qs.filter(variables__key=key, variables__value=value)
         return qs
+
+
+class _AbstractModel(BModel):
+    objects     = BManager.from_queryset(_AbstractInventoryQuerySet)
+    name        = models.CharField(max_length=512,
+                                   default=uuid.uuid1)
+    variables   = GenericRelation(Variable, related_query_name="variables",
+                                  object_id_field="object_id")
+
+    class Meta:
+        abstract = True
 
 
 # Block of models
@@ -117,20 +142,6 @@ class Environment(BModel):
         return self.integration.additionals()
 
 
-class Variable(BModel):
-    content_type   = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id      = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-    key            = models.CharField(max_length=128)
-    value          = models.CharField(max_length=2*1024)
-
-    def __unicode__(self):
-        return "{}={}".format(self.key, self.value)
-
-    def __str__(self):
-        return self.__unicode__()
-
-
 class HostQuerySet(_AbstractInventoryQuerySet):
     # pylint: disable=no-member
     pass
@@ -141,14 +152,10 @@ class HostManager(BManager.from_queryset(HostQuerySet)):
     pass
 
 
-class Host(BModel):
+class Host(_AbstractModel):
     objects = HostManager()
-    name        = models.CharField(max_length=512,
-                                   default=uuid.uuid1)
     type        = models.CharField(max_length=5,
                                    default="HOST")
-    variables   = GenericRelation(Variable, related_query_name="variables",
-                                  object_id_field="object_id")
     environment = models.ForeignKey(Environment,
                                     blank=True,
                                     null=True)
@@ -181,16 +188,26 @@ class GroupManager(BManager.from_queryset(GroupQuerySet)):
     pass
 
 
-class Group(BModel):
+class Group(_AbstractModel):
     objects = HostManager()
-    name        = models.CharField(max_length=512,
-                                   default=uuid.uuid1)
     hosts       = models.ManyToManyField(Host)
-    variables   = GenericRelation(Variable, related_query_name="variables",
-                                  object_id_field="object_id")
 
     class Meta:
         default_related_name = "groups"
+
+    def __unicode__(self):
+        return str(self.name)
+
+    def __str__(self):
+        return self.__unicode__()
+
+
+class Inventory(_AbstractModel):
+    hosts       = models.ManyToManyField(Host)
+    groups      = models.ManyToManyField(Group)
+
+    class Meta:
+        default_related_name = "inventories"
 
     def __unicode__(self):
         return str(self.name)

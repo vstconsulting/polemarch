@@ -1,54 +1,15 @@
 from ._base import BaseTestCase, json
-from ..models import Host, Group
+from ..models import Host, Group, Inventory
 
 
 class _ApiGHBaseTestCase(BaseTestCase):
-    def _mass_create(self, url, data):
-        '''
-        Mass creation objects in api-abstration
-        :param url: - url to abstract layer
-        :param data: - fields of model
-        :return: - list of id by every resulted models
-        '''
-        results_id = []
-        for dt in data:
-            result = self.get_result("post", url, 201, data=dt)
-            self.assertTrue(isinstance(result, dict))
-            self.assertEqual(result["name"], data[0]["name"])
-            self.assertEqual(result["type"], data[0]["type"])
-            self.assertEqual(result["variables"], data[0]["variables"])
-            results_id.append(result["id"])
-        return results_id
-
     def _create_hosts(self, hosts):
-        return self._mass_create("/api/v1/hosts/", hosts)
+        return self._mass_create("/api/v1/hosts/", hosts,
+                                 "name", "type", "variables")
 
     def _create_groups(self, groups):
-        return self._mass_create("/api/v1/groups/", groups)
-
-    def _list_test(self, url, count):
-        '''
-        Test for get list of models
-        :param url: - url to abstract layer
-        :param count: - count of objects in DB
-        :return: None
-        '''
-        result = self.get_result("get", url)
-        self.assertTrue(isinstance(result, dict))
-        self.assertEqual(result["count"], count)
-
-    def _details_test(self, url, **kwargs):
-        '''
-        Test for get details of model
-        :param url: - url to abstract layer
-        :param **kwargs: - params thats should be
-                          (key - field name, value - field value)
-        :return: None
-        '''
-        result = self.get_result("get", url)
-        self.assertTrue(isinstance(result, dict))
-        for key, value in kwargs:
-            self.assertEqual(result[key], value)
+        return self._mass_create("/api/v1/groups/", groups,
+                                 "name", "variables")
 
 
 class ApiHostsTestCase(_ApiGHBaseTestCase):
@@ -208,8 +169,8 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         self.vars3 = dict(ansible_ssh_pass="qwerty")
         self.vars3.update(self.vars)
         self.vars3.update(self.vars2)
-        inv1 = Inventories.objects.create(name="First inventory")
-        inv2 = Inventories.objects.create(name="Second inventory")
+        self.inv1 = Inventory.objects.create(name="First_inventory")
+        self.inv2 = Inventory.objects.create(name="Second_inventory")
 
     def test_create_delete_inventory(self):
         url = "/api/v1/inventories/"
@@ -220,14 +181,14 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         data = [dict(name="Inv1", variables=self.vars),
                 dict(name="Inv2", variables=self.vars2),
                 dict(name="Inv3", variables=self.vars3), ]
-        results_id = self._mass_create(url, data)
+        results_id = self._mass_create(url, data, "name", "variables")
 
         for host_id in results_id:
             self.get_result("delete", url + "{}/".format(host_id))
         self.assertEqual(Host.objects.filter(id__in=results_id).count(), 0)
 
-    def test_hosts_in_group(self):
-        url = "/api/v1/inventories/"  # URL to groups layer
+    def test_hosts_in_inventory(self):
+        url = "/api/v1/inventories/"  # URL to inventorys layer
 
         groups_data = [dict(name="one", variables=self.vars),
                        dict(name="two", variables=self.vars2),
@@ -263,3 +224,23 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         compare_list("delete", 204, inv_id, [groups_id[0]], "groups")
         # Full update groups of inventory
         compare_list("put", 200, inv_id, groups_id, "groups")
+
+    def test_filter_inventory(self):
+        base_url = "/api/v1/inventories/"
+        filter_url = "{}?name=First_inventory,Second_inventory".format(base_url)
+        result = self.get_result("get", filter_url)
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(result["count"], 2)
+
+        filter_url = "{}?name__not=Second_inventory".format(base_url)
+        result = self.get_result("get", filter_url)
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(result["count"], 1, result)
+
+    def test_update_inventory(self):
+        url = "/api/v1/inventories/{}/".format(self.inv1.id)
+        data = dict(variables=dict(auth_user="ubuntu"))
+        self.get_result("patch", url, data=json.dumps(data))
+        result = self.get_result("get", url)
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(result["variables"], data["variables"], result)

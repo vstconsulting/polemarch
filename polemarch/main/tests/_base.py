@@ -78,3 +78,44 @@ class BaseTestCase(TestCase):
         result = self.result(request, url, code=code, *args, **kwargs)
         self._logout(client)
         return result
+
+    def _mass_create(self, url, data, *fields):
+        '''
+        Mass creation objects in api-abstration
+        :param url: - url to abstract layer
+        :param data: - fields of model
+        :params fields: - list of fields to check
+        :return: - list of id by every resulted models
+        '''
+        results_id = []
+        for dt in data:
+            result = self.get_result("post", url, 201, data=dt)
+            self.assertTrue(isinstance(result, dict))
+            for field in fields:
+                self.assertEqual(result[field], data[0][field])
+            results_id.append(result["id"])
+        return results_id
+
+    def _list_test(self, url, count):
+        '''
+        Test for get list of models
+        :param url: - url to abstract layer
+        :param count: - count of objects in DB
+        :return: None
+        '''
+        result = self.get_result("get", url)
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(result["count"], count)
+
+    def _details_test(self, url, **kwargs):
+        '''
+        Test for get details of model
+        :param url: - url to abstract layer
+        :param **kwargs: - params thats should be
+                          (key - field name, value - field value)
+        :return: None
+        '''
+        result = self.get_result("get", url)
+        self.assertTrue(isinstance(result, dict))
+        for key, value in kwargs:
+            self.assertEqual(result[key], value)
