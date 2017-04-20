@@ -3,6 +3,27 @@ from ..models import Host, Group, Inventory
 
 
 class _ApiGHBaseTestCase(BaseTestCase):
+    def _compare_list(self, url, rtype, code, gr_id, req_entries, list_url,
+                      res_entries):
+        '''
+        ensure that after executed operation object contains only enumerated
+        entries
+        :param url: - root url for this kind of objects (group, inventory, etc)
+        :param rtype: - type of request to make (get, post, delete, etc)
+        :param code: - code, which must be in response
+        :param gr_id: - id of object to work with
+        :param req_entries: - list of entries to put in request
+        :param list_url: - part of url to get this entries via get request
+        :param res_entries: - list of entries which should be in result
+        :return: None
+        '''
+        single_url = url + "{}/".format(gr_id)  # URL to created group
+        gr_lists_url = single_url + list_url + "/"  # URL to list in group
+        self.get_result(rtype, gr_lists_url, code, data=req_entries)
+        rhosts = self.get_result("get", single_url)["hosts"]
+        self.assertCount(rhosts, len(req_entries))
+        self.assertCount(set(rhosts).intersection(req_entries), len(req_entries))
+
     def _create_hosts(self, hosts):
         return self._mass_create("/api/v1/hosts/", hosts,
                                  "name", "type", "variables")
@@ -10,6 +31,14 @@ class _ApiGHBaseTestCase(BaseTestCase):
     def _create_groups(self, groups):
         return self._mass_create("/api/v1/groups/", groups,
                                  "name", "variables")
+
+    def _create_inventories(self, inventories):
+        return self._mass_create("/api/v1/inventories/", inventories,
+                                 "name", "variables")
+
+    def _create_tasks(self, tasks):
+        return self._mass_create("/api/v1/tasks/", tasks,
+                                 "inventory", "playbook")
 
 
 class ApiHostsTestCase(_ApiGHBaseTestCase):
@@ -108,37 +137,41 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
                      self.get_result("post", url, 201, data=data[2])["id"],
                      gr_id]
 
-        def compare_list(rtype, code, gr_id, entries, list_url):
-            gr_url = url + "{}/".format(gr_id)      # URL to created group
-            gr_lists_url = gr_url + list_url + "/"  # URL to list in group
-            self.get_result(rtype, gr_lists_url, code, data=entries)
-            rhosts = self.get_result("get", gr_url)["hosts"]
-            self.assertCount(rhosts, len(entries))
-            self.assertCount(set(rhosts).intersection(entries), len(entries))
-
         # Test for group with hosts
         # Just put two hosts in group
-        compare_list("post", 200, gr_id, hosts_id[0:2], "hosts")
+        self._compare_list(url, "post", 200, gr_id, hosts_id[0:2], "hosts",
+                           hosts_id[0:2])
         # Delete one of hosts in group
-        compare_list("delete", 204, gr_id, [hosts_id[0]], "hosts")
+        self._compare_list(url, "delete", 204, gr_id, [hosts_id[0]], "hosts",
+                           hosts_id[1:2])
         # Full update list of hosts
-        compare_list("put", 200, gr_id, hosts_id, "hosts")
+        self._compare_list(url, "put", 200, gr_id, hosts_id, "hosts",
+                           hosts_id)
         # Error on operations with subgroups
-        compare_list("post", 409, gr_id, groups_id[0:2], "groups")
-        compare_list("delete", 409, gr_id, [groups_id[0]], "groups")
-        compare_list("put", 409, gr_id, groups_id, "groups")
+        self._compare_list(url, "post", 409, gr_id, groups_id[0:2], "groups",
+                           groups_id[0:2])
+        self._compare_list(url, "delete", 409, gr_id, [groups_id[0]], "groups",
+                           groups_id[1:2])
+        self._compare_list(url, "put", 409, gr_id, groups_id, "groups",
+                           groups_id)
 
         # Test for group:children
         # Just put two groups in group
-        compare_list("post", 200, gr_ch_id, groups_id[0:2], "groups")
+        self._compare_list(url, "post", 200, gr_ch_id, groups_id[0:2],
+                           "groups", groups_id[0:2])
         # Delete one of groups in group
-        compare_list("delete", 204, gr_ch_id, [groups_id[0]], "groups")
+        self._compare_list(url, "delete", 204, gr_ch_id, [groups_id[0]],
+                           "groups", groups_id[1:2])
         # Full update groups of group
-        compare_list("put", 200, gr_ch_id, groups_id, "groups")
+        self._compare_list(url, "put", 200, gr_ch_id, groups_id, "groups",
+                           [])
         # Error on operations with hosts
-        compare_list("post", 409, gr_id, groups_id[0:2], "hosts")
-        compare_list("delete", 409, gr_id, [groups_id[0]], "hosts")
-        compare_list("put", 409, gr_id, groups_id, "hosts")
+        self._compare_list(url, "post", 409, gr_id, hosts_id[0:2], "hosts",
+                           [])
+        self._compare_list(url, "delete", 409, gr_id, [hosts_id[0]], "hosts",
+                           [])
+        self._compare_list(url, "put", 409, gr_id, hosts_id, "hosts",
+                           [])
 
     def test_filter_group(self):
         base_url = "/api/v1/groups/"
@@ -188,7 +221,7 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         self.assertEqual(Host.objects.filter(id__in=results_id).count(), 0)
 
     def test_hosts_in_inventory(self):
-        url = "/api/v1/inventories/"  # URL to inventorys layer
+        url = "/api/v1/inventories/"  # URL to inventories layer
 
         groups_data = [dict(name="one", variables=self.vars),
                        dict(name="two", variables=self.vars2),
@@ -201,29 +234,27 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         data = dict(name="Inv3", variables=self.vars3)
         inv_id = self.get_result("post", url, 201, data=data)["id"]
 
-        def compare_list(rtype, code, gr_id, entries, list_url):
-            inv_url = url + "{}/".format(gr_id)      # URL to created group
-            gr_lists_url = inv_url + list_url + "/"  # URL to list in group
-            self.get_result(rtype, gr_lists_url, code, data=entries)
-            rhosts = self.get_result("get", inv_url)["hosts"]
-            self.assertCount(rhosts, len(entries))
-            self.assertCount(set(rhosts).intersection(entries), len(entries))
-
         # Test hosts
         # Just put two hosts in inventory
-        compare_list("post", 200, inv_id, hosts_id[0:2], "hosts")
+        self._compare_list(url, "post", 200, inv_id, hosts_id[0:2], "hosts",
+                           hosts_id[0:2])
         # Delete one of hosts in inventory
-        compare_list("delete", 204, inv_id, [hosts_id[0]], "hosts")
+        self._compare_list(url, "delete", 204, inv_id, [hosts_id[0]], "hosts",
+                           hosts_id[1:2])
         # Full update list of inventory
-        compare_list("put", 200, inv_id, hosts_id, "hosts")
+        self._compare_list(url, "put", 200, inv_id, hosts_id, "hosts",
+                           hosts_id)
 
         # Test groups
         # Just put two groups in inventory
-        compare_list("post", 200, inv_id, groups_id[0:2], "groups")
+        self._compare_list(url, "post", 200, inv_id, groups_id[0:2], "groups",
+                           groups_id[0:2])
         # Delete one of groups in inventory
-        compare_list("delete", 204, inv_id, [groups_id[0]], "groups")
+        self._compare_list(url, "delete", 204, inv_id, [groups_id[0]], "groups",
+                           groups_id[1:2])
         # Full update groups of inventory
-        compare_list("put", 200, inv_id, groups_id, "groups")
+        self._compare_list(url, "put", 200, inv_id, groups_id, "groups",
+                           groups_id)
 
     def test_filter_inventory(self):
         base_url = "/api/v1/inventories/"
@@ -244,3 +275,67 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         result = self.get_result("get", url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["variables"], data["variables"], result)
+
+
+class ApiProjectsTestCase(_ApiGHBaseTestCase):
+    def setUp(self):
+        super(ApiProjectsTestCase, self).setUp()
+        self.prj1 = Project.objects.create(name="First project",
+                                           repository="git@ex.us:dir/rep1.git")
+        self.prj2 = Project.objects.create(name="Second project",
+                                           repository="git@ex.us:dir/rep2.git")
+
+    def test_create_delete_project(self):
+        url = "/api/v1/projects/"
+        self._list_test(url, 2)
+        self._details_test(url+"{}/".format(self.prj1.id),
+                           name=self.prj1.name,
+                           repository="git@ex.us:dir/rep1.git")
+
+        data = [dict(name="Prj3", repository="git@ex.us:dir/rep3.git"),
+                dict(name="Prj4", repository="git@ex.us:dir/rep4.git")]
+        results_id = self._mass_create(url, data, "name", "repository")
+
+        for project_id in results_id:
+            self.get_result("delete", url + "{}/".format(project_id))
+        self.assertEqual(Host.objects.filter(id__in=results_id).count(), 0)
+
+    def test_inventories_in_project(self):
+        url = "/api/v1/projects/"  # URL to projects layer
+
+        inventories_data = [dict(name="Inv1", variables={}),
+                            dict(name="Inv2", variables={}),
+                            dict(name="Inv2", variables={})]
+        inventories_id = self._create_inventories(inventories_data)
+
+        data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
+        prj_id = self.get_result("post", url, 201, data=data)["id"]
+
+        self._compare_list(url, "post", 200, prj_id, inventories_id[0:2],
+                           "inventories", inventories_id[0:2])
+        self._compare_list(url, "delete", 204, prj_id, [inventories_id[0]],
+                           "hosts", inventories_id[1:2])
+        self._compare_list(url, "put", 200, prj_id, inventories_id, "hosts",
+                           inventories_id)
+
+    def test_tasks_in_project(self):
+        url = "/api/v1/projects/"  # URL to projects layer
+
+        inventories_data = [dict(name="Inv1", variables={})]
+        inventory_id = self._create_inventories(inventories_data)[0]
+
+
+        tasks_data = [dict(inventory=inventory_id, playbook="play1.yml"),
+                      dict(inventory=inventory_id, playbook="play2.yml"),
+                      dict(inventory=inventory_id, playbook="play3.yml")]
+        tasks_id = self._create_tasks(tasks_data)
+
+        data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
+        prj_id = self.get_result("post", url, 201, data=data)["id"]
+
+        self._compare_list(url, "post", 200, prj_id, tasks_id[0:2],
+                           "inventories", tasks_id[0:2])
+        self._compare_list(url, "delete", 204, prj_id, [tasks_id[0]],
+                           "hosts", tasks_id[1:2])
+        self._compare_list(url, "put", 200, prj_id, tasks_id, "hosts",
+                           tasks_id)
