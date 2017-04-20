@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 
 from rest_framework import serializers
 from rest_framework import exceptions
+from rest_framework.response import Response
 
 from ...main import models
 
@@ -173,7 +174,55 @@ class OneHostSerializer(HostSerializer):
                   'vars',
                   'url',)
 
+###################################
+# Subclasses for operations
+# with hosts and groups
+class _InventoryOperations(_WithVariablesSerializer):
+    default_operations = dict(DELETE="remove",
+                              POST="add",
+                              PUT="update")
 
+    def _response(self, total, found, code):
+        data = dict(total=len(total))
+        data["operated"] = len(found)
+        data["not_found"] = data["total"] - data["operated"]
+        return Response(data, status=code)
+
+    def _get_objects(self, model, objs_id):
+        return list(model.objects.filter(id__in=objs_id))
+
+    def _operate(self, action, model, attr, objects=None, code=200):
+        tp = getattr(self.instance, attr)
+        obj_list = self._get_objects(model, objects)
+        if action == "set":
+            getattr(tp, action)(obj_list)
+        else:
+            getattr(tp, action)(*obj_list)
+        return self._response(objects, obj_list, code)
+
+    def hosts_add(self, data):
+        return self._operate("add", models.Host, "hosts", data)
+
+    def hosts_remove(self, data):
+        return self._operate("remove", models.Host, "hosts", data, 204)
+
+    def hosts_update(self, data):
+        return self._operate("set", models.Host, "hosts", data)
+
+    def groups_add(self, data):
+        return self._operate("add", models.Group, "groups", data)
+
+    def groups_remove(self, data):
+        return self._operate("remove", models.Group, "groups", data, 204)
+
+    def groups_update(self, data):
+        return self._operate("set", models.Group, "groups", data)
+
+    def get_operation(self, request, tp):
+        attr = "{}_{}".format(tp, self.default_operations[request.method])
+        return getattr(self, attr)(request.data)
+
+###################################
 class GroupSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
 
@@ -182,16 +231,33 @@ class GroupSerializer(_WithVariablesSerializer):
         fields = ('id',
                   'name',
                   'vars',
+                  'children',
                   'url',)
 
-class OneGroupSerializer(HostSerializer):
-    vars  = DictField(required=False)
-    hosts = HostSerializer(read_only=True, many=True)
+class OneGroupSerializer(HostSerializer, _InventoryOperations):
+    vars   = DictField(required=False)
+    hosts  = HostSerializer(read_only=True, many=True)
+    groups = GroupSerializer(read_only=True, many=True)
 
     class Meta:
         model = models.Group
         fields = ('id',
                   'name',
                   'hosts',
+                  "groups",
                   'vars',
+                  'children',
                   'url',)
+
+    class ValidationException(exceptions.ValidationError):
+        status_code = 409
+
+    def hosts_operations(self, request):
+        if self.instance.children:
+            raise self.ValidationException("Group is children.")
+        return self.get_operation(request, tp="hosts")
+
+    def groups_operations(self, request):
+        if not self.instance.children:
+            raise self.ValidationException("Group is not children.")
+        return self.get_operation(request, tp="groups")

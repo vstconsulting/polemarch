@@ -199,8 +199,10 @@ class GroupManager(BManager.from_queryset(GroupQuerySet)):
 
 
 class Group(_AbstractModel):
-    objects = HostManager()
+    objects     = HostManager()
     hosts       = models.ManyToManyField(Host)
+    groups      = models.ManyToManyField('self', blank=True, null=True)
+    children    = models.BooleanField(default=False)
 
     class Meta:
         default_related_name = "groups"

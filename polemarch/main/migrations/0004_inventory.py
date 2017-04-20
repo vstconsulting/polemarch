@@ -25,4 +25,14 @@ class Migration(migrations.Migration):
                 'default_related_name': 'inventories',
             },
         ),
+        migrations.AddField(
+            model_name='group',
+            name='children',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='group',
+            name='groups',
+            field=models.ManyToManyField(blank=True, null=True, related_name='_group_groups_+', to='main.Group'),
+        ),
     ]

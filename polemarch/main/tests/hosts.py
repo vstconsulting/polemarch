@@ -19,10 +19,14 @@ class _ApiGHBaseTestCase(BaseTestCase):
         '''
         single_url = url + "{}/".format(gr_id)  # URL to created group
         gr_lists_url = single_url + list_url + "/"  # URL to list in group
-        self.get_result(rtype, gr_lists_url, code, data=req_entries)
-        rhosts = self.get_result("get", single_url)["hosts"]
-        self.assertCount(rhosts, len(res_entries))
-        self.assertCount(set(rhosts).intersection(req_entries), len(res_entries))
+        self.get_result(rtype, gr_lists_url, code,
+                        data=json.dumps(req_entries))
+        if code != 409:
+            rlist = self.get_result("get", single_url)[list_url]
+            rlist = [i["id"] for i in rlist]
+            self.assertCount(rlist, len(req_entries))
+            self.assertCount(set(rlist).intersection(res_entries),
+                             len(res_entries))
 
     def _create_hosts(self, hosts):
         return self.mass_create("/api/v1/hosts/", hosts,
@@ -125,20 +129,19 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
 
     def test_hosts_in_group(self):
         url = "/api/v1/groups/"  # URL to groups layer
-        data = [dict(name="hosted_group1"),
-                dict(name="hosted_group2"),
-                dict(name="hosted_group3"),
-                dict(name="hosted_group4",
-                     children=True)]
-        gr_id = self.get_result("post", url, 201, data=data[0])["id"]
-        gr_ch_id = self.get_result("post", url, 201, data=data[3])["id"]
-        data = [dict(name="127.0.1.1", type="HOST", vars=self.vars),
-                dict(name="hostlocl", type="HOST", vars=self.vars3),
-                dict(name="127.0.1.[5:6]", type="RANGE", vars=self.vars2)]
-        hosts_id = self._create_hosts(data)
-        groups_id = [self.get_result("post", url, 201, data=data[1])["id"],
-                     self.get_result("post", url, 201, data=data[2])["id"],
-                     gr_id]
+        d_groups = [dict(name="hosted_group1"),
+                    dict(name="hosted_group2"),
+                    dict(name="hosted_group3"),
+                    dict(name="hosted_group4", children=True)]
+        groups_id = [self.get_result("post", url, 201, data=d_groups[0])["id"],
+                     self.get_result("post", url, 201, data=d_groups[1])["id"],
+                     self.get_result("post", url, 201, data=d_groups[2])["id"],
+                     self.get_result("post", url, 201, data=d_groups[3])["id"]]
+        gr_id, grch_id = groups_id[0], groups_id[3]
+        d_hosts = [dict(name="127.0.1.1", type="HOST", vars=self.vars),
+                   dict(name="hostlocl", type="HOST", vars=self.vars3),
+                   dict(name="127.0.1.[5:6]", type="RANGE", vars=self.vars2)]
+        hosts_id = self._create_hosts(d_hosts)
 
         # Test for group with hosts
         # Just put two hosts in group
@@ -160,20 +163,20 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
 
         # Test for group:children
         # Just put two groups in group
-        self._compare_list(url, "post", 200, gr_ch_id, groups_id[0:2],
+        self._compare_list(url, "post", 200, grch_id, groups_id[0:2],
                            "groups", groups_id[0:2])
         # Delete one of groups in group
-        self._compare_list(url, "delete", 204, gr_ch_id, [groups_id[0]],
+        self._compare_list(url, "delete", 204, grch_id, [groups_id[0]],
                            "groups", groups_id[1:2])
         # Full update groups of group
-        self._compare_list(url, "put", 200, gr_ch_id, groups_id, "groups",
+        self._compare_list(url, "put", 200, grch_id, groups_id, "groups",
                            [])
         # Error on operations with hosts
-        self._compare_list(url, "post", 409, gr_id, hosts_id[0:2], "hosts",
+        self._compare_list(url, "post", 409, grch_id, hosts_id[0:2], "hosts",
                            [])
-        self._compare_list(url, "delete", 409, gr_id, [hosts_id[0]], "hosts",
+        self._compare_list(url, "delete", 409, grch_id, [hosts_id[0]], "hosts",
                            [])
-        self._compare_list(url, "put", 409, gr_id, hosts_id, "hosts",
+        self._compare_list(url, "put", 409, grch_id, hosts_id, "hosts",
                            [])
 
     def test_filter_group(self):

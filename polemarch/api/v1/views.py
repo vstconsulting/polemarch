@@ -64,6 +64,18 @@ class GroupViewSet(base.ModelViewSet):
     serializer_class_one = serializers.OneGroupSerializer
     filter_class = filters.GroupFilter
 
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def hosts(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return serializer.hosts_operations(request)
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def groups(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return serializer.groups_operations(request)
+
 
 class EnvironmentViewSet(base.ModelViewSet):
     model = serializers.models.Environment
