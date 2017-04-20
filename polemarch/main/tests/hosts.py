@@ -21,8 +21,8 @@ class _ApiGHBaseTestCase(BaseTestCase):
         gr_lists_url = single_url + list_url + "/"  # URL to list in group
         self.get_result(rtype, gr_lists_url, code, data=req_entries)
         rhosts = self.get_result("get", single_url)["hosts"]
-        self.assertCount(rhosts, len(req_entries))
-        self.assertCount(set(rhosts).intersection(req_entries), len(req_entries))
+        self.assertCount(rhosts, len(res_entries))
+        self.assertCount(set(rhosts).intersection(res_entries), len(res_entries))
 
     def _create_hosts(self, hosts):
         return self._mass_create("/api/v1/hosts/", hosts,
@@ -311,10 +311,14 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
         prj_id = self.get_result("post", url, 201, data=data)["id"]
 
+        # Test inventories
+        # Just put two inventory in project
         self._compare_list(url, "post", 200, prj_id, inventories_id[0:2],
                            "inventories", inventories_id[0:2])
+        # Delete one of inventory in project
         self._compare_list(url, "delete", 204, prj_id, [inventories_id[0]],
                            "hosts", inventories_id[1:2])
+        # Full update list of project
         self._compare_list(url, "put", 200, prj_id, inventories_id, "hosts",
                            inventories_id)
 
@@ -333,9 +337,13 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
         prj_id = self.get_result("post", url, 201, data=data)["id"]
 
+        # Test tasks
+        # Just put two tasks in project
         self._compare_list(url, "post", 200, prj_id, tasks_id[0:2],
                            "inventories", tasks_id[0:2])
+        # Delete one of tasks in project
         self._compare_list(url, "delete", 204, prj_id, [tasks_id[0]],
                            "hosts", tasks_id[1:2])
+        # Full update tasks of project
         self._compare_list(url, "put", 200, prj_id, tasks_id, "hosts",
                            tasks_id)
