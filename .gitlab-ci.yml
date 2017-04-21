@@ -25,6 +25,7 @@ stages:
     - dist/
   except:
     - master
+    - GUI
     - tags
 
 

@@ -47,7 +47,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         self._compare_list(url, "put", 200, prj_id, inventories_id,
                            "inventories", inventories_id)
 
-    def _test_tasks_in_project(self):
+    def test_tasks_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer
 
         inventories_data = [dict(name="Inv1", vars={})]
@@ -72,7 +72,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         self._compare_list(url, "put", 200, prj_id, tasks_id, "hosts",
                            tasks_id)
 
-    def _test_periodic_tasks_in_project(self):
+    def test_periodic_tasks_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer
 
         inventories_data = [dict(name="Inv1", vars={})]
