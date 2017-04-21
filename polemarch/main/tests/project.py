@@ -1,5 +1,5 @@
 from .inventory import _ApiGHBaseTestCase
-from ..models import Host
+from ..models import Host, Project
 
 
 class ApiProjectsTestCase(_ApiGHBaseTestCase):
@@ -41,7 +41,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         self._compare_list(url, "post", 200, prj_id, inventories_id[0:2],
                            "inventories", inventories_id[0:2])
         # Delete one of inventory in project
-        self._compare_list(url, "delete", 204, prj_id, [inventories_id[0]],
+        self._compare_list(url, "delete", 200, prj_id, [inventories_id[0]],
                            "hosts", inventories_id[1:2])
         # Full update list of project
         self._compare_list(url, "put", 200, prj_id, inventories_id, "hosts",
@@ -52,7 +52,6 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
 
         inventories_data = [dict(name="Inv1", vars={})]
         inventory_id = self._create_inventories(inventories_data)[0]
-
 
         tasks_data = [dict(inventory=inventory_id, playbook="play1.yml"),
                       dict(inventory=inventory_id, playbook="play2.yml"),
@@ -67,7 +66,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         self._compare_list(url, "post", 200, prj_id, tasks_id[0:2],
                            "inventories", tasks_id[0:2])
         # Delete one of tasks in project
-        self._compare_list(url, "delete", 204, prj_id, [tasks_id[0]],
+        self._compare_list(url, "delete", 200, prj_id, [tasks_id[0]],
                            "hosts", tasks_id[1:2])
         # Full update tasks of project
         self._compare_list(url, "put", 200, prj_id, tasks_id, "hosts",
@@ -93,9 +92,8 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         self._compare_list(url, "post", 200, prj_id, schedules_id[0:2],
                            "inventories", schedules_id[0:2])
         # Delete one of periodic tasks in project
-        self._compare_list(url, "delete", 204, prj_id, [schedules_id[0]],
+        self._compare_list(url, "delete", 200, prj_id, [schedules_id[0]],
                            "hosts", schedules_id[1:2])
         # Full update periodic tasks of project
         self._compare_list(url, "put", 200, prj_id, schedules_id, "hosts",
                            schedules_id)
-

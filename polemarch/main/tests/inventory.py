@@ -30,23 +30,23 @@ class _ApiGHBaseTestCase(BaseTestCase):
 
     def _create_hosts(self, hosts):
         return self.mass_create("/api/v1/hosts/", hosts,
-                                 "name", "type", "vars")
+                                "name", "type", "vars")
 
     def _create_groups(self, groups):
         return self.mass_create("/api/v1/groups/", groups,
-                                 "name", "vars")
+                                "name", "vars")
 
     def _create_inventories(self, inventories):
         return self.mass_create("/api/v1/inventories/", inventories,
-                                 "name", "vars")
+                                "name", "vars")
 
     def _create_tasks(self, tasks):
         return self.mass_create("/api/v1/tasks/", tasks,
-                                 "inventory", "playbook")
+                                "inventory", "playbook")
 
     def _create_periodic_tasks(self, tasks):
         return self.mass_create("/api/v1/periodic-tasks/", tasks,
-                                 "task", "schedule", "type")
+                                "task", "schedule", "type")
 
 
 class ApiHostsTestCase(_ApiGHBaseTestCase):
@@ -123,9 +123,9 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
                 dict(name="three", vars=self.vars3)]
         results_id = self._create_groups(data)
 
-        for host_id in results_id:
-            self.get_result("delete", url + "{}/".format(host_id))
-        self.assertEqual(Host.objects.filter(id__in=results_id).count(), 0)
+        for group_id in results_id:
+            self.get_result("delete", url + "{}/".format(group_id))
+        self.assertEqual(self.get_result("get", url)["count"], 3)
 
     def test_hosts_in_group(self):
         url = "/api/v1/groups/"  # URL to groups layer
@@ -148,7 +148,7 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         self._compare_list(url, "post", 200, gr_id, hosts_id[0:2], "hosts",
                            hosts_id[0:2])
         # Delete one of hosts in group
-        self._compare_list(url, "delete", 204, gr_id, [hosts_id[0]], "hosts",
+        self._compare_list(url, "delete", 200, gr_id, [hosts_id[0]], "hosts",
                            hosts_id[1:2])
         # Full update list of hosts
         self._compare_list(url, "put", 200, gr_id, hosts_id, "hosts",
@@ -166,7 +166,7 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         self._compare_list(url, "post", 200, grch_id, groups_id[0:2],
                            "groups", groups_id[0:2])
         # Delete one of groups in group
-        self._compare_list(url, "delete", 204, grch_id, [groups_id[0]],
+        self._compare_list(url, "delete", 200, grch_id, [groups_id[0]],
                            "groups", groups_id[1:2])
         # Full update groups of group
         self._compare_list(url, "put", 200, grch_id, groups_id, "groups",
@@ -219,11 +219,11 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         data = [dict(name="Inv1", vars=self.vars),
                 dict(name="Inv2", vars=self.vars2),
                 dict(name="Inv3", vars=self.vars3), ]
-        results_id = self.mass_create(url, data, "name", "vars")
+        results_id = self._create_inventories(data)
 
-        for host_id in results_id:
-            self.get_result("delete", url + "{}/".format(host_id))
-        self.assertEqual(Host.objects.filter(id__in=results_id).count(), 0)
+        for inventory_id in results_id:
+            self.get_result("delete", url + "{}/".format(inventory_id))
+        self.assertEqual(self.get_result("get", url)["count"], 2)
 
     def test_hosts_in_inventory(self):
         url = "/api/v1/inventories/"  # URL to inventories layer
@@ -236,15 +236,15 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         groups_id = self._create_groups(groups_data)
         hosts_id = self._create_hosts(hosts_data)
 
-        data = dict(name="Inv3", vars=self.vars3)
-        inv_id = self.get_result("post", url, 201, data=data)["id"]
+        data = dict(name="Inv4", vars=self.vars3)
+        inv_id = self._create_inventories([data])[0]
 
         # Test hosts
         # Just put two hosts in inventory
         self._compare_list(url, "post", 200, inv_id, hosts_id[0:2], "hosts",
                            hosts_id[0:2])
         # Delete one of hosts in inventory
-        self._compare_list(url, "delete", 204, inv_id, [hosts_id[0]], "hosts",
+        self._compare_list(url, "delete", 200, inv_id, [hosts_id[0]], "hosts",
                            hosts_id[1:2])
         # Full update list of inventory
         self._compare_list(url, "put", 200, inv_id, hosts_id, "hosts",
@@ -252,24 +252,24 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
 
         # Test groups
         # Just put two groups in inventory
-        self._compare_list(url, "post", 200, inv_id, groups_id[0:2], "groups",
-                           groups_id[0:2])
+        self._compare_list(url, "post", 200, inv_id, groups_id[0:2],
+                           "groups", groups_id[0:2])
         # Delete one of groups in inventory
-        self._compare_list(url, "delete", 204, inv_id, [groups_id[0]], "groups",
-                           groups_id[1:2])
+        self._compare_list(url, "delete", 200, inv_id, [groups_id[0]],
+                           "groups", groups_id[1:2])
         # Full update groups of inventory
-        self._compare_list(url, "put", 200, inv_id, groups_id, "groups",
-                           groups_id)
+        self._compare_list(url, "put", 200, inv_id, groups_id,
+                           "groups", groups_id)
 
     def test_filter_inventory(self):
         base_url = "/api/v1/inventories/"
-        filter_url = "{}?name=First_inventory,Second_inventory".format(base_url)
-        result = self.get_result("get", filter_url)
+        f_url = "{}?name=First_inventory,Second_inventory".format(base_url)
+        result = self.get_result("get", f_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 2)
 
-        filter_url = "{}?name__not=Second_inventory".format(base_url)
-        result = self.get_result("get", filter_url)
+        f_url = "{}?name__not=Second_inventory".format(base_url)
+        result = self.get_result("get", f_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 1, result)
 

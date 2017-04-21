@@ -255,7 +255,8 @@ LOGGING = {
         },
     }
 }
-SILENCED_SYSTEM_CHECKS = ['fields.W342', 'urls.W001', '1_10.W001']
+SILENCED_SYSTEM_CHECKS = ['fields.W342', 'urls.W001', '1_10.W001',
+                          "fields.W340"]
 
 try:
     __CACHE_DEFAULT_SETTINGS = {k.upper():v.format(**__kwargs) for k, v in config.items('cache')}

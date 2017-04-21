@@ -111,14 +111,8 @@ class EnvironmentSerializer(serializers.ModelSerializer):
                   'hosts')
 
 
-class DictSerializer(serializers.ListSerializer):
-    def to_representation(self, data):
-        return {item.key:item.value for item in data.all()}
-
-
 class VariableSerializer(serializers.ModelSerializer):
     class Meta:
-        list_serializer_class = DictSerializer
         model = models.Variable
         fields = ('key',
                   'value',)
@@ -177,12 +171,14 @@ class OneHostSerializer(HostSerializer):
 ###################################
 # Subclasses for operations
 # with hosts and groups
+
+
 class _InventoryOperations(_WithVariablesSerializer):
     default_operations = dict(DELETE="remove",
                               POST="add",
                               PUT="update")
 
-    def _response(self, total, found, code):
+    def _response(self, total, found, code=200):
         data = dict(total=len(total))
         data["operated"] = len(found)
         data["not_found"] = data["total"] - data["operated"]
@@ -191,20 +187,21 @@ class _InventoryOperations(_WithVariablesSerializer):
     def _get_objects(self, model, objs_id):
         return list(model.objects.filter(id__in=objs_id))
 
-    def _operate(self, action, model, attr, objects=None, code=200):
+    def _operate(self, action, model, attr, objects=None):
         tp = getattr(self.instance, attr)
         obj_list = self._get_objects(model, objects)
         if action == "set":
-            getattr(tp, action)(obj_list)
-        else:
-            getattr(tp, action)(*obj_list)
-        return self._response(objects, obj_list, code)
+            # Because django<=1.9 does not support .set()
+            getattr(tp, "clear")()
+            action = "add"
+        getattr(tp, action)(*obj_list)
+        return self._response(objects, obj_list)
 
     def hosts_add(self, data):
         return self._operate("add", models.Host, "hosts", data)
 
     def hosts_remove(self, data):
-        return self._operate("remove", models.Host, "hosts", data, 204)
+        return self._operate("remove", models.Host, "hosts", data)
 
     def hosts_update(self, data):
         return self._operate("set", models.Host, "hosts", data)
@@ -213,7 +210,7 @@ class _InventoryOperations(_WithVariablesSerializer):
         return self._operate("add", models.Group, "groups", data)
 
     def groups_remove(self, data):
-        return self._operate("remove", models.Group, "groups", data, 204)
+        return self._operate("remove", models.Group, "groups", data)
 
     def groups_update(self, data):
         return self._operate("set", models.Group, "groups", data)
@@ -222,7 +219,16 @@ class _InventoryOperations(_WithVariablesSerializer):
         attr = "{}_{}".format(tp, self.default_operations[request.method])
         return getattr(self, attr)(request.data)
 
+    def hosts_operations(self, request):
+        return self.get_operation(request, tp="hosts")
+
+    def groups_operations(self, request):
+        return self.get_operation(request, tp="groups")
+
+
 ###################################
+
+
 class GroupSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
 
@@ -234,7 +240,8 @@ class GroupSerializer(_WithVariablesSerializer):
                   'children',
                   'url',)
 
-class OneGroupSerializer(HostSerializer, _InventoryOperations):
+
+class OneGroupSerializer(GroupSerializer, _InventoryOperations):
     vars   = DictField(required=False)
     hosts  = HostSerializer(read_only=True, many=True)
     groups = GroupSerializer(read_only=True, many=True)
@@ -255,9 +262,35 @@ class OneGroupSerializer(HostSerializer, _InventoryOperations):
     def hosts_operations(self, request):
         if self.instance.children:
             raise self.ValidationException("Group is children.")
-        return self.get_operation(request, tp="hosts")
+        return super(OneGroupSerializer, self).hosts_operations(request)
 
     def groups_operations(self, request):
         if not self.instance.children:
             raise self.ValidationException("Group is not children.")
-        return self.get_operation(request, tp="groups")
+        return super(OneGroupSerializer, self).groups_operations(request)
+
+
+class InventorySerializer(_WithVariablesSerializer):
+    vars = DictField(required=False, write_only=True)
+
+    class Meta:
+        model = models.Inventory
+        fields = ('id',
+                  'name',
+                  'vars',
+                  'url',)
+
+
+class OneInventorySerializer(InventorySerializer, _InventoryOperations):
+    vars   = DictField(required=False)
+    hosts  = HostSerializer(read_only=True, many=True)
+    groups = InventorySerializer(read_only=True, many=True)
+
+    class Meta:
+        model = models.Inventory
+        fields = ('id',
+                  'name',
+                  'hosts',
+                  "groups",
+                  'vars',
+                  'url',)

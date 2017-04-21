@@ -66,14 +66,29 @@ class GroupViewSet(base.ModelViewSet):
 
     @detail_route(methods=["post", "put", "delete", "get"])
     def hosts(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
+        serializer = self.get_serializer(self.get_object())
         return serializer.hosts_operations(request)
 
     @detail_route(methods=["post", "put", "delete", "get"])
     def groups(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
+        serializer = self.get_serializer(self.get_object())
+        return serializer.groups_operations(request)
+
+
+class InventoryViewSet(base.ModelViewSet):
+    model = serializers.models.Inventory
+    serializer_class = serializers.InventorySerializer
+    serializer_class_one = serializers.OneInventorySerializer
+    filter_class = filters.InventoryFilter
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def hosts(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.hosts_operations(request)
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def groups(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
         return serializer.groups_operations(request)
 
 

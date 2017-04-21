@@ -6,6 +6,7 @@ from django.db.models import signals
 from django.dispatch import receiver
 
 from .hosts import Host, Group, Inventory, Variable, Environment
+from .projects import Project
 from ..validators import validate_hostname
 
 
@@ -18,7 +19,7 @@ def validate_integrations(instance, **kwargs):
 
 
 @receiver(signals.pre_save, sender=Host)
-def validate_integrations(instance, **kwargs):
+def validate_hosts(instance, **kwargs):
     if instance.type == "HOST" and \
        instance.variables.filter(key="ansible_host").count():
         validate_hostname(instance.name)

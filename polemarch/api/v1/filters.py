@@ -25,6 +25,8 @@ class UserFilter(filters.FilterSet):
 
 
 class HostFilter(filters.FilterSet):
+    id        = filters.django_filters.NumberFilter(method=extra_filter)
+    id__not   = filters.django_filters.NumberFilter(method=extra_filter)
     name__not = filters.django_filters.CharFilter(method=extra_filter)
     name      = filters.django_filters.CharFilter(method=extra_filter)
 
@@ -35,11 +37,25 @@ class HostFilter(filters.FilterSet):
 
 
 class GroupFilter(filters.FilterSet):
+    id        = filters.django_filters.NumberFilter(method=extra_filter)
+    id__not   = filters.django_filters.NumberFilter(method=extra_filter)
     name__not = filters.django_filters.CharFilter(method=extra_filter)
     name      = filters.django_filters.CharFilter(method=extra_filter)
 
     class Meta:
         model = models.Group
+        fields = ('id',
+                  'name',)
+
+
+class InventoryFilter(filters.FilterSet):
+    id        = filters.django_filters.NumberFilter(method=extra_filter)
+    id__not   = filters.django_filters.NumberFilter(method=extra_filter)
+    name__not = filters.django_filters.CharFilter(method=extra_filter)
+    name      = filters.django_filters.CharFilter(method=extra_filter)
+
+    class Meta:
+        model = models.Inventory
         fields = ('id',
                   'name',)
 
@@ -50,4 +66,3 @@ class EnvironmentsFilter(filters.FilterSet):
         fields = ('id',
                   'type',
                   'name',)
-
