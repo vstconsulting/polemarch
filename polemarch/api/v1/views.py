@@ -58,6 +58,25 @@ class HostViewSet(base.ModelViewSet):
     filter_class = filters.HostFilter
 
 
+class GroupViewSet(base.ModelViewSet):
+    model = serializers.models.Group
+    serializer_class = serializers.GroupSerializer
+    serializer_class_one = serializers.OneGroupSerializer
+    filter_class = filters.GroupFilter
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def hosts(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return serializer.hosts_operations(request)
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def groups(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return serializer.groups_operations(request)
+
+
 class EnvironmentViewSet(base.ModelViewSet):
     model = serializers.models.Environment
     serializer_class = serializers.EnvironmentSerializer
@@ -70,22 +89,3 @@ class EnvironmentViewSet(base.ModelViewSet):
     @list_route(methods=['get'])
     def types(self, request):
         return Response(self.model.objects.get_integrations())
-
-
-class TaskViewSet(base.ModelViewSet):
-    model = serializers.models.Task
-    serializer_class = serializers.TaskSerializer
-    serializer_class_one = serializers.OneTaskSerializer
-    filter_class = filters.TaskFilter
-
-
-class ScenarioViewSet(base.ModelViewSet):
-    model = serializers.models.Scenario
-    serializer_class = serializers.ScenarioSerializer
-    serializer_class_one = serializers.OneScenarioSerializer
-    filter_class = filters.ScenarioFilter
-
-    @detail_route(methods=['post'])
-    def tasks(self, request, pk):
-        serializer = self.get_serializer(self.get_object())
-        return Response(serializer.set_tasks(request.data))

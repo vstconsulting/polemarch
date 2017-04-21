@@ -4,9 +4,9 @@ from django.contrib.auth.hashers import make_password
 from polemarch.main.utils import redirect_stdany
 from ._base import BaseTestCase, User, json
 from .envs import ApiEnvsTestCase
-from .tasks import ApiTasksTestCase
-from .hosts import ApiHostsTestCase
-from ..models import Task
+from .inventory import (ApiHostsTestCase, ApiGroupsTestCase,
+                        ApiInventoriesTestCase)
+from .project import ApiProjectsTestCase
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -164,12 +164,10 @@ class ApiUsersTestCase(BaseTestCase):
         self._logout(client)
 
 
-class APITestCase(ApiUsersTestCase, ApiEnvsTestCase, ApiTasksTestCase,
-                  ApiHostsTestCase):
+class APITestCase(ApiUsersTestCase, ApiEnvsTestCase,
+                  ApiHostsTestCase, ApiGroupsTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
-        for i in range(1, 101):
-            Task.objects.create(name="task-{}".format(i))
 
     def test_api_versions_list(self):
         client = self._login()
@@ -184,8 +182,6 @@ class APITestCase(ApiUsersTestCase, ApiEnvsTestCase, ApiTasksTestCase,
         self.assertTrue(result.get('users', False))
         self.assertTrue(result.get('hosts', False))
         self.assertTrue(result.get('environments', False))
-        self.assertTrue(result.get('tasks', False))
-        self.assertTrue(result.get('scenarios', False))
 
     def test_api_router(self):
         client = self._login()

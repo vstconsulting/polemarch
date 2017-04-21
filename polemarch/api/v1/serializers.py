@@ -1,4 +1,5 @@
 # pylint: disable=no-member,unused-argument
+from __future__ import unicode_literals
 import json
 
 import six
@@ -6,6 +7,7 @@ from django.contrib.auth.models import User
 
 from rest_framework import serializers
 from rest_framework import exceptions
+from rest_framework.response import Response
 
 from ...main import models
 
@@ -109,95 +111,153 @@ class EnvironmentSerializer(serializers.ModelSerializer):
                   'hosts')
 
 
-class FullHostSerializer(serializers.ModelSerializer):
-    nodeid    = serializers.CharField(read_only=True)
+class DictSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        return {item.key:item.value for item in data.all()}
+
+
+class VariableSerializer(serializers.ModelSerializer):
+    class Meta:
+        list_serializer_class = DictSerializer
+        model = models.Variable
+        fields = ('key',
+                  'value',)
+
+    def to_representation(self, instance):
+        return {instance.key: instance.value}
+
+
+class _WithVariablesSerializer(serializers.ModelSerializer):
+    def __do_with_vars(self, method, *args, **kwargs):
+        variables = kwargs['validated_data'].pop("vars", None)
+        instance = method(*args, **kwargs)
+        if variables is not None:
+            if isinstance(variables, (six.string_types, six.text_type)):
+                variables = json.loads(variables)
+            instance.set_vars(variables)
+        return instance
+
+    def create(self, validated_data):
+        method = super(_WithVariablesSerializer, self).create
+        return self.__do_with_vars(method, validated_data=validated_data)
+
+    def update(self, instance, validated_data):
+        method = super(_WithVariablesSerializer, self).update
+        return self.__do_with_vars(method, instance,
+                                   validated_data=validated_data)
+
+
+class HostSerializer(_WithVariablesSerializer):
+    vars = DictField(required=False, write_only=True)
+    environment = ModelRelatedField(required=False,
+                                    model=models.Environment)
 
     class Meta:
         model = models.Host
         fields = ('id',
                   'name',
-                  'address',
-                  'auth_user',
-                  'auth_type',
-                  'auth_data',
+                  'type',
                   'environment',
-                  'nodeid',
-                  'group',
-                  'parent',
-                  'url',)
-
-
-class HostSerializer(FullHostSerializer):
-    auth_data = serializers.CharField(write_only=True, required=False,
-                                      style={'input_type': 'password'})
-    environment = ModelRelatedField(required=False, model=models.Environment)
-
-    class Meta(FullHostSerializer.Meta):
-        model = models.Host
-        fields = ('id',
-                  'name',
-                  'address',
-                  'auth_user',
-                  'auth_type',
-                  'auth_data',
-                  'environment',
-                  'group',
-                  'parent',
+                  'vars',
                   'url',)
 
 
 class OneHostSerializer(HostSerializer):
-
-    class Meta(FullHostSerializer.Meta):
-        pass
-
-
-class TaskSerializer(serializers.ModelSerializer):
+    vars = DictField(required=False)
 
     class Meta:
-        model = models.Task
+        model = models.Host
         fields = ('id',
                   'name',
-                  'group',
-                  'parent',
+                  'type',
+                  'environment',
+                  'vars',
                   'url',)
 
+###################################
+# Subclasses for operations
+# with hosts and groups
+class _InventoryOperations(_WithVariablesSerializer):
+    default_operations = dict(DELETE="remove",
+                              POST="add",
+                              PUT="update")
 
-class OneTaskSerializer(TaskSerializer):
+    def _response(self, total, found, code):
+        data = dict(total=len(total))
+        data["operated"] = len(found)
+        data["not_found"] = data["total"] - data["operated"]
+        return Response(data, status=code)
+
+    def _get_objects(self, model, objs_id):
+        return list(model.objects.filter(id__in=objs_id))
+
+    def _operate(self, action, model, attr, objects=None, code=200):
+        tp = getattr(self.instance, attr)
+        obj_list = self._get_objects(model, objects)
+        if action == "set":
+            getattr(tp, action)(obj_list)
+        else:
+            getattr(tp, action)(*obj_list)
+        return self._response(objects, obj_list, code)
+
+    def hosts_add(self, data):
+        return self._operate("add", models.Host, "hosts", data)
+
+    def hosts_remove(self, data):
+        return self._operate("remove", models.Host, "hosts", data, 204)
+
+    def hosts_update(self, data):
+        return self._operate("set", models.Host, "hosts", data)
+
+    def groups_add(self, data):
+        return self._operate("add", models.Group, "groups", data)
+
+    def groups_remove(self, data):
+        return self._operate("remove", models.Group, "groups", data, 204)
+
+    def groups_update(self, data):
+        return self._operate("set", models.Group, "groups", data)
+
+    def get_operation(self, request, tp):
+        attr = "{}_{}".format(tp, self.default_operations[request.method])
+        return getattr(self, attr)(request.data)
+
+###################################
+class GroupSerializer(_WithVariablesSerializer):
+    vars = DictField(required=False, write_only=True)
 
     class Meta:
-        model = models.Task
+        model = models.Group
         fields = ('id',
                   'name',
-                  'group',
-                  'parent',
-                  'data',)
-
-
-class ScenarioSerializer(serializers.ModelSerializer):
-    tasks = TaskSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = models.Scenario
-        fields = ('id',
-                  'name',
-                  'tasks',
-                  'group',
-                  'parent',
+                  'vars',
+                  'children',
                   'url',)
 
-
-class OneScenarioSerializer(ScenarioSerializer):
-    tasks = OneTaskSerializer(many=True, read_only=True)
+class OneGroupSerializer(HostSerializer, _InventoryOperations):
+    vars   = DictField(required=False)
+    hosts  = HostSerializer(read_only=True, many=True)
+    groups = GroupSerializer(read_only=True, many=True)
 
     class Meta:
-        model = models.Scenario
+        model = models.Group
         fields = ('id',
                   'name',
-                  'tasks',
-                  'group',
-                  'parent',
+                  'hosts',
+                  "groups",
+                  'vars',
+                  'children',
                   'url',)
 
-    def set_tasks(self, tasks):
-        return self.instance.set_tasks(tasks)
+    class ValidationException(exceptions.ValidationError):
+        status_code = 409
+
+    def hosts_operations(self, request):
+        if self.instance.children:
+            raise self.ValidationException("Group is children.")
+        return self.get_operation(request, tp="hosts")
+
+    def groups_operations(self, request):
+        if not self.instance.children:
+            raise self.ValidationException("Group is not children.")
+        return self.get_operation(request, tp="groups")

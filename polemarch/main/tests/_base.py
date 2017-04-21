@@ -44,12 +44,30 @@ class BaseTestCase(TestCase):
         except ValueError:
             return None
 
+    def assertCount(self, list, count):
+        self.assertEqual(len(list), count)
+
     def assertRCode(self, resp, code=200):
+        '''
+        Fail if response code is not equal. Message is response body.
+        :param resp: - response object
+        :param code: - expected code
+        :return: None
+        '''
         self.assertEqual(resp.status_code, code,
                          "{} != {}\n{}".format(resp.status_code, code,
                                                resp.rendered_content.decode()))
 
     def get_result(self, rtype, url, code=None, *args, **kwargs):
+        '''
+        Test request with returning result of request
+        :param rtype:  - request type (methods from Client class): get, post etc
+        :param url:    - requested url
+        :param code:   - expected return code from request.
+        :param args:   - extra-args for Client class
+        :param kwargs: - extra-kwargs for Client class
+        :return:       - result of request
+        '''
         client = self._login()
         request = getattr(client, rtype)
         if code is None:
@@ -60,3 +78,60 @@ class BaseTestCase(TestCase):
         result = self.result(request, url, code=code, *args, **kwargs)
         self._logout(client)
         return result
+
+    def mass_create(self, url, data, *fields):
+        '''
+        Mass creation objects in api-abstration
+        :param url: - url to abstract layer
+        :param data: - fields of model
+        :params fields: - list of fields to check
+        :return: - list of id by every resulted models
+        '''
+        results_id = []
+        counter = 0
+        for dt in data:
+            result = self.get_result("post", url, 201, data=json.dumps(dt))
+            self.assertTrue(isinstance(result, dict))
+            for field in fields:
+                self.assertEqual(result[field], data[counter][field])
+            results_id.append(result["id"])
+            counter += 1
+        return results_id
+
+    def list_test(self, url, count):
+        '''
+        Test for get list of models
+        :param url: - url to abstract layer
+        :param count: - count of objects in DB
+        :return: None
+        '''
+        result = self.get_result("get", url)
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(result["count"], count)
+
+    def details_test(self, url, **kwargs):
+        '''
+        Test for get details of model
+        :param url: - url to abstract layer
+        :param **kwargs: - params thats should be
+                          (key - field name, value - field value)
+        :return: None
+        '''
+        result = self.get_result("get", url)
+        self.assertTrue(isinstance(result, dict))
+        for key, value in kwargs.items():
+            self.assertEqual(result[key], value)
+
+    def _check_update(self, url, data, **fields):
+        '''
+        Test update instance of model
+        :param url: - url to instance
+        :param data: - update fields
+        :param fields: - checking resulted fields as named args
+        :return: None
+        '''
+        self.get_result("patch", url, data=json.dumps(data))
+        result = self.get_result("get", url)
+        self.assertTrue(isinstance(result, dict))
+        for field, value in fields.items():
+            self.assertEqual(result[field], value)
