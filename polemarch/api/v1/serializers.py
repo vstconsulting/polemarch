@@ -174,9 +174,9 @@ class OneHostSerializer(HostSerializer):
 
 
 class _InventoryOperations(_WithVariablesSerializer):
-    default_operations = dict(DELETE="remove",
-                              POST="add",
-                              PUT="update")
+    operations = dict(DELETE="remove",
+                      POST="add",
+                      PUT="set")
 
     def _response(self, total, found, code=200):
         data = dict(total=len(total))
@@ -187,43 +187,22 @@ class _InventoryOperations(_WithVariablesSerializer):
     def _get_objects(self, model, objs_id):
         return list(model.objects.filter(id__in=objs_id))
 
-    def _operate(self, action, model, attr, objects=None):
+    def get_operation(self, request, attr):
         tp = getattr(self.instance, attr)
-        obj_list = self._get_objects(model, objects)
+        obj_list = self._get_objects(tp.model, request.data)
+        action = self.operations[request.method]
         if action == "set":
             # Because django<=1.9 does not support .set()
             getattr(tp, "clear")()
             action = "add"
         getattr(tp, action)(*obj_list)
-        return self._response(objects, obj_list)
-
-    def hosts_add(self, data):
-        return self._operate("add", models.Host, "hosts", data)
-
-    def hosts_remove(self, data):
-        return self._operate("remove", models.Host, "hosts", data)
-
-    def hosts_update(self, data):
-        return self._operate("set", models.Host, "hosts", data)
-
-    def groups_add(self, data):
-        return self._operate("add", models.Group, "groups", data)
-
-    def groups_remove(self, data):
-        return self._operate("remove", models.Group, "groups", data)
-
-    def groups_update(self, data):
-        return self._operate("set", models.Group, "groups", data)
-
-    def get_operation(self, request, tp):
-        attr = "{}_{}".format(tp, self.default_operations[request.method])
-        return getattr(self, attr)(request.data)
+        return self._response(request.data, obj_list)
 
     def hosts_operations(self, request):
-        return self.get_operation(request, tp="hosts")
+        return self.get_operation(request, attr="hosts")
 
     def groups_operations(self, request):
-        return self.get_operation(request, tp="groups")
+        return self.get_operation(request, attr="groups")
 
 
 ###################################
@@ -284,7 +263,7 @@ class InventorySerializer(_WithVariablesSerializer):
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     vars   = DictField(required=False)
     hosts  = HostSerializer(read_only=True, many=True)
-    groups = InventorySerializer(read_only=True, many=True)
+    groups = GroupSerializer(read_only=True, many=True)
 
     class Meta:
         model = models.Inventory
@@ -294,3 +273,31 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
                   "groups",
                   'vars',
                   'url',)
+
+
+class ProjectSerializer(_WithVariablesSerializer):
+
+    class Meta:
+        model = models.Project
+        fields = ('id',
+                  'name',
+                  'url',)
+
+
+class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
+    hosts       = HostSerializer(read_only=True, many=True)
+    groups      = GroupSerializer(read_only=True, many=True)
+    inventories = InventorySerializer(read_only=True, many=True)
+
+    class Meta:
+        model = models.Project
+        fields = ('id',
+                  'name',
+                  'repository',
+                  'hosts',
+                  "groups",
+                  'inventories',
+                  'url',)
+
+    def inventories_operations(self, request):
+        return self.get_operation(request, attr="inventories")

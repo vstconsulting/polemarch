@@ -51,6 +51,20 @@ class UserViewSet(base.ModelViewSet):
         return Response(serializer.data)
 
 
+class EnvironmentViewSet(base.ModelViewSet):
+    model = serializers.models.Environment
+    serializer_class = serializers.EnvironmentSerializer
+    filter_class = filters.EnvironmentsFilter
+
+    @list_route(methods=['post'])
+    def additionals(self, request):
+        return Response(self.model(**request.data).additionals)
+
+    @list_route(methods=['get'])
+    def types(self, request):
+        return Response(self.model.objects.get_integrations())
+
+
 class HostViewSet(base.ModelViewSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
@@ -92,15 +106,23 @@ class InventoryViewSet(base.ModelViewSet):
         return serializer.groups_operations(request)
 
 
-class EnvironmentViewSet(base.ModelViewSet):
-    model = serializers.models.Environment
-    serializer_class = serializers.EnvironmentSerializer
-    filter_class = filters.EnvironmentsFilter
+class ProjectViewSet(base.ModelViewSet):
+    model = serializers.models.Project
+    serializer_class = serializers.ProjectSerializer
+    serializer_class_one = serializers.OneProjectSerializer
+    filter_class = filters.ProjectFilter
 
-    @list_route(methods=['post'])
-    def additionals(self, request):
-        return Response(self.model(**request.data).additionals)
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def hosts(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.hosts_operations(request)
 
-    @list_route(methods=['get'])
-    def types(self, request):
-        return Response(self.model.objects.get_integrations())
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def groups(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.groups_operations(request)
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def inventories(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.inventories_operations(request)

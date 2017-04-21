@@ -60,6 +60,18 @@ class InventoryFilter(filters.FilterSet):
                   'name',)
 
 
+class ProjectFilter(filters.FilterSet):
+    id        = filters.django_filters.NumberFilter(method=extra_filter)
+    id__not   = filters.django_filters.NumberFilter(method=extra_filter)
+    name__not = filters.django_filters.CharFilter(method=extra_filter)
+    name      = filters.django_filters.CharFilter(method=extra_filter)
+
+    class Meta:
+        model = models.Project
+        fields = ('id',
+                  'name',)
+
+
 class EnvironmentsFilter(filters.FilterSet):
     class Meta:
         model = models.Environment
