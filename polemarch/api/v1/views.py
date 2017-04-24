@@ -56,13 +56,6 @@ class UserViewSet(base.ModelViewSet):
         return Response(serializer.data)
 
 
-class HostViewSet(base.ModelViewSet):
-    model = serializers.models.Host
-    serializer_class = serializers.HostSerializer
-    serializer_class_one = serializers.OneHostSerializer
-    filter_class = filters.HostFilter
-
-
 class EnvironmentViewSet(base.ModelViewSet):
     model = serializers.models.Environment
     serializer_class = serializers.EnvironmentSerializer
@@ -77,20 +70,64 @@ class EnvironmentViewSet(base.ModelViewSet):
         return Response(self.model.objects.get_integrations())
 
 
-class TaskViewSet(base.ModelViewSet):
-    model = serializers.models.Task
-    serializer_class = serializers.TaskSerializer
-    serializer_class_one = serializers.OneTaskSerializer
-    filter_class = filters.TaskFilter
+class HostViewSet(base.ModelViewSet):
+    model = serializers.models.Host
+    serializer_class = serializers.HostSerializer
+    serializer_class_one = serializers.OneHostSerializer
+    filter_class = filters.HostFilter
 
 
-class ScenarioViewSet(base.ModelViewSet):
-    model = serializers.models.Scenario
-    serializer_class = serializers.ScenarioSerializer
-    serializer_class_one = serializers.OneScenarioSerializer
-    filter_class = filters.ScenarioFilter
+class GroupViewSet(base.ModelViewSet):
+    model = serializers.models.Group
+    serializer_class = serializers.GroupSerializer
+    serializer_class_one = serializers.OneGroupSerializer
+    filter_class = filters.GroupFilter
 
-    @detail_route(methods=['post'])
-    def tasks(self, request, pk):
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def hosts(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
-        return Response(serializer.set_tasks(request.data))
+        return serializer.hosts_operations(request)
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def groups(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.groups_operations(request)
+
+
+class InventoryViewSet(base.ModelViewSet):
+    model = serializers.models.Inventory
+    serializer_class = serializers.InventorySerializer
+    serializer_class_one = serializers.OneInventorySerializer
+    filter_class = filters.InventoryFilter
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def hosts(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.hosts_operations(request)
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def groups(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.groups_operations(request)
+
+
+class ProjectViewSet(base.ModelViewSet):
+    model = serializers.models.Project
+    serializer_class = serializers.ProjectSerializer
+    serializer_class_one = serializers.OneProjectSerializer
+    filter_class = filters.ProjectFilter
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def hosts(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.hosts_operations(request)
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def groups(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.groups_operations(request)
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def inventories(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.inventories_operations(request)

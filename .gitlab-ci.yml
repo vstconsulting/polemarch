@@ -25,6 +25,7 @@ stages:
     - dist/
   except:
     - master
+    - GUI
     - tags
 
 
@@ -59,11 +60,15 @@ py27-django19:
   <<: *tests_template
 py27-django110:
   <<: *tests_template
+py27-django111:
+  <<: *tests_template
 py34-django18:
   <<: *tests_template
 py34-django19:
   <<: *tests_template
 py34-django110:
+  <<: *tests_template
+py34-django111:
   <<: *tests_template
 
 pep8_checks:

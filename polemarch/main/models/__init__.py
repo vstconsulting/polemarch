@@ -5,8 +5,9 @@ import json
 from django.db.models import signals
 from django.dispatch import receiver
 
-from .hosts import Host, Environment
-from .tasks import Task, Scenario
+from .hosts import Host, Group, Inventory, Variable, Environment
+from .projects import Project
+from ..validators import validate_hostname
 
 
 #####################################
@@ -15,6 +16,15 @@ from .tasks import Task, Scenario
 @receiver(signals.pre_save, sender=Environment)
 def validate_integrations(instance, **kwargs):
     json.loads(instance.data)
+
+
+@receiver(signals.pre_save, sender=Host)
+def validate_hosts(instance, **kwargs):
+    if instance.type == "HOST" and \
+       instance.variables.filter(key="ansible_host").count():
+        validate_hostname(instance.name)
+    elif instance.variables.filter(key="ansible_host").count():
+        validate_hostname(instance.variables.get("ansible_host"))
 
 
 @receiver(signals.pre_delete, sender=Environment)
