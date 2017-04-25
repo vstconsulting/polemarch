@@ -1,4 +1,6 @@
+from django.contrib.auth.models import User
 from rest_framework import viewsets
+from rest_framework.decorators import detail_route
 
 
 class ModelViewSet(viewsets.ModelViewSet):
@@ -19,4 +21,12 @@ class ModelViewSet(viewsets.ModelViewSet):
                 % self.__class__.__name__
             )
             self.queryset = self.model.objects.all()
+        if not self.request.user.is_staff and self.queryset.model != User:
+            qs = self.queryset.filter(related_objects__user=self.request.user)
+            self.queryset = qs
         return super(ModelViewSet, self).get_queryset()
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def permissions(self, request):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.permissions(request)

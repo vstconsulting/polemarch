@@ -27,7 +27,7 @@ def get_integration(name):
     try:
         backend = get_integrations()[name].get('BACKEND', None)
         if backend is None:
-            raise ex.IHSException("Backend is 'None'.")
+            raise ex.PMException("Backend is 'None'.")
         return import_module(backend).Integration
     except KeyError or ImportError:
         raise ex.UnknownIntegrationException(name)
@@ -45,11 +45,8 @@ class Variable(BModel):
     key            = models.CharField(max_length=128)
     value          = models.CharField(max_length=2*1024)
 
-    def __unicode__(self):
+    def __unicode__(self):  # pragma: no cover
         return "{}={}".format(self.key, self.value)
-
-    def __str__(self):
-        return self.__unicode__()
 
 
 class _AbstractInventoryQuerySet(BQuerySet):
@@ -79,6 +76,11 @@ class _AbstractModel(BModel):
 
     class Meta:
         abstract = True
+
+    def __unicode__(self):  # pragma: no cover
+        _vars = " ".join(["{}={}".format(k, v)
+                          for k, v in self.vars.items()])
+        return "{} {}".format(self.name, _vars)
 
     @transaction.atomic()
     def set_vars(self, variables):
@@ -122,12 +124,9 @@ class Environment(BModel):
                                   default="{}",
                                   db_column='data')
 
-    def __unicode__(self):
+    def __unicode__(self):  # pragma: no cover
         return "{}:{}".format(self.name,
                               self.type)
-
-    def __str__(self):
-        return self.__unicode__()
 
     @property
     def data(self):
@@ -141,9 +140,9 @@ class Environment(BModel):
             try:
                 self._data = json.dumps(json.loads(value)) if value else '{}'
             except ValueError as err:
-                raise ex.IHSException("{}. Data: {}".format(err, value))
+                raise ex.PMException("{}. Data: {}".format(err, value))
         else:
-            raise ex.IHSException("Unknown `data` field type.")
+            raise ex.PMException("Unknown `data` field type.")
 
     @property
     def integration(self):
@@ -170,12 +169,6 @@ class Host(_AbstractModel):
     class Meta:
         default_related_name = "hosts"
 
-    def __unicode__(self):
-        return str(self.name)
-
-    def __str__(self):
-        return self.__unicode__()
-
     @property
     def integration(self):
         env = self.environment or Environment(name="NullEnv")
@@ -199,12 +192,6 @@ class Group(_AbstractModel):
     class Meta:
         default_related_name = "groups"
 
-    def __unicode__(self):
-        return str(self.name)
-
-    def __str__(self):
-        return self.__unicode__()
-
 
 class Inventory(_AbstractModel):
     objects     = BManager.from_queryset(_AbstractInventoryQuerySet)()
@@ -215,7 +202,4 @@ class Inventory(_AbstractModel):
         default_related_name = "inventories"
 
     def __unicode__(self):
-        return str(self.name)
-
-    def __str__(self):
-        return self.__unicode__()
+        return str(self.name)  # pragma: no cover

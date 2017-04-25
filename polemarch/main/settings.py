@@ -62,7 +62,7 @@ INSTALLED_APPS = [
 
 try:
     import mod_wsgi
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 else:
     INSTALLED_APPS += ['mod_wsgi.server',]  # pragma: no cover
@@ -158,7 +158,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAdminUser",
+        "polemarch.api.permissions.ModelPermission",
     ),
     'EXCEPTION_HANDLER': 'polemarch.api.handlers.polemarch_exception_handler',
     'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),

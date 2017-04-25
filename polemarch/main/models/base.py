@@ -39,6 +39,9 @@ class BModel(models.Model):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        return self.__unicode__()
+
 
 class BGroupedModel(BModel):
     parent     = models.ForeignKey('self', blank=True, null=True)

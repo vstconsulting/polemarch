@@ -1,13 +1,13 @@
-class IHSException(Exception):
+class PMException(Exception):
     def __init__(self, *args, **kwargs):
         self.msg = (list(args)[0:1]+[""])[0]
-        super(IHSException, self).__init__(*args, **kwargs)
+        super(PMException, self).__init__(*args, **kwargs)
 
     def __repr__(self):
         return repr(self.msg)
 
 
-class UnknownIntegrationException(IHSException):
+class UnknownIntegrationException(PMException):
     _def_message = "Unknown type {}."
 
     def __init__(self, tp):
@@ -15,13 +15,13 @@ class UnknownIntegrationException(IHSException):
         super(UnknownIntegrationException, self).__init__(msg)
 
 
-class NodeFailedException(IHSException):
+class NodeFailedException(PMException):
     pass
 
 
-class NodeOfflineException(IHSException):
+class NodeOfflineException(PMException):
     pass
 
 
-class AnsibleNotFoundException(IHSException):
+class AnsibleNotFoundException(PMException):
     pass

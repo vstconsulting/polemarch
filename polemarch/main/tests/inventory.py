@@ -48,6 +48,12 @@ class _ApiGHBaseTestCase(BaseTestCase):
         return self.mass_create("/api/v1/periodic-tasks/", tasks,
                                 "task", "schedule", "type")
 
+    def _filter_test(self, base_url, variables, count):
+        filter_url = "{}?variables={}".format(base_url, variables)
+        result = self.get_result("get", filter_url)
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(result["count"], count, result)
+
 
 class ApiHostsTestCase(_ApiGHBaseTestCase):
     def setUp(self):
@@ -92,6 +98,23 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 3, result)
+
+        # Test variables filter
+        hosts_d = [
+            dict(name="h1", vars=dict(ansible_port="222", ansible_user="one")),
+            dict(name="h2", vars=dict(ansible_port="221", ansible_user="one")),
+            dict(name="h3", vars=dict(ansible_port='222', ansible_user="one")),
+            dict(name="h4", vars=dict(ansible_port='221', ansible_user="rh")),
+            dict(name="h5", vars=dict(ansible_port='222', ansible_user="rh")),
+            dict(name="h6", vars=dict(ansible_port='221', ansible_user="rh"))
+        ]
+        results_id = self.mass_create(base_url, hosts_d, "name", "vars")
+
+        self._filter_test(base_url, "ansible_port:222,ansible_user:one", 2)
+        self._filter_test(base_url, "ansible_port:221,ansible_user:rh", 2)
+
+        for host_id in results_id:
+            self.get_result("delete", base_url + "{}/".format(host_id))
 
     def test_update_host(self):
         url = "/api/v1/hosts/{}/".format(self.h1.id)
@@ -191,6 +214,23 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 2, result)
 
+        # Test variables filter
+        groups_d = [
+            dict(name="g1", vars=dict(ansible_port="222", ansible_user="one")),
+            dict(name="g2", vars=dict(ansible_port="221", ansible_user="one")),
+            dict(name="g3", vars=dict(ansible_port='222', ansible_user="one")),
+            dict(name="g4", vars=dict(ansible_port='221', ansible_user="rh")),
+            dict(name="g5", vars=dict(ansible_port='222', ansible_user="rh")),
+            dict(name="g6", vars=dict(ansible_port='221', ansible_user="rh"))
+        ]
+        results_id = self.mass_create(base_url, groups_d, "name", "vars")
+
+        self._filter_test(base_url, "ansible_port:222,ansible_user:one", 2)
+        self._filter_test(base_url, "ansible_port:221,ansible_user:rh", 2)
+
+        for group_id in results_id:
+            self.get_result("delete", base_url + "{}/".format(group_id))
+
     def test_update_group(self):
         url = "/api/v1/groups/{}/".format(self.gr1.id)
         data1 = dict(vars=dict(auth_user="ubuntu"))
@@ -272,6 +312,23 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         result = self.get_result("get", f_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 1, result)
+
+        # Test variables filter
+        inventories_d = [
+            dict(name="i1", vars=dict(ansible_port="222", ansible_user="one")),
+            dict(name="i2", vars=dict(ansible_port="221", ansible_user="one")),
+            dict(name="i3", vars=dict(ansible_port='222', ansible_user="one")),
+            dict(name="i4", vars=dict(ansible_port='221', ansible_user="rh")),
+            dict(name="i5", vars=dict(ansible_port='222', ansible_user="rh")),
+            dict(name="i6", vars=dict(ansible_port='221', ansible_user="rh"))
+        ]
+        results_id = self.mass_create(base_url, inventories_d, "name", "vars")
+
+        self._filter_test(base_url, "ansible_port:222,ansible_user:one", 2)
+        self._filter_test(base_url, "ansible_port:221,ansible_user:rh", 2)
+
+        for inventory_id in results_id:
+            self.get_result("delete", base_url + "{}/".format(inventory_id))
 
     def test_update_inventory(self):
         url = "/api/v1/inventories/{}/".format(self.inv1.id)

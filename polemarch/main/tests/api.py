@@ -29,8 +29,8 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 302)
         response = self.client.get('/')
         self.assertRedirects(response, self.login_url + '?next=/')
-        # response = self.client.get('/help/')
-        # self.assertEqual(response.status_code, 200)
+        response = self.client.get('/help/')
+        self.assertEqual(response.status_code, 200)
 
     def test_api_users_get(self):
         client = self._login()
