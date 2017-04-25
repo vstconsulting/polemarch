@@ -39,7 +39,7 @@
             <small>
                 {% block description %}
                 {{ description }}
-                {% if not description %}CloudNS API{% endif %}
+                {% if not description %}{{ name }}{% endif %}
                 {% endblock %}
             </small>
         </h1>
