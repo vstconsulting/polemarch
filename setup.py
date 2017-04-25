@@ -36,7 +36,7 @@ setup(
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 1.{8-10}',
+        'Framework :: Django :: 1.{8-11}',
         'Operating System :: Centos',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
@@ -46,7 +46,7 @@ setup(
     ],
     scripts=['polemarchctl'],
     install_requires=[
-        "django>=1.8,<1.11",
+        "django>=1.8,<1.12",
     ] + REQUIRES,
     extras_require={
         "apache": [

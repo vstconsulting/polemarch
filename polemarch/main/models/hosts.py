@@ -1,4 +1,4 @@
-# pylint: disable=protected-access
+# pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
 import json
@@ -53,6 +53,8 @@ class Variable(BModel):
 
 
 class _AbstractInventoryQuerySet(BQuerySet):
+    use_for_related_fields = True
+
     @transaction.atomic
     def create(self, **kwargs):
         variables = kwargs.pop("vars", {})
@@ -157,13 +159,8 @@ class HostQuerySet(_AbstractInventoryQuerySet):
     pass
 
 
-class HostManager(BManager.from_queryset(HostQuerySet)):
-    # pylint: disable=no-member
-    pass
-
-
 class Host(_AbstractModel):
-    objects = HostManager()
+    objects     = BManager.from_queryset(HostQuerySet)()
     type        = models.CharField(max_length=5,
                                    default="HOST")
     environment = models.ForeignKey(Environment,
@@ -193,13 +190,8 @@ class GroupQuerySet(_AbstractInventoryQuerySet):
     pass
 
 
-class GroupManager(BManager.from_queryset(GroupQuerySet)):
-    # pylint: disable=no-member
-    pass
-
-
 class Group(_AbstractModel):
-    objects     = HostManager()
+    objects     = BManager.from_queryset(GroupQuerySet)()
     hosts       = models.ManyToManyField(Host)
     groups      = models.ManyToManyField('self', blank=True, null=True)
     children    = models.BooleanField(default=False)
@@ -215,6 +207,7 @@ class Group(_AbstractModel):
 
 
 class Inventory(_AbstractModel):
+    objects     = BManager.from_queryset(_AbstractInventoryQuerySet)()
     hosts       = models.ManyToManyField(Host)
     groups      = models.ManyToManyField(Group)
 

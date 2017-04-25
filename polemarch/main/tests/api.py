@@ -165,7 +165,8 @@ class ApiUsersTestCase(BaseTestCase):
 
 
 class APITestCase(ApiUsersTestCase, ApiEnvsTestCase,
-                  ApiHostsTestCase, ApiGroupsTestCase):
+                  ApiHostsTestCase, ApiGroupsTestCase,
+                  ApiInventoriesTestCase, ApiProjectsTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 

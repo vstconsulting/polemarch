@@ -7,9 +7,9 @@ from django.conf.urls.static import static
 from . import views
 from ..api.urls import urls as api_urls
 
-admin.site.site_header = 'Infrastructure Heat Service'
-admin.site.site_title = "IHService"
-admin.site.index_title = "IHService Settings Panel"
+admin.site.site_header = 'Polemarch - infrastructure orcestrator'
+admin.site.site_title = "Polemarch"
+admin.site.index_title = "Polemarch Settings Panel"
 admin.site.site_url = "/"
 login_url = getattr(settings, 'LOGIN_URL', '/login/')[1:]
 logout_url = getattr(settings, 'LOGOUT_URL', '/logout/')[1:]

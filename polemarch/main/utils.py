@@ -188,3 +188,30 @@ class Paginator(BasePaginator):
                 obj.paginator = self
                 obj.page = page
                 yield obj
+
+
+class task(object):
+    def __init__(self, app, *args, **kwargs):
+        self.app = app
+        self.args, self.kwargs = args, kwargs
+
+    def __call__(self, task_cls):
+
+        self.kwargs["name"] = "{c.__module__}.{c.__name__}".format(c=task_cls)
+        @self.app.task(*self.args, **self.kwargs)
+        def wrapper(*args, **kwargs):
+            return task_cls(*args, **kwargs).start()
+
+        return wrapper
+
+
+class BaseTask(object):
+    def __init__(self, *args, **kwargs):
+        super(BaseTask, self).__init__()
+        self.args, self.kwargs = args, kwargs
+
+    def start(self):
+        return self.run()
+
+    def run(self):  # pragma: no cover
+        raise NotImplemented()

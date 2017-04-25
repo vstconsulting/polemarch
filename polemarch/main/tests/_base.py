@@ -61,7 +61,7 @@ class BaseTestCase(TestCase):
     def get_result(self, rtype, url, code=None, *args, **kwargs):
         '''
         Test request with returning result of request
-        :param rtype:  - request type (methods from Client class): get, post etc
+        :param rtype:  - request type (methods from Client cls): get, post etc
         :param url:    - requested url
         :param code:   - expected return code from request.
         :param args:   - extra-args for Client class

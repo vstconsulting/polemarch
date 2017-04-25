@@ -1,5 +1,5 @@
 from .inventory import _ApiGHBaseTestCase
-from ..models import Host
+from ..models import Project
 
 
 class ApiProjectsTestCase(_ApiGHBaseTestCase):
@@ -23,7 +23,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
 
         for project_id in results_id:
             self.get_result("delete", url + "{}/".format(project_id))
-        self.assertEqual(Host.objects.filter(id__in=results_id).count(), 0)
+        self.assertEqual(Project.objects.filter(id__in=results_id).count(), 0)
 
     def test_inventories_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer
@@ -41,18 +41,17 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         self._compare_list(url, "post", 200, prj_id, inventories_id[0:2],
                            "inventories", inventories_id[0:2])
         # Delete one of inventory in project
-        self._compare_list(url, "delete", 204, prj_id, [inventories_id[0]],
-                           "hosts", inventories_id[1:2])
+        self._compare_list(url, "delete", 200, prj_id, [inventories_id[0]],
+                           "inventories", inventories_id[1:2])
         # Full update list of project
-        self._compare_list(url, "put", 200, prj_id, inventories_id, "hosts",
-                           inventories_id)
+        self._compare_list(url, "put", 200, prj_id, inventories_id,
+                           "inventories", inventories_id)
 
     def test_tasks_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer
 
         inventories_data = [dict(name="Inv1", vars={})]
         inventory_id = self._create_inventories(inventories_data)[0]
-
 
         tasks_data = [dict(inventory=inventory_id, playbook="play1.yml"),
                       dict(inventory=inventory_id, playbook="play2.yml"),
@@ -65,12 +64,12 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         # Test tasks
         # Just put two tasks in project
         self._compare_list(url, "post", 200, prj_id, tasks_id[0:2],
-                           "inventories", tasks_id[0:2])
+                           "tasks", tasks_id[0:2])
         # Delete one of tasks in project
-        self._compare_list(url, "delete", 204, prj_id, [tasks_id[0]],
-                           "hosts", tasks_id[1:2])
+        self._compare_list(url, "delete", 200, prj_id, [tasks_id[0]],
+                           "tasks", tasks_id[1:2])
         # Full update tasks of project
-        self._compare_list(url, "put", 200, prj_id, tasks_id, "hosts",
+        self._compare_list(url, "put", 200, prj_id, tasks_id, "tasks",
                            tasks_id)
 
     def test_periodic_tasks_in_project(self):
@@ -91,11 +90,10 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         # Test tasks
         # Just put two periodic tasks in project
         self._compare_list(url, "post", 200, prj_id, schedules_id[0:2],
-                           "inventories", schedules_id[0:2])
+                           "periodic_tasks", schedules_id[0:2])
         # Delete one of periodic tasks in project
-        self._compare_list(url, "delete", 204, prj_id, [schedules_id[0]],
-                           "hosts", schedules_id[1:2])
+        self._compare_list(url, "delete", 200, prj_id, [schedules_id[0]],
+                           "periodic_tasks", schedules_id[1:2])
         # Full update periodic tasks of project
-        self._compare_list(url, "put", 200, prj_id, schedules_id, "hosts",
-                           schedules_id)
-
+        self._compare_list(url, "put", 200, prj_id, schedules_id,
+                           "periodic_tasks", schedules_id)
