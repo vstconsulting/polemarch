@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 
@@ -13,6 +14,13 @@ class ModelViewSet(viewsets.ModelViewSet):
                 return self.serializer_class_one
         return super(ModelViewSet, self).get_serializer_class()
 
+    def _get_extra_queryset(self):
+        aval_projs = self.request.user.related_objects.projects.all()
+        return self.queryset.filter(
+            Q(related_objects__user=self.request.user) |
+            Q(related_objects__projects__in=aval_projs)
+        )
+
     def get_queryset(self):
         if self.queryset is None:
             assert self.model is not None, (
@@ -22,8 +30,7 @@ class ModelViewSet(viewsets.ModelViewSet):
             )
             self.queryset = self.model.objects.all()
         if not self.request.user.is_staff and self.queryset.model != User:
-            qs = self.queryset.filter(related_objects__user=self.request.user)
-            self.queryset = qs
+            self.queryset = self._get_extra_queryset()
         return super(ModelViewSet, self).get_queryset()
 
     @detail_route(methods=["post", "put", "delete", "get"])

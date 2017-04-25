@@ -39,6 +39,9 @@ class BModel(models.Model):
     class Meta:
         abstract = True
 
+    def __unicode__(self):
+        return "<{}>".format(self.id)
+
     def __str__(self):
         return self.__unicode__()
 
