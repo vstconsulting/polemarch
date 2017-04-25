@@ -64,12 +64,12 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         # Test tasks
         # Just put two tasks in project
         self._compare_list(url, "post", 200, prj_id, tasks_id[0:2],
-                           "inventories", tasks_id[0:2])
+                           "tasks", tasks_id[0:2])
         # Delete one of tasks in project
         self._compare_list(url, "delete", 200, prj_id, [tasks_id[0]],
-                           "hosts", tasks_id[1:2])
+                           "tasks", tasks_id[1:2])
         # Full update tasks of project
-        self._compare_list(url, "put", 200, prj_id, tasks_id, "hosts",
+        self._compare_list(url, "put", 200, prj_id, tasks_id, "tasks",
                            tasks_id)
 
     def test_periodic_tasks_in_project(self):
@@ -90,10 +90,10 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         # Test tasks
         # Just put two periodic tasks in project
         self._compare_list(url, "post", 200, prj_id, schedules_id[0:2],
-                           "inventories", schedules_id[0:2])
+                           "periodic_tasks", schedules_id[0:2])
         # Delete one of periodic tasks in project
         self._compare_list(url, "delete", 200, prj_id, [schedules_id[0]],
-                           "hosts", schedules_id[1:2])
+                           "periodic_tasks", schedules_id[1:2])
         # Full update periodic tasks of project
-        self._compare_list(url, "put", 200, prj_id, schedules_id, "hosts",
-                           schedules_id)
+        self._compare_list(url, "put", 200, prj_id, schedules_id,
+                           "periodic_tasks", schedules_id)
