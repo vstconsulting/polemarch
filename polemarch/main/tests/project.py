@@ -76,13 +76,9 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
     def _test_periodic_tasks_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer
 
-        inventories_data = [dict(name="Inv1", vars={})]
-        inventory_id = self._create_inventories(inventories_data)[0]
-        tasks_data = [dict(inventory=inventory_id, playbook="play1.yml")]
-        tasks_id = self._create_tasks(tasks_data)
-        schedules_data = [dict(task=tasks_id[0], schedule="10", type="DELTA"),
-                          dict(task=tasks_id[0], schedule="5", type="DELTA"),
-                          dict(task=tasks_id[0], schedule="1", type="DELTA")]
+        schedules_data = [dict(playbook="p1.yml", schedule="10", type="DELTA"),
+                          dict(playbook="p2.yml", schedule="5", type="DELTA"),
+                          dict(playbook="p1.yml", schedule="1", type="DELTA")]
         schedules_id = self._create_periodic_tasks(schedules_data)
 
         data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
@@ -91,10 +87,10 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         # Test tasks
         # Just put two periodic tasks in project
         self._compare_list(url, "post", 200, prj_id, schedules_id[0:2],
-                           "periodic_tasks", schedules_id[0:2])
+                           "periodic-tasks", schedules_id[0:2])
         # Delete one of periodic tasks in project
         self._compare_list(url, "delete", 200, prj_id, [schedules_id[0]],
-                           "periodic_tasks", schedules_id[1:2])
+                           "periodic-tasks", schedules_id[1:2])
         # Full update periodic tasks of project
         self._compare_list(url, "put", 200, prj_id, schedules_id,
-                           "periodic_tasks", schedules_id)
+                           "periodic-tasks", schedules_id)
