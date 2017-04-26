@@ -31,7 +31,7 @@ class BaseIntegration(object):
     is_cloud = False
     _errors = {}
 
-    class IntegrationsException(exceptions.IHSException):
+    class IntegrationsException(exceptions.PMException):
         _d_msg = "Incorrect data on environment."
 
         def __init__(self, msg=None, amsg=None):

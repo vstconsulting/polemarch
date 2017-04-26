@@ -198,6 +198,7 @@ class task(object):
     def __call__(self, task_cls):
 
         self.kwargs["name"] = "{c.__module__}.{c.__name__}".format(c=task_cls)
+
         @self.app.task(*self.args, **self.kwargs)
         def wrapper(*args, **kwargs):
             return task_cls(*args, **kwargs).start()
@@ -214,4 +215,5 @@ class BaseTask(object):
         return self.run()
 
     def run(self):  # pragma: no cover
-        raise NotImplemented()
+        # pylint: disable=notimplemented-raised,
+        raise NotImplemented

@@ -2,17 +2,21 @@
 from __future__ import unicode_literals
 
 import logging
-import uuid
 
-from .base import BModel, models
+from django.contrib.auth.models import User as BaseUser
+
+from .base import models, BModel
+from .projects import Project
 from . import hosts as hosts_models
 
 logger = logging.getLogger("polemarch")
 
 
-class Project(BModel):
-    name        = models.CharField(max_length=256, default=uuid.uuid1)
-    repository  = models.CharField(max_length=2*1024)
+class TypesPermissions(BModel):
+    user        = models.ForeignKey(BaseUser,
+                                    related_query_name='related_objects')
+    projects    = models.ManyToManyField(Project,
+                                         blank=True, null=True)
     inventories = models.ManyToManyField(hosts_models.Inventory,
                                          blank=True, null=True)
     hosts       = models.ManyToManyField(hosts_models.Host,
@@ -21,7 +25,7 @@ class Project(BModel):
                                          blank=True, null=True)
 
     class Meta:
-        default_related_name = "projects"
+        default_related_name = "related_objects"
 
     def __unicode__(self):
-        return str(self.name)  # pragma: no cover
+        return str(self.user)  # pragma: no cover

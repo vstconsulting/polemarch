@@ -1,10 +1,13 @@
 # pylint: disable=protected-access
 from __future__ import unicode_literals
 
+import uuid
 import logging
 import subprocess
 
-# from .base import BModel, BManager, BQuerySet, BGroupedModel, models
+from .base import BModel, models
+from .projects import Project
+from .hosts import Inventory
 from ...main import exceptions as ex
 
 logger = logging.getLogger("polemarch")
@@ -69,3 +72,18 @@ class ExecuteStatusHandler:
 
 
 # Block of real models
+class Task(BModel):
+    name        = models.CharField(max_length=256, default=uuid.uuid1)
+    playbook    = models.CharField(max_length=256)
+    inventory   = models.ForeignKey(Inventory, on_delete=models.SET_NULL)
+    project     = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    class Meta:
+        default_related_name = "projects"
+
+    def __unicode__(self):
+        return str(self.name)
+
+
+class PeriodicTask(BModel):
+    pass

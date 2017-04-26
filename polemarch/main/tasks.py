@@ -15,7 +15,7 @@ class TestTask(BaseTask):
         try:
             if arg1 == 1:
                 raise Exception("Unfortunately we can't proceed with this "
-                                     "random number")
+                                "random number")
             self.arg1 = arg1
             self.arg2 = arg2
         except Exception as e:

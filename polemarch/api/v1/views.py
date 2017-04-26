@@ -4,7 +4,6 @@ from rest_framework import permissions, exceptions as excepts
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
-from polemarch.main import tasks
 from .. import base
 from . import filters
 from . import serializers
@@ -13,11 +12,8 @@ from . import serializers
 class UserViewSet(base.ModelViewSet):
     model = serializers.User
     serializer_class = serializers.UserSerializer
+    serializer_class_one = serializers.OneUserSerializer
     filter_class = filters.UserFilter
-
-    @detail_route(methods=['get'])
-    def exec_task(self, request, pk=None):
-        tasks.test.delay(3, 5)
 
     @detail_route(methods=['post'],
                   permission_classes=[permissions.IsAuthenticated])

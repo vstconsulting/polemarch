@@ -67,11 +67,11 @@ class Command(ServiceCommand):
             '--server-root',
             action='store',
             dest='server-root',
-            default='/tmp/ihserviceweb',
+            default='/tmp/polemarchweb',
             type=str,
             help='Specify an alternate directory for where the generated'
                  'web server configuration, startup files and logs will'
-                 'be stored. Defaults to directory /tmp/ihserviceweb.')
+                 'be stored. Defaults to directory /tmp/polemarchweb.')
         parser.add_argument(
             '--log-directory',
             action='store',
