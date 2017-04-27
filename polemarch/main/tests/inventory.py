@@ -54,6 +54,53 @@ class _ApiGHBaseTestCase(BaseTestCase):
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], count, result)
 
+    def _test_access_rights(self, url, data, list_urls=[]):
+        id = self.mass_create(url, [data], data.keys())[0]
+        single_url = url + "{}/".format(id)
+
+        # another user can't do anything with this object
+        self.change_identity()
+        self.assertEqual(self.get_result("get", url)["count"], 0)
+        self.get_result("get", single_url, 403)
+        self.get_result("put", single_url, 403,
+                        data=json.dumps(data[0]))
+        self.get_result("delete", single_url, 403)
+
+        # and with his satellites
+        for list_url in list_urls:
+            gr_lists_url = single_url + list_url + "/"
+            # trying to do get list, or set or delete from it. Always pass
+            # incorrect id = -1 as id of element, because it is not important
+            # in this context (access violation error should happen before id
+            # check)
+            self.get_result("post", gr_lists_url, 403,
+                            data=json.dumps([-1]))
+            self.get_result("put", gr_lists_url, 403,
+                            data=json.dumps([-1]))
+            self.get_result("delete", gr_lists_url, 403,
+                            data=json.dumps([-1]))
+
+        # superuser can do anything
+        self.change_identity(is_super_user=True)
+        self.assertEqual(self.get_result("get", url)["count"], 1)
+        self.get_result("get", single_url, 200)
+        self.get_result("put", single_url, 201,
+                        data=json.dumps(data[0]))
+        self.get_result("delete", single_url, 201)
+
+        # and with his satellites
+        for list_url in list_urls:
+            gr_lists_url = single_url + list_url + "/"
+            # passing -1 as id of element, because we just want to check that
+            # it actually trying to do specified action without any access
+            # violation errors
+            self.get_result("post", gr_lists_url, 400,
+                            data=json.dumps([-1]))
+            self.get_result("put", gr_lists_url, 400,
+                            data=json.dumps([-1]))
+            self.get_result("delete", gr_lists_url, 400,
+                            data=json.dumps([-1]))
+
 
 class ApiHostsTestCase(_ApiGHBaseTestCase):
     def setUp(self):
@@ -86,6 +133,12 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         for host_id in results_id:
             self.get_result("delete", url + "{}/".format(host_id))
         self.assertEqual(Host.objects.filter(id__in=results_id).count(), 0)
+
+    def test_access_rights(self):
+        self._test_access_rights("/api/v1/hosts/",
+                                 dict(name="127.0.1.1",
+                                      type="HOST",
+                                      vars=self.vars))
 
     def test_filter_host(self):
         base_url = "/api/v1/hosts/"
@@ -149,6 +202,11 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         for group_id in results_id:
             self.get_result("delete", url + "{}/".format(group_id))
         self.assertEqual(self.get_result("get", url)["count"], 3)
+
+    def test_access_rights(self):
+        self._test_access_rights("/api/v1/groups/",
+                                 dict(name="one", vars=self.vars),
+                                 ["hosts", "groups"])
 
     def test_hosts_in_group(self):
         url = "/api/v1/groups/"  # URL to groups layer
@@ -264,6 +322,11 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         for inventory_id in results_id:
             self.get_result("delete", url + "{}/".format(inventory_id))
         self.assertEqual(self.get_result("get", url)["count"], 2)
+
+    def test_access_rights(self):
+        self._test_access_rights("/api/v1/inventories/",
+                                 dict(name="Inv1", vars=self.vars),
+                                 ["hosts", "groups"])
 
     def test_hosts_in_inventory(self):
         url = "/api/v1/inventories/"  # URL to inventories layer

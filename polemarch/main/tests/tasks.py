@@ -48,3 +48,9 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         # test with bad value
         data = [dict(playbook="p1.yml", schedule="30 */4 foo", type="CRONTAB")]
         self.get_result("post", url, 400, data=json.dumps(data))
+
+    def test_access_rights(self):
+        self._test_access_rights("/api/v1/periodic-tasks/",
+                                 dict(playbook="p1.yml",
+                                      schedule="10",
+                                      type="DELTA"))

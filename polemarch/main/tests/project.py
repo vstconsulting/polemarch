@@ -25,6 +25,12 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
             self.get_result("delete", url + "{}/".format(project_id))
         self.assertEqual(Project.objects.filter(id__in=results_id).count(), 0)
 
+    def test_access_rights(self):
+        self._test_access_rights("/api/v1/projects/",
+                                 dict(name="Prj3",
+                                      repository="git@ex.us:dir/rep3.git"),
+                                 ["inventories", "tasks", "periodic-tasks"])
+
     def test_inventories_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer
 
