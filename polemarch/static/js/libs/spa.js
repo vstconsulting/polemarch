@@ -161,10 +161,10 @@ if(!window.spajs)
                     root : root
             });
 
-            var html = spajs.just.renderSync('spajs_holder');
+            /*var html = spajs.just.renderSync('spajs_holder');
 
             $(".spa").remove()
-            $("body").append(html);
+            $("body").append(html);*/
         }
 
         // Фиксируем факт того что страница не активна http://javascript.ru/forum/events/2498-kak-opredelit-aktivnoe-okno-vkladku.html
@@ -622,6 +622,11 @@ if(!window.spajs)
      */
     spajs.open = function(opt)
     {
+        if(!opt.menuId)
+        {
+            opt.menuId = "";
+        }
+        
         var def = new $.Deferred();
         if(!spajs.opt.addParamsToUrl && opt.event_state == undefined)
         {

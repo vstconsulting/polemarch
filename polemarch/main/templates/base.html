@@ -75,6 +75,16 @@
             {% endif %}
         </script>
 
+        <script src="{% static 'js/libs/tabSignal.js' %}"></script> 
+        <script src="{% static 'js/libs/just.js' %}"></script> 
+        <script src="{% static 'js/libs/just-watch.js' %}"></script> 
+        <script src="{% static 'js/libs/notify.js' %}"></script>
+        <script src="{% static 'js/libs/moment.min.js' %}"></script>
+        <script src="{% static 'js/libs/markdown.js' %}"></script>
+        <script src="{% static 'js/libs/spa.js' %}"></script> 
+        
+        <script src="{% static 'js/polemarch.js' %}"></script>
+
         {% block custom_style %}
         {% endblock %}
       {% endblock %}
@@ -226,7 +236,7 @@
             </header>
             <!-- Left side column. contains the logo and sidebar -->
             <aside class="main-sidebar">
-                <!-- sidebar: style can be found in sidebar.less -->
+                <!-- sidebar: style can be found in sidebar.less --> 
                 <section class="sidebar">  
                     <!-- sidebar menu: : style can be found in sidebar.less -->
                     <ul class="sidebar-menu">

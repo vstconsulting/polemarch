@@ -3,7 +3,7 @@
 {% block script %}
 
 <!-- Страница тестовая -->
-<script type="text/x-just" style="display: none;" data-just="test_page">
+<script type="text/x-just" style="display: none;" data-just="home_page">
     <section class="content-header">
         <h1>
             Test <small>v1</small>
@@ -13,7 +13,7 @@
             <li class="active">Backup</li>
         </ol>
     </section>
- 
+
     <section class="content">
         <div class="row">
             <div class="col-md-6">
@@ -87,16 +87,14 @@
         </div>
     </section>
 </script>
-  
 
-<script src="{% static 'js/polemarch.js' %}"></script>
 <script>
     $(document).ready(function()
     {
         polemarch.start({
-            is_superuser:is_superuser
+            is_superuser:is_superuser,
+            holder:'#spajs-body'
         })
     })
-</script> 
+</script>
 {% endblock %}
-  
