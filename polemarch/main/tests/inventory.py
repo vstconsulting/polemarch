@@ -54,12 +54,7 @@ class _ApiGHBaseTestCase(BaseTestCase):
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], count, result)
 
-    def _test_access_rights(self, url, data, list_urls=[]):
-        id = self.mass_create(url, [data], data.keys())[0]
-        single_url = url + "{}/".format(id)
-
-        # another user can't do anything with this object
-        self.change_identity()
+    def _ensure_no_rights(self, url, data, list_urls, single_url):
         self.assertEqual(self.get_result("get", url)["count"], 0)
         self.get_result("get", single_url, 403)
         self.get_result("put", single_url, 403,
@@ -80,8 +75,7 @@ class _ApiGHBaseTestCase(BaseTestCase):
             self.get_result("delete", gr_lists_url, 403,
                             data=json.dumps([-1]))
 
-        # superuser can do anything
-        self.change_identity(is_super_user=True)
+    def _ensure_have_rights(self, url, data, list_urls, single_url):
         self.assertEqual(self.get_result("get", url)["count"], 1)
         self.get_result("get", single_url, 200)
         self.get_result("put", single_url, 201,
@@ -100,6 +94,34 @@ class _ApiGHBaseTestCase(BaseTestCase):
                             data=json.dumps([-1]))
             self.get_result("delete", gr_lists_url, 400,
                             data=json.dumps([-1]))
+
+    def _test_access_rights(self, url, data, list_urls=[]):
+        id = self.mass_create(url, [data], data.keys())[0]
+        single_url = url + "{}/".format(id)
+
+        # another user can't do anything with this object
+        nonprivileged_user = self.user
+        self.change_identity()
+        self._ensure_no_rights(url, data, list_urls, single_url)
+
+        # superuser can do anything
+        self.change_identity(is_super_user=True)
+        self._ensure_have_rights(url, data, list_urls, single_url)
+
+        perm_url = single_url + "permissions/"
+
+        # we can set add rights for user
+        self.get_result("post", perm_url, 201,
+                        data=json.dumps([nonprivileged_user.id]))
+        self.user = nonprivileged_user
+        self._ensure_have_rights(url, data, list_urls, single_url)
+
+        # we can remove rights for user
+        self.change_identity(is_super_user=True)
+        self.get_result("delete", perm_url, 201,
+                        data=json.dumps([nonprivileged_user.id]))
+        self.user = nonprivileged_user
+        self._ensure_no_rights(url, data, list_urls, single_url)
 
 
 class ApiHostsTestCase(_ApiGHBaseTestCase):
