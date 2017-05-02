@@ -218,12 +218,12 @@ var deepExtend = function (/*obj_1, [obj_2], [obj_N]*/) {
  *
  * Подстановка класса если знаение не false
  * <h1 class="<%= anyObject.justClass('anyValue', 'anyClassName') %> " >Any text</h1>
- * 
- * Подстановка атрибута 
+ *
+ * Подстановка атрибута
  * <h1 <%= anyObject.justAttr('anyValue', 'data-test') %> >Any text</h1>
  * <h1 <%= anyObject.justAttr('anyValue', 'data-test', function(v){return (v+"").replace("a", "G") }) %> >Any text</h1>
- * 
- */ 
+ *
+ */
 if (!Object.prototype.justHtml)
 {
     var justStrip = function(html)
@@ -287,8 +287,8 @@ if (!Object.prototype.justHtml)
                     {
                         newval.val = val;
                     }
- 
-                    console.log("setter", newval);
+
+                    //console.log("setter", newval);
                     for(var i in newval.just_ids)
                     {
                         if(newval.just_ids[i].type == 'innerHTML')
@@ -304,8 +304,8 @@ if (!Object.prototype.justHtml)
                         else if(newval.just_ids[i].type == 'class')
                         {
                             var el = document.getElementsByClassName("just-watch-class-"+newval.just_ids[i].id)
-                            
-                            var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData) 
+
+                            var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
                             console.log("class", valT)
                             if(!valT)
                             {
@@ -352,9 +352,9 @@ if (!Object.prototype.justHtml)
                         , enumerable: true
                         , configurable: true
                 });
-                
-                if(isArray(newval.val))
-                { 
+
+                if(Array.isArray(newval.val))
+                {
                     /*
                      * Методы массивов применяем для реактивности массива
                      */
@@ -370,7 +370,7 @@ if (!Object.prototype.justHtml)
                     'splice',
                     'unshift',
                     'unshift']
-                
+
                     for(var i in methods)
                     {
                         Object.defineProperty(this[opt.prop], methods[i], {
@@ -381,10 +381,10 @@ if (!Object.prototype.justHtml)
                                   Array.prototype[methods[i]].apply(this,arguments);
                                   setter.apply(this,["__justWatch_update"]);
                                   console.log(methods[i], arguments);
-                                  return this; 
+                                  return this;
                               }
-                        });  
-                    } 
+                        });
+                    }
                 }
             }
         }
@@ -406,7 +406,7 @@ if (!Object.prototype.justHtml)
             return "<div id='_justWatch"+id+"' class='just-watch just-watch-html' style='display: inline;' >"+opt.callBack(this[opt.prop], opt.customData)+"</div>";
         }
         else if(opt.type == 'textContent')
-        { 
+        {
             return "<div id='_justWatch"+id+"' style='display: inline;' class='just-watch just-watch-text' >"+justStrip(opt.callBack(this[opt.prop], opt.customData))+"</div>";
         }
         else if(opt.type == 'class')
@@ -445,7 +445,7 @@ if (!Object.prototype.justHtml)
       , value: function(prop, callBack, customData){ return setValue.apply(this, [{type:'innerHTML', prop:prop, callBack:callBack, customData:customData}])
       }
     });
- 
+
     // Проставляет text значения
     Object.defineProperty(Object.prototype, "justText", {
         enumerable: false
@@ -460,7 +460,7 @@ if (!Object.prototype.justHtml)
       , configurable: true
       , writable: false
       , value: function(prop, className, callBack, customData)
-        { 
+        {
             return setValue.apply(this, [{
                     type:'class',
                     prop:prop,

@@ -33,7 +33,8 @@
 				STATE_CASE = 6,
 				STATE_DEFAULT = 7,
 				STATE_LOOP = 8,
-				STATE_SUBBLOK = 4,
+				STATE_SUBBLOK = 9,
+				STATE_TEXT = 10,
 				cache = {},
                                 countUid = 0,
                                 
@@ -176,6 +177,11 @@
 								prefix = '\',(' + line + ', ';
 								postfix = '),\'';
 								break;
+							case '-':
+								prefix = '\',(' + line + ', ';
+								postfix = '),\'';
+								state = STATE_TEXT;
+								break;
 							case '?':
 								prefix = '\');' + line + ';';
 								postfix = 'this.buffer.push(\'';
@@ -204,6 +210,9 @@
 							switch (state) {
 							case STATE_RAW:
 								buffer.push(prefix, text.substr(jsFromPos).replace(trimExp, ''), postfix);
+								break; 
+							case STATE_TEXT:
+								buffer.push(prefix, 'JustEscapeHtml('+text.substr(jsFromPos).replace(trimExp, '')+')', postfix);
 								break;
 							case STATE_CONDITION:
 								tmp = text.substr(jsFromPos).replace(trimExp, '');
@@ -264,7 +273,7 @@
                                         if (Object.prototype.toString.call(data) === '[object String]') {
                                                 return data;
                                         } else {
-                                                console.error('Failed to load template')
+                                                console.error('Failed to load template', file)
                                                 return '';
                                         }
 				},
@@ -538,3 +547,20 @@
 
 		window.JUST = JUST;
 }());
+
+
+function JustEscapeHtml(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+   
+  if(!text || !text.replace)
+  {
+      return text;
+  }
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
