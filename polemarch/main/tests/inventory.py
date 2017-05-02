@@ -54,33 +54,13 @@ class _ApiGHBaseTestCase(BaseTestCase):
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], count, result)
 
-    def _ensure_no_rights(self, url, data, list_urls, single_url):
-        self.assertEqual(self.get_result("get", url)["count"], 0)
-        self.get_result("get", single_url, 403)
-        self.get_result("put", single_url, 403,
-                        data=json.dumps(data[0]))
-        self.get_result("delete", single_url, 403)
-
-        # and with his satellites
-        for list_url in list_urls:
-            gr_lists_url = single_url + list_url + "/"
-            # trying to do get list, or set or delete from it. Always pass
-            # incorrect id = -1 as id of element, because it is not important
-            # in this context (access violation error should happen before id
-            # check)
-            self.get_result("post", gr_lists_url, 403,
-                            data=json.dumps([-1]))
-            self.get_result("put", gr_lists_url, 403,
-                            data=json.dumps([-1]))
-            self.get_result("delete", gr_lists_url, 403,
-                            data=json.dumps([-1]))
-
-    def _ensure_have_rights(self, url, data, list_urls, single_url):
+    def _ensure_rights(self, url, data, list_urls, single_url,
+                       get_code, set_code, error_code):
         self.assertEqual(self.get_result("get", url)["count"], 1)
-        self.get_result("get", single_url, 200)
-        self.get_result("put", single_url, 201,
+        self.get_result("get", single_url, get_code)
+        self.get_result("put", single_url, set_code,
                         data=json.dumps(data[0]))
-        self.get_result("delete", single_url, 201)
+        self.get_result("delete", single_url, set_code)
 
         # and with his satellites
         for list_url in list_urls:
@@ -88,12 +68,18 @@ class _ApiGHBaseTestCase(BaseTestCase):
             # passing -1 as id of element, because we just want to check that
             # it actually trying to do specified action without any access
             # violation errors
-            self.get_result("post", gr_lists_url, 400,
+            self.get_result("post", gr_lists_url, error_code,
                             data=json.dumps([-1]))
-            self.get_result("put", gr_lists_url, 400,
+            self.get_result("put", gr_lists_url, error_code,
                             data=json.dumps([-1]))
-            self.get_result("delete", gr_lists_url, 400,
+            self.get_result("delete", gr_lists_url, error_code,
                             data=json.dumps([-1]))
+
+    def _ensure_no_rights(self, url, data, list_urls, single_url):
+        self._ensure_rights(url, data, list_urls, single_url, 403, 403, 403)
+
+    def _ensure_have_rights(self, url, data, list_urls, single_url):
+        self._ensure_rights(url, data, list_urls, single_url, 200, 201, 400)
 
     def _test_access_rights(self, url, data, list_urls=[]):
         id = self.mass_create(url, [data], data.keys())[0]

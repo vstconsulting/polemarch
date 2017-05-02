@@ -6,8 +6,8 @@ from .inventory import _ApiGHBaseTestCase
 class ApiTasksTestCase(_ApiGHBaseTestCase):
     def setUp(self):
         super(ApiTasksTestCase, self).setUp()
-        self.task1 = Tasks.objects.create(playbook="first.yml")
-        self.task2 = Tasks.objects.create(playbook="second.yml")
+        self.task1 = Task.objects.create(playbook="first.yml")
+        self.task2 = Task.objects.create(playbook="second.yml")
 
     def test_get_tasks(self):
         url = "/api/v1/tasks/"
@@ -17,12 +17,12 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
     def setUp(self):
         super(ApiPeriodicTasksTestCase, self).setUp()
-        self.ptask1 = PeriodicTasks.objects.create(playbook="p1.yml",
-                                                   schedule="10",
-                                                   type="DELTA")
-        self.ptask2 = PeriodicTasks.objects.create(playbook="p2.yml",
-                                                   schedule="10",
-                                                   type="DELTA")
+        self.ptask1 = PeriodicTask.objects.create(playbook="p1.yml",
+                                                  schedule="10",
+                                                  type="DELTA")
+        self.ptask2 = PeriodicTask.objects.create(playbook="p2.yml",
+                                                  schedule="10",
+                                                  type="DELTA")
 
     def test_create_delete_periodic_task(self):
         url = "/api/v1/periodic-tasks/"
@@ -42,7 +42,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
 
         for project_id in results_id:
             self.get_result("delete", url + "{}/".format(project_id))
-        count = PeriodicTasks.objects.filter(id__in=results_id).count()
+        count = PeriodicTask.objects.filter(id__in=results_id).count()
         self.assertEqual(count, 0)
 
         # test with bad value
