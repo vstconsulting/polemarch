@@ -1,1 +1,102 @@
 {% extends "base.html" %}
+
+{% block script %}
+
+<!-- Страница тестовая -->
+<script type="text/x-just" style="display: none;" data-just="test_page">
+    <section class="content-header">
+        <h1>
+            Test <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><i class="fa fa-dashboard"></i> Home</li>
+            <li class="active">Backup</li>
+        </ol>
+    </section>
+ 
+    <section class="content">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Save backup</h3>
+                    </div>
+                    <div class="box-body">
+                        <a href="/api/backup/?format=json" class="btn btn-block btn-success btn-lg">Save backup</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="box box-danger">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Upload backup</h3>
+                    </div>
+                        <input
+                            type="file"
+                            onchange="cloudDns.onSelectBackup(event)"
+                            style="position: absolute; width: 100%; cursor: pointer; height: 46px; opacity: 0; margin-top: 10px;" />
+                    <div class="box-body">
+                        <a href="#" class="btn btn-block btn-warning btn-lg">Select backup</a>
+
+                        <div id="backup-info" style="display:none;margin-top:10px;" >
+                            <table class="table" >
+                                <tbody>
+                                    <tr>
+                                        <td  style="min-width: 140px;" >
+                                            Name
+                                        </td>
+                                        <td id="backup-info-name"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Size
+                                        </td>
+                                        <td id="backup-info-size"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Last modified date
+                                        </td>
+                                        <td id="backup-info-lastModifiedDate"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <br>
+                            <a href="#" class="btn btn-block btn-danger btn-lg" onclick="cloudDns.uploadBackup(); return false;">Upload backup</a>
+                        </div>
+
+                        <table style="display:none;margin-top:10px;" id="backup-progress-status" class="table" >
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="progress progress-xs progress-striped ">
+                                            <div class="progress-bar progress-bar-primary active" style="width: 0%" id="backup-progress-bar"></div>
+                                        </div>
+                                    </td>
+                                    <td style="width: 30px;">
+                                        <span class="badge bg-light-blue" id="backup-progress-value" >0%</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div
+        </div>
+    </section>
+</script>
+  
+
+<script src="{% static 'js/polemarch.js' %}"></script>
+<script>
+    $(document).ready(function()
+    {
+        polemarch.start({
+            is_superuser:is_superuser
+        })
+    })
+</script> 
+{% endblock %}
+  
