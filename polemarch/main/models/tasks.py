@@ -73,10 +73,9 @@ class ExecuteStatusHandler:
 
 # Block of real models
 class Task(BModel):
+    project     = models.ForeignKey(Project, on_delete=models.CASCADE)
     name        = models.CharField(max_length=256, default=uuid.uuid1)
     playbook    = models.CharField(max_length=256)
-    inventory   = models.ForeignKey(Inventory, on_delete=models.SET_NULL)
-    project     = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
         default_related_name = "projects"
@@ -86,4 +85,10 @@ class Task(BModel):
 
 
 class PeriodicTask(BModel):
-    pass
+    project     = models.ForeignKey(Project, on_delete=models.CASCADE)
+    playbook    = models.CharField(max_length=256)
+    schedule    = models.CharField(max_length=4*1024)
+    type        = models.CharField(max_length=10)
+
+    class Meta:
+        default_related_name = "periodic_tasks"

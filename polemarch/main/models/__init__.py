@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from .hosts import Host, Group, Inventory, Variable, Environment
 from .projects import Project
 from .users import TypesPermissions
+from .tasks import Task, PeriodicTask
 from ..validators import validate_hostname
 
 
