@@ -10,7 +10,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         super(ApiTasksTestCase, self).setUp()
         data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git")]
         project_id = self.mass_create("/api/v1/projects/", data,
-                                      "name", "repository")[0]
+                                      "name", "repository")[0]["id"]
 
         self.task1 = Task.objects.create(playbook="first.yml",
                                          project=project_id)
