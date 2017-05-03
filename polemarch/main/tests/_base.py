@@ -33,6 +33,7 @@ class BaseTestCase(TestCase):
             user = User.objects.create_user(username=username,
                                             password=password,
                                             email=email)
+        user.related_objects.get_or_create()
         user.data = {'username': username, 'password': password}
         return user
 

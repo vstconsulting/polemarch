@@ -15,7 +15,8 @@ class ModelViewSet(viewsets.ModelViewSet):
         return super(ModelViewSet, self).get_serializer_class()
 
     def _get_extra_queryset(self):
-        aval_projs = self.request.user.related_objects.projects.all()
+        aval_projs = self.request.user.related_objects.values_list('projects',
+                                                                   flat=True)
         return self.queryset.filter(
             Q(related_objects__user=self.request.user) |
             Q(related_objects__projects__in=aval_projs)
