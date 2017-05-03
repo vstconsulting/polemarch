@@ -75,6 +75,26 @@ class ProjectFilter(_BaseFilter):
                   'name',)
 
 
+class TaskFilter(_BaseFilter):
+
+    class Meta:
+        model = models.Task
+        fields = ('id',
+                  'name',
+                  'playbook',
+                  'project')
+
+
+class PeriodicTaskFilter(_BaseFilter):
+
+    class Meta:
+        model = models.PeriodicTask
+        fields = ('id',
+                  'playbook',
+                  'type',
+                  'project')
+
+
 class EnvironmentsFilter(filters.FilterSet):
     class Meta:
         model = models.Environment

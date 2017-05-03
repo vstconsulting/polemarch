@@ -216,6 +216,48 @@ class OneHostSerializer(HostSerializer):
                   'vars',
                   'url',)
 
+class TaskSerializer(_WithVariablesSerializer):
+
+    class Meta:
+        model = models.Task
+        fields = ('id',
+                  'name',
+                  'url',)
+
+class OneTaskSerializer(TaskSerializer):
+    project  = ModelRelatedField(read_only=True)
+    playbook = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = models.Task
+        fields = ('id',
+                  'name',
+                  'playbook',
+                  'project',
+                  'url',)
+
+
+class PeriodicTaskSerializer(_WithVariablesSerializer):
+
+    class Meta:
+        model = models.PeriodicTask
+        fields = ('id',
+                  'type',
+                  'schedule',
+                  'playbook',
+                  'url',)
+
+class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
+
+    class Meta:
+        model = models.PeriodicTask
+        fields = ('id',
+                  'type',
+                  'schedule',
+                  'playbook',
+                  'project',
+                  'url',)
+
 ###################################
 # Subclasses for operations
 # with hosts and groups

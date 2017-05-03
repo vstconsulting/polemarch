@@ -4,7 +4,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 
 
-class ModelViewSet(viewsets.ModelViewSet):
+class GenericViewSet(viewsets.GenericViewSet):
     serializer_class_one = None
     model = None
 
@@ -12,7 +12,7 @@ class ModelViewSet(viewsets.ModelViewSet):
         if self.kwargs.get("pk", False) or self.action == "create":
             if self.serializer_class_one is not None:
                 return self.serializer_class_one
-        return super(ModelViewSet, self).get_serializer_class()
+        return super(GenericViewSet, self).get_serializer_class()
 
     def _get_extra_queryset(self):
         aval_projs = self.request.user.related_objects.values_list('projects',
@@ -32,9 +32,18 @@ class ModelViewSet(viewsets.ModelViewSet):
             self.queryset = self.model.objects.all()
         if not self.request.user.is_staff and self.queryset.model != User:
             self.queryset = self._get_extra_queryset()
-        return super(ModelViewSet, self).get_queryset()
+        return super(GenericViewSet, self).get_queryset()
 
     @detail_route(methods=["post", "put", "delete", "get"])
     def permissions(self, request):
         serializer = self.get_serializer(self.get_object())
         return serializer.permissions(request)
+
+
+class ReadOnlyModelViewSetSet(GenericViewSet,
+                              viewsets.ReadOnlyModelViewSet):
+    pass
+
+
+class ModelViewSetSet(GenericViewSet, viewsets.ModelViewSet):
+    pass

@@ -9,7 +9,7 @@ from . import filters
 from . import serializers
 
 
-class UserViewSet(base.ModelViewSet):
+class UserViewSet(base.ModelViewSetSet):
     model = serializers.User
     serializer_class = serializers.UserSerializer
     serializer_class_one = serializers.OneUserSerializer
@@ -52,7 +52,7 @@ class UserViewSet(base.ModelViewSet):
         return Response(serializer.data)
 
 
-class EnvironmentViewSet(base.ModelViewSet):
+class EnvironmentViewSet(base.ModelViewSetSet):
     model = serializers.models.Environment
     serializer_class = serializers.EnvironmentSerializer
     filter_class = filters.EnvironmentsFilter
@@ -66,14 +66,14 @@ class EnvironmentViewSet(base.ModelViewSet):
         return Response(self.model.objects.get_integrations())
 
 
-class HostViewSet(base.ModelViewSet):
+class HostViewSet(base.ModelViewSetSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
     serializer_class_one = serializers.OneHostSerializer
     filter_class = filters.HostFilter
 
 
-class GroupViewSet(base.ModelViewSet):
+class GroupViewSet(base.ModelViewSetSet):
     model = serializers.models.Group
     serializer_class = serializers.GroupSerializer
     serializer_class_one = serializers.OneGroupSerializer
@@ -90,7 +90,7 @@ class GroupViewSet(base.ModelViewSet):
         return serializer.groups_operations(request)
 
 
-class InventoryViewSet(base.ModelViewSet):
+class InventoryViewSet(base.ModelViewSetSet):
     model = serializers.models.Inventory
     serializer_class = serializers.InventorySerializer
     serializer_class_one = serializers.OneInventorySerializer
@@ -107,7 +107,7 @@ class InventoryViewSet(base.ModelViewSet):
         return serializer.groups_operations(request)
 
 
-class ProjectViewSet(base.ModelViewSet):
+class ProjectViewSet(base.ModelViewSetSet):
     model = serializers.models.Project
     serializer_class = serializers.ProjectSerializer
     serializer_class_one = serializers.OneProjectSerializer
@@ -127,3 +127,17 @@ class ProjectViewSet(base.ModelViewSet):
     def inventories(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
         return serializer.inventories_operations(request)
+
+
+class TaskViewSet(base.ReadOnlyModelViewSetSet):
+    model = serializers.models.Task
+    serializer_class = serializers.TaskSerializer
+    serializer_class_one = serializers.OneTaskSerializer
+    filter_class = filters.TaskFilter
+
+
+class PeriodicTaskViewSet(base.ModelViewSetSet):
+    model = serializers.models.PeriodicTask
+    serializer_class = serializers.PeriodicTaskSerializer
+    serializer_class_one = serializers.OnePeriodicTaskSerializer
+    filter_class = filters.PeriodicTaskFilter
