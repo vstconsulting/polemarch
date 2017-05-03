@@ -60,7 +60,8 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                      project=self.project_id),
                 dict(playbook="p1.yml", schedule="30 */4", type="CRONTAB",
                      project=self.project_id)]
-        results_id = self.mass_create(url, data, "name", "repository")
+        results_id = self.mass_create(url, data, "playbook", "schedule",
+                                      "type", "project")
 
         for project_id in results_id:
             self.get_result("delete", url + "{}/".format(project_id))

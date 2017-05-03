@@ -55,8 +55,8 @@ class _ApiGHBaseTestCase(BaseTestCase):
         self.assertEqual(result["count"], count, result)
 
     def _ensure_rights(self, url, data, list_urls, single_url,
-                       get_code, set_code, error_code):
-        self.assertEqual(self.get_result("get", url)["count"], 1)
+                       get_code, set_code, error_code, count):
+        self.assertEqual(self.get_result("get", url)["count"], count)
         self.get_result("get", single_url, get_code)
         self.get_result("put", single_url, set_code,
                         data=json.dumps(data[0]))
@@ -76,10 +76,10 @@ class _ApiGHBaseTestCase(BaseTestCase):
                             data=json.dumps([-1]))
 
     def _ensure_no_rights(self, url, data, list_urls, single_url):
-        self._ensure_rights(url, data, list_urls, single_url, 403, 403, 403)
+        self._ensure_rights(url, data, list_urls, single_url, 403, 403, 403, 0)
 
     def _ensure_have_rights(self, url, data, list_urls, single_url):
-        self._ensure_rights(url, data, list_urls, single_url, 200, 201, 400)
+        self._ensure_rights(url, data, list_urls, single_url, 200, 201, 400, 1)
 
     def _test_access_rights(self, url, data, list_urls=[]):
         id = self.mass_create(url, [data], *data.keys())[0]
