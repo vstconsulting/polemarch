@@ -240,6 +240,7 @@ class OneTaskSerializer(TaskSerializer):
 
 
 class PeriodicTaskSerializer(_WithVariablesSerializer):
+    schedule  = serializers.CharField(allow_blank=True)
 
     class Meta:
         model = models.PeriodicTask

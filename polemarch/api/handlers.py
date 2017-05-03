@@ -1,9 +1,11 @@
 import logging
 import sys
 import traceback
+import six
 
 from django.http import Http404
 from django.core import exceptions as djexcs
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import exceptions, status, views
 from rest_framework.response import Response
 
@@ -15,8 +17,12 @@ logger = logging.getLogger("polemarch")
 def polemarch_exception_handler(exc, context):
     # pylint: disable=too-many-return-statements
     logger.info(traceback.format_exc())
-    default_exc = (exceptions.APIException, Http404, djexcs.PermissionDenied)
-    if isinstance(exc, djexcs.ValidationError):
+    default_exc = (exceptions.APIException, djexcs.PermissionDenied)
+    if isinstance(exc, Http404):
+        msg = _('Not found or not allowed to view.')
+        data = {'detail': six.text_type(msg)}
+        return Response(data, status=404)
+    elif isinstance(exc, djexcs.ValidationError):
         errors = dict(exc).get('__all__', dict(exc))
         if isinstance(errors, list):
             errors = {'other_errors': errors}  # pragma: no cover
