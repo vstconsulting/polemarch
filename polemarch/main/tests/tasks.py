@@ -1,5 +1,7 @@
 import json
 
+from ..models import Task, PeriodicTask
+
 from .inventory import _ApiGHBaseTestCase
 
 
