@@ -9,9 +9,6 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
                        get_code, set_code, error_code, count):
         self.assertEqual(self.get_result("get", url)["count"], count)
         self.get_result("get", single_url, get_code)
-        self.get_result("put", single_url, get_code,
-                        data=json.dumps(data))
-        self.get_result("delete", single_url, set_code)
 
         # and with his satellites
         for list_url in list_urls:
@@ -26,11 +23,15 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
             self.get_result("delete", gr_lists_url, error_code,
                             data=json.dumps([-1]))
 
+        self.get_result("put", single_url, get_code,
+                        data=json.dumps(data))
+        self.get_result("delete", single_url, set_code)
+
     def _ensure_no_rights(self, url, data, list_urls, single_url):
         self._ensure_rights(url, data, list_urls, single_url, 404, 404, 404, 0)
 
     def _ensure_have_rights(self, url, data, list_urls, single_url):
-        self._ensure_rights(url, data, list_urls, single_url, 200, 204, 400, 1)
+        self._ensure_rights(url, data, list_urls, single_url, 200, 204, 200, 1)
 
     def _test_access_rights(self, url, data, list_urls=[]):
         id = self.mass_create(url, [data], *data.keys())[0]
