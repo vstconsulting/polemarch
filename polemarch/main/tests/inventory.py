@@ -59,7 +59,7 @@ class _ApiGHBaseTestCase(BaseTestCase):
         self.assertEqual(self.get_result("get", url)["count"], count)
         self.get_result("get", single_url, get_code)
         self.get_result("put", single_url, set_code,
-                        data=json.dumps(data[0]))
+                        data=json.dumps(data))
         self.get_result("delete", single_url, set_code)
 
         # and with his satellites
@@ -76,7 +76,7 @@ class _ApiGHBaseTestCase(BaseTestCase):
                             data=json.dumps([-1]))
 
     def _ensure_no_rights(self, url, data, list_urls, single_url):
-        self._ensure_rights(url, data, list_urls, single_url, 403, 403, 403, 0)
+        self._ensure_rights(url, data, list_urls, single_url, 404, 404, 404, 0)
 
     def _ensure_have_rights(self, url, data, list_urls, single_url):
         self._ensure_rights(url, data, list_urls, single_url, 200, 201, 400, 1)
