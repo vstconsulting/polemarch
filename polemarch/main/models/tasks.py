@@ -7,7 +7,6 @@ import subprocess
 
 from .base import BModel, models
 from .projects import Project
-from .hosts import Inventory
 from ...main import exceptions as ex
 
 logger = logging.getLogger("polemarch")

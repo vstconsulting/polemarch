@@ -96,7 +96,7 @@ class _ApiGHBaseTestCase(BaseTestCase):
 
         perm_url = single_url + "permissions/"
 
-        # we can set add rights for user
+        # we can add rights for user
         self.get_result("post", perm_url, 201,
                         data=json.dumps([nonprivileged_user.id]))
         self.user = nonprivileged_user
