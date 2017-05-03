@@ -216,6 +216,7 @@ class OneHostSerializer(HostSerializer):
                   'vars',
                   'url',)
 
+
 class TaskSerializer(_WithVariablesSerializer):
 
     class Meta:
@@ -223,6 +224,7 @@ class TaskSerializer(_WithVariablesSerializer):
         fields = ('id',
                   'name',
                   'url',)
+
 
 class OneTaskSerializer(TaskSerializer):
     project  = ModelRelatedField(read_only=True)
@@ -246,6 +248,7 @@ class PeriodicTaskSerializer(_WithVariablesSerializer):
                   'schedule',
                   'playbook',
                   'url',)
+
 
 class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
 

@@ -18,7 +18,7 @@ class BaseTestCase(TestCase):
 
     def change_identity(self, is_super_user=False):
         old_user = self.user
-        self.user = self._create_user(False)
+        self.user = self._create_user(is_super_user)
         return old_user
 
     def _create_user(self, is_super_user=True):

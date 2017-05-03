@@ -1,6 +1,6 @@
 import json
 
-from polemarch.main.models import Project
+from ..models import Project
 from ..models import Task, PeriodicTask
 
 from .inventory import _ApiGHBaseTestCase
@@ -76,36 +76,3 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         # test with with no project
         data = [dict(playbook="p1.yml", schedule="30 */4", type="CRONTAB")]
         self.get_result("post", url, 400, data=json.dumps(data))
-
-    def test_access_rights(self):
-        url = "/api/v1/periodic-tasks/"
-        data = dict(playbook="p1.yml",
-                    schedule="10",
-                    type="DELTA",
-                    project=self.project_id)
-        id = self.mass_create(url, [data], data.keys())[0]
-        single_url = url + "{}/".format(id)
-
-        # another user can't do anything with this object
-        nonprivileged_user = self.user
-        self.change_identity()
-        self._ensure_no_rights(url, data, [], single_url)
-
-        # superuser can do anything
-        self.change_identity(is_super_user=True)
-        self._ensure_have_rights(url, data, [], single_url)
-
-        perm_url = "/api/v1/projects/permissions/"
-
-        # we can add rights for user
-        self.get_result("post", perm_url, 201,
-                        data=json.dumps([nonprivileged_user.id]))
-        self.user = nonprivileged_user
-        self._ensure_have_rights(url, data, [], single_url)
-
-        # we can remove rights for user
-        self.change_identity(is_super_user=True)
-        self.get_result("delete", perm_url, 201,
-                        data=json.dumps([nonprivileged_user.id]))
-        self.user = nonprivileged_user
-        self._ensure_no_rights(url, data, [], single_url)
