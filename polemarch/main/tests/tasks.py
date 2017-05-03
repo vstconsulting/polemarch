@@ -1,5 +1,6 @@
 import json
 
+from polemarch.main.models import Project
 from ..models import Task, PeriodicTask
 
 from .inventory import _ApiGHBaseTestCase
@@ -10,12 +11,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         super(ApiTasksTestCase, self).setUp()
         data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git")]
         project_id = self.mass_create("/api/v1/projects/", data,
-                                      "name", "repository")[0]["id"]
+                                      "name", "repository")[0]
+        project = Project.objects.get(id=project_id)
 
         self.task1 = Task.objects.create(playbook="first.yml",
-                                         project=project_id)
+                                         project=project)
         self.task2 = Task.objects.create(playbook="second.yml",
-                                         project=project_id)
+                                         project=project)
 
     def test_get_tasks(self):
         url = "/api/v1/tasks/"
@@ -29,15 +31,16 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git")]
         self.project_id = self.mass_create("/api/v1/projects/", data,
                                            "name", "repository")[0]
+        project = Project.objects.get(id=self.project_id)
 
         self.ptask1 = PeriodicTask.objects.create(playbook="p1.yml",
                                                   schedule="10",
                                                   type="DELTA",
-                                                  project=self.project_id)
+                                                  project=project)
         self.ptask2 = PeriodicTask.objects.create(playbook="p2.yml",
                                                   schedule="10",
                                                   type="DELTA",
-                                                  project=self.project_id)
+                                                  project=project)
 
     def test_create_delete_periodic_task(self):
         url = "/api/v1/periodic-tasks/"

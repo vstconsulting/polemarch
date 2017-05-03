@@ -12,7 +12,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
 
     def test_create_delete_project(self):
         url = "/api/v1/projects/"
-        self.list_test(url, 2)
+        self.list_test(url, 4)
         self.details_test(url + "{}/".format(self.prj1.id),
                           name=self.prj1.name,
                           repository="git@ex.us:dir/rep1.git")

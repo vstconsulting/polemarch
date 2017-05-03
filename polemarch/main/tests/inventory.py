@@ -82,7 +82,7 @@ class _ApiGHBaseTestCase(BaseTestCase):
         self._ensure_rights(url, data, list_urls, single_url, 200, 201, 400)
 
     def _test_access_rights(self, url, data, list_urls=[]):
-        id = self.mass_create(url, [data], data.keys())[0]
+        id = self.mass_create(url, [data], *data.keys())[0]
         single_url = url + "{}/".format(id)
 
         # another user can't do anything with this object
