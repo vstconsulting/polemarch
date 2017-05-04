@@ -5,6 +5,8 @@ import uuid
 import logging
 import subprocess
 
+from django.utils import timezone
+
 from .base import BModel, models
 from .projects import Project
 from ...main import exceptions as ex
@@ -91,3 +93,21 @@ class PeriodicTask(BModel):
 
     class Meta:
         default_related_name = "periodic_tasks"
+
+
+class History(BModel):
+    project       = models.ForeignKey(Project,
+                                      on_delete=models.CASCADE,
+                                      related_query_name="history")
+    playbook      = models.CharField(max_length=256)
+    start_time    = models.DateTimeField(default=timezone.now)
+    stop_time     = models.DateTimeField(blank=True, null=True)
+    raw_stdout    = models.TextField()
+    raw_inventory = models.TextField()
+    status        = models.CharField(max_length=50)
+
+    class Meta:
+        default_related_name = "history"
+        index_together = [
+            ["project", "playbook", "status", "start_time", "stop_time"]
+        ]
