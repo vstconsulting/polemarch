@@ -241,6 +241,7 @@ class TaskSerializer(_WithVariablesSerializer):
                   'name',
                   'url',)
 
+
 class OneTaskSerializer(TaskSerializer):
     project = ModelRelatedField(read_only=True)
     playbook = serializers.CharField(read_only=True)
@@ -253,6 +254,7 @@ class OneTaskSerializer(TaskSerializer):
                   'project',
                   'url',)
 
+
 class PeriodicTaskSerializer(_WithVariablesSerializer):
     schedule = serializers.CharField(allow_blank=True)
 
@@ -263,6 +265,7 @@ class PeriodicTaskSerializer(_WithVariablesSerializer):
                   'schedule',
                   'playbook',
                   'url',)
+
 
 class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
     class Meta:

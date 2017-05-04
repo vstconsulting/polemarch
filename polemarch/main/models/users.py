@@ -11,22 +11,29 @@ from .tasks import Task, PeriodicTask
 from . import hosts as hosts_models
 
 logger = logging.getLogger("polemarch")
+def_rel_name = 'related_objects'
 
 
 class TypesPermissions(BModel):
     user           = models.ForeignKey(BaseUser,
-                                       related_query_name='related_objects')
+                                       related_query_name=def_rel_name)
     projects       = models.ManyToManyField(Project,
+                                            related_query_name=def_rel_name,
                                             blank=True, null=True)
     inventories    = models.ManyToManyField(hosts_models.Inventory,
+                                            related_query_name=def_rel_name,
                                             blank=True, null=True)
     hosts          = models.ManyToManyField(hosts_models.Host,
+                                            related_query_name=def_rel_name,
                                             blank=True, null=True)
     groups         = models.ManyToManyField(hosts_models.Group,
+                                            related_query_name=def_rel_name,
                                             blank=True, null=True)
     tasks          = models.ManyToManyField(Task,
+                                            related_query_name=def_rel_name,
                                             blank=True, null=True)
     periodic_tasks = models.ManyToManyField(PeriodicTask,
+                                            related_query_name=def_rel_name,
                                             blank=True, null=True)
 
     class Meta:
