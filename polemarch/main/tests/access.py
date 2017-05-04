@@ -137,5 +137,5 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         id, single_url = self._ensure_have_rights(url, data, [],
                                                   single_url)
         # cleanup
-        self.get_result("delete", single_url, 204)
-        self.get_result("delete", "/api/v1/projects/" + str(project_id), 204)
+        self.get_result("delete", single_url)
+        self.get_result("delete", "/api/v1/projects/{}/".format(project_id))

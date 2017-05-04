@@ -10,4 +10,4 @@ class ModelPermission(permissions.IsAuthenticated):
             return True
         elif request.user == obj:
             return True
-        return bool(obj.related_objects.filter(user=request.user).count())
+        return bool(view.get_queryset().filter(id=obj.id).count())
