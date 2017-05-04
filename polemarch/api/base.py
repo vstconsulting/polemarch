@@ -20,7 +20,7 @@ class GenericViewSet(viewsets.GenericViewSet):
         return self.queryset.filter(
             Q(related_objects__user=self.request.user) |
             Q(related_objects__projects__in=aval_projs)
-        )
+        ).distinct()
 
     def get_queryset(self):
         if self.queryset is None:
