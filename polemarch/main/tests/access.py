@@ -32,13 +32,21 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
 
     def _ensure_have_rights(self, url, data, list_urls, single_url):
         self._ensure_rights(url, data, list_urls, single_url, 200, 204, 200, 1)
+        # recreate object because we also test above, that we have delete right
+        id, single_url = self._create_subject(url, data)
+        return id, single_url
 
-    def _test_access_rights(self, url, data, list_urls=[]):
+    def _create_subject(self, url, data):
         id = self.mass_create(url, [data], *data.keys())[0]
         single_url = url + "{}/".format(id)
+        return id, single_url
+
+    def _test_access_rights(self, url, data, list_urls=[]):
+        id, single_url = self._create_subject(url, data)
 
         # owner have all rights
-        self._ensure_have_rights(url, data, list_urls, single_url)
+        id, single_url = self._ensure_have_rights(url, data, list_urls,
+                                                  single_url)
 
         # another user can't do anything with this object
         nonprivileged_user = self.user
@@ -47,7 +55,8 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
 
         # superuser can do anything
         self.change_identity(is_super_user=True)
-        self._ensure_have_rights(url, data, list_urls, single_url)
+        id, single_url = self._ensure_have_rights(url, data, list_urls,
+                                                  single_url)
 
         perm_url = single_url + "permissions/"
 
@@ -55,7 +64,8 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         self.get_result("post", perm_url, 201,
                         data=json.dumps([nonprivileged_user.id]))
         self.user = nonprivileged_user
-        self._ensure_have_rights(url, data, list_urls, single_url)
+        id, single_url = self._ensure_have_rights(url, data, list_urls,
+                                                  single_url)
 
         # we can remove rights for user
         self.change_identity(is_super_user=True)
@@ -104,7 +114,7 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         single_url = url + "{}/".format(id)
 
         # owner have all rights
-        self._ensure_have_rights(url, data, [], single_url)
+        id, single_url = self._ensure_have_rights(url, data, [], single_url)
 
         # another user can't do anything with this object
         nonprivileged_user = self.user
@@ -113,7 +123,7 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
 
         # superuser can do anything
         self.change_identity(is_super_user=True)
-        self._ensure_have_rights(url, data, [], single_url)
+        id, single_url = self._ensure_have_rights(url, data, [], single_url)
 
         perm_url = "/api/v1/projects/permissions/"
 
@@ -121,7 +131,7 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         self.get_result("post", perm_url, 201,
                         data=json.dumps([nonprivileged_user.id]))
         self.user = nonprivileged_user
-        self._ensure_have_rights(url, data, [], single_url)
+        id, single_url = self._ensure_have_rights(url, data, [], single_url)
 
         # we can remove rights for user
         self.change_identity(is_super_user=True)
