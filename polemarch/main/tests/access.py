@@ -1,6 +1,5 @@
 import json
 
-from ..models import Project
 from .inventory import _ApiGHBaseTestCase
 
 
@@ -98,6 +97,7 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
                                  ["inventories"])
 
     def test_periodic_tasks_access_rights(self):
+        self.change_identity()
         data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git")]
         project_id = self.mass_create("/api/v1/projects/", data,
                                       "name", "repository")[0]
@@ -109,7 +109,6 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
                     type="DELTA",
                     project=project_id)
 
-        self.change_identity()
         nonprivileged_user1 = self.user
         id, single_url = self._create_subject(url, data)
         # owner have all rights
@@ -120,6 +119,7 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         self._ensure_no_rights(url, data, [], single_url)
         # we can add rights for user
         self.user = nonprivileged_user1
+        self.change_identity(is_super_user=True)
         self.get_result("post", perm_url, 200,
                         data=json.dumps([nonprivileged_user2.id]))
         self.user = nonprivileged_user2
