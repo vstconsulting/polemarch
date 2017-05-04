@@ -85,45 +85,66 @@
                     </div>
                     <div class="box-body">
                         
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">Username</label>
-                            <input type="text"  placeholder="Enter username"  id="user_<%- polemarch.model.users[user_id].id %>_username" value="<%- polemarch.model.users[user_id].username %>"  class="form-control" maxlength="255">
-                            <div class="help-block"></div>
-                        </div>
-                    
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">Active</label>
-                            <select class="form-control" id="user_<%- polemarch.model.users[user_id].id %>_is_active">
-                                <option value="true" <%if(polemarch.model.users[user_id].is_active){ %> selected <% } %> >True</option>
-                                <option value="false" <%if(!polemarch.model.users[user_id].is_active){ %> selected <% } %> >False</option>
-                            </select>
-                            <div class="help-block"></div>
-                        </div>
-                        
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">Password</label>
-                            <input type="password" class="form-control" placeholder="Enter password" id="user_<%- polemarch.model.users[user_id].id %>_password" >
-                            <div class="help-block"></div>
-                        </div>
-                        
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">Email</label>
-                            <input type="email" class="form-control" placeholder="Enter email" id="user_<%- polemarch.model.users[user_id].id %>_email" value="<%- polemarch.model.users[user_id].email %>" >
-                            <div class="help-block"></div>
-                        </div>
-                         
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">First name</label>
-                            <input type="text" class="form-control" placeholder="Enter first name" id="user_<%- polemarch.model.users[user_id].id %>_first_name" value="<%- polemarch.model.users[user_id].first_name %>" >
-                            <div class="help-block"></div>
+                        <div class="row"> 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Active</label>
+                                <select class="form-control" id="user_<%- polemarch.model.users[user_id].id %>_is_active">
+                                    <option value="true" <%if(polemarch.model.users[user_id].is_active){ %> selected <% } %> >True</option>
+                                    <option value="false" <%if(!polemarch.model.users[user_id].is_active){ %> selected <% } %> >False</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Staff</label>
+                                <select class="form-control" id="user_<%- polemarch.model.users[user_id].id %>_is_staff">
+                                    <option value="true" <%if(polemarch.model.users[user_id].is_staff){ %> selected <% } %> >True</option>
+                                    <option value="false" <%if(!polemarch.model.users[user_id].is_staff){ %> selected <% } %> >False</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div>
                         </div>
                         
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">Last name</label>
-                            <input type="text" class="form-control" placeholder="Enter last name" id="user_<%- polemarch.model.users[user_id].id %>_last_name" value="<%- polemarch.model.users[user_id].last_name %>" >
-                            <div class="help-block"></div>
+                        
+                        <div class="row"> 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Username</label>
+                                <input type="text"  placeholder="Enter username"  id="user_<%- polemarch.model.users[user_id].id %>_username" value="<%- polemarch.model.users[user_id].username %>"  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Password</label>
+                                <input type="password" class="form-control" placeholder="Enter password" id="user_<%- polemarch.model.users[user_id].id %>_password" >
+                                <div class="help-block"></div>
+                            </div>
                         </div>
-                         
+                        
+                        
+                        <div class="row"> 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Email</label>
+                                <input type="email" class="form-control" placeholder="Enter email" id="user_<%- polemarch.model.users[user_id].id %>_email" value="<%- polemarch.model.users[user_id].email %>" >
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">First name</label>
+                                <input type="text" class="form-control" placeholder="Enter first name" id="user_<%- polemarch.model.users[user_id].id %>_first_name" value="<%- polemarch.model.users[user_id].first_name %>" >
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        
+                        
+                        
+                        <div class="row">  
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Last name</label>
+                                <input type="text" class="form-control" placeholder="Enter last name" id="user_<%- polemarch.model.users[user_id].id %>_last_name" value="<%- polemarch.model.users[user_id].last_name %>" >
+                                <div class="help-block"></div>
+                            </div> 
+                        </div>
+                        
                     </div>
                 </div>
             </section>
@@ -160,44 +181,63 @@
                          
                         </div>
                     </div>
-                    <div class="box-body"> 
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">Username</label>
-                            <input type="text" class="form-control" placeholder="Enter username" id="new_user_username" >
-                            <div class="help-block"></div>
-                        </div>
+                    <div class="box-body">
                     
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">Active</label>
-                            <select class="form-control" id="new_user_is_active" >
-                                <option value="true" selected >True</option>
-                                <option value="false" >False</option>
-                            </select>
-                            <div class="help-block"></div>
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Staff</label>
+                                <select class="form-control" id="new_user_is_staff" >
+                                    <option value="true" selected >True</option>
+                                    <option value="false" >False</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div>
+                            
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Active</label>
+                                <select class="form-control" id="new_user_is_active" >
+                                    <option value="true" selected >True</option>
+                                    <option value="false" >False</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Username</label>
+                                <input type="text" class="form-control" placeholder="Enter username" id="new_user_username" >
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Password</label>
+                                <input type="text" class="form-control" placeholder="Enter password" id="new_user_password" >
+                                <div class="help-block"></div>
+                            </div>
                         </div>
                         
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">Password</label>
-                            <input type="text" class="form-control" placeholder="Enter password" id="new_user_password" >
-                            <div class="help-block"></div>
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Email</label>
+                                <input type="email" class="form-control" placeholder="Enter email" id="new_user_email" >
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">First name</label>
+                                <input type="text" class="form-control" placeholder="Enter first name" id="new_user_first_name" >
+                                <div class="help-block"></div>
+                            </div>
                         </div>
                         
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">Email</label>
-                            <input type="email" class="form-control" placeholder="Enter email" id="new_user_email" >
-                            <div class="help-block"></div>
-                        </div>
-                         
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">First name</label>
-                            <input type="text" class="form-control" placeholder="Enter first name" id="new_user_first_name" >
-                            <div class="help-block"></div>
-                        </div>
-                        
-                        <div class="form-group col-lg-2">
-                            <label class="control-label" for="patient-name">Last name</label>
-                            <input type="text" class="form-control" placeholder="Enter last name" id="new_user_last_name" >
-                            <div class="help-block"></div>
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Last name</label>
+                                <input type="text" class="form-control" placeholder="Enter last name" id="new_user_last_name" >
+                                <div class="help-block"></div>
+                            </div>
                         </div>
                          
                     </div>

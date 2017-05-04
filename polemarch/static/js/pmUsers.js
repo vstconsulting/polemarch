@@ -112,6 +112,7 @@ pmUsers.addUser = function()
     data.last_name = $("#new_user_last_name").val()
     data.username = $("#new_user_username").val()
     data.is_active = $("#new_user_is_active").val()
+    data.is_staff = $("#new_user_is_staff").val()
     data.password = $("#new_user_password").val()
 
     if(!data.username)
@@ -162,6 +163,7 @@ pmUsers.updateUser = function(user_id)
     data.last_name = $("#user_"+user_id+"_last_name").val()
     data.username = $("#user_"+user_id+"_username").val()
     data.is_active = $("#user_"+user_id+"_is_active").val()
+    data.is_staff = $("#user_"+user_id+"_is_staff").val()
 
     if(!data.username)
     {
