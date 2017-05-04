@@ -73,7 +73,10 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
     def test_groups_access_rights(self):
         self._test_access_rights("/api/v1/groups/",
                                  dict(name="one", vars={}),
-                                 ["hosts", "groups"])
+                                 ["hosts"])
+        self._test_access_rights("/api/v1/groups/",
+                                 dict(name="one", vars={}, children=True),
+                                 ["groups"])
 
     def test_inventories_access_rights(self):
         self._test_access_rights("/api/v1/inventories/",
