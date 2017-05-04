@@ -61,15 +61,16 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         perm_url = single_url + "permissions/"
 
         # we can add rights for user
-        self.get_result("post", perm_url, 201,
+        self.get_result("post", perm_url, 200,
                         data=json.dumps([nonprivileged_user.id]))
         self.user = nonprivileged_user
         id, single_url = self._ensure_have_rights(url, data, list_urls,
                                                   single_url)
+        perm_url = single_url + "permissions/"
 
         # we can remove rights for user
         self.change_identity(is_super_user=True)
-        self.get_result("delete", perm_url, 201,
+        self.get_result("delete", perm_url, 200,
                         data=json.dumps([nonprivileged_user.id]))
         self.user = nonprivileged_user
         self._ensure_no_rights(url, data, list_urls, single_url)
@@ -97,7 +98,7 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         self._test_access_rights("/api/v1/projects/",
                                  dict(name="Prj3",
                                       repository="git@ex.us:dir/rep3.git"),
-                                 ["inventories", "tasks", "periodic-tasks"])
+                                 ["inventories", "periodic-tasks"])
 
     def test_periodic_tasks_access_rights(self):
         data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git")]
@@ -128,14 +129,14 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         perm_url = "/api/v1/projects/" + str(project_id) + "/permissions/"
 
         # we can add rights for user
-        self.get_result("post", perm_url, 201,
+        self.get_result("post", perm_url, 200,
                         data=json.dumps([nonprivileged_user.id]))
         self.user = nonprivileged_user
         id, single_url = self._ensure_have_rights(url, data, [], single_url)
 
         # we can remove rights for user
         self.change_identity(is_super_user=True)
-        self.get_result("delete", perm_url, 201,
+        self.get_result("delete", perm_url, 200,
                         data=json.dumps([nonprivileged_user.id]))
         self.user = nonprivileged_user
         self._ensure_no_rights(url, data, [], single_url)
