@@ -125,7 +125,7 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         self.change_identity(is_super_user=True)
         id, single_url = self._ensure_have_rights(url, data, [], single_url)
 
-        perm_url = "/api/v1/projects/permissions/"
+        perm_url = "/api/v1/projects/" + str(project_id) + "/permissions/"
 
         # we can add rights for user
         self.get_result("post", perm_url, 201,
