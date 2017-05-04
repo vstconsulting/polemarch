@@ -4,6 +4,7 @@ import json
 
 import six
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from rest_framework import serializers
 from rest_framework import exceptions
@@ -146,6 +147,22 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
                       POST="add",
                       PUT="set")
 
+    def _get_objects(self, model, objs_id):
+        user = self.context['request'].user
+        qs = model.objects.all()
+        if not user.is_staff:
+            projs = user.related_objects.values_list('projects', flat=True)
+            qs = qs.filter(
+                Q(related_objects__user=user) |
+                Q(related_objects__projects__in=projs)
+            )
+        return list(qs.filter(id__in=objs_id))
+
+    def get_operation(self, request, attr):
+        tp = getattr(self.instance, attr)
+        obj_list = self._get_objects(tp.model, request.data)
+        return self._operate(request, attr, obj_list)
+
     def _response(self, total, found, code=200):
         data = dict(total=len(total))
         data["operated"] = len(found)
@@ -218,16 +235,14 @@ class OneHostSerializer(HostSerializer):
 
 
 class TaskSerializer(_WithVariablesSerializer):
-
     class Meta:
         model = models.Task
         fields = ('id',
                   'name',
                   'url',)
 
-
 class OneTaskSerializer(TaskSerializer):
-    project  = ModelRelatedField(read_only=True)
+    project = ModelRelatedField(read_only=True)
     playbook = serializers.CharField(read_only=True)
 
     class Meta:
@@ -238,9 +253,8 @@ class OneTaskSerializer(TaskSerializer):
                   'project',
                   'url',)
 
-
 class PeriodicTaskSerializer(_WithVariablesSerializer):
-    schedule  = serializers.CharField(allow_blank=True)
+    schedule = serializers.CharField(allow_blank=True)
 
     class Meta:
         model = models.PeriodicTask
@@ -250,9 +264,7 @@ class PeriodicTaskSerializer(_WithVariablesSerializer):
                   'playbook',
                   'url',)
 
-
 class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
-
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
@@ -262,24 +274,13 @@ class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
                   'project',
                   'url',)
 
+
 ###################################
 # Subclasses for operations
 # with hosts and groups
 
 
 class _InventoryOperations(_WithVariablesSerializer):
-
-    def _get_objects(self, model, objs_id):
-        user = self.context['request'].user
-        qs = model.objects.all()
-        if not user.is_staff:
-            qs = qs.filter(related_objects__user=user)
-        return list(qs.filter(id__in=objs_id))
-
-    def get_operation(self, request, attr):
-        tp = getattr(self.instance, attr)
-        obj_list = self._get_objects(tp.model, request.data)
-        return self._operate(request, attr, obj_list)
 
     def hosts_operations(self, request):
         return self.get_operation(request, attr="hosts")
@@ -289,7 +290,6 @@ class _InventoryOperations(_WithVariablesSerializer):
 
 
 ###################################
-
 
 class GroupSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
@@ -358,7 +358,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
                   'url',)
 
 
-class ProjectSerializer(_WithVariablesSerializer):
+class ProjectSerializer(_InventoryOperations):
 
     class Meta:
         model = models.Project

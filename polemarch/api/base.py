@@ -35,7 +35,8 @@ class GenericViewSet(viewsets.GenericViewSet):
         return super(GenericViewSet, self).get_queryset()
 
     @detail_route(methods=["post", "put", "delete", "get"])
-    def permissions(self, request):
+    def permissions(self, request, pk=None):
+        # pylint: disable=unused-argument
         serializer = self.get_serializer(self.get_object())
         return serializer.permissions(request)
 
