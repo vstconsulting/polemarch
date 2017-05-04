@@ -31,7 +31,8 @@ polemarch.model = {}
 
 polemarch.model.nowTime = 0;
 
-
+polemarch.model.userslist = []
+polemarch.model.users = {}
 
 polemarch.start = function(options)
 {
@@ -82,35 +83,31 @@ polemarch.start = function(options)
 
 
     spajs.addMenu({
-        id:"home",              // id комнаты должен соответсвовать регулярному выражению  [A-z9-0_]{ 4,64}
-        name:"home",                        // Имя кнопки
-        urlregexp:[/^(home|)$/],
-        type:"custom",                  // Тип пункта меню (false|bottom|custom)
-        menuHtml:'<a href="/?spa=home" onclick="return spajs.openURL(this.href);" ><i class="fa fa-wrench"></i> <span>Home</span></a>',
-        priority: 100,
-        /*
-         *  callback вызываемый по открытии этого пункта меню
-         *  @param object holder html элемент в списке меню
-         *  @param object menuInfo Информация о том пункет меню на который совершён переход
-         *  @param object data объект с доп параметрами (не обязательными)
-         */
+        id:"home",                      // id комнаты должен соответсвовать регулярному выражению  [A-z9-0_]{ 4,64}
+        name:"home",                     
+        urlregexp:[/^(home|)$/], 
         onOpen:polemarch.showHome
     })
 
     spajs.addMenu({
-        id:"users",              // id комнаты должен соответсвовать регулярному выражению  [A-z9-0_]{ 4,64}
-        name:"users",                        // Имя кнопки
-        urlregexp:[/^users$/],
-        type:"custom",                  // Тип пункта меню (false|bottom|custom)
-        menuHtml:'<a href="/?spa=users" onclick="return spajs.openURL(this.href);" ><i class="fa fa-wrench"></i> <span>Users</span></a>',
-        priority: 100,
-        /*
-         *  callback вызываемый по открытии этого пункта меню
-         *  @param object holder html элемент в списке меню
-         *  @param object menuInfo Информация о том пункет меню на который совершён переход
-         *  @param object data объект с доп параметрами (не обязательными)
-         */
+        id:"users",                     // id комнаты должен соответсвовать регулярному выражению  [A-z9-0_]{ 4,64}
+        name:"users",                    
+        urlregexp:[/^users$/], 
         onOpen:pmUsers.showUsers
+    })
+    
+    spajs.addMenu({
+        id:"user",                     // id комнаты должен соответсвовать регулярному выражению  [A-z9-0_]{ 4,64}
+        name:"user",                    
+        urlregexp:[/^user-([0-9]+)$/], 
+        onOpen:pmUsers.showUser
+    })
+    
+    spajs.addMenu({
+        id:"newuser",                     // id комнаты должен соответсвовать регулярному выражению  [A-z9-0_]{ 4,64}
+        name:"newuser",                    
+        urlregexp:[/^new-user$/], 
+        onOpen:pmUsers.showNewUserPage
     })
     
     spajs.openMenuFromUrl()

@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 
 {% block script %}
-
-
+ 
 <!-- Список пользователей -->
 <script type="text/x-just" data-just="users_list"> 
     <section class="content-header">
@@ -11,13 +10,13 @@
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="<%- polemarch.opt.host %>"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li class="active">Users list</li>
         </ol>
     </section>
 
     <section class="content">
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-new-user">Add user</button>
+        <a class="btn btn-primary"  href="/?spa=new-user" onclick="spajs.open({ menuId:'new-user'}); return false;">Add user</a>
         <br>
         <br>
         <div class="row">
@@ -30,9 +29,9 @@
                         </div>
                     </div>
                     <div class="box-body">
-                        <% for(var i in polemarch.model.users.results){ %>
+                        <% for(var i in polemarch.model.userslist.results){ %>
                             <ul>
-                                <li><%- polemarch.model.users.results[i].username %></li>
+                                <li><a href="/?spa=user-<%- polemarch.model.userslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.userslist.results[i].username %></a></li>
                             </ul>
                         <% } %>
                              
@@ -42,6 +41,172 @@
         </div>
     </section>
 </script>
+
+<!-- Страница пользователя -->
+<script type="text/x-just" data-just="user_page"> 
+    <section class="content-header">
+        <h1>
+            <%- polemarch.model.users[user_id].username %>
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?spa=users"  onclick="return spajs.openURL(this.href);" >Users list</a></li>
+            <li class="active"><%- polemarch.model.users[user_id].username %></li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="pmUsers.deleteUser(<%- user_id %>); return false;" class="btn btn-danger" >Remove user</button>
+        <button type="button" onclick="pmUsers.updateUser(<%- user_id %>); return false;" class="btn btn-primary" >Save user</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Users<br>
+                        <div class="box-tools pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-bars"></i>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li><a href="#" onclick="pmUsers.deleteUser(<%- user_id %>); return false;" >Save this user</a></li>
+                                    <li><a href="#" onclick="pmUsers.updateUser(<%- user_id %>); return false;" >Remove this user</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="/?spa=new-user" onclick="spajs.open({ menuId:'new-user'}); return false;" >Add new user</a></li>
+                                </ul>
+                            </div>
+                            
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                         
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">Username</label>
+                            <input type="text"  placeholder="Enter username"  id="user_<%- polemarch.model.users[user_id].id %>_username" value="<%- polemarch.model.users[user_id].username %>"  class="form-control" maxlength="255">
+                            <div class="help-block"></div>
+                        </div>
+                    
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">Active</label>
+                            <select class="form-control" id="user_<%- polemarch.model.users[user_id].id %>_is_active">
+                                <option value="true" <%if(polemarch.model.users[user_id].is_active){ %> selected <% } %> >True</option>
+                                <option value="false" <%if(!polemarch.model.users[user_id].is_active){ %> selected <% } %> >False</option>
+                            </select>
+                            <div class="help-block"></div>
+                        </div>
+                        
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">Password</label>
+                            <input type="password" class="form-control" placeholder="Enter password" id="user_<%- polemarch.model.users[user_id].id %>_password" >
+                            <div class="help-block"></div>
+                        </div>
+                        
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">Email</label>
+                            <input type="email" class="form-control" placeholder="Enter email" id="user_<%- polemarch.model.users[user_id].id %>_email" value="<%- polemarch.model.users[user_id].email %>" >
+                            <div class="help-block"></div>
+                        </div>
+                         
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">First name</label>
+                            <input type="text" class="form-control" placeholder="Enter first name" id="user_<%- polemarch.model.users[user_id].id %>_first_name" value="<%- polemarch.model.users[user_id].first_name %>" >
+                            <div class="help-block"></div>
+                        </div>
+                        
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">Last name</label>
+                            <input type="text" class="form-control" placeholder="Enter last name" id="user_<%- polemarch.model.users[user_id].id %>_last_name" value="<%- polemarch.model.users[user_id].last_name %>" >
+                            <div class="help-block"></div>
+                        </div>
+                         
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<!-- Страница пользователя -->
+<script type="text/x-just" data-just="new_user_page"> 
+    <section class="content-header">
+        <h1>
+            Add new user
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?spa=users" onclick="return spajs.openURL(this.href);" >Users list</a></li>
+            <li class="active">Add new user</li>
+        </ol>
+    </section>
+
+    <section class="content"> 
+        <button type="button" onclick="pmUsers.addUser(); return false;" class="btn btn-primary" >Add user</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        New user<br>
+                        <div class="box-tools pull-right">
+                           
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                         
+                        </div>
+                    </div>
+                    <div class="box-body"> 
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">Username</label>
+                            <input type="text" class="form-control" placeholder="Enter username" id="new_user_username" >
+                            <div class="help-block"></div>
+                        </div>
+                    
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">Active</label>
+                            <select class="form-control" id="new_user_is_active" >
+                                <option value="true" selected >True</option>
+                                <option value="false" >False</option>
+                            </select>
+                            <div class="help-block"></div>
+                        </div>
+                        
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">Password</label>
+                            <input type="text" class="form-control" placeholder="Enter password" id="new_user_password" >
+                            <div class="help-block"></div>
+                        </div>
+                        
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">Email</label>
+                            <input type="email" class="form-control" placeholder="Enter email" id="new_user_email" >
+                            <div class="help-block"></div>
+                        </div>
+                         
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">First name</label>
+                            <input type="text" class="form-control" placeholder="Enter first name" id="new_user_first_name" >
+                            <div class="help-block"></div>
+                        </div>
+                        
+                        <div class="form-group col-lg-2">
+                            <label class="control-label" for="patient-name">Last name</label>
+                            <input type="text" class="form-control" placeholder="Enter last name" id="new_user_last_name" >
+                            <div class="help-block"></div>
+                        </div>
+                         
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
 
 <!-- Страница тестовая -->
 <script type="text/x-just" data-just="home_page">

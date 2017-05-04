@@ -441,6 +441,11 @@ if(!window.spajs)
         {
             return;
         }
+        
+        if(!menu.type)
+        {
+            menu.type = "custom"
+        }
 
         var targetBlock = $("#left_sidebar")
 

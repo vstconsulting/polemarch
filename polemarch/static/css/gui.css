@@ -1,0 +1,15 @@
+
+.paramTable{
+
+}
+
+.paramTable td{
+    padding-bottom: 10px;
+    padding-right: 20px;
+    min-width: 160px;
+    vertical-align: top;
+}
+
+.paramTable input{
+    width: 236px;
+}
