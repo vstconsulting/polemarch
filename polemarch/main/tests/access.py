@@ -42,38 +42,35 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         return id, single_url
 
     def _test_access_rights(self, url, data, list_urls=[]):
+        self.change_identity()
+        nonprivileged_user1 = self.user
         id, single_url = self._create_subject(url, data)
-
         # owner have all rights
         id, single_url = self._ensure_have_rights(url, data, list_urls,
                                                   single_url)
-
         # another user can't do anything with this object
-        nonprivileged_user = self.user
         self.change_identity()
+        nonprivileged_user2 = self.user
         self._ensure_no_rights(url, data, list_urls, single_url)
-
+        # we can add rights for user
+        self.user = nonprivileged_user1
+        self.get_result("post", single_url + "permissions/", 200,
+                        data=json.dumps([nonprivileged_user2.id]))
+        self.user = nonprivileged_user2
+        id, single_url = self._ensure_have_rights(url, data, list_urls,
+                                                  single_url)
+        # we can remove rights for user
+        self.get_result("post", single_url + "permissions/", 200,
+                        data=json.dumps([nonprivileged_user1.id]))
+        self.get_result("delete", single_url + "permissions/", 200,
+                        data=json.dumps([nonprivileged_user1.id]))
+        self.user = nonprivileged_user1
+        self._ensure_no_rights(url, data, list_urls, single_url)
         # superuser can do anything
         self.change_identity(is_super_user=True)
         id, single_url = self._ensure_have_rights(url, data, list_urls,
                                                   single_url)
-
-        perm_url = single_url + "permissions/"
-
-        # we can add rights for user
-        self.get_result("post", perm_url, 200,
-                        data=json.dumps([nonprivileged_user.id]))
-        self.user = nonprivileged_user
-        id, single_url = self._ensure_have_rights(url, data, list_urls,
-                                                  single_url)
-        perm_url = single_url + "permissions/"
-
-        # we can remove rights for user
-        self.change_identity(is_super_user=True)
-        self.get_result("delete", perm_url, 200,
-                        data=json.dumps([nonprivileged_user.id]))
-        self.user = nonprivileged_user
-        self._ensure_no_rights(url, data, list_urls, single_url)
+        self.get_result("delete", single_url, 204)
 
     def test_hosts_access_rights(self):
         self._test_access_rights("/api/v1/hosts/",
@@ -98,45 +95,47 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         self._test_access_rights("/api/v1/projects/",
                                  dict(name="Prj3",
                                       repository="git@ex.us:dir/rep3.git"),
-                                 ["inventories", "periodic-tasks"])
+                                 ["inventories"])
 
     def test_periodic_tasks_access_rights(self):
         data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git")]
         project_id = self.mass_create("/api/v1/projects/", data,
                                       "name", "repository")[0]
-        Project.objects.get(id=project_id)
+        perm_url = "/api/v1/projects/" + str(project_id) + "/permissions/"
 
         url = "/api/v1/periodic-tasks/"
         data = dict(playbook="p1.yml",
                     schedule="10",
                     type="DELTA",
                     project=project_id)
-        id = self.mass_create(url, [data], *data.keys())[0]
-        single_url = url + "{}/".format(id)
 
+        self.change_identity()
+        nonprivileged_user1 = self.user
+        id, single_url = self._create_subject(url, data)
         # owner have all rights
         id, single_url = self._ensure_have_rights(url, data, [], single_url)
-
         # another user can't do anything with this object
-        nonprivileged_user = self.user
         self.change_identity()
+        nonprivileged_user2 = self.user
         self._ensure_no_rights(url, data, [], single_url)
-
+        # we can add rights for user
+        self.user = nonprivileged_user1
+        self.get_result("post", perm_url, 200,
+                        data=json.dumps([nonprivileged_user2.id]))
+        self.user = nonprivileged_user2
+        id, single_url = self._ensure_have_rights(url, data, [],
+                                                  single_url)
+        # we can remove rights for user
+        self.get_result("post", perm_url, 200,
+                        data=json.dumps([nonprivileged_user1.id]))
+        self.get_result("delete", perm_url, 200,
+                        data=json.dumps([nonprivileged_user1.id]))
+        self.user = nonprivileged_user1
+        self._ensure_no_rights(url, data, [], single_url)
         # superuser can do anything
         self.change_identity(is_super_user=True)
-        id, single_url = self._ensure_have_rights(url, data, [], single_url)
-
-        perm_url = "/api/v1/projects/" + str(project_id) + "/permissions/"
-
-        # we can add rights for user
-        self.get_result("post", perm_url, 200,
-                        data=json.dumps([nonprivileged_user.id]))
-        self.user = nonprivileged_user
-        id, single_url = self._ensure_have_rights(url, data, [], single_url)
-
-        # we can remove rights for user
-        self.change_identity(is_super_user=True)
-        self.get_result("delete", perm_url, 200,
-                        data=json.dumps([nonprivileged_user.id]))
-        self.user = nonprivileged_user
-        self._ensure_no_rights(url, data, [], single_url)
+        id, single_url = self._ensure_have_rights(url, data, [],
+                                                  single_url)
+        # cleanup
+        self.get_result("delete", single_url, 204)
+        self.get_result("delete", "/api/v1/projects/" + str(project_id), 204)
