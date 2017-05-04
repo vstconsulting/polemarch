@@ -145,7 +145,8 @@ class VariableSerializer(serializers.ModelSerializer):
 class _WithVariablesSerializer(serializers.ModelSerializer):
     operations = dict(DELETE="remove",
                       POST="add",
-                      PUT="set")
+                      PUT="set",
+                      GET="all")
 
     def _get_objects(self, model, objs_id):
         user = self.context['request'].user
@@ -185,9 +186,15 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         return instance
 
     def _operate(self, request, attr, obj_list):
-        tp = getattr(self.instance, attr)
         action = self.operations[request.method]
-        if action == "set":
+        tp = getattr(self.instance, attr)
+        if action == "all":
+            if attr == "related_objects":
+                answer = tp.values_list("user__id", flat=True)
+            else:
+                answer = tp.values_list("id", flat=True)
+            return Response(answer, status=200)
+        elif action == "set":
             # Because django<=1.9 does not support .set()
             getattr(tp, "clear")()
             action = "add"
