@@ -132,6 +132,30 @@ class EnvironmentSerializer(serializers.ModelSerializer):
                   'hosts')
 
 
+class HistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.History
+        fields = ("id",
+                  "project",
+                  "playbook",
+                  "status",
+                  "start_time",
+                  "stop_time")
+
+
+class OneHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.History
+        fields = ("id",
+                  "project",
+                  "playbook",
+                  "status",
+                  "start_time",
+                  "stop_time",
+                  "raw_inventory",
+                  "raw_stdout")
+
+
 class VariableSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Variable

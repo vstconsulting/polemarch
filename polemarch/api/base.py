@@ -41,8 +41,14 @@ class GenericViewSet(viewsets.GenericViewSet):
         return serializer.permissions(request)
 
 
-class ReadOnlyModelViewSetSet(GenericViewSet,
-                              viewsets.ReadOnlyModelViewSet):
+class ReadOnlyModelViewSet(GenericViewSet,
+                           viewsets.ReadOnlyModelViewSet):
+    pass
+
+
+class HistoryModelViewSet(GenericViewSet,
+                          viewsets.ReadOnlyModelViewSet,
+                          viewsets.mixins.DestroyModelMixin):
     pass
 
 

@@ -7,7 +7,7 @@ from django.contrib.auth.models import User as BaseUser
 
 from .base import models, BModel
 from .projects import Project
-from .tasks import Task, PeriodicTask
+from .tasks import Task, PeriodicTask, History
 from . import hosts as hosts_models
 
 logger = logging.getLogger("polemarch")
@@ -33,6 +33,9 @@ class TypesPermissions(BModel):
                                             related_query_name=def_rel_name,
                                             blank=True, null=True)
     periodic_tasks = models.ManyToManyField(PeriodicTask,
+                                            related_query_name=def_rel_name,
+                                            blank=True, null=True)
+    history        = models.ManyToManyField(History,
                                             related_query_name=def_rel_name,
                                             blank=True, null=True)
 

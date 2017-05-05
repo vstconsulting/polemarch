@@ -32,5 +32,4 @@ class DomainNameValidator(RegexValidator):
 
 def validate_hostname(address):
     msg = _("Invalid hostname or IP '{}'.".format(address))
-    validation = DomainNameValidator(message=msg)
-    validation(address)
+    DomainNameValidator(message=msg)(address)

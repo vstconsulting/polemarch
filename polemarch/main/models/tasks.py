@@ -6,6 +6,7 @@ import logging
 import subprocess
 
 from django.utils import timezone
+from celery.schedules import crontab
 
 from .base import BModel, models
 from .projects import Project
@@ -94,6 +95,32 @@ class PeriodicTask(BModel):
     class Meta:
         default_related_name = "periodic_tasks"
 
+    time_types = {
+        'minute': {"max_": 60},
+        'hour': {"max_": 24},
+        'day_of_week': {"max_": 7},
+        'day_of_month': {"max_": 31, "min_": 1},
+        'month_of_year': {"max_": 12, "min_": 1}}
+    time_types_list = [
+        'minute', 'hour', "day_of_week", 'day_of_month', 'month_of_year'
+    ]
+
+    @property
+    def _crontab_kwargs(self):
+        kwargs, index, fields = dict(), 0, self.schedule.split(" ")
+        for field_name in self.time_types_list:
+            if index < len(fields) and len(fields[index]) > 0:
+                kwargs[field_name] = fields[index]
+            else:
+                kwargs[field_name] = "*"
+            index += 1
+        return kwargs
+
+    def get_schedule(self):
+        if self.type == "CRONTAB":
+            return crontab(**self._crontab_kwargs)
+        return float(self.schedule)
+
 
 class History(BModel):
     project       = models.ForeignKey(Project,
@@ -109,5 +136,5 @@ class History(BModel):
     class Meta:
         default_related_name = "history"
         index_together = [
-            ["project", "playbook", "status", "start_time", "stop_time"]
+            ["id", "project", "playbook", "status", "start_time", "stop_time"]
         ]

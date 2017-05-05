@@ -23,7 +23,8 @@ def polemarch_exception_handler(exc, context):
         data = {'detail': six.text_type(msg)}
         return Response(data, status=404)
     elif isinstance(exc, djexcs.ValidationError):
-        errors = dict(exc).get('__all__', dict(exc))
+        errors = dict(exc).get('__all__', dict(exc)) if isinstance(exc, dict)\
+                                                     else exc
         if isinstance(errors, list):
             errors = {'other_errors': errors}  # pragma: no cover
         return Response({"details": errors},

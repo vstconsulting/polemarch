@@ -129,7 +129,7 @@ class ProjectViewSet(base.ModelViewSetSet):
         return serializer.inventories_operations(request)
 
 
-class TaskViewSet(base.ReadOnlyModelViewSetSet):
+class TaskViewSet(base.ReadOnlyModelViewSet):
     model = serializers.models.Task
     serializer_class = serializers.TaskSerializer
     serializer_class_one = serializers.OneTaskSerializer
@@ -141,3 +141,10 @@ class PeriodicTaskViewSet(base.ModelViewSetSet):
     serializer_class = serializers.PeriodicTaskSerializer
     serializer_class_one = serializers.OnePeriodicTaskSerializer
     filter_class = filters.PeriodicTaskFilter
+
+
+class HistoryViewSet(base.HistoryModelViewSet):
+    model = serializers.models.History
+    serializer_class = serializers.HistorySerializer
+    serializer_class_one = serializers.OneHistorySerializer
+    filter_class = filters.HistoryFilter

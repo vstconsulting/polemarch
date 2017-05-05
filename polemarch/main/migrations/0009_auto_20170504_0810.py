@@ -62,6 +62,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterIndexTogether(
             name='history',
-            index_together=set([('project', 'playbook', 'status', 'start_time', 'stop_time')]),
+            index_together=set([('id', 'project', 'playbook', 'status', 'start_time', 'stop_time')]),
         ),
     ]

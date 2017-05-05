@@ -18,6 +18,7 @@ routerv1.register(r'inventories', v1.InventoryViewSet)
 routerv1.register(r'projects', v1.ProjectViewSet)
 routerv1.register(r'tasks', v1.TaskViewSet)
 routerv1.register(r'periodic-tasks', v1.PeriodicTaskViewSet)
+routerv1.register(r'history', v1.HistoryViewSet)
 
 
 # Register routers
