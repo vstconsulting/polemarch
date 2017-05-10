@@ -105,10 +105,11 @@ pmHosts.addItem = function()
     var data = {}
 
     data.name = $("#new_host_name").val()
-    data.type = $("#new_host_type").val()
-    data.vars = $("#new_host_vars").val() 
-
-    if(!data.name)
+    data.type = $("#new_host_type").val() 
+    data.vars = pmHosts.jsonEditorGetValues()
+    
+    // @todo Добавить валидацию диапазонов "127.0.1.[5:6]" и 127.0.1.1, 127.0.1.2 
+    if(!data.name || !this.validateHostName(data.name))
     {
         $.notify("Invalid value in filed name", "error");
         return;
@@ -137,7 +138,7 @@ pmHosts.addItem = function()
         }
     }); 
 }
-
+    
 /** 
  * @return $.Deferred
  */
@@ -147,9 +148,10 @@ pmHosts.updateItem = function(item_id)
 
     data.name = $("#host_"+item_id+"_name").val()
     data.type = $("#host_"+item_id+"_type").val()
-    data.vars = $("#host_"+item_id+"_vars").val() 
+    data.vars = pmHosts.jsonEditorGetValues()
 
-    if(!data.name)
+    // @todo Добавить валидацию диапазонов "127.0.1.[5:6]" и 127.0.1.1, 127.0.1.2
+    if(!data.name || !this.validateHostName(data.name))
     {
         $.notify("Invalid value in filed name", "error");
         return;
@@ -208,4 +210,40 @@ pmHosts.deleteItem = function(item_id)
             polemarch.showErrors(e.responseJSON)
         }
     });
+}
+
+
+pmHosts.jsonEditor = function(json)
+{ 
+    return spajs.just.render('jsonEditor', {data:json})
+}
+
+pmHosts.jsonEditorGetValues = function()
+{ 
+    var data = {}
+    var arr = $(".jsonEditor-data")
+    for(var i = 0; i< arr.length; i++)
+    {
+        var index = $(arr[i]).attr('data-json-name') 
+        data[index] = $(arr[i]).val()
+    }
+    
+    return data
+}
+
+pmHosts.jsonEditorAddVar = function(name, value)
+{
+    var name = $('#new_json_name').val()
+    var value = $('#new_json_value').val()
+    
+    if(!name)
+    {
+        $.notify("Empty varible name", "error");
+        return;
+    }
+    
+    $('#new_json_name').val('')
+    $('#new_json_value').val('')
+     
+    $("#jsonEditorVarList").append(spajs.just.render('jsonEditorLine', {name:name, value:value}))
 }

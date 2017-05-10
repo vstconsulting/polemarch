@@ -248,7 +248,7 @@
 </script>
 
 
- 
+
 <!-- Список хостов -->
 <script type="text/x-just" data-just="hosts_list">
     <section class="content-header">
@@ -337,8 +337,8 @@
                                 <label class="control-label" for="patient-name">Name</label>
                                 <input type="text"  placeholder="Enter host name"  id="host_<%- polemarch.model.hosts[item_id].id %>_name" value="<%- polemarch.model.hosts[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
-                            </div> 
-                            
+                            </div>
+
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Type</label>
                                 <select class="form-control" id="host_<%- polemarch.model.hosts[item_id].id %>_type">
@@ -346,9 +346,10 @@
                                     <option value="RANGE" <%if(!polemarch.model.hosts[item_id].type == 'RANGE'){ %> selected <% } %> >RANGE</option>
                                 </select>
                                 <div class="help-block"></div>
-                            </div> 
+                            </div>
                         </div>
- 
+
+                        <%= pmHosts.jsonEditor(polemarch.model.hosts[item_id].vars) %>
                     </div>
                 </div>
             </section>
@@ -392,8 +393,8 @@
                                 <label class="control-label" for="patient-name">Name</label>
                                 <input type="text"  placeholder="Enter host name"  id="new_host_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
-                            </div> 
-                            
+                            </div>
+
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Type</label>
                                 <select class="form-control" id="new_host_type">
@@ -401,9 +402,10 @@
                                     <option value="RANGE">RANGE</option>
                                 </select>
                                 <div class="help-block"></div>
-                            </div> 
+                            </div>
                         </div>
- 
+
+                        <%= pmHosts.jsonEditor({}) %>
                     </div>
                 </div>
             </section>
@@ -412,9 +414,52 @@
 </script>
 
 
+<script type="text/x-just" data-just="jsonEditorLine"> 
+    <div class="form-group col-lg-6" id="json_<%- name %>_line">
+        <label class="control-label" for="json_<%- name %>"><%- name %></label>
+        <div class="input-group">
+            <input type="text"
+                   placeholder="Enter value"
+                   id="json_<%- name %>_value"
+                   value="<%- value %>"
+                   class="form-control jsonEditor-data"
+                   data-json-name="<%- name %>" 
+                   >
+            <span class="input-group-addon  btn btn-danger" onclick="$('#json_<%- name %>_line').remove()">
+                <span class="glyphicon glyphicon-remove"></span>
+            </span>
+        </div>
+    </div> 
+</script>
+        
+        
+<script type="text/x-just" data-just="jsonEditor">
+<div class="row">
+    <div class="col-lg-4">
+        <div class="row" id="jsonEditorVarList">
+            <% for(var i in data){ %> 
+                <%= this.partial('jsonEditorLine', { name:i, value:data[i] }) %> 
+            <% } %>
+        </div>
+    </div>
+</div>
 
+<div class="row">
+    <div class="form-group col-lg-2">
+        <label class="control-label" for="jsonEditorAdd">New varible name</label>
+        <input type="text" placeholder="Enter name" id="new_json_name" value=""  class="form-control" >
+        <div class="help-block"></div>
+    </div>
 
-
+    <div class="form-group col-lg-2">
+        <label class="control-label" for="jsonEditorAdd">New varible value</label>
+        <div class="input-group">
+            <input type="text" placeholder="Enter value" id="new_json_value" value=""  class="form-control" >
+            <span class="input-group-addon btn btn-primary" onclick="pmHosts.jsonEditorAddVar();" >Add</span>
+        </div>
+    </div>
+</div> 
+</script>
 
 
 <!-- Страница тестовая -->

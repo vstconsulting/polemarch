@@ -1,6 +1,32 @@
 
 function pmItems()
 {
+    this.validateHostName = function(name)
+    {
+        var regexp = {
+            ipTest : /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/,
+            ip6Test : /((^|:)([0-9a-fA-F]{0,4})){1,8}$/,
+            domenTest : /^((\.{0,1}[a-z0-9][a-z0-9-]{0,62}[a-z0-9]\.{0,1})*)$/
+        }
+
+        if(regexp.ipTest.test(name))
+        {
+            return true;
+        }
+
+        if(regexp.ip6Test.test(name))
+        {
+            return true;
+        }
+
+        if(regexp.domenTest.test(name))
+        {
+            return true;
+        }
+
+        return false; 
+    }
+
     this.showList = function(holder, menuInfo, data){}
 
     this.showItem = function(holder, menuInfo, data){}
