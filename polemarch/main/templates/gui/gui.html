@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block script %}
- 
+
 <!-- Список пользователей -->
-<script type="text/x-just" data-just="users_list"> 
+<script type="text/x-just" data-just="users_list">
     <section class="content-header">
         <h1>
             Users list
@@ -34,7 +34,7 @@
                                 <li><a href="/?spa=user-<%- polemarch.model.userslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.userslist.results[i].username %></a></li>
                             </ul>
                         <% } %>
-                             
+
                     </div>
                 </div>
             </section>
@@ -43,22 +43,22 @@
 </script>
 
 <!-- Страница пользователя -->
-<script type="text/x-just" data-just="user_page"> 
+<script type="text/x-just" data-just="user_page">
     <section class="content-header">
         <h1>
-            <%- polemarch.model.users[user_id].username %>
+            <%- polemarch.model.users[item_id].username %>
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?spa=users"  onclick="return spajs.openURL(this.href);" >Users list</a></li>
-            <li class="active"><%- polemarch.model.users[user_id].username %></li>
+            <li class="active"><%- polemarch.model.users[item_id].username %></li>
         </ol>
     </section>
 
     <section class="content">
-        <button type="button" onclick="pmUsers.deleteUser(<%- user_id %>); return false;" class="btn btn-danger" >Remove user</button>
-        <button type="button" onclick="pmUsers.updateUser(<%- user_id %>); return false;" class="btn btn-primary" >Save user</button>
+        <button type="button" onclick="pmUsers.deleteItem(<%- item_id %>); return false;" class="btn btn-danger" >Remove user</button>
+        <button type="button" onclick="pmUsers.updateItem(<%- item_id %>); return false;" class="btn btn-primary" >Save user</button>
         <br>
         <br>
         <div class="row">
@@ -72,79 +72,79 @@
                                     <i class="fa fa-bars"></i>
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
-                                    <li><a href="#" onclick="pmUsers.deleteUser(<%- user_id %>); return false;" >Save this user</a></li>
-                                    <li><a href="#" onclick="pmUsers.updateUser(<%- user_id %>); return false;" >Remove this user</a></li>
+                                    <li><a href="#" onclick="pmUsers.deleteItem(<%- item_id %>); return false;" >Save this user</a></li>
+                                    <li><a href="#" onclick="pmUsers.updateItem(<%- item_id %>); return false;" >Remove this user</a></li>
                                     <li class="divider"></li>
                                     <li><a href="/?spa=new-user" onclick="spajs.open({ menuId:'new-user'}); return false;" >Add new user</a></li>
                                 </ul>
                             </div>
-                            
+
                             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-                         
+
                         </div>
                     </div>
                     <div class="box-body">
-                        
-                        <div class="row"> 
+
+                        <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Active</label>
-                                <select class="form-control" id="user_<%- polemarch.model.users[user_id].id %>_is_active">
-                                    <option value="true" <%if(polemarch.model.users[user_id].is_active){ %> selected <% } %> >True</option>
-                                    <option value="false" <%if(!polemarch.model.users[user_id].is_active){ %> selected <% } %> >False</option>
+                                <select class="form-control" id="user_<%- polemarch.model.users[item_id].id %>_is_active">
+                                    <option value="true" <%if(polemarch.model.users[item_id].is_active){ %> selected <% } %> >True</option>
+                                    <option value="false" <%if(!polemarch.model.users[item_id].is_active){ %> selected <% } %> >False</option>
                                 </select>
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Staff</label>
-                                <select class="form-control" id="user_<%- polemarch.model.users[user_id].id %>_is_staff">
-                                    <option value="true" <%if(polemarch.model.users[user_id].is_staff){ %> selected <% } %> >True</option>
-                                    <option value="false" <%if(!polemarch.model.users[user_id].is_staff){ %> selected <% } %> >False</option>
+                                <select class="form-control" id="user_<%- polemarch.model.users[item_id].id %>_is_staff">
+                                    <option value="true" <%if(polemarch.model.users[item_id].is_staff){ %> selected <% } %> >True</option>
+                                    <option value="false" <%if(!polemarch.model.users[item_id].is_staff){ %> selected <% } %> >False</option>
                                 </select>
                                 <div class="help-block"></div>
                             </div>
                         </div>
-                        
-                        
-                        <div class="row"> 
+
+
+                        <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Username</label>
-                                <input type="text"  placeholder="Enter username"  id="user_<%- polemarch.model.users[user_id].id %>_username" value="<%- polemarch.model.users[user_id].username %>"  class="form-control" maxlength="255">
+                                <input type="text"  placeholder="Enter username"  id="user_<%- polemarch.model.users[item_id].id %>_username" value="<%- polemarch.model.users[item_id].username %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Password</label>
-                                <input type="password" class="form-control" placeholder="Enter password" id="user_<%- polemarch.model.users[user_id].id %>_password" >
+                                <input type="password" class="form-control" placeholder="Enter password" id="user_<%- polemarch.model.users[item_id].id %>_password" >
                                 <div class="help-block"></div>
                             </div>
                         </div>
-                        
-                        
-                        <div class="row"> 
+
+
+                        <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Email</label>
-                                <input type="email" class="form-control" placeholder="Enter email" id="user_<%- polemarch.model.users[user_id].id %>_email" value="<%- polemarch.model.users[user_id].email %>" >
+                                <input type="email" class="form-control" placeholder="Enter email" id="user_<%- polemarch.model.users[item_id].id %>_email" value="<%- polemarch.model.users[item_id].email %>" >
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">First name</label>
-                                <input type="text" class="form-control" placeholder="Enter first name" id="user_<%- polemarch.model.users[user_id].id %>_first_name" value="<%- polemarch.model.users[user_id].first_name %>" >
+                                <input type="text" class="form-control" placeholder="Enter first name" id="user_<%- polemarch.model.users[item_id].id %>_first_name" value="<%- polemarch.model.users[item_id].first_name %>" >
                                 <div class="help-block"></div>
                             </div>
                         </div>
-                        
-                        
-                        
-                        <div class="row">  
+
+
+
+                        <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Last name</label>
-                                <input type="text" class="form-control" placeholder="Enter last name" id="user_<%- polemarch.model.users[user_id].id %>_last_name" value="<%- polemarch.model.users[user_id].last_name %>" >
+                                <input type="text" class="form-control" placeholder="Enter last name" id="user_<%- polemarch.model.users[item_id].id %>_last_name" value="<%- polemarch.model.users[item_id].last_name %>" >
                                 <div class="help-block"></div>
-                            </div> 
+                            </div>
                         </div>
-                        
+
                     </div>
                 </div>
             </section>
@@ -152,8 +152,8 @@
     </section>
 </script>
 
-<!-- Страница пользователя -->
-<script type="text/x-just" data-just="new_user_page"> 
+<!-- Страница создания пользователя -->
+<script type="text/x-just" data-just="new_user_page">
     <section class="content-header">
         <h1>
             Add new user
@@ -166,8 +166,8 @@
         </ol>
     </section>
 
-    <section class="content"> 
-        <button type="button" onclick="pmUsers.addUser(); return false;" class="btn btn-primary" >Add user</button>
+    <section class="content">
+        <button type="button" onclick="pmUsers.addItem(); return false;" class="btn btn-primary" >Add user</button>
         <br>
         <br>
         <div class="row">
@@ -176,13 +176,13 @@
                     <div class="box-header with-border">
                         New user<br>
                         <div class="box-tools pull-right">
-                           
+
                             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-                         
+
                         </div>
                     </div>
                     <div class="box-body">
-                    
+
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Staff</label>
@@ -192,7 +192,7 @@
                                 </select>
                                 <div class="help-block"></div>
                             </div>
-                            
+
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Active</label>
                                 <select class="form-control" id="new_user_is_active" >
@@ -217,7 +217,7 @@
                                 <div class="help-block"></div>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Email</label>
@@ -231,7 +231,7 @@
                                 <div class="help-block"></div>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" for="patient-name">Last name</label>
@@ -239,13 +239,182 @@
                                 <div class="help-block"></div>
                             </div>
                         </div>
-                         
+
                     </div>
                 </div>
             </section>
         </div>
     </section>
 </script>
+
+
+ 
+<!-- Список хостов -->
+<script type="text/x-just" data-just="hosts_list">
+    <section class="content-header">
+        <h1>
+            Hosts list
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Hosts list</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <a class="btn btn-primary"  href="/?spa=new-host" onclick="spajs.open({ menuId:'new-host'}); return false;">Add host</a>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Users<br>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <% for(var i in polemarch.model.hostslist.results){ %>
+                            <ul>
+                                <li><a href="/?spa=host-<%- polemarch.model.hostslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.hostslist.results[i].name %></a></li>
+                            </ul>
+                        <% } %>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<!-- Страница хоста -->
+<script type="text/x-just" data-just="host_page">
+    <section class="content-header">
+        <h1>
+            <%- polemarch.model.hosts[item_id].name %>
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?spa=hosts"  onclick="return spajs.openURL(this.href);" >Hosts list</a></li>
+            <li class="active"><%- polemarch.model.hosts[item_id].name %></li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="pmHosts.deleteItem(<%- item_id %>); return false;" class="btn btn-danger" >Remove host</button>
+        <button type="button" onclick="pmHosts.updateItem(<%- item_id %>); return false;" class="btn btn-primary" >Save host</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Users<br>
+                        <div class="box-tools pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-bars"></i>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li><a href="#" onclick="pmHosts.deleteItem(<%- item_id %>); return false;" >Save this host</a></li>
+                                    <li><a href="#" onclick="pmHosts.updateItem(<%- item_id %>); return false;" >Remove this host</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="/?spa=new-host" onclick="spajs.open({ menuId:'new-user'}); return false;" >Add new user</a></li>
+                                </ul>
+                            </div>
+
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Name</label>
+                                <input type="text"  placeholder="Enter host name"  id="host_<%- polemarch.model.hosts[item_id].id %>_name" value="<%- polemarch.model.hosts[item_id].name %>"  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div> 
+                            
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Type</label>
+                                <select class="form-control" id="host_<%- polemarch.model.hosts[item_id].id %>_type">
+                                    <option value="HOST" <%if(polemarch.model.hosts[item_id].type == 'HOST'){ %> selected <% } %> >HOST</option>
+                                    <option value="RANGE" <%if(!polemarch.model.hosts[item_id].type == 'RANGE'){ %> selected <% } %> >RANGE</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div> 
+                        </div>
+ 
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<!-- Страница создания хоста -->
+<script type="text/x-just" data-just="new_host_page">
+    <section class="content-header">
+        <h1>
+            Add new host
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?spa=hosts" onclick="return spajs.openURL(this.href);" >Hosts list</a></li>
+            <li class="active">Add new host</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="pmHosts.addItem(); return false;" class="btn btn-primary" >Add host</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        New user<br>
+                        <div class="box-tools pull-right">
+
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Name</label>
+                                <input type="text"  placeholder="Enter host name"  id="new_host_name" value=""  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div> 
+                            
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" for="patient-name">Type</label>
+                                <select class="form-control" id="new_host_type">
+                                    <option value="HOST" selected >HOST</option>
+                                    <option value="RANGE">RANGE</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div> 
+                        </div>
+ 
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+
+
+
+
 
 
 <!-- Страница тестовая -->
@@ -331,7 +500,7 @@
                 </div>
             </div
         </div>
-    </section> 
+    </section>
 </script>
 
 <script>

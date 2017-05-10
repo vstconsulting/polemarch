@@ -34,6 +34,10 @@ polemarch.model.nowTime = 0;
 polemarch.model.userslist = []
 polemarch.model.users = {}
 
+polemarch.model.hostslist = []
+polemarch.model.hosts = {}
+
+
 polemarch.start = function(options)
 {
     for(var i in options)
@@ -62,54 +66,75 @@ polemarch.start = function(options)
 
 
     $("body").touchwipe({
-        wipingLeftEnd: function(e) 
+        wipingLeftEnd: function(e)
         {
             if(e.isFull && Math.abs(e.dx) >  Math.abs(e.dy))
             {
                 $('body').removeClass('sidebar-open');
             }
         },
-        wipingRightEnd:  function(e) 
+        wipingRightEnd:  function(e)
         {
             if(e.isFull && Math.abs(e.dx) >  Math.abs(e.dy))
             {
                 $('body').addClass('sidebar-open');
-            } 
-        },  
-        min_move_x: 120, 
-        min_move_y: 120, 
+            }
+        },
+        min_move_x: 120,
+        min_move_y: 120,
         preventDefaultEvents: false
     });
 
 
     spajs.addMenu({
-        id:"home",                      // id комнаты должен соответсвовать регулярному выражению  [A-z9-0_]{ 4,64}
-        name:"home",                     
-        urlregexp:[/^(home|)$/], 
+        id:"home",
+        name:"home",
+        urlregexp:[/^(home|)$/],
         onOpen:polemarch.showHome
     })
 
     spajs.addMenu({
-        id:"users",                     // id комнаты должен соответсвовать регулярному выражению  [A-z9-0_]{ 4,64}
-        name:"users",                    
-        urlregexp:[/^users$/], 
-        onOpen:pmUsers.showUsers
+        id:"users",
+        name:"users",
+        urlregexp:[/^users$/],
+        onOpen:pmUsers.showList
     })
-    
+
     spajs.addMenu({
-        id:"user",                     // id комнаты должен соответсвовать регулярному выражению  [A-z9-0_]{ 4,64}
-        name:"user",                    
-        urlregexp:[/^user-([0-9]+)$/], 
-        onOpen:pmUsers.showUser
+        id:"user",
+        name:"user",
+        urlregexp:[/^user-([0-9]+)$/],
+        onOpen:pmUsers.showItem
     })
-    
+
     spajs.addMenu({
-        id:"newuser",                     // id комнаты должен соответсвовать регулярному выражению  [A-z9-0_]{ 4,64}
-        name:"newuser",                    
-        urlregexp:[/^new-user$/], 
-        onOpen:pmUsers.showNewUserPage
+        id:"newuser",
+        name:"newuser",
+        urlregexp:[/^new-user$/],
+        onOpen:pmUsers.showNewItemPage
     })
-    
+
+    spajs.addMenu({
+        id:"hosts",
+        name:"hosts",
+        urlregexp:[/^hosts$/],
+        onOpen:pmHosts.showList
+    })
+
+    spajs.addMenu({
+        id:"host",
+        name:"host",
+        urlregexp:[/^host-([0-9]+)$/],
+        onOpen:pmHosts.showItem
+    })
+
+    spajs.addMenu({
+        id:"newHost",
+        name:"newHost",
+        urlregexp:[/^new-host$/],
+        onOpen:pmHosts.showNewItemPage
+    })
+
     spajs.openMenuFromUrl()
 }
 

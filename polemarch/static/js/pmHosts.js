@@ -1,43 +1,43 @@
- 
-var pmUsers = new pmItems()  
 
-pmUsers.showList = function(holder, menuInfo, data)
+var pmHosts = new pmItems()  
+
+pmHosts.showList = function(holder, menuInfo, data)
 {
-    return $.when(pmUsers.loadAllItems()).done(function()
+    return $.when(pmHosts.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render('users_list', {}))
+        $(holder).html(spajs.just.render('hosts_list', {}))
     }).fail(function()
     {
         $.notify("", "error");
     })
 }
 
-pmUsers.showItem = function(holder, menuInfo, data)
+pmHosts.showItem = function(holder, menuInfo, data)
 {
     console.log(menuInfo, data)
     
-    return $.when(pmUsers.loadItem(data.reg[1])).done(function()
+    return $.when(pmHosts.loadItem(data.reg[1])).done(function()
     {
-        $(holder).html(spajs.just.render('user_page', {item_id:data.reg[1]}))
+        $(holder).html(spajs.just.render('host_page', {item_id:data.reg[1]}))
     }).fail(function()
     {
         $.notify("", "error");
     })
 }
 
-pmUsers.showNewItemPage = function(holder, menuInfo, data)
+pmHosts.showNewItemPage = function(holder, menuInfo, data)
 { 
-    $(holder).html(spajs.just.render('new_user_page', {}))
+    $(holder).html(spajs.just.render('new_host_page', {}))
 }
 
 /**
- * Обновляет поле модел polemarch.model.userslist и ложит туда список пользователей 
- * Обновляет поле модел polemarch.model.users и ложит туда список инфу о пользователях по их id
+ * Обновляет поле модел polemarch.model.hostslist и ложит туда список пользователей 
+ * Обновляет поле модел polemarch.model.hosts и ложит туда список инфу о пользователях по их id
  */
-pmUsers.loadAllItems = function()
+pmHosts.loadAllItems = function()
 {
     return jQuery.ajax({
-        url: "/api/v1/users/",
+        url: "/api/v1/hosts/",
         type: "GET",
         contentType:'application/json',
         data: "",
@@ -49,14 +49,14 @@ pmUsers.loadAllItems = function()
         },
         success: function(data)
         {
-            console.log("updateUsers", data)
-            polemarch.model.userslist = data
-            polemarch.model.users = {}
+            console.log("update Items", data)
+            polemarch.model.hostslist = data
+            polemarch.model.hosts = {}
             
-            for(var i in polemarch.model.users.results)
+            for(var i in polemarch.model.hosts.results)
             {
-                var val = polemarch.model.users.results[i]
-                polemarch.model.users[val.id] = val
+                var val = polemarch.model.hosts.results[i]
+                polemarch.model.hosts[val.id] = val
             }
         },
         error:function(e)
@@ -68,12 +68,12 @@ pmUsers.loadAllItems = function()
 }
 
 /**
- * Обновляет поле модел polemarch.model.users[item_id] и ложит туда пользователя
+ * Обновляет поле модел polemarch.model.hosts[item_id] и ложит туда пользователя
  */
-pmUsers.loadItem = function(item_id)
+pmHosts.loadItem = function(item_id)
 {
     return jQuery.ajax({
-        url: "/api/v1/users/"+item_id+"/",
+        url: "/api/v1/hosts/"+item_id+"/",
         type: "GET",
         contentType:'application/json',
         data: "",
@@ -86,7 +86,7 @@ pmUsers.loadItem = function(item_id)
         success: function(data)
         {
             console.log("loadUser", data)
-            polemarch.model.users[item_id] = data
+            polemarch.model.hosts[item_id] = data
         },
         error:function(e)
         {
@@ -100,32 +100,22 @@ pmUsers.loadItem = function(item_id)
 /** 
  * @return $.Deferred
  */
-pmUsers.addItem = function()
+pmHosts.addItem = function()
 {
     var data = {}
 
-    data.email = $("#new_user_email").val()
-    data.first_name = $("#new_user_first_name").val()
-    data.last_name = $("#new_user_last_name").val()
-    data.username = $("#new_user_username").val()
-    data.is_active = $("#new_user_is_active").val()
-    data.is_staff = $("#new_user_is_staff").val()
-    data.password = $("#new_user_password").val()
+    data.name = $("#new_host_name").val()
+    data.type = $("#new_host_type").val()
+    data.vars = $("#new_host_vars").val() 
 
-    if(!data.username)
+    if(!data.name)
     {
         $.notify("Invalid value in filed name", "error");
         return;
     }
-
-    if(!data.password)
-    {
-        $.notify("Invalid value in filed password", "error");
-        return;
-    }
  
     return $.ajax({
-        url: "/api/v1/users/",
+        url: "/api/v1/hosts/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
@@ -137,9 +127,9 @@ pmUsers.addItem = function()
         },
         success: function(data)
         {
-            console.log("service add", data); 
-            $.notify("User created", "success");
-            spajs.open({ menuId:"user-"+data.id})
+            console.log("addItem", data); 
+            $.notify("Host created", "success");
+            spajs.open({ menuId:"host-"+data.id})
         },
         error:function(e)
         {
@@ -151,30 +141,22 @@ pmUsers.addItem = function()
 /** 
  * @return $.Deferred
  */
-pmUsers.updateItem = function(item_id)
+pmHosts.updateItem = function(item_id)
 {
     var data = {}
 
-    data.email = $("#user_"+item_id+"_email").val()
-    data.first_name = $("#user_"+item_id+"_first_name").val()
-    data.last_name = $("#user_"+item_id+"_last_name").val()
-    data.username = $("#user_"+item_id+"_username").val()
-    data.is_active = $("#user_"+item_id+"_is_active").val()
-    data.is_staff = $("#user_"+item_id+"_is_staff").val()
+    data.name = $("#host_"+item_id+"_name").val()
+    data.type = $("#host_"+item_id+"_type").val()
+    data.vars = $("#host_"+item_id+"_vars").val() 
 
-    if(!data.username)
+    if(!data.name)
     {
         $.notify("Invalid value in filed name", "error");
         return;
     }
-
-    if($("#user_"+item_id+"_password").val())
-    {
-        data.password = $("#user_"+item_id+"_password").val()
-    }
-
+ 
     return $.ajax({
-        url: "/api/v1/users/"+item_id+"/",
+        url: "/api/v1/hosts/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data:JSON.stringify(data),
@@ -186,7 +168,7 @@ pmUsers.updateItem = function(item_id)
         },
         success: function(data)
         {
-            console.log("service add", data); 
+            console.log("updateItem", data); 
             $.notify("Save", "success");
         },
         error:function(e)
@@ -199,7 +181,7 @@ pmUsers.updateItem = function(item_id)
 /** 
  * @return $.Deferred
  */
-pmUsers.deleteItem = function(item_id)
+pmHosts.deleteItem = function(item_id)
 {
     if(!confirm("Are you sure?"))
     {
@@ -207,7 +189,7 @@ pmUsers.deleteItem = function(item_id)
     }
 
     return $.ajax({
-        url: "/api/v1/users/"+item_id+"/",
+        url: "/api/v1/hosts/"+item_id+"/",
         type: "DELETE",
         contentType:'application/json',
         beforeSend: function(xhr, settings) {
@@ -218,8 +200,8 @@ pmUsers.deleteItem = function(item_id)
         },
         success: function(data)
         {
-            console.log("users delete", data);
-            spajs.open({ menuId:"users"})
+            console.log("deleteItem", data);
+            spajs.open({ menuId:"hosts"})
         },
         error:function(e)
         {
