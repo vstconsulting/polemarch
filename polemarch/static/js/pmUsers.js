@@ -102,6 +102,7 @@ pmUsers.loadItem = function(item_id)
  */
 pmUsers.addItem = function()
 {
+    var def = new $.Deferred();
     var data = {}
 
     data.email = $("#new_user_email").val()
@@ -115,16 +116,18 @@ pmUsers.addItem = function()
     if(!data.username)
     {
         $.notify("Invalid value in filed name", "error");
-        return;
+        def.reject()
+        return def.promise();
     }
 
     if(!data.password)
     {
         $.notify("Invalid value in filed password", "error");
-        return;
+        def.reject()
+        return def.promise();
     }
  
-    return $.ajax({
+    $.ajax({
         url: "/api/v1/users/",
         type: "POST",
         contentType:'application/json',
@@ -137,15 +140,20 @@ pmUsers.addItem = function()
         },
         success: function(data)
         {
-            console.log("service add", data); 
+            console.log("user add", data); 
             $.notify("User created", "success");
-            spajs.open({ menuId:"user-"+data.id})
+            $.when(spajs.open({ menuId:"user-"+data.id})).always(function(){
+                def.resolve()
+            })
         },
         error:function(e)
         {
+            def.reject()
             polemarch.showErrors(e.responseJSON)
         }
     }); 
+    
+    return def.promise();
 }
 
 /** 
@@ -164,6 +172,7 @@ pmUsers.updateItem = function(item_id)
 
     if(!data.username)
     {
+        console.warn("Invalid value in filed name")
         $.notify("Invalid value in filed name", "error");
         return;
     }
@@ -186,11 +195,12 @@ pmUsers.updateItem = function(item_id)
         },
         success: function(data)
         {
-            console.log("service add", data); 
+            console.log("user update", data); 
             $.notify("Save", "success");
         },
         error:function(e)
         {
+            console.log("user "+item_id+" update error - " + JSON.stringify(e)); 
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -199,14 +209,16 @@ pmUsers.updateItem = function(item_id)
 /** 
  * @return $.Deferred
  */
-pmUsers.deleteItem = function(item_id)
+pmUsers.deleteItem = function(item_id, force)
 {
-    if(!confirm("Are you sure?"))
+    var def = new $.Deferred();
+    if(!force && !confirm("Are you sure?"))
     {
-        return;
+        def.reject()
+        return def.promise();
     }
 
-    return $.ajax({
+    $.ajax({
         url: "/api/v1/users/"+item_id+"/",
         type: "DELETE",
         contentType:'application/json',
@@ -218,12 +230,17 @@ pmUsers.deleteItem = function(item_id)
         },
         success: function(data)
         {
-            console.log("users delete", data);
-            spajs.open({ menuId:"users"})
+            console.log("users delete", data);  
+            $.when(spajs.open({ menuId:"users"})).always(function(){
+                def.resolve()
+            })
         },
         error:function(e)
         {
+            def.reject()
             polemarch.showErrors(e.responseJSON)
         }
     });
+    
+    return def.promise();
 }

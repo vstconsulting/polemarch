@@ -143,7 +143,7 @@ polemarch.showHome = function(holder, menuInfo, data)
     $(holder).html(spajs.just.render('home_page', {}))
 }
 
-polemarch.showError = function(res)
+polemarch.showErrors = function(res)
 {
     if(res.responseJSON)
     {
@@ -151,18 +151,41 @@ polemarch.showError = function(res)
     }
 
     if(res && res.info && res.info.message)
-    {
-        //alert(res.info.message)
+    { 
+        console.error('showErrors:' + res.info.message)
         $.notify(res.info.message, "error");
+        return res.info.message;
     }
     else if(res && res.message)
-    {
-        //alert(res.message)
+    { 
+        console.error('showErrors:' + res.message)
         $.notify(res.message, "error");
-    }
-    else if(res)
+        return res.message;
+    } 
+    
+    if(typeof res === "string")
     {
-        //alert(res.message)
+        console.error('showErrors:' + res)
         $.notify(res, "error");
+        return res;
+    }
+
+    for(var i in res)
+    {
+        if(i == "error_type")
+        {
+            continue;
+        }
+
+        if(typeof res[i] === "string")
+        {
+            console.error('showErrors:' + res[i])
+            $.notify(res[i], "error");
+            return res[i];
+        }
+        else if(typeof res[i] === "object")
+        {
+            return polemarch.showErrors(res[i])
+        }
     }
 }

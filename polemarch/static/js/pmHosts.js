@@ -102,6 +102,8 @@ pmHosts.loadItem = function(item_id)
  */
 pmHosts.addItem = function()
 {
+    var def = new $.Deferred();
+
     var data = {}
 
     data.name = $("#new_host_name").val()
@@ -115,7 +117,7 @@ pmHosts.addItem = function()
         return;
     }
  
-    return $.ajax({
+    $.ajax({
         url: "/api/v1/hosts/",
         type: "POST",
         contentType:'application/json',
@@ -130,13 +132,17 @@ pmHosts.addItem = function()
         {
             console.log("addItem", data); 
             $.notify("Host created", "success");
-            spajs.open({ menuId:"host-"+data.id})
+            $.when(spajs.open({ menuId:"host-"+data.id})).always(function(){
+                def.resolve()
+            })
         },
         error:function(e)
         {
             polemarch.showErrors(e.responseJSON)
+            def.reject()
         }
-    }); 
+    });
+    return def.promise();
 }
     
 /** 

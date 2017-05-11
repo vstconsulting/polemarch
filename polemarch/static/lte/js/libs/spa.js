@@ -486,22 +486,21 @@ spajs.close = function()
  * @param object event_state
  * @public
  *
+ * @return  $.Deferred обещание полученое от функции open или обещание созданое в нутри функции
  * @note выполняется синхронно но вот событие onOpen у пункта меню может работать не синхронно и зависит от реализыции колбека навешаного на onOpen
- * 
- * Добавляет на spajs.opt.holder класс с id открытого пункта меню вида "spajs-active-"+spajs.currentOpenMenu.id
  */
 spajs.open = function(opt)
 {
-    $(spajs.opt.holder).removeClass("spajs-spa-show-page");
+    if(!opt.menuId)
+    {
+        opt.menuId = "";
+    }
+
+    var def = new $.Deferred();
     if(!spajs.opt.addParamsToUrl && opt.event_state == undefined)
     {
         opt.event_state = {}
         opt.event_state.url = window.location.href;
-    }
-    
-    if(!opt.menuId)
-    {
-        opt.menuId = "";
     }
 
     var regExpRes = []
@@ -517,14 +516,9 @@ spajs.open = function(opt)
         {
             for(var j in spajs.opt.menu[i].urlregexp)
             {
-                if(spajs.opt.menu[i].urlregexp[j].test && spajs.opt.menu[i].urlregexp[j].test(opt.menuId))
+                if(spajs.opt.menu[i].urlregexp[j].test(opt.menuId))
                 {
                     regExpRes = spajs.opt.menu[i].urlregexp[j].exec(opt.menuId)
-                    menuInfo = spajs.opt.menu[i]
-                    break;
-                }
-                else if(spajs.opt.menu[i].urlregexp[j] == opt.menuId)
-                { 
                     menuInfo = spajs.opt.menu[i]
                     break;
                 }
@@ -535,9 +529,18 @@ spajs.open = function(opt)
     //console.log("openMenu", menuId, menuInfo)
     if(!menuInfo || !menuInfo.onOpen)
     {
-        console.warn("URL не зарегистрирован", opt)
-        return false;
+        console.error("URL не зарегистрирован", opt.menuId, opt)
+        def.reject()
+        return def.promise();
     }
+
+    if(spajs.currentOpenMenu && menuInfo.id == spajs.currentOpenMenu.id && !opt.reopen)
+    {
+        console.warn("Повторное открытие меню", menuInfo)
+        def.reject()
+        return def.promise();
+    }
+
 
     if(opt.addUrlParams === undefined)
     {
@@ -558,9 +561,10 @@ spajs.open = function(opt)
     {
         $(spajs.opt.holder).removeClass("spajs-active-"+spajs.currentOpenMenu.id);
     }
-    
+
     if(spajs.currentOpenMenu && spajs.currentOpenMenu.onClose)
     {
+        console.log("onClose", spajs.currentOpenMenu)
         spajs.currentOpenMenu.onClose(menuInfo);
     }
 
@@ -572,25 +576,54 @@ spajs.open = function(opt)
     {
         $(spajs.opt.holder).addClass("spajs-spa-show-page");
     }
+
+
+    console.log("onOpen", menuInfo)
+    if(spajs.currentOpenMenu && spajs.currentOpenMenu.id)
+    {
+        $("body").removeClass("spajs-active-"+spajs.currentOpenMenu.id)
+    }
+    else
+    {
+        console.error("Не удалён предыдущий класс меню", spajs.currentOpenMenu, menuInfo)
+    }
     $(spajs.opt.holder).addClass("spajs-active-"+menuInfo.id);
 
-
+    tabSignal.emit("spajsOpen", {menuInfo:menuInfo, data:data})
     var res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data);
     if(res)
     {
+        // in-loading
+        $("body").addClass("in-loading")
+
         console.time("Mopen")
         jQuery("#spajs-menu-"+menuInfo.id).addClass("menu-loading")
         setTimeout(function(){
-            $.when(res).then(function()
+            $.when(res).done(function()
             {
                 console.timeEnd("Mopen")
                 jQuery("#spajs-menu-"+menuInfo.id).removeClass("menu-loading")
+
+                // in-loading
+                $("body").removeClass("in-loading")
+                def.resolve()
             }).fail(function()
             {
                 console.timeEnd("Mopen")
                 jQuery("#spajs-menu-"+menuInfo.id).removeClass("menu-loading")
+
+                // in-loading
+                $("body").removeClass("in-loading")
+
+                def.reject()
             })
         }, 0)
+    }
+    else
+    {
+        $("body").removeClass("in-loading")
+        def.resolve()
+        res = def
     }
 
     // Выделяем нашу комнату как активную в меню с лева
@@ -603,7 +636,8 @@ spajs.open = function(opt)
     {
         opt.callback();
     }
-    return res;
+
+    return res.promise();
 }
 
 /**

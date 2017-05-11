@@ -1,7 +1,7 @@
 /**
  * Файл иентеграционного тестирования через phantomjs
  *
- * Вызывается  ./phantomjs phantom-test.js
+ * Вызывается phantomjs phantom-test.js
  * Открывает страницу pageUrl и вставляет в неё скрипт injectTestFile
  * Скрипт injectTestFile тестирует страницу и звершает работу phantomjs
  * В консоле остаётся вывод с информацией о том что же происходило.
