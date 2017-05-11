@@ -6,7 +6,8 @@ from django.db.models import signals
 from django.dispatch import receiver
 from django.core.validators import ValidationError
 
-from .hosts import Host, Group, Inventory, Variable, Environment
+from .vars import Variable
+from .hosts import Host, Group, Inventory, Environment
 from .projects import Project
 from .users import TypesPermissions
 from .tasks import Task, PeriodicTask, History

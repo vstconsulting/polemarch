@@ -12,7 +12,8 @@ from .inventory import _ApiGHBaseTestCase
 class ApiTasksTestCase(_ApiGHBaseTestCase):
     def setUp(self):
         super(ApiTasksTestCase, self).setUp()
-        data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git")]
+        data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git",
+                     vars=dict(repo_type="TEST"))]
         project_id = self.mass_create("/api/v1/projects/", data,
                                       "name", "repository")[0]
         project = Project.objects.get(id=project_id)
@@ -32,7 +33,8 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         super(ApiPeriodicTasksTestCase, self).setUp()
 
         repo = "git@ex.us:dir/rep3.git"
-        data = [dict(name="Prj1", repository=repo)]
+        data = [dict(name="Prj1", repository=repo,
+                     vars=dict(repo_type="TEST"))]
         self.project_id = self.mass_create("/api/v1/projects/", data,
                                            "name", "repository")[0]
         project = Project.objects.get(id=self.project_id)
@@ -46,7 +48,8 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                                                   type="DELTA",
                                                   project=project)
         self.ph = Project.objects.create(name="Prj_History",
-                                         repository=repo)
+                                         repository=repo,
+                                         vars=dict(repo_type="TEST"))
         self.default_kwargs = dict(project=self.ph, playbook="task.yml",
                                    raw_inventory="inventory",
                                    raw_stdout="text")

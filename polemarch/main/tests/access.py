@@ -93,12 +93,14 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
     def test_projects_access_rights(self):
         self._test_access_rights("/api/v1/projects/",
                                  dict(name="Prj3",
-                                      repository="git@ex.us:dir/rep3.git"),
+                                      repository="git@ex.us:dir/rep3.git",
+                                      vars=dict(repo_type="TEST")),
                                  ["inventories"])
 
     def test_periodic_tasks_access_rights(self):
         self.change_identity()
-        data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git")]
+        data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git",
+                     vars=dict(repo_type="TEST"))]
         project_id = self.mass_create("/api/v1/projects/", data,
                                       "name", "repository")[0]
         perm_url = "/api/v1/projects/" + str(project_id) + "/permissions/"
