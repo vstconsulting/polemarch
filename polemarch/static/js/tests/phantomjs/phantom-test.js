@@ -1,11 +1,11 @@
 /**
  * Файл иентеграционного тестирования через phantomjs
- * 
- * Вызывается  ./phantomjs hello.js
+ *
+ * Вызывается  ./phantomjs phantom-test.js
  * Открывает страницу pageUrl и вставляет в неё скрипт injectTestFile
  * Скрипт injectTestFile тестирует страницу и звершает работу phantomjs
  * В консоле остаётся вывод с информацией о том что же происходило.
- * 
+ *
  */
 var injectTestFile = "injectTest.js"
 var pageUrl = "http://192.168.0.12:8080"
@@ -18,14 +18,14 @@ function printArgs() {
     }
     console.log("");
 }
-  
-function saveReport(page) { 
-    
+
+function saveReport(page) {
+
     var report = page.evaluate(function() {
         return $("#qunit").html();
     });
 
-    var fs = require('fs'); 
+    var fs = require('fs');
     var content =  '<!DOCTYPE html>\
                     <html>\
                         <head>\
@@ -37,16 +37,16 @@ function saveReport(page) {
                           <div id="qunit-fixture"></div> \
                         </body>\
                     </html>'
-    
+
     try {
         fs.write("report/index.html", content, 'w');
     } catch(e) {
         console.log(e);
     }
 }
- 
-  
-  
+
+
+
 var page = require('webpage').create();
 
 page.viewportSize = { width: 800, height: 600 };
@@ -61,24 +61,24 @@ page.onLoadStarted = function() {
     printArgs.apply(this, arguments);
 };*/
 
-page.onLoadFinished = function() 
+page.onLoadFinished = function()
 {
     if(arguments[0] == "success")
     {
-        console.log("\x1b[1;32m"+arguments[0] + " page load finished\x1b[0m");  
+        console.log("\x1b[1;32m"+arguments[0] + " page load finished\x1b[0m");
     }
     else
     {
-        console.log("\x1b[1;31m"+arguments[0] + " page load finished\x1b[0m");  
+        console.log("\x1b[1;31m"+arguments[0] + " page load finished\x1b[0m");
     }
-    
+
     step += 1
-    page.evaluate(function(step) 
+    page.evaluate(function(step)
     {
         window.phantomjs_step = step
-        console.log("Set step " + step);  
+        console.log("Set step " + step);
     }, step);
-    
+
     //console.log(page.injectJs("../qunit/qunit-2.2.1.js") ? "\x1b[32mSuccess injected qunit.js file!\x1b[0m" : "\x1b[1;31mFail injected qunit file!\x1b[0m");
     //console.log(page.injectCss("../qunit/qunit-2.2.1.css") ? "\x1b[32mSuccess injected qunit.css file!\x1b[0m" : "\x1b[1;31mFail injected qunit file!\x1b[0m");
     console.log(page.injectJs(injectTestFile) ? "\x1b[32mSuccess injected test file!\x1b[0m" : "\x1b[1;31mFail injected test file!\x1b[0m");
@@ -121,10 +121,10 @@ page.onResourceRequested = function() {
 };
 
 page.onClosing = function()
-{  
+{
     saveReport(page);
-    
-    console.log("\x1b[1;33mPage closing from script\x1b[0m");  
+
+    console.log("\x1b[1;33mPage closing from script\x1b[0m");
     //printArgs.apply(this, arguments);
     phantom.exit();
 };
@@ -132,35 +132,35 @@ page.onClosing = function()
 var countRender = 0;
 
 // window.console.log(msg);
-page.onConsoleMessage = function() 
+page.onConsoleMessage = function()
 {
     if(/^render ([A-z0-9\-_]+)$/.test(arguments[0]))
     {
         countRender++;
         var name = arguments[0].replace(/^render ([A-z0-9\-_]+)$/, "$1.png")
-        page.render("report/"+countRender+"_"+name); 
+        page.render("report/"+countRender+"_"+name);
         console.log("\x1b[1;34mRender:\x1b[0m" + name);
         return;
     }
-    
+
     if(/^saveReport$/.test(arguments[0]))
-    { 
+    {
         saveReport(page);
     }
     var message = arguments[0]
     message = message.replace(/ReferenceError:/igm, "\x1b[1;31mReferenceError:\x1b[0m")
     message = message.replace(/TypeError:/igm, "\x1b[1;31mReferenceError:\x1b[0m")
-    
+
     if(/ReferenceError:/igm.test(message))
     {
         phantom.exit();
     }
-    
+
     if(/TypeError:/igm.test(message))
     {
         phantom.exit();
     }
-     
+
     console.log("\x1b[1;34mConsole message:\x1b[0m" + message);
     //printArgs.apply(this, arguments);
 };
