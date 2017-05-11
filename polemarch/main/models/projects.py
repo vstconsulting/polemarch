@@ -3,12 +3,15 @@ from __future__ import unicode_literals
 
 import logging
 
+from django.conf import settings
+
 from . import hosts as hosts_models
 from ._utils import get_class, get_classes, get_class_opts
 from .vars import _AbstractModel, _AbstractInventoryQuerySet, BManager, models
 
 
 logger = logging.getLogger("polemarch")
+PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
 
 
 def get_repo_types():
@@ -43,6 +46,10 @@ class Project(_AbstractModel):
 
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
+
+    @property
+    def path(self):
+        return "{}/{}".format(PROJECTS_DIR, self.name)
 
     @property
     def repo_class(self):

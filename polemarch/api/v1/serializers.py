@@ -4,6 +4,7 @@ import json
 
 import six
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.db.models import Q
 
 from rest_framework import serializers
@@ -420,6 +421,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'vars',
                   'url',)
 
+    @transaction.atomic
     def create(self, validated_data):
         project = super(OneProjectSerializer, self).create(validated_data)
         project.repo_class.clone()

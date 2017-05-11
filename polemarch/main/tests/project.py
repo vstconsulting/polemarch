@@ -1,3 +1,5 @@
+import sys
+import os
 from .inventory import _ApiGHBaseTestCase
 from ..models import Project
 
@@ -29,8 +31,14 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
             proj_obj = Project.objects.get(pk=project_id)
             self.assertEqual(proj_obj.vars["repo_type"], "TEST")
             self.assertEqual(proj_obj.status, "OK")
+            file = "/f{}.txt".format(sys.version_info[0])
+            with open(proj_obj.path + file) as f:
+                self.assertEqual(f.readline(), "clone")
             self.get_result("post", url + "{}/sync/".format(project_id), 200)
+            with open(proj_obj.path + file) as f:
+                self.assertEqual(f.readline(), "update")
             self.get_result("delete", url + "{}/".format(project_id))
+            self.assertTrue(not os.path.exists(proj_obj.path + file))
         self.assertEqual(Project.objects.filter(id__in=results_id).count(), 0)
 
     def test_inventories_in_project(self):

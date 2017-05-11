@@ -50,3 +50,8 @@ def clear_environment(instance, **kwargs):
 def clear_service(instance, **kwargs):
     if not instance.no_signal:
         instance.integration.rm_host(host=instance)
+
+
+@receiver(signals.pre_delete, sender=Project)
+def clean_dirs(instance, **kwargs):
+    instance.repo_class.delete()
