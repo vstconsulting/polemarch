@@ -36,8 +36,11 @@ SECRET_KEY = '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config.getboolean("main", "debug", fallback=False)
 
-EXCHANGE_DIR = config.get("worker", "exchange_dir", fallback="/tmp")
+EXCHANGE_DIR = config.get("main", "exchange_dir", fallback="/tmp")
 
+# Directory for git projects
+PROJECTS_DIR = config.get("main", "projects_dir", fallback="{HOME}/projects").format(**__kwargs)
+os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
 
 ALLOWED_HOSTS = [item for item in config.get("web",
                                              "allowed_hosts",
@@ -256,7 +259,7 @@ LOGGING = {
     }
 }
 SILENCED_SYSTEM_CHECKS = ['fields.W342', 'urls.W001', '1_10.W001',
-                          "fields.W340"]
+                          "fields.W340", "urls.W005"]
 
 try:
     __CACHE_DEFAULT_SETTINGS = {k.upper():v.format(**__kwargs) for k, v in config.items('cache')}
@@ -330,7 +333,17 @@ for __integration in __INTEGRATIONS:
         INTEGRATIONS[__integration] = __INTEGRATIONS[__integration]
 
 
+REPO_BACKENDS = {
+    "GIT": {
+        "BACKEND": "polemarch.main.repo_backends.Git",
+    }
+}
+
+
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
+    REPO_BACKENDS["TEST"] = {
+        "BACKEND": "polemarch.main.repo_backends.Test",
+    }
 
 APACHE = False if ("webserver" in sys.argv) or ("runserver" in sys.argv) else True

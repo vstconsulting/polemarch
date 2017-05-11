@@ -393,15 +393,18 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
 
 
 class ProjectSerializer(_InventoryOperations):
+    vars = DictField(required=False, write_only=True)
 
     class Meta:
         model = models.Project
         fields = ('id',
                   'name',
+                  'vars',
                   'url',)
 
 
 class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
+    vars        = DictField(required=False)
     hosts       = HostSerializer(read_only=True, many=True)
     groups      = GroupSerializer(read_only=True, many=True)
     inventories = InventorySerializer(read_only=True, many=True)
@@ -414,7 +417,17 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'hosts',
                   "groups",
                   'inventories',
+                  'vars',
                   'url',)
+
+    def create(self, validated_data):
+        project = super(OneProjectSerializer, self).create(validated_data)
+        project.repo_class.clone()
+        return project
 
     def inventories_operations(self, request):
         return self.get_operation(request, attr="inventories")
+
+    def sync(self):
+        data = dict(detail=self.instance.repo_class.get())
+        return Response(data, 200)

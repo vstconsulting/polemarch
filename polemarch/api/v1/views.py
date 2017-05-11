@@ -128,6 +128,10 @@ class ProjectViewSet(base.ModelViewSetSet):
         serializer = self.get_serializer(self.get_object())
         return serializer.inventories_operations(request)
 
+    @detail_route(methods=["post"])
+    def sync(self, request, *args, **kwargs):
+        return self.get_serializer(self.get_object()).sync()
+
 
 class TaskViewSet(base.ReadOnlyModelViewSet):
     model = serializers.models.Task
