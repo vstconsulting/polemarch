@@ -9,6 +9,7 @@ from .envs import ApiEnvsTestCase
 from .inventory import (ApiHostsTestCase, ApiGroupsTestCase,
                         ApiInventoriesTestCase)
 from .project import ApiProjectsTestCase
+from .repos import ApiProjectsVCSTestCase
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -169,7 +170,8 @@ class ApiUsersTestCase(BaseTestCase):
 class APITestCase(ApiUsersTestCase, ApiEnvsTestCase,
                   ApiHostsTestCase, ApiGroupsTestCase,
                   ApiInventoriesTestCase, ApiProjectsTestCase,
-                  ApiTasksTestCase, ApiPeriodicTasksTestCase):
+                  ApiTasksTestCase, ApiPeriodicTasksTestCase,
+                  ApiProjectsVCSTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 
