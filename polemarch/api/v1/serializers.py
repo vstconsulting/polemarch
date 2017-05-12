@@ -400,6 +400,7 @@ class ProjectSerializer(_InventoryOperations):
         model = models.Project
         fields = ('id',
                   'name',
+                  'status',
                   'vars',
                   'url',)
 
@@ -414,6 +415,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         model = models.Project
         fields = ('id',
                   'name',
+                  'status',
                   'repository',
                   'hosts',
                   "groups",
