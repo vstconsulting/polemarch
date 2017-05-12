@@ -426,12 +426,13 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     @transaction.atomic
     def create(self, validated_data):
         project = super(OneProjectSerializer, self).create(validated_data)
-        project.repo_class.clone()
+        project.clone()
         return project
 
     def inventories_operations(self, request):
         return self.get_operation(request, attr="inventories")
 
+    @transaction.atomic
     def sync(self):
-        data = dict(detail=self.instance.repo_class.get())
+        data = dict(detail=self.instance.repo_sync())
         return Response(data, 200)

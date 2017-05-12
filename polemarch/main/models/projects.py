@@ -59,3 +59,9 @@ class Project(_AbstractModel):
     def set_status(self, status):
         self.status = status
         self.save()
+
+    def clone(self):
+        return self.repo_class.clone()
+
+    def repo_sync(self):
+        return self.repo_class.get()

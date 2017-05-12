@@ -1,5 +1,4 @@
 # pylint: disable=expression-not-assigned,abstract-method
-# TODO: remove `abstract-method` from disabled
 from __future__ import unicode_literals
 
 import os
@@ -70,24 +69,29 @@ class Test(_Base):
 
 
 class Git(_Base):
+    _fetch_statuses = [
+        "NEW_TAG", "NEW_HEAD", "HEAD_UPTODATE",
+        "TAG_UPDATE", "REJECTED", "FORCED_UPDATE",
+        "FAST_FORWARD", "ERROR"
+    ]
+
     def __init__(self, *args, **kwargs):
         super(Git, self).__init__(*args, **kwargs)
         self.env = dict()
+        self._fetch_map = {
+            1 << x: self._fetch_statuses[x] for x in range(8)
+        }
 
     def _clone(self):
-        result = git.Repo.clone_from(self.proj.repository, self.path,
-                                     env=self.env, depth=1)
-        return dict(result.index.entries.keys()).keys()
+        repo = git.Repo.clone_from(self.proj.repository, self.path,
+                                   env=self.env, depth=1)
+        return repo, None
 
     def _update(self):
         repo = git.Repo(self.path)
         with repo.git.custom_environment(**self.env):
-            repo.remotes.origin.fetch()
-        return dict(repo.index.entries.keys()).keys()
-
-    def __operate(self, operation, **env_vars):
-        self.env = env_vars
-        return operation()
+            fetch_result = repo.remotes.origin.fetch()
+        return repo, fetch_result
 
     def _operate(self, operation, **env_vars):
         if self.proj.vars.get("repo_password", None) is not None:
@@ -96,22 +100,33 @@ class Git(_Base):
                 os.chmod(tmp.name, 0o700)
                 env_vars["GIT_ASKPASS"] = env_vars.get("GIT_ASKPASS", tmp.name)
                 tmp.close()
-                return self.__operate(operation, **env_vars)
+                self.env = env_vars
+                return operation()
         elif self.proj.vars.get("repo_key", None) is not None:
             raise NotImplementedError("Does not realized now.")
         else:
             return operation()
 
-    def clone(self):
+    def _make_operation(self, operation):
         self._set_status("SYNC")
-        files = self._operate(self._clone)
-        self._set_status("OK")
-        self._update_tasks(files)
-        return "Recived {} files.".format(len(files))
+        try:
+            result = self._operate(operation)
+            self._set_status("OK")
+            self._update_tasks(self._get_files(result[0]))
+        except git.InvalidGitRepositoryError:
+            self._set_status("ERROR")
+            raise
+        else:
+            return result
+
+    def _get_files(self, repo):
+        return dict(repo.index.entries.keys()).keys()
+
+    def clone(self):
+        repo = self._make_operation(self._clone)[0]
+        return "Recived {} files.".format(len(self._get_files(repo)))
 
     def get(self):
-        self._set_status("SYNC")
-        files = self._operate(self._update)
-        self._set_status("OK")
-        self._update_tasks(files)
-        return "Repo contains {} files.".format(len(files))
+        _, fres = self._make_operation(self._update)
+        return {res.ref.remote_head: self._fetch_map[res.flags]
+                for res in fres}
