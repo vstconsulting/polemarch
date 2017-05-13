@@ -1,9 +1,10 @@
-# pylint: disable=protected-access,no-member
+# pylint: disable=protected-access,no-member,unused-argument
 from __future__ import unicode_literals
 
 import logging
 
 from django.conf import settings
+from django.db import transaction
 
 from . import hosts as hosts_models
 from ._utils import get_class, get_classes, get_class_opts
@@ -27,7 +28,13 @@ def get_repo_type_opts(name):
 
 
 class ProjectQuerySet(_AbstractInventoryQuerySet):
-    pass
+    def create(self, **kwargs):
+        project = super(ProjectQuerySet, self).create(**kwargs)
+        project.start_task("clone")
+        return project
+
+    def repo_types(self):
+        return get_repo_types()
 
 
 class Project(_AbstractModel):
@@ -60,8 +67,14 @@ class Project(_AbstractModel):
         self.status = status
         self.save()
 
-    def clone(self):
+    def start_task(self, operation='sync'):
+        from ..tasks import RepoTask
+        return RepoTask.delay(self, operation)
+
+    @transaction.atomic
+    def clone(self, *args, **kwargs):
         return self.repo_class.clone()
 
-    def repo_sync(self):
+    @transaction.atomic
+    def sync(self, *args, **kwargs):
         return self.repo_class.get()

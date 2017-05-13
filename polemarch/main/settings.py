@@ -220,6 +220,7 @@ CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 CELERY_BROKER_HEARTBEAT = config.getint("rpc", "heartbeat", fallback=10)
 CELERY_BEAT_SCHEDULER = 'polemarch.main.celery_beat_scheduler:SingletonPersistentScheduler'
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']
+CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_EXPIRES = config.getint("rpc", "results_expiry_days", fallback=10)
 
 # Some hacks with logs
@@ -339,11 +340,10 @@ REPO_BACKENDS = {
     }
 }
 
+APACHE = False if ("webserver" in sys.argv) or ("runserver" in sys.argv) else True
 
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     REPO_BACKENDS["TEST"] = {
-        "BACKEND": "polemarch.main.repo_backends.Test",
+        "BACKEND": "polemarch.main.tests.repo_backends.Test",
     }
-
-APACHE = False if ("webserver" in sys.argv) or ("runserver" in sys.argv) else True

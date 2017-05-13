@@ -234,9 +234,11 @@ class task(object):
 
 
 class BaseTask(object):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, app, *args, **kwargs):
         super(BaseTask, self).__init__()
+        self.app = app
         self.args, self.kwargs = args, kwargs
+        self.task_class = self.__class__
 
     def start(self):
         return self.run()

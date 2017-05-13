@@ -1,13 +1,15 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
+import json
 import logging
 import uuid
+import six
 
+from django.db import transaction
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import (GenericForeignKey,
                                                 GenericRelation)
-from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
 
 from .base import BModel, BManager, BQuerySet, models
 
@@ -31,10 +33,12 @@ class _AbstractInventoryQuerySet(BQuerySet):
 
     @transaction.atomic
     def create(self, **kwargs):
-        variables = kwargs.pop("vars", {})
+        variables = kwargs.pop("vars", None)
         obj = super(_AbstractInventoryQuerySet, self).create(**kwargs)
-        for key, value in variables.items():
-            obj.variables.create(key=key, value=value)
+        if variables is not None:
+            if isinstance(variables, (six.string_types, six.text_type)):
+                variables = json.loads(variables)
+            obj.vars = variables
         return obj
 
     def var_filter(self, **kwargs):
@@ -68,3 +72,11 @@ class _AbstractModel(BModel):
     @property
     def vars(self):
         return dict(self.variables.all().values_list('key', 'value'))
+
+    @vars.setter
+    def vars(self, value):
+        self.set_vars(value)
+
+    @vars.deleter
+    def vars(self):
+        self.variables.all().delete()

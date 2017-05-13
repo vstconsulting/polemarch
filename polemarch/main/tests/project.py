@@ -21,6 +21,11 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
                           name=self.prj1.name,
                           repository="git@ex.us:dir/rep1.git")
 
+        result = self.get_result("get", url+"supported-repos/")
+        self.assertCount(result, 2)
+        self.assertIn("TEST", result, result)
+        self.assertIn("GIT", result, result)
+
         data = [dict(name="Prj3", repository="git@ex.us:dir/rep3.git",
                      vars=dict(repo_type="TEST", repo_password="1234")),
                 dict(name="Prj4", repository="git@ex.us:dir/rep4.git",
