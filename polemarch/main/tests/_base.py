@@ -16,13 +16,24 @@ class BaseTestCase(TestCase):
         self.login_url = getattr(settings, 'LOGIN_URL', '/login/')
         self.logout_url = getattr(settings, 'LOGOUT_URL', '/logout/')
 
-    def _create_user(self):
+    def change_identity(self, is_super_user=False):
+        old_user = self.user
+        self.user = self._create_user(is_super_user)
+        return old_user
+
+    def _create_user(self, is_super_user=True):
         username = ''.join(random.sample(string.ascii_lowercase, 8))
         email = username + '@gmail.com'
         password = username.upper()
-        user = User.objects.create_superuser(username=username,
-                                             password=password,
-                                             email=email)
+        if is_super_user:
+            user = User.objects.create_superuser(username=username,
+                                                 password=password,
+                                                 email=email)
+        else:
+            user = User.objects.create_user(username=username,
+                                            password=password,
+                                            email=email)
+        user.related_objects.get_or_create()
         user.data = {'username': username, 'password': password}
         return user
 

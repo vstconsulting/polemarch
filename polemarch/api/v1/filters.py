@@ -1,4 +1,6 @@
+# pylint: disable=import-error
 from rest_framework import filters
+from django_filters import (NumberFilter, CharFilter, IsoDateTimeFilter)
 from django.contrib.auth.models import User
 from ...main import models
 
@@ -22,10 +24,10 @@ def variables_filter(queryset, field, value):
 
 
 class _BaseFilter(filters.FilterSet):
-    id        = filters.django_filters.NumberFilter(method=extra_filter)
-    id__not   = filters.django_filters.NumberFilter(method=extra_filter)
-    name__not = filters.django_filters.CharFilter(method=extra_filter)
-    name      = filters.django_filters.CharFilter(method=extra_filter)
+    id        = NumberFilter(method=extra_filter)
+    id__not   = NumberFilter(method=extra_filter)
+    name__not = CharFilter(method=extra_filter)
+    name      = CharFilter(method=extra_filter)
 
 
 class UserFilter(filters.FilterSet):
@@ -40,7 +42,7 @@ class UserFilter(filters.FilterSet):
 
 
 class _BaseHGIFilter(_BaseFilter):
-    variables = filters.django_filters.CharFilter(method=variables_filter)
+    variables = CharFilter(method=variables_filter)
 
 
 class HostFilter(_BaseHGIFilter):
@@ -73,6 +75,54 @@ class ProjectFilter(_BaseFilter):
         model = models.Project
         fields = ('id',
                   'name',)
+
+
+class TaskFilter(_BaseFilter):
+
+    class Meta:
+        model = models.Task
+        fields = ('id',
+                  'name',
+                  'playbook',
+                  'project')
+
+
+class HistoryFilter(_BaseFilter):
+    start_time__gt = IsoDateTimeFilter(name="start_time",
+                                       lookup_expr=('gt'))
+    stop_time__gt = IsoDateTimeFilter(name="stop_time",
+                                      lookup_expr=('gt'))
+    start_time__lt = IsoDateTimeFilter(name="start_time",
+                                       lookup_expr=('lt'))
+    stop_time__lt = IsoDateTimeFilter(name="stop_time",
+                                      lookup_expr=('lt'))
+    start_time__gte = IsoDateTimeFilter(name="start_time",
+                                        lookup_expr=('gte'))
+    stop_time__gte = IsoDateTimeFilter(name="stop_time",
+                                       lookup_expr=('gte'))
+    start_time__lte = IsoDateTimeFilter(name="start_time",
+                                        lookup_expr=('lte'))
+    stop_time__lte = IsoDateTimeFilter(name="stop_time",
+                                       lookup_expr=('lte'))
+
+    class Meta:
+        model = models.History
+        fields = ('id',
+                  'playbook',
+                  'project',
+                  'status',
+                  'start_time',
+                  'stop_time',)
+
+
+class PeriodicTaskFilter(_BaseFilter):
+
+    class Meta:
+        model = models.PeriodicTask
+        fields = ('id',
+                  'playbook',
+                  'type',
+                  'project')
 
 
 class EnvironmentsFilter(filters.FilterSet):

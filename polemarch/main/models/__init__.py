@@ -4,10 +4,13 @@ from __future__ import absolute_import
 import json
 from django.db.models import signals
 from django.dispatch import receiver
+from django.core.validators import ValidationError
 
-from .hosts import Host, Group, Inventory, Variable, Environment
+from .vars import Variable
+from .hosts import Host, Group, Inventory, Environment
 from .projects import Project
 from .users import TypesPermissions
+from .tasks import Task, PeriodicTask, History
 from ..validators import validate_hostname
 
 
@@ -17,6 +20,15 @@ from ..validators import validate_hostname
 @receiver(signals.pre_save, sender=Environment)
 def validate_integrations(instance, **kwargs):
     json.loads(instance.data)
+
+
+@receiver(signals.pre_save, sender=PeriodicTask)
+def validate_crontab(instance, **kwargs):
+    try:
+        instance.get_schedule()
+    except ValueError as ex:
+        msg = dict(schedule=["{}".format(ex)])
+        raise ValidationError(msg)
 
 
 @receiver(signals.pre_save, sender=Host)
@@ -38,3 +50,8 @@ def clear_environment(instance, **kwargs):
 def clear_service(instance, **kwargs):
     if not instance.no_signal:
         instance.integration.rm_host(host=instance)
+
+
+@receiver(signals.pre_delete, sender=Project)
+def clean_dirs(instance, **kwargs):
+    instance.repo_class.delete()

@@ -4,6 +4,8 @@ import json
 
 import six
 from django.contrib.auth.models import User
+from django.db import transaction
+from django.db.models import Q
 
 from rest_framework import serializers
 from rest_framework import exceptions
@@ -131,6 +133,30 @@ class EnvironmentSerializer(serializers.ModelSerializer):
                   'hosts')
 
 
+class HistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.History
+        fields = ("id",
+                  "project",
+                  "playbook",
+                  "status",
+                  "start_time",
+                  "stop_time")
+
+
+class OneHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.History
+        fields = ("id",
+                  "project",
+                  "playbook",
+                  "status",
+                  "start_time",
+                  "stop_time",
+                  "raw_inventory",
+                  "raw_stdout")
+
+
 class VariableSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Variable
@@ -144,7 +170,24 @@ class VariableSerializer(serializers.ModelSerializer):
 class _WithVariablesSerializer(serializers.ModelSerializer):
     operations = dict(DELETE="remove",
                       POST="add",
-                      PUT="set")
+                      PUT="set",
+                      GET="all")
+
+    def _get_objects(self, model, objs_id):
+        user = self.context['request'].user
+        qs = model.objects.all()
+        if not user.is_staff:
+            projs = user.related_objects.values_list('projects', flat=True)
+            qs = qs.filter(
+                Q(related_objects__user=user) |
+                Q(related_objects__projects__in=projs)
+            )
+        return list(qs.filter(id__in=objs_id))
+
+    def get_operation(self, request, attr):
+        tp = getattr(self.instance, attr)
+        obj_list = self._get_objects(tp.model, request.data)
+        return self._operate(request, attr, obj_list)
 
     def _response(self, total, found, code=200):
         data = dict(total=len(total))
@@ -168,9 +211,15 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         return instance
 
     def _operate(self, request, attr, obj_list):
-        tp = getattr(self.instance, attr)
         action = self.operations[request.method]
-        if action == "set":
+        tp = getattr(self.instance, attr)
+        if action == "all":
+            if attr == "related_objects":
+                answer = tp.values_list("user__id", flat=True)
+            else:
+                answer = tp.values_list("id", flat=True)
+            return Response(answer, status=200)
+        elif action == "set":
             # Because django<=1.9 does not support .set()
             getattr(tp, "clear")()
             action = "add"
@@ -216,24 +265,57 @@ class OneHostSerializer(HostSerializer):
                   'vars',
                   'url',)
 
+
+class TaskSerializer(_WithVariablesSerializer):
+    class Meta:
+        model = models.Task
+        fields = ('id',
+                  'name',
+                  'url',)
+
+
+class OneTaskSerializer(TaskSerializer):
+    project = ModelRelatedField(read_only=True)
+    playbook = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = models.Task
+        fields = ('id',
+                  'name',
+                  'playbook',
+                  'project',
+                  'url',)
+
+
+class PeriodicTaskSerializer(_WithVariablesSerializer):
+    schedule = serializers.CharField(allow_blank=True)
+
+    class Meta:
+        model = models.PeriodicTask
+        fields = ('id',
+                  'type',
+                  'schedule',
+                  'playbook',
+                  'url',)
+
+
+class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
+    class Meta:
+        model = models.PeriodicTask
+        fields = ('id',
+                  'type',
+                  'schedule',
+                  'playbook',
+                  'project',
+                  'url',)
+
+
 ###################################
 # Subclasses for operations
 # with hosts and groups
 
 
 class _InventoryOperations(_WithVariablesSerializer):
-
-    def _get_objects(self, model, objs_id):
-        user = self.context['request'].user
-        qs = model.objects.all()
-        if not user.is_staff:
-            qs = qs.filter(related_objects__user=user)
-        return list(qs.filter(id__in=objs_id))
-
-    def get_operation(self, request, attr):
-        tp = getattr(self.instance, attr)
-        obj_list = self._get_objects(tp.model, request.data)
-        return self._operate(request, attr, obj_list)
 
     def hosts_operations(self, request):
         return self.get_operation(request, attr="hosts")
@@ -243,7 +325,6 @@ class _InventoryOperations(_WithVariablesSerializer):
 
 
 ###################################
-
 
 class GroupSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
@@ -312,16 +393,19 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
                   'url',)
 
 
-class ProjectSerializer(_WithVariablesSerializer):
+class ProjectSerializer(_InventoryOperations):
+    vars = DictField(required=False, write_only=True)
 
     class Meta:
         model = models.Project
         fields = ('id',
                   'name',
+                  'vars',
                   'url',)
 
 
 class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
+    vars        = DictField(required=False)
     hosts       = HostSerializer(read_only=True, many=True)
     groups      = GroupSerializer(read_only=True, many=True)
     inventories = InventorySerializer(read_only=True, many=True)
@@ -334,7 +418,18 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'hosts',
                   "groups",
                   'inventories',
+                  'vars',
                   'url',)
+
+    @transaction.atomic
+    def create(self, validated_data):
+        project = super(OneProjectSerializer, self).create(validated_data)
+        project.repo_class.clone()
+        return project
 
     def inventories_operations(self, request):
         return self.get_operation(request, attr="inventories")
+
+    def sync(self):
+        data = dict(detail=self.instance.repo_class.get())
+        return Response(data, 200)

@@ -1,3 +1,5 @@
+import sys
+import os
 from .inventory import _ApiGHBaseTestCase
 from ..models import Project
 
@@ -6,23 +8,37 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
     def setUp(self):
         super(ApiProjectsTestCase, self).setUp()
         self.prj1 = Project.objects.create(name="First project",
-                                           repository="git@ex.us:dir/rep1.git")
+                                           repository="git@ex.us:dir/rep1.git",
+                                           vars=dict(repo_type="TEST"))
         self.prj2 = Project.objects.create(name="Second project",
-                                           repository="git@ex.us:dir/rep2.git")
+                                           repository="git@ex.us:dir/rep2.git",
+                                           vars=dict(repo_type="TEST"))
 
     def test_create_delete_project(self):
         url = "/api/v1/projects/"
-        self.list_test(url, 2)
+        self.list_test(url, 5)
         self.details_test(url + "{}/".format(self.prj1.id),
                           name=self.prj1.name,
                           repository="git@ex.us:dir/rep1.git")
 
-        data = [dict(name="Prj3", repository="git@ex.us:dir/rep3.git"),
-                dict(name="Prj4", repository="git@ex.us:dir/rep4.git")]
+        data = [dict(name="Prj3", repository="git@ex.us:dir/rep3.git",
+                     vars=dict(repo_type="TEST", repo_password="1234")),
+                dict(name="Prj4", repository="git@ex.us:dir/rep4.git",
+                     vars=dict(repo_type="TEST", repo_password="qwerty"))]
         results_id = self.mass_create(url, data, "name", "repository")
 
         for project_id in results_id:
+            proj_obj = Project.objects.get(pk=project_id)
+            self.assertEqual(proj_obj.vars["repo_type"], "TEST")
+            self.assertEqual(proj_obj.status, "OK")
+            file = "/f{}.txt".format(sys.version_info[0])
+            with open(proj_obj.path + file) as f:
+                self.assertEqual(f.readline(), "clone")
+            self.get_result("post", url + "{}/sync/".format(project_id), 200)
+            with open(proj_obj.path + file) as f:
+                self.assertEqual(f.readline(), "update")
             self.get_result("delete", url + "{}/".format(project_id))
+            self.assertTrue(not os.path.exists(proj_obj.path + file))
         self.assertEqual(Project.objects.filter(id__in=results_id).count(), 0)
 
     def test_inventories_in_project(self):
@@ -33,8 +49,9 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
                             dict(name="Inv2", vars={})]
         inventories_id = self._create_inventories(inventories_data)
 
-        data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
-        prj_id = self.get_result("post", url, 201, data=data)["id"]
+        data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git",
+                    vars=dict(repo_type="TEST"))
+        prj_id = self.mass_create(url, [data], "name", "repository")[0]
 
         # Test inventories
         # Just put two inventory in project
@@ -46,55 +63,3 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         # Full update list of project
         self._compare_list(url, "put", 200, prj_id, inventories_id,
                            "inventories", inventories_id)
-
-    # TODO: uncomment when tasks will come =)
-    def _test_tasks_in_project(self):
-        url = "/api/v1/projects/"  # URL to projects layer
-
-        inventories_data = [dict(name="Inv1", vars={})]
-        inventory_id = self._create_inventories(inventories_data)[0]
-
-        tasks_data = [dict(inventory=inventory_id, playbook="play1.yml"),
-                      dict(inventory=inventory_id, playbook="play2.yml"),
-                      dict(inventory=inventory_id, playbook="play3.yml")]
-        tasks_id = self._create_tasks(tasks_data)
-
-        data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
-        prj_id = self.get_result("post", url, 201, data=data)["id"]
-
-        # Test tasks
-        # Just put two tasks in project
-        self._compare_list(url, "post", 200, prj_id, tasks_id[0:2],
-                           "tasks", tasks_id[0:2])
-        # Delete one of tasks in project
-        self._compare_list(url, "delete", 200, prj_id, [tasks_id[0]],
-                           "tasks", tasks_id[1:2])
-        # Full update tasks of project
-        self._compare_list(url, "put", 200, prj_id, tasks_id, "tasks",
-                           tasks_id)
-
-    def _test_periodic_tasks_in_project(self):
-        url = "/api/v1/projects/"  # URL to projects layer
-
-        inventories_data = [dict(name="Inv1", vars={})]
-        inventory_id = self._create_inventories(inventories_data)[0]
-        tasks_data = [dict(inventory=inventory_id, playbook="play1.yml")]
-        tasks_id = self._create_tasks(tasks_data)
-        schedules_data = [dict(task=tasks_id[0], schedule="10", type="DELTA"),
-                          dict(task=tasks_id[0], schedule="5", type="DELTA"),
-                          dict(task=tasks_id[0], schedule="1", type="DELTA")]
-        schedules_id = self._create_periodic_tasks(schedules_data)
-
-        data = dict(name="Prj1", repository="git@ex.us:dir/rep1.git")
-        prj_id = self.get_result("post", url, 201, data=data)["id"]
-
-        # Test tasks
-        # Just put two periodic tasks in project
-        self._compare_list(url, "post", 200, prj_id, schedules_id[0:2],
-                           "periodic_tasks", schedules_id[0:2])
-        # Delete one of periodic tasks in project
-        self._compare_list(url, "delete", 200, prj_id, [schedules_id[0]],
-                           "periodic_tasks", schedules_id[1:2])
-        # Full update periodic tasks of project
-        self._compare_list(url, "put", 200, prj_id, schedules_id,
-                           "periodic_tasks", schedules_id)
