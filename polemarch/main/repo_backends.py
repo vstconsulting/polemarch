@@ -84,9 +84,20 @@ class Git(_Base):
                 self.env = env_vars
                 return operation()
         elif self.proj.vars.get("repo_key", None) is not None:
-            raise NotImplementedError("Does not realized now.")
-        else:
-            return operation()
+            with tmp_file_context() as tmp:
+                tmp.write(self.proj.vars["repo_key"])
+                tmp.close()
+                ssh = "ssh -vT -i {} -F /dev/null".format(tmp.name)
+                ssh += " -o StrictHostKeyChecking=no"
+                ssh += " -o TCPKeepAlive=yes"
+                ssh += " -o IdentitiesOnly=yes"
+                ssh += " -o UserKnownHostsFile=/dev/null"
+                ssh += " -o PubkeyAuthentication=yes"
+                env_vars["GIT_SSH_COMMAND"] = env_vars.get("GIT_SSH_COMMAND",
+                                                           ssh)
+                self.env = env_vars
+                return operation()
+        return operation()
 
     def _make_operation(self, operation):
         self._set_status("SYNC")
@@ -94,7 +105,7 @@ class Git(_Base):
             result = self._operate(operation)
             self._set_status("OK")
             self._update_tasks(self._get_files(result[0]))
-        except git.InvalidGitRepositoryError:
+        except Exception as ex:
             self._set_status("ERROR")
             raise
         else:

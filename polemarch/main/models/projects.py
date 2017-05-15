@@ -71,10 +71,8 @@ class Project(_AbstractModel):
         from ..tasks import RepoTask
         return RepoTask.delay(self, operation)
 
-    @transaction.atomic
     def clone(self, *args, **kwargs):
         return self.repo_class.clone()
 
-    @transaction.atomic
     def sync(self, *args, **kwargs):
         return self.repo_class.get()
