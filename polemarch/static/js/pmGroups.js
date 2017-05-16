@@ -1,43 +1,43 @@
+ 
+var pmGroups = new pmItems()  
 
-var pmHosts = new pmItems()  
-
-pmHosts.showList = function(holder, menuInfo, data)
+pmGroups.showList = function(holder, menuInfo, data)
 {
-    return $.when(pmHosts.loadAllItems()).done(function()
+    return $.when(pmGroups.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render('hosts_list', {}))
+        $(holder).html(spajs.just.render('groups_list', {}))
     }).fail(function()
     {
         $.notify("", "error");
     })
 }
 
-pmHosts.showItem = function(holder, menuInfo, data)
+pmGroups.showItem = function(holder, menuInfo, data)
 {
     console.log(menuInfo, data)
     
-    return $.when(pmHosts.loadItem(data.reg[1])).done(function()
+    return $.when(pmGroups.loadItem(data.reg[1])).done(function()
     {
-        $(holder).html(spajs.just.render('host_page', {item_id:data.reg[1]}))
+        $(holder).html(spajs.just.render('group_page', {item_id:data.reg[1]}))
     }).fail(function()
     {
         $.notify("", "error");
     })
 }
 
-pmHosts.showNewItemPage = function(holder, menuInfo, data)
+pmGroups.showNewItemPage = function(holder, menuInfo, data)
 { 
-    $(holder).html(spajs.just.render('new_host_page', {}))
+    $(holder).html(spajs.just.render('new_group_page', {}))
 }
 
 /**
- * Обновляет поле модел polemarch.model.hostslist и ложит туда список пользователей 
- * Обновляет поле модел polemarch.model.hosts и ложит туда список инфу о пользователях по их id
+ * Обновляет поле модел polemarch.model.groupslist и ложит туда список пользователей 
+ * Обновляет поле модел polemarch.model.groups и ложит туда список инфу о пользователях по их id
  */
-pmHosts.loadAllItems = function()
+pmGroups.loadAllItems = function()
 {
     return jQuery.ajax({
-        url: "/api/v1/hosts/",
+        url: "/api/v1/groups/",
         type: "GET",
         contentType:'application/json',
         data: "",
@@ -49,14 +49,14 @@ pmHosts.loadAllItems = function()
         },
         success: function(data)
         {
-            console.log("update Items", data)
-            polemarch.model.hostslist = data
-            polemarch.model.hosts = {}
+            console.log("updateGroups", data)
+            polemarch.model.groupslist = data
+            polemarch.model.groups = {}
             
-            for(var i in polemarch.model.hosts.results)
+            for(var i in polemarch.model.groups.results)
             {
-                var val = polemarch.model.hosts.results[i]
-                polemarch.model.hosts[val.id] = val
+                var val = polemarch.model.groups.results[i]
+                polemarch.model.groups[val.id] = val
             }
         },
         error:function(e)
@@ -68,12 +68,12 @@ pmHosts.loadAllItems = function()
 }
 
 /**
- * Обновляет поле модел polemarch.model.hosts[item_id] и ложит туда пользователя
+ * Обновляет поле модел polemarch.model.users[item_id] и ложит туда пользователя
  */
-pmHosts.loadItem = function(item_id)
+pmGroups.loadItem = function(item_id)
 {
     return jQuery.ajax({
-        url: "/api/v1/hosts/"+item_id+"/",
+        url: "/api/v1/groups/"+item_id+"/",
         type: "GET",
         contentType:'application/json',
         data: "",
@@ -85,8 +85,8 @@ pmHosts.loadItem = function(item_id)
         },
         success: function(data)
         {
-            console.log("loadUser", data)
-            polemarch.model.hosts[item_id] = data
+            console.log("loadGroup", data)
+            polemarch.model.groups[item_id] = data
         },
         error:function(e)
         {
@@ -100,25 +100,23 @@ pmHosts.loadItem = function(item_id)
 /** 
  * @return $.Deferred
  */
-pmHosts.addItem = function()
+pmGroups.addItem = function()
 {
     var def = new $.Deferred();
-
     var data = {}
 
-    data.name = $("#new_host_name").val()
-    data.type = $("#new_host_type").val() 
-    data.vars = pmHosts.jsonEditorGetValues()
-    
-    // @todo Добавить валидацию диапазонов "127.0.1.[5:6]" и 127.0.1.1, 127.0.1.2 
-    if(!data.name || !this.validateHostName(data.name))
+    data.name = $("#new_group_name").val() 
+    data.vars = pmGroups.jsonEditorGetValues()
+
+    if(!data.name)
     {
         $.notify("Invalid value in filed name", "error");
-        return;
+        def.reject()
+        return def.promise();
     }
  
     $.ajax({
-        url: "/api/v1/hosts/",
+        url: "/api/v1/groups/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
@@ -130,41 +128,41 @@ pmHosts.addItem = function()
         },
         success: function(data)
         {
-            console.log("addItem", data); 
-            $.notify("Host created", "success");
-            $.when(spajs.open({ menuId:"host-"+data.id})).always(function(){
+            console.log("group add", data); 
+            $.notify("Group created", "success");
+            $.when(spajs.open({ menuId:"group-"+data.id})).always(function(){
                 def.resolve()
             })
         },
         error:function(e)
         {
-            polemarch.showErrors(e.responseJSON)
             def.reject()
+            polemarch.showErrors(e.responseJSON)
         }
-    });
+    }); 
+    
     return def.promise();
 }
-    
+
 /** 
  * @return $.Deferred
  */
-pmHosts.updateItem = function(item_id)
+pmGroups.updateItem = function(item_id)
 {
     var data = {}
-
-    data.name = $("#host_"+item_id+"_name").val()
-    data.type = $("#host_"+item_id+"_type").val()
-    data.vars = pmHosts.jsonEditorGetValues()
-
-    // @todo Добавить валидацию диапазонов "127.0.1.[5:6]" и 127.0.1.1, 127.0.1.2
-    if(!data.name || !this.validateHostName(data.name))
+ 
+    data.name = $("#group_"+item_id+"_name").val() 
+    data.vars = pmGroups.jsonEditorGetValues()
+    
+    if(!data.name)
     {
+        console.warn("Invalid value in filed name")
         $.notify("Invalid value in filed name", "error");
         return;
     }
  
     return $.ajax({
-        url: "/api/v1/hosts/"+item_id+"/",
+        url: "/api/v1/groups/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data:JSON.stringify(data),
@@ -176,11 +174,12 @@ pmHosts.updateItem = function(item_id)
         },
         success: function(data)
         {
-            console.log("updateItem", data); 
+            console.log("group update", data); 
             $.notify("Save", "success");
         },
         error:function(e)
         {
+            console.log("group "+item_id+" update error - " + JSON.stringify(e)); 
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -189,15 +188,17 @@ pmHosts.updateItem = function(item_id)
 /** 
  * @return $.Deferred
  */
-pmHosts.deleteItem = function(item_id)
+pmGroups.deleteItem = function(item_id, force)
 {
-    if(!confirm("Are you sure?"))
+    var def = new $.Deferred();
+    if(!force && !confirm("Are you sure?"))
     {
-        return;
+        def.reject()
+        return def.promise();
     }
 
-    return $.ajax({
-        url: "/api/v1/hosts/"+item_id+"/",
+    $.ajax({
+        url: "/api/v1/groups/"+item_id+"/",
         type: "DELETE",
         contentType:'application/json',
         beforeSend: function(xhr, settings) {
@@ -208,12 +209,17 @@ pmHosts.deleteItem = function(item_id)
         },
         success: function(data)
         {
-            console.log("deleteItem", data);
-            spajs.open({ menuId:"hosts"})
+            console.log("groups delete", data);  
+            $.when(spajs.open({ menuId:"groups"})).always(function(){
+                def.resolve()
+            })
         },
         error:function(e)
         {
+            def.reject()
             polemarch.showErrors(e.responseJSON)
         }
     });
-} 
+    
+    return def.promise();
+}

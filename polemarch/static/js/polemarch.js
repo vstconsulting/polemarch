@@ -37,6 +37,8 @@ polemarch.model.users = {}
 polemarch.model.hostslist = []
 polemarch.model.hosts = {}
 
+polemarch.model.groupslist = []
+polemarch.model.groups = {} 
 
 polemarch.start = function(options)
 {
@@ -93,6 +95,8 @@ polemarch.start = function(options)
         onOpen:polemarch.showHome
     })
 
+
+    // users
     spajs.addMenu({
         id:"users",
         name:"users",
@@ -114,6 +118,8 @@ polemarch.start = function(options)
         onOpen:pmUsers.showNewItemPage
     })
 
+ 
+    // hosts
     spajs.addMenu({
         id:"hosts",
         name:"hosts",
@@ -135,6 +141,30 @@ polemarch.start = function(options)
         onOpen:pmHosts.showNewItemPage
     })
 
+
+    // groups
+    spajs.addMenu({
+        id:"groups",
+        name:"groups",
+        urlregexp:[/^groups$/],
+        onOpen:pmGroups.showList
+    })
+
+    spajs.addMenu({
+        id:"group",
+        name:"group",
+        urlregexp:[/^group-([0-9]+)$/],
+        onOpen:pmGroups.showItem
+    })
+
+    spajs.addMenu({
+        id:"newGroup",
+        name:"newGroup",
+        urlregexp:[/^new-group$/],
+        onOpen:pmGroups.showNewItemPage
+    })
+    
+    
     spajs.openMenuFromUrl()
 }
 
