@@ -1,8 +1,11 @@
 # pylint: disable=invalid-name
+from __future__ import unicode_literals
+
 import sys
 import tempfile
 import time
 import traceback
+import os
 from os.path import dirname
 
 import six
@@ -11,6 +14,15 @@ from django.core.cache import cache
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation
+
+from . import exceptions as ex
+
+
+def import_class(path):
+    m_len = path.rfind(".")
+    class_name = path[m_len + 1:len(path)]
+    module = __import__(path[0:m_len], globals(), locals(), [class_name])
+    return getattr(module, class_name)
 
 
 def project_path():
@@ -28,9 +40,10 @@ def get_render(name, data, trans='en'):
 
 
 class tmp_file(object):
-    def __init__(self, mode="w", bufsize=0):
+    def __init__(self, mode="w", bufsize=0, **kwargs):
         kw = not six.PY3 and {"bufsize": bufsize} or {}
-        fd = tempfile.NamedTemporaryFile(mode, **kw)
+        kwargs.update(kw)
+        fd = tempfile.NamedTemporaryFile(mode, **kwargs)
         self.fd = fd
 
     def write(self, wr_string):
@@ -43,6 +56,27 @@ class tmp_file(object):
 
     def __del__(self):
         self.fd.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type_e, value, tb):
+        self.fd.close()
+        if value is not None:
+            return False
+
+
+class tmp_file_context(object):
+    def __init__(self, *args, **kwargs):
+        self.tmp = tmp_file(*args, **kwargs)
+
+    def __enter__(self):
+        return self.tmp
+
+    def __exit__(self, type_e, value, tb):
+        self.tmp.close()
+        if os.path.exists(self.tmp.name):
+            os.remove(self.tmp.name)
 
 
 class Lock(object):
@@ -104,6 +138,29 @@ class service_lock(__LockAbstractDecorator):
         return super(service_lock, self).execute(func, *args, **kwargs)
 
 
+class ModelHandlers(object):
+    def __init__(self, tp):
+        self.type = tp
+
+    def list(self):
+        return getattr(settings, self.type, {})
+
+    def backend(self, name):
+        try:
+            backend = self.list()[name].get('BACKEND', None)
+            if backend is None:
+                raise ex.PMException("Backend is 'None'.")
+            return import_class(backend)
+        except KeyError or ImportError:
+            raise ex.UnknownModelHandlerException(name)
+
+    def opts(self, name):
+        return self.list().get(name, {}).get('OPTIONS', {})
+
+    def get_object(self, name, obj):
+        return self.backend(name)(obj, **self.opts(name))
+
+
 class assertRaises(object):
     def __init__(self, *args, **kwargs):
         self._verbose = kwargs.pop("verbose", False)
@@ -147,19 +204,19 @@ class exception_with_traceback(raise_context):
 class _RedirectionOutput(object):
     _streams = []
 
-    def __init__(self, new_output=six.StringIO()):
-        self.output = new_output
-        self._old_outputs = {}
+    def __init__(self, new_stream=six.StringIO()):
+        self.stream = new_stream
+        self._old_streams = {}
 
     def __enter__(self):
         for stream in self._streams:
-            self._old_outputs[stream] = getattr(sys, stream)
-            setattr(sys, stream, self.output)
-        return self.output
+            self._old_streams[stream] = getattr(sys, stream)
+            setattr(sys, stream, self.stream)
+        return self.stream
 
     def __exit__(self, exctype, excinst, exctb):
         for stream in self._streams:
-            setattr(sys, stream, self._old_outputs.pop(stream))
+            setattr(sys, stream, self._old_streams.pop(stream))
 
 
 class redirect_stdout(_RedirectionOutput):
@@ -168,6 +225,10 @@ class redirect_stdout(_RedirectionOutput):
 
 class redirect_stderr(_RedirectionOutput):
     _streams = ["stderr"]
+
+
+class redirect_stdin(_RedirectionOutput):
+    _streams = ["stdin"]
 
 
 class redirect_stdany(_RedirectionOutput):
@@ -207,9 +268,11 @@ class task(object):
 
 
 class BaseTask(object):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, app, *args, **kwargs):
         super(BaseTask, self).__init__()
+        self.app = app
         self.args, self.kwargs = args, kwargs
+        self.task_class = self.__class__
 
     def start(self):
         return self.run()

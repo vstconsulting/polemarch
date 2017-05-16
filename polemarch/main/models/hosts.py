@@ -8,22 +8,10 @@ import six
 
 from .base import BModel, BManager, BQuerySet, models
 from .vars import _AbstractModel, _AbstractInventoryQuerySet
-from ._utils import get_class, get_classes, get_class_opts
 from ...main import exceptions as ex
+from ..utils import ModelHandlers
 
 logger = logging.getLogger("polemarch")
-
-
-def get_integrations():
-    return get_classes("INTEGRATIONS")
-
-
-def get_integration(name):
-    return get_class("INTEGRATIONS", name).Integration
-
-
-def get_integ_opts(name):
-    return get_class_opts("INTEGRATIONS", name)
 
 
 # Block of models
@@ -31,8 +19,9 @@ class EnvironmentManager(BManager.from_queryset(BQuerySet)):
     # pylint: disable=no-member
     def get_integrations(self):
         data = dict()
-        for integ_name in get_integrations():
-            data[integ_name] = get_integration(integ_name).required_fields()
+        handler = ModelHandlers("INTEGRATIONS")
+        for integ_name in handler.list():
+            data[integ_name] = handler.backend(integ_name).required_fields()
         return data
 
     def create(self, **kwargs):
@@ -79,7 +68,7 @@ class Environment(BModel):
 
     @property
     def integration(self):
-        return get_integration(self.type)(self, **get_integ_opts(self.type))
+        return ModelHandlers("INTEGRATIONS").get_object(self.type, self)
 
     @property
     def additionals(self):
@@ -105,7 +94,7 @@ class Host(_AbstractModel):
     @property
     def integration(self):
         env = self.environment or Environment(name="NullEnv")
-        return get_integration(env.type)(env, **get_integ_opts(env.type))
+        return ModelHandlers("INTEGRATIONS").get_object(env.type, env)
 
     def prepare(self):
         self.integration.prepare_service(self)

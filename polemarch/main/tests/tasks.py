@@ -25,7 +25,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
 
     def test_get_tasks(self):
         url = "/api/v1/tasks/"
-        self.list_test(url, 2)
+        self.list_test(url, Task.objects.all().count())
 
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
@@ -113,7 +113,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
 
     def test_create_delete_periodic_task(self):
         url = "/api/v1/periodic-tasks/"
-        self.list_test(url, 2)
+        self.list_test(url, PeriodicTask.objects.all().count())
         self.details_test(url + "{}/".format(self.ptask1.id),
                           playbook="p1.yml",
                           schedule="10",

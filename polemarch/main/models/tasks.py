@@ -75,19 +75,21 @@ class ExecuteStatusHandler:
 
 # Block of real models
 class Task(BModel):
-    project     = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project     = models.ForeignKey(Project, on_delete=models.CASCADE,
+                                    related_query_name="tasks")
     name        = models.CharField(max_length=256, default=uuid.uuid1)
     playbook    = models.CharField(max_length=256)
 
     class Meta:
-        default_related_name = "projects"
+        default_related_name = "tasks"
 
     def __unicode__(self):
         return str(self.name)
 
 
 class PeriodicTask(BModel):
-    project     = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project     = models.ForeignKey(Project, on_delete=models.CASCADE,
+                                    related_query_name="periodic_tasks")
     playbook    = models.CharField(max_length=256)
     schedule    = models.CharField(max_length=4*1024)
     type        = models.CharField(max_length=10)

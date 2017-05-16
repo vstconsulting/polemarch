@@ -1,33 +1,26 @@
-# pylint: disable=protected-access,no-member
+# pylint: disable=protected-access,no-member,unused-argument
 from __future__ import unicode_literals
 
 import logging
-
 from django.conf import settings
 
 from . import hosts as hosts_models
-from ._utils import get_class, get_classes, get_class_opts
 from .vars import _AbstractModel, _AbstractInventoryQuerySet, BManager, models
+from ..utils import ModelHandlers
 
 
 logger = logging.getLogger("polemarch")
 PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
 
 
-def get_repo_types():
-    return get_classes("REPO_BACKENDS")
-
-
-def get_repo_type(name):
-    return get_class("REPO_BACKENDS", name)
-
-
-def get_repo_type_opts(name):
-    return get_class_opts("REPO_BACKENDS", name)
-
-
 class ProjectQuerySet(_AbstractInventoryQuerySet):
-    pass
+    def create(self, **kwargs):
+        project = super(ProjectQuerySet, self).create(**kwargs)
+        project.start_task("clone")
+        return project
+
+    def repo_types(self):
+        return ModelHandlers("REPO_BACKENDS").list()
 
 
 class Project(_AbstractModel):
@@ -53,9 +46,19 @@ class Project(_AbstractModel):
 
     @property
     def repo_class(self):
-        rtype = self.vars.get("repo_type", "Null")
-        return get_repo_type(rtype)(self, **get_repo_type_opts(rtype))
+        repo_type = self.vars.get("repo_type", "Null")
+        return ModelHandlers("REPO_BACKENDS").get_object(repo_type, self)
 
     def set_status(self, status):
         self.status = status
         self.save()
+
+    def start_task(self, operation='sync'):
+        from ..tasks import RepoTask
+        return RepoTask.delay(self, operation)
+
+    def clone(self, *args, **kwargs):
+        return self.repo_class.clone()
+
+    def sync(self, *args, **kwargs):
+        return self.repo_class.get()

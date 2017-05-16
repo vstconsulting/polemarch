@@ -7,12 +7,12 @@ class PMException(Exception):
         return repr(self.msg)
 
 
-class UnknownClassException(PMException):
+class UnknownModelHandlerException(PMException):
     _def_message = "Unknown type {}."
 
     def __init__(self, tp):
         msg = self._def_message.format(tp)
-        super(UnknownClassException, self).__init__(msg)
+        super(UnknownModelHandlerException, self).__init__(msg)
 
 
 class NodeFailedException(PMException):

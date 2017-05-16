@@ -1,3 +1,5 @@
+import logging
+import json
 import sys
 import os
 from .inventory import _ApiGHBaseTestCase
@@ -21,6 +23,11 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
                           name=self.prj1.name,
                           repository="git@ex.us:dir/rep1.git")
 
+        result = self.get_result("get", url+"supported-repos/")
+        self.assertCount(result, 2)
+        self.assertIn("TEST", result, result)
+        self.assertIn("GIT", result, result)
+
         data = [dict(name="Prj3", repository="git@ex.us:dir/rep3.git",
                      vars=dict(repo_type="TEST", repo_password="1234")),
                 dict(name="Prj4", repository="git@ex.us:dir/rep4.git",
@@ -31,7 +38,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
             proj_obj = Project.objects.get(pk=project_id)
             self.assertEqual(proj_obj.vars["repo_type"], "TEST")
             self.assertEqual(proj_obj.status, "OK")
-            file = "/f{}.txt".format(sys.version_info[0])
+            file = "/f{}.yml".format(sys.version_info[0])
             with open(proj_obj.path + file) as f:
                 self.assertEqual(f.readline(), "clone")
             self.get_result("post", url + "{}/sync/".format(project_id), 200)
@@ -40,6 +47,17 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
             self.get_result("delete", url + "{}/".format(project_id))
             self.assertTrue(not os.path.exists(proj_obj.path + file))
         self.assertEqual(Project.objects.filter(id__in=results_id).count(), 0)
+
+        repo_url = "git@git.vst.lan:cepreu/ansible-experiments.git"
+        data = dict(name="GitProject{}".format(sys.version_info[0]),
+                    repository=repo_url,
+                    vars=dict(repo_type="GIT",
+                              repo_password="pN6BQnjCdVybFaaA"))
+        logging.disable(logging.CRITICAL)
+        with self.settings(LOG_LEVEL="CRITICAL"):
+            prj_id = self.get_result("post", url, data=json.dumps(data))['id']
+        self.get_result("delete", url + "{}/".format(prj_id))
+        logging.disable(logging.NOTSET)
 
     def test_inventories_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer
