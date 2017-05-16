@@ -18,3 +18,4 @@ pylint_*
 index.html
 .idea/*
 /polemarch.egg-info/
+/polemarch/projects/

@@ -115,7 +115,7 @@ class ProjectViewSet(base.ModelViewSetSet):
 
     @list_route(methods=["get"], url_path="supported-repos")
     def supported_repos(self, request):
-        return Response(self.get_queryset().repo_types().keys())
+        return Response(self.model.handlers.keys())
 
     @detail_route(methods=["post", "put", "delete", "get"])
     def hosts(self, request, *args, **kwargs):

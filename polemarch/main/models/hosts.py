@@ -17,12 +17,10 @@ logger = logging.getLogger("polemarch")
 # Block of models
 class EnvironmentManager(BManager.from_queryset(BQuerySet)):
     # pylint: disable=no-member
+    handlers = ModelHandlers("INTEGRATIONS")
+
     def get_integrations(self):
-        data = dict()
-        handler = ModelHandlers("INTEGRATIONS")
-        for integ_name in handler.list():
-            data[integ_name] = handler.backend(integ_name).required_fields()
-        return data
+        return {name: integ.required_fields() for name, integ in self.handlers}
 
     def create(self, **kwargs):
         kwargs.pop("id", None)
@@ -35,6 +33,7 @@ class EnvironmentManager(BManager.from_queryset(BQuerySet)):
 
 class Environment(BModel):
     objects    = EnvironmentManager()
+    handlers   = ModelHandlers("INTEGRATIONS")
     name       = models.CharField(max_length=40,
                                   unique=True)
     type       = models.CharField(max_length=20,
@@ -68,7 +67,7 @@ class Environment(BModel):
 
     @property
     def integration(self):
-        return ModelHandlers("INTEGRATIONS").get_object(self.type, self)
+        return self.handlers(self.type, self)
 
     @property
     def additionals(self):
