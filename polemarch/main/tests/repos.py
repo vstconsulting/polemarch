@@ -61,13 +61,13 @@ jT1uDZO+vsTDx16BEoyHCkbo2nBp3wRHbwohFW86KqdCXC0kBamrKZOpvXA=
 '''
 
 
-class VCRTestCase(VCRMixin, _ApiGHBaseTestCase):
+class VCRTestCase(VCRMixin, _ApiGHBaseTestCase):  # pragma: no cover
     def _get_cassette_library_dir(self):
         testdir = os.path.dirname(inspect.getfile(self.__class__))
         return os.path.join(testdir, 'cassettes' + str(sys.version_info[0]))
 
 
-class ApiProjectsVCSTestCase(VCRTestCase):
+class ApiProjectsVCSTestCase(VCRTestCase):  # pragma: no cover
     def setUp(self):
         super(ApiProjectsVCSTestCase, self).setUp()
         self.projects_to_delete = []
@@ -84,7 +84,7 @@ class ApiProjectsVCSTestCase(VCRTestCase):
                     repository=repo_url,
                     vars=dict(repo_type="GIT",
                               repo_password="pN6BQnjCdVybFaaA"))
-        prj_id = self.get_result("post", url, 201, data=json.dumps(data))['id']
+        prj_id = self.get_result("post", url, data=json.dumps(data))['id']
         self.projects_to_delete.append(prj_id)
         single_url = url + "{}/".format(prj_id)
         self.assertEqual(self.get_result("get", single_url)['status'], "OK")
@@ -102,7 +102,7 @@ class ApiProjectsVCSTestCase(VCRTestCase):
         #             repository=repo_url,
         #             vars=dict(repo_type="GIT",
         #                       repo_key=ssh_key))
-        # prj_id = self.get_result("post", url, 201, data=json.dumps(data))['id']
+        # prj_id = self.get_result("post", url, data=json.dumps(data))['id']
         # self.projects_to_delete.append(prj_id)
         # single_url = url + "{}/".format(prj_id)
         # self.assertEqual(self.get_result("get", single_url)['status'], "OK")

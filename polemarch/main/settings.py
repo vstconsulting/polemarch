@@ -293,13 +293,13 @@ CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 # Integrations settings
 __INTEGRATIONS = {
         "Default": {
-            "BACKEND": "polemarch.main.environments.default"
+            "BACKEND": "polemarch.main.environments.default.Integration"
         },
         "OpenStack": {
-            "BACKEND": "polemarch.main.environments.openstack"
+            "BACKEND": "polemarch.main.environments.openstack.Integration"
         },
         "Amazon": {
-            "BACKEND": "polemarch.main.environments.amazon",
+            "BACKEND": "polemarch.main.environments.amazon.Integration",
             "OPTIONS": {
                 "images": [('CentOS 7', 'ami-d2c924b2')],
                 "flavors": [
@@ -317,7 +317,7 @@ __INTEGRATIONS = {
             }
         },
         "Docker": {
-            "BACKEND": "polemarch.main.environments.dockera",
+            "BACKEND": "polemarch.main.environments.dockera.Integration",
             "OPTIONS": {
                 "images": ["vstconsulting/centos7-ssh-password"]
             }
@@ -337,6 +337,19 @@ for __integration in __INTEGRATIONS:
 REPO_BACKENDS = {
     "GIT": {
         "BACKEND": "polemarch.main.repo_backends.Git",
+        "OPTIONS": {
+            "CLONE_KWARGS": {
+                "depth": 1
+            },
+            "FETCH_KWARGS": {
+                "depth": 1
+            },
+            "GIT_ENV": {
+                "GLOBAL": {
+                    "GIT_SSL_NO_VERIFY": "true"
+                }
+            }
+        }
     }
 }
 

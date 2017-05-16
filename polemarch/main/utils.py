@@ -1,4 +1,6 @@
 # pylint: disable=invalid-name
+from __future__ import unicode_literals
+
 import sys
 import tempfile
 import time
@@ -12,6 +14,15 @@ from django.core.cache import cache
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation
+
+from . import exceptions as ex
+
+
+def import_class(path):
+    m_len = path.rfind(".")
+    class_name = path[m_len + 1:len(path)]
+    module = __import__(path[0:m_len], globals(), locals(), [class_name])
+    return getattr(module, class_name)
 
 
 def project_path():
@@ -125,6 +136,29 @@ class service_lock(__LockAbstractDecorator):
     def execute(self, func, *args, **kwargs):
         self._lock_key = kwargs.get('pk', None)
         return super(service_lock, self).execute(func, *args, **kwargs)
+
+
+class ModelHandlers(object):
+    def __init__(self, tp):
+        self.type = tp
+
+    def list(self):
+        return getattr(settings, self.type, {})
+
+    def backend(self, name):
+        try:
+            backend = self.list()[name].get('BACKEND', None)
+            if backend is None:
+                raise ex.PMException("Backend is 'None'.")
+            return import_class(backend)
+        except KeyError or ImportError:
+            raise ex.UnknownModelHandlerException(name)
+
+    def opts(self, name):
+        return self.list().get(name, {}).get('OPTIONS', {})
+
+    def get_object(self, name, obj):
+        return self.backend(name)(obj, **self.opts(name))
 
 
 class assertRaises(object):
