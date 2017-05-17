@@ -14,9 +14,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         super(ApiTasksTestCase, self).setUp()
         data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git",
                      vars=dict(repo_type="TEST"))]
-        project_id = self.mass_create("/api/v1/projects/", data,
-                                      "name", "repository")[0]
-        project = Project.objects.get(id=project_id)
+        self.project_id = self.mass_create("/api/v1/projects/", data,
+                                           "name", "repository")[0]
+        project = Project.objects.get(id=self.project_id)
 
         self.task1 = Task.objects.create(playbook="first.yml",
                                          project=project)
@@ -26,6 +26,24 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
     def test_get_tasks(self):
         url = "/api/v1/tasks/"
         self.list_test(url, Task.objects.all().count())
+
+    def test_execute(self):
+        # make host, inventory
+        data = dict(name="Inv1", vars={})
+        inv1 = self.get_result("post", "/api/v1/inventories/", 201,
+                               data=json.dumps(data))["id"]
+        data = dict(name="127.0.1.1", type="HOST", vars={})
+        h1 = self.get_result("post", "/api/v1/hosts/", 201,
+                             data=json.dumps(data))["id"]
+        # put inventory to project and host to inventory
+        self.get_result("post", "/api/v1/inventories/{}/hosts/".format(inv1),
+                        200, data=json.dumps([h1]))
+        url = "/api/v1/projects/{}/inventories/".format(self.project_id)
+        self.get_result("post", url, 200, data=json.dumps([inv1]))
+        # execute task
+        self.get_result("post",
+                        "/api/v1/tasks/{}/execute/".format(self.task1.id),
+                        data=json.dumps([inv1]))
 
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
