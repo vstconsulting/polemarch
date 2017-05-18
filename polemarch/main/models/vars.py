@@ -4,13 +4,16 @@ from __future__ import unicode_literals
 import json
 import logging
 import uuid
-import six
 
+from collections import OrderedDict
+from six import string_types, text_type
 from django.db import transaction
+from django.db.models import Case, When, Value
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import (GenericForeignKey,
                                                 GenericRelation)
 
+from ..utils import tmp_file
 from .base import BModel, BManager, BQuerySet, models
 
 
@@ -36,7 +39,7 @@ class _AbstractInventoryQuerySet(BQuerySet):
         variables = kwargs.pop("vars", None)
         obj = super(_AbstractInventoryQuerySet, self).create(**kwargs)
         if variables is not None:
-            if isinstance(variables, (six.string_types, six.text_type)):
+            if isinstance(variables, (string_types, text_type)):
                 variables = json.loads(variables)
             obj.vars = variables
         return obj
@@ -69,9 +72,37 @@ class _AbstractModel(BModel):
         for key, value in variables.items():
             self.variables.create(key=key, value=value)
 
+    def vars_string(self, variables, separator=" "):
+        return separator.join(["{}={}".format(key, value)
+                               for key, value in variables.items()])
+
+    def get_vars(self):
+        qs = self.variables.annotate(
+            name_sorter=Case(
+                When(key="ansible_host", then=Value(0)),
+                When(key="ansible_port", then=Value(1)),
+                When(key="ansible_user", then=Value(2)),
+                When(key="ansible_ssh_pass", then=Value(3)),
+                When(key="ansible_ssh_private_key_file", then=Value(4)),
+                When(key__startswith="ansible_", then=Value(5)),
+                default=100,
+                output_field=models.IntegerField(),
+            ),
+        ).order_by("name_sorter", "key")
+        return OrderedDict(qs.values_list('key', 'value'))
+
+    def get_generated_vars(self):
+        tmp = None
+        obj_vars = self.get_vars()
+        if "ansible_ssh_private_key_file" in obj_vars:
+            tmp = tmp_file()
+            tmp.write(obj_vars["ansible_ssh_private_key_file"])
+            obj_vars["ansible_ssh_private_key_file"] = tmp.name
+        return obj_vars, tmp
+
     @property
     def vars(self):
-        return dict(self.variables.all().values_list('key', 'value'))
+        return self.get_vars()
 
     @vars.setter
     def vars(self, value):
@@ -80,3 +111,7 @@ class _AbstractModel(BModel):
     @vars.deleter
     def vars(self):
         self.variables.all().delete()
+
+    @property
+    def have_vars(self):
+        return bool(len(self.vars))

@@ -32,6 +32,13 @@ def project_path():
 
 
 def get_render(name, data, trans='en'):
+    '''
+    Render string based on template
+    :param name: - full template name
+    :param data: - dict of rendered vars
+    :param trans: - translation for render
+    :return: - rendered string
+    '''
     translation.activate(trans)
     config = loader.get_template(name)
     result = config.render(data).replace('\r', '')
