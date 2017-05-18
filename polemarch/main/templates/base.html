@@ -67,6 +67,10 @@
             {% endif %}
         </script>
         
+        
+        <link href="{% static 'plugins/select2/select2.min.css' %}" rel="stylesheet" />
+        <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
+ 
         <script src="{% static 'js/libs/touchwipe.js' %}"></script> 
 
         <script src="{% static 'js/libs/tabSignal.js' %}"></script> 
@@ -92,6 +96,26 @@
 
 {% block body %}
     <body class="hold-transition skin-black-light sidebar-mini {% block bodyclass %}{% endblock %}"> 
+        
+    <div id="loader-wrapper">
+        <div id="loader"></div>
+
+        <!--<div class="spinner for-ios">
+            <div class="bar1"></div>
+            <div class="bar2"></div>
+            <div class="bar3"></div>
+            <div class="bar4"></div>
+            <div class="bar5"></div>
+            <div class="bar6"></div>
+            <div class="bar7"></div>
+            <div class="bar8"></div>
+            <div class="bar9"></div>
+            <div class="bar10"></div>
+            <div class="bar11"></div>
+            <div class="bar12"></div>
+        </div>-->
+    </div>
+    
     {% block navbar %}
         <div class="wrapper" >
             <header class="main-header">
@@ -143,8 +167,7 @@
                 <strong>Copyright © 2017 All rights reserved.
             </footer>
         </div>
-    {% endblock %}
-
+    {% endblock %} 
     {% block script %}{% endblock %}
     </body>
 {% endblock %}

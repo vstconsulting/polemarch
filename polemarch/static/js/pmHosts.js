@@ -53,9 +53,9 @@ pmHosts.loadAllItems = function()
             polemarch.model.hostslist = data
             polemarch.model.hosts = {}
             
-            for(var i in polemarch.model.hosts.results)
+            for(var i in data.results)
             {
-                var val = polemarch.model.hosts.results[i]
+                var val = data.results[i]
                 polemarch.model.hosts[val.id] = val
             }
         },

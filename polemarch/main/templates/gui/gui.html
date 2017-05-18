@@ -57,8 +57,8 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="pmUsers.deleteItem(<%- item_id %>); return false;" class="btn btn-danger" >Remove user</button>
-        <button type="button" onclick="pmUsers.updateItem(<%- item_id %>); return false;" class="btn btn-primary" >Save user</button>
+        <button type="button" onclick="spajs.showLoader(pmUsers.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger" >Remove user</button>
+        <button type="button" onclick="spajs.showLoader(pmUsers.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save user</button>
         <br>
         <br>
         <div class="row">
@@ -72,8 +72,8 @@
                                     <i class="fa fa-bars"></i>
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
-                                    <li><a href="#" onclick="pmUsers.deleteItem(<%- item_id %>); return false;" >Save this user</a></li>
-                                    <li><a href="#" onclick="pmUsers.updateItem(<%- item_id %>); return false;" >Remove this user</a></li>
+                                    <li><a href="#" onclick="spajs.showLoader(pmUsers.deleteItem(<%- item_id %>)); return false;" >Save this user</a></li>
+                                    <li><a href="#" onclick="spajs.showLoader(pmUsers.updateItem(<%- item_id %>)); return false;" >Remove this user</a></li>
                                     <li class="divider"></li>
                                     <li><a href="/?spa=new-user" onclick="spajs.open({ menuId:'new-user'}); return false;" >Add new user</a></li>
                                 </ul>
@@ -167,7 +167,7 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="pmUsers.addItem(); return false;" class="btn btn-primary" >Add user</button>
+        <button type="button" onclick="spajs.showLoader(pmUsers.addItem()); return false;" class="btn btn-primary" >Add user</button>
         <br>
         <br>
         <div class="row">
@@ -304,8 +304,8 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="pmHosts.deleteItem(<%- item_id %>); return false;" class="btn btn-danger" >Remove host</button>
-        <button type="button" onclick="pmHosts.updateItem(<%- item_id %>); return false;" class="btn btn-primary" >Save host</button>
+        <button type="button" onclick="spajs.showLoader(pmHosts.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger" >Remove host</button>
+        <button type="button" onclick="spajs.showLoader(pmHosts.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save host</button>
         <br>
         <br>
         <div class="row">
@@ -319,8 +319,8 @@
                                     <i class="fa fa-bars"></i>
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
-                                    <li><a href="#" onclick="pmHosts.deleteItem(<%- item_id %>); return false;" >Save this host</a></li>
-                                    <li><a href="#" onclick="pmHosts.updateItem(<%- item_id %>); return false;" >Remove this host</a></li>
+                                    <li><a href="#" onclick="spajs.showLoader(pmHosts.deleteItem(<%- item_id %>)); return false;" >Save this host</a></li>
+                                    <li><a href="#" onclick="spajs.showLoader(pmHosts.updateItem(<%- item_id %>)); return false;" >Remove this host</a></li>
                                     <li class="divider"></li>
                                     <li><a href="/?spa=new-host" onclick="spajs.open({ menuId:'new-host'}); return false;" >Add new user</a></li>
                                 </ul>
@@ -372,7 +372,7 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="pmHosts.addItem(); return false;" class="btn btn-primary" >Add host</button>
+        <button type="button" onclick="spajs.showLoader(pmHosts.addItem()); return false;" class="btn btn-primary" >Add host</button>
         <br>
         <br>
         <div class="row">
@@ -518,8 +518,8 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="pmGroups.deleteItem(<%- item_id %>); return false;" class="btn btn-danger" >Remove group</button>
-        <button type="button" onclick="pmGroups.updateItem(<%- item_id %>); return false;" class="btn btn-primary" >Save group</button>
+        <button type="button" onclick="spajs.showLoader(pmGroups.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger" >Remove group</button>
+        <button type="button" onclick="spajs.showLoader(pmGroups.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save group</button>
         <br>
         <br>
         <div class="row">
@@ -533,8 +533,8 @@
                                     <i class="fa fa-bars"></i>
                                 </button>
                                 <ul class="dropdown-menu pull-right" role="menu">
-                                    <li><a href="#" onclick="pmGroups.deleteItem(<%- item_id %>); return false;" >Save this host</a></li>
-                                    <li><a href="#" onclick="pmGroups.updateItem(<%- item_id %>); return false;" >Remove this host</a></li>
+                                    <li><a href="#" onclick="spajs.showLoader(pmGroups.deleteItem(<%- item_id %>)); return false;" >Save this host</a></li>
+                                    <li><a href="#" onclick="spajs.showLoader(pmGroups.updateItem(<%- item_id %>)); return false;" >Remove this host</a></li>
                                     <li class="divider"></li>
                                     <li><a href="/?spa=new-group" onclick="spajs.open({ menuId:'new-group'}); return false;" >Add new group</a></li>
                                 </ul>
@@ -559,9 +559,126 @@
                 </div>
             </section>
         </div>
+
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Sub items<br>
+                        <div class="box-tools pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-bars"></i>
+                                </button>
+                            </div>
+
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row"> 
+                            <% for(var i in polemarch.model.groups[item_id].groups){ %>
+                                <div class="form-group col-lg-2">
+                                    <label class="control-label" for="patient-name">Group</label>
+                                    <%- polemarch.model.groups[item_id].groups[i].name %>
+                                </div>
+                            <% } %>
+                            <% for(var i in polemarch.model.groups[item_id].hosts){ %>
+                                <div class="form-group col-lg-2">
+                                    <label class="control-label" for="patient-name">Host</label>
+                                    <%- polemarch.model.groups[item_id].hosts[i].name %>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <button type="button" onclick="spajs.showLoader(pmGroups.showAddSubGroupsForm(<%- item_id %>)); return false;" class="btn btn-primary" >Add existing item</button>
+                                <button type="button" onclick="spajs.showLoader(pmGroups.showAddSubHostsForm(<%- item_id %>)); return false;" class="btn btn-primary" >Add new item</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </section>
 </script>
 
+<script type="text/x-just" data-just="add_existing_groups_to_group">
+    <div class="row" id="add_existing_item_to_group">
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Sub items<br>
+                    <div class="box-tools pull-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                        </div>
+
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
+                                <% for(var i in polemarch.model.groups){ %>
+                                    <option value="<%- polemarch.model.groups[i].id %>"><%- polemarch.model.groups[i].name %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <button type="button" onclick="pmGroups.addSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val()); return false;" class="btn btn-primary" >Add</button>
+                            <button type="button" onclick="$('#add_existing_item_to_group').remove();  return false;" class="btn btn-default" >Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</script>
+
+<script type="text/x-just" data-just="add_existing_hosts_to_group">
+    <div class="row" id="add_existing_item_to_group">
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Sub items<br>
+                    <div class="box-tools pull-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                        </div>
+
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                    </div>
+                </div>
+                <div class="box-body"> 
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
+                                <% for(var i in polemarch.model.hosts){ %>
+                                    <option value="<%- polemarch.model.hosts[i].id %>"><%- polemarch.model.hosts[i].name %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <button type="button" onclick="pmGroups.addSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val()); return false;" class="btn btn-primary" >Add</button>
+                            <button type="button" onclick="$('#add_existing_item_to_group').remove(); return false;" class="btn btn-default" >Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</script>
 
 <!-- Страница создания хоста -->
 <script type="text/x-just" data-just="new_group_page">
@@ -599,7 +716,7 @@
                                 <label class="control-label" for="patient-name">Name</label>
                                 <input type="text"  placeholder="Enter group name"  id="new_group_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
-                            </div> 
+                            </div>
                         </div>
 
                         <%= pmGroups.jsonEditor({}) %>
