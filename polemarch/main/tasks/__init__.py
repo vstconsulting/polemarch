@@ -1,5 +1,6 @@
 # pylint: disable=broad-except,no-member,redefined-outer-name
 import logging
+
 from ...celery_app import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
@@ -30,3 +31,13 @@ class RepoTask(BaseTask):
             logger.info(result)
         except Exception as error:
             self.app.retry(exc=error)
+
+@task(app, ignore_result=True, bind=True)
+class ExecuteAnsibleTask(BaseTask):
+    def __init__(self, app, job, inventory, *args, **kwargs):
+        super(self.__class__, self).__init__(app, *args, **kwargs)
+        self.inventory = inventory
+        self.job = job
+
+    def run(self):
+        self.job.run_ansible_playbook(self.inventory)

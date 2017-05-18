@@ -5,13 +5,16 @@ import uuid
 import logging
 import subprocess
 
+import sys
 from django.utils import timezone
 from celery.schedules import crontab
+from os.path import dirname
 
 from .base import BModel, models
 from . import Inventory
 from .projects import Project
 from ...main import exceptions as ex
+from ..tasks import ExecuteAnsibleTask
 
 logger = logging.getLogger("polemarch")
 
@@ -89,6 +92,19 @@ class Task(BModel):
 
     def execute(self, inventory_id):
         inventory = Inventory.objects.get(id=inventory_id)
+        ExecuteAnsibleTask.delay(self, inventory)
+
+    def run_ansible_playbook(self, inventory):
+        path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
+        path_to_playbook = "{}/{}".format(self.project.path, self.playbook)
+        inventory_file, key_files = inventory.get_files()
+        args = [path_to_ansible, path_to_playbook, '-i',
+                inventory_file.name]
+        #args = [path_to_ansible, path_to_playbooks + playbook,
+        #        "-c", "paramiko", "-i", hosts_file.name,
+        #        "--extra-vars=" + extra_vars]
+        output = subprocess.check_output(args, stderr=subprocess.STDOUT)
+
 
 class PeriodicTask(BModel):
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,

@@ -3,6 +3,11 @@ import json
 from datetime import timedelta
 from django.utils.timezone import now
 
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
+
 from ..models import Project
 from ..models import Task, PeriodicTask, History
 
@@ -27,7 +32,8 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         url = "/api/v1/tasks/"
         self.list_test(url, Task.objects.all().count())
 
-    def test_execute(self):
+    @patch('subprocess.check_output')
+    def test_execute(self, subprocess_function):
         # can't execute without inventory
         self.get_result("post",
                        "/api/v1/tasks/{}/execute/".format(self.task1.id), 400,
@@ -46,15 +52,33 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                         200, data=json.dumps([h1]))
         url = "/api/v1/projects/{}/inventories/".format(self.project_id)
         self.get_result("post", url, 200, data=json.dumps([inv1]))
-        # execute task
-        self.get_result("post",
-                       "/api/v1/tasks/{}/execute/".format(self.task1.id),
-                        data=json.dumps(inv1))
         # data, which should be correct
         inventory_text = "127.0.1.1 ansible_user=centos "+\
                          "ansible_ssh_private_key_file="
-        playbook = "first.yml"
-        key_content= "somekey"
+        # execute task
+        #FIXME: it is ugly, make it simpler to read
+        result = ["", ""]
+        def side_effect(call_args, stderr): # here will save data for check
+            inventory_path = call_args[3]
+            with open(inventory_path, 'r') as inventory_file:
+                inventory = inventory_file.read().split('\n')
+                l = lambda x: x.startswith('127.')
+                result[0] = list(filter(l, inventory))[0]
+                key_path = result[0].split("=")[-1]
+                with open(key_path, 'r') as key_file:
+                    result[1] = key_file.read()
+
+        subprocess_function.side_effect = side_effect
+        self.get_result("post",
+                       "/api/v1/tasks/{}/execute/".format(self.task1.id),
+                        data=json.dumps(inv1))
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertTrue(call_args[0].endswith("ansible-playbook"))
+        self.assertTrue(call_args[1].endswith("first.yml"))
+        self.assertTrue(result[0].startswith(inventory_text))
+        self.assertEquals(result[1], "somekey")
+
         # FIXME: don't forget to test password
 
 

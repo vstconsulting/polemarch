@@ -8,7 +8,7 @@ import six
 from .base import BModel, BManager, BQuerySet, models
 from .vars import _AbstractModel, _AbstractInventoryQuerySet
 from ...main import exceptions as ex
-from ..utils import ModelHandlers, get_render
+from ..utils import ModelHandlers, get_render, tmp_file
 
 logger = logging.getLogger("polemarch")
 
@@ -214,3 +214,9 @@ class Inventory(_AbstractModel):
                          dict(groups=groups_strings, hosts=hosts_strings,
                               vars=self.vars_string(hvars, "\n")))
         return inv, keys
+
+    def get_files(self):
+        inventory_text, key_files = self.get_inventory()
+        inventory_file = tmp_file()
+        inventory_file.write(inventory_text)
+        return inventory_file, key_files
