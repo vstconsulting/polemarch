@@ -1,7 +1,8 @@
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,no-member
 from __future__ import absolute_import
 
 import json
+
 from django.db.models import signals
 from django.dispatch import receiver
 from django.core.validators import ValidationError
@@ -17,6 +18,20 @@ from ..validators import validate_hostname
 #####################################
 # SIGNALS
 #####################################
+@receiver(signals.m2m_changed, sender=Group.parents.through)
+def check_circular_deps(instance, action, pk_set, *args, **kw):
+    if action in ["pre_add", "post_add"]:
+        if instance.id in pk_set:
+            raise instance.CiclicDependencyError("The group can "
+                                                 "not refer to itself.")
+        parents = instance.parents.get_parents()
+        childrens = instance.groups.get_subgroups()
+        if instance in (parents | childrens) or \
+                parents.filter(id__in=pk_set).count():
+            raise instance.CiclicDependencyError("The group has a "
+                                                 "dependence on itself.")
+
+
 @receiver(signals.pre_save, sender=Environment)
 def validate_integrations(instance, **kwargs):
     json.loads(instance.data)

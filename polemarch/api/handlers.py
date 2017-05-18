@@ -21,7 +21,7 @@ def polemarch_exception_handler(exc, context):
     if isinstance(exc, Http404):
         msg = _('Not found or not allowed to view.')
         data = {'detail': six.text_type(msg)}
-        return Response(data, status=404)
+        return Response(data, status=status.HTTP_404_NOT_FOUND)
     elif isinstance(exc, djexcs.ValidationError):
         errors = dict(exc).get('__all__', dict(exc)) if isinstance(exc, dict)\
                                                      else exc

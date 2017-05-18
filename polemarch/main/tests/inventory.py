@@ -136,9 +136,30 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         self.gr2 = Group.objects.create(name="base_two")
         self.gr3 = Group.objects.create(name="base_three")
 
+    def test_circular_deps(self):
+        url = "/api/v1/groups/"  # URL to groups layer
+        groups = [
+            Group.objects.create(name="base_0", children=True),
+            Group.objects.create(name="base_1", children=True),
+            Group.objects.create(name="base_2", children=True),
+            Group.objects.create(name="base_3", children=True),
+            Group.objects.create(name="base_4", children=True),
+            Group.objects.create(name="base_5", children=True),
+            Group.objects.create(name="base_6", children=True)
+        ]
+        groups[1].groups.add(*[groups[2], groups[3], groups[5]])
+        groups[2].groups.add(groups[4])
+        groups[3].groups.add(groups[5])
+        groups[4].groups.add(groups[5])
+        groups[5].groups.add(groups[6])
+        test_url = "{}{}/groups/".format(url, groups[6].id)
+        result = self.get_result("post", test_url, 400,
+                                 data=json.dumps([groups[1].id]))
+        self.assertEqual(result["error_type"], "CiclicDependencyError")
+
     def test_create_delete_group(self):
         url = "/api/v1/groups/"
-        self.list_test(url, 3)
+        self.list_test(url, Group.objects.count())
         self.details_test(url + "{}/".format(self.gr1.id), name=self.gr1.name)
 
         data = [dict(name="one", vars=self.vars),
@@ -148,7 +169,8 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
 
         for group_id in results_id:
             self.get_result("delete", url + "{}/".format(group_id))
-        self.assertEqual(self.get_result("get", url)["count"], 3)
+        self.assertEqual(self.get_result("get", url)["count"],
+                         Group.objects.count())
 
     def test_hosts_in_group(self):
         url = "/api/v1/groups/"  # URL to groups layer
@@ -192,7 +214,7 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         self._compare_list(url, "delete", 200, grch_id, [groups_id[0]],
                            "groups", groups_id[1:2])
         # Full update groups of group
-        self._compare_list(url, "put", 200, grch_id, groups_id, "groups",
+        self._compare_list(url, "put", 200, grch_id, groups_id[:-1], "groups",
                            [])
         # Error on operations with hosts
         self._compare_list(url, "post", 409, grch_id, hosts_id[0:2], "hosts",

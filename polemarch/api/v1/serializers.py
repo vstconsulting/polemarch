@@ -379,8 +379,8 @@ class InventorySerializer(_WithVariablesSerializer):
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     vars   = DictField(required=False)
-    hosts  = HostSerializer(read_only=True, many=True)
-    groups = GroupSerializer(read_only=True, many=True)
+    hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
+    groups = GroupSerializer(read_only=True, many=True, source="groups_list")
 
     class Meta:
         model = models.Inventory

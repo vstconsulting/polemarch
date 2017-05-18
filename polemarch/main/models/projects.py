@@ -14,17 +14,17 @@ PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
 
 
 class ProjectQuerySet(_AbstractInventoryQuerySet):
+    handlers = ModelHandlers("REPO_BACKENDS")
+
     def create(self, **kwargs):
         project = super(ProjectQuerySet, self).create(**kwargs)
         project.start_task("clone")
         return project
 
-    def repo_types(self):
-        return ModelHandlers("REPO_BACKENDS").list()
-
 
 class Project(_AbstractModel):
     objects     = BManager.from_queryset(ProjectQuerySet)()
+    handlers    = ModelHandlers("REPO_BACKENDS")
     repository  = models.CharField(max_length=2*1024)
     status      = models.CharField(max_length=32, default="NEW")
     inventories = models.ManyToManyField(hosts_models.Inventory,
@@ -47,7 +47,7 @@ class Project(_AbstractModel):
     @property
     def repo_class(self):
         repo_type = self.vars.get("repo_type", "Null")
-        return ModelHandlers("REPO_BACKENDS").get_object(repo_type, self)
+        return self.handlers(repo_type, self)
 
     def set_status(self, status):
         self.status = status

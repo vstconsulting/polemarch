@@ -32,6 +32,13 @@ def project_path():
 
 
 def get_render(name, data, trans='en'):
+    '''
+    Render string based on template
+    :param name: - full template name
+    :param data: - dict of rendered vars
+    :param trans: - translation for render
+    :return: - rendered string
+    '''
     translation.activate(trans)
     config = loader.get_template(name)
     result = config.render(data).replace('\r', '')
@@ -142,6 +149,34 @@ class ModelHandlers(object):
     def __init__(self, tp):
         self.type = tp
 
+    @property
+    def objects(self):
+        return {name: self[name] for name in self.list()}
+
+    def __len__(self):  # pragma: no cover
+        return len(self.objects)
+
+    def __iter__(self):
+        return iter(self.items())
+
+    def __getitem__(self, name):
+        return self.backend(name)
+
+    def __call__(self, name, obj):
+        return self.get_object(name, obj)
+
+    def __dict__(self):  # pragma: no cover
+        return self.items()
+
+    def keys(self):
+        return dict(self.objects).keys()
+
+    def values(self):  # pragma: no cover
+        return dict(self).values()
+
+    def items(self):
+        return self.objects.items()
+
     def list(self):
         return getattr(settings, self.type, {})
 
@@ -149,7 +184,7 @@ class ModelHandlers(object):
         try:
             backend = self.list()[name].get('BACKEND', None)
             if backend is None:
-                raise ex.PMException("Backend is 'None'.")
+                raise ex.PMException("Backend is 'None'.")  # pragma: no cover
             return import_class(backend)
         except KeyError or ImportError:
             raise ex.UnknownModelHandlerException(name)
@@ -158,7 +193,7 @@ class ModelHandlers(object):
         return self.list().get(name, {}).get('OPTIONS', {})
 
     def get_object(self, name, obj):
-        return self.backend(name)(obj, **self.opts(name))
+        return self[name](obj, **self.opts(name))
 
 
 class assertRaises(object):
