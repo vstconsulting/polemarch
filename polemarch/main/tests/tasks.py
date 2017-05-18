@@ -28,11 +28,17 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.list_test(url, Task.objects.all().count())
 
     def test_execute(self):
+        # can't execute without inventory
+        self.get_result("post",
+                       "/api/v1/tasks/{}/execute/".format(self.task1.id), 400,
+                        data=json.dumps(100500))
         # make host, inventory
         data = dict(name="Inv1", vars={})
         inv1 = self.get_result("post", "/api/v1/inventories/", 201,
                                data=json.dumps(data))["id"]
-        data = dict(name="127.0.1.1", type="HOST", vars={})
+        data = dict(name="127.0.1.1", type="HOST",
+                    vars={"ansible_user": "centos",
+                          "ansible_ssh_private_key_file": "somekey"})
         h1 = self.get_result("post", "/api/v1/hosts/", 201,
                              data=json.dumps(data))["id"]
         # put inventory to project and host to inventory
@@ -42,8 +48,14 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.get_result("post", url, 200, data=json.dumps([inv1]))
         # execute task
         self.get_result("post",
-                        "/api/v1/tasks/{}/execute/".format(self.task1.id),
-                        data=json.dumps([inv1]))
+                       "/api/v1/tasks/{}/execute/".format(self.task1.id),
+                        data=json.dumps(inv1))
+        # data, which should be correct
+        inventory_text = "127.0.1.1 ansible_user=centos "+\
+                         "ansible_ssh_private_key_file="
+        playbook = "first.yml"
+        key_content= "somekey"
+        # FIXME: don't forget to test password
 
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
@@ -53,9 +65,9 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         repo = "git@ex.us:dir/rep3.git"
         data = [dict(name="Prj1", repository=repo,
                      vars=dict(repo_type="TEST"))]
-        self.project_id = self.mass_create("/api/v1/projects/", data,
+        self.project_periodic_id = self.mass_create("/api/v1/projects/", data,
                                            "name", "repository")[0]
-        project = Project.objects.get(id=self.project_id)
+        project = Project.objects.get(id=self.project_periodic_id)
 
         self.ptask1 = PeriodicTask.objects.create(playbook="p1.yml",
                                                   schedule="10",
@@ -136,17 +148,17 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                           playbook="p1.yml",
                           schedule="10",
                           type="DELTA",
-                          project=self.project_id)
+                          project=self.project_periodic_id)
 
         data = [dict(playbook="p1.yml", schedule="10", type="DELTA",
-                     project=self.project_id),
+                     project=self.project_periodic_id),
                 dict(playbook="p2.yml",
                      schedule="* */2 sun,fri 1-15 *",
-                     type="CRONTAB", project=self.project_id),
+                     type="CRONTAB", project=self.project_periodic_id),
                 dict(playbook="p1.yml", schedule="", type="CRONTAB",
-                     project=self.project_id),
+                     project=self.project_periodic_id),
                 dict(playbook="p1.yml", schedule="30 */4", type="CRONTAB",
-                     project=self.project_id)]
+                     project=self.project_periodic_id)]
         results_id = self.mass_create(url, data, "playbook", "schedule",
                                       "type", "project")
 
@@ -157,7 +169,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
 
         # test with bad value
         data = dict(playbook="p1.yml", schedule="30 */4 foo", type="CRONTAB",
-                    project=self.project_id)
+                    project=self.project_periodic_id)
         self.get_result("post", url, 400, data=json.dumps(data))
 
         # test with with no project

@@ -9,6 +9,7 @@ from django.utils import timezone
 from celery.schedules import crontab
 
 from .base import BModel, models
+from . import Inventory
 from .projects import Project
 from ...main import exceptions as ex
 
@@ -86,6 +87,8 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)
 
+    def execute(self, inventory_id):
+        inventory = Inventory.objects.get(id=inventory_id)
 
 class PeriodicTask(BModel):
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
