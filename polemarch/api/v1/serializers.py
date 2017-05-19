@@ -281,8 +281,9 @@ class OneTaskSerializer(TaskSerializer):
                   'url',)
 
     def execute(self, request):
-        self.instance.execute(request.data)
-        data = dict(detail="Started at inventory {}.".format(request.data))
+        inventory_id = request.data["inventory_id"]
+        self.instance.execute(inventory_id)
+        data = dict(detail="Started at inventory {}.".format(inventory_id))
         return Response(data, 201)
 
 

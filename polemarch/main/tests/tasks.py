@@ -34,31 +34,24 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
 
     @patch('subprocess.check_output')
     def test_execute(self, subprocess_function):
-        # can't execute without inventory
-        self.get_result("post",
-                       "/api/v1/tasks/{}/execute/".format(self.task1.id), 400,
-                        data=json.dumps(100500))
+        inventory_data = dict(name="Inv1", vars={})
+        host_data      = dict(name="127.0.1.1", type="HOST",
+                              vars={"ansible_user": "centos",
+                                    "ansible_ssh_private_key_file": "somekey"})
         # make host, inventory
-        data = dict(name="Inv1", vars={})
-        inv1 = self.get_result("post", "/api/v1/inventories/", 201,
-                               data=json.dumps(data))["id"]
-        data = dict(name="127.0.1.1", type="HOST",
-                    vars={"ansible_user": "centos",
-                          "ansible_ssh_private_key_file": "somekey"})
-        h1 = self.get_result("post", "/api/v1/hosts/", 201,
-                             data=json.dumps(data))["id"]
+        inv1 = self.post_result("/api/v1/inventories/",
+                                data=json.dumps(inventory_data))["id"]
+        h1 =   self.post_result("/api/v1/hosts/",
+                                data=json.dumps(host_data))["id"]
         # put inventory to project and host to inventory
-        self.get_result("post", "/api/v1/inventories/{}/hosts/".format(inv1),
-                        200, data=json.dumps([h1]))
-        url = "/api/v1/projects/{}/inventories/".format(self.project_id)
-        self.get_result("post", url, 200, data=json.dumps([inv1]))
-        # data, which should be correct
-        inventory_text = "127.0.1.1 ansible_user=centos "+\
-                         "ansible_ssh_private_key_file="
-        # execute task
-        #FIXME: it is ugly, make it simpler to read
+        self.post_result("/api/v1/inventories/{}/hosts/".
+                         format(inv1), 200, data=json.dumps([h1]))
+        self.post_result("/api/v1/projects/{}/inventories/".
+                         format(self.project_id), 200, data=json.dumps([inv1]))
+        # mock side effect to get ansible-playbook args for assertions in test
         result = ["", ""]
-        def side_effect(call_args, stderr): # here will save data for check
+
+        def side_effect(call_args, stderr):
             inventory_path = call_args[3]
             with open(inventory_path, 'r') as inventory_file:
                 inventory = inventory_file.read().split('\n')
@@ -67,19 +60,21 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                 key_path = result[0].split("=")[-1]
                 with open(key_path, 'r') as key_file:
                     result[1] = key_file.read()
-
         subprocess_function.side_effect = side_effect
-        self.get_result("post",
-                       "/api/v1/tasks/{}/execute/".format(self.task1.id),
-                        data=json.dumps(inv1))
+        # test that can't execute without inventory
+        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
+                         400, data=json.dumps(100500))
+        # test simple execution
+        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
+                         data=json.dumps(dict(inventory_id=inv1)))
+        correct_inventory_text = "127.0.1.1 ansible_user=centos " +\
+                                 "ansible_ssh_private_key_file="
         self.assertEquals(subprocess_function.call_count, 1)
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible-playbook"))
         self.assertTrue(call_args[1].endswith("first.yml"))
-        self.assertTrue(result[0].startswith(inventory_text))
+        self.assertTrue(result[0].startswith(correct_inventory_text))
         self.assertEquals(result[1], "somekey")
-
-        # FIXME: don't forget to test password
 
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
@@ -90,7 +85,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         data = [dict(name="Prj1", repository=repo,
                      vars=dict(repo_type="TEST"))]
         self.project_periodic_id = self.mass_create("/api/v1/projects/", data,
-                                           "name", "repository")[0]
+                                                    "name", "repository")[0]
         project = Project.objects.get(id=self.project_periodic_id)
 
         self.ptask1 = PeriodicTask.objects.create(playbook="p1.yml",
