@@ -277,7 +277,7 @@ try:
 except NoSectionError:
     __CACHE_LOCKS_SETTINGS = {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/polemarch_django_cache' + str(sys.version_info[0]),
+        'LOCATION': '/tmp/polemarch_django_locks' + str(sys.version_info[0]),
     }
 
 

@@ -422,6 +422,6 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         return self.get_operation(request, attr="inventories")
 
     def sync(self):
-        self.instance.start_task("sync")
+        self.instance.start_repo_task("sync")
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
