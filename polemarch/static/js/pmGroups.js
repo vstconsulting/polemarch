@@ -27,7 +27,7 @@ pmGroups.showItem = function(holder, menuInfo, data)
 
 pmGroups.showNewItemPage = function(holder, menuInfo, data)
 {
-    $(holder).html(spajs.just.render('new_group_page', {}))
+    $(holder).html(spajs.just.render('new_group_page', {parent_group:data.reg[1]}))
 }
 
 /**
@@ -104,7 +104,7 @@ pmGroups.loadItem = function(item_id)
 /**
  * @return $.Deferred
  */
-pmGroups.addItem = function()
+pmGroups.addItem = function(parent_group)
 {
     var def = new $.Deferred();
     var data = {}
@@ -134,9 +134,21 @@ pmGroups.addItem = function()
         {
             console.log("group add", data);
             $.notify("Group created", "success");
-            $.when(spajs.open({ menuId:"group-"+data.id})).always(function(){
-                def.resolve()
-            })
+
+            if(parent_group)
+            {
+                $.when(pmGroups.setSubGroups(parent_group, [data.id])).always(function(){
+                    $.when(spajs.open({ menuId:"group-"+parent_group})).always(function(){
+                        def.resolve()
+                    })
+                })
+            }
+            else
+            {
+                $.when(spajs.open({ menuId:"group-"+data.id})).always(function(){
+                    def.resolve()
+                })
+            }
         },
         error:function(e)
         {
@@ -194,10 +206,16 @@ pmGroups.updateItem = function(item_id)
  * @return $.Deferred
  */
 pmGroups.addSubGroups = function(item_id, groups_ids)
-{
+{ 
+    for(var i in groups_ids)
+    { 
+        polemarch.model.groups[item_id].groups.push(polemarch.model.groups[groups_ids[i]])
+    }
+ 
+    groups_ids = []
     for(var i in polemarch.model.groups[item_id].groups)
     {
-        groups_ids.push(polemarch.model.groups[item_id].groups[i].id)
+        groups_ids.push(polemarch.model.groups[item_id].groups[i].id) 
     }
     
     return pmGroups.setSubGroups(item_id, groups_ids)
@@ -221,6 +239,12 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
         },
         success: function(data)
         {
+            polemarch.model.groups[item_id].groups = []
+            for(var i in groups_ids)
+            {
+                polemarch.model.groups[item_id].groups.push(polemarch.model.groups[i])
+            }
+             
             console.log("group update", data);
             $.notify("Save", "success");
         },
@@ -237,9 +261,15 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
  */
 pmGroups.addSubHosts = function(item_id, hosts_ids)
 {
+    for(var i in hosts_ids)
+    { 
+        polemarch.model.groups[item_id].hosts.push(polemarch.model.hosts[hosts_ids[i]])
+    }
+ 
+    hosts_ids = []
     for(var i in polemarch.model.groups[item_id].hosts)
     {
-        hosts_ids.push(polemarch.model.groups[item_id].hosts[i].id)
+        hosts_ids.push(polemarch.model.groups[item_id].hosts[i].id) 
     }
     
     return pmGroups.setSubHosts(item_id, hosts_ids)
@@ -262,7 +292,7 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
             }
         },
         success: function(data)
-        {
+        { 
             console.log("group update", data);
             $.notify("Save", "success");
         },

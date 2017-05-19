@@ -27,7 +27,7 @@ pmHosts.showItem = function(holder, menuInfo, data)
 
 pmHosts.showNewItemPage = function(holder, menuInfo, data)
 { 
-    $(holder).html(spajs.just.render('new_host_page', {}))
+    $(holder).html(spajs.just.render('new_host_page', {parent_group:data.reg[1]}))
 }
 
 /**
@@ -100,7 +100,7 @@ pmHosts.loadItem = function(item_id)
 /** 
  * @return $.Deferred
  */
-pmHosts.addItem = function()
+pmHosts.addItem = function(parent_group)
 {
     var def = new $.Deferred();
 
@@ -132,9 +132,22 @@ pmHosts.addItem = function()
         {
             console.log("addItem", data); 
             $.notify("Host created", "success");
-            $.when(spajs.open({ menuId:"host-"+data.id})).always(function(){
-                def.resolve()
-            })
+            
+            if(parent_group)
+            {
+                $.when(pmGroups.setSubHosts(parent_group, [data.id])).always(function(){
+                    $.when(spajs.open({ menuId:"group-"+parent_group})).always(function(){
+                        def.resolve()
+                    })
+                })
+            }
+            else
+            {
+                $.when(spajs.open({ menuId:"host-"+data.id})).always(function(){
+                    def.resolve()
+                })
+            }
+            
         },
         error:function(e)
         {

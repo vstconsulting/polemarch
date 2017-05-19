@@ -87,7 +87,7 @@
 
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Active</label>
+                                <label class="control-label" >Active</label>
                                 <select class="form-control" id="user_<%- polemarch.model.users[item_id].id %>_is_active">
                                     <option value="true" <%if(polemarch.model.users[item_id].is_active){ %> selected <% } %> >True</option>
                                     <option value="false" <%if(!polemarch.model.users[item_id].is_active){ %> selected <% } %> >False</option>
@@ -96,7 +96,7 @@
                             </div>
 
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Staff</label>
+                                <label class="control-label" >Staff</label>
                                 <select class="form-control" id="user_<%- polemarch.model.users[item_id].id %>_is_staff">
                                     <option value="true" <%if(polemarch.model.users[item_id].is_staff){ %> selected <% } %> >True</option>
                                     <option value="false" <%if(!polemarch.model.users[item_id].is_staff){ %> selected <% } %> >False</option>
@@ -108,13 +108,13 @@
 
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Username</label>
+                                <label class="control-label" >Username</label>
                                 <input type="text"  placeholder="Enter username"  id="user_<%- polemarch.model.users[item_id].id %>_username" value="<%- polemarch.model.users[item_id].username %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Password</label>
+                                <label class="control-label" >Password</label>
                                 <input type="password" class="form-control" placeholder="Enter password" id="user_<%- polemarch.model.users[item_id].id %>_password" >
                                 <div class="help-block"></div>
                             </div>
@@ -123,13 +123,13 @@
 
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Email</label>
+                                <label class="control-label" >Email</label>
                                 <input type="email" class="form-control" placeholder="Enter email" id="user_<%- polemarch.model.users[item_id].id %>_email" value="<%- polemarch.model.users[item_id].email %>" >
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">First name</label>
+                                <label class="control-label" >First name</label>
                                 <input type="text" class="form-control" placeholder="Enter first name" id="user_<%- polemarch.model.users[item_id].id %>_first_name" value="<%- polemarch.model.users[item_id].first_name %>" >
                                 <div class="help-block"></div>
                             </div>
@@ -139,7 +139,7 @@
 
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Last name</label>
+                                <label class="control-label" >Last name</label>
                                 <input type="text" class="form-control" placeholder="Enter last name" id="user_<%- polemarch.model.users[item_id].id %>_last_name" value="<%- polemarch.model.users[item_id].last_name %>" >
                                 <div class="help-block"></div>
                             </div>
@@ -185,7 +185,7 @@
 
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Staff</label>
+                                <label class="control-label" >Staff</label>
                                 <select class="form-control" id="new_user_is_staff" >
                                     <option value="true" selected >True</option>
                                     <option value="false" >False</option>
@@ -194,7 +194,7 @@
                             </div>
 
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Active</label>
+                                <label class="control-label" >Active</label>
                                 <select class="form-control" id="new_user_is_active" >
                                     <option value="true" selected >True</option>
                                     <option value="false" >False</option>
@@ -206,13 +206,13 @@
                         <div class="row">
 
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Username</label>
+                                <label class="control-label" >Username</label>
                                 <input type="text" class="form-control" placeholder="Enter username" id="new_user_username" >
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Password</label>
+                                <label class="control-label" >Password</label>
                                 <input type="text" class="form-control" placeholder="Enter password" id="new_user_password" >
                                 <div class="help-block"></div>
                             </div>
@@ -220,13 +220,13 @@
 
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Email</label>
+                                <label class="control-label" >Email</label>
                                 <input type="email" class="form-control" placeholder="Enter email" id="new_user_email" >
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">First name</label>
+                                <label class="control-label" >First name</label>
                                 <input type="text" class="form-control" placeholder="Enter first name" id="new_user_first_name" >
                                 <div class="help-block"></div>
                             </div>
@@ -234,7 +234,7 @@
 
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Last name</label>
+                                <label class="control-label" >Last name</label>
                                 <input type="text" class="form-control" placeholder="Enter last name" id="new_user_last_name" >
                                 <div class="help-block"></div>
                             </div>
@@ -334,13 +334,13 @@
 
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Name</label>
+                                <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter host name"  id="host_<%- polemarch.model.hosts[item_id].id %>_name" value="<%- polemarch.model.hosts[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Type</label>
+                                <label class="control-label" >Type</label>
                                 <select class="form-control" id="host_<%- polemarch.model.hosts[item_id].id %>_type">
                                     <option value="HOST" <%if(polemarch.model.hosts[item_id].type == 'HOST'){ %> selected <% } %> >HOST</option>
                                     <option value="RANGE" <%if(!polemarch.model.hosts[item_id].type == 'RANGE'){ %> selected <% } %> >RANGE</option>
@@ -372,7 +372,7 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="spajs.showLoader(pmHosts.addItem()); return false;" class="btn btn-primary" >Add host</button>
+        <button type="button" onclick="spajs.showLoader(pmHosts.addItem(<%- parent_group %>)); return false;" class="btn btn-primary" >Add host</button>
         <br>
         <br>
         <div class="row">
@@ -390,13 +390,13 @@
 
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Name</label>
+                                <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter host name"  id="new_host_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Type</label>
+                                <label class="control-label" >Type</label>
                                 <select class="form-control" id="new_host_type">
                                     <option value="HOST" selected >HOST</option>
                                     <option value="RANGE">RANGE</option>
@@ -548,7 +548,7 @@
 
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Name</label>
+                                <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter group name"  id="group_<%- polemarch.model.groups[item_id].id %>_name" value="<%- polemarch.model.groups[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
@@ -566,35 +566,45 @@
                     <div class="box-header with-border">
                         Sub items<br>
                         <div class="box-tools pull-right">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-                                    <i class="fa fa-bars"></i>
-                                </button>
-                            </div>
-
                             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-
                         </div>
                     </div>
                     <div class="box-body">
-                        <div class="row"> 
-                            <% for(var i in polemarch.model.groups[item_id].groups){ %>
-                                <div class="form-group col-lg-2">
-                                    <label class="control-label" for="patient-name">Group</label>
-                                    <%- polemarch.model.groups[item_id].groups[i].name %>
-                                </div>
-                            <% } %>
-                            <% for(var i in polemarch.model.groups[item_id].hosts){ %>
-                                <div class="form-group col-lg-2">
-                                    <label class="control-label" for="patient-name">Host</label>
-                                    <%- polemarch.model.groups[item_id].hosts[i].name %>
-                                </div>
-                            <% } %>
+                        <div class="row">
+                            <~ polemarch.model.groups[item_id].groups >
+                                <% for(var i in polemarch.model.groups[item_id].groups){ %>
+                                    <div class="form-group col-lg-2">
+                                        <label class="control-label" >Group</label>
+                                        <%- polemarch.model.groups[item_id].groups[i].name %>
+                                    </div>
+                                <% } %>
+                            <~>
+
+                            <~ polemarch.model.groups[item_id].hosts >
+                                <% for(var i in polemarch.model.groups[item_id].hosts){ %>
+                                    <div class="form-group col-lg-2">
+                                        <label class="control-label" >Host</label>
+                                        <%- polemarch.model.groups[item_id].hosts[i].name %>
+                                    </div>
+                                <% } %>
+                            <~>
                         </div>
                         <div class="row">
                             <div class="form-group col-lg-12">
-                                <button type="button" onclick="spajs.showLoader(pmGroups.showAddSubGroupsForm(<%- item_id %>)); return false;" class="btn btn-primary" >Add existing item</button>
-                                <button type="button" onclick="spajs.showLoader(pmGroups.showAddSubHostsForm(<%- item_id %>)); return false;" class="btn btn-primary" >Add new item</button>
+                                <% if(polemarch.model.groups[item_id].children){ %>
+                                    <button
+                                            type="button"
+                                            onclick="spajs.showLoader(pmGroups.showAddSubGroupsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary"
+                                            >Add existing groups</button>
+                                            <button type="button" onclick="spajs.open({ menuId:'new-group-for-group-<%- item_id %>'}); return false;" class="btn btn-primary" >Add new group</button>
+                                <% }else{ %>
+                                    <button type="button"
+                                            onclick="spajs.showLoader(pmGroups.showAddSubHostsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary"
+                                            >Add existing hosts</button>
+                                            <button type="button" onclick="spajs.open({ menuId:'new-host-for-group-<%- item_id %>'}); return false;" class="btn btn-primary" >Add new host</button>
+                                <% } %>
                             </div>
                         </div>
                     </div>
@@ -604,6 +614,7 @@
     </section>
 </script>
 
+<!-- Добавление списка подгрупп к группе -->
 <script type="text/x-just" data-just="add_existing_groups_to_group">
     <div class="row" id="add_existing_item_to_group">
         <section class="col-lg-12">
@@ -611,12 +622,6 @@
                 <div class="box-header with-border">
                     Sub items<br>
                     <div class="box-tools pull-right">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-                                <i class="fa fa-bars"></i>
-                            </button>
-                        </div>
-
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
                     </div>
                 </div>
@@ -632,7 +637,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="pmGroups.addSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val()); return false;" class="btn btn-primary" >Add</button>
+                            <button type="button" onclick="pmGroups.addSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val()); $('#polemarch-model-items-select').val([]).trigger('change'); return false;" class="btn btn-primary" >Add</button>
                             <button type="button" onclick="$('#add_existing_item_to_group').remove();  return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
@@ -642,6 +647,7 @@
     </div>
 </script>
 
+<!-- Добавление списка хостов к группе -->
 <script type="text/x-just" data-just="add_existing_hosts_to_group">
     <div class="row" id="add_existing_item_to_group">
         <section class="col-lg-12">
@@ -649,16 +655,10 @@
                 <div class="box-header with-border">
                     Sub items<br>
                     <div class="box-tools pull-right">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-                                <i class="fa fa-bars"></i>
-                            </button>
-                        </div>
-
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
                     </div>
                 </div>
-                <div class="box-body"> 
+                <div class="box-body">
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
@@ -670,7 +670,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="pmGroups.addSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val()); return false;" class="btn btn-primary" >Add</button>
+                            <button type="button" onclick="pmGroups.addSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val()); $('#polemarch-model-items-select').val([]).trigger('change'); return false;" class="btn btn-primary" >Add</button>
                             <button type="button" onclick="$('#add_existing_item_to_group').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
@@ -680,7 +680,7 @@
     </div>
 </script>
 
-<!-- Страница создания хоста -->
+<!-- Страница создания группы -->
 <script type="text/x-just" data-just="new_group_page">
     <section class="content-header">
         <h1>
@@ -695,7 +695,7 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="pmGroups.addItem(); return false;" class="btn btn-primary" >Add group</button>
+        <button type="button" onclick="pmGroups.addItem(<%- parent_group %>); return false;" class="btn btn-primary" >Add group</button>
         <br>
         <br>
         <div class="row">
@@ -710,10 +710,9 @@
                         </div>
                     </div>
                     <div class="box-body">
-
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" for="patient-name">Name</label>
+                                <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter group name"  id="new_group_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
