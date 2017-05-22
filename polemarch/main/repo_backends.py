@@ -1,11 +1,14 @@
-# pylint: disable=expression-not-assigned,abstract-method
+# pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
 
 import os
 import re
 import shutil
 import logging
+import tarfile
+
 import git
+from six.moves.urllib.request import urlretrieve
 from django.db import transaction
 from .utils import tmp_file_context
 
@@ -154,3 +157,37 @@ class Git(_Base):  # pragma: no cover
     def get(self):
         return {res.ref.remote_head: self._fetch_map[res.flags]
                 for res in super(Git, self).get()[1]}
+
+
+class _ArchiveRepo(_Base):  # pragma: no cover
+    def make_clone(self, options):
+        os.mkdir(self.path)
+        archive = self._download(self.proj.repository, options)
+        self._extract(archive, self.path, options)
+        return None, None
+
+    def make_update(self, options):
+        archive = self._download(self.proj.repository, options)
+        self._extract(archive, self.path, options)
+        return None, None
+
+    def _download(self, url, options):
+        # pylint: disable=unused-argument
+        return urlretrieve(url)[0]
+
+    def _extract(self, archive, path, options):
+        raise NotImplementedError
+
+
+class Tar(_ArchiveRepo):  # pragma: no cover
+    def _extract(self, archive, path, options):
+        # pylint: disable=broad-except
+        shutil.move(path, path + ".bak")
+        try:
+            with tarfile.open(archive) as arch:
+                arch.extractall(path)
+        except:
+            self.delete()
+            shutil.move(path + ".bak", path)
+        else:
+            shutil.rmtree(path + ".bak")

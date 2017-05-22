@@ -350,6 +350,9 @@ REPO_BACKENDS = {
                 }
             }
         }
+    },
+    "TAR": {
+        "BACKEND": "polemarch.main.repo_backends.Tar",
     }
 }
 
