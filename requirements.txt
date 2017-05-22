@@ -5,7 +5,6 @@ django-celery<=3.2.1
 celery==4.0.2
 configparser==3.5.0b2
 six
-tarfile
 sqlalchemy
 python-novaclient==7.1.0
 ansible>=2.1, <=2.2.1
