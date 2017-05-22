@@ -454,6 +454,27 @@ function qunitAddTests_hosts()
  */
 function qunitAddTests_groups()
 {
+    syncQUnit.addTest('validateHostName', function ( assert ) {
+        var done = assert.async();
+
+        assert.ok(!pmGroups.validateHostName(), 'Host')
+        assert.ok(!pmGroups.validateRangeName(), 'Range')
+
+        assert.ok(pmGroups.validateHostName("192.168.0.12"), 'Host 192.168.0.12')
+        assert.ok(pmGroups.validateHostName("local"), 'Host local')
+        assert.ok(pmGroups.validateHostName("loc.ru"), 'Host loc.ru')
+
+        assert.ok(pmGroups.validateRangeName("192.168.0.12"), 'Range 192.168.0.12')
+        assert.ok(pmGroups.validateRangeName("local"), 'Range local')
+        assert.ok(pmGroups.validateRangeName("loc.ru"), 'Range loc.ru')
+
+        assert.ok(pmGroups.validateRangeName("19[2:7].168.0.12"), 'Range 19[2:7].168.0.12')
+        assert.ok(pmGroups.validateRangeName("loc[a:f]l"), 'Range loc[a:f]l')
+        assert.ok(pmGroups.validateRangeName("loc.[a:f]u"), 'Range loc.[a:f]u')
+
+        done();
+    });
+
     syncQUnit.addTest('groups', function ( assert )
     {
         var done = assert.async();
@@ -494,7 +515,7 @@ function qunitAddTests_groups()
         var done = assert.async();
 
         // Заполнение формы с данными пользователя
-        $("#new_group_name").val("test-group-"+t); 
+        $("#new_group_name").val("test-group-"+t);
 
         $("#new_json_name").val("test1");
         $("#new_json_value").val("val1");

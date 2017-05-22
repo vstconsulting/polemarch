@@ -109,9 +109,13 @@ pmHosts.addItem = function(parent_group)
     data.name = $("#new_host_name").val()
     data.type = $("#new_host_type").val() 
     data.vars = pmHosts.jsonEditorGetValues()
-    
-    // @todo Добавить валидацию диапазонов "127.0.1.[5:6]" и 127.0.1.1, 127.0.1.2 
-    if(!data.name || !this.validateHostName(data.name))
+     
+    if(data.type == "HOST"  && (!data.name || !this.validateHostName(data.name)))
+    {
+        $.notify("Invalid value in filed name", "error");
+        return;
+    }
+    else if(data.type == "RANGE"  && (!data.name || !this.validateRangeName(data.name)))
     {
         $.notify("Invalid value in filed name", "error");
         return;
