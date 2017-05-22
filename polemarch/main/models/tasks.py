@@ -10,6 +10,7 @@ from celery.schedules import crontab
 
 from .base import BModel, models
 from .projects import Project
+from .hosts import Inventory
 from ...main import exceptions as ex
 
 logger = logging.getLogger("polemarch")
@@ -91,6 +92,8 @@ class PeriodicTask(BModel):
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
                                     related_query_name="periodic_tasks")
     playbook    = models.CharField(max_length=256)
+    inventory   = models.ForeignKey(Inventory, on_delete=models.CASCADE,
+                                    related_query_name="periodic_tasks")
     schedule    = models.CharField(max_length=4*1024)
     type        = models.CharField(max_length=10)
 

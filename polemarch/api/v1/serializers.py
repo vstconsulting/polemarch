@@ -290,6 +290,7 @@ class PeriodicTaskSerializer(_WithVariablesSerializer):
                   'type',
                   'schedule',
                   'playbook',
+                  'inventory',
                   'url',)
 
 
@@ -301,6 +302,7 @@ class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
                   'schedule',
                   'playbook',
                   'project',
+                  'inventory',
                   'url',)
 
 
