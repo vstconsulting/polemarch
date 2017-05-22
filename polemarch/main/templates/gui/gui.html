@@ -417,7 +417,8 @@
 <!-- jsonEditor - jsonEditorLine-->
 <script type="text/x-just" data-just="jsonEditorLine">
     <div class="form-group col-lg-6" id="json_<%- name %>_line">
-        <label class="control-label" for="json_<%- name %>"><%- name %></label>
+     
+        <label class="control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>" for="#json_<%- name %>"><%- name %></label> 
         <div class="input-group">
             <input type="text"
                    placeholder="Enter value"
