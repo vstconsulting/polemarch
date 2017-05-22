@@ -596,13 +596,13 @@
                                             type="button"
                                             onclick="spajs.showLoader(pmGroups.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Add existing groups</button>
+                                            >Manage existing groups</button>
                                             <button type="button" onclick="spajs.open({ menuId:'new-group-for-group-<%- item_id %>'}); return false;" class="btn btn-primary" >Add new group</button>
                                 <% }else{ %>
                                     <button type="button"
                                             onclick="spajs.showLoader(pmGroups.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Add existing hosts</button>
+                                            >Manage existing hosts</button>
                                             <button type="button" onclick="spajs.open({ menuId:'new-host-for-group-<%- item_id %>'}); return false;" class="btn btn-primary" >Add new host</button>
                                 <% } %>
                             </div>
@@ -620,7 +620,7 @@
         <section class="col-lg-12">
             <div class="box box-info">
                 <div class="box-header with-border">
-                    Sub items<br>
+                    Edit sub groups<br>
                     <div class="box-tools pull-right">
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
                     </div>
@@ -630,7 +630,9 @@
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
                                 <% for(var i in polemarch.model.groups){ %>
-                                    <option value="<%- polemarch.model.groups[i].id %>"><%- polemarch.model.groups[i].name %></option>
+                                    <option 
+                                        value="<%- polemarch.model.groups[i].id %>"
+                                        <% if(pmGroups.hasGroups(item_id, polemarch.model.groups[i].id)){ %>selected<% } %> ><%- polemarch.model.groups[i].name %></option>
                                 <% } %>
                             </select>
                         </div>
@@ -653,7 +655,7 @@
         <section class="col-lg-12">
             <div class="box box-info">
                 <div class="box-header with-border">
-                    Sub items<br>
+                    Edit sub hosts<br>
                     <div class="box-tools pull-right">
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
                     </div>
@@ -663,7 +665,9 @@
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
                                 <% for(var i in polemarch.model.hosts){ %>
-                                    <option value="<%- polemarch.model.hosts[i].id %>"><%- polemarch.model.hosts[i].name %></option>
+                                    <option 
+                                        value="<%- polemarch.model.hosts[i].id %>" 
+                                        <% if(pmGroups.hasHosts(item_id, polemarch.model.hosts[i].id)){ %>selected<% } %> ><%- polemarch.model.hosts[i].name %></option>
                                 <% } %>
                             </select>
                         </div>

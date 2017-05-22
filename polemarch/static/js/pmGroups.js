@@ -206,18 +206,18 @@ pmGroups.updateItem = function(item_id)
  * @return $.Deferred
  */
 pmGroups.addSubGroups = function(item_id, groups_ids)
-{ 
+{
     for(var i in groups_ids)
-    { 
+    {
         polemarch.model.groups[item_id].groups.push(polemarch.model.groups[groups_ids[i]])
     }
- 
+
     groups_ids = []
     for(var i in polemarch.model.groups[item_id].groups)
     {
-        groups_ids.push(polemarch.model.groups[item_id].groups[i].id) 
+        groups_ids.push(polemarch.model.groups[item_id].groups[i].id)
     }
-    
+
     return pmGroups.setSubGroups(item_id, groups_ids)
 }
 
@@ -244,7 +244,7 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
             {
                 polemarch.model.groups[item_id].groups.push(polemarch.model.groups[i])
             }
-             
+
             console.log("group update", data);
             $.notify("Save", "success");
         },
@@ -262,16 +262,16 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
 pmGroups.addSubHosts = function(item_id, hosts_ids)
 {
     for(var i in hosts_ids)
-    { 
+    {
         polemarch.model.groups[item_id].hosts.push(polemarch.model.hosts[hosts_ids[i]])
     }
- 
+
     hosts_ids = []
     for(var i in polemarch.model.groups[item_id].hosts)
     {
-        hosts_ids.push(polemarch.model.groups[item_id].hosts[i].id) 
+        hosts_ids.push(polemarch.model.groups[item_id].hosts[i].id)
     }
-    
+
     return pmGroups.setSubHosts(item_id, hosts_ids)
 }
 
@@ -292,7 +292,7 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
             }
         },
         success: function(data)
-        { 
+        {
             console.log("group update", data);
             $.notify("Save", "success");
         },
@@ -333,6 +333,49 @@ pmGroups.showAddSubHostsForm = function(item_id, holder)
 
     }).promise()
 }
+
+/**
+ * Проверяет принадлежит ли host_id к группе item_id
+ * @param {Integer} item_id
+ * @param {Integer} host_id
+ * @returns {Boolean}
+ */
+pmGroups.hasHosts = function(item_id, host_id)
+{
+    if(polemarch.model.groups[item_id])
+    {
+        for(var i in polemarch.model.groups[item_id].hosts)
+        {
+            if(polemarch.model.groups[item_id].hosts[i].id == host_id)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * Проверяет принадлежит ли host_id к группе item_id
+ * @param {Integer} item_id
+ * @param {Integer} host_id
+ * @returns {Boolean}
+ */
+pmGroups.hasGroups = function(item_id, group_id)
+{
+    if(polemarch.model.groups[item_id])
+    {
+        for(var i in polemarch.model.groups[item_id].groups)
+        {
+            if(polemarch.model.groups[item_id].groups[i].id == group_id)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 
 /**
  * @return $.Deferred
