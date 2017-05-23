@@ -40,6 +40,9 @@ polemarch.model.hosts = {}
 polemarch.model.groupslist = []
 polemarch.model.groups = {} 
 
+polemarch.model.inventorieslist = []
+polemarch.model.inventories = {}
+            
 polemarch.start = function(options)
 {
     for(var i in options)
@@ -164,6 +167,27 @@ polemarch.start = function(options)
         onOpen:pmGroups.showNewItemPage
     })
     
+    // inventories
+    spajs.addMenu({
+        id:"inventories",
+        name:"inventories",
+        urlregexp:[/^inventories$/],
+        onOpen:pmInventories.showList
+    })
+
+    spajs.addMenu({
+        id:"inventory",
+        name:"inventory",
+        urlregexp:[/^inventory-([0-9]+)$/],
+        onOpen:pmInventories.showItem
+    })
+
+    spajs.addMenu({
+        id:"newInventory",
+        name:"newInventory",
+        urlregexp:[/^new-inventory$/],
+        onOpen:pmInventories.showNewItemPage
+    })
     
     spajs.openMenuFromUrl()
 }

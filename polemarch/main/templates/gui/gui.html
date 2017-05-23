@@ -1,6 +1,151 @@
 {% extends "base.html" %}
 
 {% block script %}
+<!-- Список пользователей -->
+<script type="text/x-just" data-just="inventories_list">
+    <section class="content-header">
+        <h1>
+            Inventories list
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Inventories list</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <a class="btn btn-primary"  href="/?spa=new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Add inventory</a>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Inventories<br>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <% for(var i in polemarch.model.inventorieslist.results){ %>
+                            <ul>
+                                <li><a href="/?spa=inventory-<%- polemarch.model.inventorieslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.inventorieslist.results[i].name %></a></li>
+                            </ul>
+                        <% } %>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<!-- Страница inventory -->
+<script type="text/x-just" data-just="inventory_page">
+    <section class="content-header">
+        <h1>
+            <%- polemarch.model.inventories[item_id].name %>
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?spa=inventories"  onclick="return spajs.openURL(this.href);" >Inventories</a></li>
+            <li class="active"><%- polemarch.model.inventories[item_id].name %></li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmInventories.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger" >Remove inventory</button>
+        <button type="button" onclick="spajs.showLoader(pmInventories.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save inventory</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Inventory<br>
+                        <div class="box-tools pull-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-bars"></i>
+                                </button>
+                                <ul class="dropdown-menu pull-right" role="menu">
+                                    <li><a href="#" onclick="spajs.showLoader(pmInventories.deleteItem(<%- item_id %>)); return false;" >Save this inventory</a></li>
+                                    <li><a href="#" onclick="spajs.showLoader(pmInventories.updateItem(<%- item_id %>)); return false;" >Remove this inventory</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="/?spa=new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;" >Add new inventory</a></li>
+                                </ul>
+                            </div>
+
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Name</label>
+                                <input type="text"  placeholder="Enter inventory name"  id="inventory_<%- polemarch.model.inventories[item_id].id %>_name" value="<%- polemarch.model.inventories[item_id].name %>"  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div> 
+                        </div>
+
+                        <%= pmInventories.jsonEditor(polemarch.model.inventories[item_id].vars) %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<!-- Страница создания inventory -->
+<script type="text/x-just" data-just="new_inventory_page">
+    <section class="content-header">
+        <h1>
+            Add new inventory
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?spa=inventories" onclick="return spajs.openURL(this.href);" >Inventories list</a></li>
+            <li class="active">Add new inventory</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmInventories.addItem()); return false;" class="btn btn-primary" >Add inventory</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        New user<br>
+                        <div class="box-tools pull-right">
+
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Name</label>
+                                <input type="text"  placeholder="Enter inventory name"  id="new_inventory_name" value=""  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div> 
+                        </div>
+
+                        <%= pmInventories.jsonEditor({}) %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
 
 <!-- Список пользователей -->
 <script type="text/x-just" data-just="users_list">
@@ -298,7 +443,7 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?spa=hosts"  onclick="return spajs.openURL(this.href);" >Hosts list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?spa=hosts"  onclick="return spajs.openURL(this.href);" >Hosts</a></li>
             <li class="active"><%- polemarch.model.hosts[item_id].name %></li>
         </ol>
     </section>
@@ -322,7 +467,7 @@
                                     <li><a href="#" onclick="spajs.showLoader(pmHosts.deleteItem(<%- item_id %>)); return false;" >Save this host</a></li>
                                     <li><a href="#" onclick="spajs.showLoader(pmHosts.updateItem(<%- item_id %>)); return false;" >Remove this host</a></li>
                                     <li class="divider"></li>
-                                    <li><a href="/?spa=new-host" onclick="spajs.open({ menuId:'new-host'}); return false;" >Add new user</a></li>
+                                    <li><a href="/?spa=new-host" onclick="spajs.open({ menuId:'new-host'}); return false;" >Add new host</a></li>
                                 </ul>
                             </div>
 
