@@ -1,4 +1,6 @@
 import json
+import os
+import re
 
 from datetime import timedelta
 from django.utils.timezone import now
@@ -75,6 +77,76 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.assertTrue(call_args[1].endswith("first.yml"))
         self.assertTrue(result[0].startswith(correct_inventory_text))
         self.assertEquals(result[1], "somekey")
+
+    @patch('subprocess.check_output')
+    def test_complex_inventory_execute(self, subprocess_function):
+        inventory_data = dict(name="Inv1",
+                              vars={"ansible_ssh_private_key_file": "ikey",
+                                    "custom_var1": "hello_world"})
+        hosts_data = [dict(name="127.0.1.1", type="HOST", vars={}),
+                      dict(name="hostlocl", type="HOST",
+                           vars={"ansible_user": "centos",
+                                 "ansible_ssh_private_key_file": "somekey"}),
+                      dict(name="127.0.1.[3:4]", type="RANGE", vars={}),
+                      dict(name="127.0.1.[5:6]", type="RANGE", vars={})]
+        groups_data = [dict(name="groups1", vars={"ansible_user": "ubuntu",
+                                                  "ansible_ssh_pass": "pass"},
+                            children=True),
+                       dict(name="groups2", vars={}, children=True),
+                       dict(name="groups3", vars={}, children=True),
+                       dict(name="hosts1", vars={}),
+                       dict(name="hosts2", vars={})]
+        # make hosts, groups, inventory
+        inv1 = self.post_result("/api/v1/inventories/",
+                                data=json.dumps(inventory_data))["id"]
+        hosts_id = self._create_hosts(hosts_data)
+        groups_id = self._create_groups(groups_data)
+        # put inventory to project and hosts and groups to inventory
+        self.post_result("/api/v1/groups/{}/groups/".
+                         format(groups_id[0]), 200,
+                         data=json.dumps(groups_id[1:3]))
+        self.post_result("/api/v1/groups/{}/groups/".
+                         format(groups_id[1]), 200,
+                         data=json.dumps([groups_id[2]]))
+        self.post_result("/api/v1/groups/{}/groups/".
+                         format(groups_id[2]), 200,
+                         data=json.dumps(groups_id[-2:]))
+        self.post_result("/api/v1/groups/{}/hosts/".
+                         format(groups_id[3]), 200,
+                         data=json.dumps(hosts_id[0:2]))
+        self.post_result("/api/v1/groups/{}/hosts/".
+                         format(groups_id[4]), 200,
+                         data=json.dumps(hosts_id[2:]))
+        self.post_result("/api/v1/inventories/{}/hosts/".
+                         format(inv1), 200, data=json.dumps(hosts_id[0:-1]))
+        self.post_result("/api/v1/inventories/{}/groups/".
+                         format(inv1), 200, data=json.dumps([groups_id[0]]))
+        # execute task and get inventory
+        result = [""]
+
+        def side_effect(call_args, stderr):
+            inventory_path = call_args[3]
+            with open(inventory_path, 'r') as inventory_file:
+                inventory = inventory_file.read()
+                result[0] = inventory
+        subprocess_function.side_effect = side_effect
+        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
+                         data=json.dumps(dict(inventory_id=inv1)))
+        # check that inventory text is correct
+        inventory = result[0]
+        file_path = os.path.dirname(os.path.abspath(__file__))
+        file_path += "/exemplary_complex_inventory"
+        with open(file_path, 'r') as inventory_file:
+            exemplary = inventory_file.read()
+        inventory = re.sub("ansible_ssh_private_key_file=/.*",
+                           "ansible_ssh_private_key_file=PATH",
+                           inventory)
+        self.assertEquals(list(map(str.strip, inventory.split("\n"))),
+                          list(map(str.strip, exemplary.split("\n"))))
+
+    @patch('subprocess.check_output')
+    def test_execute_error_handling(self, subprocess_function):
+        pass
 
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
