@@ -274,7 +274,7 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
 
     def test_create_delete_inventory(self):
         url = "/api/v1/inventories/"
-        self.list_test(url, 2)
+        self.list_test(url, Inventory.objects.count())
         self.details_test(url + "{}/".format(self.inv1.id),
                           name=self.inv1.name, hosts=[], groups=[])
 
@@ -285,7 +285,7 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
 
         for inventory_id in results_id:
             self.get_result("delete", url + "{}/".format(inventory_id))
-        self.assertEqual(self.get_result("get", url)["count"], 2)
+        self.assertEqual(self.get_result("get", url)["count"], 3)
 
     def test_hosts_in_inventory(self):
         url = "/api/v1/inventories/"  # URL to inventories layer
@@ -333,7 +333,7 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         f_url = "{}?name__not=Second_inventory".format(base_url)
         result = self.get_result("get", f_url)
         self.assertTrue(isinstance(result, dict))
-        self.assertEqual(result["count"], 1, result)
+        self.assertEqual(result["count"], 2, result)
 
         # Test variables filter
         inventories_d = [

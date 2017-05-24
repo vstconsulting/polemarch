@@ -2,7 +2,137 @@
  * Файл вставляемый на страницу при тестировании из phantomjs
  */
 
+///////////////////////////////////////////////
+// Вспомагательные функции для тестирования
+///////////////////////////////////////////////
 
+function render(name, time, callback)
+{
+    var def = new $.Deferred();
+
+    if(!time)
+    {
+        time = 10
+    }
+
+    setTimeout(function(name){
+        console.log("render " + name)
+        setTimeout(function(){
+
+            if(callback)
+            {
+                callback(name)
+            }
+
+            def.resolve()
+        }, 10)
+    }, time, name, 0)
+
+    return def.promise();
+}
+
+function saveReport()
+{
+    console.log("saveReport")
+}
+
+/**
+ * Тестовый тест, чтоб было видно что тесты вообще хоть как то работают.
+ */
+function trim(s)
+{
+    if(s) return s.replace(/^ */g, "").replace(/ *$/g, "")
+    return '';
+}
+
+/**
+ * Вставляет Qunit и запускает выполнение тестов.
+ */
+function injectQunit()
+{
+    $("body").append('<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.2.1.css">')
+    $("body").append('<script src="https://code.jquery.com/qunit/qunit-2.2.1.js"></script>')
+    $("body").append('<div id="qunit"></div><div id="qunit-fixture"></div>')
+
+    var intervalId = setInterval(function()
+    {
+        if(!window.QUnit)
+        {
+            return;
+        }
+
+        console.log("Начинаем тесты от Qunit");
+        clearInterval(intervalId)
+
+        //QUnit.config.autostart = false
+        //QUnit.config.reorder = false
+
+        QUnit.done(function( details ) {
+          console.log( "Total: "+ details.total+ " Failed: "+ details.failed+ " Passed: "+ details.passed+ " Runtime: "+ details.runtime );
+        });
+
+        QUnit.testDone(function(details){
+            var result = {
+                "Module name": details.module,
+                "Test name": details.name,
+                "Assertions": {
+                    "Total": details.total,
+                    "Passed": details.passed,
+                    "Failed": details.failed
+                },
+                "Skipped": details.skipped,
+                "Runtime": details.runtime
+            };
+
+            console.log( JSON.stringify( result, null, 2 ) );
+            saveReport()
+            if(!syncQUnit.nextTest())
+            {
+                render("ok-done", 0, window.close)
+            }
+        })
+
+        qunitAddTests()
+        syncQUnit.nextTest()
+
+    }, 500)
+}
+
+
+///////////////////////////////////////////////
+// Дополнения для QUnit для последовательного выполнения тестов.
+///////////////////////////////////////////////
+syncQUnit = {}
+syncQUnit.testsArray = []
+syncQUnit.addTest = function(name, test)
+{
+    syncQUnit.testsArray.push({name:name, test:test})
+}
+
+syncQUnit.nextTest = function(name, test)
+{
+    if(!syncQUnit.testsArray.length)
+    {
+        return false;
+    }
+
+    var test = syncQUnit.testsArray.shift()
+
+    console.log("Тест "+test.name+", осталось "+syncQUnit.testsArray.length+" тестов")
+
+    QUnit.test(test.name, test.test);
+    //syncQUnit.nextTest()
+    //QUnit.start()
+    return true;
+}
+
+///////////////////////////////////////////////
+// Функции тестирования
+///////////////////////////////////////////////
+
+/**
+ *  Авторизация, тестирование авторизации
+ */
 function startTest()
 {
     if(window.phantomjs_step === undefined)
@@ -22,7 +152,7 @@ function startTest()
 
         console.log("Тест формы авторизации шаг 2");
         jQuery.ajax({
-            url: "/api/v1/services/",
+            url: "/api/v1/users/",
             type: "GET",
             contentType:'application/json',
             data: "",
@@ -71,54 +201,13 @@ function startTest()
     }
 }
 
-
-function render(name, callback, time)
+/**
+ * В этой функции должны быть qunit тесты для приложения
+ */
+function qunitAddTests()
 {
-    if(time > 0)
-    {
-        return setTimeout(render, time, name, callback, 0)
-    }
-    console.log("render "+name)
-
-    if(callback)
-    {
-        setTimeout(callback, 10, name)
-    }
-}
-
-function saveReport()
-{
-    console.log("saveReport")
-}
-function trim(s)
-{
-    if(s) return s.replace(/^ */g, "").replace(/ *$/g, "")
-    return '';
-}
-
-function injectQunit()
-{
-    $("body").append('<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.2.1.css">')
-    $("body").append('<script src="https://code.jquery.com/qunit/qunit-2.2.1.js"></script>')
-    $("body").append('<div id="qunit"></div><div id="qunit-fixture"></div>')
-
-    var intervalId = setInterval(function()
-    {
-        if(!window.QUnit)
-        {
-            return;
-        }
-
-        console.log("Начинаем тесты от Qunit");
-        clearInterval(intervalId)
-        qunitTests()
-    }, 500)
-}
-
-
-function qunitTests()
-{
-    QUnit.test('trim()', function ( assert ) {
+    syncQUnit.addTest('trim', function ( assert ) {
+        var done = assert.async();
         assert.equal(trim(''), '', 'Пустая строка');
         assert.ok(trim('   ') === '', 'Строка из пробельных символов');
         assert.equal(trim(), '', 'Без параметра');
@@ -129,100 +218,348 @@ function qunitTests()
         assert.equal(trim('    x  '), 'x', 'Табы');
         assert.equal(trim('    x   y  '), 'x   y', 'Табы и пробелы внутри строки не трогаем');
 
+        done();
     });
 
-    QUnit.test('dropDB', function (assert)
+    qunitAddTests_users()
+    qunitAddTests_hosts()
+    qunitAddTests_groups()
+}
+
+/**
+ * Тестирование users
+ */
+function qunitAddTests_users()
+{
+    syncQUnit.addTest('users', function ( assert )
     {
         var done = assert.async();
-        $.when(cloudDns.dropDB()).then(function(){
-            assert.ok(true, 'dropDB ok');
 
-            console.log('dropDB ok') 
-            done();
+        $.when(spajs.open({ menuId:"users"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню users');
+            render("users", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню users');
+            render("users", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('new-user', function ( assert )
+    {
+        var done = assert.async();
+
+        // Открытие пункта меню new-user
+        $.when(spajs.open({ menuId:"new-user"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-user');
+            render("users-new-user", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню new-user');
+            render("users-new-user", 1000, done)
+        })
+    });
+
+    var t = new Date();
+    t = t.getTime()
+
+    syncQUnit.addTest('new-user-save', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания пользователя
+        var done = assert.async();
+
+        // Заполнение формы с данными пользователя
+        $("#new_user_username").val("test-user-"+t);
+        $("#new_user_password").val("test-user-"+t);
+        $("#new_user_email").val("test@user.ru");
+        $("#new_user_first_name").val("test");
+        $("#new_user_last_name").val("user");
+
+        // Отправка формы с данными пользователя
+        $.when(pmUsers.addItem()).done(function()
+        {
+            assert.ok(true, 'Успешно user add Item');
+            render("users-add-new-user", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при user add Item');
+            render("users-add-new-user", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('update-user', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?spa=user-5
+        var userId = /user-([0-9]+)/.exec(window.location.href)[1]
+
+        $("#user_"+userId+"_username").val("test2-user-"+t);
+        $("#user_"+userId+"_password").val("test2-user-"+t);
+        $("#user_"+userId+"_email").val("test2@user.ru");
+        $("#user_"+userId+"_first_name").val("test2-"+t);
+        $("#user_"+userId+"_last_name").val("user2-"+t);
+
+        $.when(pmUsers.updateItem(userId)).done(function()
+        {
+            assert.ok(true, 'Успешно update add Item');
+            render("users-update-user", 1000, done)
         }).fail(function(){
-            assert.ok(false, 'dropDB error');
-
-            console.log('dropDB error')
-            done();
+            assert.ok(false, 'Ошибка при update add Item');
+            render("users-update-user", 1000, done)
         })
-    })
+    });
 
-    QUnit.test('Add default environment', function (assert)
+    syncQUnit.addTest('delete-user', function ( assert )
     {
         var done = assert.async();
 
-        render("ok-environments", function(){
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?spa=user-5
+        var userId = /user-([0-9]+)/.exec(window.location.href)[1]
 
-            cloudDns.showNewEnvironmentForm('Default');
+        // Удаление пользователя.
+        $.when(pmUsers.deleteItem(userId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete add Item');
+            render("users-delete-user", 1000, done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete add Item');
+            render("users-delete-user", 1000, done)
+        })
+    });
+}
 
-            // Добавление окружения Default
-            $.when(cloudDns.addEnvironment('Default')).then(function()
-            {
-                assert.ok(false, 'Ошибка addEnvironment сработало без заполнения имени');
-            }).fail(function()
-            {
-                assert.ok(true, 'addEnvironment не сработало без заполнения имени');
-                var date = new Date()
-                var environment_name = 'QUnit-test'+date.getTime()
-                $("#new_environment_name").val(environment_name);
 
-                console.log(JSON.stringify(cloudDns.environments))
-                $.when(cloudDns.addEnvironment('Default')).then(function()
-                {
-                    assert.ok(true, 'Создан Environment - Default');
-                    render("ok-new_environmentDefault")
+/**
+ * Тестирование hosts
+ */
+function qunitAddTests_hosts()
+{
+    syncQUnit.addTest('hosts', function ( assert )
+    {
+        var done = assert.async();
 
-                    // Проверка того что созданное окружение открывается
-                    cloudDns.showEditEnvironmentForm(cloudDns.environments[0].id)
-                    assert.ok($('#edit_environment_name').val() === environment_name, 'Имя для созданного окружения ' + $('#edit_environment_name').val() + " == " + environment_name + ' совпало')
-                    render("ok-showEditEnvironmentForm")
-                     
-                    // Проверка того что созданное окружение удаляется
-                    $.when(cloudDns.deleteEnvironment(cloudDns.environments[0].id, true)).then(function(){
-                        assert.ok(true, 'Окружение удалено'); 
-                        console.log("Окружение удалено");
-                        done();
-                    }).fail(function(res){
-                        console.log('Ошибка при удалении окружения - ' + res);
-                        assert.ok(false, 'Ошибка при удалении окружения - ' + res);
-                        done();
-                    })
-
-                }).fail(function()
-                {
-                    console.log('Ошибка addEnvironment не сработало');
-                    assert.ok(false, 'Ошибка addEnvironment не сработало');
-                    // Возобновляем вручную
-                    done();
-                })
-            })
-
-            //cloudDns.showNewEnvironmentForm('OpenStack')
-            //cloudDns.showNewEnvironmentForm('Amazon')
+        $.when(spajs.open({ menuId:"hosts"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню hosts');
+            render("hosts", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню hosts');
+            render("hosts", 1000, done)
         })
     });
 
-    QUnit.done(function( details ) {
-      console.log( "Total: "+ details.total+ " Failed: "+ details.failed+ " Passed: "+ details.passed+ " Runtime: "+ details.runtime );
-      render("ok-done", window.close)
+    syncQUnit.addTest('new-host', function ( assert )
+    {
+        var done = assert.async();
+
+        // Открытие пункта меню new-host
+        $.when(spajs.open({ menuId:"new-host"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-host');
+            render("hosts-new-host", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню new-host');
+            render("hosts-new-host", 1000, done)
+        })
     });
 
-    QUnit.testDone(function(details){
-        var result = {
-            "Module name": details.module,
-            "Test name": details.name,
-            "Assertions": {
-                "Total": details.total,
-                "Passed": details.passed,
-                "Failed": details.failed
-            },
-            "Skipped": details.skipped,
-            "Runtime": details.runtime
-        };
+    var t = new Date();
+    t = t.getTime()
 
-        console.log( JSON.stringify( result, null, 2 ) );
-        saveReport()
-    })
+    syncQUnit.addTest('new-host-save', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания пользователя
+        var done = assert.async();
+
+        // Заполнение формы с данными пользователя
+        $("#new_host_name").val("test-host-"+t);
+        $("#new_host_type").val("HOST");
+
+        $("#new_json_name").val("test1");
+        $("#new_json_value").val("val1");
+        pmHosts.jsonEditorAddVar();
+
+        $("#new_json_name").val("test2");
+        $("#new_json_value").val("val2");
+        pmHosts.jsonEditorAddVar();
+
+
+        // Отправка формы с данными пользователя
+        $.when(pmHosts.addItem()).done(function()
+        {
+            assert.ok(true, 'Успешно host add Item');
+            render("hosts-add-new-host", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при user add Item');
+            render("hosts-add-new-host", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('update-host', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?spa=host-5
+        var itemId = /host-([0-9]+)/.exec(window.location.href)[1]
+
+        $("#host_"+itemId+"_name").val("test2-hosts-"+t);
+
+        $("#new_json_name").val("test3");
+        $("#new_json_value").val("val3");
+        pmHosts.jsonEditorAddVar();
+
+
+        $.when(pmHosts.updateItem(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно update add Item');
+            render("hosts-update-host", 1000, done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при update add Item');
+            render("hosts-update-host", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('delete-host', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?spa=host-5
+        var itemId = /host-([0-9]+)/.exec(window.location.href)[1]
+
+        // Удаление пользователя.
+        $.when(pmHosts.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete add Item');
+            render("hosts-delete-host", 1000, done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete add Item');
+            render("hosts-delete-host", 1000, done)
+        })
+    });
+}
+
+
+/**
+ * Тестирование groups
+ */
+function qunitAddTests_groups()
+{
+    syncQUnit.addTest('groups', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"groups"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню groups');
+            render("groups", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню groups');
+            render("groups", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('new-host', function ( assert )
+    {
+        var done = assert.async();
+
+        // Открытие пункта меню new-host
+        $.when(spajs.open({ menuId:"new-group"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-group');
+            render("groups-new-group", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню new-group');
+            render("groups-new-group", 1000, done)
+        })
+    });
+
+    var t = new Date();
+    t = t.getTime()
+
+    syncQUnit.addTest('new-group-save', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания пользователя
+        var done = assert.async();
+
+        // Заполнение формы с данными пользователя
+        $("#new_group_name").val("test-group-"+t); 
+
+        $("#new_json_name").val("test1");
+        $("#new_json_value").val("val1");
+        pmGroups.jsonEditorAddVar();
+
+        $("#new_json_name").val("test2");
+        $("#new_json_value").val("val2");
+        pmGroups.jsonEditorAddVar();
+
+
+        // Отправка формы с данными пользователя
+        $.when(pmGroups.addItem()).done(function()
+        {
+            assert.ok(true, 'Успешно group add Item');
+            render("groups-add-new-group", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при user add Item');
+            render("groups-add-new-group", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('update-group', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?spa=group-5
+        var itemId = /group-([0-9]+)/.exec(window.location.href)[1]
+
+        $("#group_"+itemId+"_name").val("test2-group-"+t);
+
+        $("#new_json_name").val("test3");
+        $("#new_json_value").val("val3");
+        pmGroups.jsonEditorAddVar();
+
+
+        $.when(pmGroups.updateItem(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно update add Item');
+            render("groups-update-group", 1000, done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при update add Item');
+            render("groups-update-group", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('delete-group', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?spa=group-5
+        var itemId = /group-([0-9]+)/.exec(window.location.href)[1]
+
+        // Удаление пользователя.
+        $.when(pmGroups.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete add Item');
+            render("groups-delete-group", 1000, done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete add Item');
+            render("groups-delete-group", 1000, done)
+        })
+    });
 }
 
 

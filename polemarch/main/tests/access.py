@@ -1,5 +1,6 @@
 import json
 
+from ..models import Inventory
 from .inventory import _ApiGHBaseTestCase
 
 
@@ -106,10 +107,12 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         perm_url = "/api/v1/projects/" + str(project_id) + "/permissions/"
 
         url = "/api/v1/periodic-tasks/"
+        inventory = Inventory.objects.create()
         data = dict(playbook="p1.yml",
                     schedule="10",
                     type="DELTA",
-                    project=project_id)
+                    project=project_id,
+                    inventory=inventory.id)
 
         nonprivileged_user1 = self.user
         id, single_url = self._create_subject(url, data)
@@ -141,3 +144,4 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         # cleanup
         self.get_result("delete", single_url)
         self.get_result("delete", "/api/v1/projects/{}/".format(project_id))
+        inventory.delete()

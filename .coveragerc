@@ -11,6 +11,7 @@ omit =
     upload_big.py
     polemarch/__init__.py
     polemarch/main/management/commands/webserver.py
+    polemarch/main/tests/repos.py
     *celery_beat_scheduler.py
 
 [report]

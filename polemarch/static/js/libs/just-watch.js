@@ -353,7 +353,7 @@ if (!Object.prototype.justHtml)
                         , configurable: true
                 });
                 
-                if(isArray(newval.val))
+                if(Array.isArray(newval.val))
                 { 
                     /*
                      * Методы массивов применяем для реактивности массива

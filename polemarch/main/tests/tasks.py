@@ -11,7 +11,7 @@ except ImportError:
     from mock import patch
 
 from ..models import Project
-from ..models import Task, PeriodicTask, History
+from ..models import Task, PeriodicTask, History, Inventory
 
 from .inventory import _ApiGHBaseTestCase
 
@@ -156,18 +156,21 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         repo = "git@ex.us:dir/rep3.git"
         data = [dict(name="Prj1", repository=repo,
                      vars=dict(repo_type="TEST"))]
-        self.project_periodic_id = self.mass_create("/api/v1/projects/", data,
-                                                    "name", "repository")[0]
-        project = Project.objects.get(id=self.project_periodic_id)
+        self.project_id = self.mass_create("/api/v1/projects/", data,
+                                           "name", "repository")[0]
+        project = Project.objects.get(id=self.project_id)
+        self.inventory = Inventory.objects.create()
 
         self.ptask1 = PeriodicTask.objects.create(playbook="p1.yml",
                                                   schedule="10",
                                                   type="DELTA",
-                                                  project=project)
+                                                  project=project,
+                                                  inventory=self.inventory)
         self.ptask2 = PeriodicTask.objects.create(playbook="p2.yml",
                                                   schedule="10",
                                                   type="DELTA",
-                                                  project=project)
+                                                  project=project,
+                                                  inventory=self.inventory)
         self.ph = Project.objects.create(name="Prj_History",
                                          repository=repo,
                                          vars=dict(repo_type="TEST"))
@@ -239,17 +242,18 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                           playbook="p1.yml",
                           schedule="10",
                           type="DELTA",
-                          project=self.project_periodic_id)
+                          project=self.project_id)
 
         data = [dict(playbook="p1.yml", schedule="10", type="DELTA",
-                     project=self.project_periodic_id),
+                     project=self.project_id, inventory=self.inventory.id),
                 dict(playbook="p2.yml",
                      schedule="* */2 sun,fri 1-15 *",
-                     type="CRONTAB", project=self.project_periodic_id),
+                     type="CRONTAB", project=self.project_id,
+                     inventory=self.inventory.id),
                 dict(playbook="p1.yml", schedule="", type="CRONTAB",
-                     project=self.project_periodic_id),
+                     project=self.project_id, inventory=self.inventory.id),
                 dict(playbook="p1.yml", schedule="30 */4", type="CRONTAB",
-                     project=self.project_periodic_id)]
+                     project=self.project_id, inventory=self.inventory.id)]
         results_id = self.mass_create(url, data, "playbook", "schedule",
                                       "type", "project")
 
@@ -260,7 +264,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
 
         # test with bad value
         data = dict(playbook="p1.yml", schedule="30 */4 foo", type="CRONTAB",
-                    project=self.project_periodic_id)
+                    project=self.project_id)
         self.get_result("post", url, 400, data=json.dumps(data))
 
         # test with with no project

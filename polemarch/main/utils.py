@@ -10,7 +10,7 @@ from os.path import dirname
 
 import six
 from django.conf import settings
-from django.core.cache import cache
+from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation
@@ -19,6 +19,14 @@ from . import exceptions as ex
 
 
 def import_class(path):
+    '''
+    Get class from string-path
+
+    :param path: -- string containing full python-path
+    :type path: str
+    :return: -- return class or module in path
+    :rtype: class, module, object
+    '''
     m_len = path.rfind(".")
     class_name = path[m_len + 1:len(path)]
     module = __import__(path[0:m_len], globals(), locals(), [class_name])
@@ -26,6 +34,12 @@ def import_class(path):
 
 
 def project_path():
+    '''
+    Get full system path to polemarch project
+
+    :return: -- string with full system path
+    :rtype: str
+    '''
     if hasattr(sys, "frozen"):
         return dirname(dirname(sys.executable))
     return dirname(dirname(__file__))
@@ -34,10 +48,15 @@ def project_path():
 def get_render(name, data, trans='en'):
     '''
     Render string based on template
-    :param name: - full template name
-    :param data: - dict of rendered vars
-    :param trans: - translation for render
-    :return: - rendered string
+
+    :param name: -- full template name
+    :type name: str
+    :param data: -- dict of rendered vars
+    :type data: dict
+    :param trans: -- translation for render. Default 'en'.
+    :type trans: str
+    :return: -- rendered string
+    :rtype: str
     '''
     translation.activate(trans)
     config = loader.get_template(name)
@@ -47,13 +66,34 @@ def get_render(name, data, trans='en'):
 
 
 class tmp_file(object):
+    '''
+    Temporary file with name
+    generated and auto removed on close.
+    '''
     def __init__(self, mode="w", bufsize=0, **kwargs):
+        '''
+        tmp_file constructor
+
+        :param mode: -- file open mode. Default 'w'.
+        :type mode: str
+        :param bufsize: -- bufer size for tempfile.NamedTemporaryFile
+        :type bufsize: int
+        :param kwargs:  -- other kwargs for tempfile.NamedTemporaryFile
+        '''
         kw = not six.PY3 and {"bufsize": bufsize} or {}
         kwargs.update(kw)
         fd = tempfile.NamedTemporaryFile(mode, **kwargs)
         self.fd = fd
 
     def write(self, wr_string):
+        '''
+        Write to file and flush
+
+        :param wr_string: -- writable string
+        :type wr_string: str
+        :return: None
+        :rtype: None
+        '''
         result = self.fd.write(wr_string)
         self.fd.flush()
         return result
@@ -65,6 +105,10 @@ class tmp_file(object):
         self.fd.close()
 
     def __enter__(self):
+        '''
+        :return: -- file object
+        :rtype: tempfile.NamedTemporaryFile
+        '''
         return self
 
     def __exit__(self, type_e, value, tb):
@@ -74,6 +118,11 @@ class tmp_file(object):
 
 
 class tmp_file_context(object):
+    '''
+    Context object for work with tmp_file.
+    Auto close on exit from context and
+    remove if file stil exist.
+    '''
     def __init__(self, *args, **kwargs):
         self.tmp = tmp_file(*args, **kwargs)
 
@@ -87,18 +136,38 @@ class tmp_file_context(object):
 
 
 class Lock(object):
+    '''
+    Lock class for multi-jobs workflow.
 
+    .. note::
+        - Used django.core.cache lib and settings in `settings.py`
+        - Have Lock.SCHEDULER and Lock.GLOBAL id
+    '''
     TIMEOUT = 60*60*24
     GLOBAL = "global-deploy"
     SCHEDULER = "celery-beat"
 
-    class AcquireLockException(Exception):
+    class AcquireLockException(ex.PMException):
         pass
 
+    try:
+        cache = caches["locks"]
+    except InvalidCacheBackendError:
+        cache = caches["default"]
+
     def __init__(self, id, payload=None, repeat=1, err_msg=""):
+        '''
+        :param id: -- unique id for lock.
+        :type id: int,str
+        :param payload: -- lock additional info.
+        :param repeat: -- time to wait lock.release. Default 1 sec.
+        :type repeat: int
+        :param err_msg: -- message for AcquireLockException error.
+        :type err_msg: str
+        '''
         self.id, start = None, time.time()
         while time.time() - start <= repeat:
-            if cache.add(id, payload, self.TIMEOUT):
+            if self.cache.add(id, payload, self.TIMEOUT):
                 self.id = id
                 return
             time.sleep(0.01)
@@ -111,7 +180,7 @@ class Lock(object):
         self.release()
 
     def release(self):
-        cache.delete(self.id)
+        self.cache.delete(self.id)
 
     def __del__(self):
         self.release()
@@ -137,17 +206,45 @@ class __LockAbstractDecorator(object):
         return wrapper
 
 
-class service_lock(__LockAbstractDecorator):
-    _err = "Service locked. Wait until the end."
+class model_lock_decorator(__LockAbstractDecorator):
+    '''
+    Decorator for functions where 'pk' kwarg exist
+    for lock by id.
+
+    .. warning::
+        - On locked error raised ``Lock.AcquireLockException``
+        - Method must have and called with ``pk`` named arg.
+
+    '''
+    _err = "Object locked. Wait until unlock."
 
     def execute(self, func, *args, **kwargs):
         self._lock_key = kwargs.get('pk', None)
-        return super(service_lock, self).execute(func, *args, **kwargs)
+        return super(model_lock_decorator, self).execute(func, *args, **kwargs)
 
 
 class ModelHandlers(object):
+    '''
+    Handlers for some models like 'INTEGRATIONS' or 'REPO_BACKENDS'.
+    All handlers backends get by first argument model object.
+
+    **Attributes**:
+
+    :param objects: -- dict of objects like: ``{<name>: <backend_class>}``
+    :type objects: dict
+    :param keys: -- names of supported backends
+    :type keys: list
+    :param values: -- supported backends classes
+    :type values: list
+
+    '''
     def __init__(self, tp):
+        '''
+        :param tp: -- type name for backends.Like name in dict.
+        :type tp: str
+        '''
         self.type = tp
+        self._list = getattr(settings, self.type, {})
 
     @property
     def objects(self):
@@ -178,9 +275,17 @@ class ModelHandlers(object):
         return self.objects.items()
 
     def list(self):
-        return getattr(settings, self.type, {})
+        return self._list
 
     def backend(self, name):
+        '''
+        Get backend class
+
+        :param name: -- name of backend type
+        :type name: str
+        :return: class of backend
+        :rtype: class,module,object
+        '''
         try:
             backend = self.list()[name].get('BACKEND', None)
             if backend is None:
@@ -193,11 +298,28 @@ class ModelHandlers(object):
         return self.list().get(name, {}).get('OPTIONS', {})
 
     def get_object(self, name, obj):
+        '''
+        :param name: -- string name of backend
+        :param name: str
+        :param obj: -- model object
+        :type obj: django.db.models.Model
+        :return: backend object
+        :rtype: object
+        '''
         return self[name](obj, **self.opts(name))
 
 
 class assertRaises(object):
+    '''
+    Context for exclude rises
+    '''
     def __init__(self, *args, **kwargs):
+        '''
+        :param args: -- list of exception classes
+        :type args: list,Exception
+        :param verbose: -- logging
+        :type verbose: bool
+        '''
         self._verbose = kwargs.pop("verbose", False)
         self._excepts = tuple(args)
 
@@ -236,10 +358,25 @@ class exception_with_traceback(raise_context):
             six.reraise(exc_type, exc_val, exc_tb)
 
 
-class _RedirectionOutput(object):
-    _streams = []
+class redirect_stdany(object):
+    '''
+    Context for redirect any output to own stream.
 
-    def __init__(self, new_stream=six.StringIO()):
+    .. note::
+        - On context return stream object.
+        - On exit return old streams
+    '''
+    _streams = ["stdout", "stderr"]
+
+    def __init__(self, new_stream=six.StringIO(), streams=None):
+        '''
+        :param new_stream: -- stream where redirects all
+        :type new_stream: object
+        :param streams: -- names of streams like ``['stdout', 'stderr']``
+        :type streams: list
+        '''
+        if streams:
+            self._streams = streams
         self.stream = new_stream
         self._old_streams = {}
 
@@ -254,24 +391,17 @@ class _RedirectionOutput(object):
             setattr(sys, stream, self._old_streams.pop(stream))
 
 
-class redirect_stdout(_RedirectionOutput):
-    _streams = ["stdout"]
-
-
-class redirect_stderr(_RedirectionOutput):
-    _streams = ["stderr"]
-
-
-class redirect_stdin(_RedirectionOutput):
-    _streams = ["stdin"]
-
-
-class redirect_stdany(_RedirectionOutput):
-    _streams = ["stdout", "stderr"]
-
-
 class Paginator(BasePaginator):
+    '''
+    Class for fragmenting the query for small queries.
+    '''
     def __init__(self, qs, chunk_size=getattr(settings, "PAGE_LIMIT")):
+        '''
+        :param qs: -- queryset for fragmenting
+        :type qs: django.db.models.QuerySet
+        :param chunk_size: -- size of the fragments.
+        :type chunk_size: int
+        '''
         super(Paginator, self).__init__(qs, chunk_size)
 
     def __iter__(self):
@@ -287,7 +417,31 @@ class Paginator(BasePaginator):
 
 
 class task(object):
+    ''' Decorator for Celery task classes
+
+    **Examples**:
+
+            .. code-block:: python
+
+                @task(app)
+                class SomeTask(BaseTask):
+                    def run(self):
+                        return "Result of task"
+
+            .. code-block:: python
+
+                @task(app, bind=True)
+                class SomeTask2(BaseTask):
+                    def run(self):
+                        return "Result of task"
+    '''
     def __init__(self, app, *args, **kwargs):
+        '''
+        :param app: -- CeleryApp object
+        :type app: celery.Celery
+        :param args: -- args for CeleryApp
+        :param kwargs: -- kwargs for CeleryApp
+        '''
         self.app = app
         self.args, self.kwargs = args, kwargs
 
@@ -303,15 +457,26 @@ class task(object):
 
 
 class BaseTask(object):
+    '''
+    BaseTask class for all tasks.
+    '''
     def __init__(self, app, *args, **kwargs):
+        '''
+        :param app: -- CeleryApp object
+        :type app: celery.Celery
+        :param args: -- any args for tasks
+        :param kwargs: -- any kwargs for tasks
+        '''
         super(BaseTask, self).__init__()
         self.app = app
         self.args, self.kwargs = args, kwargs
         self.task_class = self.__class__
 
     def start(self):
+        ''' Method that starts task executions. '''
         return self.run()
 
     def run(self):  # pragma: no cover
+        ''' Method with task logic. '''
         # pylint: disable=notimplemented-raised,
         raise NotImplemented

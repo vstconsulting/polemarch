@@ -18,7 +18,7 @@ class ProjectQuerySet(_AbstractInventoryQuerySet):
 
     def create(self, **kwargs):
         project = super(ProjectQuerySet, self).create(**kwargs)
-        project.start_task("clone")
+        project.start_repo_task("clone")
         return project
 
 
@@ -53,7 +53,7 @@ class Project(_AbstractModel):
         self.status = status
         self.save()
 
-    def start_task(self, operation='sync'):
+    def start_repo_task(self, operation='sync'):
         from ..tasks import RepoTask
         return RepoTask.delay(self, operation)
 

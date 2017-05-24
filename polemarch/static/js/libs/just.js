@@ -12,9 +12,9 @@
  * Released under the MIT license
  */
 (function () {
-	'use strict'; 
+	'use strict';
 	var
-		JUST = function (newOptions) {  
+		JUST = function (newOptions) {
 			var
 				options = {
 					open : '<%',
@@ -33,24 +33,41 @@
 				STATE_CASE = 6,
 				STATE_DEFAULT = 7,
 				STATE_LOOP = 8,
-				STATE_SUBBLOK = 4,
+				STATE_SUBBLOK = 9,
+				STATE_TEXT = 10,
 				cache = {},
                                 countUid = 0,
-                                
+
 				regExpEscape = function (str) {
 					return String(str).replace(escapeExp, '\\$1');
 				},
                                 reactiveReplace = function(html)
                                 {
-                                     
+                                    /**
+                                     * Блок отслеживания
+                                     * В конструкцию включается <~ polemarch.model.groups[item_id].groups > переменная которую надо отслеживать
+                                     * При её изменении просто перерисовывается вложеный в блок кусочек шаблона
+                                     * 
+                                     * 
+                                        <~ polemarch.model.groups[item_id].groups > 
+                                            <% for(var i in polemarch.model.groups[item_id].groups){ %>
+                                                <div class="form-group col-lg-2">
+                                                    <label class="control-label" >Group</label>
+                                                    <%- polemarch.model.groups[item_id].groups[i].name %>
+                                                </div>
+                                            <% } %>
+                                        <~>  
+                                     * 
+                                     */
+                                    
                                     /* Поделить текст на ~ блоки
                                      *
                                      * Если блок открывающий то рекурсивно в глубину уходим
-                                     * <~ records[j]/name ~>
+                                     * <~ records[j].name ~>
                                      * Если блок закрывающий то поднимаемся на верх
-                                     * <~> 
-                                     * 
-                                     * рекурсивно заменим блоки циклов на вложеные подшаблоны с замыканием переменных из родительского шаблона 
+                                     * <~>
+                                     *
+                                     * рекурсивно заменим блоки циклов на вложеные подшаблоны с замыканием переменных из родительского шаблона
                                      */
                                     var status = 0
                                     var parts = html.split(/<(?=~)/g)
@@ -65,42 +82,52 @@
                                         {
                                             //console.log("Конец", status)
                                             if(status != 0 && status == lastStatus)
-                                            { 
+                                            {
                                                 var forCode = startPart[lastStatus].substr(1).split(/>/, 1)
                                                 if(!forCode || !forCode.length )
                                                 {
                                                     console.error("Invalid sub block definition", forCode)
                                                 }
-                                                
-                                                forCode = forCode[0].trim()
-                                                var forObject = forCode.match(/[^ ]+$/)
-                                                
-                                                if(forObject[0].indexOf(".") != -1)
+ 
+                                                var forObject = forCode[0].trim()  
+
+                                                if(forObject[forObject.length - 1] == ']')
+                                                { 
+                                                    // Запись вида <~ polemarch.model.groups[item_id] >
+                                                    forObject = forObject.match(/^(.*)\[([^\]]+)\]$/) 
+                                                }
+                                                else if(forObject.indexOf(".") != -1)
                                                 {
-                                                    // var j in li.ne
-                                                    forObject = forObject[0]
-                                                    forObject = forObject.match(/^(.*)\.?([^.]+)$/) 
+                                                    // Запись вида <~ polemarch.model.groups[item_id].groups > 
+                                                    forObject = forObject.match(/^(.*)\.([^.]+)$/)
+                                                    forObject[2] = "'"+forObject[2]+"'"
                                                 }
                                                 else
                                                 {
+                                                    // Запись вида <~ polemarch >
                                                     // var j in line
+                                                    forObject = []
                                                     forObject[1] = 'this.data'
-                                                    forObject[2] = forObject[0]
+                                                    forObject[2] = forObject
                                                 }
-                                                
-                                                var body = startPart[lastStatus].substr(forCode.length+2)
-                                                
+
+                                                var body = startPart[lastStatus].substr(startPart[lastStatus].indexOf(">")+1)
+
                                                 countUid++;
-                                                var tplName = '_superId'+countUid
-                                                options.root[tplName] = '<% for('+forCode+'){ %> '+body+'  <% } %>'
+                                                var tplName = '_superId'+countUid 
+                                                options.root[tplName] = body
                                                 // console.info(tplName, options.root[tplName])
-                                                
-                                                var res = html.replace("<"+startPart[lastStatus]+"<~>", 
-                                                                "<%= "+forObject[1]+".justHtml('"+forObject[2]+"', this.partialWatch, ['"+tplName+"', this.data]) %>"
-                                                                ) 
+
+                                                // Для отслеживания элемента массива по индексу  <~ polemarch.model.groups[item_id] > надо писать без одинарных кавычек forObject[2]
+                                                //var res = html.replace("<"+startPart[lastStatus]+"<~>",
+                                                //                "<%= "+forObject[1]+".justHtml("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
+                                                                
+                                                var res = html.replace("<"+startPart[lastStatus]+"<~>",
+                                                                "<%= "+forObject[1]+".justHtml("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
+                                                                )
                                                 // console.info("html:", html)
                                                 // console.error("res:", res)
-                                                return reactiveReplace(res) 
+                                                return reactiveReplace(res)
                                             }
                                             status--
 
@@ -122,26 +149,26 @@
                                     return html
                                 },
 				parseToCode = function (html) {
-                                    
+
                                     html = reactiveReplace(html)
-                                    // console.log("restpl", html) 
-                                    
+                                    // console.log("restpl", html)
+
                                     // <%= Вывод html
                                     // <%- Вывод текста ( для защиты от xxs )
-                                    
+
                                     /*
                                         myline = {line:[1, 2, 3]}
                                         $(".content").html(spajs.just.render('test2', myline))
-                                     */ 
+                                     */
 /*
 <!-- Подключаем шаблон для списка записей -->
 <script id="test-list" type="text/x-just" style="display: none;" data-just="test">
-    AAA 
+    AAA
         <~var j in line>
             <div>
                 <%= j %> - <%= line.justHtml(j) %>
             </div>
-        <~> 
+        <~>
     BBB
 </script>
 
@@ -176,6 +203,11 @@
 								prefix = '\',(' + line + ', ';
 								postfix = '),\'';
 								break;
+							case '-':
+								prefix = '\',(' + line + ', ';
+								postfix = '),\'';
+								state = STATE_TEXT;
+								break;
 							case '?':
 								prefix = '\');' + line + ';';
 								postfix = 'this.buffer.push(\'';
@@ -204,6 +236,9 @@
 							switch (state) {
 							case STATE_RAW:
 								buffer.push(prefix, text.substr(jsFromPos).replace(trimExp, ''), postfix);
+								break;
+							case STATE_TEXT:
+								buffer.push(prefix, 'JustEscapeHtml('+text.substr(jsFromPos).replace(trimExp, '')+')', postfix);
 								break;
 							case STATE_CONDITION:
 								tmp = text.substr(jsFromPos).replace(trimExp, '');
@@ -264,7 +299,7 @@
                                         if (Object.prototype.toString.call(data) === '[object String]') {
                                                 return data;
                                         } else {
-                                                console.error('Failed to load template')
+                                                console.error('Failed to load template', file)
                                                 return '';
                                         }
 				},
@@ -310,15 +345,15 @@
 				var  page = new Template(template, this.data, customData);
 				return page.renderSync();
 			};
-			Template.prototype.partialWatch = function (v, data) { 
-                                var template = data[0] 
+			Template.prototype.partialWatch = function (v, data) {
+                                var template = data[0]
                                 var customData = data[1]
-                                 
+
 				var  page = new Template(template, customData, undefined);
-				return page.renderSync(); 
+				return page.renderSync();
 			};
-                        
-                        
+
+
 			Template.prototype.renderSync = function () {
 				var that = this;
 
@@ -538,3 +573,20 @@
 
 		window.JUST = JUST;
 }());
+
+
+function JustEscapeHtml(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+
+  if(!text || !text.replace)
+  {
+      return text;
+  }
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
