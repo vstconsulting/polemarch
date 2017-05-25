@@ -75,7 +75,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         subprocess_function.side_effect = side_effect
         # test that can't execute without inventory
         self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
-                         400, data=json.dumps(100500))
+                         400, data=json.dumps(dict(inventory_id=1100500)))
         # test simple execution
         self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
                          data=json.dumps(dict(inventory_id=inv1)))
