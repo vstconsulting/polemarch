@@ -27,8 +27,8 @@ groups3
 
 
 [groups3:children]
-hosts2
 hosts1
+hosts2
 
 
 [hosts1]
