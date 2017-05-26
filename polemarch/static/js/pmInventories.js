@@ -223,3 +223,150 @@ pmInventories.deleteItem = function(item_id, force)
     
     return def.promise();
 }
+
+/**
+ * Показывает форму со списком всех групп.
+ * @return $.Deferred
+ */
+pmInventories.showAddSubGroupsForm = function(item_id, holder)
+{
+    return $.when(pmGroups.loadAllItems()).done(function(){
+        $("#add_existing_item_to_inventory").remove()
+        $(".content").append(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
+        $("#polemarch-model-items-select").select2();
+    }).fail(function(){
+
+    }).promise()
+}
+
+/**
+ * Показывает форму со списком всех хостов.
+ * @return $.Deferred
+ */
+pmInventories.showAddSubHostsForm = function(item_id, holder)
+{
+    return $.when(pmHosts.loadAllItems()).done(function(){
+        $("#add_existing_item_to_inventory").remove()
+        $(".content").append(spajs.just.render('add_existing_hosts_to_inventory', {item_id:item_id}))
+        $("#polemarch-model-items-select").select2();
+    }).fail(function(){
+
+    }).promise()
+}
+
+/**
+ * Проверяет принадлежит ли host_id к группе item_id
+ * @param {Integer} item_id
+ * @param {Integer} host_id
+ * @returns {Boolean}
+ */
+pmInventories.hasHosts = function(item_id, host_id)
+{
+    if(polemarch.model.inventories[item_id])
+    {
+        for(var i in polemarch.model.inventories[item_id].hosts)
+        {
+            if(polemarch.model.inventories[item_id].hosts[i].id == host_id)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * Проверяет принадлежит ли host_id к группе item_id
+ * @param {Integer} item_id
+ * @param {Integer} host_id
+ * @returns {Boolean}
+ */
+pmInventories.hasGroups = function(item_id, group_id)
+{
+    if(polemarch.model.inventories[item_id])
+    {
+        for(var i in polemarch.model.inventories[item_id].groups)
+        {
+            if(polemarch.model.inventories[item_id].groups[i].id == group_id)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+ 
+/**
+ * @return $.Deferred
+ */
+pmInventories.setSubGroups = function(item_id, groups_ids)
+{
+    return $.ajax({
+        url: "/api/v1/inventories/"+item_id+"/groups/",
+        type: "POST",
+        contentType:'application/json',
+        data:JSON.stringify(groups_ids),
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        { 
+            if(polemarch.model.inventories[item_id])
+            {
+                polemarch.model.inventories[item_id].groups = []
+                for(var i in groups_ids)
+                {
+                    polemarch.model.inventories[item_id].groups.push(polemarch.model.groups[groups_ids[i]])
+                }
+            }
+            console.log("group update", data);
+            $.notify("Save", "success");
+        },
+        error:function(e)
+        {
+            console.log("group "+item_id+" update error - " + JSON.stringify(e));
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+ 
+/**
+ * @return $.Deferred
+ */
+pmInventories.setSubHosts = function(item_id, hosts_ids)
+{
+    return $.ajax({
+        url: "/api/v1/inventories/"+item_id+"/hosts/",
+        type: "POST",
+        contentType:'application/json',
+        data:JSON.stringify(hosts_ids),
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            if(polemarch.model.inventories[item_id])
+            {
+                polemarch.model.inventories[item_id].hosts = []
+                for(var i in hosts_ids)
+                {
+                    polemarch.model.inventories[item_id].hosts.push(polemarch.model.hosts[hosts_ids[i]])
+                }
+            }
+            console.log("inventories update", data);
+            $.notify("Save", "success");
+        },
+        error:function(e)
+        {
+            console.log("group "+item_id+" update error - " + JSON.stringify(e));
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}

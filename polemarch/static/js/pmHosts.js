@@ -26,8 +26,8 @@ pmHosts.showItem = function(holder, menuInfo, data)
 }
 
 pmHosts.showNewItemPage = function(holder, menuInfo, data)
-{ 
-    $(holder).html(spajs.just.render('new_host_page', {parent_group:data.reg[1]}))
+{  
+    $(holder).html(spajs.just.render('new_host_page', {parent_item:data.reg[2], parent_type:data.reg[1]}))
 }
 
 /**
@@ -100,7 +100,7 @@ pmHosts.loadItem = function(item_id)
 /** 
  * @return $.Deferred
  */
-pmHosts.addItem = function(parent_group)
+pmHosts.addItem = function(parent_type, parent_item)
 {
     var def = new $.Deferred();
 
@@ -137,14 +137,25 @@ pmHosts.addItem = function(parent_group)
             console.log("addItem", data); 
             $.notify("Host created", "success");
             
-            if(parent_group)
+            if(parent_item)
             {
-                $.when(pmGroups.setSubHosts(parent_group, [data.id])).always(function(){
-                    $.when(spajs.open({ menuId:"group-"+parent_group})).always(function(){
-                        def.resolve()
+                if(parent_type == 'group')
+                {
+                    $.when(pmGroups.setSubGroups(parent_item, [data.id])).always(function(){
+                        $.when(spajs.open({ menuId:"group-"+parent_item})).always(function(){
+                            def.resolve()
+                        })
                     })
-                })
-            }
+                }
+                else if(parent_type == 'inventory')
+                {
+                    $.when(pmInventories.setSubGroups(parent_item, [data.id])).always(function(){
+                        $.when(spajs.open({ menuId:"inventory-"+parent_item})).always(function(){
+                            def.resolve()
+                        })
+                    })
+                }
+            } 
             else
             {
                 $.when(spajs.open({ menuId:"host-"+data.id})).always(function(){

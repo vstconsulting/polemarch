@@ -140,7 +140,7 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"newHost",
         name:"newHost",
-        urlregexp:[/^new-host$/, /^new-host-for-group-([0-9]+)$/],
+        urlregexp:[/^new-host$/, /^new-host-for-([A-z0-9_]+)-([0-9]+)$/],
         onOpen:pmHosts.showNewItemPage
     })
 
@@ -163,7 +163,7 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"newGroup",
         name:"newGroup",
-        urlregexp:[/^new-group$/, /^new-group-for-group-([0-9]+)$/],
+        urlregexp:[/^new-group$/, /^new-group-for-([A-z0-9_]+)-([0-9]+)$/],
         onOpen:pmGroups.showNewItemPage
     })
     
