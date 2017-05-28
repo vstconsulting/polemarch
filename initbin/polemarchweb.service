@@ -1,0 +1,17 @@
+[Unit]
+Description=Polymarch Service HTTP Server
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+ExecStart=/opt/polemarch/httpd/apachectl start
+ExecReload=/opt/polemarch/httpd/apachectl graceful
+ExecStop=/opt/polemarch/httpd/apachectl stop
+PIDFile=/var/run/polemarch/web.pid
+User=polemarch
+Group=polemarch
+KillSignal=SIGCONT
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

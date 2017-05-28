@@ -1,0 +1,133 @@
+# pylint: disable=import-error
+from rest_framework import filters
+from django_filters import (NumberFilter, CharFilter, IsoDateTimeFilter)
+from django.contrib.auth.models import User
+from ...main import models
+
+
+def extra_filter(queryset, field, value):
+    vals = field.split("__")
+    field, tp = vals[0], (list(vals)[1:2] + [""])[0]
+    field += "__in"
+    value = value.split(",")
+    if tp.upper() == "NOT":
+        return queryset.exclude(**{field: value})
+    return queryset.filter(**{field: value})
+
+
+def variables_filter(queryset, field, value):
+    if field == "variables":
+        items = value.split(",")
+        kwargs = {item.split(":")[0]: item.split(":")[1] for item in items}
+        return queryset.var_filter(**kwargs)
+    return queryset.filter(**dict(field=value))
+
+
+class _BaseFilter(filters.FilterSet):
+    id        = NumberFilter(method=extra_filter)
+    id__not   = NumberFilter(method=extra_filter)
+    name__not = CharFilter(method=extra_filter)
+    name      = CharFilter(method=extra_filter)
+
+
+class UserFilter(filters.FilterSet):
+    class Meta:
+        model = User
+        fields = ('id',
+                  'username',
+                  'is_active',
+                  'first_name',
+                  'last_name',
+                  'email',)
+
+
+class _BaseHGIFilter(_BaseFilter):
+    variables = CharFilter(method=variables_filter)
+
+
+class HostFilter(_BaseHGIFilter):
+
+    class Meta:
+        model = models.Host
+        fields = ('id',
+                  'name',)
+
+
+class GroupFilter(_BaseHGIFilter):
+
+    class Meta:
+        model = models.Group
+        fields = ('id',
+                  'name',)
+
+
+class InventoryFilter(_BaseHGIFilter):
+
+    class Meta:
+        model = models.Inventory
+        fields = ('id',
+                  'name',)
+
+
+class ProjectFilter(_BaseFilter):
+
+    class Meta:
+        model = models.Project
+        fields = ('id',
+                  'name',)
+
+
+class TaskFilter(_BaseFilter):
+
+    class Meta:
+        model = models.Task
+        fields = ('id',
+                  'name',
+                  'playbook',
+                  'project')
+
+
+class HistoryFilter(_BaseFilter):
+    start_time__gt = IsoDateTimeFilter(name="start_time",
+                                       lookup_expr=('gt'))
+    stop_time__gt = IsoDateTimeFilter(name="stop_time",
+                                      lookup_expr=('gt'))
+    start_time__lt = IsoDateTimeFilter(name="start_time",
+                                       lookup_expr=('lt'))
+    stop_time__lt = IsoDateTimeFilter(name="stop_time",
+                                      lookup_expr=('lt'))
+    start_time__gte = IsoDateTimeFilter(name="start_time",
+                                        lookup_expr=('gte'))
+    stop_time__gte = IsoDateTimeFilter(name="stop_time",
+                                       lookup_expr=('gte'))
+    start_time__lte = IsoDateTimeFilter(name="start_time",
+                                        lookup_expr=('lte'))
+    stop_time__lte = IsoDateTimeFilter(name="stop_time",
+                                       lookup_expr=('lte'))
+
+    class Meta:
+        model = models.History
+        fields = ('id',
+                  'playbook',
+                  'project',
+                  'status',
+                  'start_time',
+                  'stop_time',)
+
+
+class PeriodicTaskFilter(_BaseFilter):
+
+    class Meta:
+        model = models.PeriodicTask
+        fields = ('id',
+                  'playbook',
+                  'type',
+                  'project')
+
+
+class EnvironmentsFilter(filters.FilterSet):
+    class Meta:
+        model = models.Environment
+        fields = ('id',
+                  'type',
+                  'name',)

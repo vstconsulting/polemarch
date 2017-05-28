@@ -5,10 +5,14 @@ omit =
     */*/migrations/*
     */main/wsgi.py
     */manage.py
-    *cloudnsctl
+    *ihsctl
     *setup.py
     test.py
     upload_big.py
+    polemarch/__init__.py
+    polemarch/main/management/commands/webserver.py
+    polemarch/main/tests/repos.py
+    *celery_beat_scheduler.py
 
 [report]
 exclude_lines =

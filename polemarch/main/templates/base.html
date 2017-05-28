@@ -1,0 +1,174 @@
+{% load staticfiles %}
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+  <head>
+    {% block head %}
+
+      {% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NONE,NOARCHIVE" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+      {% endblock %}
+
+      <title>{% block title %}{% if name %}{{ name }} – {% endif %}GUI Dashboard{% endblock %}</title>
+
+      {% block style %}
+
+        {% block bootstrap_theme %} 
+        {% endblock %}  
+         
+        <!-- jQuery 2.2.3 -->
+        <script src="{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}"></script>
+        <!-- Bootstrap 3.3.6 -->
+        <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+        <!-- FastClick -->
+        <script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+        <!-- AdminLTE App -->
+        <script src="{% static 'js/app.js' %}"></script>
+      
+        
+        <!-- Bootstrap 3.3.6 -->
+        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="{% static 'lte/css/font-awesome.min.css' %}">
+        <!-- Ionicons -->
+        <link rel="stylesheet" href="{% static 'lte/css/ionicons.min.css' %}">
+        <!-- Theme style -->
+        <link rel="stylesheet" href="{% static 'lte/css/AdminLTE.min.css' %}">
+        <!-- AdminLTE Skins. Choose a skin from the css/skins
+             folder instead of downloading all of them to reduce the load. -->
+        <link rel="stylesheet" href="{% static 'lte/css/skins/_all-skins.min.css' %}">
+         
+        <link rel="stylesheet" href="{% static 'css/gui.css' %}">
+        
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+ 
+        <script type="text/javascript">
+            var hostname = window.location.host;
+            var server_status_types = '{{server_status_types|safe}}';
+
+            {% if user.is_authenticated %}
+                var is_authenticated = true
+            {% else %}
+                var is_authenticated = false
+            {% endif %}
+
+            {% if user.is_superuser %}
+                var is_superuser = true
+            {% else %}
+                var is_superuser = false
+            {% endif %}
+        </script>
+        
+        
+        <link href="{% static 'plugins/select2/select2.min.css' %}" rel="stylesheet" />
+        <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
+ 
+        <script src="{% static 'js/libs/touchwipe.js' %}"></script> 
+
+        <script src="{% static 'js/libs/tabSignal.js' %}"></script> 
+        <script src="{% static 'js/libs/just.js' %}"></script> 
+        <script src="{% static 'js/libs/just-watch.js' %}"></script> 
+        <script src="{% static 'js/libs/notify.js' %}"></script>
+        <script src="{% static 'js/libs/moment.min.js' %}"></script>
+        <script src="{% static 'js/libs/markdown.js' %}"></script>
+        <script src="{% static 'js/libs/spa.js' %}"></script> 
+        
+        <script src="{% static 'js/polemarch.js' %}"></script>
+        <script src="{% static 'js/pmItems.js' %}"></script>
+        <script src="{% static 'js/pmUsers.js' %}"></script>
+        <script src="{% static 'js/pmHosts.js' %}"></script>
+        <script src="{% static 'js/pmGroups.js' %}"></script>
+
+        {% block custom_style %}
+        {% endblock %}
+      {% endblock %}
+
+    {% endblock %}
+  </head>
+
+{% block body %}
+    <body class="hold-transition skin-black-light sidebar-mini {% block bodyclass %}{% endblock %}"> 
+        
+    <div id="loader-wrapper">
+        <div id="loader"></div>
+
+        <!--<div class="spinner for-ios">
+            <div class="bar1"></div>
+            <div class="bar2"></div>
+            <div class="bar3"></div>
+            <div class="bar4"></div>
+            <div class="bar5"></div>
+            <div class="bar6"></div>
+            <div class="bar7"></div>
+            <div class="bar8"></div>
+            <div class="bar9"></div>
+            <div class="bar10"></div>
+            <div class="bar11"></div>
+            <div class="bar12"></div>
+        </div>-->
+    </div>
+    
+    {% block navbar %}
+        <div class="wrapper" >
+            <header class="main-header">
+                <!-- Logo -->
+                <a href="/" class="logo">
+                    <!-- mini logo for sidebar mini 50x50 pixels -->
+                    <span class="logo-mini"><b>P</b></span>
+                    <!-- logo for regular state and mobile devices -->
+                    <span class="logo-lg"><b>P</b>olemarch</span>
+                </a>
+                <!-- Header Navbar: style can be found in header.less -->
+                <nav class="navbar navbar-static-top">
+                    <!-- Sidebar toggle button-->
+                    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                        <span class="sr-only">Toggle navigation</span>
+                    </a>
+
+                    <div class="navbar-custom-menu">
+                        <ul class="nav navbar-nav"> 
+                            {% include "menu.html" %} 
+                        </ul>
+                    </div>
+                </nav>
+            </header>
+            <!-- Left side column. contains the logo and sidebar -->
+            <aside class="main-sidebar">
+                <!-- sidebar: style can be found in sidebar.less --> 
+                <section class="sidebar">  
+                    <!-- sidebar menu: : style can be found in sidebar.less -->
+                    <ul class="sidebar-menu">
+                        {% block left_menu %}
+                            {% include "left_menu.html" %}
+                        {% endblock %} 
+                    </ul>
+                </section>
+                <!-- /.sidebar -->
+            </aside>
+
+            <!-- Content Wrapper. Contains page content -->
+            <div class="content-wrapper" id='spajs-right-area'>
+                <!-- Main content -->
+                {% block content %}{% endblock %}
+            </div>
+            
+            <footer class="main-footer">
+                <div class="pull-right hidden-xs">
+                    <b>Version</b> 0.0.1
+                </div>
+                <strong>Copyright © 2017 All rights reserved.
+            </footer>
+        </div>
+    {% endblock %} 
+    {% block script %}{% endblock %}
+    </body>
+{% endblock %}
+</html>

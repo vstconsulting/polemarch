@@ -1,10 +1,10 @@
 PIP=pip
 PY=python
-LOC_TEST_ENVS = build,py27-django18-coverage,py34-django110-coverage,pep,flake
+LOC_TEST_ENVS = build,py27-django18-coverage,py34-django111-coverage,pep,flake,pylint
 ENVS = $(LOC_TEST_ENVS)
 TESTS =
-NAME = ihservice
-VER = $(shell $(PY) -c 'import ihservice; print(ihservice.__version__)')
+NAME = polemarch
+VER = $(shell $(PY) -c 'import polemarch; print(polemarch.__version__)')
 RELEASE=0
 ARCHIVE = $(NAME)-$(VER).tar.gz
 
@@ -48,5 +48,5 @@ rpm: build
 	mkdir -p ~/rpmbuild/SOURCES/
 	ls -la
 	cp -vf dist/$(ARCHIVE) ~/rpmbuild/SOURCES
-	rpmbuild --verbose -bb ihservice.spec -D 'version $(VER)' -D 'release $(RELEASE)'
+	rpmbuild --verbose -bb polemarch.spec -D 'version $(VER)' -D 'release $(RELEASE)'
 	cp -vr ~/rpmbuild/RPMS dist/
