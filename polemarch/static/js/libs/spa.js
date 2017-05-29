@@ -245,7 +245,9 @@ if(!window.spajs)
     spajs.openURL = function(url, title)
     {
         history.pushState({url:url}, title, url);
-        return !spajs.openMenuFromUrl(url)
+        var res = spajs.openMenuFromUrl(url)
+        var state = res.state()
+        return  state == "rejected"
     }
 
     /**
