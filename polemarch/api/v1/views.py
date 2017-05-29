@@ -113,6 +113,10 @@ class ProjectViewSet(base.ModelViewSetSet):
     serializer_class_one = serializers.OneProjectSerializer
     filter_class = filters.ProjectFilter
 
+    @list_route(methods=["get"], url_path="supported-repos")
+    def supported_repos(self, request):
+        return Response(self.model.handlers.keys())
+
     @detail_route(methods=["post", "put", "delete", "get"])
     def hosts(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())

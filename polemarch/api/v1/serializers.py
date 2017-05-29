@@ -4,7 +4,6 @@ import json
 
 import six
 from django.contrib.auth.models import User
-from django.db import transaction
 from django.db.models import Q
 
 from rest_framework import serializers
@@ -197,12 +196,7 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
 
     def __do_with_vars(self, method_name, *args, **kwargs):
         method = getattr(super(_WithVariablesSerializer, self), method_name)
-        variables = kwargs['validated_data'].pop("vars", None)
         instance = method(*args, **kwargs)
-        if variables is not None:
-            if isinstance(variables, (six.string_types, six.text_type)):
-                variables = json.loads(variables)
-            instance.set_vars(variables)
         if method.__name__ == "create":
             user = self.context['request'].user
             instance.related_objects.add(
@@ -296,6 +290,7 @@ class PeriodicTaskSerializer(_WithVariablesSerializer):
                   'type',
                   'schedule',
                   'playbook',
+                  'inventory',
                   'url',)
 
 
@@ -307,6 +302,7 @@ class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
                   'schedule',
                   'playbook',
                   'project',
+                  'inventory',
                   'url',)
 
 
@@ -380,8 +376,8 @@ class InventorySerializer(_WithVariablesSerializer):
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     vars   = DictField(required=False)
-    hosts  = HostSerializer(read_only=True, many=True)
-    groups = GroupSerializer(read_only=True, many=True)
+    hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
+    groups = GroupSerializer(read_only=True, many=True, source="groups_list")
 
     class Meta:
         model = models.Inventory
@@ -394,12 +390,14 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
 
 
 class ProjectSerializer(_InventoryOperations):
-    vars = DictField(required=False, write_only=True)
+    status = serializers.CharField(read_only=True)
+    vars   = DictField(required=False, write_only=True)
 
     class Meta:
         model = models.Project
         fields = ('id',
                   'name',
+                  'status',
                   'vars',
                   'url',)
 
@@ -414,6 +412,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         model = models.Project
         fields = ('id',
                   'name',
+                  'status',
                   'repository',
                   'hosts',
                   "groups",
@@ -421,15 +420,10 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'vars',
                   'url',)
 
-    @transaction.atomic
-    def create(self, validated_data):
-        project = super(OneProjectSerializer, self).create(validated_data)
-        project.repo_class.clone()
-        return project
-
     def inventories_operations(self, request):
         return self.get_operation(request, attr="inventories")
 
     def sync(self):
-        data = dict(detail=self.instance.repo_class.get())
+        self.instance.start_repo_task("sync")
+        data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)

@@ -220,6 +220,7 @@ CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 CELERY_BROKER_HEARTBEAT = config.getint("rpc", "heartbeat", fallback=10)
 CELERY_BEAT_SCHEDULER = 'polemarch.main.celery_beat_scheduler:SingletonPersistentScheduler'
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']
+CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_EXPIRES = config.getint("rpc", "results_expiry_days", fallback=10)
 
 # Some hacks with logs
@@ -276,7 +277,7 @@ try:
 except NoSectionError:
     __CACHE_LOCKS_SETTINGS = {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/polemarch_django_cache' + str(sys.version_info[0]),
+        'LOCATION': '/tmp/polemarch_django_locks' + str(sys.version_info[0]),
     }
 
 
@@ -292,13 +293,13 @@ CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 # Integrations settings
 __INTEGRATIONS = {
         "Default": {
-            "BACKEND": "polemarch.main.environments.default"
+            "BACKEND": "polemarch.main.environments.default.Integration"
         },
         "OpenStack": {
-            "BACKEND": "polemarch.main.environments.openstack"
+            "BACKEND": "polemarch.main.environments.openstack.Integration"
         },
         "Amazon": {
-            "BACKEND": "polemarch.main.environments.amazon",
+            "BACKEND": "polemarch.main.environments.amazon.Integration",
             "OPTIONS": {
                 "images": [('CentOS 7', 'ami-d2c924b2')],
                 "flavors": [
@@ -316,7 +317,7 @@ __INTEGRATIONS = {
             }
         },
         "Docker": {
-            "BACKEND": "polemarch.main.environments.dockera",
+            "BACKEND": "polemarch.main.environments.dockera.Integration",
             "OPTIONS": {
                 "images": ["vstconsulting/centos7-ssh-password"]
             }
@@ -336,14 +337,29 @@ for __integration in __INTEGRATIONS:
 REPO_BACKENDS = {
     "GIT": {
         "BACKEND": "polemarch.main.repo_backends.Git",
+        "OPTIONS": {
+            "CLONE_KWARGS": {
+                "depth": 1
+            },
+            "FETCH_KWARGS": {
+                "depth": 1
+            },
+            "GIT_ENV": {
+                "GLOBAL": {
+                    "GIT_SSL_NO_VERIFY": "true"
+                }
+            }
+        }
+    },
+    "TAR": {
+        "BACKEND": "polemarch.main.repo_backends.Tar",
     }
 }
 
+APACHE = False if ("webserver" in sys.argv) or ("runserver" in sys.argv) else True
 
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     REPO_BACKENDS["TEST"] = {
-        "BACKEND": "polemarch.main.repo_backends.Test",
+        "BACKEND": "polemarch.main.tests.repo_backends.Test",
     }
-
-APACHE = False if ("webserver" in sys.argv) or ("runserver" in sys.argv) else True

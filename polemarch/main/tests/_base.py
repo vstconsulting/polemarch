@@ -3,6 +3,7 @@ import random
 import string
 
 import six
+from django.db import transaction
 from django.test import TestCase
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -47,6 +48,7 @@ class BaseTestCase(TestCase):
     def _logout(self, client):
         self.assertEqual(client.get(self.logout_url).status_code, 302)
 
+    @transaction.atomic
     def result(self, request, url, code=200, *args, **kwargs):
         response = request(url, *args, **kwargs)
         self.assertRCode(response, code)
