@@ -217,11 +217,12 @@ pmHosts.updateItem = function(item_id)
 /** 
  * @return $.Deferred
  */
-pmHosts.deleteItem = function(item_id)
+pmHosts.deleteItem = function(item_id, force)
 {
-    if(!confirm("Are you sure?"))
+    if(!force && !confirm("Are you sure?"))
     {
-        return;
+        def.reject()
+        return def.promise();
     }
 
     return $.ajax({
