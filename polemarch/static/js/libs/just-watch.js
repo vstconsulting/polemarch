@@ -224,7 +224,7 @@ var deepExtend = function (/*obj_1, [obj_2], [obj_N]*/) {
  * <h1 <%= anyObject.justAttr('anyValue', 'data-test', function(v){return (v+"").replace("a", "G") }) %> >Any text</h1>
  * 
  */ 
-if (!Object.prototype.justHtml)
+if (!Object.prototype.justHtml || true)
 {
     var justWatch = {
         
@@ -299,12 +299,12 @@ if (!Object.prototype.justHtml)
 
                     var setter = function (val)
                     {
-                        if(val && val == "__justWatch_test")
+                        if(val === "__justWatch_test")
                         {
                             return val;
                         }
 
-                        if(val &&  val.__add_justHtml_test === "__justWatch_test")
+                        if(val.__add_justHtml_test === "__justWatch_test")
                         {
                             console.log("setter add", newval);
                             newval.just_ids.push({
@@ -318,7 +318,7 @@ if (!Object.prototype.justHtml)
                             return val;
                         }
 
-                        if(val && val !== "__justWatch_update")
+                        if(val !== "__justWatch_update")
                         {
                             newval.val = val;
 

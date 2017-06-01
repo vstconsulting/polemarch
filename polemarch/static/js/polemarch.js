@@ -189,6 +189,28 @@ polemarch.start = function(options)
         onOpen:pmInventories.showNewItemPage
     })
     
+    // inventories
+    spajs.addMenu({
+        id:"projects",
+        name:"projects",
+        urlregexp:[/^projects$/],
+        onOpen:pmProjects.showList
+    })
+ 
+    spajs.addMenu({
+        id:"project",
+        name:"project",
+        urlregexp:[/^project-([0-9]+)$/],
+        onOpen:pmProjects.showItem
+    })
+
+    spajs.addMenu({
+        id:"newProject",
+        name:"newProject",
+        urlregexp:[/^new-project$/],
+        onOpen:pmProjects.showNewItemPage
+    })
+    
     spajs.openMenuFromUrl()
 }
 
