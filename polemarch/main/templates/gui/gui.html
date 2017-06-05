@@ -15,7 +15,7 @@
     </section>
 
     <section class="content">
-        <a class="btn btn-primary"  href="/?spa=new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Add inventory</a>
+        <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Add inventory</a>
         <br>
         <br>
         <div class="row">
@@ -30,7 +30,7 @@
                     <div class="box-body">
                         <% for(var i in polemarch.model.inventorieslist.results){ %>
                             <ul>
-                                <li><a href="/?spa=inventory-<%- polemarch.model.inventorieslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.inventorieslist.results[i].name %></a></li>
+                                <li><a href="/?inventory-<%- polemarch.model.inventorieslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.inventorieslist.results[i].name %></a></li>
                             </ul>
                         <% } %>
 
@@ -50,7 +50,7 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?spa=inventories"  onclick="return spajs.openURL(this.href);" >Inventories</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" >Inventories</a></li>
             <li class="active"><%- polemarch.model.inventories[item_id].name %></li>
         </ol>
     </section>
@@ -74,7 +74,7 @@
                                     <li><a href="#" onclick="spajs.showLoader(pmInventories.deleteItem(<%- item_id %>)); return false;" >Save this inventory</a></li>
                                     <li><a href="#" onclick="spajs.showLoader(pmInventories.updateItem(<%- item_id %>)); return false;" >Remove this inventory</a></li>
                                     <li class="divider"></li>
-                                    <li><a href="/?spa=new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;" >Add new inventory</a></li>
+                                    <li><a href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;" >Add new inventory</a></li>
                                 </ul>
                             </div>
 
@@ -163,7 +163,7 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?spa=inventories" onclick="return spajs.openURL(this.href);" >Inventories list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" >Inventories list</a></li>
             <li class="active">Add new inventory</li>
         </ol>
     </section>
@@ -286,7 +286,7 @@
     </section>
 
     <section class="content">
-        <a class="btn btn-primary"  href="/?spa=new-user" onclick="spajs.open({ menuId:'new-user'}); return false;">Add user</a>
+        <a class="btn btn-primary"  href="/?new-user" onclick="spajs.open({ menuId:'new-user'}); return false;">Add user</a>
         <br>
         <br>
         <div class="row">
@@ -301,7 +301,7 @@
                     <div class="box-body">
                         <% for(var i in polemarch.model.userslist.results){ %>
                             <ul>
-                                <li><a href="/?spa=user-<%- polemarch.model.userslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.userslist.results[i].username %></a></li>
+                                <li><a href="/?user-<%- polemarch.model.userslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.userslist.results[i].username %></a></li>
                             </ul>
                         <% } %>
 
@@ -321,7 +321,7 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?spa=users"  onclick="return spajs.openURL(this.href);" >Users list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?users"  onclick="return spajs.openURL(this.href);" >Users list</a></li>
             <li class="active"><%- polemarch.model.users[item_id].username %></li>
         </ol>
     </section>
@@ -345,7 +345,7 @@
                                     <li><a href="#" onclick="spajs.showLoader(pmUsers.deleteItem(<%- item_id %>)); return false;" >Save this user</a></li>
                                     <li><a href="#" onclick="spajs.showLoader(pmUsers.updateItem(<%- item_id %>)); return false;" >Remove this user</a></li>
                                     <li class="divider"></li>
-                                    <li><a href="/?spa=new-user" onclick="spajs.open({ menuId:'new-user'}); return false;" >Add new user</a></li>
+                                    <li><a href="/?new-user" onclick="spajs.open({ menuId:'new-user'}); return false;" >Add new user</a></li>
                                 </ul>
                             </div>
 
@@ -431,7 +431,7 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?spa=users" onclick="return spajs.openURL(this.href);" >Users list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" >Users list</a></li>
             <li class="active">Add new user</li>
         </ol>
     </section>
@@ -533,7 +533,7 @@
     </section>
 
     <section class="content">
-        <a class="btn btn-primary"  href="/?spa=new-host" onclick="spajs.open({ menuId:'new-host'}); return false;">Add host</a>
+        <a class="btn btn-primary"  href="/?new-host" onclick="spajs.open({ menuId:'new-host'}); return false;">Add host</a>
         <br>
         <br>
         <div class="row">
@@ -548,7 +548,7 @@
                     <div class="box-body">
                         <% for(var i in polemarch.model.hostslist.results){ %>
                             <ul>
-                                <li><a href="/?spa=host-<%- polemarch.model.hostslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.hostslist.results[i].name %></a></li>
+                                <li><a href="/?host-<%- polemarch.model.hostslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.hostslist.results[i].name %></a></li>
                             </ul>
                         <% } %>
 
@@ -568,7 +568,7 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?spa=hosts"  onclick="return spajs.openURL(this.href);" >Hosts</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?hosts"  onclick="return spajs.openURL(this.href);" >Hosts</a></li>
             <li class="active"><%- polemarch.model.hosts[item_id].name %></li>
         </ol>
     </section>
@@ -592,7 +592,7 @@
                                     <li><a href="#" onclick="spajs.showLoader(pmHosts.deleteItem(<%- item_id %>)); return false;" >Save this host</a></li>
                                     <li><a href="#" onclick="spajs.showLoader(pmHosts.updateItem(<%- item_id %>)); return false;" >Remove this host</a></li>
                                     <li class="divider"></li>
-                                    <li><a href="/?spa=new-host" onclick="spajs.open({ menuId:'new-host'}); return false;" >Add new host</a></li>
+                                    <li><a href="/?new-host" onclick="spajs.open({ menuId:'new-host'}); return false;" >Add new host</a></li>
                                 </ul>
                             </div>
 
@@ -636,7 +636,7 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?spa=hosts" onclick="return spajs.openURL(this.href);" >Hosts list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" >Hosts list</a></li>
             <li class="active">Add new host</li>
         </ol>
     </section>
@@ -749,7 +749,7 @@
     </section>
 
     <section class="content">
-        <a class="btn btn-primary"  href="/?spa=new-group" onclick="spajs.open({ menuId:'new-group'}); return false;">Add group</a>
+        <a class="btn btn-primary"  href="/?new-group" onclick="spajs.open({ menuId:'new-group'}); return false;">Add group</a>
         <br>
         <br>
         <div class="row">
@@ -764,7 +764,7 @@
                     <div class="box-body">
                         <% for(var i in polemarch.model.groupslist.results){ %>
                             <ul>
-                                <li><a href="/?spa=group-<%- polemarch.model.groupslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.groupslist.results[i].name %></a></li>
+                                <li><a href="/?group-<%- polemarch.model.groupslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.groupslist.results[i].name %></a></li>
                             </ul>
                         <% } %>
                     </div>
@@ -783,7 +783,7 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?spa=groups"  onclick="return spajs.openURL(this.href);" >Groups list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?groups"  onclick="return spajs.openURL(this.href);" >Groups list</a></li>
             <li class="active"><%- polemarch.model.groups[item_id].name %></li>
         </ol>
     </section>
@@ -807,7 +807,7 @@
                                     <li><a href="#" onclick="spajs.showLoader(pmGroups.deleteItem(<%- item_id %>)); return false;" >Save this host</a></li>
                                     <li><a href="#" onclick="spajs.showLoader(pmGroups.updateItem(<%- item_id %>)); return false;" >Remove this host</a></li>
                                     <li class="divider"></li>
-                                    <li><a href="/?spa=new-group" onclick="spajs.open({ menuId:'new-group'}); return false;" >Add new group</a></li>
+                                    <li><a href="/?new-group" onclick="spajs.open({ menuId:'new-group'}); return false;" >Add new group</a></li>
                                 </ul>
                             </div>
 
@@ -964,7 +964,7 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?spa=groups" onclick="return spajs.openURL(this.href);" >Groups list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" >Groups list</a></li>
             <li class="active">Add new group</li>
         </ol>
     </section>

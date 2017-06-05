@@ -295,7 +295,7 @@ function qunitAddTests_users()
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
-        // с адресом http://192.168.0.12:8080/?spa=user-5
+        // с адресом http://192.168.0.12:8080/?user-5
         var userId = /user-([0-9]+)/.exec(window.location.href)[1]
 
         $("#user_"+userId+"_username").val("test2-user-"+t);
@@ -319,7 +319,7 @@ function qunitAddTests_users()
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
-        // с адресом http://192.168.0.12:8080/?spa=user-5
+        // с адресом http://192.168.0.12:8080/?user-5
         var userId = /user-([0-9]+)/.exec(window.location.href)[1]
 
         // Удаление пользователя.
@@ -409,7 +409,7 @@ function qunitAddTests_hosts()
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования хоста
-        // с адресом http://192.168.0.12:8080/?spa=host-5
+        // с адресом http://192.168.0.12:8080/?host-5
         var itemId = /host-([0-9]+)/.exec(window.location.href)[1]
 
         $("#host_"+itemId+"_name").val("test2-hosts-"+t);
@@ -434,7 +434,7 @@ function qunitAddTests_hosts()
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования хоста
-        // с адресом http://192.168.0.12:8080/?spa=host-5
+        // с адресом http://192.168.0.12:8080/?host-5
         var itemId = /host-([0-9]+)/.exec(window.location.href)[1]
 
         // Удаление хоста.
@@ -544,7 +544,7 @@ function qunitAddTests_groups()
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования группы
-        // с адресом http://192.168.0.12:8080/?spa=group-5
+        // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /group-([0-9]+)/.exec(window.location.href)[1]
 
         $("#group_"+itemId+"_name").val("test2-group-"+t);
@@ -569,7 +569,7 @@ function qunitAddTests_groups()
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования группы
-        // с адресом http://192.168.0.12:8080/?spa=group-5
+        // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /group-([0-9]+)/.exec(window.location.href)[1]
 
         // Удаление группы.
@@ -658,7 +658,7 @@ function qunitAddTests_inventories()
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования inventory
-        // с адресом http://192.168.0.12:8080/?spa=group-5
+        // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /inventory-([0-9]+)/.exec(window.location.href)[1]
 
         $("#inventory_"+itemId+"_name").val("test2-inventory-"+t);
@@ -683,7 +683,7 @@ function qunitAddTests_inventories()
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования inventory
-        // с адресом http://192.168.0.12:8080/?spa=inventory-5
+        // с адресом http://192.168.0.12:8080/?inventory-5
         var itemId = /inventory-([0-9]+)/.exec(window.location.href)[1]
 
         // Удаление inventory.

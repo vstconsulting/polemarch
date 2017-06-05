@@ -59,7 +59,7 @@ polemarch.start = function(options)
 
     spajs.init({
         holder: polemarch.opt.holder,
-        menuId_url: "spa",
+        menu_url: undefined,
         useHistoryApi:true
     })
 

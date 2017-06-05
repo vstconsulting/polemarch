@@ -257,12 +257,24 @@ if(!window.spajs)
      */
     spajs.openMenuFromUrl = function(event_state)
     {
-        if(!spajs.opt.menu_url)
+        var menuId;
+        
+        // Если menu_url не задан то используем первый знак вопроса в строке адреса
+        if(window.location.href.indexOf("?") != -1)
         {
-            return false;
+            menuId = window.location.href.slice(window.location.href.indexOf("?")+1)
+        } 
+        else
+        {
+            // Если menu_url не задан то используем window.location.hash
+            menuId = window.location.hash.slice(1)
         }
-
-        var menuId = spajs.getUrlParam(spajs.opt.menu_url, event_state)
+        
+        if(spajs.opt.menu_url)
+        {
+            menuId = spajs.getUrlParam(spajs.opt.menu_url, event_state)
+        } 
+ 
         return spajs.openMenu(menuId, {}, true, event_state);
     }
 
