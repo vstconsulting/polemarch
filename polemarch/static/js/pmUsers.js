@@ -142,7 +142,7 @@ pmUsers.addItem = function()
         {
             console.log("user add", data); 
             $.notify("User created", "success");
-            $.when(spajs.open({ menuId:"user-"+data.id})).always(function(){
+            $.when(spajs.open({ menuId:"user/"+data.id})).always(function(){
                 def.resolve()
             })
         },

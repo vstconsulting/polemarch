@@ -158,7 +158,7 @@ pmHosts.addItem = function(parent_type, parent_item)
             } 
             else
             {
-                $.when(spajs.open({ menuId:"host-"+data.id})).always(function(){
+                $.when(spajs.open({ menuId:"host/"+data.id})).always(function(){
                     def.resolve()
                 })
             }

@@ -130,7 +130,7 @@ pmInventories.addItem = function()
         {
             console.log("inventory add", data); 
             $.notify("inventory created", "success");
-            $.when(spajs.open({ menuId:"inventory-"+data.id})).always(function(){
+            $.when(spajs.open({ menuId:"inventory/"+data.id})).always(function(){
                 def.resolve()
             })
         },

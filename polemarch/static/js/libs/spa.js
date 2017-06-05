@@ -280,43 +280,48 @@ if(!window.spajs)
 
     spajs.setUrlParam = function(params, title)
     {
-        var new_url = window.location.href;
-        for(var i in params)
+        var url = window.location.pathname + "?" + params.toString(); 
+        if(typeof params === "object")
         {
-            if(!params.hasOwnProperty(i))
+            var new_url = window.location.href;
+            for(var i in params)
             {
-                continue;
-            }
-
-            var name = i;
-            var value = params[i];
-
-            if(value == undefined)
-            {
-                // Если параметр равен undefined то его надо удалить из строки урла
-                new_url = new_url.replace(new RegExp(name+"=[^&\/]+"), "");
-            }
-            else
-            {
-                if(!new_url.match(new RegExp(name+"=[^&\/]+")))
+                if(!params.hasOwnProperty(i))
                 {
-                    if(new_url.indexOf("?") != -1)
-                    {
-                        new_url += "&"+ name + "=" + value;
-                    }
-                    else
-                    {
-                        new_url += "?"+ name + "=" + value;
-                    }
+                    continue;
+                }
+
+                var name = i;
+                var value = params[i];
+
+                if(value == undefined)
+                {
+                    // Если параметр равен undefined то его надо удалить из строки урла
+                    new_url = new_url.replace(new RegExp(name+"=[^&\/]+"), "");
                 }
                 else
                 {
-                    new_url = new_url.replace(new RegExp(name+"=[^&\/]+"), name + "=" + value);
+                    if(!new_url.match(new RegExp(name+"=[^&\/]+")))
+                    {
+                        if(new_url.indexOf("?") != -1)
+                        {
+                            new_url += "&"+ name + "=" + value;
+                        }
+                        else
+                        {
+                            new_url += "?"+ name + "=" + value;
+                        }
+                    }
+                    else
+                    {
+                        new_url = new_url.replace(new RegExp(name+"=[^&\/]+"), name + "=" + value);
+                    }
                 }
             }
-        }
 
-        var url = new_url.replace(/&+/img, "&").replace(/&+$/img, "").replace(/\?+$/img, "").replace(/\?&+/img, "?")
+            url = new_url.replace(/&+/img, "&").replace(/&+$/img, "").replace(/\?+$/img, "").replace(/\?&+/img, "?")
+        }
+        
         if(!spajs.opt.addParamsToUrl)
         {
             url = window.location.href;
@@ -697,10 +702,21 @@ if(!window.spajs)
             opt.addUrlParams = {}
         }
 
-        opt.addUrlParams[spajs.opt.menu_url] = opt.menuId;
-        if(!opt.notAddToHistory)
+        if(spajs.opt.menu_url)
         {
-            var url = spajs.setUrlParam(opt.addUrlParams, menuInfo.title || menuInfo.name)
+            opt.addUrlParams[spajs.opt.menu_url] = opt.menuId;
+            if(!opt.notAddToHistory)
+            {
+                var url = spajs.setUrlParam(opt.addUrlParams, menuInfo.title || menuInfo.name)
+                if(opt.event_state)
+                {
+                    opt.event_state.url = url;
+                }
+            }
+        }
+        else if(!opt.notAddToHistory)
+        {
+            var url = spajs.setUrlParam(opt.menuId, menuInfo.title || menuInfo.name)
             if(opt.event_state)
             {
                 opt.event_state.url = url;

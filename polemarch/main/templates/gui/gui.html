@@ -30,7 +30,7 @@
                     <div class="box-body">
                         <% for(var i in polemarch.model.inventorieslist.results){ %>
                             <ul>
-                                <li><a href="/?inventory-<%- polemarch.model.inventorieslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.inventorieslist.results[i].name %></a></li>
+                                <li><a href="/?inventory/<%- polemarch.model.inventorieslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.inventorieslist.results[i].name %></a></li>
                             </ul>
                         <% } %>
 
@@ -137,13 +137,13 @@
                                             onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Manage existing groups</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'new-group-for-inventory-<%- item_id %>'}); return false;" class="btn btn-primary" >Add new group</button>
+                                            <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
                                 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Manage existing hosts</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'new-host-for-inventory-<%- item_id %>'}); return false;" class="btn btn-primary" >Add new host</button>
+                                            <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
                                
                             </div>
                         </div>
@@ -301,7 +301,7 @@
                     <div class="box-body">
                         <% for(var i in polemarch.model.userslist.results){ %>
                             <ul>
-                                <li><a href="/?user-<%- polemarch.model.userslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.userslist.results[i].username %></a></li>
+                                <li><a href="/?user/<%- polemarch.model.userslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.userslist.results[i].username %></a></li>
                             </ul>
                         <% } %>
 
@@ -548,7 +548,7 @@
                     <div class="box-body">
                         <% for(var i in polemarch.model.hostslist.results){ %>
                             <ul>
-                                <li><a href="/?host-<%- polemarch.model.hostslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.hostslist.results[i].name %></a></li>
+                                <li><a href="/?host/<%- polemarch.model.hostslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.hostslist.results[i].name %></a></li>
                             </ul>
                         <% } %>
 
@@ -764,7 +764,7 @@
                     <div class="box-body">
                         <% for(var i in polemarch.model.groupslist.results){ %>
                             <ul>
-                                <li><a href="/?group-<%- polemarch.model.groupslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.groupslist.results[i].name %></a></li>
+                                <li><a href="/?group/<%- polemarch.model.groupslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.groupslist.results[i].name %></a></li>
                             </ul>
                         <% } %>
                     </div>
@@ -868,13 +868,13 @@
                                             onclick="spajs.showLoader(pmGroups.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Manage existing groups</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'new-group-for-group-<%- item_id %>'}); return false;" class="btn btn-primary" >Add new group</button>
+                                            <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
                                 <% }else{ %>
                                     <button type="button"
                                             onclick="spajs.showLoader(pmGroups.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Manage existing hosts</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'new-host-for-group-<%- item_id %>'}); return false;" class="btn btn-primary" >Add new host</button>
+                                            <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
                                 <% } %>
                             </div>
                         </div>

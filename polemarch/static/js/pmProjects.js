@@ -130,7 +130,7 @@ pmProjects.addItem = function()
         success: function(data)
         { 
             $.notify("project created", "success");
-            $.when(spajs.open({ menuId:"project-"+data.id})).always(function(){
+            $.when(spajs.open({ menuId:"project/"+data.id})).always(function(){
                 def.resolve()
             })
         },

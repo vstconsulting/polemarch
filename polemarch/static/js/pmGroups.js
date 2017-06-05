@@ -156,7 +156,7 @@ pmGroups.addItem = function(parent_type, parent_item)
             }
             else
             {
-                $.when(spajs.open({ menuId:"group-"+data.id})).always(function(){
+                $.when(spajs.open({ menuId:"group/"+data.id})).always(function(){
                     def.resolve()
                 })
             }
