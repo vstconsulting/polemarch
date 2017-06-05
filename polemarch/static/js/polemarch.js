@@ -43,6 +43,10 @@ polemarch.model.groups = {}
 polemarch.model.inventorieslist = []
 polemarch.model.inventories = {}
             
+polemarch.model.projectslist = []
+polemarch.model.projects = {}
+
+
 polemarch.start = function(options)
 {
     for(var i in options)
@@ -185,7 +189,7 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"newInventory",
         name:"newInventory",
-        urlregexp:[/^new-inventory$/],
+        urlregexp:[/^new-inventory$/, /^([A-z0-9_]+)\/([0-9]+)\/new-inventory$/],
         onOpen:pmInventories.showNewItemPage
     })
     
@@ -221,6 +225,11 @@ polemarch.showHome = function(holder, menuInfo, data)
 
 polemarch.showErrors = function(res)
 {
+    if(!res)
+    {
+        return true;
+    }
+    
     if(res.responseJSON)
     {
         res = res.responseJSON

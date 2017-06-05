@@ -226,6 +226,36 @@ pmProjects.deleteItem = function(item_id, force)
  * Показывает форму со списком всех групп.
  * @return $.Deferred
  */
+pmProjects.showAddSubInventoriesForm = function(item_id, holder)
+{
+    return $.when(pmInventories.loadAllItems()).done(function(){
+        $("#add_existing_item_to_project").remove()
+        $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
+        $("#polemarch-model-items-select").select2();
+    }).fail(function(){
+
+    }).promise()
+}
+
+/**
+ * Показывает форму со списком всех групп.
+ * @return $.Deferred
+ */
+pmProjects.showAddSubInventoriesForm = function(item_id, holder)
+{
+    return $.when(pmInventories.loadAllItems()).done(function(){
+        $("#add_existing_item_to_project").remove()
+        $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
+        $("#polemarch-model-items-select").select2();
+    }).fail(function(){
+
+    }).promise()
+}
+
+/**
+ * Показывает форму со списком всех групп.
+ * @return $.Deferred
+ */
 pmProjects.showAddSubGroupsForm = function(item_id, holder)
 {
     return $.when(pmGroups.loadAllItems()).done(function(){
@@ -294,6 +324,64 @@ pmProjects.hasGroups = function(item_id, group_id)
     return false;
 }
 
+/**
+ * Проверяет принадлежит ли Inventory_id к группе item_id
+ * @param {Integer} item_id
+ * @param {Integer} inventory_id
+ * @returns {Boolean}
+ */
+pmProjects.hasInventories = function(item_id, inventory_id)
+{
+    if(polemarch.model.projects[item_id])
+    {
+        for(var i in polemarch.model.projects[item_id].inventories)
+        {
+            if(polemarch.model.projects[item_id].inventories[i].id == inventory_id)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+ 
+/**
+ * @return $.Deferred
+ */
+pmProjects.setSubInventories = function(item_id, inventories_ids)
+{
+    return $.ajax({
+        url: "/api/v1/projects/"+item_id+"/inventories/",
+        type: "POST",
+        contentType:'application/json',
+        data:JSON.stringify(inventories_ids),
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        { 
+            if(polemarch.model.projects[item_id])
+            {
+                polemarch.model.projects[item_id].inventories = []
+                for(var i in inventories_ids)
+                {
+                    polemarch.model.projects[item_id].inventories.push(polemarch.model.inventories[inventories_ids[i]])
+                }
+            }
+            console.log("inventories update", data);
+            $.notify("Save", "success");
+        },
+        error:function(e)
+        {
+            console.log("inventories "+item_id+" update error - " + JSON.stringify(e));
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
  
 /**
  * @return $.Deferred
@@ -331,7 +419,7 @@ pmProjects.setSubGroups = function(item_id, groups_ids)
         }
     });
 }
- 
+
 /**
  * @return $.Deferred
  */

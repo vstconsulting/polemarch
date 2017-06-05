@@ -140,7 +140,7 @@ pmGroups.addItem = function(parent_type, parent_item)
                 if(parent_type == 'group')
                 {
                     $.when(pmGroups.setSubGroups(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"group-"+parent_item})).always(function(){
+                        $.when(spajs.open({ menuId:"group/"+parent_item})).always(function(){
                             def.resolve()
                         })
                     })
@@ -148,9 +148,24 @@ pmGroups.addItem = function(parent_type, parent_item)
                 else if(parent_type == 'inventory')
                 {
                     $.when(pmInventories.setSubGroups(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"inventory-"+parent_item})).always(function(){
+                        $.when(spajs.open({ menuId:"inventory/"+parent_item})).always(function(){
                             def.resolve()
                         })
+                    })
+                }
+                else if(parent_type == 'project')
+                {
+                    $.when(pmProjects.setSubGroups(parent_item, [data.id])).always(function(){
+                        $.when(spajs.open({ menuId:"project/"+parent_item})).always(function(){
+                            def.resolve()
+                        })
+                    })
+                }
+                else
+                {
+                    console.error("Не известный parent_type", parent_type)
+                    $.when(spajs.open({ menuId:"group/"+data.id})).always(function(){
+                        def.resolve()
                     })
                 }
             }

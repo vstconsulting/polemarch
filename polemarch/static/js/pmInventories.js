@@ -27,7 +27,7 @@ pmInventories.showItem = function(holder, menuInfo, data)
 
 pmInventories.showNewItemPage = function(holder, menuInfo, data)
 { 
-    $(holder).html(spajs.just.render('new_inventory_page', {}))
+    $(holder).html(spajs.just.render('new_inventory_page', {parent_item:data.reg[2], parent_type:data.reg[1]}))
 }
 
 /**
@@ -100,7 +100,7 @@ pmInventories.loadItem = function(item_id)
 /** 
  * @return $.Deferred
  */
-pmInventories.addItem = function()
+pmInventories.addItem = function(parent_type, parent_item)
 {
     var def = new $.Deferred();
     var data = {}
@@ -130,9 +130,25 @@ pmInventories.addItem = function()
         {
             console.log("inventory add", data); 
             $.notify("inventory created", "success");
-            $.when(spajs.open({ menuId:"inventory/"+data.id})).always(function(){
-                def.resolve()
-            })
+            
+            if(parent_item)
+            {
+                if(parent_type == 'project')
+                {
+                    $.when(pmProjects.setSubInventories(parent_item, [data.id])).always(function(){
+                        $.when(spajs.open({ menuId:"project/"+parent_item})).always(function(){
+                            def.resolve()
+                        })
+                    })
+                }
+            }
+            else
+            { 
+                $.when(spajs.open({ menuId:"inventory/"+data.id})).always(function(){
+                    def.resolve()
+                })
+            }
+            
         },
         error:function(e)
         {
