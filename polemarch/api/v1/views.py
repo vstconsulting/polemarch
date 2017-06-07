@@ -143,6 +143,10 @@ class TaskViewSet(base.ReadOnlyModelViewSet):
     serializer_class_one = serializers.OneTaskSerializer
     filter_class = filters.TaskFilter
 
+    @detail_route(methods=["post"])
+    def execute(self, request, *args, **kwargs):
+        return self.get_serializer(self.get_object()).execute(request)
+
 
 class PeriodicTaskViewSet(base.ModelViewSetSet):
     model = serializers.models.PeriodicTask

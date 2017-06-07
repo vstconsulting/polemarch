@@ -2,9 +2,11 @@
 import logging
 
 from polemarch.main.models import PeriodicTask
+
 from ...celery_app import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
+from ..models import Inventory
 
 logger = logging.getLogger("polemarch")
 
@@ -44,3 +46,13 @@ class ScheduledTask(BaseTask):
         task = PeriodicTask.objects.get(id=self.job_id)
         print(task.playbook)
         return task.playbook + " PRINTED"
+
+@task(app, ignore_result=True, bind=True)
+class ExecuteAnsibleTask(BaseTask):
+    def __init__(self, app, job, inventory_id, *args, **kwargs):
+        super(self.__class__, self).__init__(app, *args, **kwargs)
+        self.inventory = Inventory.objects.get(id=inventory_id)
+        self.job = job
+
+    def run(self):
+        self.job.run_ansible_playbook(self.inventory)

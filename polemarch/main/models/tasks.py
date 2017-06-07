@@ -5,13 +5,18 @@ import uuid
 import logging
 import subprocess
 
+import sys
+from os.path import dirname
+
 from django.utils import timezone
 from celery.schedules import crontab
 
+from polemarch.main.utils import tmp_file
 from .base import BModel, models
+from . import Inventory
 from .projects import Project
-from .hosts import Inventory
 from ...main import exceptions as ex
+from ..tasks import ExecuteAnsibleTask
 
 logger = logging.getLogger("polemarch")
 
@@ -86,6 +91,41 @@ class Task(BModel):
 
     def __unicode__(self):
         return str(self.name)
+
+    def execute(self, inventory_id):
+        # pylint: disable=no-member
+        inventory = Inventory.objects.get(id=inventory_id)
+        ExecuteAnsibleTask.delay(self, inventory.id)
+
+    def run_ansible_playbook(self, inventory):
+        start_time = timezone.now()
+        path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
+        path_to_playbook = "{}/{}".format(self.project.path, self.playbook)
+        inventory_text, key_files = inventory.get_inventory()
+        inventory_file = tmp_file()
+        inventory_file.write(inventory_text)
+        args = [path_to_ansible, path_to_playbook, '-i',
+                inventory_file.name]
+        status = "OK"
+        try:
+            output = subprocess.check_output(args, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            output = str(e.output)
+            if e.returncode == 4:
+                status = "OFFLINE"
+            else:
+                status = "ERROR"
+        inventory_file.close()
+        for key_file in key_files:
+            key_file.close()
+        stop_time = timezone.now()
+        History.objects.create(playbook=self.playbook,
+                               start_time=start_time,
+                               stop_time=stop_time,
+                               raw_stdout=output,
+                               raw_inventory=inventory_text,
+                               status=status,
+                               project=self.project)
 
 
 class PeriodicTask(BModel):
