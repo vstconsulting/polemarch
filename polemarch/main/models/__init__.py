@@ -3,9 +3,11 @@ from __future__ import absolute_import
 
 import json
 
+import django_celery_beat
 from django.db.models import signals
 from django.dispatch import receiver
 from django.core.validators import ValidationError
+from django_celery_beat.models import IntervalSchedule, CrontabSchedule
 
 from .vars import Variable
 from .hosts import Host, Group, Inventory, Environment
@@ -70,3 +72,30 @@ def clear_service(instance, **kwargs):
 @receiver(signals.pre_delete, sender=Project)
 def clean_dirs(instance, **kwargs):
     instance.repo_class.delete()
+
+
+@receiver(signals.post_save, sender=PeriodicTask)
+def save_to_beat(instance, **kwargs):
+    manager = django_celery_beat.models.PeriodicTask.objects
+    if instance.type == "INTERVAL":
+        units = IntervalSchedule.SECONDS
+        secs = instance.get_schedule()
+        schedule, _ = IntervalSchedule.objects.get_or_create(every=secs,
+                                                             period=units)
+        manager.create(interval=schedule,
+                       name=str(instance.id),
+                       task='polemarch.main.tasks.ScheduledTask',
+                       args=json.dumps([instance.id]))
+    elif instance.type == "CRONTAB":
+        cron_data = instance.crontab_kwargs
+        schedule, _ = CrontabSchedule.objects.get_or_create(**cron_data)
+        manager.create(crontab=schedule,
+                       name=str(instance.id),
+                       task='polemarch.main.tasks.ScheduledTask',
+                       args=json.dumps([instance.id]))
+
+
+@receiver(signals.post_delete, sender=PeriodicTask)
+def delete_from_beat(instance, **kwargs):
+    manager = django_celery_beat.models.PeriodicTask.objects
+    manager.get(name=str(instance.id)).delete()

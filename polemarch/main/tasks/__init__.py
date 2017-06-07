@@ -1,5 +1,7 @@
 # pylint: disable=broad-except,no-member,redefined-outer-name
 import logging
+
+from polemarch.main.models import PeriodicTask
 from ...celery_app import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
@@ -30,3 +32,15 @@ class RepoTask(BaseTask):
             logger.info(result)
         except Exception as error:
             self.app.retry(exc=error)
+
+
+@task(app, ignore_result=True, bind=True)
+class ScheduledTask(BaseTask):
+    def __init__(self, app, job_id, *args, **kwargs):
+        super(self.__class__, self).__init__(app, *args, **kwargs)
+        self.job_id = job_id
+
+    def run(self):
+        task = PeriodicTask.objects.get(id=self.job_id)
+        print(task.playbook)
+        return task.playbook + " PRINTED"

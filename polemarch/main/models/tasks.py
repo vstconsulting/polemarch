@@ -111,7 +111,7 @@ class PeriodicTask(BModel):
     ]
 
     @property
-    def _crontab_kwargs(self):
+    def crontab_kwargs(self):
         kwargs, index, fields = dict(), 0, self.schedule.split(" ")
         for field_name in self.time_types_list:
             if index < len(fields) and len(fields[index]) > 0:
@@ -123,7 +123,7 @@ class PeriodicTask(BModel):
 
     def get_schedule(self):
         if self.type == "CRONTAB":
-            return crontab(**self._crontab_kwargs)
+            return crontab(**self.crontab_kwargs)
         return float(self.schedule)
 
 

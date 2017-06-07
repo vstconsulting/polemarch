@@ -1,8 +1,8 @@
 djangorestframework>=3.4, <4.0
 django-filter
 django-crispy-forms
-django-celery<=3.2.1
-celery==4.0.2
+git+http://cepreu@git.vst.lan/vst/celery.git#egg=celery
+django-celery-beat=1.0.1
 configparser==3.5.0b2
 six
 sqlalchemy

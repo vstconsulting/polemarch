@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
     'crispy_forms',
     'rest_framework',
     'rest_framework.authtoken',
@@ -218,7 +219,7 @@ CELERY_RESULT_BACKEND = config.get("rpc", "result_backend", fallback="file:///tm
 CELERY_WORKER_CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 CELERY_BROKER_HEARTBEAT = config.getint("rpc", "heartbeat", fallback=10)
-CELERY_BEAT_SCHEDULER = 'polemarch.main.celery_beat_scheduler:SingletonPersistentScheduler'
+CELERY_BEAT_SCHEDULER = 'polemarch.main.celery_beat_scheduler:SingletonDatabaseScheduler'
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_EXPIRES = config.getint("rpc", "results_expiry_days", fallback=10)
