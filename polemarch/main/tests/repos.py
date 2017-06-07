@@ -114,7 +114,7 @@ class ApiProjectsVCSTestCase(_ApiGHBaseTestCase):  # pragma: no cover
         # self.get_result("post", single_url + "sync/", 200)
 
     def test_tar_import(self):
-        repo_url = "https://mos.vst.lan:8080/swift/v1/test/test_repo.tar.gz"
+        repo_url = "https://cloud.vst.lan:8080/swift/v1/test/test_repo.tar.gz"
         data = dict(name="GitProject{}-2".format(sys.version_info[0]),
                     repository=repo_url,
                     vars=dict(repo_type="TAR"))
