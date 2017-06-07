@@ -4,6 +4,7 @@ import json
 
 import six
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.db.models import Q
 
 from rest_framework import serializers
@@ -194,7 +195,7 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         data["not_found"] = data["total"] - data["operated"]
         return Response(data, status=code)
 
-    def __do_with_vars(self, method_name, *args, **kwargs):
+    def _do_with_vars(self, method_name, *args, **kwargs):
         method = getattr(super(_WithVariablesSerializer, self), method_name)
         instance = method(*args, **kwargs)
         if method.__name__ == "create":
@@ -221,11 +222,11 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         return self._response(request.data, obj_list)
 
     def create(self, validated_data):
-        return self.__do_with_vars("create", validated_data=validated_data)
+        return self._do_with_vars("create", validated_data=validated_data)
 
     def update(self, instance, validated_data):
-        return self.__do_with_vars("update", instance,
-                                   validated_data=validated_data)
+        return self._do_with_vars("update", instance,
+                                  validated_data=validated_data)
 
     def permissions(self, request):
         pms = models.TypesPermissions.objects.filter(user__id__in=request.data)
@@ -400,6 +401,11 @@ class ProjectSerializer(_InventoryOperations):
                   'status',
                   'vars',
                   'url',)
+
+    @transaction.atomic
+    def _do_with_vars(self, *args, **kw):
+        instance = super(ProjectSerializer, self)._do_with_vars(*args, **kw)
+        return instance if instance.repo_class else None
 
 
 class OneProjectSerializer(ProjectSerializer, _InventoryOperations):

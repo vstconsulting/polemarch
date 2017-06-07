@@ -238,12 +238,13 @@ class ModelHandlers(object):
     :type values: list
 
     '''
-    def __init__(self, tp):
+    def __init__(self, tp, err_message=None):
         '''
         :param tp: -- type name for backends.Like name in dict.
         :type tp: str
         '''
         self.type = tp
+        self.err_message = err_message
         self._list = getattr(settings, self.type, {})
 
     @property
@@ -292,7 +293,9 @@ class ModelHandlers(object):
                 raise ex.PMException("Backend is 'None'.")  # pragma: no cover
             return import_class(backend)
         except KeyError or ImportError:
-            raise ex.UnknownModelHandlerException(name)
+            msg = "{} ({})".format(name, self.err_message) if self.err_message\
+                                                           else name
+            raise ex.UnknownModelHandlerException(msg)
 
     def opts(self, name):
         return self.list().get(name, {}).get('OPTIONS', {})
