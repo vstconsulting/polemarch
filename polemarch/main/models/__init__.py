@@ -15,6 +15,7 @@ from .projects import Project
 from .users import TypesPermissions
 from .tasks import Task, PeriodicTask, History
 from ..validators import validate_hostname
+from ..utils import raise_context
 
 
 #####################################
@@ -70,6 +71,7 @@ def clear_service(instance, **kwargs):
 
 
 @receiver(signals.pre_delete, sender=Project)
+@raise_context()
 def clean_dirs(instance, **kwargs):
     instance.repo_class.delete()
 
