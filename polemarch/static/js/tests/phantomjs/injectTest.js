@@ -225,6 +225,7 @@ function qunitAddTests()
     qunitAddTests_hosts()
     qunitAddTests_groups()
     qunitAddTests_inventories()
+    qunitAddTests_projects()
 }
 
 /**
@@ -586,7 +587,7 @@ function qunitAddTests_groups()
 
 
 /**
- * Тестирование groups
+ * Тестирование inventories
  */
 function qunitAddTests_inventories()
 { 
@@ -694,6 +695,120 @@ function qunitAddTests_inventories()
         }).fail(function(){
             assert.ok(false, 'Ошибка при delete Item');
             render("inventories-delete-inventory", 1000, done)
+        })
+    });
+}
+
+/**
+ * Тестирование projects
+ */
+function qunitAddTests_projects()
+{ 
+    syncQUnit.addTest('projects', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"projects"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню projects');
+            render("projects", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню projects');
+            render("projects", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('new-project', function ( assert )
+    {
+        var done = assert.async();
+
+        // Открытие пункта меню new-project
+        $.when(spajs.open({ menuId:"new-project"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-project');
+            render("groups-new-project", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню new-project');
+            render("groups-new-project", 1000, done)
+        })
+    });
+
+    var t = new Date();
+    t = t.getTime()
+
+    syncQUnit.addTest('new-project-save', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        // Заполнение формы с данными project
+        $("#new_project_name").val("test-project-"+t);
+        $("#new_project_repository").val("git://test-project-"+t);
+
+        $("#new_json_name").val("test1");
+        $("#new_json_value").val("val1");
+        pmProjects.jsonEditorAddVar();
+
+        $("#new_json_name").val("test2");
+        $("#new_json_value").val("val2");
+        pmProjects.jsonEditorAddVar();
+
+
+        // Отправка формы с данными project
+        $.when(pmProjects.addItem()).done(function()
+        {
+            assert.ok(true, 'Успешно project add Item');
+            render("groups-add-new-project", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при project add Item');
+            render("groups-add-new-project", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('update-project', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+
+        $("#project_"+itemId+"_name").val("test2-project-"+t);
+
+        $("#new_json_name").val("test3");
+        $("#new_json_value").val("val3");
+        pmProjects.jsonEditorAddVar();
+
+
+        $.when(pmProjects.updateItem(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно update add Item');
+            render("projects-update-project", 1000, done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при update add Item');
+            render("projects-update-project", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('delete-project', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?project-5
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+
+        // Удаление project.
+        $.when(pmProjects.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete Item');
+            render("projects-delete-project", 1000, done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete Item');
+            render("projects-delete-project", 1000, done)
         })
     });
 }
