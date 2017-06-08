@@ -16,6 +16,10 @@ RQF = os.path.join(os.path.dirname(__file__), 'requirements.txt')
 with open(RQF) as req:
     REQUIRES = req.read().strip().split('\n')
 
+RQF_git = os.path.join(os.path.dirname(__file__), 'requirements-git.txt')
+with open(RQF) as req:
+    REQUIRES_git = req.read().strip().split('\n')
+
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
@@ -48,6 +52,8 @@ setup(
     install_requires=[
         "django>=1.8,<1.12",
     ] + REQUIRES,
+    dependency_links=[
+    ] + REQUIRES_git,
     extras_require={
         "apache": [
             "mod_wsgi==4.5.14"

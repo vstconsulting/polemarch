@@ -174,9 +174,12 @@ class Group(_AbstractModel):
         hvars, key = self.get_generated_vars()
         keys = [key] if key is not None else []
         if self.children:
-            objects = "\n".join(self.groups.values_list("name", flat=True))
+            groups = self.groups.values_list("name",
+                                             flat=True).order_by("name")
+            objects = "\n".join(groups)
         else:
-            hosts_strings, keys = _get_strings(self.hosts.all(), keys)
+            hosts = self.hosts.all().order_by("name")
+            hosts_strings, keys = _get_strings(hosts, keys)
             objects = "\n".join(hosts_strings)
         data = dict(vars=self.vars_string(hvars, var_sep),
                     objects=objects, group=self)
@@ -204,11 +207,12 @@ class Inventory(_AbstractModel):
 
     @property
     def hosts_list(self):
-        return self.hosts.all()
+        return self.hosts.all().order_by("name")
 
     def get_inventory(self):
         hvars, key = self.get_generated_vars()
-        hosts_strings, keys = _get_strings(list(self.hosts_list), [key])
+        keys = [key] if key else list()
+        hosts_strings, keys = _get_strings(list(self.hosts_list), keys)
         groups_strings, keys = _get_strings(list(self.groups_list), keys)
         inv = get_render("models/inventory",
                          dict(groups=groups_strings, hosts=hosts_strings,

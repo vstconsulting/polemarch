@@ -1,6 +1,7 @@
 include polemarch/README.md
 include polemarch/main/settings.ini
 include requirements.txt
+include requirements-git.txt
 recursive-include etc *
 recursive-include polemarch/static *
 recursive-include polemarch/*/templates *

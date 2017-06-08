@@ -71,6 +71,9 @@ class BaseTestCase(TestCase):
                          "{} != {}\n{}".format(resp.status_code, code,
                                                resp.rendered_content.decode()))
 
+    def post_result(self, url, code=None, *args, **kwargs):
+        return self.get_result("post", url, code, *args, **kwargs)
+
     def get_result(self, rtype, url, code=None, *args, **kwargs):
         '''
         Test request with returning result of request
