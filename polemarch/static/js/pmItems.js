@@ -102,6 +102,12 @@ function pmItems()
             $.notify("Empty varible name", "error");
             return;
         }
+        
+        if($("#json_"+name+"_value").length)
+        {
+            $.notify("This var already exists", "error");
+            return;
+        }
 
         $('#new_json_name').val('')
         $('#new_json_value').val('')

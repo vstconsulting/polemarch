@@ -22,27 +22,30 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Projects<br> 
-                    </div> 
+                        Projects
+                        <div class="form-group col-lg-2" style="float: right; margin: 0px; padding: 0px;">
+                            <input type="text"  placeholder="Search project by name" class="form-control" maxlength="255">
+                        </div>
+                    </div>
                     <div class="box-body">
                         <% for(var i in polemarch.model.projectslist.results){ %>
-                            <div class="row">  
+                            <div class="row">
                                 <div class="form-group col-lg-9">
-                                    <a href="/?project/<%- polemarch.model.projectslist.results[i].id %>"  
-                                        onclick="return spajs.openURL(this.href);" ><%- polemarch.model.projectslist.results[i].name %></a> 
+                                    <a href="/?project/<%- polemarch.model.projectslist.results[i].id %>"
+                                        onclick="return spajs.openURL(this.href);" ><%- polemarch.model.projectslist.results[i].name %></a>
                                 </div>
                                 <div class="form-group col-lg-1">
-                                    <span><%- polemarch.model.projectslist.results[i].status %></span> 
-                                </div> 
-                                
-                                <div class="form-group col-lg-2">
-                                    <a href="/?project/<%- polemarch.model.projectslist.results[i].id %>" 
-                                        class="btn btn-primary"
-                                        onclick="return spajs.openURL(this.href);" >Edit</a> 
+                                    <span><%- polemarch.model.projectslist.results[i].status %></span>
+                                </div>
 
-                                    <a href="/?project/<%- polemarch.model.projectslist.results[i].id %>" 
+                                <div class="form-group col-lg-2">
+                                    <a href="/?project/<%- polemarch.model.projectslist.results[i].id %>"
+                                        class="btn btn-primary"
+                                        onclick="return spajs.openURL(this.href);" >Edit</a>
+
+                                    <a href="/?project/<%- polemarch.model.projectslist.results[i].id %>"
                                         class="btn btn-danger"
-                                        onclick="spajs.showLoader(pmProjects.deleteItem(<%- polemarch.model.projectslist.results[i].id %>)); return false;" >Delete</a> 
+                                        onclick="spajs.showLoader(pmProjects.deleteItem(<%- polemarch.model.projectslist.results[i].id %>)); return false;" >Delete</a>
                                 </div>
                             </div>
                         <% } %>
@@ -103,20 +106,20 @@
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter project name"  id="project_<%- polemarch.model.projects[item_id].id %>_name" value="<%- polemarch.model.projects[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
-                            </div> 
-                        
+                            </div>
+
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Repository</label>
                                 <input type="text"  placeholder="Enter project repository"  id="project_<%- polemarch.model.projects[item_id].id %>_repository" value="<%- polemarch.model.projects[item_id].repository %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
-                            </div> 
-                        </div> 
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
             <%= pmProjects.jsonEditor(polemarch.model.projects[item_id].vars) %>
         </div>
-        
+
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -130,7 +133,7 @@
                         <div class="row">
                             <~ polemarch.model.projects[item_id].groups >
                                 <% console.log("projects", item_id, polemarch.model.projects[item_id].groups) %>
-                                <% for(var i in polemarch.model.projects[item_id].groups){ %> 
+                                <% for(var i in polemarch.model.projects[item_id].groups){ %>
                                     <div class="form-group col-lg-2">
                                         <label class="control-label" >Group</label>
                                         <%- polemarch.model.projects[item_id].groups[i].name %>
@@ -146,7 +149,7 @@
                                     </div>
                                 <% } %>
                             <~>
-                            
+
                             <~ polemarch.model.projects[item_id].inventories >
                                 <% for(var i in polemarch.model.projects[item_id].inventories){ %>
                                     <div class="form-group col-lg-2">
@@ -158,20 +161,20 @@
                         </div>
                         <div class="row">
                             <div class="form-group col-lg-12">
-                                
+
                                     <button
                                             type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Manage existing groups</button>
                                     <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
-                                
+
                                     <button type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Manage existing hosts</button>
                                     <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
-                               
+
                                     <button type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubInventoriesForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
@@ -208,7 +211,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        New project<br> 
+                        New project<br>
                     </div>
                     <div class="box-body">
 
@@ -217,13 +220,13 @@
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter project name"  id="new_project_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
-                            </div> 
-                        
+                            </div>
+
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Repository</label>
                                 <input type="text"  placeholder="Enter project repository"  id="new_project_repository" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
-                            </div> 
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -240,14 +243,14 @@
         <section class="col-lg-12">
             <div class="box box-info">
                 <div class="box-header with-border">
-                    Edit sub inventories<br> 
+                    Edit sub inventories<br>
                 </div>
                 <div class="box-body">
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
                                 <% for(var i in polemarch.model.inventories){ %>
-                                    <option 
+                                    <option
                                         value="<%- polemarch.model.inventories[i].id %>"
                                         <% if(pmProjects.hasInventories(item_id, polemarch.model.inventories[i].id)){ %>selected<% } %> ><%- polemarch.model.inventories[i].name %></option>
                                 <% } %>
@@ -266,21 +269,21 @@
     </div>
 </script>
 
-  
+
 <!-- Добавление списка подгрупп к прокекту -->
 <script type="text/x-just" data-just="add_existing_groups_to_project">
     <div class="row" id="add_existing_item_to_project">
         <section class="col-lg-12">
             <div class="box box-info">
                 <div class="box-header with-border">
-                    Edit sub groups<br> 
+                    Edit sub groups<br>
                 </div>
                 <div class="box-body">
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
                                 <% for(var i in polemarch.model.groups){ %>
-                                    <option 
+                                    <option
                                         value="<%- polemarch.model.groups[i].id %>"
                                         <% if(pmProjects.hasGroups(item_id, polemarch.model.groups[i].id)){ %>selected<% } %> ><%- polemarch.model.groups[i].name %></option>
                                 <% } %>
@@ -315,8 +318,8 @@
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
                                 <% for(var i in polemarch.model.hosts){ %>
-                                    <option 
-                                        value="<%- polemarch.model.hosts[i].id %>" 
+                                    <option
+                                        value="<%- polemarch.model.hosts[i].id %>"
                                         <% if(pmProjects.hasHosts(item_id, polemarch.model.hosts[i].id)){ %>selected<% } %> ><%- polemarch.model.hosts[i].name %></option>
                                 <% } %>
                             </select>
@@ -332,8 +335,8 @@
             </div>
         </section>
     </div>
-</script>      
-        
+</script>
+
 
 <!-- Список inventory -->
 <script type="text/x-just" data-just="inventories_list">
@@ -356,7 +359,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Inventories<br> 
+                        Inventories<br>
                     </div>
                     <div class="box-body">
                         <% for(var i in polemarch.model.inventorieslist.results){ %>
@@ -420,14 +423,14 @@
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter inventory name"  id="inventory_<%- polemarch.model.inventories[item_id].id %>_name" value="<%- polemarch.model.inventories[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
-                            </div> 
-                        </div> 
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
             <%= pmInventories.jsonEditor(polemarch.model.inventories[item_id].vars) %>
         </div>
-        
+
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -461,20 +464,20 @@
                         </div>
                         <div class="row">
                             <div class="form-group col-lg-12">
-                                
+
                                     <button
                                             type="button"
                                             onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Manage existing groups</button>
                                             <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
-                                
+
                                     <button type="button"
                                             onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Manage existing hosts</button>
                                             <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
-                               
+
                             </div>
                         </div>
                     </div>
@@ -506,7 +509,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        New inventory<br> 
+                        New inventory<br>
                     </div>
                     <div class="box-body">
 
@@ -515,7 +518,7 @@
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter inventory name"  id="new_inventory_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
-                            </div> 
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -526,21 +529,21 @@
     </section>
 </script>
 
-  
+
 <!-- Добавление списка подгрупп к inventory -->
 <script type="text/x-just" data-just="add_existing_groups_to_inventory">
     <div class="row" id="add_existing_item_to_inventory">
         <section class="col-lg-12">
             <div class="box box-info">
                 <div class="box-header with-border">
-                    Edit sub groups<br> 
+                    Edit sub groups<br>
                 </div>
                 <div class="box-body">
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
                                 <% for(var i in polemarch.model.groups){ %>
-                                    <option 
+                                    <option
                                         value="<%- polemarch.model.groups[i].id %>"
                                         <% if(pmInventories.hasGroups(item_id, polemarch.model.groups[i].id)){ %>selected<% } %> ><%- polemarch.model.groups[i].name %></option>
                                 <% } %>
@@ -575,8 +578,8 @@
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
                                 <% for(var i in polemarch.model.hosts){ %>
-                                    <option 
-                                        value="<%- polemarch.model.hosts[i].id %>" 
+                                    <option
+                                        value="<%- polemarch.model.hosts[i].id %>"
                                         <% if(pmInventories.hasHosts(item_id, polemarch.model.hosts[i].id)){ %>selected<% } %> ><%- polemarch.model.hosts[i].name %></option>
                                 <% } %>
                             </select>
@@ -592,8 +595,8 @@
             </div>
         </section>
     </div>
-</script>      
-        
+</script>
+
 <!-- Список пользователей -->
 <script type="text/x-just" data-just="users_list">
     <section class="content-header">
@@ -615,7 +618,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Users<br> 
+                        Users<br>
                     </div>
                     <div class="box-body">
                         <% for(var i in polemarch.model.userslist.results){ %>
@@ -763,7 +766,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        New user<br> 
+                        New user<br>
                     </div>
                     <div class="box-body">
 
@@ -854,7 +857,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Hosts<br> 
+                        Hosts<br>
                     </div>
                     <div class="box-body">
                         <% for(var i in polemarch.model.hostslist.results){ %>
@@ -960,7 +963,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        New user<br> 
+                        New user<br>
                     </div>
                     <div class="box-body">
 
@@ -993,8 +996,8 @@
 <!-- jsonEditor - jsonEditorLine-->
 <script type="text/x-just" data-just="jsonEditorLine">
     <div class="form-group col-lg-6" id="json_<%- name %>_line">
-     
-        <label class="control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>" for="#json_<%- name %>"><%- name %></label> 
+
+        <label class="control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>" for="#json_<%- name %>"><%- name %></label>
         <div class="input-group">
             <input type="text"
                    placeholder="Enter value"
@@ -1012,11 +1015,11 @@
 
 <!-- jsonEditor -->
 <script type="text/x-just" data-just="jsonEditor">
-    
+
 <section class="col-lg-12">
     <div class="box box-info">
         <div class="box-header with-border">
-            Varibals<br> 
+            Varibals<br>
         </div>
         <div class="box-body">
             <div class="row">
@@ -1037,14 +1040,14 @@
                 </div>
 
                 <div class="form-group col-lg-2">
-                    <label class="control-label" for="jsonEditorAdd">New varible value</label> 
-                    <input type="text" placeholder="Enter value" id="new_json_value" value=""  class="form-control" >  
+                    <label class="control-label" for="jsonEditorAdd">New varible value</label>
+                    <input type="text" placeholder="Enter value" id="new_json_value" value=""  class="form-control" >
                 </div>
             </div>
 
             <div class="row">
-                <div class="form-group col-lg-1"> 
-                    <span class="btn btn-primary" onclick="pmHosts.jsonEditorAddVar();" >Add varible</span> 
+                <div class="form-group col-lg-1">
+                    <span class="btn btn-primary" onclick="pmHosts.jsonEditorAddVar();" >Add varible</span>
                 </div>
             </div>
         </div>
@@ -1075,7 +1078,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Group<br> 
+                        Group<br>
                     </div>
                     <div class="box-body">
                         <% for(var i in polemarch.model.groupslist.results){ %>
@@ -1207,14 +1210,14 @@
         <section class="col-lg-12">
             <div class="box box-info">
                 <div class="box-header with-border">
-                    Edit sub groups<br> 
+                    Edit sub groups<br>
                 </div>
                 <div class="box-body">
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
                                 <% for(var i in polemarch.model.groups){ %>
-                                    <option 
+                                    <option
                                         value="<%- polemarch.model.groups[i].id %>"
                                         <% if(pmGroups.hasGroups(item_id, polemarch.model.groups[i].id)){ %>selected<% } %> ><%- polemarch.model.groups[i].name %></option>
                                 <% } %>
@@ -1249,8 +1252,8 @@
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
                                 <% for(var i in polemarch.model.hosts){ %>
-                                    <option 
-                                        value="<%- polemarch.model.hosts[i].id %>" 
+                                    <option
+                                        value="<%- polemarch.model.hosts[i].id %>"
                                         <% if(pmGroups.hasHosts(item_id, polemarch.model.hosts[i].id)){ %>selected<% } %> ><%- polemarch.model.hosts[i].name %></option>
                                 <% } %>
                             </select>
@@ -1290,7 +1293,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        New group<br> 
+                        New group<br>
                     </div>
                     <div class="box-body">
                         <div class="row">
