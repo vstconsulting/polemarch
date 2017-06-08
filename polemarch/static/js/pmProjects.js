@@ -448,10 +448,61 @@ pmProjects.setSubHosts = function(item_id, hosts_ids)
             } 
             $.notify("Save", "success");
         },
-        error:function(e)
+        error:function(e) 
         {
             console.log("project "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
+}
+
+pmProjects.search = function(query)
+{
+    console.log("search", query) 
+    if(!query)
+    {
+        $(".projects-list .project-row").show();
+        return;
+    }
+    
+    for(var i in polemarch.model.projectslist.results)
+    {
+        var val = polemarch.model.projectslist.results[i]
+        
+        var position = val.name.indexOf(query);
+        var el = $(".projects-list .project-"+val.id)
+        if( position == -1)
+        {
+            position = 999;
+            el.hide();
+        }
+        else
+        {
+            el.show();
+        }
+        
+        $(".projects-list .project-"+val.id).attr({ 'data-position':position });
+    }
+    
+    var sortItems = $(".projects-list").children();
+    sortItems.sort(fSort);
+    
+    sortItems.detach().appendTo($(".projects-list"));
+}
+
+function fSort(a, b)
+{
+    a = parseInt($(a).attr("data-position"));
+    if(isNaN(a))
+    {
+        return 1;
+    }
+
+    b = parseInt($(b).attr("data-position"));
+    if(isNaN(b))
+    {
+        return -1;
+    }
+
+    return a-b;
 }

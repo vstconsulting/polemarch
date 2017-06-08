@@ -384,7 +384,7 @@ if(!window.spajs)
     {
         var sortmenu = targetBlock.children();
 
-        sortmenu.sort(function f(a, b)
+        sortmenu.sort(function(a, b)
         {
             a = parseInt($(a).attr("data-index"));
             if(isNaN(a))
