@@ -1,9 +1,9 @@
 djangorestframework>=3.4, <4.0
 django-filter
 django-crispy-forms
-git+http://cepreu@git.vst.lan/vst/celery.git#egg=celery
 django-celery-beat==1.0.1
 configparser==3.5.0b2
+celery<=4.0.3
 six
 sqlalchemy
 python-novaclient==7.1.0

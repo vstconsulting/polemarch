@@ -61,7 +61,7 @@ id -g %{file_permissions_group} &>/dev/null || groupadd %{file_permissions_group
 make build
 %{venv_cmd} %{venv_dir}
 %{venv_pip} dist/%{name}-%{unmangled_version}.tar.gz[apache]
-%{venv_pip} -r requirements.txt
+%{venv_pip} -r requirements.txt -r requirements-git.txt
 cd %{buildroot}
 cd -
 # RECORD files are used by wheels for checksum. They contain path names which
