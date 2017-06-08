@@ -69,12 +69,15 @@ class InventoryFilter(_BaseHGIFilter):
                   'name',)
 
 
-class ProjectFilter(_BaseFilter):
+class ProjectFilter(_BaseHGIFilter):
+    status        = CharFilter(method=extra_filter)
+    status__not   = CharFilter(method=extra_filter)
 
     class Meta:
         model = models.Project
         fields = ('id',
-                  'name',)
+                  'name',
+                  'status',)
 
 
 class TaskFilter(_BaseFilter):
