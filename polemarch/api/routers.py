@@ -8,6 +8,7 @@ from rest_framework import routers
 
 
 class _AbstractRouter(routers.DefaultRouter):
+    custom_urls = []
 
     def __init__(self, *args, **kwargs):
         self.permission_classes = kwargs.pop("perms", None)
@@ -23,6 +24,11 @@ class _AbstractRouter(routers.DefaultRouter):
                 'it does not have a `.queryset` or `.model` attribute.'
             return model._meta.object_name.lower()
         return super(_AbstractRouter, self).get_default_base_name(viewset)
+
+    def register_view(self, prefix, view, name=None):
+        if name is None:
+            name = view().get_view_name()
+        self.custom_urls.append((prefix, view, name))
 
 
 class APIRouter(_AbstractRouter):
@@ -50,7 +56,6 @@ class APIRouter(_AbstractRouter):
 
 class MainRouter(_AbstractRouter):
     routers = []
-    custom_urls = []
 
     def get_api_root_view(self, *args, **kwargs):
         api_root_dict = OrderedDict()
@@ -84,11 +89,6 @@ class MainRouter(_AbstractRouter):
         if name is None:
             name = router.root_view_name
         self.routers.append((prefix, router, name))
-
-    def register_view(self, prefix, view, name=None):
-        if name is None:
-            name = view().get_view_name()
-        self.custom_urls.append((prefix, view, name))
 
     def get_urls(self):
         urls = super(MainRouter, self).get_urls()

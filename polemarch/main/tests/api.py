@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.test import Client
 from django.contrib.auth.hashers import make_password
 
 from .tasks import ApiTasksTestCase, \
@@ -18,6 +19,7 @@ class ApiUsersTestCase(BaseTestCase):
         client = self._login()
         response = self.client.get('/login/')
         self.assertRedirects(response, "/")
+        self.result(client.delete, '/api/v1/token/', 400)
         self._logout(client)
         data = dict(username="sometestuser",
                     email="admin@test.lan",
@@ -33,6 +35,24 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertRedirects(response, self.login_url + '?next=/')
         response = self.client.get('/help/')
         self.assertEqual(response.status_code, 200)
+
+        client = Client()
+        data = {'username': self.user.data['username'],
+                'password': self.user.data['password']}
+        result = self.result(client.post, '/api/v1/token/', data=data)
+        self.assertIn("token", result)
+        headers = dict(
+            HTTP_AUTHORIZATION="Token {}".format(result['token']),
+            content_type="application/json"
+        )
+        response = client.get('/api/v1/', **headers)
+        self.assertEqual(response.status_code, 200)
+        response = client.get('/api/v1/')
+        self.assertNotEqual(response.status_code, 200)
+        result = self.result(client.delete, '/api/v1/token/', 204, **headers)
+        self.assertIn("detail", result)
+        response = client.get('/api/v1/', **headers)
+        self.assertNotEqual(response.status_code, 200)
 
     def test_api_users_get(self):
         client = self._login()
@@ -176,7 +196,7 @@ class APITestCase(ApiUsersTestCase, ApiEnvsTestCase,
     def test_api_versions_list(self):
         client = self._login()
         result = self.result(client.get, "/api/")
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 2)
         self.assertTrue(result.get('v1', False))
         self._logout(client)
 
