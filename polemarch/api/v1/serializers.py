@@ -398,6 +398,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
 
 class ProjectSerializer(_InventoryOperations):
     status = serializers.CharField(read_only=True)
+    type   = serializers.CharField(read_only=True)
     vars   = DictField(required=False, write_only=True)
 
     class Meta:
@@ -405,6 +406,7 @@ class ProjectSerializer(_InventoryOperations):
         fields = ('id',
                   'name',
                   'status',
+                  'type',
                   'vars',
                   'url',)
 
