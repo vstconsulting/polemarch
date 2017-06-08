@@ -49,6 +49,10 @@ class Project(_AbstractModel):
         repo_type = self.vars.get("repo_type", "Null")
         return self.handlers(repo_type, self)
 
+    @property
+    def type(self):
+        return self.variables.get(key="repo_type").value
+
     def set_status(self, status):
         self.status = status
         self.save()

@@ -23,6 +23,10 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
                           name=self.prj1.name,
                           repository="git@ex.us:dir/rep1.git")
 
+        result = self.get_result("get", url)
+        for pr in result['results']:
+            self.assertEqual(pr['type'], "TEST")
+
         result = self.get_result("get", url+"supported-repos/")
         self.assertCount(result, 3)
         self.assertIn("TEST", result, result)
