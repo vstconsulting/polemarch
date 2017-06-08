@@ -224,225 +224,244 @@ var deepExtend = function (/*obj_1, [obj_2], [obj_N]*/) {
  * <h1 <%= anyObject.justAttr('anyValue', 'data-test', function(v){return (v+"").replace("a", "G") }) %> >Any text</h1>
  * 
  */ 
-if (!Object.prototype.justHtml)
+if (!Object.prototype.justHtml || true)
 {
-    var justStrip = function(html)
-    {
-       var tmp = document.createElement("DIV");
-       tmp.innerHTML = html;
-       return tmp.textContent || tmp.innerText || "";
-    }
-
-    var _just_Id = 0;
-    var setValue = function (opt)
-    {
-        _just_Id++;
-        var id = _just_Id;
-
-        if(!opt.callBack)
+    var justWatch = {
+        
+        justStrip:function(html)
         {
-            opt.callBack = function(val){ return val;}
-        }
-
-        var thisObj = this[opt.prop]
-        this[opt.prop] = "__justWatch_test";
-
-        if( this[opt.prop] === "__justWatch_test")
+           var tmp = document.createElement("DIV");
+           tmp.innerHTML = html;
+           return tmp.textContent || tmp.innerText || "";
+        },
+        
+        addMethod:function(setter, prop, method)
         {
-            this[opt.prop] = thisObj
-            var newval = {
-                val:this[opt.prop],
-                just_ids:[{id:id, callBack:opt.callBack, type:opt.type, className:opt.className, attrName:opt.attrName, customData:opt.customData}],
+            Object.defineProperty(this[prop], method, {
+                    enumerable: false
+                  , configurable: true
+                  , writable: true
+                  , value: function(){
+                      console.log("watch method", method, arguments);
+                      Array.prototype[method].apply(this, arguments);
+                      setter.apply(this,["__justWatch_update"]);
+                      return this; 
+                  }
+            }); 
+        },
+        
+        _just_Id:0,  
+        
+        methods:['pop',
+            'push',
+            'reduce',
+            'reduceRight',
+            'reverse',
+            'shift',
+            'slice',
+            'some',
+            'sort',
+            'splice',
+            'unshift',
+            'unshift'
+        ],
+        
+        setValue:function (opt)
+        {
+            /*
+             * Методы массивов применяем для реактивности массива
+             */
+            justWatch._just_Id++;
+            var id = justWatch._just_Id;
+
+            if(!opt.callBack)
+            {
+                opt.callBack = function(val){ return val;}
             }
 
-            if (delete this[opt.prop])
+            var thisObj = this[opt.prop]
+            this[opt.prop] = "__justWatch_test";
+
+            if( this[opt.prop] === "__justWatch_test")
             {
-                var getter = function ()
-                {
-                    return newval.val;
+                this[opt.prop] = thisObj
+                var newval = {
+                    val:this[opt.prop],
+                    just_ids:[{id:id, callBack:opt.callBack, type:opt.type, className:opt.className, attrName:opt.attrName, customData:opt.customData}],
                 }
 
-                var setter = function (val)
+                if (delete this[opt.prop])
                 {
-                    if(val && val == "__justWatch_test")
+                    var getter = function ()
                     {
-                        return val;
+                        return newval.val;
                     }
 
-                    if(val &&  val.__add_justHtml_test === "__justWatch_test")
+                    var setter = function (val)
                     {
-                        console.log("setter add", newval);
-                        newval.just_ids.push({
-                            id:val.id,
-                            attrName:val.attrName,
-                            callBack:val.callBack,
-                            className:val.className,
-                            customData:val.customData,
-                            type:val.type
-                        })
-                        return val;
-                    }
+                        if(val === "__justWatch_test")
+                        {
+                            return val;
+                        }
 
-                    if(val && val !== "__justWatch_update")
-                    {
-                        newval.val = val;
-                    }
- 
-                    console.log("setter", newval);
-                    for(var i in newval.just_ids)
-                    {
-                        if(newval.just_ids[i].type == 'innerHTML')
+                        if(val.__add_justHtml_test === "__justWatch_test")
                         {
-                            var el = document.getElementById("_justWatch"+newval.just_ids[i].id)
-                            if(el) el.innerHTML = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+                            console.log("setter add", newval);
+                            newval.just_ids.push({
+                                id:val.id,
+                                attrName:val.attrName,
+                                callBack:val.callBack,
+                                className:val.className,
+                                customData:val.customData,
+                                type:val.type
+                            })
+                            return val;
                         }
-                        else if(newval.just_ids[i].type == 'textContent')
+
+                        if(val !== "__justWatch_update")
                         {
-                            var el = document.getElementById("_justWatch"+newval.just_ids[i].id)
-                            if(el) el.textContent = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
-                        }
-                        else if(newval.just_ids[i].type == 'class')
-                        {
-                            var el = document.getElementsByClassName("just-watch-class-"+newval.just_ids[i].id)
-                            
-                            var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData) 
-                            console.log("class", valT)
-                            if(!valT)
+                            newval.val = val;
+
+                            if(Array.isArray(val))
                             {
-                                if(el && el.length)
-                                    el[0].className = el[0].className
-                                        .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
-                                        .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
-                                        .replace(new RegExp(" +"+newval.just_ids[i].className+"$","g"), "")
-                            }
-                            else
-                            {
-                                if(el && el.length)
-                                    el[0].className = el[0].className
-                                        .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
-                                        .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
-                                        .replace(new RegExp(" "+newval.just_ids[i].className+"$","g"), "")
-                                        + " " + newval.just_ids[i].className
-                            }
-                        }
-                        else if(newval.just_ids[i].type == 'attr')
-                        {
-                            var el = document.querySelectorAll("[data-just-watch-"+newval.just_ids[i].id+"]");
-                            if(el && el.length)
-                            {
-                                var attrVal = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
-                                if(attrVal)
+                                for(var i in justWatch.methods)
                                 {
-                                    el[0].setAttribute(newval.just_ids[i].attrName, attrVal);
+                                    justWatch.addMethod.apply(this, [setter, opt.prop, justWatch.methods[i]])
+                                } 
+                            }
+                        }
+
+                        console.log("setter", newval);
+                        for(var i in newval.just_ids)
+                        {
+                            if(newval.just_ids[i].type == 'innerHTML')
+                            {
+                                var el = document.getElementById("_justWatch"+newval.just_ids[i].id)
+                                if(el) el.innerHTML = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+                            }
+                            else if(newval.just_ids[i].type == 'textContent')
+                            {
+                                var el = document.getElementById("_justWatch"+newval.just_ids[i].id)
+                                if(el) el.textContent = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+                            }
+                            else if(newval.just_ids[i].type == 'class')
+                            {
+                                var el = document.getElementsByClassName("just-watch-class-"+newval.just_ids[i].id)
+
+                                var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData) 
+                                console.log("class", valT)
+                                if(!valT)
+                                {
+                                    if(el && el.length)
+                                        el[0].className = el[0].className
+                                            .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
+                                            .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
+                                            .replace(new RegExp(" +"+newval.just_ids[i].className+"$","g"), "")
                                 }
                                 else
                                 {
-                                    el[0].removeAttribute(newval.just_ids[i].attrName);
+                                    if(el && el.length)
+                                        el[0].className = el[0].className
+                                            .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
+                                            .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
+                                            .replace(new RegExp(" "+newval.just_ids[i].className+"$","g"), "")
+                                            + " " + newval.just_ids[i].className
+                                }
+                            }
+                            else if(newval.just_ids[i].type == 'attr')
+                            {
+                                var el = document.querySelectorAll("[data-just-watch-"+newval.just_ids[i].id+"]");
+                                if(el && el.length)
+                                {
+                                    var attrVal = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+                                    if(attrVal)
+                                    {
+                                        el[0].setAttribute(newval.just_ids[i].attrName, attrVal);
+                                    }
+                                    else
+                                    {
+                                        el[0].removeAttribute(newval.just_ids[i].attrName);
+                                    }
                                 }
                             }
                         }
+                        return val;
                     }
-                    return val;
-                }
 
-                // can't watch constants
-                Object.defineProperty(this, opt.prop, {
-                          get: getter
-                        , set: setter
-                        , enumerable: true
-                        , configurable: true
-                });
-                
-                if(Array.isArray(newval.val))
-                { 
-                    /*
-                     * Методы массивов применяем для реактивности массива
-                     */
-                    var methods = ['pop',
-                    'push',
-                    'reduce',
-                    'reduceRight',
-                    'reverse',
-                    'shift',
-                    'slice',
-                    'some',
-                    'sort',
-                    'splice',
-                    'unshift',
-                    'unshift']
-                
-                    for(var i in methods)
-                    {
-                        Object.defineProperty(this[opt.prop], methods[i], {
-                                enumerable: false
-                              , configurable: true
-                              , writable: true
-                              , value: function(){
-                                  Array.prototype[methods[i]].apply(this,arguments);
-                                  setter.apply(this,["__justWatch_update"]);
-                                  console.log(methods[i], arguments);
-                                  return this; 
-                              }
-                        });  
-                    } 
-                }
-            }
-        }
-        else
-        {
-            this[opt.prop] = {
-                __add_justHtml_test:"__justWatch_test",
-                id:id,
-                type:opt.type,
-                callBack:opt.callBack,
-                attrName:opt.attrName,
-                className:opt.className,
-                customData:opt.customData
-            }
-        }
+                    // can't watch constants
+                    Object.defineProperty(this, opt.prop, {
+                              get: getter
+                            , set: setter
+                            , enumerable: true
+                            , configurable: true
+                    });
 
-        if(opt.type == 'innerHTML')
-        {
-            return "<div id='_justWatch"+id+"' class='just-watch just-watch-html' style='display: inline;' >"+opt.callBack(this[opt.prop], opt.customData)+"</div>";
-        }
-        else if(opt.type == 'textContent')
-        { 
-            return "<div id='_justWatch"+id+"' style='display: inline;' class='just-watch just-watch-text' >"+justStrip(opt.callBack(this[opt.prop], opt.customData))+"</div>";
-        }
-        else if(opt.type == 'class')
-        {
-            var val = opt.callBack(this[opt.prop], opt.customData)
-            if(val)
-            {
-                return " just-watch just-watch-class just-watch-class-"+id+" "+justStrip(opt.className)+" ";
+                    if(Array.isArray(newval.val))
+                    { 
+                        for(var i in justWatch.methods)
+                        {
+                            justWatch.addMethod.apply(this, [setter, opt.prop, justWatch.methods[i]])
+                        } 
+                    }
+                }
             }
             else
             {
-                return " just-watch just-watch-class just-watch-class-"+id+" ";
+                this[opt.prop] = {
+                    __add_justHtml_test:"__justWatch_test",
+                    id:id,
+                    type:opt.type,
+                    callBack:opt.callBack,
+                    attrName:opt.attrName,
+                    className:opt.className,
+                    customData:opt.customData
+                }
             }
-        }
-        else if(opt.type == 'attr')
-        {
-            var val = opt.callBack(this[opt.prop], opt.customData)
-            if(val)
+
+            if(opt.type == 'innerHTML')
             {
-                return " data-just-watch-"+id+" "+opt.attrName+"=\""+ justStrip(val).replace(/\"/g, "\\\"") +"\"";
+                return "<div id='_justWatch"+id+"' class='just-watch just-watch-html' style='display: inline;' >"+opt.callBack(this[opt.prop], opt.customData)+"</div>";
             }
-            else
+            else if(opt.type == 'textContent')
+            { 
+                return "<div id='_justWatch"+id+"' style='display: inline;' class='just-watch just-watch-text' >"+justWatch.justStrip(opt.callBack(this[opt.prop], opt.customData))+"</div>";
+            }
+            else if(opt.type == 'class')
             {
-                return " data-just-watch-"+id+" ";
+                var val = opt.callBack(this[opt.prop], opt.customData)
+                if(val)
+                {
+                    return " just-watch just-watch-class just-watch-class-"+id+" "+justWatch.justStrip(opt.className)+" ";
+                }
+                else
+                {
+                    return " just-watch just-watch-class just-watch-class-"+id+" ";
+                }
             }
+            else if(opt.type == 'attr')
+            {
+                var val = opt.callBack(this[opt.prop], opt.customData)
+                if(val)
+                {
+                    return " data-just-watch-"+id+" "+opt.attrName+"=\""+ justWatch.justStrip(val).replace(/\"/g, "\\\"") +"\"";
+                }
+                else
+                {
+                    return " data-just-watch-"+id+" ";
+                }
+            }
+
+            return opt.callBack(this[opt.prop], opt.customData)
         }
 
-        return opt.callBack(this[opt.prop], opt.customData)
-    }
-
+    } 
+ 
     // Проставляет html код значения
     Object.defineProperty(Object.prototype, "justHtml", {
         enumerable: false
       , configurable: true
       , writable: false
-      , value: function(prop, callBack, customData){ return setValue.apply(this, [{type:'innerHTML', prop:prop, callBack:callBack, customData:customData}])
+      , value: function(prop, callBack, customData){ return justWatch.setValue.apply(this, [{type:'innerHTML', prop:prop, callBack:callBack, customData:customData}])
       }
     });
  
@@ -451,7 +470,7 @@ if (!Object.prototype.justHtml)
         enumerable: false
       , configurable: true
       , writable: false
-      , value: function(prop, callBack, customData){ return setValue.apply(this, [{type:'textContent', prop:prop, callBack:callBack, customData:customData}])}
+      , value: function(prop, callBack, customData){ return justWatch.setValue.apply(this, [{type:'textContent', prop:prop, callBack:callBack, customData:customData}])}
     });
 
     // Проставляет css class
@@ -461,7 +480,7 @@ if (!Object.prototype.justHtml)
       , writable: false
       , value: function(prop, className, callBack, customData)
         { 
-            return setValue.apply(this, [{
+            return justWatch.setValue.apply(this, [{
                     type:'class',
                     prop:prop,
                     className:className,
@@ -471,12 +490,12 @@ if (!Object.prototype.justHtml)
         }
     });
 
-    // Проставляет css class
+    // Проставляет атрибут
     Object.defineProperty(Object.prototype, "justAttr", {
         enumerable: false
       , configurable: true
       , writable: false
-      , value: function(prop, attrName, callBack, customData){ return setValue.apply(this, [{type:'attr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
+      , value: function(prop, attrName, callBack, customData){ return justWatch.setValue.apply(this, [{type:'attr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
     });
 }
 

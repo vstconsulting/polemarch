@@ -8,7 +8,7 @@
  *
  */
 var injectTestFile = "injectTest.js"
-var pageUrl = "http://192.168.0.12:8080"
+var pageUrl = "http://172.16.1.20:8080"
 var step = 0;
 
 function printArgs() {

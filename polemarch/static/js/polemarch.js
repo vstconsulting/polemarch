@@ -40,6 +40,13 @@ polemarch.model.hosts = {}
 polemarch.model.groupslist = []
 polemarch.model.groups = {} 
 
+polemarch.model.inventorieslist = []
+polemarch.model.inventories = {}
+            
+polemarch.model.projectslist = []
+polemarch.model.projects = {}
+
+
 polemarch.start = function(options)
 {
     for(var i in options)
@@ -56,7 +63,7 @@ polemarch.start = function(options)
 
     spajs.init({
         holder: polemarch.opt.holder,
-        menuId_url: "spa",
+        menu_url: undefined,
         useHistoryApi:true
     })
 
@@ -100,14 +107,14 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"users",
         name:"users",
-        urlregexp:[/^users$/],
+        urlregexp:[/^users$/, /^user$/],
         onOpen:pmUsers.showList
     })
 
     spajs.addMenu({
         id:"user",
         name:"user",
-        urlregexp:[/^user-([0-9]+)$/],
+        urlregexp:[/^user\/([0-9]+)$/],
         onOpen:pmUsers.showItem
     })
 
@@ -123,21 +130,21 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"hosts",
         name:"hosts",
-        urlregexp:[/^hosts$/],
+        urlregexp:[/^hosts$/, /^host$/],
         onOpen:pmHosts.showList
     })
 
     spajs.addMenu({
         id:"host",
         name:"host",
-        urlregexp:[/^host-([0-9]+)$/],
+        urlregexp:[/^host\/([0-9]+)$/],
         onOpen:pmHosts.showItem
     })
 
     spajs.addMenu({
         id:"newHost",
         name:"newHost",
-        urlregexp:[/^new-host$/, /^new-host-for-group-([0-9]+)$/],
+        urlregexp:[/^new-host$/, /^([A-z0-9_]+)\/([0-9]+)\/new-host$/],
         onOpen:pmHosts.showNewItemPage
     })
 
@@ -146,24 +153,67 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"groups",
         name:"groups",
-        urlregexp:[/^groups$/],
+        urlregexp:[/^groups$/, /^group$/],
         onOpen:pmGroups.showList
     })
 
     spajs.addMenu({
         id:"group",
         name:"group",
-        urlregexp:[/^group-([0-9]+)$/],
+        urlregexp:[/^group\/([0-9]+)$/],
         onOpen:pmGroups.showItem
     })
 
     spajs.addMenu({
         id:"newGroup",
         name:"newGroup",
-        urlregexp:[/^new-group$/, /^new-group-for-group-([0-9]+)$/],
+        urlregexp:[/^new-group$/, /^([A-z0-9_]+)\/([0-9]+)\/new-group$/],
         onOpen:pmGroups.showNewItemPage
     })
     
+    // inventories
+    spajs.addMenu({
+        id:"inventories",
+        name:"inventories",
+        urlregexp:[/^inventories$/, /^inventory$/],
+        onOpen:pmInventories.showList
+    })
+
+    spajs.addMenu({
+        id:"inventory",
+        name:"inventory",
+        urlregexp:[/^inventory\/([0-9]+)$/],
+        onOpen:pmInventories.showItem
+    })
+
+    spajs.addMenu({
+        id:"newInventory",
+        name:"newInventory",
+        urlregexp:[/^new-inventory$/, /^([A-z0-9_]+)\/([0-9]+)\/new-inventory$/],
+        onOpen:pmInventories.showNewItemPage
+    })
+    
+    // inventories
+    spajs.addMenu({
+        id:"projects",
+        name:"projects",
+        urlregexp:[/^projects$/, /^project$/],
+        onOpen:pmProjects.showList
+    })
+ 
+    spajs.addMenu({
+        id:"project",
+        name:"project",
+        urlregexp:[/^project\/([0-9]+)$/],
+        onOpen:pmProjects.showItem
+    })
+
+    spajs.addMenu({
+        id:"newProject",
+        name:"newProject",
+        urlregexp:[/^new-project$/],
+        onOpen:pmProjects.showNewItemPage
+    })
     
     spajs.openMenuFromUrl()
 }
@@ -175,6 +225,11 @@ polemarch.showHome = function(holder, menuInfo, data)
 
 polemarch.showErrors = function(res)
 {
+    if(!res)
+    {
+        return true;
+    }
+    
     if(res.responseJSON)
     {
         res = res.responseJSON
