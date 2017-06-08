@@ -1,6 +1,6 @@
 from django_celery_beat.schedulers import DatabaseScheduler
 
-from polemarch.main.utils import Lock
+from ..main.utils import Lock
 
 
 class SingletonDatabaseScheduler(DatabaseScheduler):

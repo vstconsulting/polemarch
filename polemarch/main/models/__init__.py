@@ -4,10 +4,10 @@ from __future__ import absolute_import
 import json
 
 import django_celery_beat
+from django_celery_beat.models import IntervalSchedule, CrontabSchedule
 from django.db.models import signals
 from django.dispatch import receiver
 from django.core.validators import ValidationError
-from django_celery_beat.models import IntervalSchedule, CrontabSchedule
 
 from .vars import Variable
 from .hosts import Host, Group, Inventory, Environment

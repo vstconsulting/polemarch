@@ -156,7 +156,8 @@ class Lock(object):
         cache = caches["default"]
 
     def __init__(self, id, payload=None, repeat=1, err_msg="",
-                 timeout = None):
+                 timeout=None):
+        # pylint: disable=too-many-arguments
         '''
         :param id: -- unique id for lock.
         :type id: int,str
