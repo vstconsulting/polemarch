@@ -14,7 +14,7 @@ PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
 
 
 class ProjectQuerySet(_AbstractInventoryQuerySet):
-    handlers = ModelHandlers("REPO_BACKENDS")
+    handlers = ModelHandlers("REPO_BACKENDS", "'repo_type' variable needed!")
 
     def create(self, **kwargs):
         project = super(ProjectQuerySet, self).create(**kwargs)
@@ -24,7 +24,7 @@ class ProjectQuerySet(_AbstractInventoryQuerySet):
 
 class Project(_AbstractModel):
     objects     = BManager.from_queryset(ProjectQuerySet)()
-    handlers    = ModelHandlers("REPO_BACKENDS")
+    handlers    = objects._queryset_class.handlers
     repository  = models.CharField(max_length=2*1024)
     status      = models.CharField(max_length=32, default="NEW")
     inventories = models.ManyToManyField(hosts_models.Inventory,
@@ -48,6 +48,10 @@ class Project(_AbstractModel):
     def repo_class(self):
         repo_type = self.vars.get("repo_type", "Null")
         return self.handlers(repo_type, self)
+
+    @property
+    def type(self):
+        return self.variables.get(key="repo_type").value
 
     def set_status(self, status):
         self.status = status

@@ -23,6 +23,10 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
                           name=self.prj1.name,
                           repository="git@ex.us:dir/rep1.git")
 
+        result = self.get_result("get", url)
+        for pr in result['results']:
+            self.assertEqual(pr['type'], "TEST")
+
         result = self.get_result("get", url+"supported-repos/")
         self.assertCount(result, 3)
         self.assertIn("TEST", result, result)
@@ -49,7 +53,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
             self.assertTrue(not os.path.exists(proj_obj.path + file))
         self.assertEqual(Project.objects.filter(id__in=results_id).count(), 0)
 
-        repo_url = "git@git.vst.lan:cepreu/ansible-experiments.git"
+        repo_url = "git@sdf:cepreu/ansible-experiments.git"
         data = dict(name="GitProject{}".format(sys.version_info[0]),
                     repository=repo_url,
                     vars=dict(repo_type="GIT",
@@ -58,6 +62,9 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         with self.settings(LOG_LEVEL="CRITICAL"):
             prj_id = self.get_result("post", url, data=json.dumps(data))['id']
         self.get_result("delete", url + "{}/".format(prj_id))
+        # Unsupported repos error
+        data = dict(name="asdad", repository="kflk")
+        self.get_result("post", url, 415, data=json.dumps(data))
         logging.disable(logging.NOTSET)
 
     def test_inventories_in_project(self):
