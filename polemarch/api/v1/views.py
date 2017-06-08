@@ -1,12 +1,24 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 from django.db import transaction
 from rest_framework import permissions, exceptions as excepts
+from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
 from .. import base
 from . import filters
 from . import serializers
+
+
+class TokenView(token_views.ObtainAuthToken):
+    def delete(self, request, *args, **kwargs):
+        token = request.auth
+        if token:
+            key = token.key
+            token.delete()
+            return Response(dict(detail="Token {} removed.".format(key)),
+                            status=204)
+        raise excepts.ParseError("Token not found.")
 
 
 class UserViewSet(base.ModelViewSetSet):

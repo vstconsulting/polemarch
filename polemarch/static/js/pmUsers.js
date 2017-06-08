@@ -53,9 +53,9 @@ pmUsers.loadAllItems = function()
             polemarch.model.userslist = data
             polemarch.model.users = {}
             
-            for(var i in polemarch.model.users.results)
+            for(var i in data.results)
             {
-                var val = polemarch.model.users.results[i]
+                var val = data.results[i]
                 polemarch.model.users[val.id] = val
             }
         },
@@ -142,7 +142,7 @@ pmUsers.addItem = function()
         {
             console.log("user add", data); 
             $.notify("User created", "success");
-            $.when(spajs.open({ menuId:"user-"+data.id})).always(function(){
+            $.when(spajs.open({ menuId:"user/"+data.id})).always(function(){
                 def.resolve()
             })
         },

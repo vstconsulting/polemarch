@@ -3,6 +3,11 @@ function pmItems()
 {
     this.validateHostName = function(name)
     {
+        if(!name)
+        {
+            return false; 
+        }
+        
         var regexp = {
             ipTest : /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/,
             ip6Test : /((^|:)([0-9a-fA-F]{0,4})){1,8}$/,
@@ -27,6 +32,16 @@ function pmItems()
         return false; 
     }
 
+    this.validateRangeName = function(name)
+    {
+        if(!name)
+        {
+            return false; 
+        }
+        
+        return name.replace(/\[([0-9A-z]+):([0-9A-z]+)\]/g, "$1") && name.replace(/\[([0-9A-z]+):([0-9A-z]+)\]/g, "$2")
+    }
+    
     this.showList = function(holder, menuInfo, data){}
 
     this.showItem = function(holder, menuInfo, data){}
