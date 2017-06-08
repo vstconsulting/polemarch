@@ -99,5 +99,8 @@ def save_to_beat(instance, **kwargs):
 
 @receiver(signals.post_delete, sender=PeriodicTask)
 def delete_from_beat(instance, **kwargs):
-    manager = django_celery_beat.models.PeriodicTask.objects
-    manager.get(name=str(instance.id)).delete()
+    try:
+        manager = django_celery_beat.models.PeriodicTask.objects
+        manager.get(name=str(instance.id)).delete()
+    except django_celery_beat.models.PeriodicTask.DoesNotExist:
+        pass
