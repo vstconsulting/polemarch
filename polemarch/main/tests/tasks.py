@@ -1,7 +1,16 @@
 import json
+import os
+import re
 
 from datetime import timedelta
+
+import subprocess
 from django.utils.timezone import now
+
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
 
 from ..models import Project
 from ..models import Task, PeriodicTask, History, Inventory
@@ -14,9 +23,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         super(ApiTasksTestCase, self).setUp()
         data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git",
                      vars=dict(repo_type="TEST"))]
-        project_id = self.mass_create("/api/v1/projects/", data,
-                                      "name", "repository")[0]
-        project = Project.objects.get(id=project_id)
+        self.project_id = self.mass_create("/api/v1/projects/", data,
+                                           "name", "repository")[0]
+        project = Project.objects.get(id=self.project_id)
 
         self.task1 = Task.objects.create(playbook="first.yml",
                                          project=project)
@@ -27,6 +36,162 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         url = "/api/v1/tasks/"
         self.list_test(url, Task.objects.all().count())
 
+    correct_simple_inventory = "127.0.1.1 ansible_user=centos " +\
+                               "ansible_ssh_private_key_file="
+
+    def create_inventory(self):
+        inventory_data = dict(name="Inv1", vars={})
+        host_data = dict(name="127.0.1.1", type="HOST",
+                         vars={"ansible_user": "centos",
+                               "ansible_ssh_private_key_file": "somekey"})
+        # make host, inventory
+        inventory = self.post_result("/api/v1/inventories/",
+                                     data=json.dumps(inventory_data))["id"]
+        host = self.post_result("/api/v1/hosts/",
+                                data=json.dumps(host_data))["id"]
+        # put inventory to project and host to inventory
+        self.post_result("/api/v1/inventories/{}/hosts/".
+                         format(inventory), 200, data=json.dumps([host]))
+        self.post_result("/api/v1/projects/{}/inventories/".
+                         format(self.project_id), 200,
+                         data=json.dumps([inventory]))
+        return inventory, host
+
+    @patch('subprocess.check_output')
+    def test_execute(self, subprocess_function):
+        inv1, h1 = self.create_inventory()
+        # mock side effect to get ansible-playbook args for assertions in test
+        result = ["", ""]
+
+        def side_effect(call_args, stderr):
+            inventory_path = call_args[3]
+            with open(inventory_path, 'r') as inventory_file:
+                inventory = inventory_file.read().split('\n')
+                l = lambda x: x.startswith('127.')
+                result[0] = list(filter(l, inventory))[0]
+                key_path = result[0].split("=")[-1]
+                with open(key_path, 'r') as key_file:
+                    result[1] = key_file.read()
+        subprocess_function.side_effect = side_effect
+        # test that can't execute without inventory
+        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
+                         400, data=json.dumps(dict(inventory_id=1100500)))
+        # test simple execution
+        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
+                         data=json.dumps(dict(inventory_id=inv1)))
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertTrue(call_args[0].endswith("ansible-playbook"))
+        self.assertTrue(call_args[1].endswith("first.yml"))
+        self.assertTrue(result[0].startswith(self.correct_simple_inventory))
+        self.assertEquals(result[1], "somekey")
+
+    @patch('subprocess.check_output')
+    def test_complex_inventory_execute(self, subprocess_function):
+        inventory_data = dict(name="Inv1",
+                              vars={"ansible_ssh_private_key_file": "ikey",
+                                    "custom_var1": "hello_world"})
+        hosts_data = [dict(name="127.0.1.1", type="HOST", vars={}),
+                      dict(name="hostlocl", type="HOST",
+                           vars={"ansible_user": "centos",
+                                 "ansible_ssh_private_key_file": "somekey"}),
+                      dict(name="127.0.1.[3:4]", type="RANGE", vars={}),
+                      dict(name="127.0.1.[5:6]", type="RANGE", vars={})]
+        groups_data = [dict(name="groups1", vars={"ansible_user": "ubuntu",
+                                                  "ansible_ssh_pass": "pass"},
+                            children=True),
+                       dict(name="groups2", vars={}, children=True),
+                       dict(name="groups3", vars={}, children=True),
+                       dict(name="hosts1", vars={}),
+                       dict(name="hosts2", vars={})]
+        # make hosts, groups, inventory
+        inv1 = self.post_result("/api/v1/inventories/",
+                                data=json.dumps(inventory_data))["id"]
+        hosts_id = self._create_hosts(hosts_data)
+        groups_id = self._create_groups(groups_data)
+        # put inventory to project and hosts and groups to inventory
+        self.post_result("/api/v1/groups/{}/groups/".
+                         format(groups_id[0]), 200,
+                         data=json.dumps(groups_id[1:3]))
+        self.post_result("/api/v1/groups/{}/groups/".
+                         format(groups_id[1]), 200,
+                         data=json.dumps([groups_id[2]]))
+        self.post_result("/api/v1/groups/{}/groups/".
+                         format(groups_id[2]), 200,
+                         data=json.dumps(groups_id[-2:]))
+        self.post_result("/api/v1/groups/{}/hosts/".
+                         format(groups_id[3]), 200,
+                         data=json.dumps(hosts_id[0:2]))
+        self.post_result("/api/v1/groups/{}/hosts/".
+                         format(groups_id[4]), 200,
+                         data=json.dumps(hosts_id[2:]))
+        self.post_result("/api/v1/inventories/{}/hosts/".
+                         format(inv1), 200, data=json.dumps(hosts_id[0:-1]))
+        self.post_result("/api/v1/inventories/{}/groups/".
+                         format(inv1), 200, data=json.dumps([groups_id[0]]))
+        # execute task and get inventory
+        result = [""]
+
+        def side_effect(call_args, stderr):
+            inventory_path = call_args[3]
+            with open(inventory_path, 'r') as inventory_file:
+                inventory = inventory_file.read()
+                result[0] = inventory
+        subprocess_function.side_effect = side_effect
+        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
+                         data=json.dumps(dict(inventory_id=inv1)))
+        # check that inventory text is correct
+        inventory = result[0]
+        file_path = os.path.dirname(os.path.abspath(__file__))
+        file_path += "/exemplary_complex_inventory"
+        with open(file_path, 'r') as inventory_file:
+            exemplary = inventory_file.read()
+        inventory = re.sub("ansible_ssh_private_key_file=/.*",
+                           "ansible_ssh_private_key_file=PATH",
+                           inventory)
+        self.assertEquals(list(map(str.strip, inventory.split("\n"))),
+                          list(map(str.strip, exemplary.split("\n"))))
+
+    @patch('subprocess.check_output')
+    def test_execute_error_handling(self, subprocess_function):
+        def check_status(exception, status):
+            error = exception
+            subprocess_function.side_effect = error
+            self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
+                             data=json.dumps(dict(inventory_id=inv1)))
+            history = get_history_item()
+            self.assertEquals(history.status, status)
+
+        def get_history_item():
+            histories = History.objects.filter(playbook="first.yml")
+            self.assertEquals(histories.count(), 1)
+            history = histories[0]
+            History.objects.all().delete()
+            return history
+
+        def side_effect(call_args, stderr):
+            return "test_output"
+        subprocess_function.side_effect = side_effect
+        inv1, h1 = self.create_inventory()
+        # check good run (without any problems)
+        start_time = now()
+        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
+                         data=json.dumps(dict(inventory_id=inv1)))
+        end_time = now()
+        history = get_history_item()
+        inventory = history.raw_inventory
+        self.assertTrue(self.correct_simple_inventory in inventory)
+        self.assertEquals(history.raw_stdout, "test_output")
+        self.assertEquals(history.status, "OK")
+        self.assertTrue(history.start_time >= start_time and
+                        history.start_time <= history.stop_time)
+        self.assertTrue(history.stop_time <= end_time and
+                        history.stop_time >= history.start_time)
+        # node are offline
+        check_status(subprocess.CalledProcessError(4, None, None), "OFFLINE")
+        # error at node
+        check_status(subprocess.CalledProcessError(None, None, None), "ERROR")
+
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
     def setUp(self):
@@ -35,9 +200,9 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         repo = "git@ex.us:dir/rep3.git"
         data = [dict(name="Prj1", repository=repo,
                      vars=dict(repo_type="TEST"))]
-        self.project_id = self.mass_create("/api/v1/projects/", data,
-                                           "name", "repository")[0]
-        project = Project.objects.get(id=self.project_id)
+        self.periodic_project_id = self.mass_create("/api/v1/projects/", data,
+                                                    "name", "repository")[0]
+        project = Project.objects.get(id=self.periodic_project_id)
         self.inventory = Inventory.objects.create()
 
         self.ptask1 = PeriodicTask.objects.create(playbook="p1.yml",
@@ -121,18 +286,21 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                           playbook="p1.yml",
                           schedule="10",
                           type="DELTA",
-                          project=self.project_id)
+                          project=self.periodic_project_id)
 
         data = [dict(playbook="p1.yml", schedule="10", type="DELTA",
-                     project=self.project_id, inventory=self.inventory.id),
+                     project=self.periodic_project_id,
+                     inventory=self.inventory.id),
                 dict(playbook="p2.yml",
                      schedule="* */2 sun,fri 1-15 *",
-                     type="CRONTAB", project=self.project_id,
+                     type="CRONTAB", project=self.periodic_project_id,
                      inventory=self.inventory.id),
                 dict(playbook="p1.yml", schedule="", type="CRONTAB",
-                     project=self.project_id, inventory=self.inventory.id),
+                     project=self.periodic_project_id,
+                     inventory=self.inventory.id),
                 dict(playbook="p1.yml", schedule="30 */4", type="CRONTAB",
-                     project=self.project_id, inventory=self.inventory.id)]
+                     project=self.periodic_project_id,
+                     inventory=self.inventory.id)]
         results_id = self.mass_create(url, data, "playbook", "schedule",
                                       "type", "project")
 
@@ -143,7 +311,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
 
         # test with bad value
         data = dict(playbook="p1.yml", schedule="30 */4 foo", type="CRONTAB",
-                    project=self.project_id)
+                    project=self.periodic_project_id)
         self.get_result("post", url, 400, data=json.dumps(data))
 
         # test with with no project

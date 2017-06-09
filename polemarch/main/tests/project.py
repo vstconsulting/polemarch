@@ -9,12 +9,13 @@ from ..models import Project
 class ApiProjectsTestCase(_ApiGHBaseTestCase):
     def setUp(self):
         super(ApiProjectsTestCase, self).setUp()
-        self.prj1 = Project.objects.create(name="First project",
+        self.prj1 = Project.objects.create(name="First_project",
                                            repository="git@ex.us:dir/rep1.git",
                                            vars=dict(repo_type="TEST"))
-        self.prj2 = Project.objects.create(name="Second project",
+        self.prj2 = Project.objects.create(name="Second_project",
                                            repository="git@ex.us:dir/rep2.git",
-                                           vars=dict(repo_type="TEST"))
+                                           vars=dict(repo_type="TEST",
+                                                     some_arg="search_arg"))
 
     def test_create_delete_project(self):
         url = "/api/v1/projects/"
@@ -66,6 +67,11 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         data = dict(name="asdad", repository="kflk")
         self.get_result("post", url, 415, data=json.dumps(data))
         logging.disable(logging.NOTSET)
+
+        self._filter_test(url, dict(name__not="First_project"), 4)
+        self._filter_test(url, dict(status="OK", name__not="First_project"), 4)
+        self._filter_vars(url, "repo_type:TEST", 5)
+        self._filter_vars(url, "some_arg:search_arg", 1)
 
     def test_inventories_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer

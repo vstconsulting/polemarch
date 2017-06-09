@@ -1,8 +1,10 @@
 # pylint: disable=broad-except,no-member,redefined-outer-name
 import logging
+
 from ...celery_app import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
+from ..models import Inventory
 
 logger = logging.getLogger("polemarch")
 
@@ -30,3 +32,25 @@ class RepoTask(BaseTask):
             logger.info(result)
         except Exception as error:
             self.app.retry(exc=error)
+
+
+@task(app, ignore_result=True, bind=True)
+class ScheduledTask(BaseTask):
+    def __init__(self, app, job_id, *args, **kwargs):
+        super(self.__class__, self).__init__(app, *args, **kwargs)
+        self.job_id = job_id
+
+    def run(self):
+        from ..models import PeriodicTask
+        task = PeriodicTask.objects.get(id=self.job_id)
+        task.execute()
+
+@task(app, ignore_result=True, bind=True)
+class ExecuteAnsibleTask(BaseTask):
+    def __init__(self, app, job, inventory_id, *args, **kwargs):
+        super(self.__class__, self).__init__(app, *args, **kwargs)
+        self.inventory = Inventory.objects.get(id=inventory_id)
+        self.job = job
+
+    def run(self):
+        self.job.run_ansible_playbook(self.inventory)

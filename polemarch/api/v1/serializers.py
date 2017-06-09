@@ -281,6 +281,12 @@ class OneTaskSerializer(TaskSerializer):
                   'project',
                   'url',)
 
+    def execute(self, request):
+        inventory_id = int(request.data["inventory_id"])
+        self.instance.execute(inventory_id)
+        data = dict(detail="Started at inventory {}.".format(inventory_id))
+        return Response(data, 201)
+
 
 class PeriodicTaskSerializer(_WithVariablesSerializer):
     schedule = serializers.CharField(allow_blank=True)

@@ -155,7 +155,9 @@ class Lock(object):
     except InvalidCacheBackendError:
         cache = caches["default"]
 
-    def __init__(self, id, payload=None, repeat=1, err_msg=""):
+    def __init__(self, id, payload=None, repeat=1, err_msg="",
+                 timeout=None):
+        # pylint: disable=too-many-arguments
         '''
         :param id: -- unique id for lock.
         :type id: int,str
@@ -165,13 +167,18 @@ class Lock(object):
         :param err_msg: -- message for AcquireLockException error.
         :type err_msg: str
         '''
+        self.timeout = timeout if timeout else self.TIMEOUT
         self.id, start = None, time.time()
         while time.time() - start <= repeat:
-            if self.cache.add(id, payload, self.TIMEOUT):
+            if self.cache.add(id, payload, self.timeout):
                 self.id = id
                 return
             time.sleep(0.01)
         raise self.AcquireLockException(err_msg)
+
+    def prolong(self):
+        payload = self.cache.get(self.id)
+        self.cache.set(self.id, payload, self.timeout)
 
     def __enter__(self):
         return self

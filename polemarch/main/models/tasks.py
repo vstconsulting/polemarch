@@ -5,15 +5,51 @@ import uuid
 import logging
 import subprocess
 
+import sys
+from os.path import dirname
+
 from django.utils import timezone
 from celery.schedules import crontab
 
+from ...main.utils import tmp_file
 from .base import BModel, models
+from . import Inventory
 from .projects import Project
-from .hosts import Inventory
 from ...main import exceptions as ex
+from ..tasks import ExecuteAnsibleTask
 
 logger = logging.getLogger("polemarch")
+
+
+def run_ansible_playbook(task, inventory):
+    start_time = timezone.now()
+    path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
+    path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
+    inventory_text, key_files = inventory.get_inventory()
+    inventory_file = tmp_file()
+    inventory_file.write(inventory_text)
+    args = [path_to_ansible, path_to_playbook, '-i',
+            inventory_file.name]
+    status = "OK"
+    try:
+        output = subprocess.check_output(args, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        output = str(e.output)
+        if e.returncode == 4:
+            status = "OFFLINE"
+        else:
+            status = "ERROR"
+    inventory_file.close()
+    for key_file in key_files:
+        key_file.close()
+    stop_time = timezone.now()
+    History.objects.create(playbook=task.playbook,
+                           start_time=start_time,
+                           stop_time=stop_time,
+                           raw_stdout=output,
+                           raw_inventory=inventory_text,
+                           status=status,
+                           project=task.project)
 
 
 # Block of abstract models
@@ -87,6 +123,14 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)
 
+    def execute(self, inventory_id):
+        # pylint: disable=no-member
+        inventory = Inventory.objects.get(id=inventory_id)
+        ExecuteAnsibleTask.delay(self, inventory.id)
+
+    def run_ansible_playbook(self, inventory):
+        run_ansible_playbook(self, inventory)
+
 
 class PeriodicTask(BModel):
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
@@ -111,7 +155,7 @@ class PeriodicTask(BModel):
     ]
 
     @property
-    def _crontab_kwargs(self):
+    def crontab_kwargs(self):
         kwargs, index, fields = dict(), 0, self.schedule.split(" ")
         for field_name in self.time_types_list:
             if index < len(fields) and len(fields[index]) > 0:
@@ -123,8 +167,15 @@ class PeriodicTask(BModel):
 
     def get_schedule(self):
         if self.type == "CRONTAB":
-            return crontab(**self._crontab_kwargs)
+            return crontab(**self.crontab_kwargs)
         return float(self.schedule)
+
+    def execute(self):
+        # pylint: disable=no-member
+        self.run_ansible_playbook()
+
+    def run_ansible_playbook(self):
+        run_ansible_playbook(self, self.inventory)
 
 
 class History(BModel):

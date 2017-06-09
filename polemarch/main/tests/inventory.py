@@ -49,6 +49,14 @@ class _ApiGHBaseTestCase(BaseTestCase):
                                 "task", "schedule", "type")
 
     def _filter_test(self, base_url, variables, count):
+        filter_url = "{}?".format(base_url)
+        for key, value in variables.items():
+            filter_url += "{}={}&".format(key, value)
+        result = self.get_result("get", filter_url)
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(result["count"], count, result)
+
+    def _filter_vars(self, base_url, variables, count):
         filter_url = "{}?variables={}".format(base_url, variables)
         result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
@@ -110,8 +118,8 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         ]
         results_id = self.mass_create(base_url, hosts_d, "name", "vars")
 
-        self._filter_test(base_url, "ansible_port:222,ansible_user:one", 2)
-        self._filter_test(base_url, "ansible_port:221,ansible_user:rh", 2)
+        self._filter_vars(base_url, "ansible_port:222,ansible_user:one", 2)
+        self._filter_vars(base_url, "ansible_port:221,ansible_user:rh", 2)
 
         for host_id in results_id:
             self.get_result("delete", base_url + "{}/".format(host_id))
@@ -247,8 +255,8 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         ]
         results_id = self.mass_create(base_url, groups_d, "name", "vars")
 
-        self._filter_test(base_url, "ansible_port:222,ansible_user:one", 2)
-        self._filter_test(base_url, "ansible_port:221,ansible_user:rh", 2)
+        self._filter_vars(base_url, "ansible_port:222,ansible_user:one", 2)
+        self._filter_vars(base_url, "ansible_port:221,ansible_user:rh", 2)
 
         for group_id in results_id:
             self.get_result("delete", base_url + "{}/".format(group_id))
@@ -346,8 +354,8 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         ]
         results_id = self.mass_create(base_url, inventories_d, "name", "vars")
 
-        self._filter_test(base_url, "ansible_port:222,ansible_user:one", 2)
-        self._filter_test(base_url, "ansible_port:221,ansible_user:rh", 2)
+        self._filter_vars(base_url, "ansible_port:222,ansible_user:one", 2)
+        self._filter_vars(base_url, "ansible_port:221,ansible_user:rh", 2)
 
         for inventory_id in results_id:
             self.get_result("delete", base_url + "{}/".format(inventory_id))
