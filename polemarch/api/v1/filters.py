@@ -5,14 +5,22 @@ from django.contrib.auth.models import User
 from ...main import models
 
 
-def extra_filter(queryset, field, value):
+def _extra_search(queryset, field, value, stype):
     vals = field.split("__")
     field, tp = vals[0], (list(vals)[1:2] + [""])[0]
-    field += "__in"
-    value = value.split(",")
+    field += "__{}".format(stype)
+    value = value.split(",") if stype == "in" else value
     if tp.upper() == "NOT":
         return queryset.exclude(**{field: value})
     return queryset.filter(**{field: value})
+
+
+def extra_filter(queryset, field, value):
+    return _extra_search(queryset, field, value, "in")
+
+
+def name_filter(queryset, field, value):
+    return _extra_search(queryset, field, value, "contains")
 
 
 def variables_filter(queryset, field, value):
@@ -26,8 +34,8 @@ def variables_filter(queryset, field, value):
 class _BaseFilter(filters.FilterSet):
     id        = NumberFilter(method=extra_filter)
     id__not   = NumberFilter(method=extra_filter)
-    name__not = CharFilter(method=extra_filter)
-    name      = CharFilter(method=extra_filter)
+    name__not = CharFilter(method=name_filter)
+    name      = CharFilter(method=name_filter)
 
 
 class UserFilter(filters.FilterSet):

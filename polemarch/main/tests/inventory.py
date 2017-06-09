@@ -97,10 +97,10 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
 
     def test_filter_host(self):
         base_url = "/api/v1/hosts/"
-        filter_url = "{}?name=127.0.0.1,hostonlocal".format(base_url)
+        filter_url = "{}?name=hostonlocal".format(base_url)
         result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
-        self.assertEqual(result["count"], 2)
+        self.assertEqual(result["count"], 1)
 
         filter_url = "{}?name__not=127.0.0.1".format(base_url)
         result = self.get_result("get", filter_url)
@@ -234,7 +234,7 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
 
     def test_filter_group(self):
         base_url = "/api/v1/groups/"
-        filter_url = "{}?name=base_one,base_two".format(base_url)
+        filter_url = "{}?name=base_t".format(base_url)
         result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 2)
@@ -333,7 +333,7 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
 
     def test_filter_inventory(self):
         base_url = "/api/v1/inventories/"
-        f_url = "{}?name=First_inventory,Second_inventory".format(base_url)
+        f_url = "{}?name=_inventory".format(base_url)
         result = self.get_result("get", f_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 2)
