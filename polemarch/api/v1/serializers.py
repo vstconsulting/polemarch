@@ -281,12 +281,6 @@ class OneTaskSerializer(TaskSerializer):
                   'project',
                   'url',)
 
-    def execute(self, request):
-        inventory_id = int(request.data["inventory_id"])
-        self.instance.execute(inventory_id)
-        data = dict(detail="Started at inventory {}.".format(inventory_id))
-        return Response(data, 201)
-
 
 class PeriodicTaskSerializer(_WithVariablesSerializer):
     schedule = serializers.CharField(allow_blank=True)
@@ -441,3 +435,11 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         self.instance.start_repo_task("sync")
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
+
+    def execute(self, request):
+        data = dict(request.data)
+        inventory_id = int(data.pop("inventory"))
+        playbook_name = str(data.pop("playbook"))
+        self.instance.execute(playbook_name, inventory_id, **data)
+        rdata = dict(detail="Started at inventory {}.".format(inventory_id))
+        return Response(rdata, 201)

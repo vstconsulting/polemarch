@@ -16,12 +16,12 @@ from .base import BModel, models
 from . import Inventory
 from .projects import Project
 from ...main import exceptions as ex
-from ..tasks import ExecuteAnsibleTask
 
 logger = logging.getLogger("polemarch")
 
 
-def run_ansible_playbook(task, inventory):
+def run_ansible_playbook(task, inventory, **extra):
+    # TODO: Add extra kwargs operates
     start_time = timezone.now()
     path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
     path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
@@ -123,13 +123,8 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)
 
-    def execute(self, inventory_id):
-        # pylint: disable=no-member
-        inventory = Inventory.objects.get(id=inventory_id)
-        ExecuteAnsibleTask.delay(self, inventory.id)
-
-    def run_ansible_playbook(self, inventory):
-        run_ansible_playbook(self, inventory)
+    def run_ansible_playbook(self, inventory, **extra):
+        run_ansible_playbook(self, inventory, **extra)
 
 
 class PeriodicTask(BModel):

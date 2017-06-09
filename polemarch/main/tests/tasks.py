@@ -25,12 +25,12 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                      vars=dict(repo_type="TEST"))]
         self.project_id = self.mass_create("/api/v1/projects/", data,
                                            "name", "repository")[0]
-        project = Project.objects.get(id=self.project_id)
+        self.task_project = Project.objects.get(id=self.project_id)
 
         self.task1 = Task.objects.create(playbook="first.yml",
-                                         project=project)
+                                         project=self.task_project)
         self.task2 = Task.objects.create(playbook="second.yml",
-                                         project=project)
+                                         project=self.task_project)
 
     def test_get_tasks(self):
         url = "/api/v1/tasks/"
@@ -74,11 +74,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                     result[1] = key_file.read()
         subprocess_function.side_effect = side_effect
         # test that can't execute without inventory
-        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
-                         400, data=json.dumps(dict(inventory_id=1100500)))
+        self.post_result(
+            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            400, data=json.dumps(dict(inventory=1100500)))
         # test simple execution
-        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
-                         data=json.dumps(dict(inventory_id=inv1)))
+        self.post_result(
+            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            data=json.dumps(dict(inventory=inv1, playbook="first.yml")))
         self.assertEquals(subprocess_function.call_count, 1)
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible-playbook"))
@@ -138,8 +140,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                 inventory = inventory_file.read()
                 result[0] = inventory
         subprocess_function.side_effect = side_effect
-        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
-                         data=json.dumps(dict(inventory_id=inv1)))
+        self.post_result(
+            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            data=json.dumps(dict(inventory=inv1, playbook="first.yml")))
         # check that inventory text is correct
         inventory = result[0]
         file_path = os.path.dirname(os.path.abspath(__file__))
@@ -157,8 +160,10 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         def check_status(exception, status):
             error = exception
             subprocess_function.side_effect = error
-            self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
-                             data=json.dumps(dict(inventory_id=inv1)))
+            self.post_result(
+                "/api/v1/projects/{}/execute/".format(self.task_project.id),
+                data=json.dumps(dict(inventory=inv1, playbook="first.yml"))
+            )
             history = get_history_item()
             self.assertEquals(history.status, status)
 
@@ -175,8 +180,10 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         inv1, h1 = self.create_inventory()
         # check good run (without any problems)
         start_time = now()
-        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
-                         data=json.dumps(dict(inventory_id=inv1)))
+        self.post_result(
+            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            data=json.dumps(dict(inventory=inv1, playbook="first.yml"))
+        )
         end_time = now()
         history = get_history_item()
         inventory = history.raw_inventory
