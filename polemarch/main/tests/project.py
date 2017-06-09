@@ -69,6 +69,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         logging.disable(logging.NOTSET)
 
         self._filter_test(url, dict(name__not="First_project"), 4)
+        self._filter_test(url, dict(name="Prj"), 3)
         self._filter_test(url, dict(status="OK", name__not="First_project"), 4)
         self._filter_vars(url, "repo_type:TEST", 5)
         self._filter_vars(url, "some_arg:search_arg", 1)
