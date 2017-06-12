@@ -27,7 +27,7 @@
                             <input
                                 type="text"
                                 id="search-query-input"
-                                placeholder="Search project by name"
+                                placeholder="Search by name"
                                 class="form-control"
                                 maxlength="255"
                                 onkeyup="pmProjects.search(this.value);"
@@ -868,15 +868,28 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Hosts<br>
+                        Hosts 
+                        <div class="input-group col-lg-2" style="float: right; margin: 0px; padding: 0px;">
+                            <input
+                                type="text"
+                                id="search-query-input"
+                                placeholder="Search by name"
+                                class="form-control"
+                                maxlength="255" 
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmHosts.search($('#search-query-input').val()));"
+                            >
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmHosts.search($('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
+                            </div>
+                        </div>
                     </div>
                     <div class="box-body">
                         <% for(var i in polemarch.model.hostslist.results){ %>
                             <ul>
                                 <li><a href="/?host/<%- polemarch.model.hostslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.hostslist.results[i].name %></a></li>
                             </ul>
-                        <% } %>
-
+                        <% } %> 
                     </div>
                 </div>
             </section>

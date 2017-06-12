@@ -5,7 +5,23 @@ pmHosts.showList = function(holder, menuInfo, data)
 {
     return $.when(pmHosts.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render('hosts_list', {}))
+        $(holder).html(spajs.just.render('hosts_list', {query:""}))
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+  
+pmHosts.search = function(query)
+{
+    return spajs.open({ menuId:"hosts/search/"+query, reopen:true});
+}
+
+pmHosts.showSearchResults = function(holder, menuInfo, data)
+{
+    return $.when(pmHosts.searchItems(data.reg[1])).done(function()
+    {
+        $(holder).html(spajs.just.render('hosts_list', {query:data.reg[1]}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -51,7 +67,40 @@ pmHosts.loadAllItems = function()
         {
             console.log("update Items", data)
             polemarch.model.hostslist = data
-            polemarch.model.hosts = {}
+            //polemarch.model.hosts = {}
+            
+            for(var i in data.results)
+            {
+                var val = data.results[i]
+                polemarch.model.hosts[val.id] = val
+            }
+        },
+        error:function(e)
+        {
+            console.log(e)
+            polemarch.showErrors(e)
+        }
+    });
+}
+
+pmHosts.searchItems = function(query)
+{
+    return jQuery.ajax({
+        url: "/api/v1/hosts/?name="+encodeURIComponent(query),
+        type: "GET",
+        contentType:'application/json',
+        data: "",
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            console.log("update Items", data)
+            polemarch.model.hostslist = data
+            //polemarch.model.hosts = {}
             
             for(var i in data.results)
             {

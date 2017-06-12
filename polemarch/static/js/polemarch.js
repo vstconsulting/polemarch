@@ -107,8 +107,15 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"users",
         name:"users",
-        urlregexp:[/^users$/, /^user$/],
+        urlregexp:[/^users$/, /^user$/, /^users\/(page)\/([0-9]+)$/],
         onOpen:pmUsers.showList
+    })
+    
+    spajs.addMenu({
+        id:"users-search",
+        name:"users-search",
+        urlregexp:[/^users\/search\/([A-z0-9 \-]+)$/],
+        onOpen:pmUsers.showSearchResults
     })
 
     spajs.addMenu({
@@ -130,8 +137,15 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"hosts",
         name:"hosts",
-        urlregexp:[/^hosts$/, /^host$/],
+        urlregexp:[/^hosts$/, /^host$/, /^hosts\/(page)\/([0-9]+)$/],
         onOpen:pmHosts.showList
+    })
+    
+    spajs.addMenu({
+        id:"hosts-search",
+        name:"hosts",
+        urlregexp:[/^hosts\/search\/([A-z0-9 \-]+)$/],
+        onOpen:pmHosts.showSearchResults
     })
 
     spajs.addMenu({
@@ -153,8 +167,15 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"groups",
         name:"groups",
-        urlregexp:[/^groups$/, /^group$/],
+        urlregexp:[/^groups$/, /^group$/, /^groups\/(page)\/([0-9]+)$/],
         onOpen:pmGroups.showList
+    })
+    
+    spajs.addMenu({
+        id:"groups-search",
+        name:"groups-search",
+        urlregexp:[/^groups\/search\/([A-z0-9 \-]+)$/],
+        onOpen:pmGroups.showSearchResults
     })
 
     spajs.addMenu({
@@ -175,8 +196,15 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"inventories",
         name:"inventories",
-        urlregexp:[/^inventories$/, /^inventory$/],
+        urlregexp:[/^inventories$/, /^inventory$/, /^inventories\/(page)\/([0-9]+)$/],
         onOpen:pmInventories.showList
+    })
+    
+    spajs.addMenu({
+        id:"inventories-search",
+        name:"inventories-search",
+        urlregexp:[/^inventories\/search\/([A-z0-9 \-]+)$/],
+        onOpen:pmInventories.showSearchResults
     })
 
     spajs.addMenu({
@@ -193,18 +221,25 @@ polemarch.start = function(options)
         onOpen:pmInventories.showNewItemPage
     })
     
-    // inventories
+    // projects
     spajs.addMenu({
         id:"projects",
         name:"projects",
-        urlregexp:[/^projects$/, /^project$/],
+        urlregexp:[/^projects$/, /^project$/, /^projects\/(page)\/([0-9]+)$/],
         onOpen:pmProjects.showList
     })
  
     spajs.addMenu({
+        id:"projects-search",
+        name:"projects-search",
+        urlregexp:[/^projects\/search\/([A-z0-9 \-]+)$/],
+        onOpen:pmProjects.showSearchResults
+    })
+    
+    spajs.addMenu({
         id:"project",
         name:"project",
-        urlregexp:[/^project\/([0-9]+)$/],
+        urlregexp:[/^project\/([0-9]+)$/], 
         onOpen:pmProjects.showItem
     })
 
