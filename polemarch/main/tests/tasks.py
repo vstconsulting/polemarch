@@ -57,7 +57,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                          data=json.dumps([inventory]))
         return inventory, host
 
-    @patch('subprocess.check_output')
+    @patch('polemarch.main.models.tasks.check_output')
     def test_execute(self, subprocess_function):
         inv1, h1 = self.create_inventory()
         # mock side effect to get ansible-playbook args for assertions in test
@@ -88,7 +88,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.assertTrue(result[0].startswith(self.correct_simple_inventory))
         self.assertEquals(result[1], "somekey")
 
-    @patch('subprocess.check_output')
+    @patch('polemarch.main.models.tasks.check_output')
     def test_complex_inventory_execute(self, subprocess_function):
         inventory_data = dict(name="Inv1",
                               vars={"ansible_ssh_private_key_file": "ikey",
@@ -155,9 +155,10 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.assertEquals(list(map(str.strip, inventory.split("\n"))),
                           list(map(str.strip, exemplary.split("\n"))))
 
-    @patch('subprocess.check_output')
+    @patch('polemarch.main.models.tasks.check_output')
     def test_execute_error_handling(self, subprocess_function):
         extra_vars = '{"pacman":"mrs","ghosts":["inky","pinky","clyde","sue"]}'
+        key_file = "-----BEGIN RSA PRIVATE KEY-----......"
 
         def check_status(exception, status):
             error = exception
@@ -182,6 +183,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
             self.assertIn("limited-hosts", call_args)
             self.assertIn("--user", call_args)
             self.assertIn("some-def-user", call_args)
+            self.assertIn("--key-file", call_args)
             self.assertIn(extra_vars, call_args)
             self.assertIn("other/playbook.yml", call_args[1])
             return "test_output"
@@ -193,7 +195,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
             "/api/v1/projects/{}/execute/".format(self.task_project.id),
             data=json.dumps(dict(inventory=inv1, playbook="other/playbook.yml",
                                  limit="limited-hosts", user="some-def-user",
-                                 extra_vars=extra_vars))
+                                 extra_vars=extra_vars, key_file=key_file))
         )
         end_time = now()
         history = get_history_item()
