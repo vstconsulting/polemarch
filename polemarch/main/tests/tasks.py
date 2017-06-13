@@ -57,13 +57,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                          data=json.dumps([inventory]))
         return inventory, host
 
-    @patch('polemarch.main.models.tasks.check_output')
+    @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute(self, subprocess_function):
         inv1, h1 = self.create_inventory()
         # mock side effect to get ansible-playbook args for assertions in test
         result = ["", ""]
 
-        def side_effect(call_args, stderr):
+        def side_effect(call_args, *args, **kwargs):
             inventory_path = call_args[3]
             with open(inventory_path, 'r') as inventory_file:
                 inventory = inventory_file.read().split('\n')
@@ -88,7 +88,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.assertTrue(result[0].startswith(self.correct_simple_inventory))
         self.assertEquals(result[1], "somekey")
 
-    @patch('polemarch.main.models.tasks.check_output')
+    @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_complex_inventory_execute(self, subprocess_function):
         inventory_data = dict(name="Inv1",
                               vars={"ansible_ssh_private_key_file": "ikey",
@@ -134,7 +134,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         # execute task and get inventory
         result = [""]
 
-        def side_effect(call_args, stderr):
+        def side_effect(call_args, *args, **kwargs):
             inventory_path = call_args[3]
             with open(inventory_path, 'r') as inventory_file:
                 inventory = inventory_file.read()
@@ -155,7 +155,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.assertEquals(list(map(str.strip, inventory.split("\n"))),
                           list(map(str.strip, exemplary.split("\n"))))
 
-    @patch('polemarch.main.models.tasks.check_output')
+    @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute_error_handling(self, subprocess_function):
         extra_vars = '{"pacman":"mrs","ghosts":["inky","pinky","clyde","sue"]}'
         key_file = "-----BEGIN RSA PRIVATE KEY-----......"
@@ -178,7 +178,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
             History.objects.all().delete()
             return history
 
-        def side_effect(call_args, stderr):
+        def side_effect(call_args, *args, **kwargs):
             self.assertIn("--limit", call_args)
             self.assertIn("limited-hosts", call_args)
             self.assertIn("--user", call_args)

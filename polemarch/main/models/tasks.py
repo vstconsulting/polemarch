@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import logging
 import sys
 import uuid
-from subprocess import CalledProcessError, STDOUT, check_output
+# from subprocess import CalledProcessError, STDOUT, check_output
 from collections import namedtuple
 from os.path import dirname
 
@@ -14,7 +14,7 @@ from django.utils import timezone
 from . import Inventory
 from .base import BModel, models
 from .projects import Project
-from ...main.utils import tmp_file
+from ...main.utils import tmp_file, CmdExecutor, CalledProcessError
 
 logger = logging.getLogger("polemarch")
 AnsibleExtra = namedtuple('AnsibleExtraArgs', [
@@ -55,7 +55,7 @@ def run_ansible_playbook(task, inventory, **extra_args):
     status = "OK"
     history = History.objects.create(status="RUN", **history_kwargs)
     try:
-        history_kwargs['raw_stdout'] = check_output(args, stderr=STDOUT)
+        history_kwargs['raw_stdout'] = Executor(history).execute(args)
     except CalledProcessError as exception:
         history_kwargs['raw_stdout'] = str(exception.output)
         if exception.returncode == 4:
@@ -71,6 +71,18 @@ def run_ansible_playbook(task, inventory, **extra_args):
             key_file.close()
         history_kwargs.update(dict(stop_time=timezone.now(), status=status))
         History(id=history.id, **history_kwargs).save()
+
+
+# Classes for support
+class Executor(CmdExecutor):
+    def __init__(self, history):
+        super(Executor, self).__init__()
+        self.history = history
+
+    def write_output(self, line):
+        super(Executor, self).write_output(line)
+        self.history.raw_stdout += line
+        self.history.save()
 
 
 # Block of real models
