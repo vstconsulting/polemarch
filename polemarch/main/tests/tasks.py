@@ -157,24 +157,33 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
 
     @patch('subprocess.check_output')
     def test_execute_error_handling(self, subprocess_function):
+        extra_vars = '{"pacman":"mrs","ghosts":["inky","pinky","clyde","sue"]}'
+
         def check_status(exception, status):
             error = exception
             subprocess_function.side_effect = error
             self.post_result(
                 "/api/v1/projects/{}/execute/".format(self.task_project.id),
-                data=json.dumps(dict(inventory=inv1, playbook="first.yml"))
+                data=json.dumps(dict(inventory=inv1,
+                                     playbook="other/playbook.yml"))
             )
             history = get_history_item()
             self.assertEquals(history.status, status)
 
         def get_history_item():
-            histories = History.objects.filter(playbook="first.yml")
+            histories = History.objects.filter(playbook="other/playbook.yml")
             self.assertEquals(histories.count(), 1)
             history = histories[0]
             History.objects.all().delete()
             return history
 
         def side_effect(call_args, stderr):
+            self.assertIn("--limit", call_args)
+            self.assertIn("limited-hosts", call_args)
+            self.assertIn("--user", call_args)
+            self.assertIn("some-def-user", call_args)
+            self.assertIn(extra_vars, call_args)
+            self.assertIn("other/playbook.yml", call_args[1])
             return "test_output"
         subprocess_function.side_effect = side_effect
         inv1, h1 = self.create_inventory()
@@ -182,7 +191,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         start_time = now()
         self.post_result(
             "/api/v1/projects/{}/execute/".format(self.task_project.id),
-            data=json.dumps(dict(inventory=inv1, playbook="first.yml"))
+            data=json.dumps(dict(inventory=inv1, playbook="other/playbook.yml",
+                                 limit="limited-hosts", user="some-def-user",
+                                 extra_vars=extra_vars))
         )
         end_time = now()
         history = get_history_item()

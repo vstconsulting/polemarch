@@ -20,8 +20,19 @@ from ...main import exceptions as ex
 logger = logging.getLogger("polemarch")
 
 
+def __parse_extra_args(**extra):
+    extra_args = list()
+    for key, value in extra.items():
+        if key == "extra_vars":
+            key = "extra-vars"
+        extra_args.append("--{}".format(key))
+        extra_args += [str(value)] if value else []
+    return extra_args
+
+
 def run_ansible_playbook(task, inventory, **extra):
-    # TODO: Add extra kwargs operates
+    # pylint: disable=too-many-locals
+    extra_args = __parse_extra_args(**extra)
     start_time = timezone.now()
     path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
     path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
@@ -29,16 +40,19 @@ def run_ansible_playbook(task, inventory, **extra):
     inventory_file = tmp_file()
     inventory_file.write(inventory_text)
     args = [path_to_ansible, path_to_playbook, '-i',
-            inventory_file.name]
+            inventory_file.name] + extra_args
     status = "OK"
     try:
         output = subprocess.check_output(args, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        output = str(e.output)
-        if e.returncode == 4:
+    except subprocess.CalledProcessError as exception:
+        output = str(exception.output)
+        if exception.returncode == 4:
             status = "OFFLINE"
         else:
             status = "ERROR"
+    except Exception as exception:  # pragma: no cover
+        output = str(exception)
+        status = "ERROR"
     inventory_file.close()
     for key_file in key_files:
         key_file.close()
