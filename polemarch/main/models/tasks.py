@@ -1,113 +1,88 @@
 # pylint: disable=protected-access
 from __future__ import unicode_literals
 
-import uuid
 import logging
-import subprocess
-
 import sys
+import uuid
+# from subprocess import CalledProcessError, STDOUT, check_output
+from collections import namedtuple
 from os.path import dirname
 
-from django.utils import timezone
 from celery.schedules import crontab
+from django.utils import timezone
 
-from ...main.utils import tmp_file
-from .base import BModel, models
 from . import Inventory
+from .base import BModel, models
 from .projects import Project
-from ...main import exceptions as ex
-from ..tasks import ExecuteAnsibleTask
+from ...main.utils import tmp_file, CmdExecutor, CalledProcessError
 
 logger = logging.getLogger("polemarch")
+AnsibleExtra = namedtuple('AnsibleExtraArgs', [
+    'args',
+    'files',
+])
 
 
-def run_ansible_playbook(task, inventory):
-    start_time = timezone.now()
+def __parse_extra_args(project, **extra):
+    extra_args, files = list(), list()
+    for key, value in extra.items():
+        if key == "extra_vars":
+            key = "extra-vars"
+        elif key == "key_file":
+            if "BEGIN RSA PRIVATE KEY" in value:
+                kfile = tmp_file()
+                kfile.write(value)
+                files.append(kfile)
+                value = "{}/{}".format(project.path, kfile.name)
+            key = "key-file"
+        extra_args.append("--{}".format(key))
+        extra_args += [str(value)] if value else []
+    return AnsibleExtra(extra_args, files)
+
+
+def run_ansible_playbook(task, inventory, **extra_args):
+    # pylint: disable=too-many-locals
+    extra = __parse_extra_args(project=task.project, **extra_args)
+    history_kwargs = dict(playbook=task.playbook, start_time=timezone.now(),
+                          project=task.project, raw_stdout="")
     path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
     path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
-    inventory_text, key_files = inventory.get_inventory()
+    history_kwargs["raw_inventory"], key_files = inventory.get_inventory()
     inventory_file = tmp_file()
-    inventory_file.write(inventory_text)
+    inventory_file.write(history_kwargs["raw_inventory"])
     args = [path_to_ansible, path_to_playbook, '-i',
-            inventory_file.name]
+            inventory_file.name] + extra.args
     status = "OK"
+    history = History.objects.create(status="RUN", **history_kwargs)
     try:
-        output = subprocess.check_output(args, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        output = str(e.output)
-        if e.returncode == 4:
+        history_kwargs['raw_stdout'] = Executor(history).execute(args)
+    except CalledProcessError as exception:
+        history_kwargs['raw_stdout'] = str(exception.output)
+        if exception.returncode == 4:
             status = "OFFLINE"
         else:
             status = "ERROR"
-    inventory_file.close()
-    for key_file in key_files:
-        key_file.close()
-    stop_time = timezone.now()
-    History.objects.create(playbook=task.playbook,
-                           start_time=start_time,
-                           stop_time=stop_time,
-                           raw_stdout=output,
-                           raw_inventory=inventory_text,
-                           status=status,
-                           project=task.project)
+    except Exception as exception:  # pragma: no cover
+        history_kwargs['raw_stdout'] = str(exception)
+        status = "ERROR"
+    finally:
+        inventory_file.close()
+        for key_file in key_files:
+            key_file.close()
+        history_kwargs.update(dict(stop_time=timezone.now(), status=status))
+        History(id=history.id, **history_kwargs).save()
 
 
-# Block of abstract models
-class ExecuteStatusHandler:
-    # pylint: disable=old-style-class
-    _playbooks = dict()
-    _ok = dict(err=False)
-    _other = {OSError: {'err': ex.AnsibleNotFoundException}}
-    _retcodes = {"other": {"err": ex.NodeFailedException},
-                 4: {"err": ex.NodeOfflineException}}
+# Classes for support
+class Executor(CmdExecutor):
+    def __init__(self, history):
+        super(Executor, self).__init__()
+        self.history = history
 
-    def __init__(self, **kwargs):
-        self.status_logics = self.logic(**kwargs)
-
-    def get_raise(self, service, exception=None, playbook=""):
-        self.service = service
-        if exception:
-            return self.callproc_error(playbook, exception) or \
-                   self.other_error(exception) or exception
-
-    def handler(self, logic, exception, output):
-        self.service.set_status(logic["status"])
-        if isinstance(logic['err'], bool) and logic['err']:
-            return exception  # pragma: no cover
-        elif issubclass(logic['err'], Exception):
-            return logic['err'](output)
-
-    def callproc_error(self, playbook, exception):
-        if not isinstance(exception, subprocess.CalledProcessError):
-            return
-        pblogic = list(pb for pb in self.status_logics["playbooks"]
-                       if pb in playbook)
-        if any(pblogic):
-            logic = self.status_logics["playbooks"][pblogic[0]]
-        elif exception.returncode in self.status_logics["retcodes"]:
-            logic = self.status_logics["retcodes"][exception.returncode]
-        else:
-            logic = self.status_logics["retcodes"]["other"]
-        return self.handler(logic, exception, exception.output)
-
-    def other_error(self, exception):
-        logic = self.status_logics['other'].get(exception.__class__, None)
-        if logic is None:
-            return
-        return self.handler(logic, exception, str(exception))
-
-    @staticmethod
-    def logic(**kwargs):
-        kwargs.pop('self', None)
-        defaults = ExecuteStatusHandler
-        result = dict(ok=defaults._ok.copy(),
-                      other=defaults._other.copy(),
-                      playbooks=defaults._playbooks.copy(),
-                      retcodes=defaults._retcodes.copy())
-        result['retcodes'].update(kwargs.pop("retcodes", {}))
-        result['playbooks'].update(kwargs.pop("playbooks", {}))
-        result.update(kwargs)
-        return result
+    def write_output(self, line):
+        super(Executor, self).write_output(line)
+        self.history.raw_stdout += line
+        self.history.save()
 
 
 # Block of real models
@@ -123,13 +98,8 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)
 
-    def execute(self, inventory_id):
-        # pylint: disable=no-member
-        inventory = Inventory.objects.get(id=inventory_id)
-        ExecuteAnsibleTask.delay(self, inventory.id)
-
-    def run_ansible_playbook(self, inventory):
-        run_ansible_playbook(self, inventory)
+    def run_ansible_playbook(self, inventory, **extra):
+        run_ansible_playbook(self, inventory, **extra)
 
 
 class PeriodicTask(BModel):

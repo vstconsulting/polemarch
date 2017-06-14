@@ -148,16 +148,16 @@ class ProjectViewSet(base.ModelViewSetSet):
     def sync(self, request, *args, **kwargs):
         return self.get_serializer(self.get_object()).sync()
 
+    @detail_route(methods=["post"])
+    def execute(self, request, *args, **kwargs):
+        return self.get_serializer(self.get_object()).execute(request)
+
 
 class TaskViewSet(base.ReadOnlyModelViewSet):
     model = serializers.models.Task
     serializer_class = serializers.TaskSerializer
     serializer_class_one = serializers.OneTaskSerializer
     filter_class = filters.TaskFilter
-
-    @detail_route(methods=["post"])
-    def execute(self, request, *args, **kwargs):
-        return self.get_serializer(self.get_object()).execute(request)
 
 
 class PeriodicTaskViewSet(base.ModelViewSetSet):
