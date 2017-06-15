@@ -8,9 +8,9 @@ import subprocess
 from django.utils.timezone import now
 
 try:
-    from unittest.mock import patch
-except ImportError:
     from mock import patch
+except ImportError:
+    from unittest.mock import patch
 
 from ..models import Project
 from ..models import Task, PeriodicTask, History, Inventory

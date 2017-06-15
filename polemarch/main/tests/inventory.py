@@ -121,6 +121,15 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         self._filter_vars(base_url, "ansible_port:222,ansible_user:one", 2)
         self._filter_vars(base_url, "ansible_port:221,ansible_user:rh", 2)
 
+        filter_data = dict(
+            filter=dict(variables__key="ansible_port", variables__value="222"),
+            exclude=dict(variables__key="ansible_user", variables__value="rh")
+        )
+        result = self.get_result("post", base_url+"filter/", code=200,
+                                 data=json.dumps(filter_data))
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(result["count"], 2, result)
+
         for host_id in results_id:
             self.get_result("delete", base_url + "{}/".format(host_id))
 

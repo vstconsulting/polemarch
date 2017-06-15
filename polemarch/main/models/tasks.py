@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import logging
 import sys
 import uuid
-# from subprocess import CalledProcessError, STDOUT, check_output
 from collections import namedtuple
 from os.path import dirname
 
