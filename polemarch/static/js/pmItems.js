@@ -1,6 +1,7 @@
 
 function pmItems()
 {
+    this.pageSize = 2; 
     this.validateHostName = function(name)
     {
         if(!name)
@@ -52,7 +53,7 @@ function pmItems()
      * Обновляет поле модел polemarch.model.hostslist и ложит туда список пользователей
      * Обновляет поле модел polemarch.model.hosts и ложит туда список инфу о пользователях по их id
      */
-    this.loadAllItems = function(){}
+    this.loadItems = function(){}
  
     /**
      * Обновляет поле модел polemarch.model.hosts[item_id] и ложит туда пользователя
@@ -115,5 +116,44 @@ function pmItems()
         $("#jsonEditorVarList").append(spajs.just.render('jsonEditorLine', {name:name, value:value}))
     }
 
+    ////////////////////////////////////////////////
+    // pagination
+    ////////////////////////////////////////////////
+
+    this.paginationHtml = function(list)
+    {
+        var totalPage = list.count / list.limit
+        if(totalPage > Math.floor(totalPage))
+        {
+            totalPage = Math.floor(totalPage) + 1
+        }
+
+        var currentPage = 0;
+        if(list.offset)
+        {
+            currentPage = Math.floor(list.offset / list.limit)
+        }
+        var url = window.location.href  
+        return  spajs.just.render('pagination', {
+            totalPage:totalPage,
+            currentPage:currentPage,
+            url:url})
+    }
+
+    this.getTotalPages = function(list)
+    {
+        var totalPage = list.count / list.limit 
+        return  totalPage
+    }
+}
+
+
+/**
+ * Тестовый тест, чтоб было видно что тесты вообще хоть как то работают.
+ */
+function trim(s)
+{
+    if(s) return s.replace(/^ */g, "").replace(/ *$/g, "")
+    return '';
 }
 

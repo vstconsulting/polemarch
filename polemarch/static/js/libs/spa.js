@@ -651,6 +651,11 @@ if(!window.spajs)
             opt.menuId = "";
         }
         
+        if(opt.reopen === undefined)
+        {
+            opt.reopen = true;
+        }
+        
         var def = new $.Deferred();
         if(!spajs.opt.addParamsToUrl && opt.event_state == undefined)
         {

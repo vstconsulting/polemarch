@@ -869,7 +869,8 @@
                 <div class="box box-info">
                     <div class="box-header with-border">
                         Hosts 
-                        <div class="input-group col-lg-2" style="float: right; margin: 0px; padding: 0px;">
+                        
+                        <div class="input-group col-lg-2" style="float: right;">
                             <input
                                 type="text"
                                 id="search-query-input"
@@ -883,14 +884,74 @@
                                 <span class="glyphicon glyphicon-search" ></span>
                             </div>
                         </div>
+                        <% if(pmHosts.getTotalPages(polemarch.model.hostslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmHosts.paginationHtml(polemarch.model.hostslist) %>
+                            </div>
+                        <% } %>
+                        
                     </div>
                     <div class="box-body">
-                        <% for(var i in polemarch.model.hostslist.results){ %>
-                            <ul>
-                                <li><a href="/?host/<%- polemarch.model.hostslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.hostslist.results[i].name %></a></li>
-                            </ul>
-                        <% } %> 
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 30px"></th>
+                                    <th>Name</th>
+                                    <th style="width: 60px">Type</th> 
+                                    <th style="width: 133px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 80px;" class="visible-xs">Actions</th>
+                                </tr>
+                                <% for(var i in polemarch.model.hostslist.results){ %> 
+                                    <tr class="item-row item-<%- polemarch.model.hostslist.results[i].id %>" >
+                                        <td>
+                                            <div style="float: left; padding: 0px 15px;">
+                                                <input type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a href="/?hosts/<%- polemarch.model.hostslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- polemarch.model.hostslist.results[i].name %></a>
+                                        </td>
+                                        <td>
+                                            <span><%- polemarch.model.hostslist.results[i].type %></span>
+                                        </td>
+                                        <td class="hidden-xs"> 
+                                            <a href="/?host/<%- polemarch.model.hostslist.results[i].id %>"
+                                                class="btn btn-primary"
+                                                onclick="return spajs.openURL(this.href);" >Edit</a> 
+
+                                            <a href="/?project/<%- polemarch.model.hostslist.results[i].id %>"
+                                                class="btn btn-danger"
+                                                onclick="spajs.showLoader(pmHosts.deleteItem(<%- polemarch.model.hostslist.results[i].id %>)); return false;" >Delete</a> 
+                                        </td>
+                                        <td class="visible-xs"> 
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Actions
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a href="/?host/<%- polemarch.model.hostslist.results[i].id %>" 
+                                                            onclick="return spajs.openURL(this.href);" >Edit</a> 
+                                                    </li>
+                                                    <li>
+                                                        <a href="/?project/<%- polemarch.model.hostslist.results[i].id %>" 
+                                                            onclick="spajs.showLoader(pmHosts.deleteItem(<%- polemarch.model.hostslist.results[i].id %>)); return false;" >Delete</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>  
+                                <% } %> 
+                            </tbody>
+                        </table> 
                     </div>
+                    <% if(pmHosts.getTotalPages(polemarch.model.hostslist)){ %>
+                        <div class="box-footer clearfix">  
+                            <%= pmHosts.paginationHtml(polemarch.model.hostslist) %> 
+                        </div>
+                    <% } %>
                 </div>
             </section>
         </div>
@@ -1423,6 +1484,39 @@
         </div>
     </section>
 </script>
+
+<script  type="text/x-just" style="display: none;" data-just="pagination">
+<% if(totalPage > 1){ %> 
+        <ul class="pagination no-margin pull-right"> 
+            <% if(totalPage < 21){ %>
+                <% for(var i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" ><%- i+1 %></a></li>
+                    <% } %>
+                <% } %>
+            <% }else{ %>
+                <% for(var i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
+                            <% if( dotShow == false){ %>
+                                <% dotShow = true %>
+                                <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);">..</a></li>
+                            <% } %>
+                        <% }else{ %>
+                            <% dotShow = false %>
+                            <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" ><%- i+1 %></a></li>
+                        <% } %>
+                    <% } %>
+                <% } %>
+            <% } %>
+        </ul> 
+<% } %>
+</script>
+
 
 <script>
     $(document).ready(function()

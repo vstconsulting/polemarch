@@ -3,7 +3,7 @@ var pmGroups = new pmItems()
 
 pmGroups.showList = function(holder, menuInfo, data)
 {
-    return $.when(pmGroups.loadAllItems()).done(function()
+    return $.when(pmGroups.loadItems()).done(function()
     {
         $(holder).html(spajs.just.render('groups_list', {}))
     }).fail(function()
@@ -34,7 +34,7 @@ pmGroups.showNewItemPage = function(holder, menuInfo, data)
  * Обновляет поле модел polemarch.model.groupslist и ложит туда список пользователей
  * Обновляет поле модел polemarch.model.groups и ложит туда список инфу о пользователях по их id
  */
-pmGroups.loadAllItems = function()
+pmGroups.loadItems = function()
 {
     var def = new $.Deferred();
     jQuery.ajax({
@@ -307,7 +307,7 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
  */
 pmGroups.showAddSubGroupsForm = function(item_id, holder)
 {
-    return $.when(pmGroups.loadAllItems()).done(function(){
+    return $.when(pmGroups.loadItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").append(spajs.just.render('add_existing_groups_to_group', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -322,7 +322,7 @@ pmGroups.showAddSubGroupsForm = function(item_id, holder)
  */
 pmGroups.showAddSubHostsForm = function(item_id, holder)
 {
-    return $.when(pmHosts.loadAllItems()).done(function(){
+    return $.when(pmHosts.loadItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").append(spajs.just.render('add_existing_hosts_to_group', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();

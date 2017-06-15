@@ -3,7 +3,7 @@ var pmProjects = new pmItems()
 
 pmProjects.showList = function(holder, menuInfo, data)
 {
-    return $.when(pmProjects.loadAllItems()).done(function()
+    return $.when(pmProjects.loadItems()).done(function()
     {
         $(holder).html(spajs.just.render('projects_list', {}))
     }).fail(function()
@@ -34,7 +34,7 @@ pmProjects.showNewItemPage = function(holder, menuInfo, data)
  * Обновляет поле модел polemarch.model.userslist и ложит туда список пользователей 
  * Обновляет поле модел polemarch.model.users и ложит туда список инфу о пользователях по их id
  */
-pmProjects.loadAllItems = function()
+pmProjects.loadItems = function()
 {
     return jQuery.ajax({
         url: "/api/v1/projects/",
@@ -228,7 +228,7 @@ pmProjects.deleteItem = function(item_id, force)
  */
 pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
-    return $.when(pmInventories.loadAllItems()).done(function(){
+    return $.when(pmInventories.loadItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -243,7 +243,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
  */
 pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
-    return $.when(pmInventories.loadAllItems()).done(function(){
+    return $.when(pmInventories.loadItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -258,7 +258,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
  */
 pmProjects.showAddSubGroupsForm = function(item_id, holder)
 {
-    return $.when(pmGroups.loadAllItems()).done(function(){
+    return $.when(pmGroups.loadItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_groups_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -273,7 +273,7 @@ pmProjects.showAddSubGroupsForm = function(item_id, holder)
  */
 pmProjects.showAddSubHostsForm = function(item_id, holder)
 {
-    return $.when(pmHosts.loadAllItems()).done(function(){
+    return $.when(pmHosts.loadItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_hosts_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();

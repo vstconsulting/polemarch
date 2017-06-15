@@ -3,7 +3,7 @@ var pmUsers = new pmItems()
 
 pmUsers.showList = function(holder, menuInfo, data)
 {
-    return $.when(pmUsers.loadAllItems()).done(function()
+    return $.when(pmUsers.loadItems()).done(function()
     {
         $(holder).html(spajs.just.render('users_list', {}))
     }).fail(function()
@@ -34,7 +34,7 @@ pmUsers.showNewItemPage = function(holder, menuInfo, data)
  * Обновляет поле модел polemarch.model.userslist и ложит туда список пользователей 
  * Обновляет поле модел polemarch.model.users и ложит туда список инфу о пользователях по их id
  */
-pmUsers.loadAllItems = function()
+pmUsers.loadItems = function()
 {
     return jQuery.ajax({
         url: "/api/v1/users/",

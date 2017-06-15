@@ -3,7 +3,7 @@ var pmInventories = new pmItems()
 
 pmInventories.showList = function(holder, menuInfo, data)
 {
-    return $.when(pmInventories.loadAllItems()).done(function()
+    return $.when(pmInventories.loadItems()).done(function()
     {
         $(holder).html(spajs.just.render('inventories_list', {}))
     }).fail(function()
@@ -34,7 +34,7 @@ pmInventories.showNewItemPage = function(holder, menuInfo, data)
  * Обновляет поле модел polemarch.model.userslist и ложит туда список пользователей 
  * Обновляет поле модел polemarch.model.users и ложит туда список инфу о пользователях по их id
  */
-pmInventories.loadAllItems = function()
+pmInventories.loadItems = function()
 {
     return jQuery.ajax({
         url: "/api/v1/inventories/",
@@ -246,7 +246,7 @@ pmInventories.deleteItem = function(item_id, force)
  */
 pmInventories.showAddSubGroupsForm = function(item_id, holder)
 {
-    return $.when(pmGroups.loadAllItems()).done(function(){
+    return $.when(pmGroups.loadItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").append(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -261,7 +261,7 @@ pmInventories.showAddSubGroupsForm = function(item_id, holder)
  */
 pmInventories.showAddSubHostsForm = function(item_id, holder)
 {
-    return $.when(pmHosts.loadAllItems()).done(function(){
+    return $.when(pmHosts.loadItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").append(spajs.just.render('add_existing_hosts_to_inventory', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();

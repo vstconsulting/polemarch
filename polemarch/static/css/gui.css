@@ -300,3 +300,7 @@ div.spinner div.bar12 {
     display: block !important;
 }
  
+.borderless td, .borderless th {
+    border: none;
+    border-top: none !important;
+}

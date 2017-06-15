@@ -1,9 +1,16 @@
 
 var pmHosts = new pmItems()  
-
+ 
 pmHosts.showList = function(holder, menuInfo, data)
 {
-    return $.when(pmHosts.loadAllItems()).done(function()
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[1] > 0)
+    {
+        offset = this.pageSize*(data.reg[1] - 1);
+    }
+    
+    return $.when(this.loadItems(limit, offset)).done(function()
     {
         $(holder).html(spajs.just.render('hosts_list', {query:""}))
     }).fail(function()
@@ -14,14 +21,19 @@ pmHosts.showList = function(holder, menuInfo, data)
   
 pmHosts.search = function(query)
 {
-    return spajs.open({ menuId:"hosts/search/"+query, reopen:true});
+    if(!query || !trim(query))
+    {
+        return spajs.open({ menuId:"hosts", reopen:true});
+    }
+    
+    return spajs.open({ menuId:"hosts/search/"+encodeURIComponent(trim(query)), reopen:true});
 }
 
 pmHosts.showSearchResults = function(holder, menuInfo, data)
 {
-    return $.when(pmHosts.searchItems(data.reg[1])).done(function()
+    return $.when(this.searchItems(data.reg[1])).done(function()
     {
-        $(holder).html(spajs.just.render('hosts_list', {query:data.reg[1]}))
+        $(holder).html(spajs.just.render('hosts_list', {query:decodeURIComponent(data.reg[1])}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -32,7 +44,7 @@ pmHosts.showItem = function(holder, menuInfo, data)
 {
     console.log(menuInfo, data)
     
-    return $.when(pmHosts.loadItem(data.reg[1])).done(function()
+    return $.when(this.loadItem(data.reg[1])).done(function()
     {
         $(holder).html(spajs.just.render('host_page', {item_id:data.reg[1]}))
     }).fail(function()
@@ -50,13 +62,23 @@ pmHosts.showNewItemPage = function(holder, menuInfo, data)
  * Обновляет поле модел polemarch.model.hostslist и ложит туда список пользователей 
  * Обновляет поле модел polemarch.model.hosts и ложит туда список инфу о пользователях по их id
  */
-pmHosts.loadAllItems = function()
+pmHosts.loadItems = function(limit, offset)
 {
+    if(!limit)
+    {
+        limit = 30;
+    }
+    
+    if(!offset)
+    {
+        offset = 0;
+    }
+    
     return jQuery.ajax({
         url: "/api/v1/hosts/",
         type: "GET",
         contentType:'application/json',
-        data: "",
+        data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
         beforeSend: function(xhr, settings) {
             if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
                 // Only send the token to relative URLs i.e. locally.
@@ -67,6 +89,8 @@ pmHosts.loadAllItems = function()
         {
             console.log("update Items", data)
             polemarch.model.hostslist = data
+            polemarch.model.hostslist.limit = limit
+            polemarch.model.hostslist.offset = offset
             //polemarch.model.hosts = {}
             
             for(var i in data.results)
@@ -157,7 +181,7 @@ pmHosts.addItem = function(parent_type, parent_item)
 
     data.name = $("#new_host_name").val()
     data.type = $("#new_host_type").val() 
-    data.vars = pmHosts.jsonEditorGetValues()
+    data.vars = this.jsonEditorGetValues()
      
     if(data.type == "HOST"  && (!data.name || !this.validateHostName(data.name)))
     {
@@ -246,7 +270,7 @@ pmHosts.updateItem = function(item_id)
 
     data.name = $("#host_"+item_id+"_name").val()
     data.type = $("#host_"+item_id+"_type").val()
-    data.vars = pmHosts.jsonEditorGetValues()
+    data.vars = this.jsonEditorGetValues()
 
     // @todo Добавить валидацию диапазонов "127.0.1.[5:6]" и 127.0.1.1, 127.0.1.2
     if(!data.name || !this.validateHostName(data.name))
