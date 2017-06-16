@@ -304,3 +304,29 @@ div.spinner div.bar12 {
     border: none;
     border-top: none !important;
 }
+
+.multiple-select .selected{
+    background-color: rgba(35, 144, 0, 0.15);
+}
+
+.multiple-select .selected .ico-on{
+    display: block;
+}
+
+.multiple-select .selected .ico-off{
+    display: none;
+}
+
+.multiple-select .ico-on{
+    display: none;
+    font-size: 24px;
+    color: #128200;
+}
+
+.multiple-select .ico-off{
+    display: block;
+    font-size: 24px;
+    /* color: #f44;*/
+    color: #eee;
+}
+

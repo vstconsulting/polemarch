@@ -36,6 +36,7 @@ polemarch.model.users = {}
 
 polemarch.model.hostslist = []
 polemarch.model.hosts = {}
+polemarch.model.selectedhosts = {}
 
 polemarch.model.groupslist = []
 polemarch.model.groups = {} 

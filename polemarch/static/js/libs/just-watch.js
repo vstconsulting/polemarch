@@ -226,8 +226,11 @@ var deepExtend = function (/*obj_1, [obj_2], [obj_N]*/) {
  */ 
 if (!Object.prototype.justHtml || true)
 {
-    var justWatch = {
+    var justReactive = {
         
+        /**
+         * Вырезает html код
+         */
         justStrip:function(html)
         {
            var tmp = document.createElement("DIV");
@@ -244,7 +247,7 @@ if (!Object.prototype.justHtml || true)
                   , value: function(){
                       console.log("watch method", method, arguments);
                       Array.prototype[method].apply(this, arguments);
-                      setter.apply(this,["__justWatch_update"]);
+                      setter.apply(this,["__justReactive_update"]);
                       return this; 
                   }
             }); 
@@ -252,6 +255,9 @@ if (!Object.prototype.justHtml || true)
         
         _just_Id:0,  
         
+        /*
+         * Методы массивов применяем для реактивности массива
+         */
         methods:['pop',
             'push',
             'reduce',
@@ -271,8 +277,8 @@ if (!Object.prototype.justHtml || true)
             /*
              * Методы массивов применяем для реактивности массива
              */
-            justWatch._just_Id++;
-            var id = justWatch._just_Id;
+            justReactive._just_Id++;
+            var id = justReactive._just_Id;
 
             if(!opt.callBack)
             {
@@ -280,33 +286,44 @@ if (!Object.prototype.justHtml || true)
             }
 
             var thisObj = this[opt.prop]
-            this[opt.prop] = "__justWatch_test";
+            
+            // Проверка того нетули уже наблюдения за этим объектом
+            // Так как если уже стоит сеттер от just-watch то после присвоения 
+            // строки __justReactive_test в объект через сетор значение объекта не поменяется.
+            this[opt.prop] = "__justReactive_test";
 
-            if( this[opt.prop] === "__justWatch_test")
+            if( this[opt.prop] === "__justReactive_test")
             {
+                // Значение поменялось на __justReactive_test значит нашего
+                //  сетора небыло и надо его поставить.
                 this[opt.prop] = thisObj
                 var newval = {
                     val:this[opt.prop],
                     just_ids:[{id:id, callBack:opt.callBack, type:opt.type, className:opt.className, attrName:opt.attrName, customData:opt.customData}],
                 }
 
+                // Удаляем оригинальное значение
                 if (delete this[opt.prop])
                 {
+                    // гетер
                     var getter = function ()
                     {
                         return newval.val;
                     }
 
+                    // сетор
                     var setter = function (val)
                     {
-                        if(val === "__justWatch_test")
+                        if(val === "__justReactive_test")
                         {
+                            // Тест сетора - значение не меняем.
                             return val;
                         }
 
-                        if(val.__add_justHtml_test === "__justWatch_test")
+                        if(val.__add_justHtml_test === "__justReactive_test")
                         {
-                            console.log("setter add", newval);
+                            // Добавление точки отслеживания, значение не меняем.
+                            //console.log("setter add", newval);
                             newval.just_ids.push({
                                 id:val.id,
                                 attrName:val.attrName,
@@ -318,15 +335,20 @@ if (!Object.prototype.justHtml || true)
                             return val;
                         }
 
-                        if(val !== "__justWatch_update")
+                        if(val === "__justReactive_update")
+                        { 
+                            // Обновление объекта внешними средсвами, значение не меняем
+                            // Но вызовем все колбеки
+                            // Используется на пример для обновления массивов через их методы.
+                        }
+                        else
                         {
-                            newval.val = val;
-
+                            newval.val = val; 
                             if(Array.isArray(val))
                             {
-                                for(var i in justWatch.methods)
+                                for(var i in justReactive.methods)
                                 {
-                                    justWatch.addMethod.apply(this, [setter, opt.prop, justWatch.methods[i]])
+                                    justReactive.addMethod.apply(this, [setter, opt.prop, justReactive.methods[i]])
                                 } 
                             }
                         }
@@ -336,16 +358,19 @@ if (!Object.prototype.justHtml || true)
                         {
                             if(newval.just_ids[i].type == 'innerHTML')
                             {
-                                var el = document.getElementById("_justWatch"+newval.just_ids[i].id)
+                                // innerHTML - вставить без обработки на страницу.
+                                var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
                                 if(el) el.innerHTML = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
                             }
                             else if(newval.just_ids[i].type == 'textContent')
                             {
-                                var el = document.getElementById("_justWatch"+newval.just_ids[i].id)
+                                // textContent - вставить с вырезанием html кода на страницу.
+                                var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
                                 if(el) el.textContent = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
                             }
                             else if(newval.just_ids[i].type == 'class')
                             {
+                                // class - вставить класс на страницу.
                                 var el = document.getElementsByClassName("just-watch-class-"+newval.just_ids[i].id)
 
                                 var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData) 
@@ -368,8 +393,34 @@ if (!Object.prototype.justHtml || true)
                                             + " " + newval.just_ids[i].className
                                 }
                             }
+                            else if(newval.just_ids[i].type == 'notClass')
+                            {
+                                // class - вставить класс на страницу.
+                                var el = document.getElementsByClassName("just-watch-class-"+newval.just_ids[i].id)
+
+                                var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData) 
+                                console.log("class", valT)
+                                if(valT)
+                                {
+                                    if(el && el.length)
+                                        el[0].className = el[0].className
+                                            .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
+                                            .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
+                                            .replace(new RegExp(" +"+newval.just_ids[i].className+"$","g"), "")
+                                }
+                                else
+                                {
+                                    if(el && el.length)
+                                        el[0].className = el[0].className
+                                            .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
+                                            .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
+                                            .replace(new RegExp(" "+newval.just_ids[i].className+"$","g"), "")
+                                            + " " + newval.just_ids[i].className
+                                }
+                            }
                             else if(newval.just_ids[i].type == 'attr')
                             {
+                                // class - вставить атрибут на страницу.
                                 var el = document.querySelectorAll("[data-just-watch-"+newval.just_ids[i].id+"]");
                                 if(el && el.length)
                                 {
@@ -388,7 +439,7 @@ if (!Object.prototype.justHtml || true)
                         return val;
                     }
 
-                    // can't watch constants
+                    // Вписываем свои гетер и сетор
                     Object.defineProperty(this, opt.prop, {
                               get: getter
                             , set: setter
@@ -398,17 +449,19 @@ if (!Object.prototype.justHtml || true)
 
                     if(Array.isArray(newval.val))
                     { 
-                        for(var i in justWatch.methods)
+                        for(var i in justReactive.methods)
                         {
-                            justWatch.addMethod.apply(this, [setter, opt.prop, justWatch.methods[i]])
+                            justReactive.addMethod.apply(this, [setter, opt.prop, justReactive.methods[i]])
                         } 
                     }
                 }
             }
             else
             {
+                // Значение не поменялось на __justReactive_test значит сетер есть
+                // И мы просто впишем в него новую точку отслеживания
                 this[opt.prop] = {
-                    __add_justHtml_test:"__justWatch_test",
+                    __add_justHtml_test:"__justReactive_test",
                     id:id,
                     type:opt.type,
                     callBack:opt.callBack,
@@ -418,20 +471,33 @@ if (!Object.prototype.justHtml || true)
                 }
             }
 
+            // Вернём в ответ код который надо вставить в шаблон
             if(opt.type == 'innerHTML')
             {
-                return "<div id='_justWatch"+id+"' class='just-watch just-watch-html' style='display: inline;' >"+opt.callBack(this[opt.prop], opt.customData)+"</div>";
+                return "<div id='_justReactive"+id+"' class='just-watch just-watch-html' style='display: inline;' >"+opt.callBack(this[opt.prop], opt.customData)+"</div>";
             }
             else if(opt.type == 'textContent')
             { 
-                return "<div id='_justWatch"+id+"' style='display: inline;' class='just-watch just-watch-text' >"+justWatch.justStrip(opt.callBack(this[opt.prop], opt.customData))+"</div>";
+                return "<div id='_justReactive"+id+"' style='display: inline;' class='just-watch just-watch-text' >"+justReactive.justStrip(opt.callBack(this[opt.prop], opt.customData))+"</div>";
             }
             else if(opt.type == 'class')
             {
                 var val = opt.callBack(this[opt.prop], opt.customData)
                 if(val)
                 {
-                    return " just-watch just-watch-class just-watch-class-"+id+" "+justWatch.justStrip(opt.className)+" ";
+                    return " just-watch just-watch-class just-watch-class-"+id+" "+justReactive.justStrip(opt.className)+" ";
+                }
+                else
+                {
+                    return " just-watch just-watch-class just-watch-class-"+id+" ";
+                }
+            }
+            else if(opt.type == 'notClass')
+            {
+                var val = opt.callBack(this[opt.prop], opt.customData)
+                if(!val)
+                {
+                    return " just-watch just-watch-class just-watch-class-"+id+" "+justReactive.justStrip(opt.className)+" ";
                 }
                 else
                 {
@@ -443,7 +509,7 @@ if (!Object.prototype.justHtml || true)
                 var val = opt.callBack(this[opt.prop], opt.customData)
                 if(val)
                 {
-                    return " data-just-watch-"+id+" "+opt.attrName+"=\""+ justWatch.justStrip(val).replace(/\"/g, "\\\"") +"\"";
+                    return " data-just-watch-"+id+" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/\"/g, "\\\"") +"\"";
                 }
                 else
                 {
@@ -461,7 +527,7 @@ if (!Object.prototype.justHtml || true)
         enumerable: false
       , configurable: true
       , writable: false
-      , value: function(prop, callBack, customData){ return justWatch.setValue.apply(this, [{type:'innerHTML', prop:prop, callBack:callBack, customData:customData}])
+      , value: function(prop, callBack, customData){ return justReactive.setValue.apply(this, [{type:'innerHTML', prop:prop, callBack:callBack, customData:customData}])
       }
     });
  
@@ -470,7 +536,7 @@ if (!Object.prototype.justHtml || true)
         enumerable: false
       , configurable: true
       , writable: false
-      , value: function(prop, callBack, customData){ return justWatch.setValue.apply(this, [{type:'textContent', prop:prop, callBack:callBack, customData:customData}])}
+      , value: function(prop, callBack, customData){ return justReactive.setValue.apply(this, [{type:'textContent', prop:prop, callBack:callBack, customData:customData}])}
     });
 
     // Проставляет css class
@@ -480,8 +546,26 @@ if (!Object.prototype.justHtml || true)
       , writable: false
       , value: function(prop, className, callBack, customData)
         { 
-            return justWatch.setValue.apply(this, [{
+            return justReactive.setValue.apply(this, [{
                     type:'class',
+                    prop:prop,
+                    className:className,
+                    callBack:callBack,
+                    customData:customData
+                }])
+        }
+    });
+    
+    
+    // Проставляет css class
+    Object.defineProperty(Object.prototype, "justNotClass", {
+        enumerable: false
+      , configurable: true
+      , writable: false
+      , value: function(prop, className, callBack, customData)
+        { 
+            return justReactive.setValue.apply(this, [{
+                    type:'notClass',
                     prop:prop,
                     className:className,
                     callBack:callBack,
@@ -495,27 +579,7 @@ if (!Object.prototype.justHtml || true)
         enumerable: false
       , configurable: true
       , writable: false
-      , value: function(prop, attrName, callBack, customData){ return justWatch.setValue.apply(this, [{type:'attr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
-    });
-}
-
-if (!Object.prototype.getBy)
-{
-    Object.defineProperty(Object.prototype, "getBy", {
-        enumerable: false
-      , configurable: true
-      , writable: false
-      , value: function(prop, value)
-      {
-            for(var i in this)
-            {
-                var val = this[i];
-                if(val[prop] == value)
-                {
-                    return this[i];
-                }
-            }
-      }
+      , value: function(prop, attrName, callBack, customData){ return justReactive.setValue.apply(this, [{type:'attr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
     });
 }
 

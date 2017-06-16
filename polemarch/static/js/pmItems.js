@@ -1,7 +1,27 @@
 
 function pmItems()
-{
+{ 
     this.pageSize = 2; 
+    this.model = {}
+    this.model.selectedItems = {}
+    
+    this.toggleSelect = function(item_id)
+    {
+        this.model.selectedItems[item_id] = !this.model.selectedItems[item_id]
+
+        var count = 0;
+        for(var i in this.model.selectedItems)
+        {
+            if(this.model.selectedItems[i])
+            {
+                count += 1
+            }
+        }
+
+        this.model.selectedCount = count;
+        return this.model.selectedItems[item_id];
+    }
+    
     this.validateHostName = function(name)
     {
         if(!name)
