@@ -1,14 +1,21 @@
 
 function pmItems()
 { 
-    this.pageSize = 2; 
-    this.model = {}
-    this.model.selectedItems = {}
+    this.pageSize = 20; 
+    this.model = {};
+    this.model.selectedItems = {};
     
-    this.toggleSelect = function(item_id)
+    this.toggleSelect = function(item_id, mode)
     {
-        this.model.selectedItems[item_id] = !this.model.selectedItems[item_id]
-
+        if(mode === undefined)
+        {
+            this.model.selectedItems[item_id] = !this.model.selectedItems[item_id]
+        }
+        else
+        {
+            this.model.selectedItems[item_id] = mode
+        }
+        
         var count = 0;
         for(var i in this.model.selectedItems)
         {
@@ -20,6 +27,14 @@ function pmItems()
 
         this.model.selectedCount = count;
         return this.model.selectedItems[item_id];
+    }
+    
+    this.toggleSelectAll = function(elements, mode)
+    {  
+        for(var i=0; i< elements.length; i++)
+        {
+            this.toggleSelect($(elements[i]).attr('data-id'), mode)
+        } 
     }
     
     this.validateHostName = function(name)

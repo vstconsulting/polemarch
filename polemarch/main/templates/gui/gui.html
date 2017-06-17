@@ -895,14 +895,19 @@
                         <table class="table table-bordered multiple-select">
                             <tbody>
                                 <tr>
-                                    <th style="width: 30px"></th>
+                                    <th style="width: 30px" onclick=" $(this).parent().toggleClass('selected'); pmHosts.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div> 
+                                    </th>
                                     <th>Name</th>
                                     <th style="width: 60px">Type</th> 
                                     <th style="width: 133px;" class="hidden-xs">Actions</th>
                                     <th style="width: 80px;" class="visible-xs">Actions</th>
                                 </tr>
                                 <% for(var i in polemarch.model.hostslist.results){ %> 
-                                    <tr class="item-row item-<%- polemarch.model.hostslist.results[i].id %>  <%- pmHosts.model.selectedItems.justClass(polemarch.model.hostslist.results[i].id, 'selected') %>" >
+                                    <tr 
+                                        class="item-row item-<%- polemarch.model.hostslist.results[i].id %>  <%- pmHosts.model.selectedItems.justClass(polemarch.model.hostslist.results[i].id, 'selected') %>"
+                                        data-id="<%- polemarch.model.hostslist.results[i].id %>" >
                                         <td class=""  onclick="pmHosts.toggleSelect(<%- polemarch.model.hostslist.results[i].id %>); return false;"> 
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div> 
@@ -955,7 +960,7 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a href="/?host/<%- polemarch.model.hostslist.results[i].id %>" 
-                                        onclick="spajs.showLoader(pmHosts.deleteItem(<%- polemarch.model.hostslist.results[i].id %>)); return false;" >Delete</a>
+                                        onclick="pmHosts.deleteRows($('.multiple-select .selected')); return false;" >Delete</a>
                                 </li>
                             </ul>
                         </div>

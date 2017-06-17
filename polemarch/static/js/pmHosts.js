@@ -1,6 +1,6 @@
 
-var pmHosts = new pmItems()  
-  
+var pmHosts = new pmItems()
+
 pmHosts.showList = function(holder, menuInfo, data)
 {
     var offset = 0
@@ -9,7 +9,7 @@ pmHosts.showList = function(holder, menuInfo, data)
     {
         offset = this.pageSize*(data.reg[1] - 1);
     }
-    
+
     return $.when(this.loadItems(limit, offset)).done(function()
     {
         $(holder).html(spajs.just.render('hosts_list', {query:""}))
@@ -18,14 +18,14 @@ pmHosts.showList = function(holder, menuInfo, data)
         $.notify("", "error");
     })
 }
-  
+
 pmHosts.search = function(query)
 {
     if(!query || !trim(query))
     {
         return spajs.open({ menuId:"hosts", reopen:true});
     }
-    
+
     return spajs.open({ menuId:"hosts/search/"+encodeURIComponent(trim(query)), reopen:true});
 }
 
@@ -43,7 +43,7 @@ pmHosts.showSearchResults = function(holder, menuInfo, data)
 pmHosts.showItem = function(holder, menuInfo, data)
 {
     console.log(menuInfo, data)
-    
+
     return $.when(this.loadItem(data.reg[1])).done(function()
     {
         $(holder).html(spajs.just.render('host_page', {item_id:data.reg[1]}))
@@ -54,12 +54,12 @@ pmHosts.showItem = function(holder, menuInfo, data)
 }
 
 pmHosts.showNewItemPage = function(holder, menuInfo, data)
-{  
+{
     $(holder).html(spajs.just.render('new_host_page', {parent_item:data.reg[2], parent_type:data.reg[1]}))
 }
 
 /**
- * Обновляет поле модел polemarch.model.hostslist и ложит туда список пользователей 
+ * Обновляет поле модел polemarch.model.hostslist и ложит туда список пользователей
  * Обновляет поле модел polemarch.model.hosts и ложит туда список инфу о пользователях по их id
  */
 pmHosts.loadItems = function(limit, offset)
@@ -68,12 +68,12 @@ pmHosts.loadItems = function(limit, offset)
     {
         limit = 30;
     }
-    
+
     if(!offset)
     {
         offset = 0;
     }
-    
+
     return jQuery.ajax({
         url: "/api/v1/hosts/",
         type: "GET",
@@ -92,7 +92,7 @@ pmHosts.loadItems = function(limit, offset)
             polemarch.model.hostslist.limit = limit
             polemarch.model.hostslist.offset = offset
             //polemarch.model.hosts = {}
-            
+
             for(var i in data.results)
             {
                 var val = data.results[i]
@@ -125,7 +125,7 @@ pmHosts.searchItems = function(query)
             console.log("update Items", data)
             polemarch.model.hostslist = data
             //polemarch.model.hosts = {}
-            
+
             for(var i in data.results)
             {
                 var val = data.results[i]
@@ -170,7 +170,7 @@ pmHosts.loadItem = function(item_id)
 }
 
 
-/** 
+/**
  * @return $.Deferred
  */
 pmHosts.addItem = function(parent_type, parent_item)
@@ -180,9 +180,9 @@ pmHosts.addItem = function(parent_type, parent_item)
     var data = {}
 
     data.name = $("#new_host_name").val()
-    data.type = $("#new_host_type").val() 
+    data.type = $("#new_host_type").val()
     data.vars = this.jsonEditorGetValues()
-     
+
     if(data.type == "HOST"  && (!data.name || !this.validateHostName(data.name)))
     {
         $.notify("Invalid value in filed name", "error");
@@ -193,7 +193,7 @@ pmHosts.addItem = function(parent_type, parent_item)
         $.notify("Invalid value in filed name", "error");
         return;
     }
- 
+
     $.ajax({
         url: "/api/v1/hosts/",
         type: "POST",
@@ -207,9 +207,9 @@ pmHosts.addItem = function(parent_type, parent_item)
         },
         success: function(data)
         {
-            console.log("addItem", data); 
+            console.log("addItem", data);
             $.notify("Host created", "success");
-            
+
             if(parent_item)
             {
                 if(parent_type == 'group')
@@ -243,14 +243,14 @@ pmHosts.addItem = function(parent_type, parent_item)
                         def.resolve()
                     })
                 }
-            } 
+            }
             else
             {
                 $.when(spajs.open({ menuId:"host/"+data.id})).always(function(){
                     def.resolve()
                 })
             }
-            
+
         },
         error:function(e)
         {
@@ -260,8 +260,8 @@ pmHosts.addItem = function(parent_type, parent_item)
     });
     return def.promise();
 }
-    
-/** 
+
+/**
  * @return $.Deferred
  */
 pmHosts.updateItem = function(item_id)
@@ -278,7 +278,7 @@ pmHosts.updateItem = function(item_id)
         $.notify("Invalid value in filed name", "error");
         return;
     }
- 
+
     return $.ajax({
         url: "/api/v1/hosts/"+item_id+"/",
         type: "PATCH",
@@ -292,7 +292,7 @@ pmHosts.updateItem = function(item_id)
         },
         success: function(data)
         {
-            console.log("updateItem", data); 
+            console.log("updateItem", data);
             $.notify("Save", "success");
         },
         error:function(e)
@@ -302,17 +302,71 @@ pmHosts.updateItem = function(item_id)
     });
 }
 
-/** 
+/**
  * @return $.Deferred
  */
 pmHosts.deleteItem = function(item_id, force)
 {
     if(!force && !confirm("Are you sure?"))
-    {
-        def.reject()
-        return def.promise();
+    { 
+        return;
     }
 
+    return $.when(this.deleteItemQuery(item_id)).done(function(data){
+        console.log("deleteItem", data);
+        spajs.open({ menuId:"hosts"})
+    }).fail(function(e){
+        polemarch.showErrors(e.responseJSON)
+    }).promise()
+}
+
+pmHosts.deleteRows = function(elements)
+{
+    var item_ids = []
+    for(var i=0; i< elements.length; i++)
+    {
+        item_ids.push($(elements[i]).attr('data-id'))
+    }
+    
+    $.when(pmHosts.deleteItems(item_ids)).always(function(){
+        spajs.openURL(window.location.href);
+    })
+}
+
+pmHosts.deleteItems = function(item_ids, force, def)
+{
+    if(!force && !confirm("Are you sure?"))
+    {
+        return;
+    }
+    
+    if(def === undefined)
+    {
+        def = new $.Deferred();
+    }
+    
+    if(!item_ids || !item_ids.length)
+    {
+        def.resolve()
+        return def.promise();
+    }
+     
+    $.when(pmHosts.deleteItemQuery(item_ids[0])).always(function(){
+        item_ids.splice(0, 1)
+        pmHosts.deleteItems(item_ids, true, def);
+    })
+    
+    return def.promise();
+}
+
+/**
+ * @return $.Deferred
+ */
+pmHosts.deleteItemQuery = function(item_id)
+{
+    $(".item-"+item_id).remove();
+    this.toggleSelect(item_id, false);
+    
     return $.ajax({
         url: "/api/v1/hosts/"+item_id+"/",
         type: "DELETE",
@@ -322,15 +376,30 @@ pmHosts.deleteItem = function(item_id, force)
                 // Only send the token to relative URLs i.e. locally.
                 xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
             }
-        },
-        success: function(data)
-        {
-            console.log("deleteItem", data);
-            spajs.open({ menuId:"hosts"})
-        },
-        error:function(e)
-        {
-            polemarch.showErrors(e.responseJSON)
         }
     });
-} 
+}
+
+/*
+ * 
+detail:"database is locked"
+error_type:"OperationalError"
+ * 
+for(var i =0; i< 1000; i++)
+{
+    name = Math.random()+"-"+Math.random()
+    name = name.replace(/\./g, "")
+    $.ajax({
+            url: "/api/v1/hosts/",
+            type: "POST",
+            contentType:'application/json',
+            data: JSON.stringify({name:name, type:"HOST"}),
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:/.test(settings.url) || /^https:/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            }
+    })
+}
+ */ 
