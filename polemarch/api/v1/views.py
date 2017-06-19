@@ -64,20 +64,6 @@ class UserViewSet(base.ModelViewSetSet):
         return Response(serializer.data)
 
 
-class EnvironmentViewSet(base.ModelViewSetSet):
-    model = serializers.models.Environment
-    serializer_class = serializers.EnvironmentSerializer
-    filter_class = filters.EnvironmentsFilter
-
-    @list_route(methods=['post'])
-    def additionals(self, request):
-        return Response(self.model(**request.data).additionals)
-
-    @list_route(methods=['get'])
-    def types(self, request):
-        return Response(self.model.objects.get_integrations())
-
-
 class HostViewSet(base.ModelViewSetSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer

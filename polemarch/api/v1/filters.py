@@ -134,11 +134,3 @@ class PeriodicTaskFilter(_BaseFilter):
                   'playbook',
                   'type',
                   'project')
-
-
-class EnvironmentsFilter(filters.FilterSet):
-    class Meta:
-        model = models.Environment
-        fields = ('id',
-                  'type',
-                  'name',)

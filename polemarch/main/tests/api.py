@@ -6,7 +6,6 @@ from .tasks import ApiTasksTestCase, \
     ApiPeriodicTasksTestCase
 from ..utils import redirect_stdany
 from ._base import BaseTestCase, User, json
-from .envs import ApiEnvsTestCase
 from .inventory import (ApiHostsTestCase, ApiGroupsTestCase,
                         ApiInventoriesTestCase)
 from .project import ApiProjectsTestCase
@@ -186,7 +185,7 @@ class ApiUsersTestCase(BaseTestCase):
         self._logout(client)
 
 
-class APITestCase(ApiUsersTestCase, ApiEnvsTestCase,
+class APITestCase(ApiUsersTestCase,
                   ApiHostsTestCase, ApiGroupsTestCase,
                   ApiInventoriesTestCase, ApiProjectsTestCase,
                   ApiTasksTestCase, ApiPeriodicTasksTestCase):
@@ -205,7 +204,6 @@ class APITestCase(ApiUsersTestCase, ApiEnvsTestCase,
         result = self.result(client.get, "/api/v1/")
         self.assertTrue(result.get('users', False))
         self.assertTrue(result.get('hosts', False))
-        self.assertTrue(result.get('environments', False))
 
     def test_api_router(self):
         client = self._login()

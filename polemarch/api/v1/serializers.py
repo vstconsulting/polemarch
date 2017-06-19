@@ -117,22 +117,6 @@ class OneUserSerializer(UserSerializer):
                             'date_joined',)
 
 
-class EnvironmentSerializer(serializers.ModelSerializer):
-    data = DictField(required=False)
-    hosts = serializers.HyperlinkedRelatedField(many=True,
-                                                read_only=True,
-                                                view_name='host-detail')
-
-    class Meta:
-        model = models.Environment
-        fields = ('id',
-                  'name',
-                  'type',
-                  'key',
-                  'data',
-                  'hosts')
-
-
 class HistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.History
@@ -235,15 +219,12 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
 
 class HostSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
-    environment = ModelRelatedField(required=False,
-                                    model=models.Environment)
 
     class Meta:
         model = models.Host
         fields = ('id',
                   'name',
                   'type',
-                  'environment',
                   'vars',
                   'url',)
 
@@ -256,7 +237,6 @@ class OneHostSerializer(HostSerializer):
         fields = ('id',
                   'name',
                   'type',
-                  'environment',
                   'vars',
                   'url',)
 
