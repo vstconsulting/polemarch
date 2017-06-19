@@ -273,7 +273,7 @@ pmProjects.showAddSubGroupsForm = function(item_id, holder)
  */
 pmProjects.showAddSubHostsForm = function(item_id, holder)
 {
-    return $.when(pmHosts.loadItems()).done(function(){
+    return $.when(pmHosts.loadItems(99999)).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_hosts_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -351,9 +351,14 @@ pmProjects.hasInventories = function(item_id, inventory_id)
  */
 pmProjects.setSubInventories = function(item_id, inventories_ids)
 {
+    if(!inventories_ids) 
+    {
+        inventories_ids = []
+    }
+    
     return $.ajax({
         url: "/api/v1/projects/"+item_id+"/inventories/",
-        type: "POST",
+        type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(inventories_ids),
         beforeSend: function(xhr, settings) {
@@ -388,9 +393,14 @@ pmProjects.setSubInventories = function(item_id, inventories_ids)
  */
 pmProjects.setSubGroups = function(item_id, groups_ids)
 {
+    if(!groups_ids) 
+    {
+        groups_ids = []
+    }
+    
     return $.ajax({
         url: "/api/v1/projects/"+item_id+"/groups/",
-        type: "POST",
+        type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
         beforeSend: function(xhr, settings) {
@@ -425,9 +435,13 @@ pmProjects.setSubGroups = function(item_id, groups_ids)
  */
 pmProjects.setSubHosts = function(item_id, hosts_ids)
 {
+    if(!hosts_ids) 
+    {
+        hosts_ids = []
+    }
     return $.ajax({
         url: "/api/v1/projects/"+item_id+"/hosts/",
-        type: "POST",
+        type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
         beforeSend: function(xhr, settings) {
@@ -443,7 +457,7 @@ pmProjects.setSubHosts = function(item_id, hosts_ids)
                 polemarch.model.projects[item_id].hosts = []
                 for(var i in hosts_ids)
                 {
-                    polemarch.model.projects[item_id].hosts.push(polemarch.model.hosts[hosts_ids[i]])
+                    polemarch.model.projects[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
                 }
             } 
             $.notify("Save", "success");

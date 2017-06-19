@@ -328,10 +328,10 @@
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
-                                <% for(var i in polemarch.model.hosts){ %>
+                                <% for(var i in pmHosts.model.items){ %>
                                     <option
-                                        value="<%- polemarch.model.hosts[i].id %>"
-                                        <% if(pmProjects.hasHosts(item_id, polemarch.model.hosts[i].id)){ %>selected<% } %> ><%- polemarch.model.hosts[i].name %></option>
+                                        value="<%- pmHosts.model.items[i].id %>"
+                                        <% if(pmProjects.hasHosts(item_id, pmHosts.model.items[i].id)){ %>selected<% } %> ><%- pmHosts.model.items[i].name %></option>
                                 <% } %>
                             </select>
                         </div>
@@ -588,10 +588,10 @@
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
-                                <% for(var i in polemarch.model.hosts){ %>
+                                <% for(var i in pmHosts.model.items){ %>
                                     <option
-                                        value="<%- polemarch.model.hosts[i].id %>"
-                                        <% if(pmInventories.hasHosts(item_id, polemarch.model.hosts[i].id)){ %>selected<% } %> ><%- polemarch.model.hosts[i].name %></option>
+                                        value="<%- pmHosts.model.items[i].id %>"
+                                        <% if(pmInventories.hasHosts(item_id, pmHosts.model.items[i].id)){ %>selected<% } %> ><%- pmHosts.model.items[i].name %></option>
                                 <% } %>
                             </select>
                         </div>
@@ -621,6 +621,7 @@
         </ol>
     </section>
 
+    
     <section class="content">
         <a class="btn btn-primary"  href="/?new-user" onclick="spajs.open({ menuId:'new-user'}); return false;">Add user</a>
         <br>
@@ -629,15 +630,100 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Users<br>
+                        Users
+                        <div class="input-group col-lg-2" style="float: right;">
+                            <input
+                                type="text"
+                                id="search-query-input"
+                                placeholder="Search by name"
+                                class="form-control"
+                                maxlength="255" 
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmUsers.search($('#search-query-input').val()));"
+                            >
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmUsers.search($('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
+                            </div>
+                        </div>
+                        <% if(pmUsers.getTotalPages(pmUsers.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmUsers.paginationHtml(pmUsers.model.itemslist) %>
+                            </div>
+                        <% } %>
+                        
                     </div>
                     <div class="box-body">
-                        <% for(var i in polemarch.model.userslist.results){ %>
-                            <ul>
-                                <li><a href="/?user/<%- polemarch.model.userslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.userslist.results[i].username %></a></li>
-                            </ul>
-                        <% } %>
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 30px" onclick=" $(this).parent().toggleClass('selected'); pmUsers.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div> 
+                                    </th>
+                                    <th>Name</th>
+                                    <th style="width: 133px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 80px;" class="visible-xs">Actions</th>
+                                </tr>
+                                <% for(var i in pmUsers.model.itemslist.results){ %> 
+                                    <tr 
+                                        class="item-row item-<%- pmUsers.model.itemslist.results[i].id %>  <%- pmUsers.model.selectedItems.justClass(pmUsers.model.itemslist.results[i].id, 'selected') %>"
+                                        data-id="<%- pmUsers.model.itemslist.results[i].id %>" >
+                                        <td class=""  onclick="pmUsers.toggleSelect(<%- pmUsers.model.itemslist.results[i].id %>); return false;"> 
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div> 
+                                        </td>
+                                        <td class="<% if(pmUsers.model.itemslist.results[i].is_active){ %>user-active<% }else{ %>user-not-active<% } %>">
+                                            <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- pmUsers.model.itemslist.results[i].username %></a>
+                                        </td> 
+                                        <td class="hidden-xs"> 
+                                            <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
+                                                class="btn btn-primary"
+                                                onclick="return spajs.openURL(this.href);" >Edit</a> 
 
+                                            <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
+                                                class="btn btn-danger"
+                                                onclick="spajs.showLoader(pmUsers.deleteItem(<%- pmUsers.model.itemslist.results[i].id %>)); return false;" >Delete</a> 
+                                        </td>
+                                        <td class="visible-xs"> 
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Actions
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>" 
+                                                            onclick="return spajs.openURL(this.href);" >Edit</a> 
+                                                    </li>
+                                                    <li>
+                                                        <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>" 
+                                                            onclick="spajs.showLoader(pmUsers.deleteItem(<%- pmUsers.model.itemslist.results[i].id %>)); return false;" >Delete</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>  
+                                <% } %> 
+                            </tbody>
+                        </table> 
+                    </div>
+                    <div class="box-footer clearfix">  
+                        <div class="btn-group <%- pmUsers.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= pmUsers.model.justText('selectedCount') %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>" 
+                                        onclick="pmUsers.deleteRows($('.multiple-select .selected')); return false;" >Delete</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <% if(pmUsers.getTotalPages(pmUsers.model.itemslist)){ %>
+                                <%= pmUsers.paginationHtml(pmUsers.model.itemslist) %> 
+                        <% } %>
                     </div>
                 </div>
             </section>
@@ -646,19 +732,19 @@
 </script>
 
 <!-- Страница пользователя -->
-<script type="text/x-just" data-just="user_page">
+<script type="text/x-just" data-just="users_page">
     <section class="content-header">
         <h1>
-            <%- polemarch.model.users[item_id].username %>
+            <%- pmUsers.model.items[item_id].username %>
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?users"  onclick="return spajs.openURL(this.href);" >Users list</a></li>
-            <li class="active"><%- polemarch.model.users[item_id].username %></li>
+            <li class="active"><%- pmUsers.model.items[item_id].username %></li>
         </ol>
     </section>
-
+ 
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmUsers.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger" >Remove user</button>
         <button type="button" onclick="spajs.showLoader(pmUsers.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save user</button>
@@ -691,18 +777,18 @@
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Active</label>
-                                <select class="form-control" id="user_<%- polemarch.model.users[item_id].id %>_is_active">
-                                    <option value="true" <%if(polemarch.model.users[item_id].is_active){ %> selected <% } %> >True</option>
-                                    <option value="false" <%if(!polemarch.model.users[item_id].is_active){ %> selected <% } %> >False</option>
+                                <select class="form-control" id="user_<%- pmUsers.model.items[item_id].id %>_is_active">
+                                    <option value="true" <%if(pmUsers.model.items[item_id].is_active){ %> selected <% } %> >True</option>
+                                    <option value="false" <%if(!pmUsers.model.items[item_id].is_active){ %> selected <% } %> >False</option>
                                 </select>
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Staff</label>
-                                <select class="form-control" id="user_<%- polemarch.model.users[item_id].id %>_is_staff">
-                                    <option value="true" <%if(polemarch.model.users[item_id].is_staff){ %> selected <% } %> >True</option>
-                                    <option value="false" <%if(!polemarch.model.users[item_id].is_staff){ %> selected <% } %> >False</option>
+                                <select class="form-control" id="user_<%- pmUsers.model.items[item_id].id %>_is_staff">
+                                    <option value="true" <%if(pmUsers.model.items[item_id].is_staff){ %> selected <% } %> >True</option>
+                                    <option value="false" <%if(!pmUsers.model.items[item_id].is_staff){ %> selected <% } %> >False</option>
                                 </select>
                                 <div class="help-block"></div>
                             </div>
@@ -712,13 +798,13 @@
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Username</label>
-                                <input type="text"  placeholder="Enter username"  id="user_<%- polemarch.model.users[item_id].id %>_username" value="<%- polemarch.model.users[item_id].username %>"  class="form-control" maxlength="255">
+                                <input type="text"  placeholder="Enter username"  id="user_<%- pmUsers.model.items[item_id].id %>_username" value="<%- pmUsers.model.items[item_id].username %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Password</label>
-                                <input type="password" class="form-control" placeholder="Enter password" id="user_<%- polemarch.model.users[item_id].id %>_password" >
+                                <input type="password" class="form-control" placeholder="Enter password" id="user_<%- pmUsers.model.items[item_id].id %>_password" >
                                 <div class="help-block"></div>
                             </div>
                         </div>
@@ -727,13 +813,13 @@
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Email</label>
-                                <input type="email" class="form-control" placeholder="Enter email" id="user_<%- polemarch.model.users[item_id].id %>_email" value="<%- polemarch.model.users[item_id].email %>" >
+                                <input type="email" class="form-control" placeholder="Enter email" id="user_<%- pmUsers.model.items[item_id].id %>_email" value="<%- pmUsers.model.items[item_id].email %>" >
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >First name</label>
-                                <input type="text" class="form-control" placeholder="Enter first name" id="user_<%- polemarch.model.users[item_id].id %>_first_name" value="<%- polemarch.model.users[item_id].first_name %>" >
+                                <input type="text" class="form-control" placeholder="Enter first name" id="user_<%- pmUsers.model.items[item_id].id %>_first_name" value="<%- pmUsers.model.items[item_id].first_name %>" >
                                 <div class="help-block"></div>
                             </div>
                         </div>
@@ -743,7 +829,7 @@
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Last name</label>
-                                <input type="text" class="form-control" placeholder="Enter last name" id="user_<%- polemarch.model.users[item_id].id %>_last_name" value="<%- polemarch.model.users[item_id].last_name %>" >
+                                <input type="text" class="form-control" placeholder="Enter last name" id="user_<%- pmUsers.model.items[item_id].id %>_last_name" value="<%- pmUsers.model.items[item_id].last_name %>" >
                                 <div class="help-block"></div>
                             </div>
                         </div>
@@ -756,7 +842,7 @@
 </script>
 
 <!-- Страница создания пользователя -->
-<script type="text/x-just" data-just="new_user_page">
+<script type="text/x-just" data-just="users_new_page">
     <section class="content-header">
         <h1>
             Add new user
@@ -884,9 +970,9 @@
                                 <span class="glyphicon glyphicon-search" ></span>
                             </div>
                         </div>
-                        <% if(pmHosts.getTotalPages(polemarch.model.hostslist)){ %>
+                        <% if(pmHosts.getTotalPages(pmHosts.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
-                                <%= pmHosts.paginationHtml(polemarch.model.hostslist) %>
+                                <%= pmHosts.paginationHtml(pmHosts.model.itemslist) %>
                             </div>
                         <% } %>
                         
@@ -904,29 +990,29 @@
                                     <th style="width: 133px;" class="hidden-xs">Actions</th>
                                     <th style="width: 80px;" class="visible-xs">Actions</th>
                                 </tr>
-                                <% for(var i in polemarch.model.hostslist.results){ %> 
+                                <% for(var i in pmHosts.model.itemslist.results){ %> 
                                     <tr 
-                                        class="item-row item-<%- polemarch.model.hostslist.results[i].id %>  <%- pmHosts.model.selectedItems.justClass(polemarch.model.hostslist.results[i].id, 'selected') %>"
-                                        data-id="<%- polemarch.model.hostslist.results[i].id %>" >
-                                        <td class=""  onclick="pmHosts.toggleSelect(<%- polemarch.model.hostslist.results[i].id %>); return false;"> 
+                                        class="item-row item-<%- pmHosts.model.itemslist.results[i].id %>  <%- pmHosts.model.selectedItems.justClass(pmHosts.model.itemslist.results[i].id, 'selected') %>"
+                                        data-id="<%- pmHosts.model.itemslist.results[i].id %>" >
+                                        <td class=""  onclick="pmHosts.toggleSelect(<%- pmHosts.model.itemslist.results[i].id %>); return false;"> 
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div> 
                                         </td>
                                         <td>
-                                            <a href="/?host/<%- polemarch.model.hostslist.results[i].id %>" class="item-name"
-                                                    onclick="return spajs.openURL(this.href);" ><%- polemarch.model.hostslist.results[i].name %></a>
+                                            <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- pmHosts.model.itemslist.results[i].name %></a>
                                         </td>
                                         <td>
-                                            <span><%- polemarch.model.hostslist.results[i].type %></span>
+                                            <span><%- pmHosts.model.itemslist.results[i].type %></span>
                                         </td>
                                         <td class="hidden-xs"> 
-                                            <a href="/?host/<%- polemarch.model.hostslist.results[i].id %>"
+                                            <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
                                                 class="btn btn-primary"
                                                 onclick="return spajs.openURL(this.href);" >Edit</a> 
 
-                                            <a href="/?host/<%- polemarch.model.hostslist.results[i].id %>"
+                                            <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
-                                                onclick="spajs.showLoader(pmHosts.deleteItem(<%- polemarch.model.hostslist.results[i].id %>)); return false;" >Delete</a> 
+                                                onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a> 
                                         </td>
                                         <td class="visible-xs"> 
                                             <div class="btn-group" role="group">
@@ -936,12 +1022,12 @@
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <a href="/?host/<%- polemarch.model.hostslist.results[i].id %>" 
+                                                        <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>" 
                                                             onclick="return spajs.openURL(this.href);" >Edit</a> 
                                                     </li>
                                                     <li>
-                                                        <a href="/?host/<%- polemarch.model.hostslist.results[i].id %>" 
-                                                            onclick="spajs.showLoader(pmHosts.deleteItem(<%- polemarch.model.hostslist.results[i].id %>)); return false;" >Delete</a>
+                                                        <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>" 
+                                                            onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -959,13 +1045,13 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="/?host/<%- polemarch.model.hostslist.results[i].id %>" 
+                                    <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>" 
                                         onclick="pmHosts.deleteRows($('.multiple-select .selected')); return false;" >Delete</a>
                                 </li>
                             </ul>
                         </div>
-                        <% if(pmHosts.getTotalPages(polemarch.model.hostslist)){ %>
-                                <%= pmHosts.paginationHtml(polemarch.model.hostslist) %> 
+                        <% if(pmHosts.getTotalPages(pmHosts.model.itemslist)){ %>
+                                <%= pmHosts.paginationHtml(pmHosts.model.itemslist) %> 
                         <% } %>
                     </div>
                 </div>
@@ -975,16 +1061,16 @@
 </script>
 
 <!-- Страница хоста -->
-<script type="text/x-just" data-just="host_page">
+<script type="text/x-just" data-just="hosts_page">
     <section class="content-header">
         <h1>
-            <%- polemarch.model.hosts[item_id].name %>
+            <%- pmHosts.model.items[item_id].name %>
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?hosts"  onclick="return spajs.openURL(this.href);" >Hosts</a></li>
-            <li class="active"><%- polemarch.model.hosts[item_id].name %></li>
+            <li class="active"><%- pmHosts.model.items[item_id].name %></li>
         </ol>
     </section>
 
@@ -1009,10 +1095,7 @@
                                     <li class="divider"></li>
                                     <li><a href="/?new-host" onclick="spajs.open({ menuId:'new-host'}); return false;" >Add new host</a></li>
                                 </ul>
-                            </div>
-
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-
+                            </div> 
                         </div>
                     </div>
                     <div class="box-body">
@@ -1020,15 +1103,15 @@
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Name</label>
-                                <input type="text"  placeholder="Enter host name"  id="host_<%- polemarch.model.hosts[item_id].id %>_name" value="<%- polemarch.model.hosts[item_id].name %>"  class="form-control" maxlength="255">
+                                <input type="text"  placeholder="Enter host name"  id="host_<%- pmHosts.model.items[item_id].id %>_name" value="<%- pmHosts.model.items[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Type</label>
-                                <select class="form-control" id="host_<%- polemarch.model.hosts[item_id].id %>_type">
-                                    <option value="HOST" <%if(polemarch.model.hosts[item_id].type == 'HOST'){ %> selected <% } %> >HOST</option>
-                                    <option value="RANGE" <%if(!polemarch.model.hosts[item_id].type == 'RANGE'){ %> selected <% } %> >RANGE</option>
+                                <select class="form-control" id="host_<%- pmHosts.model.items[item_id].id %>_type">
+                                    <option value="HOST" <%if(pmHosts.model.items[item_id].type == 'HOST'){ %> selected <% } %> >HOST</option>
+                                    <option value="RANGE" <%if(!pmHosts.model.items[item_id].type == 'RANGE'){ %> selected <% } %> >RANGE</option>
                                 </select>
                                 <div class="help-block"></div>
                             </div>
@@ -1037,13 +1120,13 @@
                 </div>
             </section>
 
-            <%= pmHosts.jsonEditor(polemarch.model.hosts[item_id].vars) %>
+            <%= pmHosts.jsonEditor(pmHosts.model.items[item_id].vars) %>
         </div>
     </section>
 </script>
 
 <!-- Страница создания хоста -->
-<script type="text/x-just" data-just="new_host_page">
+<script type="text/x-just" data-just="hosts_new_page">
     <section class="content-header">
         <h1>
             Add new host
@@ -1352,10 +1435,10 @@
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
-                                <% for(var i in polemarch.model.hosts){ %>
+                                <% for(var i in pmHosts.model.items){ %>
                                     <option
-                                        value="<%- polemarch.model.hosts[i].id %>"
-                                        <% if(pmGroups.hasHosts(item_id, polemarch.model.hosts[i].id)){ %>selected<% } %> ><%- polemarch.model.hosts[i].name %></option>
+                                        value="<%- pmHosts.model.items[i].id %>"
+                                        <% if(pmGroups.hasHosts(item_id, pmHosts.model.items[i].id)){ %>selected<% } %> ><%- pmHosts.model.items[i].name %></option>
                                 <% } %>
                             </select>
                         </div>

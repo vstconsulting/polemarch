@@ -320,7 +320,7 @@ pmInventories.setSubGroups = function(item_id, groups_ids)
 {
     return $.ajax({
         url: "/api/v1/inventories/"+item_id+"/groups/",
-        type: "POST",
+        type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
         beforeSend: function(xhr, settings) {
@@ -357,7 +357,7 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
 {
     return $.ajax({
         url: "/api/v1/inventories/"+item_id+"/hosts/",
-        type: "POST",
+        type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
         beforeSend: function(xhr, settings) {
@@ -373,7 +373,7 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
                 polemarch.model.inventories[item_id].hosts = []
                 for(var i in hosts_ids)
                 {
-                    polemarch.model.inventories[item_id].hosts.push(polemarch.model.hosts[hosts_ids[i]])
+                    polemarch.model.inventories[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
                 }
             }
             console.log("inventories update", data);
