@@ -20,66 +20,145 @@
         <br>
         <div class="row">
             <section class="col-lg-12">
-                <div class="box box-info"> 
+                <div class="box box-info">
                     <div class="box-header with-border">
-                        Projects
-                        <div class="input-group col-lg-2" style="float: right; margin: 0px; padding: 0px;">
+                        Inventories
+                        <div class="input-group col-lg-2" style="float: right;">
                             <input
                                 type="text"
                                 id="search-query-input"
                                 placeholder="Search by name"
                                 class="form-control"
                                 maxlength="255"
-                                onkeyup="pmProjects.search(this.value);"
-                                onchange="pmProjects.search(this.value);"
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmProjects.search($('#search-query-input').val()));"
                             >
-                            <div class="input-group-addon" onclick="$('#search-query-input').val(''); pmProjects.search();">
-                                <span class="glyphicon glyphicon-remove" ></span>
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmProjects.search($('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
                             </div>
                         </div>
-                    </div>
-                    <div class="box-body projects-list">
-                        <% for(var i in polemarch.model.projectslist.results){ %>
-                            <div class="row project-row project-<%- polemarch.model.projectslist.results[i].id %>">
-                                <div class="form-group col-lg-9">
-                                    <a href="/?project/<%- polemarch.model.projectslist.results[i].id %>" class="project-name"
-                                        onclick="return spajs.openURL(this.href);" ><%- polemarch.model.projectslist.results[i].name %></a>
-                                </div>
-                                <div class="form-group col-lg-1">
-                                    <span><%- polemarch.model.projectslist.results[i].status %></span>
-                                </div>
-
-                                <div class="form-group col-lg-2">
-                                    <a href="/?project/<%- polemarch.model.projectslist.results[i].id %>"
-                                        class="btn btn-primary"
-                                        onclick="return spajs.openURL(this.href);" >Edit</a>
-
-                                    <a href="/?project/<%- polemarch.model.projectslist.results[i].id %>"
-                                        class="btn btn-danger"
-                                        onclick="spajs.showLoader(pmProjects.deleteItem(<%- polemarch.model.projectslist.results[i].id %>)); return false;" >Delete</a>
-                                </div>
+                        <% if(pmProjects.getTotalPages(pmProjects.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmProjects.paginationHtml(pmProjects.model.itemslist) %>
                             </div>
                         <% } %>
 
                     </div>
+                    <div class="box-body">
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmProjects.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
+                                    <th>Name</th>
+                                    <th style="width: 486px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 95px;" class="visible-xs">Actions</th>
+                                </tr>
+                                <% for(var i in pmProjects.model.itemslist.results){ %>
+                                    <tr
+                                        class="item-row item-<%- pmProjects.model.itemslist.results[i].id %>  <%- pmProjects.model.selectedItems.justClass(pmProjects.model.itemslist.results[i].id, 'selected') %>"
+                                        data-id="<%- pmProjects.model.itemslist.results[i].id %>" >
+                                        <td class=""  onclick="pmProjects.toggleSelect(<%- pmProjects.model.itemslist.results[i].id %>); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td>
+                                            <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.itemslist.results[i].name %></a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>"
+                                                class="btn btn-primary"
+                                                onclick="return spajs.openURL(this.href);" >Edit</a>
+
+                                            <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>"
+                                                class="btn btn-danger"
+                                                onclick="spajs.showLoader(pmProjects.deleteItem(<%- pmProjects.model.itemslist.results[i].id %>)); return false;" >Delete</a>
+                                                 
+                                            <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>"
+                                                class="btn btn-primary"
+                                                onclick="spajs.open({ menuId:'project/<%- pmProjects.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub group</a>
+
+                                            <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>"
+                                                class="btn btn-primary"
+                                                onclick="spajs.open({ menuId:'project/<%- pmProjects.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub host</a>
+
+                                            <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>"
+                                                class="btn btn-primary"
+                                                onclick="spajs.open({ menuId:'project/<%- pmProjects.model.itemslist.results[i].id %>/new-inventory'}); return false;" >Add sub inventory</a>
+                                        </td>
+                                        <td class="visible-xs">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Actions
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>"
+                                                            onclick="return spajs.openURL(this.href);" >Edit</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.showLoader(pmProjects.deleteItem(<%- pmProjects.model.itemslist.results[i].id %>)); return false;" >Delete</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.open({ menuId:'project/<%- pmProjects.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub group</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.open({ menuId:'project/<%- pmProjects.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub host</a>
+                                                    </li>
+                                                    <li> 
+                                                        <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.open({ menuId:'project/<%- pmProjects.model.itemslist.results[i].id %>/new-inventory'}); return false;" >Add sub inventory</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="btn-group <%- pmProjects.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= pmProjects.model.justText('selectedCount') %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#"
+                                        onclick="pmProjects.deleteRows($('.multiple-select .selected')); return false;" >Delete</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <% if(pmProjects.getTotalPages(pmProjects.model.itemslist)){ %>
+                                <%= pmProjects.paginationHtml(pmProjects.model.itemslist) %>
+                        <% } %>
+                    </div>
                 </div>
             </section>
         </div>
-    </section>
+    </section> 
 </script>
 
 
 <!-- Страница прокекта -->
-<script type="text/x-just" data-just="project_page">
+<script type="text/x-just" data-just="projects_page">
     <section class="content-header">
         <h1>
-            <%- polemarch.model.projects[item_id].name %>
+            <%- pmProjects.model.items[item_id].name %>
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects"  onclick="return spajs.openURL(this.href);" >Projects</a></li>
-            <li class="active"><%- polemarch.model.projects[item_id].name %></li>
+            <li class="active"><%- pmProjects.model.items[item_id].name %></li>
         </ol>
     </section>
 
@@ -115,20 +194,20 @@
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Name</label>
-                                <input type="text"  placeholder="Enter project name"  id="project_<%- polemarch.model.projects[item_id].id %>_name" value="<%- polemarch.model.projects[item_id].name %>"  class="form-control" maxlength="255">
+                                <input type="text"  placeholder="Enter project name"  id="project_<%- pmProjects.model.items[item_id].id %>_name" value="<%- pmProjects.model.items[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Repository</label>
-                                <input type="text"  placeholder="Enter project repository"  id="project_<%- polemarch.model.projects[item_id].id %>_repository" value="<%- polemarch.model.projects[item_id].repository %>"  class="form-control" maxlength="255">
+                                <input type="text"  placeholder="Enter project repository"  id="project_<%- pmProjects.model.items[item_id].id %>_repository" value="<%- pmProjects.model.items[item_id].repository %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
-            <%= pmProjects.jsonEditor(polemarch.model.projects[item_id].vars) %>
+            <%= pmProjects.jsonEditor(pmProjects.model.items[item_id].vars) %>
         </div>
 
         <div class="row">
@@ -142,30 +221,30 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <~ polemarch.model.projects[item_id].groups >
-                                <% console.log("projects", item_id, polemarch.model.projects[item_id].groups) %>
-                                <% for(var i in polemarch.model.projects[item_id].groups){ %>
+                            <~ pmProjects.model.items[item_id].groups >
+                                <% console.log("projects", item_id, pmProjects.model.items[item_id].groups) %>
+                                <% for(var i in pmProjects.model.items[item_id].groups){ %>
                                     <div class="form-group col-lg-2">
                                         <label class="control-label" >Group</label>
-                                        <%- polemarch.model.projects[item_id].groups[i].name %>
+                                        <%- pmProjects.model.items[item_id].groups[i].name %>
                                     </div>
                                 <% } %>
                             <~>
 
-                            <~ polemarch.model.projects[item_id].hosts >
-                                <% for(var i in polemarch.model.projects[item_id].hosts){ %>
+                            <~ pmProjects.model.items[item_id].hosts >
+                                <% for(var i in pmProjects.model.items[item_id].hosts){ %>
                                     <div class="form-group col-lg-2">
                                         <label class="control-label" >Host</label>
-                                        <%- polemarch.model.projects[item_id].hosts[i].name %>
+                                        <%- pmProjects.model.items[item_id].hosts[i].name %>
                                     </div>
                                 <% } %>
                             <~>
 
-                            <~ polemarch.model.projects[item_id].inventories >
-                                <% for(var i in polemarch.model.projects[item_id].inventories){ %>
+                            <~ pmProjects.model.items[item_id].inventories >
+                                <% for(var i in pmProjects.model.items[item_id].inventories){ %>
                                     <div class="form-group col-lg-2">
                                         <label class="control-label" >Inventory</label>
-                                        <%- polemarch.model.projects[item_id].inventories[i].name %>
+                                        <%- pmProjects.model.items[item_id].inventories[i].name %>
                                     </div>
                                 <% } %>
                             <~>
@@ -201,7 +280,7 @@
 </script>
 
 <!-- Страница создания прокекта -->
-<script type="text/x-just" data-just="new_project_page">
+<script type="text/x-just" data-just="projects_new_page">
     <section class="content-header">
         <h1>
             Add new project
@@ -260,10 +339,10 @@
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
-                                <% for(var i in polemarch.model.inventories){ %>
+                                <% for(var i in pmInventories.model.items){ %>
                                     <option
-                                        value="<%- polemarch.model.inventories[i].id %>"
-                                        <% if(pmProjects.hasInventories(item_id, polemarch.model.inventories[i].id)){ %>selected<% } %> ><%- polemarch.model.inventories[i].name %></option>
+                                        value="<%- pmInventories.model.items[i].id %>"
+                                        <% if(pmProjects.hasInventories(item_id, pmInventories.model.items[i].id)){ %>selected<% } %> ><%- pmInventories.model.items[i].name %></option>
                                 <% } %>
                             </select>
                         </div>
@@ -293,10 +372,10 @@
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
-                                <% for(var i in polemarch.model.groups){ %>
+                                <% for(var i in pmGroups.model.items){ %>
                                     <option
-                                        value="<%- polemarch.model.groups[i].id %>"
-                                        <% if(pmProjects.hasGroups(item_id, polemarch.model.groups[i].id)){ %>selected<% } %> ><%- polemarch.model.groups[i].name %></option>
+                                        value="<%- pmGroups.model.items[i].id %>"
+                                        <% if(pmProjects.hasGroups(item_id, pmGroups.model.items[i].id)){ %>selected<% } %> ><%- pmGroups.model.items[i].name %></option>
                                 <% } %>
                             </select>
                         </div>
@@ -361,7 +440,7 @@
             <li class="active">Inventories list</li>
         </ol>
     </section>
-
+ 
     <section class="content">
         <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Add inventory</a>
         <br>
@@ -370,15 +449,117 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Inventories<br>
-                    </div>
-                    <div class="box-body">
-                        <% for(var i in polemarch.model.inventorieslist.results){ %>
-                            <ul>
-                                <li><a href="/?inventory/<%- polemarch.model.inventorieslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.inventorieslist.results[i].name %></a></li>
-                            </ul>
+                        Inventories
+                        <div class="input-group col-lg-2" style="float: right;">
+                            <input
+                                type="text"
+                                id="search-query-input"
+                                placeholder="Search by name"
+                                class="form-control"
+                                maxlength="255"
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmInventories.search($('#search-query-input').val()));"
+                            >
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmInventories.search($('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
+                            </div>
+                        </div>
+                        <% if(pmInventories.getTotalPages(pmInventories.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmInventories.paginationHtml(pmInventories.model.itemslist) %>
+                            </div>
                         <% } %>
 
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmInventories.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
+                                    <th>Name</th>
+                                    <th style="width: 351px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 95px;" class="visible-xs">Actions</th>
+                                </tr>
+                                <% for(var i in pmInventories.model.itemslist.results){ %>
+                                    <tr
+                                        class="item-row item-<%- pmInventories.model.itemslist.results[i].id %>  <%- pmInventories.model.selectedItems.justClass(pmInventories.model.itemslist.results[i].id, 'selected') %>"
+                                        data-id="<%- pmInventories.model.itemslist.results[i].id %>" >
+                                        <td class=""  onclick="pmInventories.toggleSelect(<%- pmInventories.model.itemslist.results[i].id %>); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td>
+                                            <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- pmInventories.model.itemslist.results[i].name %></a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                class="btn btn-primary"
+                                                onclick="return spajs.openURL(this.href);" >Edit</a>
+
+                                            <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                class="btn btn-danger"
+                                                onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
+                                                 
+                                            <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                class="btn btn-primary"
+                                                onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub group</a>
+
+                                            <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                class="btn btn-primary"
+                                                onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub host</a>
+
+                                        </td>
+                                        <td class="visible-xs">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Actions
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                            onclick="return spajs.openURL(this.href);" >Edit</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub group</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub host</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="btn-group <%- pmInventories.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= pmInventories.model.justText('selectedCount') %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#"
+                                        onclick="pmInventories.deleteRows($('.multiple-select .selected')); return false;" >Delete</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <% if(pmInventories.getTotalPages(pmInventories.model.itemslist)){ %>
+                                <%= pmInventories.paginationHtml(pmInventories.model.itemslist) %>
+                        <% } %>
                     </div>
                 </div>
             </section>
@@ -387,16 +568,16 @@
 </script>
 
 <!-- Страница inventory -->
-<script type="text/x-just" data-just="inventory_page">
+<script type="text/x-just" data-just="inventories_page">
     <section class="content-header">
         <h1>
-            <%- polemarch.model.inventories[item_id].name %>
+            <%- pmInventories.model.items[item_id].name %>
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" >Inventories</a></li>
-            <li class="active"><%- polemarch.model.inventories[item_id].name %></li>
+            <li class="active"><%- pmInventories.model.items[item_id].name %></li>
         </ol>
     </section>
 
@@ -432,14 +613,14 @@
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Name</label>
-                                <input type="text"  placeholder="Enter inventory name"  id="inventory_<%- polemarch.model.inventories[item_id].id %>_name" value="<%- polemarch.model.inventories[item_id].name %>"  class="form-control" maxlength="255">
+                                <input type="text"  placeholder="Enter inventory name"  id="inventory_<%- pmInventories.model.items[item_id].id %>_name" value="<%- pmInventories.model.items[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
-            <%= pmInventories.jsonEditor(polemarch.model.inventories[item_id].vars) %>
+            <%= pmInventories.jsonEditor(pmInventories.model.items[item_id].vars) %>
         </div>
 
         <div class="row">
@@ -453,22 +634,22 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <~ polemarch.model.inventories[item_id].groups >
-                                <% console.log("inventories", item_id, polemarch.model.inventories[item_id].groups) %>
-                                <% for(var i in polemarch.model.inventories[item_id].groups){ %>
-                                    <% console.log("inventory", polemarch.model.inventories[item_id].groups[i]) %>
+                            <~ pmInventories.model.items[item_id].groups >
+                                <% console.log("inventories", item_id, pmInventories.model.items[item_id].groups) %>
+                                <% for(var i in pmInventories.model.items[item_id].groups){ %>
+                                    <% console.log("inventory", pmInventories.model.items[item_id].groups[i]) %>
                                     <div class="form-group col-lg-2">
                                         <label class="control-label" >Group</label>
-                                        <%- polemarch.model.inventories[item_id].groups[i].name %>
+                                        <%- pmInventories.model.items[item_id].groups[i].name %>
                                     </div>
                                 <% } %>
                             <~>
 
-                            <~ polemarch.model.inventories[item_id].hosts >
-                                <% for(var i in polemarch.model.inventories[item_id].hosts){ %>
+                            <~ pmInventories.model.items[item_id].hosts >
+                                <% for(var i in pmInventories.model.items[item_id].hosts){ %>
                                     <div class="form-group col-lg-2">
                                         <label class="control-label" >Host</label>
-                                        <%- polemarch.model.inventories[item_id].hosts[i].name %>
+                                        <%- pmInventories.model.items[item_id].hosts[i].name %>
                                     </div>
                                 <% } %>
                             <~>
@@ -499,7 +680,7 @@
 </script>
 
 <!-- Страница создания inventory -->
-<script type="text/x-just" data-just="new_inventory_page">
+<script type="text/x-just" data-just="inventories_new_page">
     <section class="content-header">
         <h1>
             Add new inventory
@@ -553,10 +734,10 @@
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
-                                <% for(var i in polemarch.model.groups){ %>
+                                <% for(var i in pmGroups.model.items){ %>
                                     <option
-                                        value="<%- polemarch.model.groups[i].id %>"
-                                        <% if(pmInventories.hasGroups(item_id, polemarch.model.groups[i].id)){ %>selected<% } %> ><%- polemarch.model.groups[i].name %></option>
+                                        value="<%- pmGroups.model.items[i].id %>"
+                                        <% if(pmInventories.hasGroups(item_id, pmGroups.model.items[i].id)){ %>selected<% } %> ><%- pmGroups.model.items[i].name %></option>
                                 <% } %>
                             </select>
                         </div>
@@ -621,7 +802,7 @@
         </ol>
     </section>
 
-    
+
     <section class="content">
         <a class="btn btn-primary"  href="/?new-user" onclick="spajs.open({ menuId:'new-user'}); return false;">Add user</a>
         <br>
@@ -637,7 +818,7 @@
                                 id="search-query-input"
                                 placeholder="Search by name"
                                 class="form-control"
-                                maxlength="255" 
+                                maxlength="255"
                                 value="<%- query %>"
                                 onkeyup="if(event.keyCode == 13) spajs.showLoader(pmUsers.search($('#search-query-input').val()));"
                             >
@@ -650,42 +831,42 @@
                                 <%= pmUsers.paginationHtml(pmUsers.model.itemslist) %>
                             </div>
                         <% } %>
-                        
+
                     </div>
                     <div class="box-body">
                         <table class="table table-bordered multiple-select">
                             <tbody>
                                 <tr>
-                                    <th style="width: 30px" onclick=" $(this).parent().toggleClass('selected'); pmUsers.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmUsers.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
                                         <div class="ico-on fa fa-toggle-on"></div>
-                                        <div class="ico-off fa  fa-toggle-off"></div> 
+                                        <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
                                     <th style="width: 133px;" class="hidden-xs">Actions</th>
-                                    <th style="width: 80px;" class="visible-xs">Actions</th>
+                                    <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
-                                <% for(var i in pmUsers.model.itemslist.results){ %> 
-                                    <tr 
+                                <% for(var i in pmUsers.model.itemslist.results){ %>
+                                    <tr
                                         class="item-row item-<%- pmUsers.model.itemslist.results[i].id %>  <%- pmUsers.model.selectedItems.justClass(pmUsers.model.itemslist.results[i].id, 'selected') %>"
                                         data-id="<%- pmUsers.model.itemslist.results[i].id %>" >
-                                        <td class=""  onclick="pmUsers.toggleSelect(<%- pmUsers.model.itemslist.results[i].id %>); return false;"> 
+                                        <td class=""  onclick="pmUsers.toggleSelect(<%- pmUsers.model.itemslist.results[i].id %>); return false;">
                                             <div class="ico-on fa fa-toggle-on"></div>
-                                            <div class="ico-off fa  fa-toggle-off"></div> 
+                                            <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
                                         <td class="<% if(pmUsers.model.itemslist.results[i].is_active){ %>user-active<% }else{ %>user-not-active<% } %>">
                                             <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmUsers.model.itemslist.results[i].username %></a>
-                                        </td> 
-                                        <td class="hidden-xs"> 
+                                        </td>
+                                        <td class="hidden-xs">
                                             <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
                                                 class="btn btn-primary"
-                                                onclick="return spajs.openURL(this.href);" >Edit</a> 
+                                                onclick="return spajs.openURL(this.href);" >Edit</a>
 
                                             <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
-                                                onclick="spajs.showLoader(pmUsers.deleteItem(<%- pmUsers.model.itemslist.results[i].id %>)); return false;" >Delete</a> 
+                                                onclick="spajs.showLoader(pmUsers.deleteItem(<%- pmUsers.model.itemslist.results[i].id %>)); return false;" >Delete</a>
                                         </td>
-                                        <td class="visible-xs"> 
+                                        <td class="visible-xs">
                                             <div class="btn-group" role="group">
                                                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     Actions
@@ -693,22 +874,22 @@
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>" 
-                                                            onclick="return spajs.openURL(this.href);" >Edit</a> 
+                                                        <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
+                                                            onclick="return spajs.openURL(this.href);" >Edit</a>
                                                     </li>
                                                     <li>
-                                                        <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>" 
+                                                        <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmUsers.deleteItem(<%- pmUsers.model.itemslist.results[i].id %>)); return false;" >Delete</a>
                                                     </li>
                                                 </ul>
                                             </div>
                                         </td>
-                                    </tr>  
-                                <% } %> 
+                                    </tr>
+                                <% } %>
                             </tbody>
-                        </table> 
+                        </table>
                     </div>
-                    <div class="box-footer clearfix">  
+                    <div class="box-footer clearfix">
                         <div class="btn-group <%- pmUsers.model.justNotClass('selectedCount', 'hide') %>" role="group">
                             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Actions on <%= pmUsers.model.justText('selectedCount') %> items
@@ -716,13 +897,13 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>" 
+                                    <a href="#"
                                         onclick="pmUsers.deleteRows($('.multiple-select .selected')); return false;" >Delete</a>
                                 </li>
                             </ul>
                         </div>
                         <% if(pmUsers.getTotalPages(pmUsers.model.itemslist)){ %>
-                                <%= pmUsers.paginationHtml(pmUsers.model.itemslist) %> 
+                                <%= pmUsers.paginationHtml(pmUsers.model.itemslist) %>
                         <% } %>
                     </div>
                 </div>
@@ -744,7 +925,7 @@
             <li class="active"><%- pmUsers.model.items[item_id].username %></li>
         </ol>
     </section>
- 
+
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmUsers.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger" >Remove user</button>
         <button type="button" onclick="spajs.showLoader(pmUsers.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save user</button>
@@ -767,9 +948,6 @@
                                     <li><a href="/?new-user" onclick="spajs.open({ menuId:'new-user'}); return false;" >Add new user</a></li>
                                 </ul>
                             </div>
-
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-
                         </div>
                     </div>
                     <div class="box-body">
@@ -954,15 +1132,15 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Hosts 
-                        
+                        Hosts
+
                         <div class="input-group col-lg-2" style="float: right;">
                             <input
                                 type="text"
                                 id="search-query-input"
                                 placeholder="Search by name"
                                 class="form-control"
-                                maxlength="255" 
+                                maxlength="255"
                                 value="<%- query %>"
                                 onkeyup="if(event.keyCode == 13) spajs.showLoader(pmHosts.search($('#search-query-input').val()));"
                             >
@@ -975,46 +1153,46 @@
                                 <%= pmHosts.paginationHtml(pmHosts.model.itemslist) %>
                             </div>
                         <% } %>
-                        
+
                     </div>
                     <div class="box-body">
                         <table class="table table-bordered multiple-select">
                             <tbody>
                                 <tr>
-                                    <th style="width: 30px" onclick=" $(this).parent().toggleClass('selected'); pmHosts.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmHosts.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
                                         <div class="ico-on fa fa-toggle-on"></div>
-                                        <div class="ico-off fa  fa-toggle-off"></div> 
+                                        <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 60px">Type</th> 
+                                    <th style="width: 60px" class="hidden-xs">Type</th>
                                     <th style="width: 133px;" class="hidden-xs">Actions</th>
-                                    <th style="width: 80px;" class="visible-xs">Actions</th>
+                                    <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
-                                <% for(var i in pmHosts.model.itemslist.results){ %> 
-                                    <tr 
+                                <% for(var i in pmHosts.model.itemslist.results){ %>
+                                    <tr
                                         class="item-row item-<%- pmHosts.model.itemslist.results[i].id %>  <%- pmHosts.model.selectedItems.justClass(pmHosts.model.itemslist.results[i].id, 'selected') %>"
                                         data-id="<%- pmHosts.model.itemslist.results[i].id %>" >
-                                        <td class=""  onclick="pmHosts.toggleSelect(<%- pmHosts.model.itemslist.results[i].id %>); return false;"> 
+                                        <td class=""  onclick="pmHosts.toggleSelect(<%- pmHosts.model.itemslist.results[i].id %>); return false;">
                                             <div class="ico-on fa fa-toggle-on"></div>
-                                            <div class="ico-off fa  fa-toggle-off"></div> 
+                                            <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
                                         <td>
                                             <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmHosts.model.itemslist.results[i].name %></a>
                                         </td>
-                                        <td>
+                                        <td class="hidden-xs">
                                             <span><%- pmHosts.model.itemslist.results[i].type %></span>
                                         </td>
-                                        <td class="hidden-xs"> 
+                                        <td class="hidden-xs">
                                             <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
                                                 class="btn btn-primary"
-                                                onclick="return spajs.openURL(this.href);" >Edit</a> 
+                                                onclick="return spajs.openURL(this.href);" >Edit</a>
 
                                             <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
-                                                onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a> 
+                                                onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a>
                                         </td>
-                                        <td class="visible-xs"> 
+                                        <td class="visible-xs">
                                             <div class="btn-group" role="group">
                                                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     Actions
@@ -1022,22 +1200,22 @@
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>" 
-                                                            onclick="return spajs.openURL(this.href);" >Edit</a> 
+                                                        <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
+                                                            onclick="return spajs.openURL(this.href);" >Edit</a>
                                                     </li>
                                                     <li>
-                                                        <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>" 
+                                                        <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a>
                                                     </li>
                                                 </ul>
                                             </div>
                                         </td>
-                                    </tr>  
-                                <% } %> 
+                                    </tr>
+                                <% } %>
                             </tbody>
-                        </table> 
+                        </table>
                     </div>
-                    <div class="box-footer clearfix">  
+                    <div class="box-footer clearfix">
                         <div class="btn-group <%- pmHosts.model.justNotClass('selectedCount', 'hide') %>" role="group">
                             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Actions on <%= pmHosts.model.justText('selectedCount') %> items
@@ -1045,13 +1223,13 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>" 
+                                    <a href="#"
                                         onclick="pmHosts.deleteRows($('.multiple-select .selected')); return false;" >Delete</a>
                                 </li>
                             </ul>
                         </div>
                         <% if(pmHosts.getTotalPages(pmHosts.model.itemslist)){ %>
-                                <%= pmHosts.paginationHtml(pmHosts.model.itemslist) %> 
+                                <%= pmHosts.paginationHtml(pmHosts.model.itemslist) %>
                         <% } %>
                     </div>
                 </div>
@@ -1095,7 +1273,7 @@
                                     <li class="divider"></li>
                                     <li><a href="/?new-host" onclick="spajs.open({ menuId:'new-host'}); return false;" >Add new host</a></li>
                                 </ul>
-                            </div> 
+                            </div>
                         </div>
                     </div>
                     <div class="box-body">
@@ -1262,13 +1440,120 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Group<br>
+                        Groups
+                        <div class="input-group col-lg-2" style="float: right;">
+                            <input
+                                type="text"
+                                id="search-query-input"
+                                placeholder="Search by name"
+                                class="form-control"
+                                maxlength="255"
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmGroups.search($('#search-query-input').val()));"
+                            >
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmGroups.search($('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
+                            </div>
+                        </div>
+                        <% if(pmGroups.getTotalPages(pmGroups.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmGroups.paginationHtml(pmGroups.model.itemslist) %>
+                            </div>
+                        <% } %>
+
                     </div>
                     <div class="box-body">
-                        <% for(var i in polemarch.model.groupslist.results){ %>
-                            <ul>
-                                <li><a href="/?group/<%- polemarch.model.groupslist.results[i].id %>"  onclick="return spajs.openURL(this.href);" ><%- polemarch.model.groupslist.results[i].name %></a></li>
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmGroups.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
+                                    <th>Name</th>
+                                    <th style="width: 237px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 95px;" class="visible-xs">Actions</th>
+                                </tr>
+                                <% for(var i in pmGroups.model.itemslist.results){ %>
+                                    <tr
+                                        class="item-row item-<%- pmGroups.model.itemslist.results[i].id %>  <%- pmGroups.model.selectedItems.justClass(pmGroups.model.itemslist.results[i].id, 'selected') %>"
+                                        data-id="<%- pmGroups.model.itemslist.results[i].id %>" >
+                                        <td class=""  onclick="pmGroups.toggleSelect(<%- pmGroups.model.itemslist.results[i].id %>); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td>
+                                            <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- pmGroups.model.itemslist.results[i].name %></a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>"
+                                                class="btn btn-primary"
+                                                onclick="return spajs.openURL(this.href);" >Edit</a>
+
+                                            <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>"
+                                                class="btn btn-danger"
+                                                onclick="spajs.showLoader(pmGroups.deleteItem(<%- pmGroups.model.itemslist.results[i].id %>)); return false;" >Delete</a>
+
+                                            <% if(pmGroups.model.itemslist.results[i].children){ %>
+                                                <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>/new-group"
+                                                    class="btn btn-primary"
+                                                    onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub group</a>
+                                            <% }else{ %>
+                                                <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>/new-host"
+                                                    class="btn btn-primary"
+                                                    onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub host</a>
+                                            <% } %>
+                                        </td>
+                                        <td class="visible-xs">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Actions
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>"
+                                                            onclick="return spajs.openURL(this.href);" >Edit</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.showLoader(pmGroups.deleteItem(<%- pmGroups.model.itemslist.results[i].id %>)); return false;" >Delete</a>
+                                                    </li>
+                                                    <% if(pmGroups.model.itemslist.results[i].children){ %>
+                                                        <li>
+                                                            <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>/new-group"
+                                                               onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub group</a>
+                                                        </li>
+                                                    <% }else{ %>
+                                                        <li>
+                                                            <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>/new-host"
+                                                               onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub host</a>
+                                                        </li>
+                                                    <% } %>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="btn-group <%- pmGroups.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= pmGroups.model.justText('selectedCount') %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#"
+                                        onclick="pmGroups.deleteRows($('.multiple-select .selected')); return false;" >Delete</a>
+                                </li>
                             </ul>
+                        </div>
+                        <% if(pmGroups.getTotalPages(pmGroups.model.itemslist)){ %>
+                                <%= pmGroups.paginationHtml(pmGroups.model.itemslist) %>
                         <% } %>
                     </div>
                 </div>
@@ -1278,16 +1563,16 @@
 </script>
 
 <!-- Страница группы -->
-<script type="text/x-just" data-just="group_page">
+<script type="text/x-just" data-just="groups_page">
     <section class="content-header">
         <h1>
-            <%- polemarch.model.groups[item_id].name %>
+            <%- pmGroups.model.items[item_id].name %>
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?groups"  onclick="return spajs.openURL(this.href);" >Groups list</a></li>
-            <li class="active"><%- polemarch.model.groups[item_id].name %></li>
+            <li class="active"><%- pmGroups.model.items[item_id].name %></li>
         </ol>
     </section>
 
@@ -1323,7 +1608,7 @@
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Name</label>
-                                <input type="text"  placeholder="Enter group name"  id="group_<%- polemarch.model.groups[item_id].id %>_name" value="<%- polemarch.model.groups[item_id].name %>"  class="form-control" maxlength="255">
+                                <input type="text"  placeholder="Enter group name"  id="group_<%- pmGroups.model.items[item_id].id %>_name" value="<%- pmGroups.model.items[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
                         </div>
@@ -1331,7 +1616,7 @@
                 </div>
             </section>
 
-            <%= pmGroups.jsonEditor(polemarch.model.groups[item_id].vars) %>
+            <%= pmGroups.jsonEditor(pmGroups.model.items[item_id].vars) %>
         </div>
 
         <div class="row">
@@ -1345,27 +1630,27 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <~ polemarch.model.groups[item_id].groups >
-                                <% for(var i in polemarch.model.groups[item_id].groups){ %>
+                            <~ pmGroups.model.items[item_id].groups >
+                                <% for(var i in pmGroups.model.items[item_id].groups){ %>
                                     <div class="form-group col-lg-2">
                                         <label class="control-label" >Group</label>
-                                        <%- polemarch.model.groups[item_id].groups[i].name %>
+                                        <%- pmGroups.model.items[item_id].groups[i].name %>
                                     </div>
                                 <% } %>
                             <~>
 
-                            <~ polemarch.model.groups[item_id].hosts >
-                                <% for(var i in polemarch.model.groups[item_id].hosts){ %>
+                            <~ pmGroups.model.items[item_id].hosts >
+                                <% for(var i in pmGroups.model.items[item_id].hosts){ %>
                                     <div class="form-group col-lg-2">
                                         <label class="control-label" >Host</label>
-                                        <%- polemarch.model.groups[item_id].hosts[i].name %>
+                                        <%- pmGroups.model.items[item_id].hosts[i].name %>
                                     </div>
                                 <% } %>
                             <~>
                         </div>
                         <div class="row">
                             <div class="form-group col-lg-12">
-                                <% if(polemarch.model.groups[item_id].children){ %>
+                                <% if(pmGroups.model.items[item_id].children){ %>
                                     <button
                                             type="button"
                                             onclick="spajs.showLoader(pmGroups.showAddSubGroupsForm(<%- item_id %>)); return false;"
@@ -1400,10 +1685,10 @@
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
-                                <% for(var i in polemarch.model.groups){ %>
+                                <% for(var i in pmGroups.model.items){ %>
                                     <option
-                                        value="<%- polemarch.model.groups[i].id %>"
-                                        <% if(pmGroups.hasGroups(item_id, polemarch.model.groups[i].id)){ %>selected<% } %> ><%- polemarch.model.groups[i].name %></option>
+                                        value="<%- pmGroups.model.items[i].id %>"
+                                        <% if(pmGroups.hasGroups(item_id, pmGroups.model.items[i].id)){ %>selected<% } %> ><%- pmGroups.model.items[i].name %></option>
                                 <% } %>
                             </select>
                         </div>
@@ -1456,7 +1741,7 @@
 </script>
 
 <!-- Страница создания группы -->
-<script type="text/x-just" data-just="new_group_page">
+<script type="text/x-just" data-just="groups_new_page">
     <section class="content-header">
         <h1>
             Add new group
@@ -1571,7 +1856,7 @@
                                             <div class="progress-bar progress-bar-primary active" style="width: 0%" id="backup-progress-bar"></div>
                                         </div>
                                     </td>
-                                    <td style="width: 30px;">
+                                    <td style="width: 45px;">
                                         <span class="badge bg-light-blue" id="backup-progress-value" >0%</span>
                                     </td>
                                 </tr>
@@ -1585,8 +1870,8 @@
 </script>
 
 <script  type="text/x-just" style="display: none;" data-just="pagination">
-<% if(totalPage > 1){ %> 
-        <ul class="pagination no-margin pull-right"> 
+<% if(totalPage > 1){ %>
+        <ul class="pagination no-margin pull-right">
             <% if(totalPage < 21){ %>
                 <% for(var i = 0; i < totalPage; i++){ %>
                     <% if(i == currentPage){ %>
@@ -1612,7 +1897,7 @@
                     <% } %>
                 <% } %>
             <% } %>
-        </ul> 
+        </ul>
 <% } %>
 </script>
 

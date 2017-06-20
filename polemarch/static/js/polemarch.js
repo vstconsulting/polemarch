@@ -30,21 +30,7 @@ polemarch.opt.host = "//"+window.location.host
 polemarch.model = {}
 
 polemarch.model.nowTime = 0;
-
-polemarch.model.userslist = []
-polemarch.model.users = {}
-
-
-polemarch.model.groupslist = []
-polemarch.model.groups = {} 
-
-polemarch.model.inventorieslist = []
-polemarch.model.inventories = {}
-            
-polemarch.model.projectslist = []
-polemarch.model.projects = {}
-
-
+    
 polemarch.start = function(options)
 {
     for(var i in options)
@@ -135,7 +121,7 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"hosts",
         name:"hosts",
-        urlregexp:[/^hosts$/, /^host$/, /^hosts\/page\/([0-9]+)$/],
+        urlregexp:[/^hosts$/, /^host$/, /^hosts\/(page)\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showList(holder, menuInfo, data);}
     })
     

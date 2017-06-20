@@ -330,3 +330,6 @@ div.spinner div.bar12 {
     color: #eee;
 }
 
+table{ 
+    table-layout: fixed;
+}

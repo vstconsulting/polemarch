@@ -20,16 +20,7 @@ function pmItems()
             this.model.selectedItems[item_id] = mode
         }
         
-        var count = 0;
-        for(var i in this.model.selectedItems)
-        {
-            if(this.model.selectedItems[i])
-            {
-                count += 1
-            }
-        }
-
-        this.model.selectedCount = count;
+        this.model.selectedCount = $('.multiple-select .selected').length;
         return this.model.selectedItems[item_id];
     }
     
@@ -96,6 +87,9 @@ function pmItems()
         return $.when(this.loadItems(limit, offset)).done(function()
         {
             $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:""}))
+            
+            thisObj.model.selectedCount = $('.multiple-select .selected').length;
+            
         }).fail(function()
         {
             $.notify("", "error");
