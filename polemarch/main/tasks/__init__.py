@@ -4,7 +4,7 @@ import logging
 from ...celery_app import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
-from ..models import Inventory
+from ..models.tasks import Task
 
 logger = logging.getLogger("polemarch")
 
@@ -47,10 +47,10 @@ class ScheduledTask(BaseTask):
 
 @task(app, ignore_result=True, bind=True)
 class ExecuteAnsibleTask(BaseTask):
-    def __init__(self, app, job, inventory_id, *args, **kwargs):
+    def __init__(self, app, project, playbook, inventory, *args, **kwargs):
         super(self.__class__, self).__init__(app, *args, **kwargs)
-        self.inventory = Inventory.objects.get(id=inventory_id)
-        self.job = job
+        self.inventory = inventory
+        self.job = Task(playbook=playbook, project=project)
 
     def run(self):
-        self.job.run_ansible_playbook(self.inventory)
+        self.job.run_ansible_playbook(self.inventory, **self.kwargs)

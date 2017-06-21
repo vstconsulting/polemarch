@@ -53,6 +53,12 @@ class Project(_AbstractModel):
     def type(self):
         return self.variables.get(key="repo_type").value
 
+    def execute(self, playbook_name, inventory_id, **extra):
+        # pylint: disable=no-member
+        from ..tasks import ExecuteAnsibleTask
+        inventory = hosts_models.Inventory.objects.get(id=inventory_id)
+        ExecuteAnsibleTask.delay(self, playbook_name, inventory, **extra)
+
     def set_status(self, status):
         self.status = status
         self.save()

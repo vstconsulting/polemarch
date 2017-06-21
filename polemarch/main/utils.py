@@ -1,12 +1,14 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,ungrouped-imports
 from __future__ import unicode_literals
 
+import contextlib
+import os
 import sys
 import tempfile
 import time
 import traceback
-import os
 from os.path import dirname
+from subprocess import CalledProcessError, Popen, PIPE, STDOUT
 
 import six
 from django.conf import settings
@@ -63,6 +65,63 @@ def get_render(name, data, trans='en'):
     result = config.render(data).replace('\r', '')
     translation.deactivate()
     return result
+
+
+class CmdExecutor(object):
+    # pylint: disable=no-member
+    '''
+    Command executor with realtime output write
+    '''
+    newlines = ['\n', '\r\n', '\r']
+
+    def __init__(self):
+        self.output = None
+
+    def write_output(self, line):
+        '''
+        :param line: -- line from command output
+        :type line: str
+        :return: None
+        :rtype: None
+        '''
+        self.output += line
+        self.output += "\n"
+
+    def _unbuffered(self, proc, stream='stdout'):
+        stream = getattr(proc, stream)
+        with contextlib.closing(stream):
+            while True:
+                out = []
+                last = stream.read(1)
+                # Don't loop forever
+                if last == '' and proc.poll() is not None:
+                    break
+                while last not in self.newlines:
+                    # Don't loop forever
+                    if last == '' and proc.poll() is not None:
+                        break
+                    out.append(last)
+                    last = stream.read(1)
+                out = ''.join(out)
+                yield out
+
+    def execute(self, cmd):
+        '''
+        Execute commands and output this
+
+        :param cmd: -- list of cmd command and arguments
+        :type cmd: list
+        :return: -- string with full output
+        :rtype: str
+        '''
+        self.output = ""
+        proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, universal_newlines=True)
+        for line in self._unbuffered(proc):
+            self.write_output(line)
+        retcode = proc.poll()
+        if retcode:
+            raise CalledProcessError(retcode, proc.args, output=self.output)
+        return self.output
 
 
 class tmp_file(object):

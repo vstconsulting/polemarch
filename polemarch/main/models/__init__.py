@@ -10,7 +10,7 @@ from django.dispatch import receiver
 from django.core.validators import ValidationError
 
 from .vars import Variable
-from .hosts import Host, Group, Inventory, Environment
+from .hosts import Host, Group, Inventory
 from .projects import Project
 from .users import TypesPermissions
 from .tasks import Task, PeriodicTask, History
@@ -35,11 +35,6 @@ def check_circular_deps(instance, action, pk_set, *args, **kw):
                                                  "dependence on itself.")
 
 
-@receiver(signals.pre_save, sender=Environment)
-def validate_integrations(instance, **kwargs):
-    json.loads(instance.data)
-
-
 @receiver(signals.pre_save, sender=PeriodicTask)
 def validate_crontab(instance, **kwargs):
     try:
@@ -56,18 +51,6 @@ def validate_hosts(instance, **kwargs):
         validate_hostname(instance.name)
     elif instance.variables.filter(key="ansible_host").count():
         validate_hostname(instance.variables.get("ansible_host"))
-
-
-@receiver(signals.pre_delete, sender=Environment)
-def clear_environment(instance, **kwargs):
-    if not instance.no_signal:
-        instance.integration.rm()
-
-
-@receiver(signals.pre_delete, sender=Host)
-def clear_service(instance, **kwargs):
-    if not instance.no_signal:
-        instance.integration.rm_host(host=instance)
 
 
 @receiver(signals.pre_delete, sender=Project)

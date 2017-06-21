@@ -8,9 +8,9 @@ import subprocess
 from django.utils.timezone import now
 
 try:
-    from unittest.mock import patch
-except ImportError:
     from mock import patch
+except ImportError:
+    from unittest.mock import patch
 
 from ..models import Project
 from ..models import Task, PeriodicTask, History, Inventory
@@ -25,12 +25,12 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                      vars=dict(repo_type="TEST"))]
         self.project_id = self.mass_create("/api/v1/projects/", data,
                                            "name", "repository")[0]
-        project = Project.objects.get(id=self.project_id)
+        self.task_project = Project.objects.get(id=self.project_id)
 
         self.task1 = Task.objects.create(playbook="first.yml",
-                                         project=project)
+                                         project=self.task_project)
         self.task2 = Task.objects.create(playbook="second.yml",
-                                         project=project)
+                                         project=self.task_project)
 
     def test_get_tasks(self):
         url = "/api/v1/tasks/"
@@ -57,13 +57,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                          data=json.dumps([inventory]))
         return inventory, host
 
-    @patch('subprocess.check_output')
+    @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute(self, subprocess_function):
         inv1, h1 = self.create_inventory()
         # mock side effect to get ansible-playbook args for assertions in test
         result = ["", ""]
 
-        def side_effect(call_args, stderr):
+        def side_effect(call_args, *args, **kwargs):
             inventory_path = call_args[3]
             with open(inventory_path, 'r') as inventory_file:
                 inventory = inventory_file.read().split('\n')
@@ -74,11 +74,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                     result[1] = key_file.read()
         subprocess_function.side_effect = side_effect
         # test that can't execute without inventory
-        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
-                         400, data=json.dumps(dict(inventory_id=1100500)))
+        self.post_result(
+            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            400, data=json.dumps(dict(inventory=1100500)))
         # test simple execution
-        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
-                         data=json.dumps(dict(inventory_id=inv1)))
+        self.post_result(
+            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            data=json.dumps(dict(inventory=inv1, playbook="first.yml")))
         self.assertEquals(subprocess_function.call_count, 1)
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible-playbook"))
@@ -86,7 +88,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.assertTrue(result[0].startswith(self.correct_simple_inventory))
         self.assertEquals(result[1], "somekey")
 
-    @patch('subprocess.check_output')
+    @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_complex_inventory_execute(self, subprocess_function):
         inventory_data = dict(name="Inv1",
                               vars={"ansible_ssh_private_key_file": "ikey",
@@ -132,14 +134,15 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         # execute task and get inventory
         result = [""]
 
-        def side_effect(call_args, stderr):
+        def side_effect(call_args, *args, **kwargs):
             inventory_path = call_args[3]
             with open(inventory_path, 'r') as inventory_file:
                 inventory = inventory_file.read()
                 result[0] = inventory
         subprocess_function.side_effect = side_effect
-        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
-                         data=json.dumps(dict(inventory_id=inv1)))
+        self.post_result(
+            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            data=json.dumps(dict(inventory=inv1, playbook="first.yml")))
         # check that inventory text is correct
         inventory = result[0]
         file_path = os.path.dirname(os.path.abspath(__file__))
@@ -152,31 +155,48 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.assertEquals(list(map(str.strip, inventory.split("\n"))),
                           list(map(str.strip, exemplary.split("\n"))))
 
-    @patch('subprocess.check_output')
+    @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute_error_handling(self, subprocess_function):
+        extra_vars = '{"pacman":"mrs","ghosts":["inky","pinky","clyde","sue"]}'
+        key_file = "-----BEGIN RSA PRIVATE KEY-----......"
+
         def check_status(exception, status):
             error = exception
             subprocess_function.side_effect = error
-            self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
-                             data=json.dumps(dict(inventory_id=inv1)))
+            self.post_result(
+                "/api/v1/projects/{}/execute/".format(self.task_project.id),
+                data=json.dumps(dict(inventory=inv1,
+                                     playbook="other/playbook.yml"))
+            )
             history = get_history_item()
             self.assertEquals(history.status, status)
 
         def get_history_item():
-            histories = History.objects.filter(playbook="first.yml")
+            histories = History.objects.filter(playbook="other/playbook.yml")
             self.assertEquals(histories.count(), 1)
             history = histories[0]
             History.objects.all().delete()
             return history
 
-        def side_effect(call_args, stderr):
+        def side_effect(call_args, *args, **kwargs):
+            self.assertIn("--limit", call_args)
+            self.assertIn("limited-hosts", call_args)
+            self.assertIn("--user", call_args)
+            self.assertIn("some-def-user", call_args)
+            self.assertIn("--key-file", call_args)
+            self.assertIn(extra_vars, call_args)
+            self.assertIn("other/playbook.yml", call_args[1])
             return "test_output"
         subprocess_function.side_effect = side_effect
         inv1, h1 = self.create_inventory()
         # check good run (without any problems)
         start_time = now()
-        self.post_result("/api/v1/tasks/{}/execute/".format(self.task1.id),
-                         data=json.dumps(dict(inventory_id=inv1)))
+        self.post_result(
+            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            data=json.dumps(dict(inventory=inv1, playbook="other/playbook.yml",
+                                 limit="limited-hosts", user="some-def-user",
+                                 extra_vars=extra_vars, key_file=key_file))
+        )
         end_time = now()
         history = get_history_item()
         inventory = history.raw_inventory

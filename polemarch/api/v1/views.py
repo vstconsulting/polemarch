@@ -64,20 +64,6 @@ class UserViewSet(base.ModelViewSetSet):
         return Response(serializer.data)
 
 
-class EnvironmentViewSet(base.ModelViewSetSet):
-    model = serializers.models.Environment
-    serializer_class = serializers.EnvironmentSerializer
-    filter_class = filters.EnvironmentsFilter
-
-    @list_route(methods=['post'])
-    def additionals(self, request):
-        return Response(self.model(**request.data).additionals)
-
-    @list_route(methods=['get'])
-    def types(self, request):
-        return Response(self.model.objects.get_integrations())
-
-
 class HostViewSet(base.ModelViewSetSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
@@ -148,16 +134,16 @@ class ProjectViewSet(base.ModelViewSetSet):
     def sync(self, request, *args, **kwargs):
         return self.get_serializer(self.get_object()).sync()
 
+    @detail_route(methods=["post"])
+    def execute(self, request, *args, **kwargs):
+        return self.get_serializer(self.get_object()).execute(request)
+
 
 class TaskViewSet(base.ReadOnlyModelViewSet):
     model = serializers.models.Task
     serializer_class = serializers.TaskSerializer
     serializer_class_one = serializers.OneTaskSerializer
     filter_class = filters.TaskFilter
-
-    @detail_route(methods=["post"])
-    def execute(self, request, *args, **kwargs):
-        return self.get_serializer(self.get_object()).execute(request)
 
 
 class PeriodicTaskViewSet(base.ModelViewSetSet):

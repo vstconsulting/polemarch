@@ -117,22 +117,6 @@ class OneUserSerializer(UserSerializer):
                             'date_joined',)
 
 
-class EnvironmentSerializer(serializers.ModelSerializer):
-    data = DictField(required=False)
-    hosts = serializers.HyperlinkedRelatedField(many=True,
-                                                read_only=True,
-                                                view_name='host-detail')
-
-    class Meta:
-        model = models.Environment
-        fields = ('id',
-                  'name',
-                  'type',
-                  'key',
-                  'data',
-                  'hosts')
-
-
 class HistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.History
@@ -235,15 +219,12 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
 
 class HostSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
-    environment = ModelRelatedField(required=False,
-                                    model=models.Environment)
 
     class Meta:
         model = models.Host
         fields = ('id',
                   'name',
                   'type',
-                  'environment',
                   'vars',
                   'url',)
 
@@ -256,7 +237,6 @@ class OneHostSerializer(HostSerializer):
         fields = ('id',
                   'name',
                   'type',
-                  'environment',
                   'vars',
                   'url',)
 
@@ -280,12 +260,6 @@ class OneTaskSerializer(TaskSerializer):
                   'playbook',
                   'project',
                   'url',)
-
-    def execute(self, request):
-        inventory_id = int(request.data["inventory_id"])
-        self.instance.execute(inventory_id)
-        data = dict(detail="Started at inventory {}.".format(inventory_id))
-        return Response(data, 201)
 
 
 class PeriodicTaskSerializer(_WithVariablesSerializer):
@@ -441,3 +415,11 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         self.instance.start_repo_task("sync")
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
+
+    def execute(self, request):
+        data = dict(request.data)
+        inventory_id = int(data.pop("inventory"))
+        playbook_name = str(data.pop("playbook"))
+        self.instance.execute(playbook_name, inventory_id, **data)
+        rdata = dict(detail="Started at inventory {}.".format(inventory_id))
+        return Response(rdata, 201)

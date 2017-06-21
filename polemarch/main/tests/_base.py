@@ -67,9 +67,12 @@ class BaseTestCase(TestCase):
         :param code: - expected code
         :return: None
         '''
-        self.assertEqual(resp.status_code, code,
-                         "{} != {}\n{}".format(resp.status_code, code,
-                                               resp.rendered_content.decode()))
+        err_msg = "{} != {}\n{}".format(
+            resp.status_code, code,
+            resp.rendered_content.decode()
+            if resp.status_code != 404 else "HttpResponseNotFound"
+        )
+        self.assertEqual(resp.status_code, code, err_msg)
 
     def post_result(self, url, code=None, *args, **kwargs):
         return self.get_result("post", url, code, *args, **kwargs)
