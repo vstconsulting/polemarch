@@ -20,7 +20,7 @@ function pmItems()
             this.model.selectedItems[item_id] = mode
         }
         
-        this.model.selectedCount = $('.multiple-select .selected').length;
+        this.model.selectedCount = $('.multiple-select .item-row.selected').length;
         return this.model.selectedItems[item_id];
     }
     
@@ -269,20 +269,30 @@ function pmItems()
         }).promise()
     }
 
-    this.deleteRows = function(elements)
+    this.multiOperationsOnEachRow = function(elements, operation)
     {
+        var def = new $.Deferred();
         var item_ids = []
         for(var i=0; i< elements.length; i++)
         {
             item_ids.push($(elements[i]).attr('data-id'))
         }
 
-        $.when(this.deleteItems(item_ids)).always(function(){
+        $.when(this.multiOperationsOnItems(operation, item_ids)).always(function(){
+            def.resolve()
+        })
+        
+        return def.promise();
+    }
+    
+    this.deleteRows = function(elements)
+    { 
+        $.when(this.multiOperationsOnEachRow(elements, 'deleteItemQuery')).always(function(){ 
             spajs.openURL(window.location.href);
         })
     }
 
-    this.deleteItems = function(item_ids, force, def)
+    this.multiOperationsOnItems = function(operation, item_ids, force, def)
     {
         if(!force && !confirm("Are you sure?"))
         {
@@ -301,14 +311,14 @@ function pmItems()
         }
 
         var thisObj = this;
-        $.when(this.deleteItemQuery(item_ids[0])).always(function(){
+        $.when(this[operation](item_ids[0])).always(function(){
             item_ids.splice(0, 1)
-            thisObj.deleteItems(item_ids, true, def);
+            thisObj.multiOperationsOnItems(operation, item_ids, true, def);
         })
 
         return def.promise();
     }
-
+     
     /**
      * @return $.Deferred
      */

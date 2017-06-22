@@ -336,3 +336,30 @@ pmProjects.setSubHosts = function(item_id, hosts_ids)
         }
     });
 } 
+
+/**
+ * @return $.Deferred
+ */
+pmProjects.syncRepo = function(item_id)
+{ 
+    return $.ajax({
+        url: "/api/v1/projects/"+item_id+"/sync/",
+        type: "POST",
+        contentType:'application/json', 
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        { 
+            $.notify("Send sync query", "success");
+        },
+        error:function(e) 
+        {
+            console.log("project "+item_id+" sync error - " + JSON.stringify(e));
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+} 
