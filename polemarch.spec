@@ -28,7 +28,7 @@ Source0: %{name}-%{unmangled_version}.tar.gz
 Summary: Infrasructure Heat Service for orcestration infrastructure by ansible.
 Group: Application/System
 Vendor: VST Consulting <sergey.k@vstconsulting.net>
-License: MIT
+License: AGPLv3
 AutoReq: No
 AutoProv: No
 Requires: python, python-virtualenv, openssl-devel

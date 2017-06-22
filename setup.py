@@ -32,7 +32,7 @@ setup(
     version=polemarch.__version__,
     packages=find_packages(),
     include_package_data=True,
-    license='MIT',
+    license='AGPLv3',
     description='Polemarch is ansible based for orcestration infrastructure.',
     long_description=README,
     author='VST Consulting',
