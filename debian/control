@@ -10,7 +10,7 @@ Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/polemarch.git;a=summary
 
 Package: polemarch
 Architecture: amd64
-Depends: ${shlibs:Depends}, ${misc:Depends}, apache2, python-virtualenv, libffi6, libssl, sshpass, bind9
+Depends: ${shlibs:Depends}, ${misc:Depends}, apache2, python-virtualenv, libffi6, libssl1.0.0, sshpass
 Description: Infrasructure Heat Service for orcestration infrastructure by ansible.
  Infrasructure Heat Service for orcestration infrastructure by ansible.
  Simply WEB gui for orcestration infrastructure by ansible playbooks.

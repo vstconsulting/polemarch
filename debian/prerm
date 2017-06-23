@@ -1,8 +1,12 @@
 #!/bin/bash
+NAME=polemarch
 # deactivating services
-/usr/bin/systemctl disable polemarchweb.service > /dev/null 2>&1
-/usr/bin/systemctl disable polemarchworker.service > /dev/null 2>&1
+systemctl disable polemarchweb.service > /dev/null 2>&1
+systemctl disable polemarchworker.service > /dev/null 2>&1
 if [ "$1" = "0" ]; then
 	service polemarchweb stop >/dev/null 2>&1
 	service polemarchworker stop >/dev/null 2>&1
 fi
+# cleaning after yourself
+rm -r /opt/$NAME/lib/python2.7/site-packages/$NAME/projects/
+rm -rf /opt/$NAME/httpd/

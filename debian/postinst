@@ -1,6 +1,11 @@
 #!/bin/bash
 NAME=polemarch
 USER=polemarch
+# change owner of all dirs
+chown -R $USER:$USER /opt/$NAME
+chown -R $USER:$USER /var/log/$NAME
+chown -R $USER:$USER /var/run/$NAME
+chown -R $USER:$USER /var/lock/$NAME
 # making migration and activate services
 sudo -u $USER /opt/$NAME/bin/polemarchctl migrate > /dev/null 2>&1
 sudo -u $USER /opt/$NAME/bin/polemarchctl webserver \
@@ -11,6 +16,6 @@ sudo -u $USER /opt/$NAME/bin/polemarchctl webserver \
                                           --access-log \
                                           --pid-file=/var/run/$NAME/web.pid \
                                           >/dev/null 2>&1
-/usr/bin/systemctl enable polemarchweb.service > /dev/null 2>&1
-/usr/bin/systemctl enable polemarchworker.service > /dev/null 2>&1
-/usr/bin/systemctl daemon-reload > /dev/null 2>&1
+systemctl enable polemarchweb.service > /dev/null 2>&1
+systemctl enable polemarchworker.service > /dev/null 2>&1
+systemctl daemon-reload > /dev/null 2>&1
