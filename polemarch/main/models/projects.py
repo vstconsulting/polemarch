@@ -65,6 +65,7 @@ class Project(_AbstractModel):
 
     def start_repo_task(self, operation='sync'):
         from ..tasks import RepoTask
+        self.set_status("WAIT_SYNC")
         return RepoTask.delay(self, operation)
 
     def clone(self, *args, **kwargs):
