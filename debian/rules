@@ -1,0 +1,44 @@
+#!/usr/bin/make -f
+# maximum verbosity during deb build
+DH_VERBOSE = 1
+export DH_OPTIONS=-v
+# paths and executables variables
+NAME = polemarch
+BUILDROOT = debian/$(NAME)
+INSTALLDIR = opt/$(NAME)
+# some additonal variables
+VER = $(shell python -c 'import polemarch; print(polemarch.__version__)')
+PIPARGS = --index-url=http://pipc.vst.lan:8001/simple/ --trusted-host pipc.vst.lan
+# targets, that we want to override with no actions
+override_dh_auto_test:
+	# don't want to test during package build
+override_dh_strip:
+	# it is broken for some unknown reason
+override_dh_link:
+	# it is replacing python in virtualenv with system python
+# real install
+override_dh_auto_install:
+	# create taget directory and clear it in case of some files exist from
+	# previous build
+	mkdir -p $(BUILDROOT)
+	touch $(BUILDROOT)/dummy
+	rm -rf $(BUILDROOT)/*
+	# install our package with all required python dependencies in virtualenv
+	virtualenv --no-site-packages $(BUILDROOT)/$(INSTALLDIR)
+	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) dist/$(NAME)-$(VER).tar.gz[apache]
+	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements.txt -r requirements-git.txt
+	find $(BUILDROOT)/ -name "RECORD" -exec rm -rf {} \;
+	venvctrl-relocate --source=$(BUILDROOT)/$(INSTALLDIR) --destination=/$(INSTALLDIR)
+	# system folders which is needed for application to work (lob, lock, etc)
+	mkdir -p $(BUILDROOT)/var/log/$(NAME)
+	mkdir -p $(BUILDROOT)/var/run/$(NAME)
+	mkdir -p $(BUILDROOT)/var/lock/$(NAME)
+	mkdir -p $(BUILDROOT)/etc/$(NAME)
+	# systemd services
+	mkdir -p $(BUILDROOT)/etc/systemd/system/
+	cp initbin/*.service $(BUILDROOT)/etc/systemd/system/
+	# settings
+	cp $(NAME)/main/settings.ini $(BUILDROOT)/etc/$(NAME)/
+%:
+	dh $@ 
+

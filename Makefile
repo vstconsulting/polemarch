@@ -8,7 +8,7 @@ VER = $(shell $(PY) -c 'import polemarch; print(polemarch.__version__)')
 RELEASE=0
 ARCHIVE = $(NAME)-$(VER).tar.gz
 
-all: rpm build-clean
+all: build
 
 test:
 	tox -e $(ENVS) $(TESTS)

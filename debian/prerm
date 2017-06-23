@@ -1,0 +1,8 @@
+#!/bin/bash
+# deactivating services
+/usr/bin/systemctl disable polemarchweb.service > /dev/null 2>&1
+/usr/bin/systemctl disable polemarchworker.service > /dev/null 2>&1
+if [ "$1" = "0" ]; then
+	service polemarchweb stop >/dev/null 2>&1
+	service polemarchworker stop >/dev/null 2>&1
+fi
