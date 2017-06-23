@@ -1,12 +1,12 @@
 
 function pmItems()
-{ 
-    this.pageSize = 20; 
+{
+    this.pageSize = 20;
     this.model = {};
     this.model.selectedItems = {};
-    
+
     this.model.itemslist = []
-    this.model.items = {} 
+    this.model.items = {}
     this.model.name = "based"
 
     this.toggleSelect = function(item_id, mode)
@@ -19,26 +19,26 @@ function pmItems()
         {
             this.model.selectedItems[item_id] = mode
         }
-        
+
         this.model.selectedCount = $('.multiple-select .item-row.selected').length;
         return this.model.selectedItems[item_id];
     }
-    
+
     this.toggleSelectAll = function(elements, mode)
-    {  
+    {
         for(var i=0; i< elements.length; i++)
         {
             this.toggleSelect($(elements[i]).attr('data-id'), mode)
-        } 
+        }
     }
-    
+
     this.validateHostName = function(name)
     {
         if(!name)
         {
-            return false; 
+            return false;
         }
-        
+
         var regexp = {
             ipTest : /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/,
             ip6Test : /((^|:)([0-9a-fA-F]{0,4})){1,8}$/,
@@ -60,20 +60,20 @@ function pmItems()
             return true;
         }
 
-        return false; 
+        return false;
     }
 
     this.validateRangeName = function(name)
     {
         if(!name)
         {
-            return false; 
+            return false;
         }
-        
+
         return name.replace(/\[([0-9A-z]+):([0-9A-z]+)\]/g, "$1") && name.replace(/\[([0-9A-z]+):([0-9A-z]+)\]/g, "$2")
     }
-    
-    
+
+
     this.showList = function(holder, menuInfo, data)
     {
         var thisObj = this;
@@ -87,9 +87,9 @@ function pmItems()
         return $.when(this.loadItems(limit, offset)).done(function()
         {
             $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:""}))
-            
+
             thisObj.model.selectedCount = $('.multiple-select .selected').length;
-            
+
         }).fail(function()
         {
             $.notify("", "error");
@@ -176,6 +176,7 @@ function pmItems()
                 for(var i in data.results)
                 {
                     var val = data.results[i]
+                    thisObj.model.items.justWatch(val.id);
                     thisObj.model.items[val.id] = val
                 }
             },
@@ -250,14 +251,14 @@ function pmItems()
             }
         });
     }
-    
+
     /**
      * @return $.Deferred
      */
     this.deleteItem = function(item_id, force)
     {
         if(!force && !confirm("Are you sure?"))
-        { 
+        {
             return;
         }
         var thisObj = this;
@@ -281,13 +282,13 @@ function pmItems()
         $.when(this.multiOperationsOnItems(operation, item_ids)).always(function(){
             def.resolve()
         })
-        
+
         return def.promise();
     }
-    
+
     this.deleteRows = function(elements)
-    { 
-        $.when(this.multiOperationsOnEachRow(elements, 'deleteItemQuery')).always(function(){ 
+    {
+        $.when(this.multiOperationsOnEachRow(elements, 'deleteItemQuery')).always(function(){
             spajs.openURL(window.location.href);
         })
     }
@@ -318,7 +319,7 @@ function pmItems()
 
         return def.promise();
     }
-     
+
     /**
      * @return $.Deferred
      */
@@ -345,17 +346,17 @@ function pmItems()
     ////////////////////////////////////////////////
 
     this.jsonEditor = function(json)
-    { 
+    {
         return spajs.just.render('jsonEditor', {data:json})
     }
 
     this.jsonEditorGetValues = function()
-    { 
+    {
         var data = {}
         var arr = $(".jsonEditor-data")
         for(var i = 0; i< arr.length; i++)
         {
-            var index = $(arr[i]).attr('data-json-name') 
+            var index = $(arr[i]).attr('data-json-name')
             data[index] = $(arr[i]).val()
         }
 
@@ -372,7 +373,7 @@ function pmItems()
             $.notify("Empty varible name", "error");
             return;
         }
-        
+
         if($("#json_"+name+"_value").length)
         {
             $.notify("This var already exists", "error");
@@ -402,7 +403,7 @@ function pmItems()
         {
             currentPage = Math.floor(list.offset / list.limit)
         }
-        var url = window.location.href  
+        var url = window.location.href
         return  spajs.just.render('pagination', {
             totalPage:totalPage,
             currentPage:currentPage,
@@ -411,7 +412,7 @@ function pmItems()
 
     this.getTotalPages = function(list)
     {
-        var totalPage = list.count / list.limit 
+        var totalPage = list.count / list.limit
         return  totalPage
     }
 }

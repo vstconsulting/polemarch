@@ -1,7 +1,35 @@
  
 var pmProjects = new pmItems()  
-pmProjects.model.name = "projects"
+pmProjects.model.name = "projects" 
  
+pmProjects.openList = function(holder, menuInfo, data)
+{
+    var res = pmProjects.showList(holder, menuInfo, data); 
+    
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[1] > 0)
+    {
+        offset = this.pageSize*(data.reg[1] - 1);
+    }
+    pmProjects.model.updateTimeoutId = setTimeout(pmProjects.updateList, 1000, limit, offset)
+    
+    return res;
+}
+
+pmProjects.updateList = function(limit, offset)
+{ 
+    $.when(pmProjects.loadItems(limit, offset)).always(function(){ 
+        pmProjects.model.updateTimeoutId = setTimeout(pmProjects.updateList, 1000, limit, offset)
+    })
+}
+
+pmProjects.closeList = function()
+{
+    clearTimeout(pmProjects.model.updateTimeoutId)
+    pmProjects.model.updateTimeoutId = undefined;
+}
+
 /** 
  * @return $.Deferred
  */
@@ -360,6 +388,32 @@ pmProjects.syncRepo = function(item_id)
         {
             console.log("project "+item_id+" sync error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
+        }
+    });
+} 
+
+/**
+ * @return $.Deferred
+ */
+pmProjects.supportedRepos = function(item_id)
+{ 
+    return $.ajax({
+        url: "/api/v1/projects/supported-repos/",
+        type: "GET",
+        contentType:'application/json', 
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        { 
+            pmProjects.model.supportedRepos = data;
+        },
+        error:function(e) 
+        {
+            console.log("project "+item_id+" sync error - " + JSON.stringify(e)); 
         }
     });
 } 

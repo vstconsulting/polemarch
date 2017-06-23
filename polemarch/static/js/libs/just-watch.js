@@ -58,7 +58,35 @@ var justReactive = {
         'unshift',
         'unshift'
     ],
-
+    megreFunc:function(obj, prop, newval)
+    {
+        console.log("megreFunc", obj[prop], newval)
+        if(typeof obj[prop] != "object")
+        {
+            obj[prop] = newval;
+            return;
+        }
+        
+        var v1arr = {}
+        for(var i in obj[prop])
+        {
+            v1arr[i] = false;
+        }
+        
+        for(var i in newval)
+        {
+            v1arr[i] = true;
+            justReactive.megreFunc(obj[prop], i, newval[i]);
+        }
+        
+        for(var i in v1arr)
+        {
+            if(!v1arr[i])
+            {
+                delete obj[prop][i];
+            }
+        }
+    },
     applyFunc:function(val, newval)
     {
         //console.log("setter", newval);
@@ -249,6 +277,11 @@ var justReactive = {
 
                     if(val && val.__add_justHtml_test === "__justReactive_test")
                     {
+                        if(val.type == "watch")
+                        { 
+                            return val;
+                        }
+                        
                         // Добавление точки отслеживания, значение не меняем.
                         //console.log("setter add", newval);
                         newval.just_ids.push({
@@ -275,7 +308,9 @@ var justReactive = {
                     }
                     else
                     {
-                        newval.val = val;
+                        //newval.val = val;
+                        justReactive.megreFunc(newval, 'val', val);
+                        
                         if(Array.isArray(val))
                         {
                             for(var i in justReactive.methods)
@@ -285,10 +320,12 @@ var justReactive = {
                         }
                     }
 
-                    // Обновляем значения в DOM не сразу а с задержкой в 30мс
+                    // Обновляем значения в DOM не сразу а с задержкой в 10мс
                     // для того чтоб если они ещё раз изменятся за менее чем
-                    // 30мс не дёргать DOM в целях оптимизации
-                    newval.timeoutId = setTimeout(justReactive.applyFunc, 30, val, newval) 
+                    // 10мс не дёргать DOM в целях оптимизации
+                    // newval.timeoutId = setTimeout(justReactive.applyFunc, 10, val, newval) 
+                    
+                    justReactive.applyFunc(val, newval)
                     return val;
                 }
 
@@ -454,6 +491,20 @@ Object.defineProperty(Object.prototype, "justAttr", {
   , configurable: true
   , writable: false
   , value: function(prop, attrName, callBack, customData){ return justReactive.setValue.apply(this, [{type:'attr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
+});
+
+// Проставляет значение как css class
+Object.defineProperty(Object.prototype, "justWatch", {
+    enumerable: false
+  , configurable: true
+  , writable: false
+  , value: function(prop)
+    {
+        return justReactive.setValue.apply(this, [{
+                type:'watch',
+                prop:prop
+            }])
+    }
 });
 
 /*

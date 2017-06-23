@@ -53,7 +53,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 58px;">Status</th>
+                                    <th style="width: 82px;">Status</th>
                                     <th style="width: 201px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
@@ -67,7 +67,7 @@
                                         </td>
                                         <td>
                                             <a href="/?project/<%- pmProjects.model.itemslist.results[i].id %>" class="item-name"
-                                                    onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.itemslist.results[i].name %></a>
+                                                    onclick="return spajs.openURL(this.href);" ><%= pmProjects.model.items[pmProjects.model.itemslist.results[i].id].justText('name') %></a>
                                         </td>
                                         <td class="project-status <%- pmProjects.model.items[pmProjects.model.itemslist.results[i].id].justClassName('status', function(v){ return "project-status-"+v}) %>" > 
                                             <%= pmProjects.model.items[pmProjects.model.itemslist.results[i].id].justText('status') %>
