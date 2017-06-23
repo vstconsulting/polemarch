@@ -16,6 +16,9 @@ override_dh_strip:
 	# it is broken for some unknown reason
 override_dh_link:
 	# it is replacing python in virtualenv with system python
+override_dh_shlibdeps:
+	# it generates dependency which breaks compartibility with newer distros:
+	# libssl with exact version 1.0.0
 # real install
 override_dh_auto_install:
 	# create taget directory and clear it in case of some files exist from

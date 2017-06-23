@@ -50,3 +50,5 @@ rpm: build
 	cp -vf dist/$(ARCHIVE) ~/rpmbuild/SOURCES
 	rpmbuild --verbose -bb polemarch.spec -D 'version $(VER)' -D 'release $(RELEASE)'
 	cp -vr ~/rpmbuild/RPMS dist/
+deb:
+	dpkg-buildpackage -uc -us
