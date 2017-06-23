@@ -92,9 +92,9 @@ sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl webserver \
                                           --access-log \
                                           --pid-file=/var/run/%{name}/web.pid \
                                           >/dev/null 2>&1
-/bin/systemctl enable %{shortname}web.service > /dev/null 2>&1
-/bin/systemctl enable %{shortname}worker.service > /dev/null 2>&1
-/bin/systemctl daemon-reload > /dev/null 2>&1
+/usr/bin/systemctl enable %{shortname}web.service > /dev/null 2>&1
+/usr/bin/systemctl enable %{shortname}worker.service > /dev/null 2>&1
+/usr/bin/systemctl daemon-reload > /dev/null 2>&1
 
 # if [ "$1" = "1" ]; then
     # chkconfig --add %{shortname}web
