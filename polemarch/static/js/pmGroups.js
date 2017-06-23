@@ -11,7 +11,7 @@ pmGroups.addItem = function(parent_type, parent_item)
     var data = {}
 
     data.name = $("#new_group_name").val()
-    data.vars = this.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues()
 
     if(!data.name)
     {
@@ -95,7 +95,7 @@ pmGroups.updateItem = function(item_id)
     var data = {}
 
     data.name = $("#group_"+item_id+"_name").val()
-    data.vars = this.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues()
 
     if(!data.name)
     {

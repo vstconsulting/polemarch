@@ -175,7 +175,7 @@ pmProjects.addItem = function()
 
     data.name = $("#new_project_name").val()
     data.repository = $("#new_project_repository").val()
-    data.vars = pmProjects.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues()
 
     if(!data.name)
     {
@@ -220,7 +220,7 @@ pmProjects.updateItem = function(item_id)
     var data = {}
 
     data.name = $("#project_"+item_id+"_name").val()
-    data.vars = pmProjects.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues()
 
     if(!data.name)
     {

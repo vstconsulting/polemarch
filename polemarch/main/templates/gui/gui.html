@@ -1391,9 +1391,9 @@
             </label> 
             <div class="input-group" style="width: 100%;">
                     <% if(thisOpt.type == 'select' ){ %> 
-                        <select class="form-control jsonEditor-data">
+                        <select class="form-control jsonEditor-data" id="json_<%- name %>_value"> data-json-name="<%- name %>"
                             <% for(var i in thisOpt.options){ %>
-                               <option value="<%- thisOpt.options[i] %>"><%- thisOpt.options[i] %></option>
+                               <option value="<%- thisOpt.options[i] %>" <% if(value == thisOpt.options[i]){ %>selected<% } %>><%- thisOpt.options[i] %></option>
                             <% } %>
                         </select>
                     <% } else if(thisOpt.type == 'password' ){ %> 

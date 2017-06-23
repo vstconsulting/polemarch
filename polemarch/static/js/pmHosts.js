@@ -14,7 +14,7 @@ pmHosts.addItem = function(parent_type, parent_item)
 
     data.name = $("#new_host_name").val()
     data.type = $("#new_host_type").val()
-    data.vars = this.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues()
 
     if(data.type == "HOST"  && (!data.name || !this.validateHostName(data.name)))
     {
@@ -103,7 +103,7 @@ pmHosts.updateItem = function(item_id)
 
     data.name = $("#host_"+item_id+"_name").val()
     data.type = $("#host_"+item_id+"_type").val()
-    data.vars = this.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues()
 
     // @todo Добавить валидацию диапазонов "127.0.1.[5:6]" и 127.0.1.1, 127.0.1.2
     if(!data.name || !this.validateHostName(data.name))

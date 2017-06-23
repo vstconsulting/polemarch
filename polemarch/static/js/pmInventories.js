@@ -11,7 +11,7 @@ pmInventories.addItem = function(parent_type, parent_item)
     var data = {}
 
     data.name = $("#new_inventory_name").val()
-    data.vars = pmInventories.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues()
      
     if(!data.name)
     {
@@ -73,7 +73,7 @@ pmInventories.updateItem = function(item_id)
     var data = {}
 
     data.name = $("#inventory_"+item_id+"_name").val()
-    data.vars = pmInventories.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues()
     
     if(!data.name)
     {
