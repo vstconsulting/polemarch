@@ -225,14 +225,14 @@ polemarch.start = function(options)
         id:"project",
         name:"project",
         urlregexp:[/^project\/([0-9]+)$/], 
-        onOpen:function(holder, menuInfo, data){return pmProjects.showItem(holder, menuInfo, data);}
+        onOpen:function(holder, menuInfo, data){return pmProjects.openItem(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
         id:"newProject",
         name:"newProject",
         urlregexp:[/^new-project$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.showNewItemPage(holder, menuInfo, data);}
+        onOpen:function(holder, menuInfo, data){return pmProjects.openNewItemPage(holder, menuInfo, data);}
     })
     
     spajs.openMenuFromUrl()

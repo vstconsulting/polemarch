@@ -333,3 +333,11 @@ div.spinner div.bar12 {
 table{ 
     table-layout: fixed;
 }
+
+.popover-title{
+    color:#000; 
+}
+
+.popover-content{
+    color:#000; 
+}

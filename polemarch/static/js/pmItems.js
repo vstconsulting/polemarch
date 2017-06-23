@@ -1,4 +1,59 @@
 
+var jsonEditor = {}
+
+jsonEditor.options = {};
+
+////////////////////////////////////////////////
+// jsonEditor
+////////////////////////////////////////////////
+
+jsonEditor.editor = function(json, optionsblock)
+{ 
+    return spajs.just.render('jsonEditor', {data:json, optionsblock:optionsblock})
+}
+
+jsonEditor.jsonEditorGetValues = function()
+{
+    var data = {}
+    var arr = $(".jsonEditor-data")
+    for(var i = 0; i< arr.length; i++)
+    {
+        var index = $(arr[i]).attr('data-json-name')
+        data[index] = $(arr[i]).val()
+    }
+
+    return data
+}
+
+jsonEditor.jsonEditorAddVar = function(optionsblock)
+{
+    if(!optionsblock)
+    {
+        optionsblock = 'base'
+    }
+    
+    var name = $('#new_json_name').val()
+    var value = $('#new_json_value').val()
+
+    if(!name)
+    {
+        $.notify("Empty varible name", "error");
+        return;
+    }
+
+    if($("#json_"+name+"_value").length)
+    {
+        $.notify("This var already exists", "error");
+        return;
+    }
+
+    $('#new_json_name').val('')
+    $('#new_json_value').val('')
+
+    $("#jsonEditorVarList").append(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock}))  
+}
+ 
+
 function pmItems()
 {
     this.pageSize = 20;
@@ -339,51 +394,6 @@ function pmItems()
                 }
             }
         });
-    }
-
-    ////////////////////////////////////////////////
-    // jsonEditor
-    ////////////////////////////////////////////////
-
-    this.jsonEditor = function(json)
-    {
-        return spajs.just.render('jsonEditor', {data:json})
-    }
-
-    this.jsonEditorGetValues = function()
-    {
-        var data = {}
-        var arr = $(".jsonEditor-data")
-        for(var i = 0; i< arr.length; i++)
-        {
-            var index = $(arr[i]).attr('data-json-name')
-            data[index] = $(arr[i]).val()
-        }
-
-        return data
-    }
-
-    this.jsonEditorAddVar = function(name, value)
-    {
-        var name = $('#new_json_name').val()
-        var value = $('#new_json_value').val()
-
-        if(!name)
-        {
-            $.notify("Empty varible name", "error");
-            return;
-        }
-
-        if($("#json_"+name+"_value").length)
-        {
-            $.notify("This var already exists", "error");
-            return;
-        }
-
-        $('#new_json_name').val('')
-        $('#new_json_value').val('')
-
-        $("#jsonEditorVarList").append(spajs.just.render('jsonEditorLine', {name:name, value:value}))
     }
 
     ////////////////////////////////////////////////
