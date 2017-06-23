@@ -1,7 +1,7 @@
 Source: polemarch
 Section: unknown
 Priority: optional
-Maintainer: Cloud-init-user <sergey.k@vstconsulting.net>
+Maintainer: VST Consulting <sergey.k@vstconsulting.net>
 Build-Depends: debhelper (>= 9), python-virtualenv, python-pip, apache2, apache2-dev, python-dev, gcc, libffi-dev, libssl-dev
 Standards-Version: 3.9.5
 Homepage: <insert the upstream URL, if relevant>
