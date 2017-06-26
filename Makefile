@@ -4,11 +4,23 @@ LOC_TEST_ENVS = build,py27-django18-coverage,py34-django111-coverage,pep,flake,p
 ENVS = $(LOC_TEST_ENVS)
 TESTS =
 NAME = polemarch
+USER = $(NAME)
 VER = $(shell $(PY) -c 'import polemarch; print(polemarch.__version__)')
-RELEASE=0
+PIPARGS = --index-url=http://pipc.vst.lan:8001/simple/ --trusted-host pipc.vst.lan
 ARCHIVE = $(NAME)-$(VER).tar.gz
+LICENSE = AGPL-3+
+define DESCRIPTION
+ Infrasructure Heat Service for orcestration infrastructure by ansible.
+ Simply WEB gui for orcestration infrastructure by ansible playbooks.
+endef
+export DESCRIPTION
+SUMMARY = Infrasructure Heat Service for orcestration infrastructure by ansible.
+VENDOR = VST Consulting <sergey.k@vstconsulting.net>
 
-all: rpm build-clean
+include rpm.mk
+include deb.mk
+
+all: build
 
 test:
 	tox -e $(ENVS) $(TESTS)
@@ -52,9 +64,34 @@ fclean: clean
 	-rm -rf .tox
 
 rpm: compile
+	echo "$$RPM_SPEC" > polemarch.spec
 	rm -rf ~/rpmbuild
 	mkdir -p ~/rpmbuild/SOURCES/
 	ls -la
 	cp -vf dist/$(ARCHIVE) ~/rpmbuild/SOURCES
-	rpmbuild --verbose -bb polemarch.spec -D 'version $(VER)' -D 'release $(RELEASE)'
+	rpmbuild --verbose -bb polemarch.spec
 	cp -vr ~/rpmbuild/RPMS dist/
+	rm polemarch.spec
+
+deb:
+	rm -rf debian
+	mkdir debian
+	# create needed files
+	cp changelog debian/
+	echo 9 > debian/compat
+	echo "$$DEBIAN_CONTROL" > debian/control
+	echo "$$DEBIAN_COPYRIGHT" > debian/copyright
+	echo "$$DEBIAN_RULES" > debian/rules
+	echo "$$DEBIAN_PREINST" > debian/preinst
+	echo "$$DEBIAN_POSTINST" > debian/postinst
+	echo "$$DEBIAN_PRERM" > debian/prerm
+	echo "$$DEBIAN_POSTRM" > debian/postrm
+	chmod +x debian/rules
+	chmod +x debian/preinst
+	chmod +x debian/postinst
+	chmod +x debian/prerm
+	chmod +x debian/postrm
+	# build
+	dpkg-buildpackage -uc -us
+	# cleanup
+	rm -rf debian
