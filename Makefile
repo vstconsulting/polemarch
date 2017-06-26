@@ -63,6 +63,7 @@ rpm: build
 	rpmbuild --verbose -bb polemarch.spec
 	cp -vr ~/rpmbuild/RPMS dist/
 	rm polemarch.spec
+
 deb:
 	rm -rf debian
 	mkdir debian
