@@ -1,5 +1,0 @@
-#!/bin/bash
-USER=polemarch
-# making sure user created
-id -u $USER &>/dev/null || useradd -M $USER
-id -g $USER &>/dev/null || groupadd $USER

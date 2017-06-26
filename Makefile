@@ -4,9 +4,12 @@ LOC_TEST_ENVS = build,py27-django18-coverage,py34-django111-coverage,pep,flake,p
 ENVS = $(LOC_TEST_ENVS)
 TESTS =
 NAME = polemarch
+USER = $(NAME)
 VER = $(shell $(PY) -c 'import polemarch; print(polemarch.__version__)')
 RELEASE=0
 ARCHIVE = $(NAME)-$(VER).tar.gz
+
+include debian.mk
 
 all: build
 
@@ -51,4 +54,24 @@ rpm: build
 	rpmbuild --verbose -bb polemarch.spec -D 'version $(VER)' -D 'release $(RELEASE)'
 	cp -vr ~/rpmbuild/RPMS dist/
 deb:
+	rm -rf debian
+	mkdir debian
+	# create needed files
+	cp changelog debian/
+	echo 9 > debian/compat
+	echo "$$DEBIAN_CONTROL" > debian/control
+	echo "$$DEBIAN_COPYRIGHT" > debian/copyright
+	echo "$$DEBIAN_RULES" > debian/rules
+	echo "$$DEBIAN_PREINST" > debian/preinst
+	echo "$$DEBIAN_POSTINST" > debian/postinst
+	echo "$$DEBIAN_PRERM" > debian/prerm
+	echo "$$DEBIAN_POSTRM" > debian/postrm
+	chmod +x debian/rules
+	chmod +x debian/preinst
+	chmod +x debian/postinst
+	chmod +x debian/prerm
+	chmod +x debian/postrm
+	# build
 	dpkg-buildpackage -uc -us
+	# cleanup
+	rm -rf debian

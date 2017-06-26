@@ -1,8 +1,0 @@
-#!/bin/bash
-NAME=polemarch
-# remove whole /opt/polemarch (database included) if purge called
-case "$1" in
-  purge)
-    rm -rf /opt/$NAME
-  ;;
-esac
