@@ -1,5 +1,5 @@
-PIP=pip
-PY=python
+PIP=pip2
+PY=python2
 LOC_TEST_ENVS = build,py27-django18-coverage,py34-django111-coverage,pep,flake,pylint
 ENVS = $(LOC_TEST_ENVS)
 TESTS =
@@ -20,7 +20,7 @@ VENDOR = VST Consulting <sergey.k@vstconsulting.net>
 include rpm.mk
 include deb.mk
 
-all: build
+all: compile
 
 test:
 	tox -e $(ENVS) $(TESTS)
@@ -33,11 +33,11 @@ pylint:
 
 build: build-clean
 	-rm -rf dist
-	$(PY) setup.py build -v
 	$(PY) setup.py sdist -v
 
 compile: build-clean
 	-rm -rf dist
+	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
 	$(PY) setup.py compile -v
 
 install:
@@ -55,12 +55,12 @@ clean: build-clean
 
 build-clean:
 	find . -name "*.pyc" -print0 | xargs -0 rm -rf
-	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf build
 	-rm -rf *.egg-info
 	-rm pylint_*
 
 fclean: clean
+	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf .tox
 
 rpm: compile

@@ -66,6 +66,7 @@ ext_modules = list(Extension(m, f) for m, f in extensions_dict.items())
 if use_cython:
     ext_modules = cythonize(ext_modules)
 
+
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
@@ -91,9 +92,9 @@ setup(
     name='polemarch',
     version=polemarch.__version__,
     packages=find_packages(),
-    ext_modules=cythonize(ext_modules),
+    ext_modules=ext_modules,
     include_package_data=True,
-    license='AGPLv3',
+    license='AGPLv3+',
     description='Polemarch is ansible based for orcestration infrastructure.',
     long_description=README,
     author='VST Consulting',
@@ -118,9 +119,6 @@ setup(
         'Topic :: Utilities',
     ],
     scripts=['polemarchctl'],
-    setup_requires=[
-        "cython>=0.25.2",
-    ],
     install_requires=[
         "django>=1.8,<1.12",
     ] + REQUIRES,

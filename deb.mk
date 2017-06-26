@@ -71,6 +71,7 @@ override_dh_auto_install:
 	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements.txt -r requirements-git.txt
 	find $(BUILDROOT)/ -name "RECORD" -exec rm -rf {} \;
 	venvctrl-relocate --source=$(BUILDROOT)/$(INSTALLDIR) --destination=/$(INSTALLDIR)
+	find $(BUILDROOT)/$(INSTALLDIR)/lib -type f -name "*.c" -print0 | xargs -0 rm -rf
 	# system folders which is needed for application to work (lob, lock, etc)
 	mkdir -p $(BUILDROOT)/var/log/$(NAME)
 	mkdir -p $(BUILDROOT)/var/run/$(NAME)

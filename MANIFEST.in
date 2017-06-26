@@ -4,6 +4,8 @@ include polemarch/main/tests/exemplary_complex_inventory
 include requirements.txt
 include requirements-git.txt
 recursive-include etc *
+recursive-include polemarch/*.c *
+recursive-include polemarch/*.so *
 recursive-include polemarch/static *
 recursive-include polemarch/*/templates *
 recursive-include initbin *

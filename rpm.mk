@@ -73,6 +73,7 @@ find %{buildroot} -name "RECORD" -exec rm -rf {} \;
 venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir}
 # Strip native modules as they contain buildroot paths in their debug information
 find %{venv_dir}/lib -type f -name "*.so" | grep -v _cffi_backend | xargs -r strip
+find %{venv_dir}/lib -type f -name "*.c" -print0 | xargs -0 rm -rf
 # Setup init scripts
 mkdir -p $$RPM_BUILD_ROOT/etc/systemd/system
 mkdir -p $$RPM_BUILD_ROOT/etc/%{name}
