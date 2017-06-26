@@ -31,8 +31,9 @@ Vendor: VST Consulting <sergey.k@vstconsulting.net>
 License: AGPLv3
 AutoReq: No
 AutoProv: No
-Requires: python, python-virtualenv, openssl-devel
+Requires: python, openssl-devel
 Requires: httpd, httpd-devel, logrotate
+# Requires: python-virtualenv
 
 
 %description
@@ -61,7 +62,7 @@ id -g %{file_permissions_group} &>/dev/null || groupadd %{file_permissions_group
 make build
 %{venv_cmd} %{venv_dir}
 %{venv_pip} dist/%{name}-%{unmangled_version}.tar.gz[apache]
-%{venv_pip} -r requirements.txt -r requirements-git.txt
+%{venv_pip} -U -r requirements.txt -r requirements-git.txt
 cd %{buildroot}
 cd -
 # RECORD files are used by wheels for checksum. They contain path names which

@@ -21,10 +21,15 @@ pylint:
 
 build: build-clean
 	-rm -rf dist
+	$(PY) setup.py build -v
 	$(PY) setup.py sdist -v
 
+compile: build-clean
+	-rm -rf dist
+	$(PY) setup.py compile -v
+
 install:
-	$(PIP) install dist/$(ARCHIVE) django\>=1.8,\<1.10
+	$(PIP) install dist/$(ARCHIVE) django\>=1.8,\<1.12
 
 uninstall:
 	$(PIP) uninstall $(NAME)
@@ -33,9 +38,12 @@ clean: build-clean
 	-rm -rf htmlcov
 	-rm -rf .coverage
 	-rm -rf dist
+	-rm -rf build
+	-rm -rf *.egg-info
 
 build-clean:
 	find . -name "*.pyc" -print0 | xargs -0 rm -rf
+	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf build
 	-rm -rf *.egg-info
 	-rm pylint_*
@@ -43,7 +51,7 @@ build-clean:
 fclean: clean
 	-rm -rf .tox
 
-rpm: build
+rpm: compile
 	rm -rf ~/rpmbuild
 	mkdir -p ~/rpmbuild/SOURCES/
 	ls -la
