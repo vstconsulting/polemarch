@@ -31,7 +31,7 @@ Source0: %{name}-%{unmangled_version}.tar.gz
 Summary: $(SUMMARY)
 Group: Application/System
 Vendor: $(VENDOR)
-License: AGPLv3
+License: ${LICENSE}
 AutoReq: No
 AutoProv: No
 Requires: python, python-virtualenv, openssl-devel

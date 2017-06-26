@@ -24,7 +24,7 @@ Source: <url://example.com>
 
 Files: *
 Copyright: 2017 VST Consulting
-License: AGPL-3+
+License: ${LICENSE}
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero Public License as published by
  the Free Software Foundation, either version 3 of the License, or

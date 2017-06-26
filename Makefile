@@ -8,6 +8,7 @@ USER = $(NAME)
 VER = $(shell $(PY) -c 'import polemarch; print(polemarch.__version__)')
 PIPARGS = --index-url=http://pipc.vst.lan:8001/simple/ --trusted-host pipc.vst.lan
 ARCHIVE = $(NAME)-$(VER).tar.gz
+LICENSE = AGPL-3+
 define DESCRIPTION
  Infrasructure Heat Service for orcestration infrastructure by ansible.
  Simply WEB gui for orcestration infrastructure by ansible playbooks.
@@ -16,7 +17,7 @@ export DESCRIPTION
 SUMMARY = Infrasructure Heat Service for orcestration infrastructure by ansible.
 VENDOR = VST Consulting <sergey.k@vstconsulting.net>
 
-include polemarch.spec.mk
+include rpm.mk
 include debian.mk
 
 all: build
