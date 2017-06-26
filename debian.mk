@@ -2,7 +2,7 @@ define DEBIAN_CONTROL
 Source: $(NAME)
 Section: unknown
 Priority: optional
-Maintainer: VST Consulting <sergey.k@vstconsulting.net>
+Maintainer: $(VENDOR)
 Build-Depends: debhelper (>= 9), python-virtualenv, python-pip, apache2, apache2-dev, python-dev, gcc, libffi-dev, libssl-dev
 Standards-Version: 3.9.5
 Homepage: <insert the upstream URL, if relevant>
@@ -11,10 +11,9 @@ Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/polemarch.git;a=summary
 
 Package: $(NAME)
 Architecture: amd64
-Depends: ${shlibs:Depends}, ${misc:Depends}, apache2, python-virtualenv, libffi6, libssl-dev, sshpass, libpython2.7
-Description: Infrasructure Heat Service for orcestration infrastructure by ansible.
- Infrasructure Heat Service for orcestration infrastructure by ansible.
- Simply WEB gui for orcestration infrastructure by ansible playbooks.
+Depends: $${shlibs:Depends}, $${misc:Depends}, apache2, python-virtualenv, libffi6, libssl-dev, sshpass, libpython2.7
+Description: $(SUMMARY)
+$(DESCRIPTION)
 endef
 export DEBIAN_CONTROL
 
@@ -44,8 +43,6 @@ export DEBIAN_COPYRIGHT
 # paths and executables variables
 BUILDROOT = debian/$(NAME)
 INSTALLDIR = opt/$(NAME)
-# some additonal variables
-PIPARGS = --index-url=http://pipc.vst.lan:8001/simple/ --trusted-host pipc.vst.lan
 define DEBIAN_RULES
 #!/usr/bin/make -f
 # maximum verbosity during deb build
@@ -117,6 +114,8 @@ sudo -u $(USER) /opt/$(NAME)/bin/polemarchctl webserver \
 systemctl enable polemarchweb.service > /dev/null 2>&1
 systemctl enable polemarchworker.service > /dev/null 2>&1
 systemctl daemon-reload > /dev/null 2>&1
+service polemarchweb start >/dev/null 2>&1
+service polemarchworker start >/dev/null 2>&1
 endef
 export DEBIAN_POSTINST
 
@@ -136,7 +135,7 @@ export DEBIAN_PRERM
 define DEBIAN_POSTRM
 #!/bin/bash
 # remove whole /opt/polemarch (database included) if purge called
-case "$1" in
+case "$$1" in
   purge)
     rm -rf /opt/$(NAME)
   ;;

@@ -6,9 +6,17 @@ TESTS =
 NAME = polemarch
 USER = $(NAME)
 VER = $(shell $(PY) -c 'import polemarch; print(polemarch.__version__)')
-RELEASE=0
+PIPARGS = --index-url=http://pipc.vst.lan:8001/simple/ --trusted-host pipc.vst.lan
 ARCHIVE = $(NAME)-$(VER).tar.gz
+define DESCRIPTION
+ Infrasructure Heat Service for orcestration infrastructure by ansible.
+ Simply WEB gui for orcestration infrastructure by ansible playbooks.
+endef
+export DESCRIPTION
+SUMMARY = Infrasructure Heat Service for orcestration infrastructure by ansible.
+VENDOR = VST Consulting <sergey.k@vstconsulting.net>
 
+include polemarch.spec.mk
 include debian.mk
 
 all: build
@@ -47,12 +55,14 @@ fclean: clean
 	-rm -rf .tox
 
 rpm: build
+	echo "$$RPM_SPEC" > polemarch.spec
 	rm -rf ~/rpmbuild
 	mkdir -p ~/rpmbuild/SOURCES/
 	ls -la
 	cp -vf dist/$(ARCHIVE) ~/rpmbuild/SOURCES
-	rpmbuild --verbose -bb polemarch.spec -D 'version $(VER)' -D 'release $(RELEASE)'
+	rpmbuild --verbose -bb polemarch.spec
 	cp -vr ~/rpmbuild/RPMS dist/
+	rm polemarch.spec
 deb:
 	rm -rf debian
 	mkdir debian
