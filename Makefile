@@ -18,7 +18,7 @@ SUMMARY = Infrasructure Heat Service for orcestration infrastructure by ansible.
 VENDOR = VST Consulting <sergey.k@vstconsulting.net>
 
 include rpm.mk
-include debian.mk
+include deb.mk
 
 all: build
 
