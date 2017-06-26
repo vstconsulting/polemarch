@@ -7,3 +7,4 @@ recursive-include polemarch/static *
 recursive-include polemarch/*/templates *
 recursive-include initbin *
 include Makefile
+include debian.mk
