@@ -69,24 +69,24 @@
                                             <a href="/?project/<%- valid %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= pmProjects.model.items[valid].justText('name') %></a>
                                         </td>
-                                        <td class="project-status <%- pmProjects.model.items[valid].justClassName('status', function(v){ return "project-status-"+v}) %>" > 
+                                        <td class="project-status <%- pmProjects.model.items[valid].justClassName('status', function(v){ return "project-status-"+v}) %>" >
                                             <%= pmProjects.model.items[valid].justText('status') %>
                                         </td>
                                         <td class="hidden-xs">
                                             <a href="#"
                                                 class="btn btn-danger"
                                                 onclick="spajs.showLoader(pmProjects.deleteItem(<%- valid %>)); return false;" >Delete</a>
-                                                 
+
                                             <a href="#"
                                                 class="btn btn-warning"
                                                 onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
- 
+
                                             <div class="btn-group" role="group">
                                                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     Add
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu"> 
+                                                <ul class="dropdown-menu">
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/new-group'}); return false;" >Add sub group</a>
@@ -95,7 +95,7 @@
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/new-host'}); return false;" >Add sub host</a>
                                                     </li>
-                                                    <li> 
+                                                    <li>
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/new-inventory'}); return false;" >Add sub inventory</a>
                                                     </li>
@@ -125,7 +125,7 @@
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/new-host'}); return false;" >Add sub host</a>
                                                     </li>
-                                                    <li> 
+                                                    <li>
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/new-inventory'}); return false;" >Add sub inventory</a>
                                                     </li>
@@ -157,7 +157,7 @@
                 </div>
             </section>
         </div>
-    </section> 
+    </section>
 </script>
 
 
@@ -454,7 +454,7 @@
             <li class="active">Inventories list</li>
         </ol>
     </section>
- 
+
     <section class="content">
         <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Add inventory</a>
         <br>
@@ -517,7 +517,7 @@
                                             <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
                                                 onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
-                                                 
+
                                             <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
                                                 class="btn btn-primary"
                                                 onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub group</a>
@@ -1371,58 +1371,97 @@
 
 <!-- jsonEditor - jsonEditorLine-->
 <script type="text/x-just" data-just="jsonEditorLine">
-    <div class="form-group col-lg-6" id="json_<%- name %>_line"> 
-        <% if(jsonEditor.options[optionsblock] && jsonEditor.options[optionsblock][name]){ thisOpt = jsonEditor.options[optionsblock][name]; %>
+    <% if(jsonEditor.options[optionsblock] && jsonEditor.options[optionsblock][name]){ thisOpt = jsonEditor.options[optionsblock][name]; %>
+        <div class="form-group
+                    <% if(thisOpt.type == 'textarea' ){ %> col-lg-12 <% }else{ %> col-lg-6 <% } %>
+                    <% if(thisOpt.type == 'boolean' ){ %> boolean-select <% } %>" 
+                id="json_<%- name %>_line">
             <label
                     class="control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
-                    for="#json_<%- name %>" 
+                    for="#json_<%- name %>"
                 >
                 <%- name %>
-                <% if(thisOpt.help){ %> 
-                    <span class="glyphicon glyphicon-question-sign"
-                            onmouseenter="$(this).popover();"
-                            role="button"
-                            data-toggle="popover" 
-                            trigger="hover"
-                            title="<%- thisOpt.help %>" 
-                            data-placement="top"
-                            data-content="<%- thisOpt.helpcontent %>"></span>
-                <% } %>
-            </label> 
+            </label>
             <div class="input-group" style="width: 100%;">
-                    <% if(thisOpt.type == 'select' ){ %> 
-                        <select class="form-control jsonEditor-data" id="json_<%- name %>_value"> data-json-name="<%- name %>"
+                    <% if(thisOpt.type == 'select' ){ %>
+                        <select class="form-control jsonEditor-data"
+                                id="json_<%- name %>_value"
+                                data-json-name="<%- name %>"
+                                data-type="<%- thisOpt.type %>" >
                             <% for(var i in thisOpt.options){ %>
                                <option value="<%- thisOpt.options[i] %>" <% if(value == thisOpt.options[i]){ %>selected<% } %>><%- thisOpt.options[i] %></option>
                             <% } %>
                         </select>
-                    <% } else if(thisOpt.type == 'password' ){ %> 
+                    <% } else if(thisOpt.type == 'password' ){ %>
                         <input type="password"
                                placeholder="Enter value"
+                               data-type="<%- thisOpt.type %>"
                                id="json_<%- name %>_value"
                                value="<%- value %>"
                                class="form-control jsonEditor-data"
-                               data-json-name="<%- name %>" 
+                               data-json-name="<%- name %>"
                                >
-                    <% } else { %> 
+                    <% } else if(thisOpt.type == 'boolean' ){ %> 
+                        <div class="form-control jsonEditor-data <% if(value){ %>selected<% } %>"
+                                onclick="$(this).toggleClass('selected');"
+                                onselectstart="return false"
+                                onmousedown="return false" 
+                                style="cursor: pointer;"
+                                id="json_<%- name %>_value"
+                                data-json-name="<%- name %>"
+                                data-type="<%- thisOpt.type %>" >
+                            <div class="ico-on fa fa-toggle-on"></div>
+                            <div class="ico-off fa  fa-toggle-off"></div>
+                            <div class="boolean-title" >Boolean value</div>
+                        </div> 
+                    <% } else if(thisOpt.type == 'textarea' ){ %>
+                        <textarea
+                               data-type="<%- thisOpt.type %>"
+                               placeholder="Enter value"
+                               id="json_<%- name %>_value"
+                               class="form-control jsonEditor-data"
+                               data-json-name="<%- name %>"
+                               rows="4"
+                               style="max-width: 459px;"
+                               ><%- value %></textarea>
+                    <% } else { %>
                         <input type="text"
+                               data-type="text"
                                placeholder="Enter value"
                                id="json_<%- name %>_value"
                                value="<%- value %>"
                                class="form-control jsonEditor-data"
-                               data-json-name="<%- name %>" 
+                               data-json-name="<%- name %>"
                                >
                     <% } %>
 
-                    <% if(!thisOpt.required){ %> 
+                    <% if(!thisOpt.required){ %>
                         <span class="input-group-addon  btn btn-danger" onclick="$('#json_<%- name %>_line').remove()">
                             <span class="glyphicon glyphicon-remove"></span>
                         </span>
                     <% } %>
             </div>
-        <% }else{ %>
+            <% if(thisOpt.help){ %>
+                <span class="help-block"
+                                onmouseenter="$(this).children().popover();">
+                    <%- thisOpt.help %>
+                    <% if(thisOpt.help){ %>
+                        <span class="glyphicon glyphicon-question-sign"
+                                role="button"
+                                data-type="text"
+                                data-trigger="hover"
+                                title="<%- thisOpt.help %>"
+                                data-placement="top"
+                                data-html="true"
+                                data-content="<%- thisOpt.helpcontent %>"></span>
+                    <% } %>
+                </span>
+            <% } %>
+        </div>
+    <% }else{ %>
+        <div class="form-group col-lg-6" id="json_<%- name %>_line">
             <label class="control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>" for="#json_<%- name %>">
-                <%- name %> 
+                <%- name %>
             </label>
             <div class="input-group" style="width: 100%;">
                 <input type="text"
@@ -1430,14 +1469,14 @@
                        id="json_<%- name %>_value"
                        value="<%- value %>"
                        class="form-control jsonEditor-data"
-                       data-json-name="<%- name %>" 
+                       data-json-name="<%- name %>"
                        >
                 <span class="input-group-addon  btn btn-danger" onclick="$('#json_<%- name %>_line').remove()">
                     <span class="glyphicon glyphicon-remove"></span>
                 </span>
             </div>
-        <% } %>
-    </div>
+        </div>
+    <% } %>
 </script>
 
 <!-- jsonEditor -->

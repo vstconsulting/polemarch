@@ -330,6 +330,37 @@ div.spinner div.bar12 {
     color: #eee;
 }
 
+.boolean-select .selected .ico-on{
+    display: inline-block;
+    cursor: pointer;
+}
+
+.boolean-select .selected .ico-off{
+    display: none;
+    cursor: pointer;
+}
+
+.boolean-select .ico-on{
+    display: none;
+    font-size: 24px;
+    color: #128200;
+    cursor: pointer;
+}
+
+.boolean-select .ico-off{
+    display: inline-block;
+    font-size: 24px;
+    /* color: #f44;*/
+    color: #eee;
+    cursor: pointer;
+}
+.boolean-title{ 
+    display: inline-block;
+    position: absolute;
+    padding-left: 28px;
+    cursor: pointer;
+}
+    
 table{ 
     table-layout: fixed;
 }
@@ -340,4 +371,8 @@ table{
 
 .popover-content{
     color:#000; 
+}
+
+.popover-content i{
+    color:#ccc;
 }
