@@ -119,11 +119,15 @@ export DEBIAN_POSTINST
 
 define DEBIAN_PRERM
 #!/bin/bash
-# deactivating services
-systemctl disable polemarchweb.service > /dev/null 2>&1
-systemctl disable polemarchworker.service > /dev/null 2>&1
-service polemarchweb stop >/dev/null 2>&1
-service polemarchworker stop >/dev/null 2>&1
+case "$$1" in
+  remove)
+    # deactivating services
+    systemctl disable polemarchweb.service > /dev/null 2>&1
+    systemctl disable polemarchworker.service > /dev/null 2>&1
+    service polemarchweb stop >/dev/null 2>&1
+    service polemarchworker stop >/dev/null 2>&1
+  ;;
+esac
 # cleaning after yourself
 rm -r /opt/$(NAME)/lib/python2.7/site-packages/$(NAME)/projects/
 rm -rf /opt/$(NAME)/httpd/
