@@ -70,7 +70,7 @@ rpm: compile
 	ls -la
 	cp -vf dist/$(ARCHIVE) ~/rpmbuild/SOURCES
 	rpmbuild --verbose -bb polemarch.spec
-	cp -vr ~/rpmbuild/RPMS dist/
+	cp -v ~/rpmbuild/RPMS/x86_64/*.rpm dist/
 	rm polemarch.spec
 
 deb:
@@ -93,5 +93,6 @@ deb:
 	chmod +x debian/postrm
 	# build
 	dpkg-buildpackage -uc -us
+	mv -v ../$(NAME)_$(VER)*.deb dist/
 	# cleanup
 	rm -rf debian
