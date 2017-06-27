@@ -17,7 +17,6 @@ stages:
    - make test
    - make build-clean
    - coverage html
-   - make rpm RELEASE=${CI_BUILD_ID}
   artifacts:
     name: "coverage_branch(${CI_BUILD_REF_NAME})_${CI_BUILD_ID}"
     expire_in: 1 hour
@@ -34,14 +33,14 @@ stages:
   stage: packaging-test
   artifacts:
     name: "package($CI_BUILD_NAME)"
-    expire_in: 2 hour
+    expire_in: 1 hour
     paths:
     - dist/
   allow_failure: false
-  except:
-    - master
-    - GUI
-    - tags
+  only:
+    - /^issue_.*$/
+    - developer
+    - make_bin_packages
 
 
 .tests_template: &tests_template
@@ -62,7 +61,7 @@ default_tests:
 default_rpm_tests:
   <<: *packing-test
   script:
-   - make rpm
+   - make rpm RELEASE=${CI_BUILD_ID}
    - sudo yum install dist/*.rpm -y -q
    - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
    - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
