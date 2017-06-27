@@ -71,6 +71,7 @@ default_deb_tests:
   image: git.vst.lan/vst/tests:ubuntu
   script:
    - make deb
+   - echo "echo 'hello'" > /bin/systemctl
    - sudo apt install ./dist/*.deb -y -q
    - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
    - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests

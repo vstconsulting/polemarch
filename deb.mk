@@ -114,8 +114,6 @@ sudo -u $(USER) /opt/$(NAME)/bin/polemarchctl webserver \
 systemctl enable polemarchweb.service
 systemctl enable polemarchworker.service
 systemctl daemon-reload
-service polemarchweb start
-service polemarchworker start
 endef
 export DEBIAN_POSTINST
 
