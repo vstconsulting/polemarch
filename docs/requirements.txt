@@ -1,0 +1,3 @@
+sphinx
+sphinx-autobuild
+sphinxcontrib.httpdomain

@@ -10,11 +10,11 @@ PIPARGS = --index-url=http://pipc.vst.lan:8001/simple/ --trusted-host pipc.vst.l
 ARCHIVE = $(NAME)-$(VER).tar.gz
 LICENSE = AGPL-3+
 define DESCRIPTION
- Infrasructure Heat Service for orcestration infrastructure by ansible.
- Simply WEB gui for orcestration infrastructure by ansible playbooks.
+ Infrastructure Heat Service for orchestration infrastructure by ansible.
+ Simply WEB gui for orchestration infrastructure by ansible playbooks.
 endef
 export DESCRIPTION
-SUMMARY = Infrasructure Heat Service for orcestration infrastructure by ansible.
+SUMMARY = Infrastructure Heat Service for orchestration infrastructure by ansible.
 VENDOR = VST Consulting <sergey.k@vstconsulting.net>
 
 include rpm.mk
