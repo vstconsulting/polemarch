@@ -384,8 +384,8 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="spajs.showLoader(pmProjects.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
-                            <button type="button" onclick="$('#add_existing_item_to_project').remove();  return false;" class="btn btn-default" >Cancel</button>
+                            <button type="button" onclick="$('#add_existing_item_to_project').remove(); spajs.showLoader(pmProjects.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_project').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -419,7 +419,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="spajs.showLoader(pmProjects.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_project').remove(); spajs.showLoader(pmProjects.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
                             <button type="button" onclick="$('#add_existing_item_to_project').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
@@ -733,8 +733,8 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="spajs.showLoader(pmInventories.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
-                            <button type="button" onclick="$('#add_existing_item_to_inventory').remove();  return false;" class="btn btn-default" >Cancel</button>
+                            <button type="button" onclick="$('#add_existing_item_to_inventory').remove(); spajs.showLoader(pmInventories.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_inventory').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -768,7 +768,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="spajs.showLoader(pmInventories.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_inventory').remove(); spajs.showLoader(pmInventories.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
                             <button type="button" onclick="$('#add_existing_item_to_inventory').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
@@ -1738,8 +1738,8 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="spajs.showLoader(pmGroups.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
-                            <button type="button" onclick="$('#add_existing_item_to_group').remove();  return false;" class="btn btn-default" >Cancel</button>
+                            <button type="button" onclick="$('#add_existing_item_to_group').remove(); spajs.showLoader(pmGroups.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_group').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -1773,7 +1773,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="spajs.showLoader(pmGroups.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_group').remove(); spajs.showLoader(pmGroups.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
                             <button type="button" onclick="$('#add_existing_item_to_group').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
