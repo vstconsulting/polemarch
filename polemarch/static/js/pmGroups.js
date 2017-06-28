@@ -11,6 +11,7 @@ pmGroups.addItem = function(parent_type, parent_item)
     var data = {}
 
     data.name = $("#new_group_name").val()
+    data.children = $("#new_group_children").hasClass('selected')
     data.vars = jsonEditor.jsonEditorGetValues()
 
     if(!data.name)
@@ -95,6 +96,7 @@ pmGroups.updateItem = function(item_id)
     var data = {}
 
     data.name = $("#group_"+item_id+"_name").val()
+    data.children = $("#group_"+item_id+"_children").hasClass('selected')
     data.vars = jsonEditor.jsonEditorGetValues()
 
     if(!data.name)
@@ -208,7 +210,7 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
  */
 pmGroups.showAddSubGroupsForm = function(item_id, holder)
 {
-    return $.when(pmGroups.loadItems()).done(function(){
+    return $.when(pmGroups.loadItems(99999)).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").append(spajs.just.render('add_existing_groups_to_group', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -223,7 +225,7 @@ pmGroups.showAddSubGroupsForm = function(item_id, holder)
  */
 pmGroups.showAddSubHostsForm = function(item_id, holder)
 {
-    return $.when(pmHosts.loadItems()).done(function(){
+    return $.when(pmHosts.loadItems(99999)).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").append(spajs.just.render('add_existing_hosts_to_group', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();

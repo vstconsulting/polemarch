@@ -485,7 +485,7 @@ pmProjects.updateItem = function(item_id)
  */
 pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
-    return $.when(pmInventories.loadItems()).done(function(){
+    return $.when(pmInventories.loadItems(99999)).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -500,7 +500,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
  */
 pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
-    return $.when(pmInventories.loadItems()).done(function(){
+    return $.when(pmInventories.loadItems(99999)).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -515,7 +515,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
  */
 pmProjects.showAddSubGroupsForm = function(item_id, holder)
 {
-    return $.when(pmGroups.loadItems()).done(function(){
+    return $.when(pmGroups.loadItems(99999)).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_groups_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();

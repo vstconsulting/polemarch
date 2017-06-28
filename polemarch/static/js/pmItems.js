@@ -232,7 +232,7 @@ function pmItems()
                 {
                     var val = data.results[i]
                     thisObj.model.items.justWatch(val.id);
-                    thisObj.model.items[val.id] = val
+                    thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
                 }
             },
             error:function(e)

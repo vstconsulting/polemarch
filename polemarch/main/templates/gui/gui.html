@@ -351,8 +351,8 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="spajs.showLoader(pmProjects.setSubInventories(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
-                            <button type="button" onclick="$('#add_existing_item_to_project').remove();  return false;" class="btn btn-default" >Close</button>
+                            <button type="button" onclick="$('#add_existing_item_to_project').hide(); spajs.showLoader(pmProjects.setSubInventories(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_project').remove(); return false;" class="btn btn-default" >Close</button>
                         </div>
                     </div>
                 </div>
@@ -384,7 +384,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="$('#add_existing_item_to_project').remove(); spajs.showLoader(pmProjects.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_project').hide(); spajs.showLoader(pmProjects.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
                             <button type="button" onclick="$('#add_existing_item_to_project').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
@@ -419,7 +419,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="$('#add_existing_item_to_project').remove(); spajs.showLoader(pmProjects.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_project').hide(); spajs.showLoader(pmProjects.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
                             <button type="button" onclick="$('#add_existing_item_to_project').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
@@ -497,11 +497,7 @@
                                             <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmInventories.model.itemslist.results[i].name %></a>
                                         </td>
-                                        <td class="hidden-xs">
-                                            <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
-                                                class="btn btn-primary"
-                                                onclick="return spajs.openURL(this.href);" >Edit</a>
-
+                                        <td class="hidden-xs"> 
                                             <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
                                                 onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -521,11 +517,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu">
-                                                    <li>
-                                                        <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
-                                                            onclick="return spajs.openURL(this.href);" >Edit</a>
-                                                    </li>
+                                                <ul class="dropdown-menu"> 
                                                     <li>
                                                         <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -733,7 +725,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="$('#add_existing_item_to_inventory').remove(); spajs.showLoader(pmInventories.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_inventory').hide(); spajs.showLoader(pmInventories.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
                             <button type="button" onclick="$('#add_existing_item_to_inventory').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
@@ -768,7 +760,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="$('#add_existing_item_to_inventory').remove(); spajs.showLoader(pmInventories.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_inventory').hide(); spajs.showLoader(pmInventories.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
                             <button type="button" onclick="$('#add_existing_item_to_inventory').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
@@ -846,11 +838,7 @@
                                             <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmUsers.model.itemslist.results[i].username %></a>
                                         </td>
-                                        <td class="hidden-xs">
-                                            <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
-                                                class="btn btn-primary"
-                                                onclick="return spajs.openURL(this.href);" >Edit</a>
-
+                                        <td class="hidden-xs"> 
                                             <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
                                                 onclick="spajs.showLoader(pmUsers.deleteItem(<%- pmUsers.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -861,11 +849,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu">
-                                                    <li>
-                                                        <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
-                                                            onclick="return spajs.openURL(this.href);" >Edit</a>
-                                                    </li>
+                                                <ul class="dropdown-menu"> 
                                                     <li>
                                                         <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmUsers.deleteItem(<%- pmUsers.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1161,11 +1145,7 @@
                                         <td class="hidden-xs">
                                             <span><%- pmHosts.model.itemslist.results[i].type %></span>
                                         </td>
-                                        <td class="hidden-xs">
-                                            <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
-                                                class="btn btn-primary"
-                                                onclick="return spajs.openURL(this.href);" >Edit</a>
-
+                                        <td class="hidden-xs"> 
                                             <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
                                                 onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1176,11 +1156,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu">
-                                                    <li>
-                                                        <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
-                                                            onclick="return spajs.openURL(this.href);" >Edit</a>
-                                                    </li>
+                                                <ul class="dropdown-menu"> 
                                                     <li>
                                                         <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1543,11 +1519,7 @@
                                             <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmGroups.model.itemslist.results[i].name %></a>
                                         </td>
-                                        <td class="hidden-xs">
-                                            <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>"
-                                                class="btn btn-primary"
-                                                onclick="return spajs.openURL(this.href);" >Edit</a>
-
+                                        <td class="hidden-xs"> 
                                             <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
                                                 onclick="spajs.showLoader(pmGroups.deleteItem(<%- pmGroups.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1568,11 +1540,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu">
-                                                    <li>
-                                                        <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>"
-                                                            onclick="return spajs.openURL(this.href);" >Edit</a>
-                                                    </li>
+                                                <ul class="dropdown-menu"> 
                                                     <li>
                                                         <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmGroups.deleteItem(<%- pmGroups.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1646,13 +1614,26 @@
                         <div class="box-tools pull-right">
                         </div>
                     </div>
-                    <div class="box-body">
-
+                    <div class="box-body"> 
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter group name"  id="group_<%- pmGroups.model.items[item_id].id %>_name" value="<%- pmGroups.model.items[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
+                            </div>
+                         
+                            <div class="form-group col-lg-2 boolean-select">
+                                <label class="control-label" >Children</label>
+                                <div class="form-control <% if(pmGroups.model.items[item_id].children){ %>selected<% } %>"
+                                        onclick="$(this).toggleClass('selected');"
+                                        onselectstart="return false"
+                                        onmousedown="return false" 
+                                        style="cursor: pointer;"
+                                        id="group_<%- pmGroups.model.items[item_id].id %>_children"  >
+                                    <div class="ico-on fa fa-toggle-on"></div>
+                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                    <div class="boolean-title" >Boolean value</div>
+                                </div> 
                             </div>
                         </div>
                     </div>
@@ -1729,16 +1710,18 @@
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
                                 <% for(var i in pmGroups.model.items){ %>
-                                    <option
-                                        value="<%- pmGroups.model.items[i].id %>"
-                                        <% if(pmGroups.hasGroups(item_id, pmGroups.model.items[i].id)){ %>selected<% } %> ><%- pmGroups.model.items[i].name %></option>
+                                    <% if(item_id != pmGroups.model.items[i].id ){ %>
+                                        <option
+                                            value="<%- pmGroups.model.items[i].id %>"
+                                            <% if(pmGroups.hasGroups(item_id, pmGroups.model.items[i].id)){ %>selected<% } %> ><%- pmGroups.model.items[i].name %></option>
+                                    <% } %>
                                 <% } %>
                             </select>
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="$('#add_existing_item_to_group').remove(); spajs.showLoader(pmGroups.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_group').hide();   spajs.showLoader(pmGroups.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
                             <button type="button" onclick="$('#add_existing_item_to_group').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
@@ -1773,7 +1756,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <button type="button" onclick="$('#add_existing_item_to_group').remove(); spajs.showLoader(pmGroups.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_group').hide(); spajs.showLoader(pmGroups.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
                             <button type="button" onclick="$('#add_existing_item_to_group').remove(); return false;" class="btn btn-default" >Cancel</button>
                         </div>
                     </div>
@@ -1813,6 +1796,19 @@
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter group name"  id="new_group_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
+                            </div>
+                            <div class="form-group col-lg-2 boolean-select">
+                                <label class="control-label" >Children</label>
+                                <div class="form-control"
+                                        onclick="$(this).toggleClass('selected');"
+                                        onselectstart="return false"
+                                        onmousedown="return false" 
+                                        style="cursor: pointer;"
+                                        id="new_group_children"  >
+                                    <div class="ico-on fa fa-toggle-on"></div>
+                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                    <div class="boolean-title" >Boolean value</div>
+                                </div> 
                             </div>
                         </div>
                     </div>
