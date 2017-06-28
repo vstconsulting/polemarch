@@ -210,8 +210,8 @@ polemarch.start = function(options)
         id:"projects",
         name:"projects",
         urlregexp:[/^projects$/, /^project$/, /^projects\/(page)\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.openList(holder, menuInfo, data);},
-        onClose:function(){return pmProjects.closeList();},
+        onOpen:function(holder, menuInfo, data){return pmProjects.showUpdatedList(holder, menuInfo, data);},
+        onClose:function(){return pmProjects.stopUpdates();},
     })
  
     spajs.addMenu({
@@ -233,6 +233,22 @@ polemarch.start = function(options)
         name:"newProject",
         urlregexp:[/^new-project$/],
         onOpen:function(holder, menuInfo, data){return pmProjects.openNewItemPage(holder, menuInfo, data);}
+    })
+    
+    // tasks
+    spajs.addMenu({
+        id:"tasks",
+        name:"tasks",
+        urlregexp:[/^tasks$/, /^task$/, /^tasks\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasks.showUpdatedList(holder, menuInfo, data);},
+        onClose:function(){return pmTasks.stopUpdates();},
+    })
+    
+    spajs.addMenu({
+        id:"tasks-search",
+        name:"tasks-search",
+        urlregexp:[/^tasks\/search\/([A-z0-9 \-]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasks.showSearchResults(holder, menuInfo, data);}
     })
     
     spajs.openMenuFromUrl()

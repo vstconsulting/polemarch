@@ -4,7 +4,7 @@ var jsonEditor = {}
 jsonEditor.options = {};
 
 jsonEditor.options['item'] = {}
-jsonEditor.options['item'].repo_password = {
+jsonEditor.options['item']['repo_password'] = {
     type:'password',
     help:'Password from repository',
     helpcontent:'Password from repository required for GIT'
@@ -343,7 +343,7 @@ jsonEditor.options['item']['ansible_ask-become-pass'] = {
 
 jsonEditor.editor = function(json, optionsblock)
 { 
-    return spajs.just.render('jsonEditor', {data:json, optionsblock:optionsblock})
+    return spajs.just.render('jsonEditor', {data:json, optionsblock:optionsblock}) 
 }
 
 jsonEditor.jsonEditorGetValues = function()
@@ -388,6 +388,23 @@ jsonEditor.jsonEditorAddVar = function(optionsblock)
     {
         $.notify("This var already exists", "error");
         return;
+    }
+    
+    if(/^--/.test(name))
+    {
+        name = name.replace(/^--/, "ansible_")
+    }
+    
+    if(/^-[A-z]$/.test(name))
+    {
+        for(var i in jsonEditor.options[optionsblock])
+        {
+            if("-"+jsonEditor.options[optionsblock][i].alias == name)
+            {
+                name = i
+                break;
+            }
+        }
     }
 
     $('#new_json_name').val('')
@@ -737,6 +754,40 @@ function pmItems()
                 }
             }
         });
+    }
+
+    this.updateList = function(limit, offset)
+    {
+        var thisObj = this;
+        $.when(this.loadItems(limit, offset)).always(function(){
+            thisObj.model.updateTimeoutId = setTimeout(
+                    function(limit, offset){
+                        thisObj.updateList(limit, offset)
+                    }, 1000, limit, offset)
+        })
+    }
+
+    this.stopUpdates = function()
+    {
+        clearTimeout(this.model.updateTimeoutId)
+        this.model.updateTimeoutId = undefined;
+    }
+    
+    this.showUpdatedList = function(holder, menuInfo, data)
+    {
+        var thisObj = this;
+        return $.when(this.showList(holder, menuInfo, data)).always(function()
+        {
+            var offset = 0
+            var limit = this.pageSize;
+            if(data.reg && data.reg[1] > 0)
+            {
+                offset = this.pageSize*(data.reg[1] - 1);
+            }
+            thisObj.model.updateTimeoutId = setTimeout(function(limit, offset){
+                thisObj.updateList(limit, offset);
+            }, 1000, limit, offset) 
+        }).promise();
     }
 
     ////////////////////////////////////////////////

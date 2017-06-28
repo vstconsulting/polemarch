@@ -1,6 +1,118 @@
 {% extends "base.html" %}
 
 {% block script %}
+<!-- Список task -->
+<script type="text/x-just" data-just="tasks_list">
+    <section class="content-header">
+        <h1>
+            Tasks list
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Tasks list</li>
+        </ol>
+    </section>
+
+    <section class="content"> 
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Tasks
+                        <div class="input-group col-lg-2" style="float: right;">
+                            <input
+                                type="text"
+                                id="search-query-input"
+                                placeholder="Search by name"
+                                class="form-control"
+                                maxlength="255"
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmTasks.search($('#search-query-input').val()));"
+                            >
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmTasks.search($('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
+                            </div>
+                        </div>
+                        <% if(pmTasks.getTotalPages(pmTasks.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmTasks.paginationHtml(pmTasks.model.itemslist) %>
+                            </div>
+                        <% } %>
+
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmTasks.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
+                                    <th>Name</th> 
+                                    <th style="width: 95px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 95px;" class="visible-xs">Actions</th>
+                                </tr>
+                                <% for(var i in pmTasks.model.itemslist.results){ valid = pmTasks.model.itemslist.results[i].id; %>
+                                    <tr
+                                        class="item-row item-<%- valid %>  <%- pmTasks.model.selectedItems.justClass(valid, 'selected') %>"
+                                        data-id="<%- valid %>" >
+                                        <td class=""  onclick="pmTasks.toggleSelect(<%- valid %>); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td>
+                                            <a href="/?project/<%- valid %>" class="item-name"
+                                                    onclick="return false; return spajs.openURL(this.href);" ><%= pmTasks.model.items[valid].justText('name') %></a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <a href="#"
+                                                class="btn btn-warning"
+                                                onclick="spajs.showLoader(pmTasks.execute(<%- valid %>)); return false;" >Execute</a>
+                                        </td>
+                                        <td class="visible-xs">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Actions
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.showLoader(pmTasks.execute(<%- valid %>)); return false;" >Execute</a>
+                                                    </li> 
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="btn-group <%- pmTasks.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= pmTasks.model.justText('selectedCount') %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#" onclick="pmTasks.executeRows($('.multiple-select .item-row.selected')); return false;" >Execute</a> 
+                                </li>
+                            </ul>
+                        </div>
+                        <% if(pmTasks.getTotalPages(pmTasks.model.itemslist)){ %>
+                                <%= pmTasks.paginationHtml(pmTasks.model.itemslist) %>
+                        <% } %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+
+
 <!-- Список прокектов -->
 <script type="text/x-just" data-just="projects_list">
     <section class="content-header">
@@ -22,7 +134,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Inventories
+                        Projects
                         <div class="input-group col-lg-2" style="float: right;">
                             <input
                                 type="text"

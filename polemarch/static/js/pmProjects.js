@@ -2,22 +2,7 @@
 var pmProjects = new pmItems()
 pmProjects.model.name = "projects" 
 jsonEditor.options[pmProjects.model.name] = jsonEditor.options['item'];
-
-pmProjects.openList = function(holder, menuInfo, data)
-{
-    return $.when(pmProjects.showList(holder, menuInfo, data)).always(function()
-    {
-        var offset = 0
-        var limit = this.pageSize;
-        if(data.reg && data.reg[1] > 0)
-        {
-            offset = this.pageSize*(data.reg[1] - 1);
-        }
-        pmProjects.model.updateTimeoutId = setTimeout(pmProjects.updateList, 1000, limit, offset)
-
-    }).promise();
-}
-
+ 
 pmProjects.openItem = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
@@ -44,20 +29,7 @@ pmProjects.openNewItemPage = function(holder, menuInfo, data)
     }).promise();
 
     return def.promise();
-}
-
-pmProjects.updateList = function(limit, offset)
-{
-    $.when(pmProjects.loadItems(limit, offset)).always(function(){
-        pmProjects.model.updateTimeoutId = setTimeout(pmProjects.updateList, 1000, limit, offset)
-    })
-}
-
-pmProjects.closeList = function()
-{
-    clearTimeout(pmProjects.model.updateTimeoutId)
-    pmProjects.model.updateTimeoutId = undefined;
-}
+} 
 
 /**
  * @return $.Deferred
