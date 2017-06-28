@@ -300,3 +300,79 @@ div.spinner div.bar12 {
     display: block !important;
 }
  
+.borderless td, .borderless th {
+    border: none;
+    border-top: none !important;
+}
+
+.multiple-select .selected{
+    background-color: rgba(35, 144, 0, 0.15);
+}
+
+.multiple-select .selected .ico-on{
+    display: block;
+}
+
+.multiple-select .selected .ico-off{
+    display: none;
+}
+
+.multiple-select .ico-on{
+    display: none;
+    font-size: 24px;
+    color: #128200;
+}
+
+.multiple-select .ico-off{
+    display: block;
+    font-size: 24px;
+    /* color: #f44;*/
+    color: #eee;
+}
+
+.boolean-select .selected .ico-on{
+    display: inline-block;
+    cursor: pointer;
+}
+
+.boolean-select .selected .ico-off{
+    display: none;
+    cursor: pointer;
+}
+
+.boolean-select .ico-on{
+    display: none;
+    font-size: 24px;
+    color: #128200;
+    cursor: pointer;
+}
+
+.boolean-select .ico-off{
+    display: inline-block;
+    font-size: 24px;
+    /* color: #f44;*/
+    color: #eee;
+    cursor: pointer;
+}
+.boolean-title{ 
+    display: inline-block;
+    position: absolute;
+    padding-left: 28px;
+    cursor: pointer;
+}
+    
+table{ 
+    table-layout: fixed;
+}
+
+.popover-title{
+    color:#000; 
+}
+
+.popover-content{
+    color:#000; 
+}
+
+.popover-content i{
+    color:#ccc;
+}

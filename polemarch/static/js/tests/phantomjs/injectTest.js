@@ -356,6 +356,21 @@ function qunitAddTests_hosts()
         })
     });
 
+    syncQUnit.addTest('hosts_page', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"hosts/page/999"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню hosts');
+            render("hosts_page_999", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню hosts');
+            render("hosts_page_999", 1000, done)
+        })
+    });
+    
     syncQUnit.addTest('new-host', function ( assert )
     {
         var done = assert.async();
