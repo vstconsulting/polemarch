@@ -15,7 +15,7 @@
     </section>
 
     <section class="content">
-        <a class="btn btn-primary"  href="/?new-project" onclick="spajs.open({ menuId:'new-project'}); return false;">Add project</a>
+        <a class="btn btn-primary"  href="/?new-project" onclick="spajs.open({ menuId:'new-project'}); return false;">Create project</a>
         <br>
         <br>
         <div class="row">
@@ -187,18 +187,6 @@
                     <div class="box-header with-border">
                         Project<br>
                         <div class="box-tools pull-right">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-                                    <i class="fa fa-bars"></i>
-                                </button>
-                                <ul class="dropdown-menu pull-right" role="menu">
-                                    <li><a href="#" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" >Save this project</a></li>
-                                    <li><a href="#" onclick="spajs.showLoader(pmProjects.updateItem(<%- item_id %>)); return false;" >Remove this project</a></li>
-                                    <li class="divider"></li>
-                                    <li><a href="/?new-project" onclick="spajs.open({ menuId:'new-project'}); return false;" >Add new project</a></li>
-                                </ul>
-                            </div>
-
                             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
 
                         </div>
@@ -270,19 +258,19 @@
                                             type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existing groups</button>
+                                            >Manage existings groups</button>
                                     <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existing hosts</button>
+                                            >Manage existings hosts</button>
                                     <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubInventoriesForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existing inventory</button>
+                                            >Manage existings inventory</button>
                                     <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-inventory'}); return false;" class="btn btn-primary" >Add new inventory</button>
                             </div>
                         </div>
@@ -297,13 +285,13 @@
 <script type="text/x-just" data-just="projects_new_page">
     <section class="content-header">
         <h1>
-            Add new project
+            Create new project
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects list</a></li>
-            <li class="active">Add new project</li>
+            <li class="active">Create new project</li>
         </ol>
     </section>
 
@@ -456,7 +444,7 @@
     </section>
 
     <section class="content">
-        <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Add inventory</a>
+        <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Create inventory</a>
         <br>
         <br>
         <div class="row">
@@ -606,20 +594,7 @@
                     <div class="box-header with-border">
                         Inventory<br>
                         <div class="box-tools pull-right">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-                                    <i class="fa fa-bars"></i>
-                                </button>
-                                <ul class="dropdown-menu pull-right" role="menu">
-                                    <li><a href="#" onclick="spajs.showLoader(pmInventories.deleteItem(<%- item_id %>)); return false;" >Save this inventory</a></li>
-                                    <li><a href="#" onclick="spajs.showLoader(pmInventories.updateItem(<%- item_id %>)); return false;" >Remove this inventory</a></li>
-                                    <li class="divider"></li>
-                                    <li><a href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;" >Add new inventory</a></li>
-                                </ul>
-                            </div>
-
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-
+                            
                         </div>
                     </div>
                     <div class="box-body">
@@ -675,13 +650,13 @@
                                             type="button"
                                             onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existing groups</button>
+                                            >Manage existings groups</button>
                                             <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existing hosts</button>
+                                            >Manage existings hosts</button>
                                             <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
 
                             </div>
@@ -697,13 +672,13 @@
 <script type="text/x-just" data-just="inventories_new_page">
     <section class="content-header">
         <h1>
-            Add new inventory
+            Create new inventory
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" >Inventories list</a></li>
-            <li class="active">Add new inventory</li>
+            <li class="active">Create new inventory</li>
         </ol>
     </section>
 
@@ -818,7 +793,7 @@
 
 
     <section class="content">
-        <a class="btn btn-primary"  href="/?new-user" onclick="spajs.open({ menuId:'new-user'}); return false;">Add user</a>
+        <a class="btn btn-primary"  href="/?new-user" onclick="spajs.open({ menuId:'new-user'}); return false;">Create user</a>
         <br>
         <br>
         <div class="row">
@@ -951,17 +926,6 @@
                     <div class="box-header with-border">
                         Users<br>
                         <div class="box-tools pull-right">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-                                    <i class="fa fa-bars"></i>
-                                </button>
-                                <ul class="dropdown-menu pull-right" role="menu">
-                                    <li><a href="#" onclick="spajs.showLoader(pmUsers.deleteItem(<%- item_id %>)); return false;" >Save this user</a></li>
-                                    <li><a href="#" onclick="spajs.showLoader(pmUsers.updateItem(<%- item_id %>)); return false;" >Remove this user</a></li>
-                                    <li class="divider"></li>
-                                    <li><a href="/?new-user" onclick="spajs.open({ menuId:'new-user'}); return false;" >Add new user</a></li>
-                                </ul>
-                            </div>
                         </div>
                     </div>
                     <div class="box-body">
@@ -1037,13 +1001,13 @@
 <script type="text/x-just" data-just="users_new_page">
     <section class="content-header">
         <h1>
-            Add new user
+            Create new user
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" >Users list</a></li>
-            <li class="active">Add new user</li>
+            <li class="active">Create new user</li>
         </ol>
     </section>
 
@@ -1139,7 +1103,7 @@
     </section>
 
     <section class="content">
-        <a class="btn btn-primary"  href="/?new-host" onclick="spajs.open({ menuId:'new-host'}); return false;">Add host</a>
+        <a class="btn btn-primary"  href="/?new-host" onclick="spajs.open({ menuId:'new-host'}); return false;">Create host</a>
         <br>
         <br>
         <div class="row">
@@ -1277,17 +1241,6 @@
                     <div class="box-header with-border">
                         Host<br>
                         <div class="box-tools pull-right">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-                                    <i class="fa fa-bars"></i>
-                                </button>
-                                <ul class="dropdown-menu pull-right" role="menu">
-                                    <li><a href="#" onclick="spajs.showLoader(pmHosts.deleteItem(<%- item_id %>)); return false;" >Save this host</a></li>
-                                    <li><a href="#" onclick="spajs.showLoader(pmHosts.updateItem(<%- item_id %>)); return false;" >Remove this host</a></li>
-                                    <li class="divider"></li>
-                                    <li><a href="/?new-host" onclick="spajs.open({ menuId:'new-host'}); return false;" >Add new host</a></li>
-                                </ul>
-                            </div>
                         </div>
                     </div>
                     <div class="box-body">
@@ -1321,13 +1274,13 @@
 <script type="text/x-just" data-just="hosts_new_page">
     <section class="content-header">
         <h1>
-            Add new host
+            Create new host
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" >Hosts list</a></li>
-            <li class="active">Add new host</li>
+            <li class="active">Create new host</li>
         </ol>
     </section>
 
@@ -1691,20 +1644,6 @@
                     <div class="box-header with-border">
                         Group<br>
                         <div class="box-tools pull-right">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-                                    <i class="fa fa-bars"></i>
-                                </button>
-                                <ul class="dropdown-menu pull-right" role="menu">
-                                    <li><a href="#" onclick="spajs.showLoader(pmGroups.deleteItem(<%- item_id %>)); return false;" >Save this host</a></li>
-                                    <li><a href="#" onclick="spajs.showLoader(pmGroups.updateItem(<%- item_id %>)); return false;" >Remove this host</a></li>
-                                    <li class="divider"></li>
-                                    <li><a href="/?new-group" onclick="spajs.open({ menuId:'new-group'}); return false;" >Add new group</a></li>
-                                </ul>
-                            </div>
-
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-
                         </div>
                     </div>
                     <div class="box-body">
@@ -1759,13 +1698,13 @@
                                             type="button"
                                             onclick="spajs.showLoader(pmGroups.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existing groups</button>
+                                            >Manage existings groups</button>
                                             <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
                                 <% }else{ %>
                                     <button type="button"
                                             onclick="spajs.showLoader(pmGroups.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existing hosts</button>
+                                            >Manage existings hosts</button>
                                             <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
                                 <% } %>
                             </div>
@@ -1848,13 +1787,13 @@
 <script type="text/x-just" data-just="groups_new_page">
     <section class="content-header">
         <h1>
-            Add new group
+            Create new group
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" >Groups list</a></li>
-            <li class="active">Add new group</li>
+            <li class="active">Create new group</li>
         </ol>
     </section>
 
