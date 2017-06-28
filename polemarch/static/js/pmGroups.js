@@ -1,6 +1,7 @@
 
 var pmGroups = new pmItems()
 pmGroups.model.name = "groups"
+jsonEditor.options[pmGroups.model.name] = jsonEditor.options['item'];
  
 /**
  * @return $.Deferred

@@ -2,6 +2,7 @@
 var pmHosts = new pmItems()
 
 pmHosts.model.name = "hosts"
+jsonEditor.options[pmHosts.model.name] = jsonEditor.options['item'];
   
 /**
  * @return $.Deferred

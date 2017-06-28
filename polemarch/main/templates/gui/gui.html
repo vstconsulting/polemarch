@@ -1331,7 +1331,7 @@
                                data-json-name="<%- name %>"
                                >
                     <% } else if(thisOpt.type == 'boolean' ){ %> 
-                        <div class="form-control jsonEditor-data <% if(value){ %>selected<% } %>"
+                        <div class="form-control jsonEditor-data <% if(value && value != 'False'){ %>selected<% } %>"
                                 onclick="$(this).toggleClass('selected');"
                                 onselectstart="return false"
                                 onmousedown="return false" 
@@ -1377,7 +1377,6 @@
                     <% if(thisOpt.help){ %>
                         <span class="glyphicon glyphicon-question-sign"
                                 role="button"
-                                data-type="text"
                                 data-trigger="hover"
                                 title="<%- thisOpt.help %>"
                                 data-placement="top"
@@ -1399,6 +1398,7 @@
                        value="<%- value %>"
                        class="form-control jsonEditor-data"
                        data-json-name="<%- name %>"
+                       data-type="text"
                        >
                 <span class="input-group-addon  btn btn-danger" onclick="$('#json_<%- name %>_line').remove()">
                     <span class="glyphicon glyphicon-remove"></span>

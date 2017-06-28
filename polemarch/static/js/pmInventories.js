@@ -1,6 +1,7 @@
  
 var pmInventories = new pmItems()  
 pmInventories.model.name = "inventories"
+jsonEditor.options[pmInventories.model.name] = jsonEditor.options['item'];
  
 /** 
  * @return $.Deferred
