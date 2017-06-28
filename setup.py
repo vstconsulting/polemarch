@@ -55,8 +55,11 @@ extensions_dict = dict((
     ("polemarch.main.models.tasks", ["polemarch/main/models/tasks"+ext]),
     ("polemarch.main.models.users", ["polemarch/main/models/users"+ext]),
     ("polemarch.main.models.vars", ["polemarch/main/models/vars"+ext]),
+    ("polemarch.main.tasks.tasks", ["polemarch/main/tasks/tasks"+ext]),
     ('polemarch.main.settings', ["polemarch/main/settings"+ext]),
     ('polemarch.main.repo_backends', ["polemarch/main/repo_backends"+ext]),
+    ('polemarch.main.validators', ["polemarch/main/validators"+ext]),
+    ('polemarch.main.views', ["polemarch/main/views"+ext]),
     ('polemarch.main.context_processors',
      ["polemarch/main/context_processors"+ext]),
 ))
@@ -71,7 +74,6 @@ class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
         install.run(self)
-        # Remove .py and .c files from libs
 
 
 class Compile(_sdist):
