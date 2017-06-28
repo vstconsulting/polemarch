@@ -6,6 +6,7 @@ variables:
 stages:
   - build
   - test
+  - packaging-test
   - code_standarts
   - release
 
@@ -16,7 +17,6 @@ stages:
    - make test
    - make build-clean
    - coverage html
-   - make rpm RELEASE=${CI_BUILD_ID}
   artifacts:
     name: "coverage_branch(${CI_BUILD_REF_NAME})_${CI_BUILD_ID}"
     expire_in: 1 hour
@@ -29,6 +29,20 @@ stages:
     - tags
 
 
+.pack_tamplate: &packing-test
+  stage: packaging-test
+  artifacts:
+    name: "package($CI_BUILD_NAME)"
+    expire_in: 1 hour
+    paths:
+    - dist/
+  allow_failure: false
+  only:
+    - /^issue_.*$/
+    - developer
+    - make_bin_packages
+
+
 .tests_template: &tests_template
   stage: test
   only:
@@ -39,10 +53,32 @@ stages:
   - build_zip
 
 
+# Branch tests
+###########################################
 default_tests:
   <<: *branch_tests
 
+default_rpm_tests:
+  <<: *packing-test
+  script:
+   - make rpm RELEASE=${CI_BUILD_ID}
+   - sudo yum install dist/*.rpm -y -q
+   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
+   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
 
+default_deb_tests:
+  <<: *packing-test
+  image: git.vst.lan/vst/tests:ubuntu
+  script:
+   - make deb
+   - echo "echo 'hello'" > /bin/systemctl
+   - sudo apt install ./dist/*.deb -y -q
+   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
+   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
+
+
+# Master tests
+###########################################
 build_zip:
   stage: build
   only:
@@ -87,7 +123,10 @@ pylint_checks:
    - make test ENVS=pylint
   allow_failure: true
 
-release:
+
+# Realese
+###########################################
+release_rpm:
   stage: release
   only:
    - tags
@@ -95,6 +134,18 @@ release:
    - make rpm
   allow_failure: false
   artifacts:
-    name: "release-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
+    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
+    paths:
+    - dist/
+
+release_deb:
+  stage: release
+  only:
+   - tags
+  script:
+   - make deb
+  allow_failure: false
+  artifacts:
+    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
     paths:
     - dist/
