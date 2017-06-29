@@ -384,7 +384,7 @@ if(!window.spajs)
     {
         var sortmenu = targetBlock.children();
 
-        sortmenu.sort(function f(a, b)
+        sortmenu.sort(function(a, b)
         {
             a = parseInt($(a).attr("data-index"));
             if(isNaN(a))
@@ -649,6 +649,11 @@ if(!window.spajs)
         if(!opt.menuId)
         {
             opt.menuId = "";
+        }
+        
+        if(opt.reopen === undefined)
+        {
+            opt.reopen = true;
         }
         
         var def = new $.Deferred();

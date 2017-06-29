@@ -5,11 +5,18 @@
  * Copyright 2012, Vadim M. Baryshev <vadimbaryshev@gmail.com>
  * Licensed under the MIT license
  * https://github.com/baryshev/just/LICENSE
+ *  
+ * https://github.com/Levhav/just-template
+ * Adding reactive to based on https://github.com/Levhav/justReactive to just template engine
+ * Copyright 2017, Trapenok Victor <Levhav@yandex.com>
+ * 
+ * @author Trapenok Victor (Трапенок Виктор Викторович)
+ * https://www.upwork.com/freelancers/~01a42b919885549ca9
+ * I will be glad to new orders for the development of something.
  *
- * Includes Cross-Browser Split 1.0.1
- * http://xregexp.com/
- * Copyright Steven Levithan <stevenlevithan.com>
- * Released under the MIT license
+ * Levhav@yandex.com
+ * Skype:Levhav
+ * 89244269357
  */
 (function () {
 	'use strict';

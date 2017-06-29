@@ -1,121 +1,55 @@
+
+var pmProjects = new pmItems()
+pmProjects.model.name = "projects" 
+jsonEditor.options[pmProjects.model.name] = jsonEditor.options['item'];
  
-var pmProjects = new pmItems()  
-
-pmProjects.showList = function(holder, menuInfo, data)
+pmProjects.openItem = function(holder, menuInfo, data)
 {
-    return $.when(pmProjects.loadAllItems()).done(function()
+    var def = new $.Deferred();
+    $.when(pmProjects.supportedRepos()).always(function()
     {
-        $(holder).html(spajs.just.render('projects_list', {}))
-    }).fail(function()
-    {
-        $.notify("", "error");
-    })
+        $.when(pmProjects.showItem(holder, menuInfo, data)) .always(function()
+        {
+            def.resolve();
+        })
+    }).promise();
+
+    return def.promise();
 }
 
-pmProjects.showItem = function(holder, menuInfo, data)
+pmProjects.openNewItemPage = function(holder, menuInfo, data)
 {
-    console.log(menuInfo, data)
-    
-    return $.when(pmProjects.loadItem(data.reg[1])).done(function()
+    var def = new $.Deferred();
+    $.when(pmProjects.supportedRepos()).always(function()
     {
-        $(holder).html(spajs.just.render('project_page', {item_id:data.reg[1]}))
-    }).fail(function()
-    {
-        $.notify("", "error");
-    })
-}
+        $.when(pmProjects.showNewItemPage(holder, menuInfo, data)) .always(function()
+        {
+            def.resolve();
+        })
+    }).promise();
 
-pmProjects.showNewItemPage = function(holder, menuInfo, data)
-{ 
-    $(holder).html(spajs.just.render('new_project_page', {}))
-}
+    return def.promise();
+} 
 
 /**
- * Обновляет поле модел polemarch.model.userslist и ложит туда список пользователей 
- * Обновляет поле модел polemarch.model.users и ложит туда список инфу о пользователях по их id
- */
-pmProjects.loadAllItems = function()
-{
-    return jQuery.ajax({
-        url: "/api/v1/projects/",
-        type: "GET",
-        contentType:'application/json',
-        data: "",
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
-        {
-            console.log("update projects", data)
-            polemarch.model.projectslist = data
-            polemarch.model.projects = {}
-            
-            for(var i in data.results)
-            {
-                var val = data.results[i]
-                polemarch.model.projects[val.id] = val
-            }
-        },
-        error:function(e)
-        {
-            console.log(e)
-            polemarch.showErrors(e)
-        }
-    });
-}
-
-/**
- * Обновляет поле модел polemarch.model.users[item_id] и ложит туда пользователя
- */
-pmProjects.loadItem = function(item_id)
-{
-    return jQuery.ajax({
-        url: "/api/v1/projects/"+item_id+"/",
-        type: "GET",
-        contentType:'application/json',
-        data: "",
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
-        {
-            console.log("load project", data)
-            polemarch.model.projects[item_id] = data
-        },
-        error:function(e)
-        {
-            console.log(e)
-            polemarch.showErrors(e)
-        }
-    });
-}
-
-
-/** 
  * @return $.Deferred
  */
 pmProjects.addItem = function()
-{ 
+{
     var def = new $.Deferred();
     var data = {}
 
     data.name = $("#new_project_name").val()
     data.repository = $("#new_project_repository").val()
-    data.vars = pmProjects.jsonEditorGetValues()
-     
+    data.vars = jsonEditor.jsonEditorGetValues()
+
     if(!data.name)
     {
         $.notify("Invalid value in filed name", "error");
         def.reject()
         return def.promise();
     }
- 
+
     $.ajax({
         url: "/api/v1/projects/",
         type: "POST",
@@ -128,7 +62,7 @@ pmProjects.addItem = function()
             }
         },
         success: function(data)
-        { 
+        {
             $.notify("project created", "success");
             $.when(spajs.open({ menuId:"project/"+data.id})).always(function(){
                 def.resolve()
@@ -139,12 +73,12 @@ pmProjects.addItem = function()
             def.reject()
             polemarch.showErrors(e.responseJSON)
         }
-    }); 
-    
+    });
+
     return def.promise();
 }
 
-/** 
+/**
  * @return $.Deferred
  */
 pmProjects.updateItem = function(item_id)
@@ -152,15 +86,15 @@ pmProjects.updateItem = function(item_id)
     var data = {}
 
     data.name = $("#project_"+item_id+"_name").val()
-    data.vars = pmProjects.jsonEditorGetValues()
-    
+    data.vars = jsonEditor.jsonEditorGetValues()
+
     if(!data.name)
     {
         console.warn("Invalid value in filed name")
         $.notify("Invalid value in filed name", "error");
         return;
     }
- 
+
     return $.ajax({
         url: "/api/v1/projects/"+item_id+"/",
         type: "PATCH",
@@ -173,53 +107,15 @@ pmProjects.updateItem = function(item_id)
             }
         },
         success: function(data)
-        { 
+        {
             $.notify("Save", "success");
         },
         error:function(e)
         {
-            console.log("project "+item_id+" update error - " + JSON.stringify(e)); 
+            console.log("project "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
-}
-
-/** 
- * @return $.Deferred
- */
-pmProjects.deleteItem = function(item_id, force)
-{
-    var def = new $.Deferred();
-    if(!force && !confirm("Are you sure?"))
-    {
-        def.reject()
-        return def.promise();
-    }
-
-    $.ajax({
-        url: "/api/v1/projects/"+item_id+"/",
-        type: "DELETE",
-        contentType:'application/json',
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
-        { 
-            $.when(spajs.open({ menuId:"projects"})).always(function(){
-                def.resolve()
-            })
-        },
-        error:function(e)
-        {
-            def.reject()
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
-    
-    return def.promise();
 }
 
 /**
@@ -228,7 +124,7 @@ pmProjects.deleteItem = function(item_id, force)
  */
 pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
-    return $.when(pmInventories.loadAllItems()).done(function(){
+    return $.when(pmInventories.loadItems(99999)).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -243,7 +139,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
  */
 pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
-    return $.when(pmInventories.loadAllItems()).done(function(){
+    return $.when(pmInventories.loadItems(99999)).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -258,7 +154,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
  */
 pmProjects.showAddSubGroupsForm = function(item_id, holder)
 {
-    return $.when(pmGroups.loadAllItems()).done(function(){
+    return $.when(pmGroups.loadItems(99999)).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_groups_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -273,7 +169,7 @@ pmProjects.showAddSubGroupsForm = function(item_id, holder)
  */
 pmProjects.showAddSubHostsForm = function(item_id, holder)
 {
-    return $.when(pmHosts.loadAllItems()).done(function(){
+    return $.when(pmHosts.loadItems(99999)).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_hosts_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -290,11 +186,11 @@ pmProjects.showAddSubHostsForm = function(item_id, holder)
  */
 pmProjects.hasHosts = function(item_id, host_id)
 {
-    if(polemarch.model.projects[item_id])
+    if(pmProjects.model.items[item_id])
     {
-        for(var i in polemarch.model.projects[item_id].hosts)
+        for(var i in pmProjects.model.items[item_id].hosts)
         {
-            if(polemarch.model.projects[item_id].hosts[i].id == host_id)
+            if(pmProjects.model.items[item_id].hosts[i].id == host_id)
             {
                 return true;
             }
@@ -311,11 +207,11 @@ pmProjects.hasHosts = function(item_id, host_id)
  */
 pmProjects.hasGroups = function(item_id, group_id)
 {
-    if(polemarch.model.projects[item_id])
+    if(pmProjects.model.items[item_id])
     {
-        for(var i in polemarch.model.projects[item_id].groups)
+        for(var i in pmProjects.model.items[item_id].groups)
         {
-            if(polemarch.model.projects[item_id].groups[i].id == group_id)
+            if(pmProjects.model.items[item_id].groups[i].id == group_id)
             {
                 return true;
             }
@@ -332,11 +228,11 @@ pmProjects.hasGroups = function(item_id, group_id)
  */
 pmProjects.hasInventories = function(item_id, inventory_id)
 {
-    if(polemarch.model.projects[item_id])
+    if(pmProjects.model.items[item_id])
     {
-        for(var i in polemarch.model.projects[item_id].inventories)
+        for(var i in pmProjects.model.items[item_id].inventories)
         {
-            if(polemarch.model.projects[item_id].inventories[i].id == inventory_id)
+            if(pmProjects.model.items[item_id].inventories[i].id == inventory_id)
             {
                 return true;
             }
@@ -345,15 +241,20 @@ pmProjects.hasInventories = function(item_id, inventory_id)
     return false;
 }
 
- 
+
 /**
  * @return $.Deferred
  */
 pmProjects.setSubInventories = function(item_id, inventories_ids)
 {
+    if(!inventories_ids)
+    {
+        inventories_ids = []
+    }
+
     return $.ajax({
         url: "/api/v1/projects/"+item_id+"/inventories/",
-        type: "POST",
+        type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(inventories_ids),
         beforeSend: function(xhr, settings) {
@@ -363,13 +264,13 @@ pmProjects.setSubInventories = function(item_id, inventories_ids)
             }
         },
         success: function(data)
-        { 
-            if(polemarch.model.projects[item_id])
+        {
+            if(pmProjects.model.items[item_id])
             {
-                polemarch.model.projects[item_id].inventories = []
+                pmProjects.model.items[item_id].inventories = []
                 for(var i in inventories_ids)
                 {
-                    polemarch.model.projects[item_id].inventories.push(polemarch.model.inventories[inventories_ids[i]])
+                    pmProjects.model.items[item_id].inventories.push(pmInventories.model.items[inventories_ids[i]])
                 }
             }
             console.log("inventories update", data);
@@ -382,15 +283,20 @@ pmProjects.setSubInventories = function(item_id, inventories_ids)
         }
     });
 }
- 
+
 /**
  * @return $.Deferred
  */
 pmProjects.setSubGroups = function(item_id, groups_ids)
 {
+    if(!groups_ids)
+    {
+        groups_ids = []
+    }
+
     return $.ajax({
         url: "/api/v1/projects/"+item_id+"/groups/",
-        type: "POST",
+        type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
         beforeSend: function(xhr, settings) {
@@ -400,13 +306,13 @@ pmProjects.setSubGroups = function(item_id, groups_ids)
             }
         },
         success: function(data)
-        { 
-            if(polemarch.model.projects[item_id])
+        {
+            if(pmProjects.model.items[item_id])
             {
-                polemarch.model.projects[item_id].groups = []
+                pmProjects.model.items[item_id].groups = []
                 for(var i in groups_ids)
                 {
-                    polemarch.model.projects[item_id].groups.push(polemarch.model.groups[groups_ids[i]])
+                    pmProjects.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
                 }
             }
             console.log("group update", data);
@@ -425,9 +331,13 @@ pmProjects.setSubGroups = function(item_id, groups_ids)
  */
 pmProjects.setSubHosts = function(item_id, hosts_ids)
 {
+    if(!hosts_ids)
+    {
+        hosts_ids = []
+    }
     return $.ajax({
         url: "/api/v1/projects/"+item_id+"/hosts/",
-        type: "POST",
+        type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
         beforeSend: function(xhr, settings) {
@@ -438,20 +348,78 @@ pmProjects.setSubHosts = function(item_id, hosts_ids)
         },
         success: function(data)
         {
-            if(polemarch.model.projects[item_id])
+            if(pmProjects.model.items[item_id])
             {
-                polemarch.model.projects[item_id].hosts = []
+                pmProjects.model.items[item_id].hosts = []
                 for(var i in hosts_ids)
                 {
-                    polemarch.model.projects[item_id].hosts.push(polemarch.model.hosts[hosts_ids[i]])
+                    pmProjects.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
                 }
-            } 
+            }
             $.notify("Save", "success");
         },
         error:function(e)
         {
             console.log("project "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+
+/**
+ * @return $.Deferred
+ */
+pmProjects.syncRepo = function(item_id)
+{
+    return $.ajax({
+        url: "/api/v1/projects/"+item_id+"/sync/",
+        type: "POST",
+        contentType:'application/json',
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            $.notify("Send sync query", "success");
+        },
+        error:function(e)
+        {
+            console.log("project "+item_id+" sync error - " + JSON.stringify(e));
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+
+/**
+ * @return $.Deferred
+ */
+pmProjects.supportedRepos = function()
+{
+    return $.ajax({
+        url: "/api/v1/projects/supported-repos/",
+        type: "GET",
+        contentType:'application/json',
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            pmProjects.model.supportedRepos = data;
+            jsonEditor.options['projects'].repo_type = {
+                type:'select',
+                options:pmProjects.model.supportedRepos,
+                required:true,
+            }
+        },
+        error:function(e)
+        {
+            console.log("project "+item_id+" sync error - " + JSON.stringify(e));
         }
     });
 }
