@@ -1,8 +1,15 @@
 
 var pmProjects = new pmItems()
-pmProjects.model.name = "projects" 
+pmProjects.model.name = "projects"
 jsonEditor.options[pmProjects.model.name] = jsonEditor.options['item'];
- 
+
+jsonEditor.options[pmProjects.model.name]['repo_password'] = {
+    type:'password',
+    help:'Password from repository',
+    helpcontent:'Password from repository required for GIT'
+}
+
+
 pmProjects.openItem = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
@@ -26,10 +33,30 @@ pmProjects.openNewItemPage = function(holder, menuInfo, data)
         {
             def.resolve();
         })
-    }).promise();
+    })
 
     return def.promise();
-} 
+}
+
+pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    $.when(pmTasks.searchItems(data.reg[1], "project")).done(function()
+    {
+        $.when(thisObj.loadItem(data.reg[1])).done(function()
+        {
+            $(holder).html(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:data.reg[1], query:data.reg[1]}))
+            def.resolve();
+        }).fail(function()
+        {
+            def.reject();
+        })
+    }).fail(function()
+    {
+        def.reject();
+    })
+}
 
 /**
  * @return $.Deferred

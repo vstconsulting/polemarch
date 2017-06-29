@@ -188,14 +188,29 @@ function pmItems()
         });
     }
 
-    this.searchItems = function(query)
+    this.searchItems = function(query, attrName, limit, offset)
     {
+        if(!limit)
+        {
+            limit = 999;
+        }
+
+        if(!offset)
+        {
+            offset = 0;
+        }
+
+        if(!attrName)
+        {
+            attrName = "name";
+        }
+        
         var thisObj = this;
         return jQuery.ajax({
-            url: "/api/v1/"+this.model.name+"/?name="+encodeURIComponent(query),
+            url: "/api/v1/"+this.model.name+"/?"+encodeURIComponent(attrName)+"="+encodeURIComponent(query),
             type: "GET",
             contentType:'application/json',
-            data: "",
+            data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
             beforeSend: function(xhr, settings) {
                 if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
                     // Only send the token to relative URLs i.e. locally.

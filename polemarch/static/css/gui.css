@@ -376,3 +376,7 @@ table{
 .popover-content i{
     color:#ccc;
 }
+
+.danger-right{
+    float: right;
+}
