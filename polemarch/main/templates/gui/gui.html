@@ -166,7 +166,7 @@
                                     </th>
                                     <th>Name</th>
                                     <th style="width: 82px;">Status</th>
-                                    <th style="width: 201px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 212px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
                                 <% for(var i in pmProjects.model.itemslist.results){ valid = pmProjects.model.itemslist.results[i].id; %>
@@ -370,19 +370,19 @@
                                             type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existings groups</button>
+                                            >Edit existings groups</button>
                                     <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existings hosts</button>
+                                            >Edit existings hosts</button>
                                     <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubInventoriesForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existings inventory</button>
+                                            >Edit existings inventory</button>
                                     <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-inventory'}); return false;" class="btn btn-primary" >Add new inventory</button>
                             </div>
                         </div>
@@ -754,13 +754,13 @@
                                             type="button"
                                             onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existings groups</button>
+                                            >Edit existings groups</button>
                                             <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existings hosts</button>
+                                            >Edit existings hosts</button>
                                             <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
 
                             </div>
@@ -1734,7 +1734,7 @@
                                 <div class="help-block"></div>
                             </div>
                          
-                            <div class="form-group col-lg-2 boolean-select">
+                            <!--<div class="form-group col-lg-2 boolean-select">
                                 <label class="control-label" >Children</label>
                                 <div class="form-control <% if(pmGroups.model.items[item_id].children){ %>selected<% } %>"
                                         onclick="$(this).toggleClass('selected');"
@@ -1746,7 +1746,7 @@
                                     <div class="ico-off fa  fa-toggle-off"></div>
                                     <div class="boolean-title" >Boolean value</div>
                                 </div> 
-                            </div>
+                            </div>-->
                         </div>
                     </div>
                 </div>
@@ -1791,13 +1791,13 @@
                                             type="button"
                                             onclick="spajs.showLoader(pmGroups.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existings groups</button>
+                                            >Edit existings groups</button>
                                             <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
                                 <% }else{ %>
                                     <button type="button"
                                             onclick="spajs.showLoader(pmGroups.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
-                                            >Manage existings hosts</button>
+                                            >Edit existings hosts</button>
                                             <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
                                 <% } %>
                             </div>
