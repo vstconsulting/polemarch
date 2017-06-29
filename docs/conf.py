@@ -152,6 +152,3 @@ texinfo_documents = [
      author, 'Polemarch', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-
