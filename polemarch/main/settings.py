@@ -15,8 +15,10 @@ import sys
 
 from configparser import ConfigParser, NoSectionError
 
+from . import __file__ as file
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(file)))
 PY_VER = sys.version_info[0]
 TMP_DIR = "/tmp"
 __kwargs = dict(HOME=BASE_DIR, PY=PY_VER, TMP=TMP_DIR)

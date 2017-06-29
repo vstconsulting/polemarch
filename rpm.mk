@@ -1,22 +1,25 @@
+define RPM_SPEC
 # Macros
-%define name polemarch
-%define shortname polemarch
-%define file_permissions_user %{shortname}
-%define file_permissions_group %{shortname}
+%define name $(NAME)
+%define shortname $(NAME)
+%define file_permissions_user $(USER)
+%define file_permissions_group $(USER)
 %define venv_cmd virtualenv --no-site-packages
 %define venv_name %{name}
 %define venv_install_dir /opt/%{venv_name}
 %define venv_dir %{buildroot}/%{venv_install_dir}
 %define venv_bin %{venv_dir}/bin
 %define venv_python %{venv_bin}/python
-%define venv_pip %{venv_python} %{venv_bin}/pip install --index-url=http://pipc.vst.lan:8001/simple/ --trusted-host pipc.vst.lan
+%define venv_pip %{venv_python} %{venv_bin}/pip install $(PIPARGS)
+%define version $(VER)
+%define release 0
 %define __prelink_undo_cmd %{nil}
 %define _binaries_in_noarch_packages_terminate_build   0
 # %{?version: %{?version: %{error: version}}}
 %define unmangled_version %{version}
 # %{?release: %{?release: %{error: release}}}
 # Globals
-%global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
+%global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$$!!g')
 
 
 # Tags
@@ -25,20 +28,19 @@ Version: %{version}
 Release: %{release}
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Source0: %{name}-%{unmangled_version}.tar.gz
-Summary: Infrasructure Heat Service for orcestration infrastructure by ansible.
+Summary: $(SUMMARY)
 Group: Application/System
-Vendor: VST Consulting <sergey.k@vstconsulting.net>
-License: AGPLv3
+Vendor: $(VENDOR)
+License: ${LICENSE}
 AutoReq: No
 AutoProv: No
-Requires: python, python-virtualenv, openssl-devel
+Requires: python, openssl-devel
 Requires: httpd, httpd-devel, logrotate
+Requires: python-virtualenv
 
 
 %description
-Infrasructure Heat Service for orcestration infrastructure by ansible.
-
-Simply WEB gui for orcestration infrastructure by ansible playbooks.
+$(DESCRIPTION)
 
 
 
@@ -61,7 +63,7 @@ id -g %{file_permissions_group} &>/dev/null || groupadd %{file_permissions_group
 make build
 %{venv_cmd} %{venv_dir}
 %{venv_pip} dist/%{name}-%{unmangled_version}.tar.gz[apache]
-%{venv_pip} -r requirements.txt -r requirements-git.txt
+%{venv_pip} -U -r requirements.txt -r requirements-git.txt
 cd %{buildroot}
 cd -
 # RECORD files are used by wheels for checksum. They contain path names which
@@ -71,16 +73,17 @@ find %{buildroot} -name "RECORD" -exec rm -rf {} \;
 venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir}
 # Strip native modules as they contain buildroot paths in their debug information
 find %{venv_dir}/lib -type f -name "*.so" | grep -v _cffi_backend | xargs -r strip
+find %{venv_dir}/lib -type f -name "*.c" -print0 | xargs -0 rm -rf
 # Setup init scripts
-mkdir -p $RPM_BUILD_ROOT/etc/systemd/system
-mkdir -p $RPM_BUILD_ROOT/etc/%{name}
-mkdir -p $RPM_BUILD_ROOT/var/log/%{name}
-mkdir -p $RPM_BUILD_ROOT/var/run/%{name}
-mkdir -p $RPM_BUILD_ROOT/var/lock/%{name}
-mkdir -p $RPM_BUILD_ROOT/usr/bin
-install -m 755 %{name}/main/settings.ini $RPM_BUILD_ROOT/etc/%{name}/settings.ini.template
-install -m 755 initbin/%{shortname}web.service $RPM_BUILD_ROOT/etc/systemd/system/%{shortname}web.service
-install -m 755 initbin/%{shortname}worker.service $RPM_BUILD_ROOT/etc/systemd/system/%{shortname}worker.service
+mkdir -p $$RPM_BUILD_ROOT/etc/systemd/system
+mkdir -p $$RPM_BUILD_ROOT/etc/%{name}
+mkdir -p $$RPM_BUILD_ROOT/var/log/%{name}
+mkdir -p $$RPM_BUILD_ROOT/var/run/%{name}
+mkdir -p $$RPM_BUILD_ROOT/var/lock/%{name}
+mkdir -p $$RPM_BUILD_ROOT/usr/bin
+install -m 755 %{name}/main/settings.ini $$RPM_BUILD_ROOT/etc/%{name}/settings.ini.template
+install -m 755 initbin/%{shortname}web.service $$RPM_BUILD_ROOT/etc/systemd/system/%{shortname}web.service
+install -m 755 initbin/%{shortname}worker.service $$RPM_BUILD_ROOT/etc/systemd/system/%{shortname}worker.service
 
 %post
 sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl migrate > /dev/null 2>&1
@@ -96,19 +99,12 @@ sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl webserver \
 /usr/bin/systemctl enable %{shortname}worker.service > /dev/null 2>&1
 /usr/bin/systemctl daemon-reload > /dev/null 2>&1
 
-# if [ "$1" = "1" ]; then
-    # chkconfig --add %{shortname}web
-    # chkconfig --add %{shortname}worker
-# fi
-
 %preun
 /usr/bin/systemctl disable %{shortname}web.service > /dev/null 2>&1
 /usr/bin/systemctl disable %{shortname}worker.service > /dev/null 2>&1
-if [ "$1" = "0" ]; then
+if [ "$$1" = "0" ]; then
 	service %{shortname}web stop >/dev/null 2>&1
-	# chkconfig --del %{shortname}web
 	service %{shortname}worker stop >/dev/null 2>&1
-	# chkconfig --del %{shortname}worker
 fi
 
 %prep
@@ -118,3 +114,5 @@ mkdir -p %{buildroot}/%{venv_install_dir}
 
 %clean
 rm -rf %{buildroot}
+endef
+export RPM_SPEC

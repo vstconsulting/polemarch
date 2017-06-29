@@ -18,6 +18,7 @@ from django.template import loader
 from django.utils import translation
 
 from . import exceptions as ex
+from . import __file__ as file
 
 
 def import_class(path):
@@ -42,9 +43,11 @@ def project_path():
     :return: -- string with full system path
     :rtype: str
     '''
-    if hasattr(sys, "frozen"):
-        return dirname(dirname(sys.executable))
-    return dirname(dirname(__file__))
+    # if hasattr(sys, "frozen"):
+    #     return dirname(dirname(sys.executable))
+    # return dirname(dirname(__file__))
+
+    return dirname(dirname(file))
 
 
 def get_render(name, data, trans='en'):
