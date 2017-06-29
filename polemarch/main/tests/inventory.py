@@ -205,6 +205,10 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
                    dict(name="127.0.1.[5:6]", type="RANGE", vars=self.vars2)]
         hosts_id = self._create_hosts(d_hosts)
 
+        # Check childrens flag update
+        self.get_result("patch", url+"{}/".format(groups_id[3]), 400,
+                        data=json.dumps(dict(children=False)))
+
         # Test for group with hosts
         # Just put two hosts in group
         self._compare_list(url, "post", 200, gr_id, hosts_id[0:2], "hosts",

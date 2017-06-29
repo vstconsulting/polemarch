@@ -209,6 +209,8 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         return self._do_with_vars("create", validated_data=validated_data)
 
     def update(self, instance, validated_data):
+        if "children" in validated_data:
+            raise exceptions.ValidationError("Children not allowed to update.")
         return self._do_with_vars("update", instance,
                                   validated_data=validated_data)
 
