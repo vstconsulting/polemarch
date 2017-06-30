@@ -92,11 +92,11 @@ class Compile(_sdist):
 
 
 name = 'polemarch'
-version=polemarch.__version__
-lic='AGPLv3+'
-description='Polemarch is ansible based for orcestration infrastructure.'
-author='VST Consulting'
-author_email='sergey.k@vstconsulting.net'
+version = polemarch.__version__
+lic = 'AGPLv3+'
+description = 'Polemarch is ansible based for orcestration infrastructure.'
+author = 'VST Consulting'
+author_email = 'sergey.k@vstconsulting.net'
 
 setup(
     name=name,
