@@ -248,6 +248,8 @@ class TaskSerializer(_WithVariablesSerializer):
         model = models.Task
         fields = ('id',
                   'name',
+                  'playbook',
+                  'project',
                   'url',)
 
 
@@ -273,6 +275,7 @@ class PeriodicTaskSerializer(_WithVariablesSerializer):
                   'type',
                   'schedule',
                   'playbook',
+                  'project',
                   'inventory',
                   'url',)
 
