@@ -42,16 +42,47 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
     var thisObj = this;
-    $.when(pmTasks.searchItems(data.reg[1], "project")).done(function()
+    $.when(pmTasks.searchItems(data.reg[1], "project"), pmProjects.loadItem(data.reg[1]), pmInventories.loadItems(99999)).done(function()
     {
-        $.when(thisObj.loadItem(data.reg[1])).done(function()
-        {
-            $(holder).html(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:data.reg[1], query:data.reg[1]}))
-            def.resolve();
-        }).fail(function()
-        {
-            def.reject();
-        })
+        $(holder).html(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:data.reg[1], query:data.reg[1]}))
+
+        $("#inventories-autocomplete").select2();
+
+        new autoComplete({
+            selector: '#playbook-autocomplete',
+            minChars: 0,
+            cache:false,
+            showByClick:true,
+            menuClass:'playbook-autocomplete',
+            renderItem: function(item, search)
+            {
+                return '<div class="autocomplete-suggestion" data-value="' + item.id + '.yaml">' + item.name + '.yaml</div>';
+            },
+            onSelect: function(event, term, item)
+            {
+                console.log('onSelect', term, item);
+                var value = $(event.target).attr('data-value');
+                $("#playbook-autocomplete").val($(event.target).text());
+                //$("#city-id").val(value);
+            },
+            source: function(term, response)
+            {
+                term = term.toLowerCase();
+
+                var matches = []
+                for(var i in pmTasks.model.items)
+                {
+                    var val = pmTasks.model.items[i]
+                    if(val.name.toLowerCase().indexOf(term) != -1)
+                    {
+                        matches.push(val)
+                    }
+                }
+                response(matches);
+            }
+        });
+
+        def.resolve();
     }).fail(function()
     {
         def.reject();

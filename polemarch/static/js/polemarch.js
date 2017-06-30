@@ -221,16 +221,27 @@ polemarch.start = function(options)
     
     // tasks
     spajs.addMenu({
-        id:"tasks", 
-        urlregexp:[/^tasks$/, /^task$/, /^tasks\/(page)\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmTasks.showUpdatedList(holder, menuInfo, data);},
-        onClose:function(){return pmTasks.stopUpdates();},
+        id:"PeriodicTasks", 
+        urlregexp:[/^periodic-tasks$/, /^periodic-task$/, /^periodic-tasks\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showList(holder, menuInfo, data);} 
     })
     
     spajs.addMenu({
-        id:"tasks-search", 
-        urlregexp:[/^tasks\/search\/([A-z0-9 \-]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmTasks.showSearchResults(holder, menuInfo, data);}
+        id:"PeriodicTasks-search", 
+        urlregexp:[/^periodic-tasks\/search\/([A-z0-9 \-]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResults(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"PeriodicTask", 
+        urlregexp:[/^periodic-task\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showItem(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"newPeriodicTask", 
+        urlregexp:[/^new-periodic-tasks$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showNewItemPage(holder, menuInfo, data);}
     })
     
     spajs.openMenuFromUrl()

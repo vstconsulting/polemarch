@@ -1,25 +1,28 @@
 {% extends "base.html" %}
 
 {% block script %}
-<!-- Список task -->
-<script type="text/x-just" data-just="tasks_list">
+<!-- Список Periodic Tasks -->
+<script type="text/x-just" data-just="periodic-tasks_list">
     <section class="content-header">
         <h1>
-            Tasks list
+            Periodic tasks list
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Tasks list</li>
+            <li class="active">Periodic tasks list</li>
         </ol>
     </section>
 
-    <section class="content"> 
+    <section class="content">
+        <a class="btn btn-primary"  href="/?new-periodic-tasks" onclick="spajs.open({ menuId:'new-periodic-tasks'}); return false;">Create task</a>
+        <br>
+        <br>
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Tasks
+                        Periodic tasks
                         <div class="input-group col-lg-2" style="float: right;">
                             <input
                                 type="text"
@@ -28,15 +31,15 @@
                                 class="form-control"
                                 maxlength="255"
                                 value="<%- query %>"
-                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmTasks.search($('#search-query-input').val()));"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmPeriodicTasks.search($('#search-query-input').val()));"
                             >
-                            <div class="input-group-addon" onclick="spajs.showLoader(pmTasks.search($('#search-query-input').val()));">
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmPeriodicTasks.search($('#search-query-input').val()));">
                                 <span class="glyphicon glyphicon-search" ></span>
                             </div>
                         </div>
-                        <% if(pmTasks.getTotalPages(pmTasks.model.itemslist)){ %>
+                        <% if(pmPeriodicTasks.getTotalPages(pmPeriodicTasks.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
-                                <%= pmTasks.paginationHtml(pmTasks.model.itemslist) %>
+                                <%= pmPeriodicTasks.paginationHtml(pmPeriodicTasks.model.itemslist) %>
                             </div>
                         <% } %>
 
@@ -45,30 +48,35 @@
                         <table class="table table-bordered multiple-select">
                             <tbody>
                                 <tr>
-                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmTasks.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmPeriodicTasks.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
                                         <div class="ico-on fa fa-toggle-on"></div>
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
-                                    <th>Name</th> 
+                                    <th>Playbook</th>
+                                    <th style="width: 95px;" class="hidden-xs">Type</th>
                                     <th style="width: 95px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
-                                <% for(var i in pmTasks.model.itemslist.results){ valid = pmTasks.model.itemslist.results[i].id; %>
+                                <% for(var i in pmPeriodicTasks.model.itemslist.results){ valid = pmPeriodicTasks.model.itemslist.results[i].id; %>
                                     <tr
-                                        class="item-row item-<%- valid %>  <%- pmTasks.model.selectedItems.justClass(valid, 'selected') %>"
+                                        class="item-row item-<%- valid %>  <%- pmPeriodicTasks.model.selectedItems.justClass(valid, 'selected') %>"
                                         data-id="<%- valid %>" >
-                                        <td class=""  onclick="pmTasks.toggleSelect(<%- valid %>); return false;">
+                                        <td class=""  onclick="pmPeriodicTasks.toggleSelect(<%- valid %>); return false;">
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
                                         <td>
-                                            <a href="/?project/<%- valid %>" class="item-name"
-                                                    onclick="return false; return spajs.openURL(this.href);" ><%= pmTasks.model.items[valid].justText('name') %></a>
+                                            <a href="/?periodic-task/<%- valid %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('playbook') %></a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <a href="/?periodic-task/<%- valid %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('type') %></a>
                                         </td>
                                         <td class="hidden-xs">
                                             <a href="#"
-                                                class="btn btn-warning"
-                                                onclick="spajs.showLoader(pmTasks.execute(<%- valid %>)); return false;" >Execute</a>
+                                                class="btn btn-danger"
+                                                onclick="spajs.showLoader(pmPeriodicTasks.deleteItem(<%- valid %>)); return false;" >Delete</a>
                                         </td>
                                         <td class="visible-xs">
                                             <div class="btn-group" role="group">
@@ -79,8 +87,8 @@
                                                 <ul class="dropdown-menu">
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.showLoader(pmTasks.execute(<%- valid %>)); return false;" >Execute</a>
-                                                    </li> 
+                                                            onclick="spajs.showLoader(pmPeriodicTasks.syncRepo(<%- valid %>)); return false;" >Sync</a>
+                                                    </li>
                                                 </ul>
                                             </div>
                                         </td>
@@ -90,20 +98,131 @@
                         </table>
                     </div>
                     <div class="box-footer clearfix">
-                        <div class="btn-group <%- pmTasks.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                        <div class="btn-group <%- pmPeriodicTasks.model.justNotClass('selectedCount', 'hide') %>" role="group">
                             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Actions on <%= pmTasks.model.justText('selectedCount') %> items
+                                Actions on <%= pmPeriodicTasks.model.justText('selectedCount') %> items
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="#" onclick="pmTasks.executeRows($('.multiple-select .item-row.selected')); return false;" >Execute</a> 
+                                    <a href="#" onclick="pmPeriodicTasks.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
                                 </li>
                             </ul>
                         </div>
-                        <% if(pmTasks.getTotalPages(pmTasks.model.itemslist)){ %>
-                                <%= pmTasks.paginationHtml(pmTasks.model.itemslist) %>
+                        <% if(pmPeriodicTasks.getTotalPages(pmPeriodicTasks.model.itemslist)){ %>
+                                <%= pmPeriodicTasks.paginationHtml(pmPeriodicTasks.model.itemslist) %>
                         <% } %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+
+<!-- Страница periodic-task -->
+<script type="text/x-just" data-just="periodic-tasks_page">
+    <section class="content-header">
+        <h1>
+            <%- pmPeriodicTasks.model.items[item_id].playbook %>
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects"  onclick="return spajs.openURL(this.href);" >Periodic tasks</a></li>
+            <li class="active"><%- pmPeriodicTasks.model.items[item_id].playbook %></li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save task</button>
+
+        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove task</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Periodic task<br>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Playbook</label>
+                                <input type="text"  placeholder="Enter playbook"  id="project_<%- pmPeriodicTasks.model.items[item_id].id %>_playbook" value="<%- pmPeriodicTasks.model.items[item_id].playbook %>"  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Type</label>
+                                <input type="text"  placeholder="Enter playbook"  id="project_<%- pmPeriodicTasks.model.items[item_id].id %>_playbook" value="<%- pmPeriodicTasks.model.items[item_id].playbook %>"  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Schedule</label>
+                                <input type="text"  placeholder="Enter playbook"  id="project_<%- pmPeriodicTasks.model.items[item_id].id %>_playbook" value="<%- pmPeriodicTasks.model.items[item_id].playbook %>"  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Inventory</label>
+                                <input type="text"  placeholder="Enter playbook"  id="project_<%- pmPeriodicTasks.model.items[item_id].id %>_playbook" value="<%- pmPeriodicTasks.model.items[item_id].playbook %>"  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<!-- Страница создания periodic-task -->
+<script type="text/x-just" data-just="periodic-tasks_new_page">
+    <section class="content-header">
+        <h1>
+            Create new periodic task
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Periodic tasks</a></li>
+            <li class="active">Create new periodic task</li>
+        </ol>
+    </section>
+
+    <section class="content"> 
+        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.addItem()); return false;" class="btn btn-primary" >Save task</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        New task<br>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Name</label>
+                                <input type="text"  placeholder="Enter project name"  id="new_project_name" value=""  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Repository</label>
+                                <input type="text"  placeholder="Enter project repository"  id="new_project_repository" value=""  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -166,7 +285,7 @@
                                     </th>
                                     <th>Name</th>
                                     <th style="width: 82px;">Status</th>
-                                    <th style="width: 212px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 310px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
                                 <% for(var i in pmProjects.model.itemslist.results){ valid = pmProjects.model.itemslist.results[i].id; %>
@@ -185,6 +304,7 @@
                                             <%= pmProjects.model.items[valid].justText('status') %>
                                         </td>
                                         <td class="hidden-xs">
+
                                             <a href="#"
                                                 class="btn btn-danger"
                                                 onclick="spajs.showLoader(pmProjects.deleteItem(<%- valid %>)); return false;" >Delete</a>
@@ -213,6 +333,11 @@
                                                     </li>
                                                 </ul>
                                             </div>
+
+                                            <a href="#"
+                                                class="btn btn-info"
+                                                onclick="spajs.open({ menuId:'project/<%- valid %>/playbook/run'}); return false;" >Run playbook</a>
+
                                         </td>
                                         <td class="visible-xs">
                                             <div class="btn-group" role="group">
@@ -223,12 +348,13 @@
                                                 <ul class="dropdown-menu">
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.showLoader(pmProjects.deleteItem(<%- valid %>)); return false;" >Delete</a>
+                                                            onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
                                                     </li>
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/playbook/run'}); return false;" >Run playbook</a>
                                                     </li>
+                                                    <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/new-group'}); return false;" >Add sub group</a>
@@ -240,6 +366,11 @@
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/new-inventory'}); return false;" >Add sub inventory</a>
+                                                    </li>
+                                                    <li role="separator" class="divider"></li>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.showLoader(pmProjects.deleteItem(<%- valid %>)); return false;" >Delete</a>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -291,7 +422,7 @@
         <button type="button" onclick="spajs.showLoader(pmProjects.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save project</button>
         <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="btn btn-warning" >Sync</button>
         <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="btn btn-info" >Run playbook</button>
-        
+
         <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove project</button>
         <br>
         <br>
@@ -410,7 +541,7 @@
     </section>
 
     <section class="content">
-        <br> 
+        <br>
         <br>
         <button type="button" onclick="spajs.showLoader(pmProjects.addItem()); return false;" class="btn btn-primary" >Save project</button>
         <br>
@@ -548,7 +679,7 @@
 <script type="text/x-just" data-just="projects_run_playbook">
 <section class="content-header">
         <h1>
-            Project `<%- pmProjects.model.items[item_id].name %>` tasks list
+            Project `<%- pmProjects.model.items[item_id].name %>` run playbook options
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
@@ -557,37 +688,43 @@
             <li><a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[item_id].name %>`</a></li>
             <li class="active">Project tasks list</li>
         </ol>
-        
-        
-        <button type="button" onclick="spajs.showLoader(pmTasks.execute(<%- item_id %>)); return false;" class="btn btn-primary"  >Save inventory</button>
     </section>
 
-    <section class="content"> 
+    <section class="content">
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
                         Run playbook
                     </div>
-                    <div class="box-body"> 
-                        <~ pmProjects.model.items[item_id].inventories >
-                            <% for(var i in pmProjects.model.items[item_id].inventories){ %>
-                                <div class="form-group col-lg-2">
-                                    <label class="control-label" >Inventory</label>
-                                    <%- pmProjects.model.items[item_id].inventories[i].name %>
-                                </div>
-                            <% } %>
-                        <~>
-                        
-                        <~ pmTasks.model.items >
-                            <% for(var i in pmTasks.model.items){ %>
-                                <div class="form-group col-lg-2">
-                                    <label class="control-label" >Task</label>
-                                    <%- pmTasks.model.items[i].name %>
-                                </div>
-                            <% } %>
-                        <~> 
-                    </div> 
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Inventory</label>
+                                <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
+                                    <% for(var i in pmInventories.model.items){ %>
+                                        <option
+                                            value="<%- pmInventories.model.items[i].id %>"
+                                            ><%- pmInventories.model.items[i].name %></option>
+                                    <% } %>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Playbook</label>
+                                <input type="text"
+                                        class="playbook-autocomplete form-control"
+                                        id="playbook-autocomplete"
+                                        value="">
+                            </div>
+                            <div class="form-group col-lg-1">
+                                <label class="control-label" >&nbsp;</label>
+                                <button type="button"
+                                        onclick="spajs.showLoader(pmTasks.execute(<%- item_id %>, $('#inventories-autocomplete').val(), $('#playbook-autocomplete').val())); return false;"
+                                        class="form-control btn btn-warning" >Execute</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -596,8 +733,8 @@
         </div>
     </section>
 </script>
-    
-    
+
+
 <!-- Список inventory -->
 <script type="text/x-just" data-just="inventories_list">
     <section class="content-header">
@@ -650,7 +787,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 351px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 299px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
                                 <% for(var i in pmInventories.model.itemslist.results){ %>
@@ -665,7 +802,7 @@
                                             <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmInventories.model.itemslist.results[i].name %></a>
                                         </td>
-                                        <td class="hidden-xs"> 
+                                        <td class="hidden-xs">
                                             <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
                                                 onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -685,7 +822,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu"> 
+                                                <ul class="dropdown-menu">
                                                     <li>
                                                         <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -754,7 +891,7 @@
                     <div class="box-header with-border">
                         Inventory<br>
                         <div class="box-tools pull-right">
-                            
+
                         </div>
                     </div>
                     <div class="box-body">
@@ -991,7 +1128,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 133px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 80px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
                                 <% for(var i in pmUsers.model.itemslist.results){ %>
@@ -1006,7 +1143,7 @@
                                             <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmUsers.model.itemslist.results[i].username %></a>
                                         </td>
-                                        <td class="hidden-xs"> 
+                                        <td class="hidden-xs">
                                             <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
                                                 onclick="spajs.showLoader(pmUsers.deleteItem(<%- pmUsers.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1017,7 +1154,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu"> 
+                                                <ul class="dropdown-menu">
                                                     <li>
                                                         <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmUsers.deleteItem(<%- pmUsers.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1295,7 +1432,7 @@
                                     </th>
                                     <th>Name</th>
                                     <th style="width: 60px" class="hidden-xs">Type</th>
-                                    <th style="width: 133px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 80px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
                                 <% for(var i in pmHosts.model.itemslist.results){ %>
@@ -1313,7 +1450,7 @@
                                         <td class="hidden-xs">
                                             <span><%- pmHosts.model.itemslist.results[i].type %></span>
                                         </td>
-                                        <td class="hidden-xs"> 
+                                        <td class="hidden-xs">
                                             <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
                                                 onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1324,7 +1461,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu"> 
+                                                <ul class="dropdown-menu">
                                                     <li>
                                                         <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1471,7 +1608,7 @@
     <% if(jsonEditor.options[optionsblock] && jsonEditor.options[optionsblock][name]){ thisOpt = jsonEditor.options[optionsblock][name]; %>
         <div class="form-group
                     <% if(thisOpt.type == 'textarea' ){ %> col-lg-12 <% }else{ %> col-lg-6 <% } %>
-                    <% if(thisOpt.type == 'boolean' ){ %> boolean-select <% } %>" 
+                    <% if(thisOpt.type == 'boolean' ){ %> boolean-select <% } %>"
                 id="json_<%- name %>_line">
             <label
                     class="control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
@@ -1498,11 +1635,11 @@
                                class="form-control jsonEditor-data"
                                data-json-name="<%- name %>"
                                >
-                    <% } else if(thisOpt.type == 'boolean' ){ %> 
+                    <% } else if(thisOpt.type == 'boolean' ){ %>
                         <div class="form-control jsonEditor-data <% if(value && value != 'False'){ %>selected<% } %>"
                                 onclick="$(this).toggleClass('selected');"
                                 onselectstart="return false"
-                                onmousedown="return false" 
+                                onmousedown="return false"
                                 style="cursor: pointer;"
                                 id="json_<%- name %>_value"
                                 data-json-name="<%- name %>"
@@ -1510,7 +1647,7 @@
                             <div class="ico-on fa fa-toggle-on"></div>
                             <div class="ico-off fa  fa-toggle-off"></div>
                             <div class="boolean-title" >Boolean value</div>
-                        </div> 
+                        </div>
                     <% } else if(thisOpt.type == 'textarea' ){ %>
                         <textarea
                                data-type="<%- thisOpt.type %>"
@@ -1672,7 +1809,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 237px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 186px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
                                 <% for(var i in pmGroups.model.itemslist.results){ %>
@@ -1687,7 +1824,7 @@
                                             <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmGroups.model.itemslist.results[i].name %></a>
                                         </td>
-                                        <td class="hidden-xs"> 
+                                        <td class="hidden-xs">
                                             <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>"
                                                 class="btn btn-danger"
                                                 onclick="spajs.showLoader(pmGroups.deleteItem(<%- pmGroups.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1695,11 +1832,11 @@
                                             <% if(pmGroups.model.itemslist.results[i].children){ %>
                                                 <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>/new-group"
                                                     class="btn btn-primary"
-                                                    onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub group</a>
+                                                    onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub item</a>
                                             <% }else{ %>
                                                 <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>/new-host"
                                                     class="btn btn-primary"
-                                                    onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub host</a>
+                                                    onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub item</a>
                                             <% } %>
                                         </td>
                                         <td class="visible-xs">
@@ -1708,7 +1845,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu"> 
+                                                <ul class="dropdown-menu">
                                                     <li>
                                                         <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmGroups.deleteItem(<%- pmGroups.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1782,26 +1919,26 @@
                         <div class="box-tools pull-right">
                         </div>
                     </div>
-                    <div class="box-body"> 
+                    <div class="box-body">
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter group name"  id="group_<%- pmGroups.model.items[item_id].id %>_name" value="<%- pmGroups.model.items[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-                         
+
                             <!--<div class="form-group col-lg-2 boolean-select">
                                 <label class="control-label" >Children</label>
                                 <div class="form-control <% if(pmGroups.model.items[item_id].children){ %>selected<% } %>"
                                         onclick="$(this).toggleClass('selected');"
                                         onselectstart="return false"
-                                        onmousedown="return false" 
+                                        onmousedown="return false"
                                         style="cursor: pointer;"
                                         id="group_<%- pmGroups.model.items[item_id].id %>_children"  >
                                     <div class="ico-on fa fa-toggle-on"></div>
                                     <div class="ico-off fa  fa-toggle-off"></div>
                                     <div class="boolean-title" >Boolean value</div>
-                                </div> 
+                                </div>
                             </div>-->
                         </div>
                     </div>
@@ -1970,13 +2107,13 @@
                                 <div class="form-control"
                                         onclick="$(this).toggleClass('selected');"
                                         onselectstart="return false"
-                                        onmousedown="return false" 
+                                        onmousedown="return false"
                                         style="cursor: pointer;"
                                         id="new_group_children"  >
                                     <div class="ico-on fa fa-toggle-on"></div>
                                     <div class="ico-off fa  fa-toggle-off"></div>
                                     <div class="boolean-title" >Boolean value</div>
-                                </div> 
+                                </div>
                             </div>
                         </div>
                     </div>
