@@ -1,6 +1,7 @@
 import os
 import sys
 
+from sphinx.setup_command import BuildDoc
 from setuptools import find_packages, setup
 from setuptools.command.install import install
 from setuptools.command.build_ext import build_ext as _build_ext
@@ -90,17 +91,24 @@ class Compile(_sdist):
         _sdist.make_release_tree(self, base_dir, files)
 
 
+name = 'polemarch'
+version=polemarch.__version__
+lic='AGPLv3+'
+description='Polemarch is ansible based for orcestration infrastructure.'
+author='VST Consulting'
+author_email='sergey.k@vstconsulting.net'
+
 setup(
-    name='polemarch',
-    version=polemarch.__version__,
+    name=name,
+    version=version,
     packages=find_packages(),
     ext_modules=ext_modules,
     include_package_data=True,
-    license='AGPLv3+',
-    description='Polemarch is ansible based for orcestration infrastructure.',
+    license=lic,
+    description=description,
     long_description=README,
-    author='VST Consulting',
-    author_email='sergey.k@vstconsulting.net',
+    author=author,
+    author_email=author_email,
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
@@ -134,6 +142,14 @@ setup(
     cmdclass={
         'install': PostInstallCommand,
         'compile': Compile,
-        'build_ext': _build_ext
+        'build_ext': _build_ext,
+        'build_sphinx': BuildDoc
+    },
+    command_options={
+        'build_sphinx': {
+            'project': ('setup.py', name),
+            'version': ('setup.py', version),
+            'release': ('setup.py', version),
+        }
     },
 )

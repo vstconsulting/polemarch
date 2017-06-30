@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'docs',
     'polemarch.main',
     'polemarch.api',
 ]
@@ -205,6 +206,12 @@ STATICFILES_FINDERS = (
   'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+# Documentation files
+# http://django-docs.readthedocs.io/en/latest/#docs-access-optional
+DOCS_ROOT = os.path.join(BASE_DIR, 'doc/html')
+DOCS_ACCESS = 'public'
+DOC_URL = "/docs/"
 
 # Celery settings
 

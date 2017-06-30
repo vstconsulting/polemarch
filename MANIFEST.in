@@ -5,6 +5,7 @@ include requirements.txt
 include requirements-git.txt
 recursive-include etc *
 recursive-include polemarch/*.c *
+recursive-include polemarch/doc/html *
 recursive-include polemarch/*.so *
 recursive-include polemarch/static *
 recursive-include polemarch/*/templates *

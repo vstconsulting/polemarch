@@ -20,3 +20,4 @@ index.html
 .idea/*
 /polemarch.egg-info/
 /polemarch/projects/
+doc/_build
