@@ -16,11 +16,18 @@ endef
 export DESCRIPTION
 SUMMARY = Infrastructure Heat Service for orchestration infrastructure by ansible.
 VENDOR = VST Consulting <sergey.k@vstconsulting.net>
+RELEASE = 0
 
 include rpm.mk
 include deb.mk
 
 all: compile
+
+
+docs:
+	-rm -rf doc/_build
+	mkdir -p doc/_static
+	$(PY) setup.py build_sphinx --build-dir doc/_build
 
 test:
 	tox -e $(ENVS) $(TESTS)
@@ -38,6 +45,8 @@ build: build-clean
 compile: build-clean
 	-rm -rf dist
 	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
+	-rm -rf polemarch/doc/*
+	$(PY) setup.py build_sphinx --build-dir polemarch/doc
 	$(PY) setup.py compile -v
 
 install:
