@@ -16,6 +16,55 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
     })
 }
 
+pmPeriodicTasks.showItem = function(holder, menuInfo, data)
+{
+    var thisObj = this;
+    console.log(menuInfo, data)
+    var item_id = data.reg[1];
+
+    return $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems()).done(function()
+    {
+        $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:data.reg[1]}))
+        
+        $('#periodic-tasks_'+item_id+'_inventory').select2();
+        
+        new autoComplete({
+            selector: '#periodic-tasks_'+item_id+'_playbook',
+            minChars: 0,
+            cache:false,
+            showByClick:true, 
+            renderItem: function(item, search)
+            {
+                return '<div class="autocomplete-suggestion" data-value="' + item.id + '.yaml">' + item.name + '.yaml</div>';
+            },
+            onSelect: function(event, term, item)
+            {
+                console.log('onSelect', term, item);
+                var value = $(event.target).attr('data-value');
+                $("#periodic-tasks_"+item_id+"_playbook").val($(event.target).text()); 
+            },
+            source: function(term, response)
+            {
+                term = term.toLowerCase();
+
+                var matches = []
+                for(var i in pmTasks.model.items)
+                {
+                    var val = pmTasks.model.items[i]
+                    if(val.name.toLowerCase().indexOf(term) != -1)
+                    {
+                        matches.push(val)
+                    }
+                }
+                response(matches);
+            }
+        });
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
 
 /**
  * @return $.Deferred
@@ -26,20 +75,21 @@ pmPeriodicTasks.addItem = function(parent_type, parent_item)
 
     var data = {}
 
-    data.name = $("#new_host_name").val()
-    data.type = $("#new_host_type").val()
+    data.playbook = $("#new_periodic-tasks_playbook").val()
+    data.type = $("#new_periodic-tasks_type").val()
+    data.inventory = $("#new_periodic-tasks_inventory").val()
+    
+    if(data.type == "CRONTAB")
+    {
+        data.schedule = $("#new_periodic-tasks_schedule_CRONTAB").val()
+    }
+    else
+    {
+        data.schedule = $("#new_periodic-tasks_schedule_DELTA").val()
+    }
+    
     data.vars = jsonEditor.jsonEditorGetValues()
 
-    if(data.type == "HOST"  && (!data.name || !this.validateHostName(data.name)))
-    {
-        $.notify("Invalid value in filed name", "error");
-        return;
-    }
-    else if(data.type == "RANGE"  && (!data.name || !this.validateRangeName(data.name)))
-    {
-        $.notify("Invalid value in filed name", "error");
-        return;
-    }
 
     $.ajax({
         url: "/api/v1/"+this.model.name+"/",
@@ -55,49 +105,11 @@ pmPeriodicTasks.addItem = function(parent_type, parent_item)
         success: function(data)
         {
             console.log("addItem", data);
-            $.notify("Host created", "success");
-
-            if(parent_item)
-            {
-                if(parent_type == 'group')
-                {
-                    $.when(pmGroups.setSubGroups(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"group/"+parent_item})).always(function(){
-                            def.resolve()
-                        })
-                    })
-                }
-                else if(parent_type == 'inventory')
-                {
-                    $.when(pmInventories.setSubGroups(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"inventory/"+parent_item})).always(function(){
-                            def.resolve()
-                        })
-                    })
-                }
-                else if(parent_type == 'project')
-                {
-                    $.when(pmProjects.setSubGroups(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"project/"+parent_item})).always(function(){
-                            def.resolve()
-                        })
-                    })
-                }
-                else
-                {
-                    console.error("Не известный parent_type", parent_type)
-                    $.when(spajs.open({ menuId:"host/"+data.id})).always(function(){
-                        def.resolve()
-                    })
-                }
-            }
-            else
-            {
-                $.when(spajs.open({ menuId:"host/"+data.id})).always(function(){
-                    def.resolve()
-                })
-            }
-
+            $.notify("periodic task created", "success");
+ 
+            $.when(spajs.open({ menuId:"periodic-task/"+data.id})).always(function(){
+                def.resolve()
+            })  
         },
         error:function(e)
         {
@@ -115,16 +127,20 @@ pmPeriodicTasks.updateItem = function(item_id)
 {
     var data = {}
 
-    data.name = $("#host_"+item_id+"_name").val()
-    data.type = $("#host_"+item_id+"_type").val()
-    data.vars = jsonEditor.jsonEditorGetValues()
-
-    // @todo Добавить валидацию диапазонов "127.0.1.[5:6]" и 127.0.1.1, 127.0.1.2
-    if(!data.name || !this.validateHostName(data.name))
+    data.playbook = $("#periodic-tasks_"+item_id+"_playbook").val()
+    data.type = $("#periodic-tasks_"+item_id+"_type").val()
+    data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
+    
+    if(data.type == "CRONTAB")
     {
-        $.notify("Invalid value in filed name", "error");
-        return;
+        data.schedule = $("#periodic-tasks_"+item_id+"_schedule_CRONTAB").val()
     }
+    else
+    {
+        data.schedule = $("#periodic-tasks_"+item_id+"_schedule_DELTA").val()
+    }
+    
+    data.vars = jsonEditor.jsonEditorGetValues()
 
     return $.ajax({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",

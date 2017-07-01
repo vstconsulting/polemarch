@@ -137,6 +137,10 @@ function pmItems()
         $(holder).html(spajs.just.render(this.model.name+'_new_page', {parent_item:data.reg[2], parent_type:data.reg[1]}))
     }
 
+    this.loadAllItems = function()
+    {
+        return this.loadItems(999999);
+    }
     /**
      * Обновляет поле модел this.model.itemslist и ложит туда список пользователей
      * Обновляет поле модел this.model.items и ложит туда список инфу о пользователях по их id
