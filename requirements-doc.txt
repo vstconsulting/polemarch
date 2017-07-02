@@ -1,0 +1,5 @@
+# Docs
+sphinx
+sphinx-autobuild
+sphinxcontrib.httpdomain
+django-docs==0.2.1

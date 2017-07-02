@@ -30,6 +30,10 @@ RQF = os.path.join(os.path.dirname(__file__), 'requirements.txt')
 with open(RQF) as req:
     REQUIRES = req.read().strip().split('\n')
 
+RQF = os.path.join(os.path.dirname(__file__), 'requirements-doc.txt')
+with open(RQF) as req:
+    REQUIRES += req.read().strip().split('\n')
+
 RQF_git = os.path.join(os.path.dirname(__file__), 'requirements-git.txt')
 with open(RQF) as req:
     REQUIRES_git = req.read().strip().split('\n')

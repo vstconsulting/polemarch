@@ -15,9 +15,3 @@ mod-wsgi==4.5.14
 
 # Repo types
 gitpython==2.1.3
-
-# Docs
-sphinx
-sphinx-autobuild
-sphinxcontrib.httpdomain
-django-docs==0.2.1
