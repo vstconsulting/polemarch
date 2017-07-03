@@ -209,6 +209,8 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         return self._do_with_vars("create", validated_data=validated_data)
 
     def update(self, instance, validated_data):
+        if "children" in validated_data:
+            raise exceptions.ValidationError("Children not allowed to update.")
         return self._do_with_vars("update", instance,
                                   validated_data=validated_data)
 
@@ -246,6 +248,8 @@ class TaskSerializer(_WithVariablesSerializer):
         model = models.Task
         fields = ('id',
                   'name',
+                  'playbook',
+                  'project',
                   'url',)
 
 
@@ -271,6 +275,7 @@ class PeriodicTaskSerializer(_WithVariablesSerializer):
                   'type',
                   'schedule',
                   'playbook',
+                  'project',
                   'inventory',
                   'url',)
 

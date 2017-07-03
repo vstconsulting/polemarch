@@ -23,8 +23,6 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
             self.get_result("delete", gr_lists_url, error_code,
                             data=json.dumps([-1]))
 
-        self.get_result("put", single_url, get_code,
-                        data=json.dumps(data))
         self.get_result("delete", single_url, set_code)
 
     def _ensure_no_rights(self, url, data, list_urls, single_url):
