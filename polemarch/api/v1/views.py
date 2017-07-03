@@ -1,6 +1,6 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 from django.db import transaction
-from rest_framework import permissions, exceptions as excepts
+from rest_framework import exceptions as excepts
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
@@ -26,17 +26,6 @@ class UserViewSet(base.ModelViewSetSet):
     serializer_class = serializers.UserSerializer
     serializer_class_one = serializers.OneUserSerializer
     filter_class = filters.UserFilter
-
-    @detail_route(methods=['post'],
-                  permission_classes=[permissions.IsAuthenticated])
-    def set_password(self, request, pk=None):
-        user = self.get_object()
-        if not self.request.user.is_superuser and user != request.user:
-            raise excepts.PermissionDenied  # pragma: no cover
-        data = request.data
-        user.set_password(data['password'])
-        user.save()
-        return Response({"status": user.password})
 
     def destroy(self, request, *args, **kwargs):
         user = self.get_object()

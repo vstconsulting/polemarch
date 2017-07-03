@@ -86,29 +86,6 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertTrue(user.check_password(userdata['password']))
         self._logout(client)
 
-    def test_api_user_set_password(self):
-        client = self._login()
-        result = self.result(client.post, "/api/v1/users/", 201,
-                             {"username": "test_user2",
-                              "password": "eadgbe",
-                              "is_active": True,
-                              "first_name": "user_f_name",
-                              "last_name": "user_l_name",
-                              "email": "test@domain.lan"
-                              })
-        id = str(result['id'])
-        self.result(client.post, "/api/v1/users/{}/set_password/".format(id),
-                    200, {"password": "123"})
-        self._logout(client)
-        client = self.client
-        client.login(**{'username': result['username'],
-                        'password': "123"})
-        self.result(client.post, "/api/v1/users/{}/set_password/".format(id),
-                    200, {"password": "888"})
-        url = "/api/v1/users/{}/".format(1)
-        response = client.post(url + "set_password/", {"password": "123"})
-        self.assertTrue(response.status_code in [403, 401])
-
     def test_api_user_update(self):
         client = self._login()
         result = self.result(client.post, "/api/v1/users/", 201,
