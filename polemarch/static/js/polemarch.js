@@ -222,25 +222,25 @@ polemarch.start = function(options)
     // tasks
     spajs.addMenu({
         id:"PeriodicTasks", 
-        urlregexp:[/^periodic-tasks$/, /^periodic-task$/, /^periodic-tasks\/(page)\/([0-9]+)$/],
+        urlregexp:[/^project\/([0-9]+)\/periodic-tasks$/, /^project\/([0-9]+)\/periodic-task$/, /^project\/([0-9]+)\/periodic-tasks\/(page)\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showList(holder, menuInfo, data);} 
     })
     
     spajs.addMenu({
         id:"PeriodicTasks-search", 
-        urlregexp:[/^periodic-tasks\/search\/([A-z0-9 \-]+)$/],
+        urlregexp:[/^project\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 \-]+)$/],
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResults(holder, menuInfo, data);}
     })
     
     spajs.addMenu({
         id:"PeriodicTask", 
-        urlregexp:[/^periodic-task\/([0-9]+)$/], 
+        urlregexp:[/^project\/([0-9]+)\/periodic-task\/([0-9]+)$/], 
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showItem(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
         id:"newPeriodicTask", 
-        urlregexp:[/^new-periodic-tasks$/],
+        urlregexp:[/^project\/([0-9]+)\/new-periodic-tasks$/],
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showNewItemPage(holder, menuInfo, data);}
     })
     

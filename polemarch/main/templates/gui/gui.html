@@ -14,8 +14,8 @@
         </ol>
     </section>
 
-    <section class="content">
-        <a class="btn btn-primary"  href="/?new-periodic-tasks" onclick="spajs.open({ menuId:'new-periodic-tasks'}); return false;">Create task</a>
+    <section class="content"> 
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- project_id %>/new-periodic-tasks'});  return false;" class="btn btn-primary" >Create periodic tasks</button> 
         <br>
         <br>
         <div class="row">
@@ -66,11 +66,11 @@
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
                                         <td>
-                                            <a href="/?periodic-task/<%- valid %>" class="item-name"
+                                            <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('playbook') %></a>
                                         </td>
                                         <td class="hidden-xs">
-                                            <a href="/?periodic-task/<%- valid %>" class="item-name"
+                                            <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/<%- valid %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('type') %></a>
                                         </td>
                                         <td class="hidden-xs">
@@ -281,7 +281,7 @@
     </section>
 
     <section class="content"> 
-        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.addItem()); return false;" class="btn btn-primary" >Save task</button>
+        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.addItem(<%- project_id %>)); return false;" class="btn btn-primary" >Save task</button>
         <br>
         <br>
         <div class="row">
@@ -290,22 +290,110 @@
                     <div class="box-header with-border">
                         New task<br>
                     </div>
-                    <div class="box-body">
-
+                    <div class="box-body"> 
                         <div class="row">
                             <div class="form-group col-lg-2">
-                                <label class="control-label" >Name</label>
-                                <input type="text"  placeholder="Enter project name"  id="new_project_name" value=""  class="form-control" maxlength="255">
+                                <label class="control-label" >Playbook</label>
+                                <input type="text"  
+                                        placeholder="Enter playbook name"
+                                        id="new_periodic-tasks_playbook"
+                                        value=""
+                                        class="form-control"
+                                        maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
                             <div class="form-group col-lg-2">
-                                <label class="control-label" >Repository</label>
-                                <input type="text"  placeholder="Enter project repository"  id="new_project_repository" value=""  class="form-control" maxlength="255">
+                                <label class="control-label" >Inventory</label>
+                                
+                                <select class="form-control select2" 
+                                        id="new_periodic-tasks_inventory"
+                                        data-placeholder="Select inventory"
+                                        style="width:100%" >
+                                    <% for(var i in pmInventories.model.items){ %>
+                                        <option
+                                            value="<%- pmInventories.model.items[i].id %>" 
+                                            ><%- pmInventories.model.items[i].name %></option>
+                                    <% } %>
+                                </select> 
                                 <div class="help-block"></div>
                             </div>
                         </div>
+                        
+                        <div class="row">
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Type</label>
+                                <select
+                                        onchange="pmPeriodicTasks.model.newitem.type = this.value;"
+                                        id="new_periodic-tasks_type"  
+                                        class="form-control" 
+                                        maxlength="255">
+                                        <option value="DELTA" >Interval schedule</option>
+                                        <option value="CRONTAB" >Cron style schedule</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div>
+                             
+                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'DELTA' }) %> ">
+                                <label class="control-label" >Interval schedule</label>
+                                <div class="input-group">
+                                    <input type="text"  
+                                            placeholder="Enter time interval in seconds"  
+                                            id="new_periodic-tasks_schedule_DELTA" 
+                                            value=""
+                                            class="form-control" 
+                                            maxlength="255" 
+                                            onkeyup="this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+(.)/g, '$1'); $('#interval-schedule-help').html('~ '+Math.floor(this.value/3600*100)/100+'h')"
+                                        >
+                                    <span class="input-group-addon" id="basic-addon2">sec</span>
+                                </div>
+                                <div class="help-block" id="interval-schedule-help"></div>
+                            </div>
+                            
+                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
+                                <label class="control-label" >Schedule `CRONTAB`</label>
+                                <input 
+                                    type="text"
+                                    placeholder="Enter time interval in cron style string"
+                                    id="new_periodic-tasks_schedule_CRONTAB"
+                                    value="" 
+                                    class="form-control"
+                                    maxlength="255">
+                                <div class="help-block" id=""></div>
+                            </div>
+                            <!--
+                            // m h dom mon dow
+                            Параметр	Допустимый интервал
+                            минуты	0-59
+                            часы	0-23
+                            день месяца	1-31
+                            месяц	1-12
+                            день недели	0-7 (0-Вс,1-Пн,2-Вт,3-Ср,4-Чт,5-Пт,6-Сб,7-Вс)
+                            
+                            * — любая цифра;
+                            целое число;
+                            целые числа через запятую — задание дискретного множества значений, например 1,2,5;
+                            два целых числа, разделенные дефисом, соответствующие диапазону значений, например 3-6.
+                            
+                            # Выполнять задание в 18 часов 7 минут 13 мая если это пятница
+                            7 18 13 5 5 
+                            
+                            # Выполнять задание раз в час в 0 минут
+                            0 */1 * * * 
+                            
+                            # Выполнять задание каждые семь часов в 0 минут
+                            0 5-7 * * * 
+                            
+                            # Выполнять задание по воскресеньям в 10 час 30 минут
+                            30 5,10 * * 0 
+                            
+                            -->
+                        </div>
                     </div>
+                </div>
+                <div class="row">
+                    <%= jsonEditor.editor({}, 'tasks') %>
                 </div>
             </section>
         </div>
@@ -350,7 +438,7 @@
                                 <span class="glyphicon glyphicon-search" ></span>
                             </div>
                         </div>
-                        <% if(pmProjects.getTotalPages(pmProjects.model.itemslist)){ %>
+                        <% if(pmProjects.getTotalPages(pmProjects.model.itemslist)){ %> 
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
                                 <%= pmProjects.paginationHtml(pmProjects.model.itemslist) %>
                             </div>
@@ -367,7 +455,7 @@
                                     </th>
                                     <th>Name</th>
                                     <th style="width: 82px;">Status</th>
-                                    <th style="width: 310px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 327px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
                                 <% for(var i in pmProjects.model.itemslist.results){ valid = pmProjects.model.itemslist.results[i].id; %>
@@ -503,8 +591,11 @@
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmProjects.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save project</button>
         <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="btn btn-warning" >Sync</button>
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="btn btn-info" >Run playbook</button>
-
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="btn btn-info" >Run playbook</button> 
+        <!--<button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-periodic-tasks'});  return false;" class="btn btn-info" >Create periodic tasks</button>-->
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/periodic-tasks'});  return false;" class="btn btn-info" >Periodic tasks</button>
+        
+        
         <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove project</button>
         <br>
         <br>
@@ -1424,7 +1515,7 @@
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Password</label>
-                                <input type="text" class="form-control" placeholder="Enter password" id="new_user_password" >
+                                <input type="password" class="form-control" placeholder="Enter password" id="new_user_password" >
                                 <div class="help-block"></div>
                             </div>
                         </div>
