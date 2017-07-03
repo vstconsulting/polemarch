@@ -461,7 +461,7 @@ Groups
 
    .. sourcecode:: http
 
-      PATCH /api/v1/groups/ HTTP/1.1
+      PATCH /api/v1/groups/3 HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -539,6 +539,8 @@ Groups
    Remove those subgroups from group. |sublists_details|
 
    |codes_groups_groups|
+
+.. _inventory:
 
 Inventories
 -----------
@@ -688,7 +690,7 @@ Inventories
 
    .. sourcecode:: http
 
-      PATCH /api/v1/inventories/ HTTP/1.1
+      PATCH /api/v1/inventories/9 HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -744,6 +746,8 @@ Inventories
 
    Remove those groups from inventory. |sublists_details|
 
+.. _projects:
+
 Projects
 --------
 
@@ -788,6 +792,7 @@ Projects
 
    :>json number id: id of project.
    :>json string name: name of project.
+   :>json string repository: |project_repository_def|
    :>json string status: current state of project. Possible values are:
      ``NEW`` - newly created project, ``WAIT_SYNC`` - repository
      synchronization scheduled but not yet started to perform, ``SYNC`` -
@@ -795,17 +800,22 @@ Projects
      failure? incorrect credentials?), ``OK`` - project is synchronized.
    :>json array hosts: |project_hosts_def|
    :>json array groups: |project_groups_def|
-   :>json object vars: |obj_vars_def| In this special case always exists
-     variables ``repo_password`` to store password for repository and
-     ``repo_type`` to store type of repository. Currently implemented types
-     are ``GIT`` for Git repositories. And ``TAR`` for uploading tar archive
-     with project files.
+   :>json object vars: |obj_vars_def| |project_vars_rem|
    :>json string url: url to this specific inventory.
 
+.. |project_repository_def| replace:: URL of repository (repo-specific URL).
+   For ``TAR`` it is just HTTP-link to archive.
 .. |project_hosts_def| replace:: list of hosts in project. See :ref:`hosts`
    for fields explanation.
 .. |project_groups_def| replace:: list of groups in project.
    See :ref:`groups` for fields explanation.
+.. |project_vars_rem| replace:: In this special case always exists
+     variables ``repo_password`` to store password for repository and
+     ``repo_type`` to store type of repository. Currently implemented types
+     are ``GIT`` for Git repositories. And ``TAR`` for uploading tar archive
+     with project files.
+.. |project_details_ref| replace:: **Response JSON Object:** response json
+   fields same as in :http:get:`/api/v1/projects/{id}`.
 
 .. http:get:: /api/v1/projects/
 
@@ -815,8 +825,8 @@ Projects
    :query name: name of project if we want to filter by it.
    :query id__not: id of project, which we want to filter out.
    :query name__not: name of project, which we want to filter out.
-   :query status: status of projects to show in list
-   :query status__not: status of projects to not show in list
+   :query status: ``status`` of projects to show in list
+   :query status__not: ``status`` of projects to not show in list
 
    Example request:
 
@@ -853,9 +863,612 @@ Projects
         }
 
    :>json string type: special shortcut to var ``repo_type``. Details about
-     that var and other json fields of response you can see at
-     :http:get:`/api/v1/projects/{id}`
+     that var and other json fields of response you can see
+     at :http:get:`/api/v1/projects/{id}`
 
+.. http:delete:: /api/v1/projects/{id}
+
+   Delete project.
+
+   :arg id: id of project.
+
+.. http:post:: /api/v1/projects/
+
+   Create project. Operation automatically triggers synchronization. Details
+   about what it is you can see in
+   description :http:post:`/api/v1/projects/{id}/sync/`
+
+   :<json string name: name of new project.
+   :<json object vars: |obj_vars_def| |project_vars_rem|
+   :<json string repository: |project_repository_def|
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/projects/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+         "name":"project_owl",
+         "repository":"somewhere-in-emptiness",
+         "vars":{
+            "repo_type":"TAR",
+            "repo_password":""
+         }
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "id":9,
+           "name":"project_owl",
+           "status":"WAIT_SYNC",
+           "repository":"somewhere-in-emptiness",
+           "hosts":[
+
+           ],
+           "groups":[
+
+           ],
+           "inventories":[
+
+           ],
+           "vars":{
+              "repo_password":"",
+              "repo_type":"TAR"
+           },
+           "url":"http://localhost:8080/api/v1/projects/9/"
+        }
+
+   |project_details_ref|
+
+.. http:patch:: /api/v1/projects/{id}
+
+   Update project. Operation does not start synchronization again.
+   If you want synchronize, you must do it by
+   using :http:post:`/api/v1/projects/{id}/sync/` |patch_reminder|
+
+   :arg id: id of project.
+
+   **Request JSON Object:**
+   request json fields same as in :http:post:`/api/v1/projects/`
+
+   Example request:
+
+   .. sourcecode:: http
+
+      PATCH /api/v1/projects/9 HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+         "name":"project_owl",
+         "repository":"somewhere-in-emptiness",
+         "vars":{
+            "repo_type":"TAR",
+            "repo_password":""
+         }
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "id":9,
+           "name":"project_owl",
+           "status":"WAIT_SYNC",
+           "repository":"somewhere-in-emptiness",
+           "hosts":[
+
+           ],
+           "groups":[
+
+           ],
+           "inventories":[
+
+           ],
+           "vars":{
+              "repo_password":"",
+              "repo_type":"TAR"
+           },
+           "url":"http://localhost:8080/api/v1/projects/9/"
+        }
+
+   |project_details_ref|
+
+.. http:post:: /api/v1/projects/{project_id}/hosts/
+
+   Add hosts to project. |sublists_details|
+
+.. http:put:: /api/v1/projects/{project_id}/hosts/
+
+   Replace sublist of hosts with new one. |sublists_details|
+
+.. http:delete:: /api/v1/projects/{project_id}/hosts/
+
+   Remove those hosts from project. |sublists_details|
+
+.. http:post:: /api/v1/projects/{project_id}/groups/
+
+   Add groups to project. |sublists_details|
+
+.. http:put:: /api/v1/projects/{project_id}/groups/
+
+   Replace sublist of groups with new one. |sublists_details|
+
+.. http:delete:: /api/v1/projects/{project_id}/groups/
+
+   Remove those groups from project. |sublists_details|
+
+.. http:post:: /api/v1/projects/{project_id}/inventories/
+
+   Add inventories to project. |sublists_details|
+
+.. http:put:: /api/v1/projects/{project_id}/inventories/
+
+   Replace sublist of inventories with new one. |sublists_details|
+
+.. http:delete:: /api/v1/projects/{project_id}/inventories/
+
+   Remove those inventories from project. |sublists_details|
+
+.. http:get:: /api/v1/projects/supported-repos/
+
+   Returns list of supported repository types.
+
+   Results:
+
+   .. sourcecode:: js
+
+        [
+            "TAR",
+            "GIT"
+        ]
+
+.. http:post:: /api/v1/projects/{id}/sync/
+
+   Starts synchronization. During that process project files uploading from
+   repository. Concrete details of process highly depends on project type.
+   For ``GIT`` is ``git pull``, for ``TAR`` it just downloading archive from
+   URL again and unpacking it with rewrite of old files. And so on.
+
+   :arg id: id of project.
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "detail":"Sync with git@ex.us:dir/rep1.git."
+        }
+
+.. http:post:: /api/v1/projects/{id}/execute/
+
+   Execute ansible playbook.
+
+   :arg id: id of project.
+   :<json number inventory: inventory to execute playbook at.
+   :<json string playbook: playbook to execute.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/projects/1/execute/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+         "inventory": 13,
+         "playbook": "main.yml"
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "detail":"Started at inventory 13."
+        }
+
+Tasks
+-----
+
+.. http:get:: /api/v1/tasks/{id}
+
+   Get details about task.
+
+   :arg id: id of task.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/tasks/5 HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "id":5,
+           "name":"Ruin my environment",
+           "playbook":"ruin_my_env.yml",
+           "project":13
+           "url":"http://localhost:8080/api/v1/tasks/5/"
+        }
+
+   :>json number id: id of task.
+   :>json string name: name of task.
+   :>json string playbook: playbook file to run within this task.
+   :>json number project: id of project, to which this task belongs.
+   :>json string url: url to this specific task.
+
+.. http:get:: /api/v1/tasks/
+
+   List tasks. |pagination_def|
+
+   :query id: id of project if we want to filter by it.
+   :query name: name of project if we want to filter by it.
+   :query id__not: id of project, which we want to filter out.
+   :query name__not: name of project, which we want to filter out.
+   :query playbook: filter by name of playbook.
+   :query project: filter by id of project.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/tasks/?project=13 HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "count":1,
+           "next":null,
+           "previous":null,
+           "results":[
+              {
+                 "id":5,
+                 "name":"Ruin my environment",
+                 "url":"http://localhost:8080/api/v1/tasks/5/"
+              }
+           ]
+        }
+
+Periodic tasks
+--------------
+
+.. http:get:: /api/v1/periodic-tasks/{id}
+
+   Get details about periodic task.
+
+   :arg id: id of periodic task.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/periodic-tasks/10 HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "id":10,
+           "type":"CRONTAB",
+           "schedule":"60* */2 sun,fri 1-15 *",
+           "playbook":"collect_data.yml",
+           "project":7,
+           "inventory":8,
+           "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/10/?format=json"
+        }
+
+   :>json number id: id of periodic task.
+   :>json string type: |ptask_type_details|
+   :>json string schedule: |ptask_schedule_details|
+   :>json string playbook: playbook to run periodically.
+   :>json number project: id of project which this task belongs to.
+   :>json number inventory: id of inventory for which must execute playbook.
+   :>json string url: url to this specific periodic task.
+
+.. |ptask_details_ref| replace:: **Response JSON Object:** response json
+   fields same as in :http:get:`/api/v1/periodic-tasks/{id}`.
+
+.. |ptask_schedule_details| replace:: string with integer value or string in
+   cron format, what depends on ``type`` value. Look at ``type`` description
+   for details.
+
+.. |ptask_type_details| replace:: type of periodic task. Either ``DELTA`` for
+   tasks that runs every N seconds or ``CRONTAB`` for tasks, which runs
+   according by more complex rules. According to that ``schedule`` field will
+   be interpreted as integer - number of seconds between runs. Or string in
+   cron format with one small exception - Polemarch expect string without year,
+   because years is not supported. You can easily find documentation for cron
+   format in web. Like those, for example:
+   https://linux.die.net/man/5/crontab and
+   http://www.nncron.ru/help/EN/working/cron-format.htm
+
+.. http:get:: /api/v1/periodic-tasks/
+
+   List of periodic tasks. |pagination_def|
+
+   :query id: id of project if we want to filter by it.
+   :query id__not: id of project, which we want to filter out.
+   :query playbook: filter by playbook.
+   :query type: filter by ``type``.
+   :query project: filter by project id.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/projects/?project=7 HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "count":2,
+           "next":null,
+           "previous":null,
+           "results":[
+              {
+                 "id":10,
+                 "type":"DELTA",
+                 "schedule":"60",
+                 "playbook":"collect_data.yml",
+                 "inventory":8,
+                 "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/10/?format=json"
+              },
+              {
+                 "id":11,
+                 "type":"CRONTAB",
+                 "schedule":"* */2 sun,fri 1-15 *",
+                 "playbook":"do_greatest_evil.yml",
+                 "inventory":8,
+                 "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/11/?format=json"
+              }
+           ]
+        }
+
+   |ptask_details_ref|
+
+.. http:delete:: /api/v1/periodic-tasks/{id}
+
+   Delete periodic task.
+
+   :arg id: id of periodic task.
+
+.. http:post:: /api/v1/periodic-tasks/
+
+   Create periodic task
+
+   :<json string type: |ptask_type_details|
+   :<json string schedule: |ptask_schedule_details|
+   :<json string playbook: playbook to run periodically.
+   :<json number project: id of project, which task belongs to.
+   :<json number inventory: id of inventory to run playbook on.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/periodic-tasks/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+          "type": "DELTA",
+          "schedule": "25",
+          "playbook": "touch_the_clouds.yml",
+          "project": 7,
+          "inventory": 8
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "id": 14,
+        "type": "DELTA",
+        "schedule": "25",
+        "playbook": "touch_the_clouds.yml",
+        "project": 7,
+        "inventory": 8,
+        "url": "http://127.0.0.1:8080/api/v1/periodic-tasks/14/?format=api"
+    }
+
+   |ptask_details_ref|
+
+.. http:patch:: /api/v1/periodic-tasks/{id}
+
+   Update periodic task. |patch_reminder|
+
+   :arg id: id of periodic task.
+
+   **Request JSON Object:**
+   request json fields same as in :http:post:`/api/v1/periodic-tasks/`
+
+   Example request:
+
+   .. sourcecode:: http
+
+      PATCH /api/v1/periodic-tasks/14 HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+          "type": "DELTA",
+          "schedule": "25",
+          "playbook": "touch_the_clouds.yml",
+          "project": 7,
+          "inventory": 8
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "id": 14,
+        "type": "DELTA",
+        "schedule": "25",
+        "playbook": "touch_the_clouds.yml",
+        "project": 7,
+        "inventory": 8,
+        "url": "http://127.0.0.1:8080/api/v1/periodic-tasks/14/?format=api"
+    }
+
+   |ptask_details_ref|
+
+History records
+---------------
+
+.. http:get:: /api/v1/history/{id}
+
+   Get details about one history record.
+
+   :arg id: id of history record.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/history/1 HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "id":1,
+           "project":2,
+           "playbook":"task.yml",
+           "status":"OK",
+           "start_time":"2017-07-02T12:48:11.922761Z",
+           "stop_time":"2017-07-02T13:48:11.922777Z",
+           "raw_inventory":"inventory",
+           "raw_stdout":"text"
+        }
+
+   :>json number id: id of history record.
+   :>json number project: id of project, which record belongs to.
+   :>json string playbook: name of executed playbook.
+   :>json string status: either ``OK``, ``STOP`` or ``ERROR``, which indicates
+     different results of execution (good, interrupted by user, failure
+     correspondingly).
+   :>json string start_time: time, when playbook execution was started.
+   :>json string stop_time: time, when playbook execution was ended (normally
+     or not)
+   :>json string raw_inventory: Ansible inventory, which used for execution. It
+     is generates from on of Polemarch's :ref:`inventory`
+   :>json string raw_stdout: what Ansible wrote to stdout and stderr during
+     execution.
+   :>json string url: url to this specific history record.
+
+.. |history_details_ref| replace:: **Response JSON Object:** response json fields
+   same as in :http:get:`/api/v1/history/{id}`.
+
+.. http:get:: /api/v1/history/
+
+   List of history records. |pagination_def|
+
+   :query id: id of inventory if we want to filter by it.
+   :query id__not: id of inventory, which we want to filter out.
+   :query start_time__gt: filter records whose ``start_time`` greater than
+    specified.
+   :query stop_time__gt: filter records whose ``stop_time`` greater than
+    specified.
+   :query start_time__lt: filter records whose ``start_time`` less than
+    specified.
+   :query stop_time__lt: filter records whose ``stop_time`` less than
+    specified.
+   :query start_time__gte: filter records whose ``start_time`` greater or equal
+    to specified.
+   :query stop_time__gte: filter records whose ``stop_time`` greater or equal
+    to specified.
+   :query start_time__lte: filter records whose ``start_time`` less or equal
+    to specified.
+   :query stop_time__lte: filter records whose ``stop_time`` less or equal
+    to specified.
+   :query playbook: filter by ``playbook``.
+   :query project: filter by ``project``.
+   :query status: filter by ``status``.
+   :query start_time: get records only with ``start_time`` equal to specified.
+   :query stop_time: get records only with ``stop_time`` equal to specified.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/history/?start_time__gte=2017-06-01T01:48:11.923896Z HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "count":3,
+           "next":null,
+           "previous":null,
+           "results":[
+              {
+                 "id":1,
+                 "project":2,
+                 "playbook":"task.yml",
+                 "status":"OK",
+                 "start_time":"2017-07-02T12:48:11.922761Z",
+                 "stop_time":"2017-07-02T13:48:11.922777Z"
+              },
+              {
+                 "id":2,
+                 "project":2,
+                 "playbook":"task.yml",
+                 "status":"STOP",
+                 "start_time":"2017-07-02T02:48:11.923896Z",
+                 "stop_time":"2017-07-02T03:48:11.923908Z"
+              },
+              {
+                 "id":3,
+                 "project":2,
+                 "playbook":"task.yml",
+                 "status":"ERROR",
+                 "start_time":"2017-07-01T16:48:11.924959Z",
+                 "stop_time":"2017-07-01T17:48:11.924973Z"
+              }
+           ]
+        }
+
+   |history_details_ref|
+
+.. http:delete:: /api/v1/history/{id}
+
+   Delete history record.
+
+   :arg id: id of record.
 
 .. _variables:
 
@@ -865,7 +1478,107 @@ Variables
 .. |obj_vars_def| replace:: dictionary of variables associated with this
    object. See :ref:`variables` for details.
 
-TODO: write it
+Hosts, groups, inventories, projects in Polemarch may have variables
+associated with them. Usually (with one exception - variables for additional
+repository data in :ref:`projects`) those variables passes to Ansible to
+somehow customize his behaviour or playbook logic. In all this kinds of
+objects variables works in same way, so here additional chapter which describes
+their behaviour abstracting from details related to every concrete type of
+object.
+
+In JSON responses related to those objects variables are placed in field
+``vars``. This field is just key-value dictionary of existent variables for
+object. It can be saved in ``POST`` and ``PATCH`` request completely
+overwriting previous dictionary.
+
+It can be represented in such more formal way:
+
+.. http:get:: /api/v1/{object_kind}/{object_id}
+
+   Get details about one object.
+
+   :arg id: id of this object.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/hosts/12 HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           // object-special data goes here
+           "vars":{
+                "string_variable1": "some_string",
+                "integer_variable2": 12,
+                "float_variable3": 0.3
+           }
+        }
+
+   :>json object vars: dictionary of variables for this object.
+
+.. http:patch:: /api/v1/{object_kind}/{object_id}
+
+   Update object.
+
+   :arg id: id of object.
+
+   :<json object vars: dictionary of variables to save in object. It is
+     completely rewrites old dictionary.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      PATCH /api/v1/hosts/12 HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+         // there is may be other object-related stuff
+         "vars":{
+                "string_variable1": "some_string",
+                "integer_variable2": 12,
+                "float_variable3": 0.3
+         }
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           // object-special data goes here
+           "vars":{
+                "string_variable1": "some_string",
+                "integer_variable2": 12,
+                "float_variable3": 0.3
+           },
+        }
+
+Also for all previously enumerated kinds of objects (which support variables)
+there is filtering by variables possible in get requests like this:
+
+.. http:get:: /api/v1/{object_kind}/
+
+   Get list of objects. |pagination_def|
+
+   :query variables: filter objects by variables and their values. Variables
+    specified as list using ``,`` as separator for every list item and ``:``
+    as separator for key and value. Like ``var1:value,var2:value,var3:12``.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/groups/?variables=ansible_port:222,ansible_user:one HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
 
 .. _sublists:
 
@@ -880,7 +1593,9 @@ Because all of those sublists base on the same logic, we documenting here
 general principles of this logic. Its made in order to not duplicate this
 information for every method of such kind.
 
-Here the list of those methods:
+**Here the list of those methods**:
+
+Groups:
 
 * :http:post:`/api/v1/groups/{group_id}/hosts/`
 * :http:put:`/api/v1/groups/{group_id}/hosts/`
@@ -888,6 +1603,27 @@ Here the list of those methods:
 * :http:post:`/api/v1/groups/{group_id}/groups/`
 * :http:put:`/api/v1/groups/{group_id}/groups/`
 * :http:delete:`/api/v1/groups/{group_id}/groups/`
+
+Inventories:
+
+* :http:post:`/api/v1/inventories/{inventory_id}/hosts/`
+* :http:put:`/api/v1/inventories/{inventory_id}/hosts/`
+* :http:delete:`/api/v1/inventories/{inventory_id}/hosts/`
+* :http:post:`/api/v1/inventories/{inventory_id}/groups/`
+* :http:put:`/api/v1/inventories/{inventory_id}/groups/`
+* :http:delete:`/api/v1/inventories/{inventory_id}/groups/`
+
+Projects:
+
+* :http:post:`/api/v1/projects/{project_id}/hosts/`
+* :http:put:`/api/v1/projects/{project_id}/hosts/`
+* :http:delete:`/api/v1/projects/{project_id}/hosts/`
+* :http:post:`/api/v1/projects/{project_id}/groups/`
+* :http:put:`/api/v1/projects/{project_id}/groups/`
+* :http:delete:`/api/v1/projects/{project_id}/groups/`
+* :http:post:`/api/v1/projects/{project_id}/inventories/`
+* :http:put:`/api/v1/projects/{project_id}/inventories/`
+* :http:delete:`/api/v1/projects/{project_id}/inventories/`
 
 As you can see there is plenty of urls and for every url ``post``, ``put`` and
 ``delete`` methods are present. They all takes list of IDs in json request
@@ -959,7 +1695,195 @@ To clarify information above here is example detailed structured explanation
 Users
 -----
 
-TODO: write it
+.. http:get:: /api/v1/users/{id}
+
+   Get details about one user.
+
+   :arg id: id of user.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/users/3 HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "id":3,
+           "username":"petya",
+           "password":"pbkdf2_sha256$36000$usSWH0uGIPZl$+Xzz3KpJrq8ZP3truExYOe3CjsaIWgOxuN6jIvJ5ZO8=",
+           "is_active":true,
+           "is_staff":false,
+           "first_name":"Petya",
+           "last_name":"Smith",
+           "email":"petyasupermail@example.com",
+           "url":"http://127.0.0.1:8080/api/v1/users/3/"
+        }
+
+   :>json number id: id of user.
+   :>json string username: login.
+   :>json string password: hash of password.
+   :>json boolean is_active: is account enabled.
+   :>json boolean is_staff: is it superuser. Superuser have access to all
+     objects/records despite of access rights.
+   :>json string first_name: name.
+   :>json string last_name: last name.
+   :>json string email: email.
+   :>json string url: url to this specific user.
+
+.. |users_details_ref| replace:: **Response JSON Object:** response json fields
+   same as in :http:get:`/api/v1/users/{id}`.
+
+.. http:get:: /api/v1/users/
+
+   List of users. |pagination_def|
+
+   :query id: id of host if we want to filter by it.
+   :query id__not: id of host, which we want to filter out.
+   :query username: filter by login.
+   :query is_active: filter enabled users.
+   :query first_name: filter by name.
+   :query last_name: filter by last name.
+   :query email: filter by email.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/users/?is_active=true HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "count":2,
+           "next":null,
+           "previous":null,
+           "results":[
+              {
+                 "id":1,
+                 "username":"admin",
+                 "is_active":true,
+                 "url":"http://127.0.0.1:8080/api/v1/users/1/"
+              },
+              {
+                 "id":3,
+                 "username":"petya",
+                 "is_active":true,
+                 "url":"http://127.0.0.1:8080/api/v1/users/3/"
+              }
+           ]
+        }
+
+   |users_details_ref|
+
+.. http:delete:: /api/v1/users/{id}
+
+   Delete user.
+
+   :arg id: id of user.
+
+.. http:post:: /api/v1/users/
+
+   Create user.
+
+   :<json string username: login.
+   :<json string password: password.
+   :<json boolean is_active: is account enabled.
+   :<json boolean is_staff: is it superuser. Superuser have access to all
+     objects/records despite of access rights.
+   :<json string first_name: name.
+   :<json string last_name: last name.
+   :<json string email: email.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/users/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+         "email":"petyasupermail@example.com",
+         "first_name":"Petya",
+         "last_name":"Smith",
+         "username":"petya",
+         "is_active":"true",
+         "is_staff":"false",
+         "password":"rex"
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "id":3,
+           "username":"petya",
+           "password":"pbkdf2_sha256$36000$usSWH0uGIPZl$+Xzz3KpJrq8ZP3truExYOe3CjsaIWgOxuN6jIvJ5ZO8=",
+           "is_active":true,
+           "is_staff":false,
+           "first_name":"Petya",
+           "last_name":"Smith",
+           "email":"petyasupermail@example.com",
+           "url":"http://127.0.0.1:8080/api/v1/users/3/"
+        }
+
+   |users_details_ref|
+
+.. http:patch:: /api/v1/users/{id}
+
+   Update user. |patch_reminder|
+
+   :arg id: id of host.
+
+   **Request JSON Object:**
+   request json fields same as in :http:post:`/api/v1/users/`
+
+   Example request:
+
+   .. sourcecode:: http
+
+      PATCH /api/v1/users/3/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+         "email":"petyasupermail@example.com",
+         "first_name":"Petya",
+         "last_name":"Smith",
+         "username":"petya",
+         "is_active":"true",
+         "is_staff":"false",
+         "password":"rex"
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "id":3,
+           "username":"petya",
+           "password":"pbkdf2_sha256$36000$usSWH0uGIPZl$+Xzz3KpJrq8ZP3truExYOe3CjsaIWgOxuN6jIvJ5ZO8=",
+           "is_active":true,
+           "is_staff":false,
+           "first_name":"Petya",
+           "last_name":"Smith",
+           "email":"petyasupermail@example.com",
+           "url":"http://127.0.0.1:8080/api/v1/users/3/"
+        }
+
+   |users_details_ref|
 
 .. |patch_reminder| replace:: All parameters except id are optional, so you can
    specify only needed to update. Only name for example.
