@@ -26,17 +26,16 @@ RMF = os.path.join(os.path.dirname(__file__), 'polemarch/README.md')
 with open(RMF) as readme:
     README = readme.read()
 
-RQF = os.path.join(os.path.dirname(__file__), 'requirements.txt')
-with open(RQF) as req:
-    REQUIRES = req.read().strip().split('\n')
 
-RQF = os.path.join(os.path.dirname(__file__), 'requirements-doc.txt')
-with open(RQF) as req:
-    REQUIRES += req.read().strip().split('\n')
+def load_requirements(file_name):
+    with open(os.path.join(os.path.dirname(__file__), file_name)) as req_file:
+        return req_file.read().strip().split('\n')
 
-RQF_git = os.path.join(os.path.dirname(__file__), 'requirements-git.txt')
-with open(RQF) as req:
-    REQUIRES_git = req.read().strip().split('\n')
+
+REQUIRES = load_requirements('requirements.txt')
+REQUIRES += load_requirements('requirements-doc.txt')
+REQUIRES_git = load_requirements('requirements-git.txt')
+
 
 if 'compile' in sys.argv:
     use_cython = True

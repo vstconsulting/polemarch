@@ -62,7 +62,7 @@ id -g %{file_permissions_group} &>/dev/null || groupadd %{file_permissions_group
 %install
 make build
 %{venv_cmd} %{venv_dir}
-%{venv_pip} -U -r requirements.txt -r requirements-git.txt
+%{venv_pip} -U -r requirements.txt -r requirements-git.txt -r requirements-doc.txt
 %{venv_pip} dist/%{name}-%{unmangled_version}.tar.gz[apache]
 cd %{buildroot}
 cd -
