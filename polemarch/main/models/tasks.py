@@ -38,11 +38,11 @@ class Executor(CmdExecutor):
 def __parse_extra_args(project, **extra):
     extra_args, files = list(), list()
     for key, value in extra.items():
-        if key == "extra_vars":
+        if key in ["extra_vars", "extra-vars"]:
             key = "extra-vars"
         elif key == "verbose":
             continue
-        elif key == "key_file":
+        elif key in ["key_file", "key-file"]:
             if "BEGIN RSA PRIVATE KEY" in value:
                 kfile = tmp_file()
                 kfile.write(value)
