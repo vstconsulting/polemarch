@@ -9,6 +9,7 @@ Simply WEB gui for orchestration infrastructure by ansible playbooks.
    :maxdepth: 2
    :caption: Contents:
 
+   quickstart
    restapi
 
 

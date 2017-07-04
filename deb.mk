@@ -104,14 +104,15 @@ chown -R $(USER):$(USER) /var/log/$(NAME)
 chown -R $(USER):$(USER) /var/run/$(NAME)
 chown -R $(USER):$(USER) /var/lock/$(NAME)
 # making migration and activate services
-sudo -u $(USER) /opt/$(NAME)/bin/polemarchctl migrate
+sudo -u $(USER) /opt/$(NAME)/bin/polemarchctl migrate > /dev/null 2>&1
 sudo -u $(USER) /opt/$(NAME)/bin/polemarchctl webserver \
                                           --setup-only --port=8080 \
                                           --user $(USER) --group $(USER) \
                                           --server-root=/opt/$(NAME)/httpd \
                                           --log-directory=/var/log/$(NAME) \
                                           --access-log \
-                                          --pid-file=/var/run/$(NAME)/web.pid
+                                          --pid-file=/var/run/$(NAME)/web.pid \
+                                           > /dev/null 2>&1
 systemctl enable polemarchweb.service
 systemctl enable polemarchworker.service
 systemctl daemon-reload
