@@ -212,6 +212,15 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         # error at node
         check_status(subprocess.CalledProcessError(None, None, None), "ERROR")
 
+        result = self.get_result(
+            "post",
+            "/api/v1/projects/{}/execute/".format(self.task_project.id), 400,
+            data=json.dumps(dict(inventory=inv1, playbook="",
+                                 limit="limited-hosts", user="some-def-user",
+                                 extra_vars=extra_vars, key_file=key_file))
+        )
+        self.assertEqual(result["detail"], "Empty playbook name.")
+
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
     def setUp(self):
@@ -226,11 +235,13 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         self.inventory = Inventory.objects.create()
 
         self.ptask1 = PeriodicTask.objects.create(playbook="p1.yml",
+                                                  name="test",
                                                   schedule="10",
                                                   type="DELTA",
                                                   project=project,
                                                   inventory=self.inventory)
         self.ptask2 = PeriodicTask.objects.create(playbook="p2.yml",
+                                                  name="test",
                                                   schedule="10",
                                                   type="DELTA",
                                                   project=project,
@@ -308,21 +319,22 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                           type="DELTA",
                           project=self.periodic_project_id)
 
+        variables = {"syntax-check": None, "limit": "host-1"}
         data = [dict(playbook="p1.yml", schedule="10", type="DELTA",
                      project=self.periodic_project_id,
-                     inventory=self.inventory.id),
+                     inventory=self.inventory.id, name="one", vars=variables),
                 dict(playbook="p2.yml",
                      schedule="* */2 sun,fri 1-15 *",
                      type="CRONTAB", project=self.periodic_project_id,
-                     inventory=self.inventory.id),
+                     inventory=self.inventory.id, name="two", vars=variables),
                 dict(playbook="p1.yml", schedule="", type="CRONTAB",
                      project=self.periodic_project_id,
-                     inventory=self.inventory.id),
+                     inventory=self.inventory.id, name="thre", vars=variables),
                 dict(playbook="p1.yml", schedule="30 */4", type="CRONTAB",
                      project=self.periodic_project_id,
-                     inventory=self.inventory.id)]
+                     inventory=self.inventory.id, name="four", vars=variables)]
         results_id = self.mass_create(url, data, "playbook", "schedule",
-                                      "type", "project")
+                                      "type", "project", "name", "vars")
 
         for project_id in results_id:
             self.get_result("delete", url + "{}/".format(project_id))

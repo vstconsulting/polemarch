@@ -125,7 +125,8 @@ class HistorySerializer(serializers.ModelSerializer):
                   "playbook",
                   "status",
                   "start_time",
-                  "stop_time")
+                  "stop_time",
+                  "url")
 
 
 class OneHistorySerializer(serializers.ModelSerializer):
@@ -138,6 +139,7 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "start_time",
                   "stop_time",
                   "raw_inventory",
+                  "raw_args",
                   "raw_stdout")
 
 
@@ -267,28 +269,35 @@ class OneTaskSerializer(TaskSerializer):
 
 
 class PeriodicTaskSerializer(_WithVariablesSerializer):
+    vars = DictField(required=False, write_only=True)
     schedule = serializers.CharField(allow_blank=True)
 
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
+                  'name',
                   'type',
                   'schedule',
                   'playbook',
                   'project',
                   'inventory',
+                  'vars',
                   'url',)
 
 
 class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
+    vars = DictField(required=False)
+
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
+                  'name',
                   'type',
                   'schedule',
                   'playbook',
                   'project',
                   'inventory',
+                  'vars',
                   'url',)
 
 

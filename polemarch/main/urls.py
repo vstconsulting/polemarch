@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name
 from django.conf import settings
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.contrib import admin
 from django.conf.urls.static import static
 
@@ -13,6 +13,7 @@ admin.site.index_title = "Polemarch Settings Panel"
 admin.site.site_url = "/"
 login_url = getattr(settings, 'LOGIN_URL', '/login/')[1:]
 logout_url = getattr(settings, 'LOGOUT_URL', '/logout/')[1:]
+doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 
 urlpatterns = [
     url(r'^$', views.GUIView.as_view()),
@@ -25,3 +26,4 @@ urlpatterns = [
 
 urlpatterns += api_urls
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += [url(r'^{}'.format(doc_url), include('docs.urls'))]
