@@ -12,7 +12,7 @@ define RPM_SPEC
 %define venv_python %{venv_bin}/python
 %define venv_pip %{venv_python} %{venv_bin}/pip install $(PIPARGS)
 %define version $(VER)
-%define release 0
+%define release $(RELEASE)
 %define __prelink_undo_cmd %{nil}
 %define _binaries_in_noarch_packages_terminate_build   0
 # %{?version: %{?version: %{error: version}}}
@@ -62,8 +62,8 @@ id -g %{file_permissions_group} &>/dev/null || groupadd %{file_permissions_group
 %install
 make build
 %{venv_cmd} %{venv_dir}
+%{venv_pip} -U -r requirements.txt -r requirements-git.txt -r requirements-doc.txt
 %{venv_pip} dist/%{name}-%{unmangled_version}.tar.gz[apache]
-%{venv_pip} -U -r requirements.txt -r requirements-git.txt
 cd %{buildroot}
 cd -
 # RECORD files are used by wheels for checksum. They contain path names which
