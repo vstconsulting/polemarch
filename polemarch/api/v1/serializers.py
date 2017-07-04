@@ -125,7 +125,8 @@ class HistorySerializer(serializers.ModelSerializer):
                   "playbook",
                   "status",
                   "start_time",
-                  "stop_time")
+                  "stop_time",
+                  "url")
 
 
 class OneHistorySerializer(serializers.ModelSerializer):
@@ -138,6 +139,7 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "start_time",
                   "stop_time",
                   "raw_inventory",
+                  "raw_args",
                   "raw_stdout")
 
 
@@ -209,6 +211,8 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         return self._do_with_vars("create", validated_data=validated_data)
 
     def update(self, instance, validated_data):
+        if "children" in validated_data:
+            raise exceptions.ValidationError("Children not allowed to update.")
         return self._do_with_vars("update", instance,
                                   validated_data=validated_data)
 
@@ -246,6 +250,8 @@ class TaskSerializer(_WithVariablesSerializer):
         model = models.Task
         fields = ('id',
                   'name',
+                  'playbook',
+                  'project',
                   'url',)
 
 
@@ -263,27 +269,35 @@ class OneTaskSerializer(TaskSerializer):
 
 
 class PeriodicTaskSerializer(_WithVariablesSerializer):
+    vars = DictField(required=False, write_only=True)
     schedule = serializers.CharField(allow_blank=True)
 
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
-                  'type',
-                  'schedule',
-                  'playbook',
-                  'inventory',
-                  'url',)
-
-
-class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
-    class Meta:
-        model = models.PeriodicTask
-        fields = ('id',
+                  'name',
                   'type',
                   'schedule',
                   'playbook',
                   'project',
                   'inventory',
+                  'vars',
+                  'url',)
+
+
+class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
+    vars = DictField(required=False)
+
+    class Meta:
+        model = models.PeriodicTask
+        fields = ('id',
+                  'name',
+                  'type',
+                  'schedule',
+                  'playbook',
+                  'project',
+                  'inventory',
+                  'vars',
                   'url',)
 
 

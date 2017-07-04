@@ -89,6 +89,8 @@ class ProjectFilter(_BaseHGIFilter):
 
 
 class TaskFilter(_BaseFilter):
+    playbook__not = CharFilter(method=name_filter)
+    playbook      = CharFilter(method=name_filter)
 
     class Meta:
         model = models.Task
