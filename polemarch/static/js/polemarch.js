@@ -244,6 +244,38 @@ polemarch.start = function(options)
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showNewItemPage(holder, menuInfo, data);}
     })
     
+    // history
+    spajs.addMenu({
+        id:"history", 
+        urlregexp:[/^history$/, /^history\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showList(holder, menuInfo, data);}, 
+    })
+    
+    spajs.addMenu({
+        id:"history-search", 
+        urlregexp:[/^history\/search\/([A-z0-9 \-]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResults(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"history-item", 
+        urlregexp:[/^history\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItem(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"project-history", 
+        urlregexp:[/^history\/([0-9]+)$/], 
+        urlregexp:[/^project\/([0-9]+)\/history$/, /^project\/([0-9]+)\/history\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showListInProjects(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"project-history-search", 
+        urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 \-]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResultsInProjects(holder, menuInfo, data);}
+    })
+    
     spajs.openMenuFromUrl()
 }
 

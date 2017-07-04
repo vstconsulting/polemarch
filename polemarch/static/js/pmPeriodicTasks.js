@@ -25,7 +25,7 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
         $.notify("", "error");
     })
 }
- 
+
 pmPeriodicTasks.search = function(project_id, query)
 {
     if(!query || !trim(query))
@@ -35,7 +35,7 @@ pmPeriodicTasks.search = function(project_id, query)
 
     return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
 }
-    
+
 pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;

@@ -1,6 +1,254 @@
 {% extends "base.html" %}
 
 {% block script %}
+
+
+<!-- Список history -->
+<script type="text/x-just" data-just="history_list">
+    <section class="content-header">
+        <h1>
+            History
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li> 
+            <li class="active">History</li>
+        </ol>
+    </section>
+
+    <section class="content"> 
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        History
+                        <div class="input-group col-lg-2" style="float: right;">
+                            <input
+                                type="text"
+                                id="search-query-input"
+                                placeholder="Search by name"
+                                class="form-control"
+                                maxlength="255"
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmHistory.search($('#search-query-input').val()));"
+                            >
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmHistory.search($('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
+                            </div>
+                        </div>
+                        <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
+                            </div>
+                        <% } %>
+
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr> 
+                                    <th>Playbook</th> 
+                                    <th>Status</th> 
+                                    <th>time</th> 
+                                </tr>
+                                <% for(var i in pmHistory.model.itemslist.results){ %>
+                                    <tr class="item-row item-<%- pmHistory.model.itemslist.results[i].id %>" > 
+                                        <td>
+                                            <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].playbook %></a>
+                                        </td> 
+                                        <td>
+                                            <%- pmHistory.model.itemslist.results[i].status %>
+                                        </td> 
+                                        <td>
+                                            <%- pmHistory.model.itemslist.results[i].start_time %>
+                                            -
+                                            <%- pmHistory.model.itemslist.results[i].stop_time %>
+                                        </td> 
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix"> 
+                        <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
+                                <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
+                        <% } %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<!-- Список history -->
+<script type="text/x-just" data-just="history_listInProjects">
+    <section class="content-header">
+        <h1>
+            History
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[project_id].name %>`</a></li>
+            <li class="active">History</li>
+        </ol>
+    </section>
+
+    <section class="content"> 
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        History
+                        <div class="input-group col-lg-2" style="float: right;">
+                            <input
+                                type="text"
+                                id="search-query-input"
+                                placeholder="Search by name"
+                                class="form-control"
+                                maxlength="255"
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmHistory.search($('#search-query-input').val()));"
+                            >
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmHistory.search($('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
+                            </div>
+                        </div>
+                        <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
+                            </div>
+                        <% } %>
+
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr> 
+                                    <th>Playbook</th> 
+                                    <th>Status</th> 
+                                    <th>time</th> 
+                                </tr>
+                                <% for(var i in pmHistory.model.itemslist.results){ %>
+                                    <tr class="item-row item-<%- pmHistory.model.itemslist.results[i].id %>" > 
+                                        <td>
+                                            <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].playbook %></a>
+                                        </td> 
+                                        <td>
+                                            <%- pmHistory.model.itemslist.results[i].status %>
+                                        </td> 
+                                        <td>
+                                            <%- pmHistory.model.itemslist.results[i].start_time %>
+                                            -
+                                            <%- pmHistory.model.itemslist.results[i].stop_time %>
+                                        </td> 
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix"> 
+                        <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
+                                <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
+                        <% } %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<!-- Список Periodic Tasks -->
+<script type="text/x-just" data-just="history_page">
+<!-- Страница пользователя -->
+    <section class="content-header">
+        <h1>
+            <%- pmHistory.model.items[item_id].playbook %>
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?history"  onclick="return spajs.openURL(this.href);" >History</a></li>
+            <li class="active"><%- pmHistory.model.items[item_id].playbook %></li>
+        </ol>
+    </section>
+
+    <section class="content"> 
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Task<br>
+                        <div class="box-tools pull-right">
+                        
+                        
+                        
+                        </div>
+                    </div>
+                    <div class="box-body"> 
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Playbook</label>
+                                <input type="text"    
+                                        value="<%- pmHistory.model.items[item_id].playbook %>"
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Status</label>
+                                <input type="text"    
+                                        value="<%- pmHistory.model.items[item_id].status %>"
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Start time</label>
+                                <input type="text"    
+                                        value="<%- pmHistory.model.items[item_id].start_time %>"
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Stop time</label>
+                                <input type="text"    
+                                        value="<%- pmHistory.model.items[item_id].stop_time %>"
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <label class="control-label" >Inventory</label>
+                                <pre style="overflow: auto; max-height: 600px;"><%- pmHistory.model.items[item_id].raw_inventory %></pre>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <label class="control-label" >stdout</label>
+                                <pre style="overflow: auto; max-height: 600px;"><%- pmHistory.model.items[item_id].raw_stdout %></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+ 
+
 <!-- Список Periodic Tasks -->
 <script type="text/x-just" data-just="periodic-tasks_list">
     <section class="content-header">
@@ -72,7 +320,7 @@
                                                     onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('playbook') %></a>
                                         </td>
                                         <td class="hidden-xs">
-                                            <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/<%- valid %>" class="item-name"
+                                            <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('type') %></a>
                                         </td>
                                         <td class="hidden-xs">

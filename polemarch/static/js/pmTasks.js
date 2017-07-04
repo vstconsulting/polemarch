@@ -7,7 +7,14 @@ pmTasks.model.name = "tasks"
 pmTasks.execute = function(project_id, inventory, playbook)
 { 
     var def = new $.Deferred(); 
-    return $.ajax({
+    if(!playbook)
+    { 
+        $.notify("Playbook name is empty", "error");
+        def.reject();
+        return def.promise();
+    }
+    
+    $.ajax({
         url: "/api/v1/projects/"+project_id+"/execute/",
         type: "POST",
         data:JSON.stringify({
@@ -32,4 +39,6 @@ pmTasks.execute = function(project_id, inventory, playbook)
             polemarch.showErrors(e.responseJSON)
         }
     })
+    
+    return def.promise();
 }
