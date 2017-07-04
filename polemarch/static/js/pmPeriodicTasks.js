@@ -14,7 +14,7 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
     }
     var project_id = data.reg[1];
 
-    return $.when(this.searchItems(project_id, 'project')).done(function()
+    return $.when(this.searchItems(project_id, 'project'), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:"", project_id:project_id}))
 
@@ -26,12 +26,23 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
     })
 }
  
+pmPeriodicTasks.search = function(project_id, query)
+{
+    if(!query || !trim(query))
+    {
+        return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name, reopen:true});
+    }
+
+    return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+}
+    
 pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
-    return $.when(this.searchItems(data.reg[1], 'playbook')).done(function()
+    var project_id = data.reg[1];
+    return $.when(this.sendSearchQuery({playbook: data.reg[2], project:project_id}), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
+        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -91,10 +102,11 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
     var thisObj = this;
     console.log(menuInfo, data)
     var item_id = data.reg[2];
+    var project_id = data.reg[1];
 
-    return $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems()).done(function()
+    return $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id}))
+        $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
 
         $('#periodic-tasks_'+item_id+'_inventory').select2();
 

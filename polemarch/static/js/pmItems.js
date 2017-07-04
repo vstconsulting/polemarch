@@ -192,7 +192,7 @@ function pmItems()
         });
     }
 
-    this.searchItems = function(query, attrName, limit, offset)
+    this.sendSearchQuery = function(query, limit, offset)
     {
         if(!limit)
         {
@@ -203,15 +203,16 @@ function pmItems()
         {
             offset = 0;
         }
-
-        if(!attrName)
-        {
-            attrName = "name";
-        }
         
+        var q = [];
+        for(var i in query)
+        {
+            q.push(encodeURIComponent(i)+"="+encodeURIComponent(query[i])) 
+        }
+
         var thisObj = this;
         return jQuery.ajax({
-            url: "/api/v1/"+this.model.name+"/?"+encodeURIComponent(attrName)+"="+encodeURIComponent(query),
+            url: "/api/v1/"+this.model.name+"/?"+q.join('&'),
             type: "GET",
             contentType:'application/json',
             data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
@@ -239,6 +240,18 @@ function pmItems()
                 polemarch.showErrors(e)
             }
         });
+    }
+    
+    this.searchItems = function(query, attrName, limit, offset)
+    {
+        if(!attrName)
+        {
+            attrName = "name";
+        }
+        
+        var q = {}
+        q[attrName] = query
+        return this.sendSearchQuery(q, limit, offset);
     }
 
     /**
