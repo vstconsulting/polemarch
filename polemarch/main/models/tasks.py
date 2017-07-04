@@ -1,17 +1,18 @@
-# pylint: disable=protected-access
+# pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
 import logging
 import sys
 import uuid
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from os.path import dirname
 
 from celery.schedules import crontab
 from django.utils import timezone
 
 from . import Inventory
-from .base import BModel, models
+from .base import BModel, BManager, models
+from .vars import _AbstractModel, _AbstractVarsQuerySet
 from .projects import Project
 from ...main.utils import tmp_file, CmdExecutor, CalledProcessError
 
@@ -57,10 +58,10 @@ def run_ansible_playbook(task, inventory, **extra_args):
     # pylint: disable=too-many-locals
     history_kwargs = dict(playbook=task.playbook, start_time=timezone.now(),
                           project=task.project, raw_stdout="")
+    history_kwargs["raw_inventory"], key_files = inventory.get_inventory()
     history = History.objects.create(status="RUN", **history_kwargs)
     path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
     path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
-    history_kwargs["raw_inventory"], key_files = inventory.get_inventory()
     inventory_file = tmp_file()
     inventory_file.write(history_kwargs["raw_inventory"])
     status = "OK"
@@ -68,6 +69,7 @@ def run_ansible_playbook(task, inventory, **extra_args):
         extra = __parse_extra_args(project=task.project, **extra_args)
         args = [path_to_ansible, path_to_playbook, '-i',
                 inventory_file.name, '-v'] + extra.args
+        history_kwargs['raw_args'] = " ".join(args)
         history_kwargs['raw_stdout'] = Executor(history).execute(args)
     except CalledProcessError as exception:
         history_kwargs['raw_stdout'] = str(exception.output)
@@ -103,7 +105,8 @@ class Task(BModel):
         run_ansible_playbook(self, inventory, **extra)
 
 
-class PeriodicTask(BModel):
+class PeriodicTask(_AbstractModel):
+    objects     = BManager.from_queryset(_AbstractVarsQuerySet)()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
                                     related_query_name="periodic_tasks")
     playbook    = models.CharField(max_length=256)
@@ -136,6 +139,10 @@ class PeriodicTask(BModel):
             index += 1
         return kwargs
 
+    def get_vars(self):
+        qs = self.variables.order_by("key")
+        return OrderedDict(qs.values_list('key', 'value'))
+
     def get_schedule(self):
         if self.type == "CRONTAB":
             return crontab(**self.crontab_kwargs)
@@ -146,7 +153,7 @@ class PeriodicTask(BModel):
         self.run_ansible_playbook()
 
     def run_ansible_playbook(self):
-        run_ansible_playbook(self, self.inventory)
+        run_ansible_playbook(self, self.inventory, **self.vars)
 
 
 class History(BModel):
@@ -156,8 +163,9 @@ class History(BModel):
     playbook      = models.CharField(max_length=256)
     start_time    = models.DateTimeField(default=timezone.now)
     stop_time     = models.DateTimeField(blank=True, null=True)
-    raw_stdout    = models.TextField()
-    raw_inventory = models.TextField()
+    raw_stdout    = models.TextField(default="")
+    raw_args      = models.TextField(default="")
+    raw_inventory = models.TextField(default="")
     status        = models.CharField(max_length=50)
 
     class Meta:

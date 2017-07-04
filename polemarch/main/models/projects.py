@@ -5,7 +5,8 @@ import logging
 from django.conf import settings
 
 from . import hosts as hosts_models
-from .vars import _AbstractModel, _AbstractInventoryQuerySet, BManager, models
+from .vars import _AbstractModel, _AbstractVarsQuerySet, BManager, models
+from ..exceptions import PMException
 from ..utils import ModelHandlers
 
 
@@ -13,7 +14,7 @@ logger = logging.getLogger("polemarch")
 PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
 
 
-class ProjectQuerySet(_AbstractInventoryQuerySet):
+class ProjectQuerySet(_AbstractVarsQuerySet):
     handlers = ModelHandlers("REPO_BACKENDS", "'repo_type' variable needed!")
 
     def create(self, **kwargs):
@@ -55,6 +56,8 @@ class Project(_AbstractModel):
 
     def execute(self, playbook_name, inventory_id, **extra):
         # pylint: disable=no-member
+        if not playbook_name:
+            raise PMException("Empty playbook name.")
         from ..tasks import ExecuteAnsibleTask
         inventory = hosts_models.Inventory.objects.get(id=inventory_id)
         ExecuteAnsibleTask.delay(self, playbook_name, inventory, **extra)

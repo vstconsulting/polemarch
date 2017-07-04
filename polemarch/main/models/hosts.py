@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import logging
 
 from .base import BManager, models
-from .vars import _AbstractModel, _AbstractInventoryQuerySet
+from .vars import _AbstractModel, _AbstractVarsQuerySet
 from ...main import exceptions as ex
 from ..utils import get_render
 
@@ -33,7 +33,7 @@ class CiclicDependencyError(ex.PMException):
 
 
 # Block of models
-class HostQuerySet(_AbstractInventoryQuerySet):
+class HostQuerySet(_AbstractVarsQuerySet):
     # pylint: disable=no-member
     pass
 
@@ -56,7 +56,7 @@ class Host(_AbstractModel):
                               self.vars_string(hvars, var_sep)), key
 
 
-class GroupQuerySet(_AbstractInventoryQuerySet):
+class GroupQuerySet(_AbstractVarsQuerySet):
     # pylint: disable=no-member
 
     def get_subgroups_id(self, accumulated=None, tp="parents"):
@@ -115,7 +115,7 @@ class Group(_AbstractModel):
 
 
 class Inventory(_AbstractModel):
-    objects     = BManager.from_queryset(_AbstractInventoryQuerySet)()
+    objects     = BManager.from_queryset(_AbstractVarsQuerySet)()
     hosts       = models.ManyToManyField(Host)
     groups      = models.ManyToManyField(Group)
 

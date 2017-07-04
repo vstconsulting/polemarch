@@ -25,19 +25,19 @@ class Variable(BModel):
     object_id      = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     key            = models.CharField(max_length=128)
-    value          = models.CharField(max_length=2*1024)
+    value          = models.CharField(max_length=2*1024, null=True)
 
     def __unicode__(self):  # pragma: no cover
         return "{}={}".format(self.key, self.value)
 
 
-class _AbstractInventoryQuerySet(BQuerySet):
+class _AbstractVarsQuerySet(BQuerySet):
     use_for_related_fields = True
 
     @transaction.atomic
     def create(self, **kwargs):
         variables = kwargs.pop("vars", None)
-        obj = super(_AbstractInventoryQuerySet, self).create(**kwargs)
+        obj = super(_AbstractVarsQuerySet, self).create(**kwargs)
         if variables is not None:
             if isinstance(variables, (string_types, text_type)):
                 variables = json.loads(variables)
@@ -52,7 +52,7 @@ class _AbstractInventoryQuerySet(BQuerySet):
 
 
 class _AbstractModel(BModel):
-    objects     = BManager.from_queryset(_AbstractInventoryQuerySet)
+    objects     = BManager.from_queryset(_AbstractVarsQuerySet)
     name        = models.CharField(max_length=512,
                                    default=uuid.uuid1)
     variables   = GenericRelation(Variable, related_query_name="variables",
