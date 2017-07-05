@@ -11,6 +11,8 @@ Simply WEB gui for orchestration infrastructure by ansible playbooks.
 
    quickstart
    restapi
+   gui
+   config
 
 
 

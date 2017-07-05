@@ -33,5 +33,10 @@ Quickstart
 
 After you install Polemarch by instructions above you can use it without any
 further configurations. Interface is pretty intuitive and common for any web
-application. But if you have problem you always can refer to our GUI
-documentation. TODO: make ref here.
+application. But if you have problem you always can refer to our
+:doc:`GUI documentation </gui>`.
+
+Default installation is suitable for most simple and common cases, but
+Polemarch is highly configurable system. If you need something more advanced
+(scalability, dedicated DB, custom cache, logging or directories) you can
+always configure Polemarch like said in :doc:`Configuration manual </config>`.
