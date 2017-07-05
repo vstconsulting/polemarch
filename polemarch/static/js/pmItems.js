@@ -109,7 +109,7 @@ function pmItems()
     this.showSearchResults = function(holder, menuInfo, data)
     {
         var thisObj = this;
-        return $.when(this.searchItems(data.reg[1])).done(function()
+        return $.when(this.searchItems(decodeURIComponent(data.reg[1]))).done(function()
         {
             $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
         }).fail(function()

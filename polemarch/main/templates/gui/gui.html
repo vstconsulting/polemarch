@@ -30,9 +30,9 @@
                                 class="form-control"
                                 maxlength="255"
                                 value="<%- query %>"
-                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmHistory.search($('#search-query-input').val()));"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmHistory.search(0, $('#search-query-input').val()));"
                             >
-                            <div class="input-group-addon" onclick="spajs.showLoader(pmHistory.search($('#search-query-input').val()));">
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmHistory.search(0, $('#search-query-input').val()));">
                                 <span class="glyphicon glyphicon-search" ></span>
                             </div>
                         </div>
@@ -110,9 +110,9 @@
                                 class="form-control"
                                 maxlength="255"
                                 value="<%- query %>"
-                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmHistory.search($('#search-query-input').val()));"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmHistory.search(<%- project_id %>, $('#search-query-input').val()));"
                             >
-                            <div class="input-group-addon" onclick="spajs.showLoader(pmHistory.search($('#search-query-input').val()));">
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmHistory.search(<%- project_id %>, $('#search-query-input').val()));">
                                 <span class="glyphicon glyphicon-search" ></span>
                             </div>
                         </div>
@@ -334,7 +334,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu">
+                                                <ul class="dropdown-menu dropdown-menu-right">
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.showLoader(pmPeriodicTasks.syncRepo(<%- valid %>)); return false;" >Sync</a>
@@ -708,9 +708,8 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 82px;">Status</th>
-                                    <th style="width: 327px;" class="hidden-xs">Actions</th>
-                                    <th style="width: 95px;" class="visible-xs">Actions</th>
+                                    <th style="width: 82px;">Status</th> 
+                                    <th style="width: 95px;">Actions</th>
                                 </tr>
                                 <% for(var i in pmProjects.model.itemslist.results){ valid = pmProjects.model.itemslist.results[i].id; %>
                                     <tr
@@ -726,54 +725,24 @@
                                         </td>
                                         <td class="project-status <%- pmProjects.model.items[valid].justClassName('status', function(v){ return "project-status-"+v}) %>" >
                                             <%= pmProjects.model.items[valid].justText('status') %>
-                                        </td>
-                                        <td class="hidden-xs">
-
-                                            <a href="#"
-                                                class="btn btn-danger"
-                                                onclick="spajs.showLoader(pmProjects.deleteItem(<%- valid %>)); return false;" >Delete</a>
-
-                                            <a href="#"
-                                                class="btn btn-warning"
-                                                onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
-
-                                            <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    Add
-                                                    <span class="caret"></span>
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-group'}); return false;" >Add sub group</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-host'}); return false;" >Add sub host</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-inventory'}); return false;" >Add sub inventory</a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-
-                                            <a href="#"
-                                                class="btn btn-info"
-                                                onclick="spajs.open({ menuId:'project/<%- valid %>/playbook/run'}); return false;" >Run playbook</a>
-
-                                        </td>
-                                        <td class="visible-xs">
+                                        </td> 
+                                        <td >
                                             <div class="btn-group" role="group">
                                                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu">
+                                                <ul class="dropdown-menu dropdown-menu-right">
+                                                    
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/periodic-tasks'}); return false;" >Periodic tasks</a>
                                                     </li>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/history'}); return false;" >History</a>
+                                                    </li>
+                                                    <li role="separator" class="divider"></li> 
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/playbook/run'}); return false;" >Run playbook</a>
@@ -792,6 +761,10 @@
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/new-inventory'}); return false;" >Add sub inventory</a>
                                                     </li>
                                                     <li role="separator" class="divider"></li>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
+                                                    </li>
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.showLoader(pmProjects.deleteItem(<%- valid %>)); return false;" >Delete</a>
@@ -848,6 +821,7 @@
         <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="btn btn-info" >Run playbook</button> 
         <!--<button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-periodic-tasks'});  return false;" class="btn btn-info" >Create periodic tasks</button>-->
         <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/periodic-tasks'});  return false;" class="btn btn-info" >Periodic tasks</button>
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/history'});  return false;" class="btn btn-info" >History</button>
         
         
         <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove project</button>
@@ -1249,7 +1223,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu">
+                                                <ul class="dropdown-menu dropdown-menu-right">
                                                     <li>
                                                         <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1581,7 +1555,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu">
+                                                <ul class="dropdown-menu dropdown-menu-right">
                                                     <li>
                                                         <a href="/?user/<%- pmUsers.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmUsers.deleteItem(<%- pmUsers.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -1888,7 +1862,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu">
+                                                <ul class="dropdown-menu dropdown-menu-right">
                                                     <li>
                                                         <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a>
@@ -2272,7 +2246,7 @@
                                                     Actions
                                                     <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu">
+                                                <ul class="dropdown-menu dropdown-menu-right">
                                                     <li>
                                                         <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>"
                                                             onclick="spajs.showLoader(pmGroups.deleteItem(<%- pmGroups.model.itemslist.results[i].id %>)); return false;" >Delete</a>

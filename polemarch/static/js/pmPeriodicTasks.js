@@ -40,7 +40,7 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
     var project_id = data.reg[1];
-    return $.when(this.sendSearchQuery({playbook: data.reg[2], project:project_id}), pmProjects.loadItem(project_id)).done(function()
+    return $.when(this.sendSearchQuery({playbook: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
     }).fail(function()

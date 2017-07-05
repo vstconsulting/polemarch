@@ -94,7 +94,7 @@ polemarch.start = function(options)
     
     spajs.addMenu({
         id:"users-search", 
-        urlregexp:[/^users\/search\/([A-z0-9 \-]+)$/],
+        urlregexp:[/^users\/search\/([A-z0-9 %\-]+)$/],
         onOpen:function(holder, menuInfo, data){return pmUsers.showSearchResults(holder, menuInfo, data);}
     })
 
@@ -120,7 +120,7 @@ polemarch.start = function(options)
     
     spajs.addMenu({
         id:"hosts-search", 
-        urlregexp:[/^hosts\/search\/([A-z0-9 \-]+)$/],
+        urlregexp:[/^hosts\/search\/([A-z0-9 %\-]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showSearchResults(holder, menuInfo, data);}
     })
 
@@ -146,7 +146,7 @@ polemarch.start = function(options)
     
     spajs.addMenu({
         id:"groups-search", 
-        urlregexp:[/^groups\/search\/([A-z0-9 \-]+)$/],
+        urlregexp:[/^groups\/search\/([A-z0-9 %\-]+)$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showSearchResults(holder, menuInfo, data);}
     })
 
@@ -171,7 +171,7 @@ polemarch.start = function(options)
     
     spajs.addMenu({
         id:"inventories-search", 
-        urlregexp:[/^inventories\/search\/([A-z0-9 \-]+)$/],
+        urlregexp:[/^inventories\/search\/([A-z0-9 %\-]+)$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showSearchResults(holder, menuInfo, data);}
     })
 
@@ -197,7 +197,7 @@ polemarch.start = function(options)
  
     spajs.addMenu({
         id:"projects-search", 
-        urlregexp:[/^projects\/search\/([A-z0-9 \-]+)$/],
+        urlregexp:[/^projects\/search\/([A-z0-9 %\-]+)$/],
         onOpen:function(holder, menuInfo, data){return pmProjects.showSearchResults(holder, menuInfo, data);}
     })
     
@@ -228,7 +228,7 @@ polemarch.start = function(options)
     
     spajs.addMenu({
         id:"PeriodicTasks-search", 
-        urlregexp:[/^project\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 \-]+)$/],
+        urlregexp:[/^project\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-]+)$/],
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResults(holder, menuInfo, data);}
     })
     
@@ -253,7 +253,7 @@ polemarch.start = function(options)
     
     spajs.addMenu({
         id:"history-search", 
-        urlregexp:[/^history\/search\/([A-z0-9 \-]+)$/],
+        urlregexp:[/^history\/search\/([A-z0-9 %\-]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResults(holder, menuInfo, data);}
     })
     
@@ -272,8 +272,8 @@ polemarch.start = function(options)
 
     spajs.addMenu({
         id:"project-history-search", 
-        urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 \-]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResultsInProjects(holder, menuInfo, data);}
+        urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInProjects(holder, menuInfo, data);}
     })
     
     spajs.openMenuFromUrl()
