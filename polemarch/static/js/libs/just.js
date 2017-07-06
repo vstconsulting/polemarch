@@ -302,7 +302,7 @@
 					return new Function(parseToCode(html));
 				},
 				readSync = function (file) {
-					var data = eval('(options.root.' + file + ')');
+					var data = eval('(options.root[\'' + file + '\'])');
                                         if (Object.prototype.toString.call(data) === '[object String]') {
                                                 return data;
                                         } else {

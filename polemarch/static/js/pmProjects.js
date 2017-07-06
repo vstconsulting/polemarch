@@ -1,8 +1,15 @@
 
 var pmProjects = new pmItems()
-pmProjects.model.name = "projects" 
+pmProjects.model.name = "projects"
 jsonEditor.options[pmProjects.model.name] = jsonEditor.options['item'];
- 
+
+jsonEditor.options[pmProjects.model.name]['repo_password'] = {
+    type:'password',
+    help:'Password from repository',
+    helpcontent:'Password from repository required for GIT'
+}
+
+
 pmProjects.openItem = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
@@ -26,10 +33,61 @@ pmProjects.openNewItemPage = function(holder, menuInfo, data)
         {
             def.resolve();
         })
-    }).promise();
+    })
 
     return def.promise();
-} 
+}
+
+pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    $.when(pmTasks.searchItems(data.reg[1], "project"), pmProjects.loadItem(data.reg[1]), pmInventories.loadAllItems()).done(function()
+    {
+        $(holder).html(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:data.reg[1], query:data.reg[1]}))
+
+        $("#inventories-autocomplete").select2();
+
+        new autoComplete({
+            selector: '#playbook-autocomplete',
+            minChars: 0,
+            cache:false,
+            showByClick:true,
+            menuClass:'playbook-autocomplete',
+            renderItem: function(item, search)
+            {
+                return '<div class="autocomplete-suggestion" data-value="' + item.id + '.yaml">' + item.name + '.yaml</div>';
+            },
+            onSelect: function(event, term, item)
+            {
+                console.log('onSelect', term, item);
+                var value = $(event.target).attr('data-value');
+                $("#playbook-autocomplete").val($(event.target).text());
+                //$("#city-id").val(value);
+            },
+            source: function(term, response)
+            {
+                term = term.toLowerCase();
+
+                var matches = []
+                for(var i in pmTasks.model.items)
+                {
+                    var val = pmTasks.model.items[i]
+                    if(val.name.toLowerCase().indexOf(term) != -1)
+                    {
+                        matches.push(val)
+                    }
+                }
+                response(matches);
+            }
+        });
+
+        def.resolve();
+    }).fail(function()
+    {
+        def.reject();
+    })
+}
 
 /**
  * @return $.Deferred
@@ -124,7 +182,7 @@ pmProjects.updateItem = function(item_id)
  */
 pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
-    return $.when(pmInventories.loadItems(99999)).done(function(){
+    return $.when(pmInventories.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -139,7 +197,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
  */
 pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
-    return $.when(pmInventories.loadItems(99999)).done(function(){
+    return $.when(pmInventories.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -154,7 +212,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
  */
 pmProjects.showAddSubGroupsForm = function(item_id, holder)
 {
-    return $.when(pmGroups.loadItems(99999)).done(function(){
+    return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_groups_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -169,7 +227,7 @@ pmProjects.showAddSubGroupsForm = function(item_id, holder)
  */
 pmProjects.showAddSubHostsForm = function(item_id, holder)
 {
-    return $.when(pmHosts.loadItems(99999)).done(function(){
+    return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").append(spajs.just.render('add_existing_hosts_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
