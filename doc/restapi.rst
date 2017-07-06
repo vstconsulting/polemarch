@@ -1384,11 +1384,20 @@ History records
    :>json string raw_inventory: Ansible inventory, which used for execution. It
      is generates from on of Polemarch's :ref:`inventory`
    :>json string raw_stdout: what Ansible wrote to stdout and stderr during
-     execution.
+     execution. The size is limited to 10M characters. Full output
+     in :http:get:`/api/v1/history/{id}/raw/`.
    :>json string url: url to this specific history record.
 
 .. |history_details_ref| replace:: **Response JSON Object:** response json fields
    same as in :http:get:`/api/v1/history/{id}/`.
+
+
+.. http:get:: /api/v1/history/{id}/raw/
+
+   Get full output of executed task.
+
+   :arg id: id of history record.
+
 
 .. http:get:: /api/v1/history/
 
