@@ -159,6 +159,7 @@ pmPeriodicTasks.addItem = function(project_id)
 
     data.project = project_id
     data.playbook = $("#new_periodic-tasks_playbook").val()
+    data.name = $("#new_periodic-tasks_name").val()
     data.type = $("#new_periodic-tasks_type").val()
     data.inventory = $("#new_periodic-tasks_inventory").val()
 
@@ -190,7 +191,7 @@ pmPeriodicTasks.addItem = function(project_id)
             console.log("addItem", data);
             $.notify("periodic task created", "success");
 
-            $.when(spajs.open({ menuId:"periodic-task/"+data.id})).always(function(){
+            $.when(spajs.open({ menuId:"project/"+project_id+"/periodic-task/"+data.id})).always(function(){
                 def.resolve()
             })
         },
@@ -213,6 +214,7 @@ pmPeriodicTasks.updateItem = function(item_id)
     data.playbook = $("#periodic-tasks_"+item_id+"_playbook").val()
     data.type = $("#periodic-tasks_"+item_id+"_type").val()
     data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
+    data.name = $("#periodic-tasks_"+item_id+"_name").val()
 
     if(data.type == "CRONTAB")
     {
