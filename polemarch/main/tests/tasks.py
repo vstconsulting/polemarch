@@ -175,7 +175,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
             histories = History.objects.filter(playbook="other/playbook.yml")
             self.assertEquals(histories.count(), 1)
             history = histories[0]
-            History.objects.all().delete()
+            # History.objects.all().delete()
             return history
 
         def side_effect(call_args, *args, **kwargs):
@@ -200,6 +200,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         end_time = now()
         history = get_history_item()
         inventory = history.raw_inventory
+        res = self.get_result("get",
+                              "/api/v1/history/{}/raw/".format(history.id))
+        self.assertEquals(res, "test_output")
         self.assertTrue(self.correct_simple_inventory in inventory)
         self.assertEquals(history.raw_stdout, "test_output")
         self.assertEquals(history.status, "OK")
@@ -207,10 +210,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                         history.start_time <= history.stop_time)
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
+        History.objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, None), "OFFLINE")
+        History.objects.all().delete()
         # error at node
         check_status(subprocess.CalledProcessError(None, None, None), "ERROR")
+        History.objects.all().delete()
 
         result = self.get_result(
             "post",
