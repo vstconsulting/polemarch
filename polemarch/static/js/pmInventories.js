@@ -113,7 +113,7 @@ pmInventories.updateItem = function(item_id)
  */
 pmInventories.showAddSubGroupsForm = function(item_id, holder)
 {
-    return $.when(pmGroups.loadItems(99999)).done(function(){
+    return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").append(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
@@ -128,7 +128,7 @@ pmInventories.showAddSubGroupsForm = function(item_id, holder)
  */
 pmInventories.showAddSubHostsForm = function(item_id, holder)
 {
-    return $.when(pmHosts.loadItems(99999)).done(function(){
+    return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").append(spajs.just.render('add_existing_hosts_to_inventory', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
