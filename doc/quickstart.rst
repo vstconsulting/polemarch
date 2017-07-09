@@ -13,7 +13,8 @@ Red Hat/CentOS installation
 3. Run services with commands ``sudo service polemarchweb start`` and
    ``sudo service polemarchworker start`` (need both of them).
 
-That's it. Polemarch web panel on 8080 port.
+That's it. Polemarch web panel on 8080 port. Default administrative account is
+admin/admin.
 
 Ubuntu/Debian installation
 --------------------------
@@ -26,7 +27,8 @@ Ubuntu/Debian installation
 3. Run services with commands ``sudo service polemarchweb start`` and
    ``sudo service polemarchworker start`` (need both of them).
 
-That's it. Polemarch web panel on 8080 port.
+That's it. Polemarch web panel on 8080 port. Default administrative account is
+admin/admin.
 
 Quickstart
 ----------
