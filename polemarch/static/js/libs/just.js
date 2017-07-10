@@ -10,8 +10,7 @@
  * Adding reactive to based on https://github.com/Levhav/justReactive to just template engine
  * Copyright 2017, Trapenok Victor <Levhav@yandex.com>
  * 
- * @author Trapenok Victor (Трапенок Виктор Викторович)
- * https://www.upwork.com/freelancers/~01a42b919885549ca9
+ * @author Trapenok Victor (Трапенок Виктор Викторович) Levhav@yandex.com
  * I will be glad to new orders for the development of something.
  *
  * Levhav@yandex.com

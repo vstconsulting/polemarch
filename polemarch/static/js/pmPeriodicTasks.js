@@ -165,7 +165,7 @@ pmPeriodicTasks.addItem = function(project_id)
 
     if(data.type == "CRONTAB")
     {
-        data.schedule = $("#new_periodic-tasks_schedule_CRONTAB").val()
+        data.schedule = crontabEditor.getCronString()
     }
     else
     {
@@ -218,7 +218,7 @@ pmPeriodicTasks.updateItem = function(item_id)
 
     if(data.type == "CRONTAB")
     {
-        data.schedule = $("#periodic-tasks_"+item_id+"_schedule_CRONTAB").val()
+        data.schedule = crontabEditor.getCronString()
     }
     else
     {

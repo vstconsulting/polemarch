@@ -11,12 +11,12 @@
             <small>v1</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li> 
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li class="active">History</li>
         </ol>
     </section>
 
-    <section class="content"> 
+    <section class="content">
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -46,31 +46,31 @@
                     <div class="box-body">
                         <table class="table table-bordered multiple-select">
                             <tbody>
-                                <tr> 
-                                    <th>Playbook</th> 
-                                    <th>Status</th> 
-                                    <th>time</th> 
+                                <tr>
+                                    <th>Playbook</th>
+                                    <th>Status</th>
+                                    <th>time</th>
                                 </tr>
                                 <% for(var i in pmHistory.model.itemslist.results){ %>
-                                    <tr class="item-row item-<%- pmHistory.model.itemslist.results[i].id %>" > 
+                                    <tr class="item-row item-<%- pmHistory.model.itemslist.results[i].id %>" >
                                         <td>
                                             <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].playbook %></a>
-                                        </td> 
+                                        </td>
                                         <td>
                                             <%- pmHistory.model.itemslist.results[i].status %>
-                                        </td> 
+                                        </td>
                                         <td>
                                             <%- pmHistory.model.itemslist.results[i].start_time %>
                                             -
                                             <%- pmHistory.model.itemslist.results[i].stop_time %>
-                                        </td> 
+                                        </td>
                                     </tr>
                                 <% } %>
                             </tbody>
                         </table>
                     </div>
-                    <div class="box-footer clearfix"> 
+                    <div class="box-footer clearfix">
                         <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
                                 <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
                         <% } %>
@@ -96,7 +96,7 @@
         </ol>
     </section>
 
-    <section class="content"> 
+    <section class="content">
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -126,31 +126,31 @@
                     <div class="box-body">
                         <table class="table table-bordered multiple-select">
                             <tbody>
-                                <tr> 
-                                    <th>Playbook</th> 
-                                    <th>Status</th> 
-                                    <th>time</th> 
+                                <tr>
+                                    <th>Playbook</th>
+                                    <th>Status</th>
+                                    <th>time</th>
                                 </tr>
                                 <% for(var i in pmHistory.model.itemslist.results){ %>
-                                    <tr class="item-row item-<%- pmHistory.model.itemslist.results[i].id %>" > 
+                                    <tr class="item-row item-<%- pmHistory.model.itemslist.results[i].id %>" >
                                         <td>
                                             <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].playbook %></a>
-                                        </td> 
+                                        </td>
                                         <td>
                                             <%- pmHistory.model.itemslist.results[i].status %>
-                                        </td> 
+                                        </td>
                                         <td>
                                             <%- pmHistory.model.itemslist.results[i].start_time %>
                                             -
                                             <%- pmHistory.model.itemslist.results[i].stop_time %>
-                                        </td> 
+                                        </td>
                                     </tr>
                                 <% } %>
                             </tbody>
                         </table>
                     </div>
-                    <div class="box-footer clearfix"> 
+                    <div class="box-footer clearfix">
                         <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
                                 <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
                         <% } %>
@@ -176,23 +176,23 @@
         </ol>
     </section>
 
-    <section class="content"> 
+    <section class="content">
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
                         Task<br>
                         <div class="box-tools pull-right">
-                        
-                        
-                        
+
+
+
                         </div>
                     </div>
-                    <div class="box-body"> 
+                    <div class="box-body">
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Playbook</label>
-                                <input type="text"    
+                                <input type="text"
                                         value="<%- pmHistory.model.items[item_id].playbook %>"
                                         class="form-control disabled"
                                         disabled=""
@@ -201,7 +201,7 @@
                             </div>
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Status</label>
-                                <input type="text"    
+                                <input type="text"
                                         value="<%- pmHistory.model.items[item_id].status %>"
                                         class="form-control disabled"
                                         disabled=""
@@ -212,7 +212,7 @@
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Start time</label>
-                                <input type="text"    
+                                <input type="text"
                                         value="<%- pmHistory.model.items[item_id].start_time %>"
                                         class="form-control disabled"
                                         disabled=""
@@ -221,7 +221,7 @@
                             </div>
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Stop time</label>
-                                <input type="text"    
+                                <input type="text"
                                         value="<%- pmHistory.model.items[item_id].stop_time %>"
                                         class="form-control disabled"
                                         disabled=""
@@ -247,7 +247,7 @@
         </div>
     </section>
 </script>
- 
+
 
 <!-- Список Periodic Tasks -->
 <script type="text/x-just" data-just="periodic-tasks_list">
@@ -264,8 +264,8 @@
         </ol>
     </section>
 
-    <section class="content"> 
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- project_id %>/new-periodic-tasks'});  return false;" class="btn btn-primary" >Create periodic tasks</button> 
+    <section class="content">
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- project_id %>/new-periodic-tasks'});  return false;" class="btn btn-primary" >Create periodic tasks</button>
         <br>
         <br>
         <div class="row">
@@ -381,7 +381,7 @@
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[project_id].name %>`</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" >Periodic tasks</a></li> 
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" >Periodic tasks</a></li>
             <li class="active"><%- pmPeriodicTasks.model.items[item_id].playbook %></li>
         </ol>
     </section>
@@ -407,7 +407,7 @@
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Name</label>
-                                <input type="text"  
+                                <input type="text"
                                         placeholder="Enter name"
                                         id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_name"
                                         value="<%- pmPeriodicTasks.model.items[item_id].name %>"
@@ -420,7 +420,7 @@
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Playbook</label>
-                                <input type="text"  
+                                <input type="text"
                                         placeholder="Enter playbook name"
                                         id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_playbook"
                                         value="<%- pmPeriodicTasks.model.items[item_id].playbook %>"
@@ -431,8 +431,8 @@
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Inventory</label>
-                                
-                                <select class="form-control select2" 
+
+                                <select class="form-control select2"
                                         id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_inventory"
                                         data-placeholder="Select inventory"
                                         style="width:100%" >
@@ -442,35 +442,35 @@
                                             <% if(pmPeriodicTasks.model.items[item_id].inventory == pmInventories.model.items[i].id){ %>selected<% } %>
                                             ><%- pmInventories.model.items[i].name %></option>
                                     <% } %>
-                                </select> 
+                                </select>
                                 <div class="help-block"></div>
                             </div>
                         </div>
-                        
+
                         <div class="row">
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Type</label>
                                 <select
                                         onchange="pmPeriodicTasks.model.items[<%- item_id %>].type = this.value;"
-                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_type"  
-                                        class="form-control" 
+                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_type"
+                                        class="form-control"
                                         maxlength="255">
                                         <option value="DELTA" <% if(pmPeriodicTasks.model.items[item_id].type == 'DELTA'){ %>selected<% } %> >Interval schedule</option>
                                         <option value="CRONTAB" <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>selected<% } %> >Cron style schedule</option>
                                 </select>
                                 <div class="help-block"></div>
                             </div>
-                             
+
                             <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'DELTA' }) %> ">
                                 <label class="control-label" >Interval schedule</label>
                                 <div class="input-group">
-                                    <input type="text"  
-                                            placeholder="Enter time interval in seconds"  
-                                            id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_schedule_DELTA" 
+                                    <input type="text"
+                                            placeholder="Enter time interval in seconds"
+                                            id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_schedule_DELTA"
                                             value="<% if(pmPeriodicTasks.model.items[item_id].type == 'DELTA'){ %><%- pmPeriodicTasks.model.items[item_id].schedule %><% } %>"
-                                            class="form-control" 
-                                            maxlength="255" 
+                                            class="form-control"
+                                            maxlength="255"
                                             onkeyup="this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+(.)/g, '$1'); $('#interval-schedule-help').html('~ '+Math.floor(this.value/3600*100)/100+'h')"
                                         >
                                     <span class="input-group-addon" id="basic-addon2">sec</span>
@@ -481,24 +481,24 @@
                                     <% } %>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group col-lg-12 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
                                 <label class="control-label" >Schedule `CRONTAB`</label>
-                                <input 
+                                <!--<input
                                     type="text"
                                     placeholder="Enter time interval in cron style string"
                                     id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_schedule_CRONTAB"
-                                    value="<% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %><%- pmPeriodicTasks.model.items[item_id].schedule %><% } %>" 
+                                    value="<% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %><%- pmPeriodicTasks.model.items[item_id].schedule %><% } %>"
                                     class="form-control col-lg-2"
-                                    maxlength="255">
+                                    maxlength="255">-->
                                 <div class="help-block" id=""></div>
                                 <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>
-                                    <%= crontabEditor.editor(pmPeriodicTasks.model.items[item_id].schedule) %>
+                                    <%= crontabEditor.editor({string:pmPeriodicTasks.model.items[item_id].schedule}) %>
                                 <% }else{ %>
-                                    <%= crontabEditor.editor('') %>
+                                    <%= crontabEditor.editor({string:''}) %>
                                 <% } %>
                             </div>
-                            
+
                             <!--
                             // m h dom mon dow
                             Параметр	Допустимый интервал
@@ -507,24 +507,24 @@
                             день месяца	1-31
                             месяц	1-12
                             день недели	0-7 (0-Вс,1-Пн,2-Вт,3-Ср,4-Чт,5-Пт,6-Сб,7-Вс)
-                            
+
                             * — любая цифра;
                             целое число;
                             целые числа через запятую — задание дискретного множества значений, например 1,2,5;
                             два целых числа, разделенные дефисом, соответствующие диапазону значений, например 3-6.
-                            
+
                             # Выполнять задание в 18 часов 7 минут 13 мая если это пятница
-                            7 18 13 5 5 
-                            
+                            7 18 13 5 5
+
                             # Выполнять задание раз в час в 0 минут
-                            0 */1 * * * 
-                            
+                            0 */1 * * *
+
                             # Выполнять задание каждые семь часов в 0 минут
-                            0 5-7 * * * 
-                            
+                            0 5-7 * * *
+
                             # Выполнять задание по воскресеньям в 10 час 30 минут
-                            30 5,10 * * 0 
-                            
+                            30 5,10 * * 0
+
                             -->
                         </div>
                     </div>
@@ -548,12 +548,12 @@
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[project_id].name %>`</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" >Periodic tasks</a></li> 
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" >Periodic tasks</a></li>
             <li class="active">Create new periodic task</li>
         </ol>
     </section>
 
-    <section class="content"> 
+    <section class="content">
         <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.addItem(<%- project_id %>)); return false;" class="btn btn-primary" >Save task</button>
         <br>
         <br>
@@ -563,23 +563,23 @@
                     <div class="box-header with-border">
                         New task<br>
                     </div>
-                    <div class="box-body"> 
+                    <div class="box-body">
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Name</label>
-                                <input type="text"  
+                                <input type="text"
                                         placeholder="Enter name"
-                                        id="new_periodic-tasks_name" 
+                                        id="new_periodic-tasks_name"
                                         class="form-control"
                                         maxlength="255">
                                 <div class="help-block"></div>
-                            </div> 
-                        </div> 
+                            </div>
+                        </div>
 
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Playbook</label>
-                                <input type="text"  
+                                <input type="text"
                                         placeholder="Enter playbook name"
                                         id="new_periodic-tasks_playbook"
                                         value=""
@@ -590,59 +590,59 @@
 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Inventory</label>
-                                
-                                <select class="form-control select2" 
+
+                                <select class="form-control select2"
                                         id="new_periodic-tasks_inventory"
                                         data-placeholder="Select inventory"
                                         style="width:100%" >
                                     <% for(var i in pmInventories.model.items){ %>
                                         <option
-                                            value="<%- pmInventories.model.items[i].id %>" 
+                                            value="<%- pmInventories.model.items[i].id %>"
                                             ><%- pmInventories.model.items[i].name %></option>
                                     <% } %>
-                                </select> 
+                                </select>
                                 <div class="help-block"></div>
                             </div>
                         </div>
-                        
+
                         <div class="row">
- 
+
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Type</label>
                                 <select
                                         onchange="pmPeriodicTasks.model.newitem.type = this.value;"
-                                        id="new_periodic-tasks_type"  
-                                        class="form-control" 
+                                        id="new_periodic-tasks_type"
+                                        class="form-control"
                                         maxlength="255">
                                         <option value="DELTA" >Interval schedule</option>
                                         <option value="CRONTAB" >Cron style schedule</option>
                                 </select>
                                 <div class="help-block"></div>
                             </div>
-                             
+
                             <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'DELTA' }) %> ">
                                 <label class="control-label" >Interval schedule</label>
                                 <div class="input-group">
-                                    <input type="text"  
-                                            placeholder="Enter time interval in seconds"  
-                                            id="new_periodic-tasks_schedule_DELTA" 
+                                    <input type="text"
+                                            placeholder="Enter time interval in seconds"
+                                            id="new_periodic-tasks_schedule_DELTA"
                                             value=""
-                                            class="form-control" 
-                                            maxlength="255" 
+                                            class="form-control"
+                                            maxlength="255"
                                             onkeyup="this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+(.)/g, '$1'); $('#interval-schedule-help').html('~ '+Math.floor(this.value/3600*100)/100+'h')"
                                         >
                                     <span class="input-group-addon" id="basic-addon2">sec</span>
                                 </div>
                                 <div class="help-block" id="interval-schedule-help"></div>
                             </div>
-                            
+
                             <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
                                 <label class="control-label" >Schedule `CRONTAB`</label>
-                                <input 
+                                <input
                                     type="text"
                                     placeholder="Enter time interval in cron style string"
                                     id="new_periodic-tasks_schedule_CRONTAB"
-                                    value="" 
+                                    value=""
                                     class="form-control"
                                     maxlength="255">
                                 <div class="help-block" id=""></div>
@@ -655,24 +655,24 @@
                             день месяца	1-31
                             месяц	1-12
                             день недели	0-7 (0-Вс,1-Пн,2-Вт,3-Ср,4-Чт,5-Пт,6-Сб,7-Вс)
-                            
+
                             * — любая цифра;
                             целое число;
                             целые числа через запятую — задание дискретного множества значений, например 1,2,5;
                             два целых числа, разделенные дефисом, соответствующие диапазону значений, например 3-6.
-                            
+
                             # Выполнять задание в 18 часов 7 минут 13 мая если это пятница
-                            7 18 13 5 5 
-                            
+                            7 18 13 5 5
+
                             # Выполнять задание раз в час в 0 минут
-                            0 */1 * * * 
-                            
+                            0 */1 * * *
+
                             # Выполнять задание каждые семь часов в 0 минут
-                            0 5-7 * * * 
-                            
+                            0 5-7 * * *
+
                             # Выполнять задание по воскресеньям в 10 час 30 минут
-                            30 5,10 * * 0 
-                            
+                            30 5,10 * * 0
+
                             -->
                         </div>
                     </div>
@@ -723,7 +723,7 @@
                                 <span class="glyphicon glyphicon-search" ></span>
                             </div>
                         </div>
-                        <% if(pmProjects.getTotalPages(pmProjects.model.itemslist)){ %> 
+                        <% if(pmProjects.getTotalPages(pmProjects.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
                                 <%= pmProjects.paginationHtml(pmProjects.model.itemslist) %>
                             </div>
@@ -739,7 +739,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 82px;">Status</th> 
+                                    <th style="width: 82px;">Status</th>
                                     <th style="width: 95px;">Actions</th>
                                 </tr>
                                 <% for(var i in pmProjects.model.itemslist.results){ valid = pmProjects.model.itemslist.results[i].id; %>
@@ -756,7 +756,7 @@
                                         </td>
                                         <td class="project-status <%- pmProjects.model.items[valid].justClassName('status', function(v){ return "project-status-"+v}) %>" >
                                             <%= pmProjects.model.items[valid].justText('status') %>
-                                        </td> 
+                                        </td>
                                         <td >
                                             <div class="btn-group" role="group">
                                                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -764,7 +764,7 @@
                                                     <span class="caret"></span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-right">
-                                                    
+
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/periodic-tasks'}); return false;" >Periodic tasks</a>
@@ -773,7 +773,7 @@
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/history'}); return false;" >History</a>
                                                     </li>
-                                                    <li role="separator" class="divider"></li> 
+                                                    <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/playbook/run'}); return false;" >Run playbook</a>
@@ -849,12 +849,12 @@
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmProjects.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save project</button>
         <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="btn btn-warning" >Sync</button>
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="btn btn-info" >Run playbook</button> 
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="btn btn-info" >Run playbook</button>
         <!--<button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-periodic-tasks'});  return false;" class="btn btn-info" >Create periodic tasks</button>-->
         <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/periodic-tasks'});  return false;" class="btn btn-info" >Periodic tasks</button>
         <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/history'});  return false;" class="btn btn-info" >History</button>
-        
-        
+
+
         <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove project</button>
         <br>
         <br>
@@ -2037,7 +2037,7 @@
 
 <!-- jsonEditor - jsonEditorLine-->
 <script type="text/x-just" data-just="jsonEditorLine">
-  
+
     <% if(jsonEditor.options[optionsblock] && jsonEditor.options[optionsblock][name]){ thisOpt = jsonEditor.options[optionsblock][name]; %>
         <div class="form-group
                     <% if(thisOpt.type == 'textarea' ){ %> col-lg-12 <% }else{ %> col-lg-12 <% } %>
@@ -2051,7 +2051,7 @@
             </label>
             <div class="input-group col-sm-10"  >
                     <% if(thisOpt.type == 'select' ){ %>
-                        <select class="form-control jsonEditor-data" 
+                        <select class="form-control jsonEditor-data"
                                 id="json_<%- name %>_value"
                                 data-json-name="<%- name %>"
                                 data-type="<%- thisOpt.type %>" >
@@ -2146,77 +2146,101 @@
     <% } %>
 </script>
 
-<!-- jsonEditor -->
-<script type="text/x-just" data-just="crontabEditor"> 
-    
-        <!--<div class="row" id="jsonEditorVarList">
-            <input type="text" value="<%- cronstring %>"> 
-        </div>-->
-        
-        <div class="row">
-            
+<!-- jsonEditor --> 
+<script type="text/x-just" data-just="crontabEditor">
+
+        <div class="row" id="jsonEditorVarList">
+            <div class="col-lg-12">
+                <!--<pre contenteditable="true" 
+                        onblur="crontabEditor.parseCronString(this.innerText);" 
+                        onkeyup="crontabEditor.parseCronString(this.innerText);" 
+                        onpaste="crontabEditor.parseCronString(this.innerText);" 
+                        oninput="crontabEditor.parseCronString(this.innerText);" 
+                         ><%= crontabEditor.model.justText('string') %></pre>-->
+                <input type="text" 
+                        class="form-control"
+                        value="<%- crontabEditor.model.string %>"
+                        id="crontabEditorString"
+                        onchange="crontabEditor.parseCronString(this.value);"  
+                        onpaste="crontabEditor.parseCronString(this.value);"  > 
+            </div>
+        </div>
+          
+        <div class="row crontabEditor" >
+
             <div class="form-group col-lg-2">
                 <label class="control-label ">
                     Months
                 </label>
 
-                <div class="control-label "> 
+                <div class="control-label ">
                     <% for(var i = 1; i<= 12; i++){ %>
-                        <button class="btn btn-default"><%- i %></button>
-                    <% } %> 
+                        <button
+                                class="btn btn-default <%- crontabEditor.model.Months.justClass(i, 'selected') %>"
+                                onclick="crontabEditor.model.Months[<%- i %>] = !crontabEditor.model.Months[<%- i %>]; crontabEditor.updateCronString(); " >
+                                <%- i %></button>
+                    <% } %>
                 </div>
             </div>
-            
-            <div class="form-group col-lg-2"> 
+
+            <div class="form-group col-lg-2">
                 <label class="control-label ">
                     Day of Month
                 </label>
 
-                <div class="control-label "> 
+                <div class="control-label ">
                     <% for(var i = 1; i<= 31; i++){ %>
-                        <button class="btn btn-default"><%- i %></button>
-                    <% } %> 
+                        <button class="btn btn-default <%- crontabEditor.model.DayOfMonth.justClass(i, 'selected') %>"
+                                onclick="crontabEditor.model.DayOfMonth[<%- i %>] = !crontabEditor.model.DayOfMonth[<%- i %>]; crontabEditor.updateCronString(); "
+                                ><%- i %></button>
+                    <% } %>
                 </div>
             </div>
-            
-            <div class="form-group col-lg-2"> 
+
+            <div class="form-group col-lg-2">
                 <label class="control-label ">
                     Hours
                 </label>
 
-                <div class="control-label "> 
-                    <% for(var i = 0; i<= 24; i++){ %>
-                        <button class="btn btn-default"><%- i %></button>
-                    <% } %> 
+                <div class="control-label ">
+                    <% for(var i = 0; i<= 23; i++){ %> 
+                        <button class="btn btn-default <%- crontabEditor.model.Hours.justClass(i, 'selected') %>"
+                                onclick="crontabEditor.model.Hours[<%- i %>] = !crontabEditor.model.Hours[<%- i %>]; crontabEditor.updateCronString(); "
+                                ><%- i %></button>
+                    <% } %>
                 </div>
             </div>
-            
+
             <div class="form-group col-lg-2">
                 <label class="control-label ">
                     Days of Week
                 </label>
 
-                <div class="control-label ">  
+                <div class="control-label ">
                     <% for(var i = 1; i<= 7; i++){ %>
-                        <button class="btn btn-default"><%- i %></button>
-                    <% } %> 
+                        <button class="btn btn-default <%- crontabEditor.model.DaysOfWeek.justClass(i, 'selected') %>"
+                                onclick="crontabEditor.model.DaysOfWeek[<%- i %>] = !crontabEditor.model.DaysOfWeek[<%- i %>]; crontabEditor.updateCronString(); "
+                                ><%- i %></button>
+                    <% } %>
                 </div>
             </div>
-            
+
             <div class="form-group col-lg-2">
                 <label class="control-label ">
                     Minutes
                 </label>
 
-                <div class="control-label "> 
+                <div class="control-label ">
                     <% for(var i = 0; i< 60; i+=1){ %>
-                        <button class="btn btn-default"><%- i %></button>
-                    <% } %> 
+                        <button class="btn btn-default <%- crontabEditor.model.Minutes.justClass(i, 'selected') %>"
+                                onclick="crontabEditor.model.Minutes[<%- i %>] = !crontabEditor.model.Minutes[<%- i %>]; crontabEditor.updateCronString(); "
+                                ><%- i %></button>
+                    <% } %>
                 </div>
             </div>
-        </div> 
+        </div>
 </script>
-    
+
 <!-- jsonEditor -->
 <script type="text/x-just" data-just="jsonEditor">
 

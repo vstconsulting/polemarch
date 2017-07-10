@@ -5,8 +5,7 @@
  *
  * Apache License 2.0
  *
- * @author Trapenok Victor (Трапенок Виктор Викторович)
- * https://www.upwork.com/freelancers/~01a42b919885549ca9
+ * @author Trapenok Victor (Трапенок Виктор Викторович) Levhav@yandex.com
  * I will be glad to new orders for the development of something.
  *
  * Levhav@yandex.com
