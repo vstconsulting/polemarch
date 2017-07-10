@@ -1054,6 +1054,12 @@ Projects
    :arg id: id of project.
    :<json number inventory: inventory to execute playbook at.
    :<json string playbook: playbook to execute.
+   :<json *: any number parameters with any name and string or number type. All
+     those parameters just passes as additional command line arguments to
+     ``ansible-playbook`` utility during execution, so you can use this feature
+     to widely customize of ansible behaviour. For any ``key:value`` in command
+     line will be ``--key value``. If you want only key without a value
+     (``--become`` option for example), just pass ``null`` as value.
 
    Example request:
 
@@ -1066,6 +1072,8 @@ Projects
       {
          "inventory": 13,
          "playbook": "main.yml"
+         "become": null,
+         "su-user": "rootburger"
       }
 
    Results:
@@ -1175,6 +1183,9 @@ Periodic tasks
            "playbook":"collect_data.yml",
            "project":7,
            "inventory":8,
+           "vars":{
+
+           },
            "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/10/?format=json"
         }
 
@@ -1184,6 +1195,7 @@ Periodic tasks
    :>json string playbook: playbook to run periodically.
    :>json number project: id of project which this task belongs to.
    :>json number inventory: id of inventory for which must execute playbook.
+   :>json object vars: |ptask_vars_def|
    :>json string url: url to this specific periodic task.
 
 .. |ptask_details_ref| replace:: **Response JSON Object:** response json
@@ -1202,6 +1214,14 @@ Periodic tasks
    format in web. Like those, for example:
    https://linux.die.net/man/5/crontab and
    http://www.nncron.ru/help/EN/working/cron-format.htm
+
+.. |ptask_vars_def| replace:: those vars have special meaning. All those
+   parameters just passes as additional command line arguments to
+   ``ansible-playbook`` utility during execution, so you can use this feature
+   to widely customize of ansible behaviour. For any ``key:value`` in command
+   line will be ``--key value``. If you want only key without a value
+   (``--become`` option for example), just pass ``null`` as value. In all other
+   aspects this field works like usual ``vars``: |obj_vars_def|
 
 .. http:get:: /api/v1/periodic-tasks/
 
@@ -1236,6 +1256,9 @@ Periodic tasks
                  "schedule":"60",
                  "playbook":"collect_data.yml",
                  "inventory":8,
+                 "vars":{
+
+                 },
                  "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/10/?format=json"
               },
               {
@@ -1244,6 +1267,9 @@ Periodic tasks
                  "schedule":"* */2 sun,fri 1-15 *",
                  "playbook":"do_greatest_evil.yml",
                  "inventory":8,
+                 "vars":{
+
+                 },
                  "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/11/?format=json"
               }
            ]
@@ -1266,6 +1292,7 @@ Periodic tasks
    :<json string playbook: playbook to run periodically.
    :<json number project: id of project, which task belongs to.
    :<json number inventory: id of inventory to run playbook on.
+   :<json object vars: |ptask_vars_def|
 
    Example request:
 
@@ -1281,6 +1308,9 @@ Periodic tasks
           "playbook": "touch_the_clouds.yml",
           "project": 7,
           "inventory": 8
+          "vars":{
+
+           },
       }
 
    Results:
@@ -1294,6 +1324,9 @@ Periodic tasks
         "playbook": "touch_the_clouds.yml",
         "project": 7,
         "inventory": 8,
+        "vars":{
+
+         },
         "url": "http://127.0.0.1:8080/api/v1/periodic-tasks/14/?format=api"
     }
 
