@@ -8,10 +8,11 @@ from collections import namedtuple, OrderedDict
 from os.path import dirname
 
 from celery.schedules import crontab
+from django.db import transaction
 from django.utils import timezone
 
 from . import Inventory
-from .base import BModel, BManager, models
+from .base import BModel, BManager, BQuerySet, models
 from .vars import _AbstractModel, _AbstractVarsQuerySet
 from .projects import Project
 from ...main.utils import tmp_file, CmdExecutor, CalledProcessError
@@ -28,21 +29,31 @@ class Executor(CmdExecutor):
     def __init__(self, history):
         super(Executor, self).__init__()
         self.history = history
+        self.counter = 0
+
+    @property
+    def output(self):
+        return self.history.raw_stdout
+
+    @output.setter
+    def output(self, value):
+        pass
 
     def write_output(self, line):
-        super(Executor, self).write_output(line)
-        self.history.raw_stdout += line
-        self.history.save()
+        self.counter += 1
+        self.history.raw_history_line.create(history=self.history,
+                                             line_number=self.counter,
+                                             line=line+"\n")
 
 
 def __parse_extra_args(project, **extra):
     extra_args, files = list(), list()
     for key, value in extra.items():
-        if key == "extra_vars":
+        if key in ["extra_vars", "extra-vars"]:
             key = "extra-vars"
         elif key == "verbose":
             continue
-        elif key == "key_file":
+        elif key in ["key_file", "key-file"]:
             if "BEGIN RSA PRIVATE KEY" in value:
                 kfile = tmp_file()
                 kfile.write(value)
@@ -63,29 +74,30 @@ def run_ansible_playbook(task, inventory, **extra_args):
     path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
     path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
     inventory_file = tmp_file()
-    inventory_file.write(history_kwargs["raw_inventory"])
+    inventory_file.write(history.raw_inventory)
     status = "OK"
     try:
         extra = __parse_extra_args(project=task.project, **extra_args)
         args = [path_to_ansible, path_to_playbook, '-i',
                 inventory_file.name, '-v'] + extra.args
-        history_kwargs['raw_args'] = " ".join(args)
-        history_kwargs['raw_stdout'] = Executor(history).execute(args)
+        history.raw_args = " ".join(args)
+        history.raw_stdout = Executor(history).execute(args)
     except CalledProcessError as exception:
-        history_kwargs['raw_stdout'] = str(exception.output)
+        history.raw_stdout = str(exception.output)
         if exception.returncode == 4:
             status = "OFFLINE"
         else:
             status = "ERROR"
     except Exception as exception:  # pragma: no cover
-        history_kwargs['raw_stdout'] = str(exception)
+        history.raw_stdout = history.raw_stdout + str(exception)
         status = "ERROR"
     finally:
         inventory_file.close()
         for key_file in key_files:
             key_file.close()
-        history_kwargs.update(dict(stop_time=timezone.now(), status=status))
-        History(id=history.id, **history_kwargs).save()
+        history.stop_time = timezone.now()
+        history.status = status
+        history.save()
 
 
 # Block of real models
@@ -105,6 +117,7 @@ class Task(BModel):
         run_ansible_playbook(self, inventory, **extra)
 
 
+# noinspection PyTypeChecker
 class PeriodicTask(_AbstractModel):
     objects     = BManager.from_queryset(_AbstractVarsQuerySet)()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
@@ -156,14 +169,25 @@ class PeriodicTask(_AbstractModel):
         run_ansible_playbook(self, self.inventory, **self.vars)
 
 
+class HistoryQuerySet(BQuerySet):
+    use_for_related_fields = True
+
+    def create(self, **kwargs):
+        raw_stdout = kwargs.pop("raw_stdout", None)
+        history = super(HistoryQuerySet, self).create(**kwargs)
+        if raw_stdout:
+            history.raw_stdout = raw_stdout
+        return history
+
+
 class History(BModel):
+    objects       = HistoryQuerySet.as_manager()
     project       = models.ForeignKey(Project,
                                       on_delete=models.CASCADE,
                                       related_query_name="history")
     playbook      = models.CharField(max_length=256)
     start_time    = models.DateTimeField(default=timezone.now)
     stop_time     = models.DateTimeField(blank=True, null=True)
-    raw_stdout    = models.TextField(default="")
     raw_args      = models.TextField(default="")
     raw_inventory = models.TextField(default="")
     status        = models.CharField(max_length=50)
@@ -172,4 +196,38 @@ class History(BModel):
         default_related_name = "history"
         index_together = [
             ["id", "project", "playbook", "status", "start_time", "stop_time"]
+        ]
+
+    @property
+    def raw_stdout(self):
+        return "".join(self.raw_history_line
+                       .values_list("line", flat=True)[:10000000])
+
+    @raw_stdout.setter
+    @transaction.atomic
+    def raw_stdout(self, lines):
+        counter = 0
+        del self.raw_stdout
+        for line in lines.split("\n"):
+            counter += 1
+            self.raw_history_line.create(history=self, line_number=counter,
+                                         line=line)
+
+    @raw_stdout.deleter
+    def raw_stdout(self):
+        self.raw_history_line.all().delete()
+
+
+class HistoryLines(BModel):
+    line         = models.TextField(default="")
+    line_number  = models.IntegerField(default=0)
+    history      = models.ForeignKey(History,
+                                     on_delete=models.CASCADE,
+                                     related_query_name="raw_history_line")
+
+    class Meta:
+        default_related_name = "raw_history_line"
+        index_together = [
+            ["history"], ["line_number"],
+            ["history", "line_number"]
         ]

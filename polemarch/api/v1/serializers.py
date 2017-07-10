@@ -140,7 +140,8 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "stop_time",
                   "raw_inventory",
                   "raw_args",
-                  "raw_stdout")
+                  "raw_stdout",
+                  "url")
 
 
 class VariableSerializer(serializers.ModelSerializer):

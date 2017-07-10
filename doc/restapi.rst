@@ -103,7 +103,7 @@ about user management api.
 Hosts
 -----
 
-.. http:get:: /api/v1/hosts/{id}
+.. http:get:: /api/v1/hosts/{id}/
 
    Get details about one host.
 
@@ -142,7 +142,7 @@ Hosts
 .. |host_name_def| replace:: either human-readable name or hostname/IP or range
    of them (it is depends at context of using this host during playbooks run).
 .. |hosts_details_ref| replace:: **Response JSON Object:** response json fields
-   same as in :http:get:`/api/v1/hosts/{id}`.
+   same as in :http:get:`/api/v1/hosts/{id}/`.
 
 .. http:get:: /api/v1/hosts/
 
@@ -199,7 +199,7 @@ Hosts
 
    |hosts_details_ref|
 
-.. http:delete:: /api/v1/hosts/{id}
+.. http:delete:: /api/v1/hosts/{id}/
 
    Delete host.
 
@@ -245,7 +245,7 @@ Hosts
 
    |hosts_details_ref|
 
-.. http:patch:: /api/v1/hosts/{id}
+.. http:patch:: /api/v1/hosts/{id}/
 
    Update host. |patch_reminder|
 
@@ -291,7 +291,7 @@ Hosts
 Groups
 ------
 
-.. http:get:: /api/v1/groups/{id}
+.. http:get:: /api/v1/groups/{id}/
 
    Get details about one group.
 
@@ -351,7 +351,7 @@ Groups
 .. |group_children_def| replace:: either this group of subgroups or group of
    hosts.
 .. |group_details_ref| replace:: **Response JSON Object:** response json fields
-   same as in :http:get:`/api/v1/groups/{id}`.
+   same as in :http:get:`/api/v1/groups/{id}/`.
 
 .. http:get:: /api/v1/groups/
 
@@ -396,7 +396,7 @@ Groups
 
    |group_details_ref|
 
-.. http:delete:: /api/v1/groups/{id}
+.. http:delete:: /api/v1/groups/{id}/
 
    Delete group.
 
@@ -448,7 +448,7 @@ Groups
 
    |group_details_ref|
 
-.. http:patch:: /api/v1/groups/{id}
+.. http:patch:: /api/v1/groups/{id}/
 
    Update group. |patch_reminder|
 
@@ -545,7 +545,7 @@ Groups
 Inventories
 -----------
 
-.. http:get:: /api/v1/inventories/{id}
+.. http:get:: /api/v1/inventories/{id}/
 
    Get details about one inventory.
 
@@ -590,7 +590,7 @@ Inventories
 .. |inventory_groups_def| replace:: list of groups in inventory.
    See :ref:`groups` for fields explanation.
 .. |inventory_details_ref| replace:: **Response JSON Object:** response json
-   fields same as in :http:get:`/api/v1/inventories/{id}`.
+   fields same as in :http:get:`/api/v1/inventories/{id}/`.
 
 .. http:get:: /api/v1/inventories/
 
@@ -628,7 +628,7 @@ Inventories
 
    |inventory_details_ref|
 
-.. http:delete:: /api/v1/inventories/{id}
+.. http:delete:: /api/v1/inventories/{id}/
 
    Delete inventory.
 
@@ -677,7 +677,7 @@ Inventories
 
    |inventory_details_ref|
 
-.. http:patch:: /api/v1/inventories/{id}
+.. http:patch:: /api/v1/inventories/{id}/
 
    Update inventory. |patch_reminder|
 
@@ -751,7 +751,7 @@ Inventories
 Projects
 --------
 
-.. http:get:: /api/v1/projects/{id}
+.. http:get:: /api/v1/projects/{id}/
 
    Get details about project.
 
@@ -815,7 +815,7 @@ Projects
      are ``GIT`` for Git repositories. And ``TAR`` for uploading tar archive
      with project files.
 .. |project_details_ref| replace:: **Response JSON Object:** response json
-   fields same as in :http:get:`/api/v1/projects/{id}`.
+   fields same as in :http:get:`/api/v1/projects/{id}/`.
 
 .. http:get:: /api/v1/projects/
 
@@ -864,9 +864,9 @@ Projects
 
    :>json string type: special shortcut to var ``repo_type``. Details about
      that var and other json fields of response you can see
-     at :http:get:`/api/v1/projects/{id}`
+     at :http:get:`/api/v1/projects/{id}/`
 
-.. http:delete:: /api/v1/projects/{id}
+.. http:delete:: /api/v1/projects/{id}/
 
    Delete project.
 
@@ -926,7 +926,7 @@ Projects
 
    |project_details_ref|
 
-.. http:patch:: /api/v1/projects/{id}
+.. http:patch:: /api/v1/projects/{id}/
 
    Update project. Operation does not start synchronization again.
    If you want synchronize, you must do it by
@@ -1079,7 +1079,7 @@ Projects
 Tasks
 -----
 
-.. http:get:: /api/v1/tasks/{id}
+.. http:get:: /api/v1/tasks/{id}/
 
    Get details about task.
 
@@ -1150,7 +1150,7 @@ Tasks
 Periodic tasks
 --------------
 
-.. http:get:: /api/v1/periodic-tasks/{id}
+.. http:get:: /api/v1/periodic-tasks/{id}/
 
    Get details about periodic task.
 
@@ -1187,7 +1187,7 @@ Periodic tasks
    :>json string url: url to this specific periodic task.
 
 .. |ptask_details_ref| replace:: **Response JSON Object:** response json
-   fields same as in :http:get:`/api/v1/periodic-tasks/{id}`.
+   fields same as in :http:get:`/api/v1/periodic-tasks/{id}/`.
 
 .. |ptask_schedule_details| replace:: string with integer value or string in
    cron format, what depends on ``type`` value. Look at ``type`` description
@@ -1251,7 +1251,7 @@ Periodic tasks
 
    |ptask_details_ref|
 
-.. http:delete:: /api/v1/periodic-tasks/{id}
+.. http:delete:: /api/v1/periodic-tasks/{id}/
 
    Delete periodic task.
 
@@ -1299,7 +1299,7 @@ Periodic tasks
 
    |ptask_details_ref|
 
-.. http:patch:: /api/v1/periodic-tasks/{id}
+.. http:patch:: /api/v1/periodic-tasks/{id}/
 
    Update periodic task. |patch_reminder|
 
@@ -1343,7 +1343,7 @@ Periodic tasks
 History records
 ---------------
 
-.. http:get:: /api/v1/history/{id}
+.. http:get:: /api/v1/history/{id}/
 
    Get details about one history record.
 
@@ -1384,11 +1384,20 @@ History records
    :>json string raw_inventory: Ansible inventory, which used for execution. It
      is generates from on of Polemarch's :ref:`inventory`
    :>json string raw_stdout: what Ansible wrote to stdout and stderr during
-     execution.
+     execution. The size is limited to 10M characters. Full output
+     in :http:get:`/api/v1/history/{id}/raw/`.
    :>json string url: url to this specific history record.
 
 .. |history_details_ref| replace:: **Response JSON Object:** response json fields
-   same as in :http:get:`/api/v1/history/{id}`.
+   same as in :http:get:`/api/v1/history/{id}/`.
+
+
+.. http:get:: /api/v1/history/{id}/raw/
+
+   Get full output of executed task.
+
+   :arg id: id of history record.
+
 
 .. http:get:: /api/v1/history/
 
@@ -1464,7 +1473,7 @@ History records
 
    |history_details_ref|
 
-.. http:delete:: /api/v1/history/{id}
+.. http:delete:: /api/v1/history/{id}/
 
    Delete history record.
 
@@ -1695,7 +1704,7 @@ To clarify information above here is example detailed structured explanation
 Users
 -----
 
-.. http:get:: /api/v1/users/{id}
+.. http:get:: /api/v1/users/{id}/
 
    Get details about one user.
 
@@ -1737,7 +1746,7 @@ Users
    :>json string url: url to this specific user.
 
 .. |users_details_ref| replace:: **Response JSON Object:** response json fields
-   same as in :http:get:`/api/v1/users/{id}`.
+   same as in :http:get:`/api/v1/users/{id}/`.
 
 .. http:get:: /api/v1/users/
 
@@ -1785,7 +1794,7 @@ Users
 
    |users_details_ref|
 
-.. http:delete:: /api/v1/users/{id}
+.. http:delete:: /api/v1/users/{id}/
 
    Delete user.
 
@@ -1840,7 +1849,7 @@ Users
 
    |users_details_ref|
 
-.. http:patch:: /api/v1/users/{id}
+.. http:patch:: /api/v1/users/{id}/
 
    Update user. |patch_reminder|
 
