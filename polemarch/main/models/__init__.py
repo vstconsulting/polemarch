@@ -62,6 +62,7 @@ def clean_dirs(instance, **kwargs):
 @receiver(signals.post_save, sender=PeriodicTask)
 def save_to_beat(instance, **kwargs):
     manager = django_celery_beat.models.PeriodicTask.objects
+    delete_from_beat(instance)
     if instance.type == "INTERVAL":
         units = IntervalSchedule.SECONDS
         secs = instance.get_schedule()
@@ -82,8 +83,5 @@ def save_to_beat(instance, **kwargs):
 
 @receiver(signals.post_delete, sender=PeriodicTask)
 def delete_from_beat(instance, **kwargs):
-    try:
-        manager = django_celery_beat.models.PeriodicTask.objects
-        manager.get(name=str(instance.id)).delete()
-    except django_celery_beat.models.PeriodicTask.DoesNotExist:
-        pass
+    django_celery_beat.models.PeriodicTask.objects.\
+        filter(name=str(instance.id)).delete()

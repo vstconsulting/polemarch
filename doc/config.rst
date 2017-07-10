@@ -46,28 +46,60 @@ example than general howto) you must do such steps:
 
 1. Install deb or rpm of Polemarch at every server with worker and web-server.
 
-2. Setup DB-server. MySQL for example. For all nodes edit configuration section
-   ``[database]`` and provide credential for you database.
+   In Debian-based distros:
+
+   .. sourcecode:: bash
+
+      sudo yum localinstall polemarch-0.0.1-2612.x86_64.rpm
+
+   In Red Hat-based:
+
+   .. sourcecode:: bash
+
+      sudo dpkg -i polemarch_0.0.1-1_amd64.deb || sudo apt-get install -f
+
+2. Setup DB-server. MySQL for example. For all nodes edit :ref:`database`
+   and provide credential for you database.
 
 3. Setup cache-server. Redis for example. Specify his credentials in
-   ``[locks]`` and ``[cache]`` sections of configuration for all nodes.
+   :ref:`locks` and :ref:`cache` for all nodes.
 
 4. Setup some network filesystem. NFS for example. Mount it in same directory
-   to all worker-intended nodes. Write that directory in ``[worker]`` section.
+   to all worker-intended nodes. Write that directory in :ref:`worker`.
 
 5. Setup some http-balancer. HAProxy for example. Point it to web-intended
    nodes.
 
 6. Run and enable ``polemarchweb`` service on web-intended nodes. Disable
-   ``polemarchworker`` service.
+   ``polemarchworker`` service:
+
+   .. sourcecode:: bash
+
+      # start web-server
+      sudo systemctl enable polemarchweb.service
+      sudo service polemarchweb start
+      # disable worker
+      sudo systemctl disable polemarchworker.service
+      sudo service polemarchworker stop
 
 7. Run and enable ``polemarchworker`` service on every worker-intended nodes.
-   Disable ``polemarchweb`` service.
+   Disable ``polemarchweb`` service:
+
+   .. sourcecode:: bash
+
+      # start worker
+      sudo systemctl enable polemarchworker.service
+      sudo service polemarchworker start
+      # disable web-server
+      sudo systemctl disable polemarchweb.service
+      sudo service polemarchweb stop
 
 That's it.
 
-Section ``[main]``
-------------------
+Main settings
+-------------
+
+Section ``[main]``.
 
 This section to store settings related to whole Polemarch (both worker and
 web). Here you can specify verbosity level of Polemarch during work, which can
@@ -75,8 +107,12 @@ be useful for troubleshoot problems (logging level etc). Also there is settings
 to change timezone for whole app and directory where Polemarch will store
 ansible projects cloned from repositories.
 
-Section ``[database]``
-----------------------
+.. _database:
+
+Database settings
+-----------------
+
+Section ``[database]``.
 
 Here you can change settings related to database system, which will Polemarch
 use. Polemarch supports all databases supported by ``django``. List of
@@ -88,8 +124,10 @@ client-server database (SQLite not suitable) shared for all nodes.
 
 .. _cache:
 
-Section ``[cache]``
--------------------
+Cache settings
+--------------
+
+Section ``[cache]``.
 
 This section to store settings related to cache backend used by Polemarch.
 Based on Django Polemarch supports all cache backends that is supports.
@@ -99,8 +137,12 @@ https://docs.djangoproject.com/en/1.10/ref/settings/#caches. In clusterization
 scenario we advice to share cache between nodes to speedup their work using
 client-server cache realizations.
 
-Section ``[locks]``
--------------------
+.. _locks:
+
+Locks settings
+--------------
+
+Section ``[locks]``.
 
 Locks is system that Polemarch use to prevent damage from parallel actions
 working on something simultaneously. It is based on Django cache, so there is
@@ -112,8 +154,12 @@ example, is not suitable. In case of clusterization we are strongly recommend
 to use Redis or Memcached as backend for that purpose. Cache and locks backend
 can be same, but don't forget about requirement we said above.
 
-Section ``[rpc]``
------------------
+.. _rpc:
+
+Rpc settings
+------------
+
+Section ``[rpc]``.
 
 Polemarch uses Celery for long-running tasks (such as ``ansible-playbook``
 runs, repo synchronizations and so on). Celery is based on message queue concept,
@@ -123,14 +169,22 @@ and Celery itself. Those kinds of settings: broker backend, number of
 worker-processes per node and some settings used for troubleshoot
 server-broker-worker interaction problems.
 
-Section ``[web]``
------------------
+.. _web:
+
+Web settings
+------------
+
+Section ``[web]``.
 
 Here placed settings related to web-server. It is settings like: allowed hosts,
 static files directory or pagination limit.
 
-Section ``[worker]``
---------------------
+.. _worker:
+
+Worker settings
+---------------
+
+Section ``[worker]``.
 
 Section for worker-related settings. Now here just one - directory to store
 files, which must be accessible by all workers. It have meaning only if you
