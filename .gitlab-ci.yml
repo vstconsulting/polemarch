@@ -1,4 +1,4 @@
-image: git.vst.lan/vst/tests:tox
+image: onegreyonewhite/tox:tox
 
 variables:
   TESTS: "polemarch.main.tests"
@@ -68,7 +68,7 @@ default_rpm_tests:
 
 default_deb_tests:
   <<: *packing-test
-  image: git.vst.lan/vst/tests:ubuntu
+  image: onegreyonewhite/tox:ubuntu
   script:
    - make deb
    - echo "echo 'hello'" > /bin/systemctl
