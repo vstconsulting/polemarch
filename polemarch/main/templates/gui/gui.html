@@ -85,9 +85,9 @@
 <script type="text/x-just" data-just="history_listInProjects">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             History
             <small>v1</small>
         </h1>
@@ -137,7 +137,7 @@
                                 <% for(var i in pmHistory.model.itemslist.results){ %>
                                     <tr class="item-row item-<%- pmHistory.model.itemslist.results[i].id %>" >
                                         <td>
-                                            <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
+                                            <a href="/?project/<%- project_id %>/history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].playbook %></a>
                                         </td>
                                         <td>
@@ -165,12 +165,12 @@
 </script>
 
 <!-- Список Periodic Tasks -->
-<script type="text/x-just" data-just="history_page"> 
+<script type="text/x-just" data-just="history_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?history"  onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?history"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             <%- pmHistory.model.items[item_id].playbook %>
             <small>v1</small>
         </h1>
@@ -253,14 +253,103 @@
     </section>
 </script>
 
+<script type="text/x-just" data-just="history_pageInProjects">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/history"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+            <%- pmHistory.model.items[item_id].playbook %>
+            <small>v1</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[project_id].name %>`</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/history"  onclick="return spajs.openURL(this.href);" >History</a></li>
+            <li class="active"><%- pmHistory.model.items[item_id].playbook %></li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Task<br>
+                        <div class="box-tools pull-right">
+
+
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Playbook</label>
+                                <input type="text"
+                                        value="<%- pmHistory.model.items[item_id].playbook %>"
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Status</label>
+                                <input type="text"
+                                        value="<%- pmHistory.model.items[item_id].status %>"
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Start time</label>
+                                <input type="text"
+                                        value="<%- pmHistory.model.items[item_id].start_time %>"
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Stop time</label>
+                                <input type="text"
+                                        value="<%- pmHistory.model.items[item_id].stop_time %>"
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <label class="control-label" >Inventory</label>
+                                <pre style="overflow: auto; max-height: 600px;"><%- pmHistory.model.items[item_id].raw_inventory %></pre>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <label class="control-label" >stdout</label>
+                                <pre style="overflow: auto; max-height: 600px;"><%- pmHistory.model.items[item_id].raw_stdout %></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
 
 <!-- Список Periodic Tasks -->
 <script type="text/x-just" data-just="periodic-tasks_list">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             Periodic tasks list
             <small>v1</small>
         </h1>
@@ -382,9 +471,9 @@
 <script type="text/x-just" data-just="periodic-tasks_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             <%- pmPeriodicTasks.model.items[item_id].playbook %>
             <small>v1</small>
         </h1>
@@ -494,7 +583,7 @@
                             </div>
 
                             <div class="form-group col-lg-12 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
-                                <label class="control-label" >Schedule `CRONTAB`</label>  
+                                <label class="control-label" >Schedule `CRONTAB`</label>
                                 <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>
                                     <%= crontabEditor.editor({string:pmPeriodicTasks.model.items[item_id].schedule}) %>
                                 <% }else{ %>
@@ -545,9 +634,9 @@
 <script type="text/x-just" data-just="periodic-tasks_new_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             Create new periodic task
             <small>v1</small>
         </h1>
@@ -644,8 +733,8 @@
                             </div>
 
                             <div class="form-group col-lg-12 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
-                                <label class="control-label" >Schedule `CRONTAB`</label>   
-                                <%= crontabEditor.editor({string:''}) %> 
+                                <label class="control-label" >Schedule `CRONTAB`</label>
+                                <%= crontabEditor.editor({string:''}) %>
                                 <div class="help-block" id=""></div>
                             </div>
                             <!--
@@ -837,9 +926,9 @@
 <script type="text/x-just" data-just="projects_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?projects"  onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?projects"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             <%- pmProjects.model.items[item_id].name %>
             <small>v1</small>
         </h1>
@@ -966,9 +1055,9 @@
 <script type="text/x-just" data-just="projects_new_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             Create new project
             <small>v1</small>
         </h1>
@@ -1118,9 +1207,9 @@
 <script type="text/x-just" data-just="projects_run_playbook">
 <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             Project `<%- pmProjects.model.items[item_id].name %>` run playbook options
             <small>v1</small>
         </h1>
@@ -1312,9 +1401,9 @@
 <script type="text/x-just" data-just="inventories_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             <%- pmInventories.model.items[item_id].name %>
             <small>v1</small>
         </h1>
@@ -1414,9 +1503,9 @@
 <script type="text/x-just" data-just="inventories_new_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             Create new inventory
             <small>v1</small>
         </h1>
@@ -1642,9 +1731,9 @@
 <script type="text/x-just" data-just="users_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             <%- pmUsers.model.items[item_id].username %>
             <small>v1</small>
         </h1>
@@ -1739,9 +1828,9 @@
 <script type="text/x-just" data-just="users_new_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             Create new user
             <small>v1</small>
         </h1>
@@ -1951,9 +2040,9 @@
 <script type="text/x-just" data-just="hosts_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             <%- pmHosts.model.items[item_id].name %>
             <small>v1</small>
         </h1>
@@ -2008,9 +2097,9 @@
 <script type="text/x-just" data-just="hosts_new_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             Create new host
             <small>v1</small>
         </h1>
@@ -2175,7 +2264,7 @@
 
         <div class="row" id="jsonEditorVarList">
             <div class="col-lg-12">
-                <div class="input-group"> 
+                <div class="input-group">
                     <input type="text"
                             class="form-control"
                             value="<%- crontabEditor.model.string %>"
@@ -2269,7 +2358,7 @@
                             <a href="#" onclick="crontabEditor.setHours('0'); return false;">At the beginning</a>
                         </li>
                     </ul>
-                </div> 
+                </div>
 
                 <div class="control-label " style="margin-top:15px;">
                     <% for(var i = 0; i<= 23; i++){ %>
@@ -2311,8 +2400,8 @@
                             <a href="#" onclick="crontabEditor.setDayOfMonth('1'); return false;">At the beginning</a>
                         </li>
                     </ul>
-                </div> 
-  
+                </div>
+
                 <div class="control-label " style="margin-top:15px;">
                     <% for(var i = 1; i<= 31; i++){ %>
                         <button class="btn btn-default <%- crontabEditor.model.DayOfMonth.justClass(i, 'selected') %>"
@@ -2345,12 +2434,12 @@
                         </li>
                         <li>
                             <a href="#" onclick="crontabEditor.setMonths('*/6'); return false;">*/6</a>
-                        </li> 
+                        </li>
                         <li>
                             <a href="#" onclick="crontabEditor.setMonths('1'); return false;">At the beginning</a>
                         </li>
                     </ul>
-                </div>  
+                </div>
                 <div class="control-label " style="margin-top:15px;">
                     <% for(var i = 1; i<= 12; i++){ %>
                         <button
@@ -2377,13 +2466,13 @@
                         </li>
                         <li>
                             <a href="#" onclick="crontabEditor.setDaysOfWeek('*/3'); return false;">*/3</a>
-                        </li> 
+                        </li>
                         <li>
                             <a href="#" onclick="crontabEditor.setDaysOfWeek('1'); return false;">At the beginning</a>
                         </li>
                     </ul>
-                </div>  
-              
+                </div>
+
                 <div class="control-label " style="margin-top:15px;">
                     <% for(var i = 1; i<= 7; i++){ %>
                         <button class="btn btn-default col-xs-6 col-lg-6 <%- crontabEditor.model.DaysOfWeek.justClass(i, 'selected') %>"
@@ -2428,26 +2517,26 @@
                     <label class="col-sm-2 control-label">
                         New varible name
                     </label>
-                    <div class="input-group col-sm-10"  > 
+                    <div class="input-group col-sm-10"  >
                         <input type="text" placeholder="Enter name" id="new_json_name" value=""  class="form-control" >
                         <div class="help-block"></div>
                     </div>
                 </div>
             </div>
-            
-            
+
+
             <div class="row">
                 <div class="form-group col-lg-12">
                     <label class="col-sm-2 control-label">
                         New varible value
                     </label>
-                    <div class="input-group col-sm-10"  > 
+                    <div class="input-group col-sm-10"  >
                         <textarea placeholder="Enter value" id="new_json_value" class="form-control"  style="resize:vertical;"></textarea>
                         <div class="help-block"></div>
                     </div>
                 </div>
             </div>
-             
+
             <div class="row">
                 <div class="form-group col-lg-1">
                     <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>');" >Add varible</span>
@@ -2599,9 +2688,9 @@
 <script type="text/x-just" data-just="groups_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             <%- pmGroups.model.items[item_id].name %>
             <small>v1</small>
         </h1>
@@ -2781,9 +2870,9 @@
 <script type="text/x-just" data-just="groups_new_page">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" class="btn btn-default" > 
+            <a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
-            </a> 
+            </a>
             Create new group
             <small>v1</small>
         </h1>

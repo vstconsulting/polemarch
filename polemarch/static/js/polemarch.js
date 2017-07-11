@@ -264,8 +264,13 @@ polemarch.start = function(options)
     })
     
     spajs.addMenu({
-        id:"project-history", 
-        urlregexp:[/^history\/([0-9]+)$/], 
+        id:"history-item-in-project", 
+        urlregexp:[/^project\/([0-9]+)\/history\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInProjects(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"project-history",  
         urlregexp:[/^project\/([0-9]+)\/history$/, /^project\/([0-9]+)\/history\/(page)\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showListInProjects(holder, menuInfo, data);}
     })

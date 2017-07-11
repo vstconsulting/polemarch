@@ -125,13 +125,13 @@ function pmItems()
 
         return $.when(this.loadItem(data.reg[1])).done(function()
         {
-            $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:data.reg[1]}))
+            $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:data.reg[1], project_id:0}))
         }).fail(function()
         {
             $.notify("", "error");
         })
     }
-
+    
     this.showNewItemPage = function(holder, menuInfo, data)
     {
         $(holder).html(spajs.just.render(this.model.name+'_new_page', {parent_item:data.reg[2], parent_type:data.reg[1]}))
