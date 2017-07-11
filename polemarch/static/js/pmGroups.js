@@ -42,7 +42,7 @@ pmGroups.addItem = function(parent_type, parent_item)
             {
                 if(parent_type == 'group')
                 {
-                    $.when(pmGroups.setSubGroups(parent_item, [data.id])).always(function(){
+                    $.when(pmGroups.addSubGroups(parent_item, [data.id])).always(function(){
                         $.when(spajs.open({ menuId:"group/"+parent_item})).always(function(){
                             def.resolve()
                         })
@@ -50,7 +50,7 @@ pmGroups.addItem = function(parent_type, parent_item)
                 }
                 else if(parent_type == 'inventory')
                 {
-                    $.when(pmInventories.setSubGroups(parent_item, [data.id])).always(function(){
+                    $.when(pmInventories.addSubGroups(parent_item, [data.id])).always(function(){
                         $.when(spajs.open({ menuId:"inventory/"+parent_item})).always(function(){
                             def.resolve()
                         })
@@ -58,7 +58,7 @@ pmGroups.addItem = function(parent_type, parent_item)
                 }
                 else if(parent_type == 'project')
                 {
-                    $.when(pmProjects.setSubGroups(parent_item, [data.id])).always(function(){
+                    $.when(pmProjects.addSubGroups(parent_item, [data.id])).always(function(){
                         $.when(spajs.open({ menuId:"project/"+parent_item})).always(function(){
                             def.resolve()
                         })
@@ -136,6 +136,11 @@ pmGroups.updateItem = function(item_id)
  */
 pmGroups.setSubGroups = function(item_id, groups_ids)
 {
+    if(!groups_ids)
+    {
+        groups_ids = []
+    }
+
     return $.ajax({
         url: "/api/v1/groups/"+item_id+"/groups/",
         type: "PUT",
@@ -173,6 +178,11 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
  */
 pmGroups.setSubHosts = function(item_id, hosts_ids)
 {
+    if(!hosts_ids)
+    {
+        hosts_ids = []
+    }
+
     return $.ajax({
         url: "/api/v1/groups/"+item_id+"/hosts/",
         type: "PUT",
@@ -189,6 +199,88 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
             if(pmGroups.model.items[item_id])
             {
                 pmGroups.model.items[item_id].hosts = []
+                for(var i in hosts_ids)
+                {
+                    pmGroups.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
+                }
+            }
+            console.log("group update", data);
+            $.notify("Save", "success");
+        },
+        error:function(e)
+        {
+            console.log("group "+item_id+" update error - " + JSON.stringify(e));
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+
+/**
+ * @return $.Deferred
+ */
+pmGroups.addSubGroups = function(item_id, groups_ids)
+{
+    if(!groups_ids)
+    {
+        groups_ids = []
+    }
+
+    return $.ajax({
+        url: "/api/v1/groups/"+item_id+"/groups/",
+        type: "POST",
+        contentType:'application/json',
+        data:JSON.stringify(groups_ids),
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            if(pmGroups.model.items[item_id])
+            { 
+                for(var i in groups_ids)
+                {
+                    pmGroups.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
+                }
+            }
+            console.log("group update", data);
+            $.notify("Save", "success");
+        },
+        error:function(e)
+        {
+            console.log("group "+item_id+" update error - " + JSON.stringify(e));
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+ 
+/**
+ * @return $.Deferred
+ */
+pmGroups.addSubHosts = function(item_id, hosts_ids)
+{
+    if(!hosts_ids)
+    {
+        hosts_ids = []
+    }
+
+    return $.ajax({
+        url: "/api/v1/groups/"+item_id+"/hosts/",
+        type: "POST",
+        contentType:'application/json',
+        data:JSON.stringify(hosts_ids),
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            if(pmGroups.model.items[item_id])
+            { 
                 for(var i in hosts_ids)
                 {
                     pmGroups.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])

@@ -48,7 +48,7 @@ pmHosts.addItem = function(parent_type, parent_item)
             {
                 if(parent_type == 'group')
                 {
-                    $.when(pmGroups.setSubHosts(parent_item, [data.id])).always(function(){
+                    $.when(pmGroups.addSubHosts(parent_item, [data.id])).always(function(){
                         $.when(spajs.open({ menuId:"group/"+parent_item})).always(function(){
                             def.resolve()
                         })
@@ -56,7 +56,7 @@ pmHosts.addItem = function(parent_type, parent_item)
                 }
                 else if(parent_type == 'inventory')
                 {
-                    $.when(pmInventories.setSubHosts(parent_item, [data.id])).always(function(){
+                    $.when(pmInventories.addSubHosts(parent_item, [data.id])).always(function(){
                         $.when(spajs.open({ menuId:"inventory/"+parent_item})).always(function(){
                             def.resolve()
                         })
@@ -64,7 +64,7 @@ pmHosts.addItem = function(parent_type, parent_item)
                 }
                 else if(parent_type == 'project')
                 {
-                    $.when(pmProjects.setSubHosts(parent_item, [data.id])).always(function(){
+                    $.when(pmProjects.addSubHosts(parent_item, [data.id])).always(function(){
                         $.when(spajs.open({ menuId:"project/"+parent_item})).always(function(){
                             def.resolve()
                         })
