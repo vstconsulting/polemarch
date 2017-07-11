@@ -123,7 +123,7 @@ class CmdExecutor(object):
             self.write_output(line)
         retcode = proc.poll()
         if retcode:
-            raise CalledProcessError(retcode, proc.args, output=self.output)
+            raise CalledProcessError(retcode, cmd, output=self.output)
         return self.output
 
 

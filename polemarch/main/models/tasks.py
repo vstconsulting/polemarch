@@ -199,6 +199,7 @@ class History(BModel):
 
     class Meta:
         default_related_name = "history"
+        ordering = ["-id"]
         index_together = [
             ["id", "project", "playbook", "status", "inventory",
              "start_time", "stop_time"]
