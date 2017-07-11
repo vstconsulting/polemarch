@@ -118,7 +118,10 @@ class Git(_Base):  # pragma: no cover
         return repo, None
 
     def make_update(self, env):
-        repo = git.Repo(self.path)
+        try:
+            repo = git.Repo(self.path)
+        except git.NoSuchPathError:
+            repo = self.make_clone(env)[0]
         with repo.git.custom_environment(**env):
             kwargs = self.options.get("FETCH_KWARGS", dict())
             fetch_result = repo.remotes.origin.fetch(**kwargs)
