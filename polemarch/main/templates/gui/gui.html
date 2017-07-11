@@ -633,19 +633,19 @@
                                         id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_type"
                                         class="form-control"
                                         maxlength="255">
-                                        <option value="DELTA" <% if(pmPeriodicTasks.model.items[item_id].type == 'DELTA'){ %>selected<% } %> >Interval schedule</option>
+                                        <option value="INTERVAL" <% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %>selected<% } %> >Interval schedule</option>
                                         <option value="CRONTAB" <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>selected<% } %> >Cron style schedule</option>
                                 </select>
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'DELTA' }) %> ">
+                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'INTERVAL' }) %> ">
                                 <label class="control-label" >Interval schedule</label>
                                 <div class="input-group">
                                     <input type="text"
                                             placeholder="Enter time interval in seconds"
-                                            id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_schedule_DELTA"
-                                            value="<% if(pmPeriodicTasks.model.items[item_id].type == 'DELTA'){ %><%- pmPeriodicTasks.model.items[item_id].schedule %><% } %>"
+                                            id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_schedule_INTERVAL"
+                                            value="<% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %><%- pmPeriodicTasks.model.items[item_id].schedule %><% } %>"
                                             class="form-control"
                                             maxlength="255"
                                             onkeyup="this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+(.)/g, '$1'); $('#interval-schedule-help').html('~ '+Math.floor(this.value/3600*100)/100+'h')"
@@ -653,7 +653,7 @@
                                     <span class="input-group-addon" id="basic-addon2">sec</span>
                                 </div>
                                 <div class="help-block" id="interval-schedule-help">
-                                    <% if(pmPeriodicTasks.model.items[item_id].type == 'DELTA'){ %>
+                                    <% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %>
                                             ~<%- Math.floor(pmPeriodicTasks.model.items[item_id].schedule/3600*100)/100  %>h
                                     <% } %>
                                 </div>
@@ -787,18 +787,18 @@
                                         id="new_periodic-tasks_type"
                                         class="form-control"
                                         maxlength="255">
-                                        <option value="DELTA" >Interval schedule</option>
+                                        <option value="INTERVAL" >Interval schedule</option>
                                         <option value="CRONTAB" >Cron style schedule</option>
                                 </select>
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'DELTA' }) %> ">
+                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'INTERVAL' }) %> ">
                                 <label class="control-label" >Interval schedule</label>
                                 <div class="input-group">
                                     <input type="text"
                                             placeholder="Enter time interval in seconds"
-                                            id="new_periodic-tasks_schedule_DELTA"
+                                            id="new_periodic-tasks_schedule_INTERVAL"
                                             value=""
                                             class="form-control"
                                             maxlength="255"
