@@ -19,7 +19,8 @@ pmTasks.execute = function(project_id, inventory, playbook)
         type: "POST",
         data:JSON.stringify({
             playbook:playbook,
-            inventory:inventory
+            inventory:inventory,
+            vars:jsonEditor.jsonEditorGetValues()
         }),
         contentType:'application/json',
         beforeSend: function(xhr, settings) {
