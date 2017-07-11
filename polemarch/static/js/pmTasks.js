@@ -14,14 +14,14 @@ pmTasks.execute = function(project_id, inventory, playbook)
         return def.promise();
     }
     
+    var data = jsonEditor.jsonEditorGetValues();
+    data.playbook = playbook
+    data.inventory = inventory
+    
     $.ajax({
         url: "/api/v1/projects/"+project_id+"/execute/",
         type: "POST",
-        data:JSON.stringify({
-            playbook:playbook,
-            inventory:inventory,
-            vars:jsonEditor.jsonEditorGetValues()
-        }),
+        data:JSON.stringify(data),
         contentType:'application/json',
         beforeSend: function(xhr, settings) {
             if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
