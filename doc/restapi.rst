@@ -1205,8 +1205,8 @@ Periodic tasks
    cron format, what depends on ``type`` value. Look at ``type`` description
    for details.
 
-.. |ptask_type_details| replace:: type of periodic task. Either ``DELTA`` for
-   tasks that runs every N seconds or ``CRONTAB`` for tasks, which runs
+.. |ptask_type_details| replace:: type of periodic task. Either ``INTERVAL``
+   for tasks that runs every N seconds or ``CRONTAB`` for tasks, which runs
    according by more complex rules. According to that ``schedule`` field will
    be interpreted as integer - number of seconds between runs. Or string in
    cron format with one small exception - Polemarch expect string without year,
@@ -1252,7 +1252,7 @@ Periodic tasks
            "results":[
               {
                  "id":10,
-                 "type":"DELTA",
+                 "type":"INTERVAL",
                  "schedule":"60",
                  "playbook":"collect_data.yml",
                  "inventory":8,
@@ -1303,7 +1303,7 @@ Periodic tasks
       Accept: application/json, text/javascript
 
       {
-          "type": "DELTA",
+          "type": "INTERVAL",
           "schedule": "25",
           "playbook": "touch_the_clouds.yml",
           "project": 7,
@@ -1319,7 +1319,7 @@ Periodic tasks
 
     {
         "id": 14,
-        "type": "DELTA",
+        "type": "INTERVAL",
         "schedule": "25",
         "playbook": "touch_the_clouds.yml",
         "project": 7,
@@ -1350,7 +1350,7 @@ Periodic tasks
       Accept: application/json, text/javascript
 
       {
-          "type": "DELTA",
+          "type": "INTERVAL",
           "schedule": "25",
           "playbook": "touch_the_clouds.yml",
           "project": 7,
@@ -1363,7 +1363,7 @@ Periodic tasks
 
     {
         "id": 14,
-        "type": "DELTA",
+        "type": "INTERVAL",
         "schedule": "25",
         "playbook": "touch_the_clouds.yml",
         "project": 7,
