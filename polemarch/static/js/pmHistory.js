@@ -67,3 +67,18 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
         $.notify("", "error");
     })
 }
+
+    
+pmHistory.showItemInProjects = function(holder, menuInfo, data)
+{
+    var thisObj = this;
+    console.log(menuInfo, data)
+
+    return $.when(this.loadItem(data.reg[2]), pmProjects.loadItem(data.reg[1])).done(function()
+    {
+        $(holder).html(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:data.reg[2], project_id:data.reg[1]}))
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
