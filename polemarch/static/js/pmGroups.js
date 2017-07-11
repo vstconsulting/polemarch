@@ -97,7 +97,7 @@ pmGroups.updateItem = function(item_id)
     var data = {}
 
     data.name = $("#group_"+item_id+"_name").val()
-    data.children = $("#group_"+item_id+"_children").hasClass('selected')
+    //data.children = $("#group_"+item_id+"_children").hasClass('selected')
     data.vars = jsonEditor.jsonEditorGetValues()
 
     if(!data.name)
