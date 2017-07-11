@@ -55,7 +55,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
     var thisObj = this;
     return $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
-        thisObj.model.newitem = {type:'DELTA'}
+        thisObj.model.newitem = {type:'INTERVAL'}
         $(holder).html(spajs.just.render(thisObj.model.name+'_new_page', {project_id:project_id}))
 
         $('#new_periodic-tasks_inventory').select2();
@@ -169,7 +169,7 @@ pmPeriodicTasks.addItem = function(project_id)
     }
     else
     {
-        data.schedule = $("#new_periodic-tasks_schedule_DELTA").val()
+        data.schedule = $("#new_periodic-tasks_schedule_INTERVAL").val()
     }
 
     data.vars = jsonEditor.jsonEditorGetValues()
@@ -222,7 +222,7 @@ pmPeriodicTasks.updateItem = function(item_id)
     }
     else
     {
-        data.schedule = $("#periodic-tasks_"+item_id+"_schedule_DELTA").val()
+        data.schedule = $("#periodic-tasks_"+item_id+"_schedule_INTERVAL").val()
     }
 
     data.vars = jsonEditor.jsonEditorGetValues()
