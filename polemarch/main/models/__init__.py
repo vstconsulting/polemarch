@@ -70,14 +70,14 @@ def save_to_beat(instance, **kwargs):
                                                              period=units)
         manager.create(interval=schedule,
                        name=str(instance.id),
-                       task='polemarch.main.tasks.ScheduledTask',
+                       task='polemarch.main.tasks.tasks.ScheduledTask',
                        args=json.dumps([instance.id]))
     elif instance.type == "CRONTAB":
         cron_data = instance.crontab_kwargs
         schedule, _ = CrontabSchedule.objects.get_or_create(**cron_data)
         manager.create(crontab=schedule,
                        name=str(instance.id),
-                       task='polemarch.main.tasks.ScheduledTask',
+                       task='polemarch.main.tasks.tasks.ScheduledTask',
                        args=json.dumps([instance.id]))
 
 
