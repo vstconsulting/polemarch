@@ -1,4 +1,4 @@
-image: git.vst.lan/vst/tests:tox
+image: onegreyonewhite/tox:tox
 
 variables:
   TESTS: "polemarch.main.tests"
@@ -68,7 +68,7 @@ default_rpm_tests:
 
 default_deb_tests:
   <<: *packing-test
-  image: git.vst.lan/vst/tests:ubuntu
+  image: onegreyonewhite/tox:ubuntu
   script:
    - make deb
    - echo "echo 'hello'" > /bin/systemctl
@@ -149,3 +149,12 @@ release_deb:
     name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
     paths:
     - dist/
+
+release_pypi:
+  stage: release
+  only:
+   - tags
+  script:
+   - python2 setup.py compile
+   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
+  allow_failure: false
