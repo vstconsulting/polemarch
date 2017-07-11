@@ -2425,19 +2425,29 @@
         <div class="box-body">
             <div class="row">
                 <div class="form-group col-lg-12">
-                    <label class="control-label" for="jsonEditorAdd">New varible name</label>
-                    <input type="text" placeholder="Enter name" id="new_json_name" value=""  class="form-control" >
-                    <div class="help-block"></div>
+                    <label class="col-sm-2 control-label">
+                        New varible name
+                    </label>
+                    <div class="input-group col-sm-10"  > 
+                        <input type="text" placeholder="Enter name" id="new_json_name" value=""  class="form-control" >
+                        <div class="help-block"></div>
+                    </div>
                 </div>
             </div>
+            
+            
             <div class="row">
                 <div class="form-group col-lg-12">
-                    <label class="control-label" for="jsonEditorAdd">New varible value</label>
-                    <textarea placeholder="Enter value" id="new_json_value" class="form-control"></textarea>
-                    <!--<input type="text" placeholder="Enter value" id="new_json_value" value=""  class="form-control" >-->
+                    <label class="col-sm-2 control-label">
+                        New varible value
+                    </label>
+                    <div class="input-group col-sm-10"  > 
+                        <textarea placeholder="Enter value" id="new_json_value" class="form-control"  style="resize:vertical;"></textarea>
+                        <div class="help-block"></div>
+                    </div>
                 </div>
             </div>
-
+             
             <div class="row">
                 <div class="form-group col-lg-1">
                     <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>');" >Add varible</span>
