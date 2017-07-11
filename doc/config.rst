@@ -69,7 +69,7 @@ example than general howto) you must do such steps:
       user = root
       password = mypassword
       host = 127.0.0.1
-      port = 13306
+      port = 3306
 
 3. Setup cache-server. Redis for example. Specify his credentials in
    :ref:`locks` and :ref:`cache` for all nodes. Like this:
@@ -96,11 +96,12 @@ example than general howto) you must do such steps:
 5. Setup some http-balancer. HAProxy for example. Point it to web-intended
    nodes.
 
-6. Install python connector for chosen DB. On CentOS for MySQL it may be:
+6. Prepare default database structure (tables and so on) in your MySQL
+   database. Polemarch can do it for you with this command:
 
    .. sourcecode:: bash
 
-      sudo yum install MySQL-python
+      sudo -u polemarch /opt/bin/polemarchctl migrate
 
 7. Run and enable ``polemarchweb`` service on web-intended nodes. Disable
    ``polemarchworker`` service:
