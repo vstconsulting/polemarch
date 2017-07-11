@@ -6,6 +6,9 @@ function crontabEditor(){
 
 crontabEditor.model = {}
 
+crontabEditor.model.MonthsNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+crontabEditor.model.DaysOfWeekNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
 crontabEditor.model.Months = {}
 crontabEditor.model.DayOfMonth = {}
 crontabEditor.model.DaysOfWeek = {}
@@ -62,6 +65,41 @@ crontabEditor.parseCronString = function(string)
     crontabEditor.parseItem(crontabEditor.model.Months, crontabEditor.model.MonthsStr, 1, 12)
     crontabEditor.parseItem(crontabEditor.model.DaysOfWeek, crontabEditor.model.DaysOfWeekStr, 1, 7)
 
+}
+
+crontabEditor.setDaysOfWeek = function(value)
+{
+    crontabEditor.model.string = crontabEditor.model.string.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 $2 $3 $4 '+value); 
+    crontabEditor.parseCronString();
+    crontabEditor.updateCronString();
+}
+
+crontabEditor.setMonths = function(value)
+{
+     crontabEditor.model.string = crontabEditor.model.string.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 $2 $3 '+value+' $5'); 
+     crontabEditor.parseCronString(); 
+     crontabEditor.updateCronString();
+}
+
+crontabEditor.setDayOfMonth = function(value)
+{
+    crontabEditor.model.string = crontabEditor.model.string.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 $2 '+value+' $4 $5');
+    crontabEditor.parseCronString();
+    crontabEditor.updateCronString();
+}
+
+crontabEditor.setHours = function(value)
+{
+    crontabEditor.model.string = crontabEditor.model.string.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 '+value+' $3 $4 $5'); 
+    crontabEditor.parseCronString(); 
+    crontabEditor.updateCronString();
+}
+
+crontabEditor.setMinutes = function(value)
+{
+    crontabEditor.model.string = crontabEditor.model.string.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, value+' $2 $3 $4 $5'); 
+    crontabEditor.parseCronString(); 
+    crontabEditor.updateCronString();
 }
 
 crontabEditor.parseItem = function(resArr, str, minInt, maxInt)
@@ -182,19 +220,19 @@ crontabEditor.getCronString = function()
 
 
 crontabEditor.compileItem = function(resArr, minInt, maxInt)
-{ 
+{
     var itemResults = []
     itemResults.push(resArr.join(","))
     if(!resArr || !resArr.length || resArr.length == maxInt - minInt + 1)
     {
         return "*";
     }
-    
+
     if(resArr.length)
     {
         var division = [];
-        for(var j=2; j<maxInt; j++)
-        { 
+        for(var j=2; j<maxInt/2; j++)
+        {
             var isInner = false
             for(var k in division)
             {
@@ -202,13 +240,13 @@ crontabEditor.compileItem = function(resArr, minInt, maxInt)
                 {
                     isInner = true;
                 }
-            } 
-            
+            }
+
             if(isInner)
             {
                 continue;
             }
-            
+
             var isOk = true
             for(var i=minInt; i<maxInt; i+=j)
             {
@@ -218,24 +256,24 @@ crontabEditor.compileItem = function(resArr, minInt, maxInt)
                     break;
                 }
             }
-            
+
             if(isOk)
             {
                 division.push(j);
             }
         }
-        
+
         var exclude = []
-        var includeParts = [] 
+        var includeParts = []
         for(var i in division)
         {
             for(var j=minInt; j<maxInt; j+=division[i])
-            { 
+            {
                 exclude.push(j)
             }
             includeParts.push("*/"+division[i])
-        } 
-        
+        }
+
         var lastVal = -1;
         var range = [];
 
@@ -245,7 +283,7 @@ crontabEditor.compileItem = function(resArr, minInt, maxInt)
             {
                 continue;
             }
-            
+
             if(lastVal + 1 == resArr[i] )
             {
                 range.push(resArr[i])
@@ -268,7 +306,7 @@ crontabEditor.compileItem = function(resArr, minInt, maxInt)
 
             lastVal = resArr[i]
         }
-        
+
         if(range.length > 2)
         {
             includeParts.push(range[0] + "-" + range[range.length-1])
@@ -282,14 +320,14 @@ crontabEditor.compileItem = function(resArr, minInt, maxInt)
         }
         itemResults.push(includeParts.join(","))
     }
-     
+
     if(resArr.length)
-    { 
+    {
         var lastVal = -1;
-        var includeParts = [] 
+        var includeParts = []
         var range = []
         for(var i in resArr)
-        { 
+        {
             if(lastVal + 1 == resArr[i] )
             {
                 range.push(resArr[i])
@@ -312,7 +350,7 @@ crontabEditor.compileItem = function(resArr, minInt, maxInt)
 
             lastVal = resArr[i]
         }
-        
+
         if(range.length > 2)
         {
             includeParts.push(range[0] + "-" + range[range.length-1])
@@ -324,10 +362,10 @@ crontabEditor.compileItem = function(resArr, minInt, maxInt)
                 includeParts.push(range[l])
             }
         }
-        
+
         itemResults.push(includeParts.join(","))
     }
-    
+
     var minLength = 99999;
     var minLengthResult = "";
     for(var i in itemResults)
@@ -338,7 +376,7 @@ crontabEditor.compileItem = function(resArr, minInt, maxInt)
             minLengthResult = itemResults[i]
         }
     }
-    
+
     return minLengthResult;
 }
 
@@ -355,8 +393,8 @@ crontabEditor.updateCronString = function()
             DaysOfWeek.push(i/1);
         }
     }
-    crontabEditor.model.DaysOfWeekStr = this.compileItem(DaysOfWeek, 1, 7);  
-    
+    crontabEditor.model.DaysOfWeekStr = this.compileItem(DaysOfWeek, 1, 7);
+
     //
     // Months
     //
@@ -368,7 +406,7 @@ crontabEditor.updateCronString = function()
             Months.push(i/1);
         }
     }
-    crontabEditor.model.MonthsStr = this.compileItem(Months, 1, 12); 
+    crontabEditor.model.MonthsStr = this.compileItem(Months, 1, 12);
 
     //
     // DayOfMonth
@@ -380,7 +418,7 @@ crontabEditor.updateCronString = function()
         {
             DayOfMonth.push(i/1);
         }
-    } 
+    }
     crontabEditor.model.DayOfMonthStr = this.compileItem(DayOfMonth, 1, 31);
 
     //
@@ -398,7 +436,7 @@ crontabEditor.updateCronString = function()
 
     //
     // Minutes
-    // 
+    //
     var Minutes = []
     for(var i in crontabEditor.model.Minutes)
     {
@@ -406,8 +444,8 @@ crontabEditor.updateCronString = function()
         {
             Minutes.push(i/1);
         }
-    } 
-    crontabEditor.model.MinutesStr = this.compileItem(Minutes, 0, 60);
+    }
+    crontabEditor.model.MinutesStr = this.compileItem(Minutes, 0, 59);
 
     crontabEditor.model.string =  crontabEditor.model.MinutesStr
                                     + " " + crontabEditor.model.HoursStr

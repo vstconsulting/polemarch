@@ -395,10 +395,11 @@ table{
 .autocomplete-suggestion.selected { background: #f0f0f0; }
 
 .crontabEditor .selected.btn{
-    background-color: #1f8dd6;
+    background-color: #3c8dbc;
+    color: #fff;
 }
  
 .crontabEditor .btn{
-    background-color: #eee;
+    /*background-color: #eee;*/
     min-width: 42px;
 }

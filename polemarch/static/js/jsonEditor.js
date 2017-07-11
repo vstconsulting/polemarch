@@ -46,7 +46,7 @@ jsonEditor.options['item']['ansible_ssh_pass'] = {
 }
 
 jsonEditor.options['item']['ansible_ssh_private_key_file'] = {
-    type:'text',
+    type:'textarea',
     help:'Inventory Parameter - ansible_ssh_private_key_file',
     helpcontent:'Private key file used by ssh. Useful if using multiple keys and you don’t want to use SSH agent.'
 }

@@ -67,7 +67,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
             showByClick:true,
             renderItem: function(item, search)
             {
-                return '<div class="autocomplete-suggestion" data-value="' + item.id + '.yaml">' + item.name + '.yaml</div>';
+                return '<div class="autocomplete-suggestion" data-value="' + item.playbook + '">' + item.playbook + '</div>';
             },
             onSelect: function(event, term, item)
             {

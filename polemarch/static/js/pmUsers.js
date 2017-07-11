@@ -16,7 +16,7 @@ pmUsers.addItem = function()
     data.last_name = $("#new_user_last_name").val()
     data.username = $("#new_user_username").val()
     data.is_active = $("#new_user_is_active").val()
-    data.is_staff = $("#new_user_is_staff").val()
+    data.is_staff = true // $("#new_user_is_staff").val()
     data.password = $("#new_user_password").val()
 
     if(!data.username)
@@ -74,7 +74,7 @@ pmUsers.updateItem = function(item_id)
     data.last_name = $("#user_"+item_id+"_last_name").val()
     data.username = $("#user_"+item_id+"_username").val()
     data.is_active = $("#user_"+item_id+"_is_active").val()
-    data.is_staff = $("#user_"+item_id+"_is_staff").val()
+    data.is_staff = true // $("#user_"+item_id+"_is_staff").val()
 
     if(!data.username)
     {
