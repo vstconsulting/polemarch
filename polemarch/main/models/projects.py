@@ -43,7 +43,7 @@ class Project(_AbstractModel):
 
     @property
     def path(self):
-        return "{}/{}".format(PROJECTS_DIR, self.name)
+        return "{}/{}".format(PROJECTS_DIR, self.id)
 
     @property
     def repo_class(self):

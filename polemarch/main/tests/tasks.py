@@ -330,7 +330,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                      project=self.periodic_project_id,
                      inventory=self.inventory.id, name="one", vars=variables),
                 dict(playbook="p2.yml",
-                     schedule="* */2 sun,fri 1-15 *",
+                     schedule="* */2 1-15 * sun,fri",
                      type="CRONTAB", project=self.periodic_project_id,
                      inventory=self.inventory.id, name="two", vars=variables),
                 dict(playbook="p1.yml", schedule="", type="CRONTAB",

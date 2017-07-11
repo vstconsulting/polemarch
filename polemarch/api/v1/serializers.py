@@ -138,6 +138,7 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "status",
                   "start_time",
                   "stop_time",
+                  "inventory",
                   "raw_inventory",
                   "raw_args",
                   "raw_stdout",

@@ -68,7 +68,8 @@ def __parse_extra_args(project, **extra):
 def run_ansible_playbook(task, inventory, **extra_args):
     # pylint: disable=too-many-locals
     history_kwargs = dict(playbook=task.playbook, start_time=timezone.now(),
-                          project=task.project, raw_stdout="")
+                          inventory=inventory, project=task.project,
+                          raw_stdout="")
     history_kwargs["raw_inventory"], key_files = inventory.get_inventory()
     history = History.objects.create(status="RUN", **history_kwargs)
     path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
@@ -138,7 +139,7 @@ class PeriodicTask(_AbstractModel):
         'day_of_month': {"max_": 31, "min_": 1},
         'month_of_year': {"max_": 12, "min_": 1}}
     time_types_list = [
-        'minute', 'hour', "day_of_week", 'day_of_month', 'month_of_year'
+        'minute', 'hour', 'day_of_month', 'month_of_year', "day_of_week"
     ]
 
     @property
@@ -185,6 +186,10 @@ class History(BModel):
     project       = models.ForeignKey(Project,
                                       on_delete=models.CASCADE,
                                       related_query_name="history")
+    inventory     = models.ForeignKey(Inventory,
+                                      on_delete=models.CASCADE,
+                                      related_query_name="history",
+                                      blank=True, null=True, default=None)
     playbook      = models.CharField(max_length=256)
     start_time    = models.DateTimeField(default=timezone.now)
     stop_time     = models.DateTimeField(blank=True, null=True)
@@ -195,13 +200,14 @@ class History(BModel):
     class Meta:
         default_related_name = "history"
         index_together = [
-            ["id", "project", "playbook", "status", "start_time", "stop_time"]
+            ["id", "project", "playbook", "status", "inventory",
+             "start_time", "stop_time"]
         ]
 
     @property
     def raw_stdout(self):
-        return "".join(self.raw_history_line
-                       .values_list("line", flat=True)[:10000000])
+        return "\n".join(self.raw_history_line
+                         .values_list("line", flat=True)[:10000000])
 
     @raw_stdout.setter
     @transaction.atomic

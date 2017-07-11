@@ -7,6 +7,7 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
 from .. import base
+from ..permissions import SuperUserPermission
 from . import filters
 from . import serializers
 
@@ -27,6 +28,7 @@ class UserViewSet(base.ModelViewSetSet):
     serializer_class = serializers.UserSerializer
     serializer_class_one = serializers.OneUserSerializer
     filter_class = filters.UserFilter
+    permission_classes = (SuperUserPermission,)
 
     def destroy(self, request, *args, **kwargs):
         user = self.get_object()

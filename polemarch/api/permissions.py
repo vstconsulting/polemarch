@@ -11,3 +11,12 @@ class ModelPermission(permissions.IsAuthenticated):
         elif request.user == obj:
             return True
         return bool(view.get_queryset().filter(id=obj.id).count())
+
+
+class SuperUserPermission(ModelPermission):
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_superuser:
+            return True
+        elif request.user == obj:
+            return True
+        return bool(view.get_queryset().filter(id=obj.id).count())
