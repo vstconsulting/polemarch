@@ -290,7 +290,7 @@ jsonEditor.options['tasks']['syntax-check'] = {
 }
 
 jsonEditor.options['tasks']['tags'] = {
-    type:'boolean',
+    type:'text',
     help:'-t TAGS, --tags=TAGS',
     helpcontent:"only run plays and tasks tagged with these values",
     alias:'t'
