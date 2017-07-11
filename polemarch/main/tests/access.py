@@ -108,7 +108,7 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         inventory = Inventory.objects.create()
         data = dict(playbook="p1.yml",
                     schedule="10",
-                    type="DELTA",
+                    type="INTERVAL",
                     project=project_id,
                     inventory=inventory.id)
 

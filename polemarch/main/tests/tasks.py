@@ -243,13 +243,13 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         self.ptask1 = PeriodicTask.objects.create(playbook="p1.yml",
                                                   name="test",
                                                   schedule="10",
-                                                  type="DELTA",
+                                                  type="INTERVAL",
                                                   project=project,
                                                   inventory=self.inventory)
         self.ptask2 = PeriodicTask.objects.create(playbook="p2.yml",
                                                   name="test",
                                                   schedule="10",
-                                                  type="DELTA",
+                                                  type="INTERVAL",
                                                   project=project,
                                                   inventory=self.inventory)
         self.ph = Project.objects.create(name="Prj_History",
@@ -322,11 +322,11 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         self.details_test(url + "{}/".format(self.ptask1.id),
                           playbook="p1.yml",
                           schedule="10",
-                          type="DELTA",
+                          type="INTERVAL",
                           project=self.periodic_project_id)
 
         variables = {"syntax-check": None, "limit": "host-1"}
-        data = [dict(playbook="p1.yml", schedule="10", type="DELTA",
+        data = [dict(playbook="p1.yml", schedule="10", type="INTERVAL",
                      project=self.periodic_project_id,
                      inventory=self.inventory.id, name="one", vars=variables),
                 dict(playbook="p2.yml",
