@@ -47,12 +47,22 @@
                         <table class="table table-bordered multiple-select">
                             <tbody>
                                 <tr>
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmHistory.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
                                     <th>Playbook</th>
                                     <th>Status</th>
                                     <th>time</th>
                                 </tr>
-                                <% for(var i in pmHistory.model.itemslist.results){ %>
-                                    <tr class="item-row item-<%- pmHistory.model.itemslist.results[i].id %>" >
+                                <% for(var i in pmHistory.model.itemslist.results){  valid = pmHistory.model.itemslist.results[i].id; %>
+                                    <tr 
+                                        class="item-row item-<%- valid %>  <%- pmHistory.model.selectedItems.justClass(valid, 'selected') %>"
+                                        data-id="<%- valid %>" >
+                                        <td class=""  onclick="pmHistory.toggleSelect(<%- valid %>); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
                                         <td>
                                             <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].playbook %></a>
@@ -71,6 +81,17 @@
                         </table>
                     </div>
                     <div class="box-footer clearfix">
+                        <div class="btn-group <%- pmHistory.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= pmHistory.model.justText('selectedCount') %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#" onclick="pmHistory.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a> 
+                                </li>
+                            </ul>
+                        </div>
                         <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
                                 <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
                         <% } %>
@@ -130,12 +151,22 @@
                         <table class="table table-bordered multiple-select">
                             <tbody>
                                 <tr>
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmHistory.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
                                     <th>Playbook</th>
                                     <th>Status</th>
                                     <th>time</th>
                                 </tr>
-                                <% for(var i in pmHistory.model.itemslist.results){ %>
-                                    <tr class="item-row item-<%- pmHistory.model.itemslist.results[i].id %>" >
+                                <% for(var i in pmHistory.model.itemslist.results){  valid = pmHistory.model.itemslist.results[i].id; %>
+                                    <tr 
+                                        class="item-row item-<%- valid %>  <%- pmHistory.model.selectedItems.justClass(valid, 'selected') %>"
+                                        data-id="<%- valid %>" >
+                                        <td class=""  onclick="pmHistory.toggleSelect(<%- valid %>); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
                                         <td>
                                             <a href="/?project/<%- project_id %>/history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].playbook %></a>
@@ -154,6 +185,17 @@
                         </table>
                     </div>
                     <div class="box-footer clearfix">
+                        <div class="btn-group <%- pmHistory.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= pmHistory.model.justText('selectedCount') %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#" onclick="pmHistory.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a> 
+                                </li>
+                            </ul>
+                        </div>
                         <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
                                 <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
                         <% } %>
@@ -163,8 +205,7 @@
         </div>
     </section>
 </script>
-
-<!-- Список Periodic Tasks -->
+ 
 <script type="text/x-just" data-just="history_page">
     <section class="content-header">
         <h1>
@@ -182,6 +223,9 @@
     </section>
 
     <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmHistory.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove</button>
+        <br>
+        <br>
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -194,6 +238,17 @@
                         </div>
                     </div>
                     <div class="box-body">
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Status</label>
+                                <input type="text"
+                                        value="<%- pmHistory.model.items[item_id].status %>"
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div> 
+                        </div>
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Playbook</label>
@@ -242,7 +297,11 @@
                         </div>
                         <div class="row">
                             <div class="form-group col-lg-12">
-                                <label class="control-label" >stdout</label>
+                                <label class="control-label" >stdout 
+                                    (<a href="<%- pmHistory.model.items[item_id].url %>raw/" 
+                                            target="_blank"
+                                            download="stdout-<%- pmHistory.model.items[item_id].playbook %>-<%- pmHistory.model.items[item_id].start_time %>.log"
+                                            >Full raw stdout</a>)</label>
                                 <pre style="overflow: auto; max-height: 600px;"><%- pmHistory.model.items[item_id].raw_stdout %></pre>
                             </div>
                         </div>
@@ -272,6 +331,9 @@
     </section>
 
     <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmHistory.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove</button>
+        <br>
+        <br>
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -284,6 +346,17 @@
                         </div>
                     </div>
                     <div class="box-body">
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Status</label>
+                                <input type="text"
+                                        value="<%- pmHistory.model.items[item_id].status %>"
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div> 
+                        </div>
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Playbook</label>
@@ -332,7 +405,11 @@
                         </div>
                         <div class="row">
                             <div class="form-group col-lg-12">
-                                <label class="control-label" >stdout</label>
+                                <label class="control-label" >stdout 
+                                    (<a href="<%- pmHistory.model.items[item_id].url %>raw/" 
+                                            target="_blank"
+                                            download="stdout-<%- pmHistory.model.items[item_id].playbook %>-<%- pmHistory.model.items[item_id].start_time %>.log"
+                                            >Full raw stdout</a>)</label>
                                 <pre style="overflow: auto; max-height: 600px;"><%- pmHistory.model.items[item_id].raw_stdout %></pre>
                             </div>
                         </div>
