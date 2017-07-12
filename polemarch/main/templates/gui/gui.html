@@ -1050,7 +1050,18 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Repository</label>
                                 <input type="text"  placeholder="Enter project repository"  id="project_<%- pmProjects.model.items[item_id].id %>_repository" value="<%- pmProjects.model.items[item_id].repository %>"  class="form-control" maxlength="255">
-                                <div class="help-block"></div>
+                                <div class="help-block" onmouseenter="$(this).children().popover();">
+                                    Enter project repository url
+                                    <span class="glyphicon glyphicon-question-sign" 
+                                            role="button"
+                                            data-trigger="hover"
+                                            title=""
+                                            data-placement="top"
+                                            data-html="true" 
+                                            data-content="For example repository url make be like this: `http://UserName@gitlab.com/UserName/ProjectRepository.git`"
+                                            data-original-title="Project repository url"></span>
+                                
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1145,9 +1156,7 @@
         </ol>
     </section>
 
-    <section class="content">
-        <br>
-        <br>
+    <section class="content"> 
         <button type="button" onclick="spajs.showLoader(pmProjects.addItem()); return false;" class="btn btn-primary" >Save project</button>
         <br>
         <br>
@@ -1169,7 +1178,18 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Repository</label>
                                 <input type="text"  placeholder="Enter project repository"  id="new_project_repository" value=""  class="form-control" maxlength="255">
-                                <div class="help-block"></div>
+                                <div class="help-block" onmouseenter="$(this).children().popover();">
+                                    Enter project repository url
+                                    <span class="glyphicon glyphicon-question-sign" 
+                                            role="button"
+                                            data-trigger="hover"
+                                            title=""
+                                            data-placement="top"
+                                            data-html="true" 
+                                            data-content="For example repository url make be like this: `http://UserName@gitlab.com/UserName/ProjectRepository.git`"
+                                            data-original-title="Project repository url"></span>
+                                
+                                </div>
                             </div>
                         </div>
                     </div>
