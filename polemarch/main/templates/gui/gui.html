@@ -165,8 +165,9 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Playbook</th>
-                                    <th>Status</th>
-                                    <th>time</th>
+                                    <th style="width: 100px;">Status</th>
+                                    <th style="width: 160px;" class="hidden-xs">Start time</th>
+                                    <th style="width: 160px;" class="hidden-xs">End time</th>
                                 </tr>
                                 <% for(var i in pmHistory.model.itemslist.results){  valid = pmHistory.model.itemslist.results[i].id; %>
                                     <tr 
@@ -183,10 +184,11 @@
                                         <td>
                                             <%- pmHistory.model.itemslist.results[i].status %>
                                         </td>
-                                        <td>
-                                            <%- pmHistory.model.itemslist.results[i].start_time %>
-                                            -
-                                            <%- pmHistory.model.itemslist.results[i].stop_time %>
+                                        <td class="hidden-xs">
+                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY H:m:s") %>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <%- moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY H:m:s") %>
                                         </td>
                                     </tr>
                                 <% } %>
