@@ -403,3 +403,7 @@ table{
     /*background-color: #eee;*/
     min-width: 42px;
 }
+
+.popover{
+    max-width: none; 
+}

@@ -948,15 +948,15 @@
                                                     <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-group'}); return false;" >Add sub group</a>
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-group'}); return false;" >Create sub group</a>
                                                     </li>
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-host'}); return false;" >Add sub host</a>
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-host'}); return false;" >Create sub host</a>
                                                     </li>
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-inventory'}); return false;" >Add sub inventory</a>
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-inventory'}); return false;" >Create sub inventory</a>
                                                     </li>
                                                     <li role="separator" class="divider"></li>
                                                     <li>
@@ -1050,7 +1050,18 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Repository</label>
                                 <input type="text"  placeholder="Enter project repository"  id="project_<%- pmProjects.model.items[item_id].id %>_repository" value="<%- pmProjects.model.items[item_id].repository %>"  class="form-control" maxlength="255">
-                                <div class="help-block"></div>
+                                <div class="help-block" onmouseenter="$(this).children().popover();">
+                                    Enter project repository url
+                                    <span class="glyphicon glyphicon-question-sign" 
+                                            role="button"
+                                            data-trigger="hover"
+                                            title=""
+                                            data-placement="top"
+                                            data-html="true" 
+                                            data-content="For example repository url make be like this: `http://UserName@gitlab.com/UserName/ProjectRepository.git`"
+                                            data-original-title="Project repository url"></span>
+                                
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1145,9 +1156,7 @@
         </ol>
     </section>
 
-    <section class="content">
-        <br>
-        <br>
+    <section class="content"> 
         <button type="button" onclick="spajs.showLoader(pmProjects.addItem()); return false;" class="btn btn-primary" >Save project</button>
         <br>
         <br>
@@ -1169,7 +1178,18 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Repository</label>
                                 <input type="text"  placeholder="Enter project repository"  id="new_project_repository" value=""  class="form-control" maxlength="255">
-                                <div class="help-block"></div>
+                                <div class="help-block" onmouseenter="$(this).children().popover();">
+                                    Enter project repository url
+                                    <span class="glyphicon glyphicon-question-sign" 
+                                            role="button"
+                                            data-trigger="hover"
+                                            title=""
+                                            data-placement="top"
+                                            data-html="true" 
+                                            data-content="For example repository url make be like this: `http://UserName@gitlab.com/UserName/ProjectRepository.git`"
+                                            data-original-title="Project repository url"></span>
+                                
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1395,7 +1415,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 317px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 360px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
                                 <% for(var i in pmInventories.model.itemslist.results){ %>
@@ -1417,11 +1437,11 @@
 
                                             <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
                                                 class="btn btn-primary"
-                                                onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub group</a>
+                                                onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-group'}); return false;" >Create sub group</a>
 
                                             <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
                                                 class="btn btn-primary"
-                                                onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub host</a>
+                                                onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-host'}); return false;" >Create sub host</a>
 
                                         </td>
                                         <td class="visible-xs">
@@ -1437,11 +1457,11 @@
                                                     </li>
                                                     <li>
                                                         <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
-                                                            onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub group</a>
+                                                            onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-group'}); return false;" >Create sub group</a>
                                                     </li>
                                                     <li>
                                                         <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
-                                                            onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub host</a>
+                                                            onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-host'}); return false;" >Create sub host</a>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -2678,7 +2698,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 196px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 230px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
                                 <% for(var i in pmGroups.model.itemslist.results){ %>
@@ -2701,11 +2721,11 @@
                                             <% if(pmGroups.model.itemslist.results[i].children){ %>
                                                 <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>/new-group"
                                                     class="btn btn-primary"
-                                                    onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub item</a>
+                                                    onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-group'}); return false;" >Create sub item</a>
                                             <% }else{ %>
                                                 <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>/new-host"
                                                     class="btn btn-primary"
-                                                    onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub item</a>
+                                                    onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-host'}); return false;" >Create sub item</a>
                                             <% } %>
                                         </td>
                                         <td class="visible-xs">
@@ -2722,12 +2742,12 @@
                                                     <% if(pmGroups.model.itemslist.results[i].children){ %>
                                                         <li>
                                                             <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>/new-group"
-                                                               onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-group'}); return false;" >Add sub group</a>
+                                                               onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-group'}); return false;" >Create sub group</a>
                                                         </li>
                                                     <% }else{ %>
                                                         <li>
                                                             <a href="/?group/<%- pmGroups.model.itemslist.results[i].id %>/new-host"
-                                                               onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-host'}); return false;" >Add sub host</a>
+                                                               onclick="spajs.open({ menuId:'group/<%- pmGroups.model.itemslist.results[i].id %>/new-host'}); return false;" >Create sub host</a>
                                                         </li>
                                                     <% } %>
                                                 </ul>

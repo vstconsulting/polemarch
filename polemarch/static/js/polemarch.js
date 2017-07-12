@@ -79,11 +79,11 @@ polemarch.start = function(options)
     });
 
 
-    spajs.addMenu({
+    /*spajs.addMenu({
         id:"home", 
         urlregexp:[/^(home|)$/],
         onOpen:polemarch.showHome
-    })
+    })*/
  
     // users
     spajs.addMenu({
@@ -190,7 +190,7 @@ polemarch.start = function(options)
     // projects
     spajs.addMenu({
         id:"projects", 
-        urlregexp:[/^projects$/, /^project$/, /^projects\/(page)\/([0-9]+)$/],
+        urlregexp:[/^(home|)$/, /^projects$/, /^project$/, /^projects\/(page)\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmProjects.showUpdatedList(holder, menuInfo, data);},
         onClose:function(){return pmProjects.stopUpdates();},
     })

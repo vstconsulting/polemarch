@@ -83,7 +83,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
                 for(var i in pmTasks.model.items)
                 {
                     var val = pmTasks.model.items[i]
-                    if(val.name.toLowerCase().indexOf(term) != -1)
+                    if(val.name.toLowerCase().indexOf(term) != -1 && val.project == project_id)
                     {
                         matches.push(val)
                     }
@@ -133,7 +133,7 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
                 for(var i in pmTasks.model.items)
                 {
                     var val = pmTasks.model.items[i]
-                    if(val.name.toLowerCase().indexOf(term) != -1)
+                    if(val.name.toLowerCase().indexOf(term) != -1 && val.project == project_id)
                     {
                         matches.push(val)
                     }

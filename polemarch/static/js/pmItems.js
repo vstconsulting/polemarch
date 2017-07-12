@@ -356,8 +356,8 @@ function pmItems()
      * @return $.Deferred
      */
     this.deleteItemQuery = function(item_id)
-    {
-        $(".item-"+item_id).remove();
+    { 
+        $(".item-"+item_id).hide();
         this.toggleSelect(item_id, false);
 
         return $.ajax({
@@ -369,6 +369,14 @@ function pmItems()
                     // Only send the token to relative URLs i.e. locally.
                     xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
                 }
+            },
+            success: function(data)
+            {
+                $(".item-"+item_id).remove();
+            },
+            error:function(e)
+            {
+                $(".item-"+item_id).show();
             }
         });
     }
