@@ -49,14 +49,14 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id',
                   'username',
                   'is_active',
+                  'is_staff',
                   'url',)
-        read_only_fields = ('is_staff',
-                            'is_superuser',)
+        read_only_fields = ('is_superuser',)
 
     def create(self, data):
         if not self.context['request'].user.is_staff:
             raise exceptions.PermissionDenied
-        valid_fields = ['username', 'password',
+        valid_fields = ['username', 'password', 'is_active', 'is_staff',
                         "email", "first_name", "last_name"]
         creditals = {d: data[d] for d in valid_fields if data.get(d, False)}
         raw_passwd = self.initial_data.get("raw_password", "False")
@@ -193,6 +193,7 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
             )
         return instance
 
+    @transaction.atomic()
     def _operate(self, request, attr, obj_list):
         action = self.operations[request.method]
         tp = getattr(self.instance, attr)
