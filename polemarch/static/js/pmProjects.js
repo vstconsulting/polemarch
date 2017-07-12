@@ -42,9 +42,10 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
     var thisObj = this;
-    $.when(pmTasks.searchItems(data.reg[1], "project"), pmProjects.loadItem(data.reg[1]), pmInventories.loadAllItems()).done(function()
+    var project_id = data.reg[1]
+    $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:data.reg[1], query:data.reg[1]}))
+        $(holder).html(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:project_id, query:project_id}))
 
         $("#inventories-autocomplete").select2();
 
@@ -73,12 +74,15 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
                 for(var i in pmTasks.model.items)
                 {
                     var val = pmTasks.model.items[i]
-                    if(val.name.toLowerCase().indexOf(term) != -1)
+                    if(val.name.toLowerCase().indexOf(term) != -1 && val.project == project_id)
                     {
                         matches.push(val)
                     }
                 }
-                response(matches);
+                if(matches.length)
+                {
+                    response(matches);
+                }
             }
         });
 
@@ -145,6 +149,7 @@ pmProjects.updateItem = function(item_id)
 
     data.name = $("#project_"+item_id+"_name").val()
     data.vars = jsonEditor.jsonEditorGetValues()
+    data.repository = $("#project_"+item_id+"_repository").val()
 
     if(!data.name)
     {
