@@ -1,6 +1,6 @@
 # pylint: disable=import-error
 from rest_framework import filters
-from django_filters import (NumberFilter, CharFilter, IsoDateTimeFilter)
+from django_filters import (CharFilter, IsoDateTimeFilter)
 from django.contrib.auth.models import User
 from ...main import models
 
@@ -32,8 +32,8 @@ def variables_filter(queryset, field, value):
 
 
 class _BaseFilter(filters.FilterSet):
-    id        = NumberFilter(method=extra_filter)
-    id__not   = NumberFilter(method=extra_filter)
+    id        = CharFilter(method=extra_filter)
+    id__not   = CharFilter(method=extra_filter)
     name__not = CharFilter(method=name_filter)
     name      = CharFilter(method=name_filter)
 
