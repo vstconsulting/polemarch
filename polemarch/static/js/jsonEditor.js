@@ -1,6 +1,6 @@
 
 function jsonEditor(){
-    
+
 }
 
 
@@ -143,7 +143,7 @@ jsonEditor.options['item']['ansible_shell_executable'] = {
                 possible to use /bin/sh (i.e. /bin/sh is not installed on the\n\
                 target machine or cannot be run from sudo.).'
 }
-   
+
 ////////////////////////////////////////////////
 // tasks
 ////////////////////////////////////////////////
@@ -481,9 +481,24 @@ jsonEditor.options['tasks']['ask-become-pass'] = {
 // jsonEditor
 ////////////////////////////////////////////////
 
-jsonEditor.editor = function(json, optionsblock)
-{ 
-    return spajs.just.render('jsonEditor', {data:json, optionsblock:optionsblock}) 
+jsonEditor.editor = function(json, opt)
+{
+    if(!opt)
+    {
+        opt = {}
+    }
+    
+    if(!opt.title1)
+    {
+        opt.title1 = 'Variables'
+    }
+    
+    if(!opt.title2)
+    {
+        opt.title2 = 'Adding new variable'
+    }
+    
+    return spajs.just.render('jsonEditor', {data:json, optionsblock:opt.block, opt})
 }
 
 jsonEditor.jsonEditorGetValues = function()
@@ -494,7 +509,7 @@ jsonEditor.jsonEditorGetValues = function()
     {
         var type = $(arr[i]).attr('data-type');
         var index = $(arr[i]).attr('data-json-name');
-         
+
         if(type == "boolean")
         {
             data[index] = $(arr[i]).hasClass('selected')
@@ -502,7 +517,7 @@ jsonEditor.jsonEditorGetValues = function()
         else
         {
             data[index] = $(arr[i]).val()
-        } 
+        }
     }
 
     return data
@@ -514,7 +529,7 @@ jsonEditor.jsonEditorAddVar = function(optionsblock)
     {
         optionsblock = 'base'
     }
-    
+
     var name = $('#new_json_name').val()
     var value = $('#new_json_value').val()
 
@@ -529,12 +544,12 @@ jsonEditor.jsonEditorAddVar = function(optionsblock)
         $.notify("This var already exists", "error");
         return;
     }
-    
+
     if(/^--/.test(name))
     {
         name = name.replace(/^--/, "ansible_")
     }
-    
+
     if(/^-[A-z]$/.test(name))
     {
         for(var i in jsonEditor.options[optionsblock])
@@ -550,6 +565,6 @@ jsonEditor.jsonEditorAddVar = function(optionsblock)
     $('#new_json_name').val('')
     $('#new_json_value').val('')
 
-    $("#jsonEditorVarList").append(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock}))  
+    $("#jsonEditorVarList").append(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock}))
 }
- 
+
