@@ -59,18 +59,51 @@ example than general howto) you must do such steps:
       sudo dpkg -i polemarch_0.0.1-1_amd64.deb || sudo apt-get install -f
 
 2. Setup DB-server. MySQL for example. For all nodes edit :ref:`database`
-   and provide credential for you database.
+   and provide credential for you database. Like this:
+
+   .. sourcecode:: ini
+
+      [database]
+      engine = django.db.backends.mysql
+      name = mydatabase
+      user = root
+      password = mypassword
+      host = 127.0.0.1
+      port = 3306
 
 3. Setup cache-server. Redis for example. Specify his credentials in
-   :ref:`locks` and :ref:`cache` for all nodes.
+   :ref:`locks` and :ref:`cache` for all nodes. Like this:
+
+   .. sourcecode:: ini
+
+      [cache]
+      backend = django.core.cache.backends.memcached.MemcachedCache
+      location = 127.0.0.1:11211
+
+      [locks]
+      backend = django.core.cache.backends.memcached.MemcachedCache
+      location = 127.0.0.1:11211
 
 4. Setup some network filesystem. NFS for example. Mount it in same directory
    to all worker-intended nodes. Write that directory in :ref:`worker`.
+   Example:
+
+   .. sourcecode:: ini
+
+      [worker]
+      exchange_dir = /mnt/mynfs
 
 5. Setup some http-balancer. HAProxy for example. Point it to web-intended
    nodes.
 
-6. Run and enable ``polemarchweb`` service on web-intended nodes. Disable
+6. Prepare default database structure (tables and so on) in your MySQL
+   database. Polemarch can do it for you with this command:
+
+   .. sourcecode:: bash
+
+      sudo -u polemarch /opt/bin/polemarchctl migrate
+
+7. Run and enable ``polemarchweb`` service on web-intended nodes. Disable
    ``polemarchworker`` service:
 
    .. sourcecode:: bash
@@ -82,7 +115,7 @@ example than general howto) you must do such steps:
       sudo systemctl disable polemarchworker.service
       sudo service polemarchworker stop
 
-7. Run and enable ``polemarchworker`` service on every worker-intended nodes.
+8. Run and enable ``polemarchworker`` service on every worker-intended nodes.
    Disable ``polemarchweb`` service:
 
    .. sourcecode:: bash
