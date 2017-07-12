@@ -51,29 +51,38 @@
                                         <div class="ico-on fa fa-toggle-on"></div>
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
+                                    <th class="hidden-xs">Project</th>
                                     <th>Playbook</th>
-                                    <th>Status</th>
-                                    <th>time</th>
+                                    <th style="width: 100px;">Status</th>
+                                    <th style="width: 160px;" class="hidden-xs">Start time</th>
+                                    <th style="width: 160px;" class="hidden-xs">End time</th>
                                 </tr>
                                 <% for(var i in pmHistory.model.itemslist.results){  valid = pmHistory.model.itemslist.results[i].id; %>
                                     <tr 
                                         class="item-row item-<%- valid %>  <%- pmHistory.model.selectedItems.justClass(valid, 'selected') %>"
                                         data-id="<%- valid %>" >
-                                        <td class=""  onclick="pmHistory.toggleSelect(<%- valid %>); return false;">
+                                        <td onclick="pmHistory.toggleSelect(<%- valid %>); return false;">
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
+                                        <td class="hidden-xs">
+                                            <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" >
+                                                    <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
+                                            </a>
+                                        </td>
                                         <td>
-                                            <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
+                                            <a href="/?history/<%- valid.id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].playbook %></a>
                                         </td>
                                         <td>
                                             <%- pmHistory.model.itemslist.results[i].status %>
                                         </td>
-                                        <td>
-                                            <%- pmHistory.model.itemslist.results[i].start_time %>
-                                            -
-                                            <%- pmHistory.model.itemslist.results[i].stop_time %>
+                                        <td class="hidden-xs">
+                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY H:m:s") %>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <%- moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY H:m:s") %>
                                         </td>
                                     </tr>
                                 <% } %>

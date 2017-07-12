@@ -492,7 +492,7 @@ Object.defineProperty(Object.prototype, "justAttr", {
   , value: function(prop, attrName, callBack, customData){ return justReactive.setValue.apply(this, [{type:'attr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
 });
 
-// Проставляет значение как css class
+//  Добавление точки отслеживания 
 Object.defineProperty(Object.prototype, "justWatch", {
     enumerable: false
   , configurable: true
