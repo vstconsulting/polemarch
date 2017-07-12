@@ -1018,14 +1018,42 @@
 
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmProjects.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save project</button>
-        <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="btn btn-warning" >Sync</button>
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="btn btn-info" >Run playbook</button>
+        <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-warning" >Sync</button>
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="hidden-sm hidden-xs btn btn-info" >Run playbook</button>
         <!--<button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-periodic-tasks'});  return false;" class="btn btn-info" >Create periodic tasks</button>-->
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/periodic-tasks'});  return false;" class="btn btn-info" >Periodic tasks</button>
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/history'});  return false;" class="btn btn-info" >History</button>
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/periodic-tasks'});  return false;" class="hidden-sm hidden-xs btn btn-info" >Periodic tasks</button>
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/history'});  return false;" class="hidden-sm hidden-xs btn btn-info" >History</button>
 
 
-        <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove project</button>
+        <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-danger" >Remove project</button>
+        
+        
+        <div class="btn-group visible-sm visible-xs" role="group" style="float: right;" >
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li>
+                    <a href="#" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'}); return false;" >Run playbook</a> 
+                </li>
+                <li>
+                    <a href="#" onclick="spajs.open({ menuId:'project/<%- item_id %>/periodic-tasks'}); return false;" >Periodic tasks</a> 
+                </li>
+                <li>
+                    <a href="#" onclick="spajs.open({ menuId:'project/<%- item_id %>/history'}); return false;" >History</a> 
+                </li> 
+                <li role="separator" class="divider"></li> 
+                <li>
+                    <a href="#" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" >Sync</a> 
+                </li> 
+                <li role="separator" class="divider"></li> 
+                <li>
+                    <a href="#" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" >Remove project</a> 
+                </li>
+            </ul>
+        </div>
+        
         <br>
         <br>
         <div class="row">
@@ -1067,9 +1095,10 @@
                     </div>
                 </div>
             </section>
-            <%= jsonEditor.editor(pmProjects.model.items[item_id].vars, {block:'projects'}) %>
+            <%= jsonEditor.editor(pmProjects.model.items[item_id].vars, {block:'projects', hideAddVarsForm:true}) %>
         </div>
 
+        <!--
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -1117,25 +1146,25 @@
                                             onclick="spajs.showLoader(pmProjects.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Edit existings groups</button>
-                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
+                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Create new group</button>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Edit existings hosts</button>
-                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
+                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Create new host</button>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubInventoriesForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Edit existings inventory</button>
-                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-inventory'}); return false;" class="btn btn-primary" >Add new inventory</button>
+                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-inventory'}); return false;" class="btn btn-primary" >Create new inventory</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
-        </div>
+        </div>-->
     </section>
 </script>
 
@@ -1196,7 +1225,7 @@
                 </div>
             </section>
 
-            <%= jsonEditor.editor({'repo_type':'GIT', 'repo_password':''}, {block:'projects'}) %>
+            <%= jsonEditor.editor({'repo_type':'GIT', 'repo_password':''}, {block:'projects', hideAddVarsForm:true}) %>
         </div>
     </section>
 </script>
@@ -1577,16 +1606,46 @@
                                     <button
                                             type="button"
                                             onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
-                                            class="btn btn-primary"
+                                            class="btn btn-primary hidden-xs"
                                             >Edit existings groups</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
+                                            
+                                    <button type="button" 
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;" 
+                                            class="btn btn-primary hidden-xs"
+                                            >Create new group</button>
+                                            
+                                    <div style="margin-top:10px;" class="hidden-xs hidden-md hidden-lg"></div>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
-                                            class="btn btn-primary"
+                                            class="btn btn-primary hidden-xs"
                                             >Edit existings hosts</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
+                                            
+                                    <button type="button"
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;"
+                                            class="btn btn-primary hidden-xs" 
+                                            >Create new host</button>
 
+                                    <button
+                                            type="button"
+                                            onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary btn-block visible-xs"
+                                            >Edit existings groups</button>
+                                            
+                                    <button type="button" 
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;" 
+                                            class="btn btn-primary btn-block visible-xs"
+                                            >Create new group</button>
+
+                                    <button type="button"
+                                            onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary btn-block visible-xs"
+                                            >Edit existings hosts</button>
+                                            
+                                    <button type="button"
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;"
+                                            class="btn btn-primary btn-block visible-xs" 
+                                            >Create new host</button>
                             </div>
                         </div>
                     </div>
@@ -2479,13 +2538,13 @@
                     <% if(thisOpt.type == 'boolean' ){ %> boolean-select <% } %>"
                 id="json_<%- name %>_line">
             <label
-                    class="col-sm-2 control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
+                    class=" col-sm-4 col-lg-3 control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
                     for="#json_<%- name %>"
                     style="word-wrap: break-word;"
                 >
                 <%- name %>
             </label>
-            <div class="input-group col-sm-10"  >
+            <div class="input-group  col-sm-8 col-lg-9 "  >
                     <% if(thisOpt.type == 'select' ){ %>
                         <select class="form-control jsonEditor-data"
                                 id="json_<%- name %>_value"
@@ -2505,8 +2564,7 @@
                                data-json-name="<%- name %>"
                                >
                     <% } else if(thisOpt.type == 'boolean' ){ %>
-                        <div class="form-control jsonEditor-data <% if(value && value != 'False'){ %>selected<% } %>"
-                                onclick="$(this).toggleClass('selected');"
+                        <div class="form-control jsonEditor-data selected"
                                 onselectstart="return false"
                                 onmousedown="return false"
                                 style="cursor: pointer;"
@@ -2545,7 +2603,7 @@
                     <% } %>
             </div>
             <% if(thisOpt.help){ %>
-                <span class="col-sm-10 col-sm-offset-2 help-block" style="padding-left: 0px;"
+                <span class="col-sm-8 col-lg-9 col-lg-offset-3 col-sm-offset-4 help-block" style="padding-left: 0px;"
                                 onmouseenter="$(this).children().popover();">
                     <%- thisOpt.help %>
                     <% if(thisOpt.help){ %>
@@ -2562,12 +2620,12 @@
         </div>
     <% }else{ %>
         <div class="form-group col-lg-12" id="json_<%- name %>_line">
-            <label class="control-label col-sm-2 <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
+            <label class="control-label  col-sm-4 col-lg-3 <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
                     for="#json_<%- name %>"
                     style="word-wrap: break-word;">
                 <%- name %>
             </label>
-            <div class="input-group col-sm-10">
+            <div class="input-group  col-sm-8 col-lg-9">
                 <input type="text"
                        placeholder="Enter value"
                        id="json_<%- name %>_value"
@@ -2606,45 +2664,47 @@
     </div>
 </section>
 
-<section class="col-lg-12">
-    <div class="box box-info">
-        <div class="box-header with-border">
-            <%- opt.title2 %><br>
-        </div>
-        <div class="box-body">
-            <div class="row">
-                <div class="form-group col-lg-12">
-                    <label class="col-sm-1 control-label">
-                        Name
-                    </label>
-                    <div class="input-group col-sm-11"  >
-                        <input type="text" placeholder="Enter name" id="new_json_name" value=""  class="form-control" >
-                        <div class="help-block"></div>
+<% if(!opt.hideAddVarsForm){ %>
+    <section class="col-lg-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <%- opt.title2 %><br>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="form-group col-lg-12">
+                        <label class=" col-sm-2 col-lg-2 control-label">
+                            Name
+                        </label>
+                        <div class="input-group  col-sm-10 col-lg-10"  >
+                            <input type="text" placeholder="Enter name" id="new_json_name" value=""  class="form-control" >
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="form-group col-lg-12">
+                        <label class="col-sm-2 col-lg-2 control-label">
+                            Value
+                        </label>
+                        <div class="input-group col-sm-10 col-lg-10"  >
+                            <textarea placeholder="Enter value" id="new_json_value" class="form-control"  style="resize:vertical;"></textarea>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-lg-1">
+                        <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>');" >Add varible</span>
                     </div>
                 </div>
             </div>
-
-
-            <div class="row">
-                <div class="form-group col-lg-12">
-                    <label class="col-sm-1 control-label">
-                        Value
-                    </label>
-                    <div class="input-group col-sm-11"  >
-                        <textarea placeholder="Enter value" id="new_json_value" class="form-control"  style="resize:vertical;"></textarea>
-                        <div class="help-block"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="form-group col-lg-1">
-                    <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>');" >Add varible</span>
-                </div>
-            </div>
         </div>
-    </div>
-</section>
+    </section>
+<% } %>
 </script>
 
 
@@ -2880,13 +2940,13 @@
                                             onclick="spajs.showLoader(pmGroups.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Edit existings groups</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
+                                            <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Create new group</button>
                                 <% }else{ %>
                                     <button type="button"
                                             onclick="spajs.showLoader(pmGroups.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Edit existings hosts</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
+                                            <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Create new host</button>
                                 <% } %>
                             </div>
                         </div>
