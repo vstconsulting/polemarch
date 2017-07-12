@@ -174,6 +174,18 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
                                  data=json.dumps([groups[1].id]))
         self.assertEqual(result["error_type"], "CiclicDependencyError")
 
+        # Fix for clear group if CiclicDependencyError
+        g1 = Group.objects.create(name="base_01")
+        g2 = Group.objects.create(name="base_02", children=True)
+        g3 = Group.objects.create(name="base_03", children=True)
+        g3.groups.add(g2)
+        g2.groups.add(g1)
+        test_url = "{}{}/groups/".format(url, g2.id)
+        result = self.get_result("post", test_url, 400,
+                                 data=json.dumps([g3.id]))
+        self.assertEqual(result["error_type"], "CiclicDependencyError")
+        self.assertCount(g2.groups.all(), 1)
+
     def test_create_delete_group(self):
         url = "/api/v1/groups/"
         self.list_test(url, Group.objects.count())

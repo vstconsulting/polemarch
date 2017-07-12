@@ -193,6 +193,7 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
             )
         return instance
 
+    @transaction.atomic()
     def _operate(self, request, attr, obj_list):
         action = self.operations[request.method]
         tp = getattr(self.instance, attr)
