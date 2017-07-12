@@ -10,6 +10,7 @@ Simply WEB gui for orchestration infrastructure by ansible playbooks.
    :caption: Contents:
 
    quickstart
+   pipinstall
    restapi
    config
 

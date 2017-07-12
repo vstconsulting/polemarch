@@ -112,7 +112,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'polemarch.main.wsgi.application'
 
-
+import pymysql
+pymysql.install_as_MySQLdb()
 try:
     __DB_SETTINGS = {k.upper():v.format(**__kwargs) for k,v in config.items('database')}
     if not __DB_SETTINGS: raise NoSectionError('database')

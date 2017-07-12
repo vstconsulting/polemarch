@@ -1,7 +1,12 @@
 import os
 import sys
 
-from sphinx.setup_command import BuildDoc
+try:
+    from sphinx.setup_command import BuildDoc
+    has_sphinx = True
+except ImportError:
+    has_sphinx = False
+
 from setuptools import find_packages, setup
 from setuptools.command.install import install
 from setuptools.command.build_ext import build_ext as _build_ext
@@ -101,6 +106,15 @@ description = 'Polemarch is ansible based for orcestration infrastructure.'
 author = 'VST Consulting'
 author_email = 'sergey.k@vstconsulting.net'
 
+cmdclass = {
+    'install': PostInstallCommand,
+    'compile': Compile,
+    'build_ext': _build_ext
+}
+
+if has_sphinx:
+    cmdclass['build_sphinx'] = BuildDoc
+
 setup(
     name=name,
     version=version,
@@ -142,12 +156,7 @@ setup(
             "mod_wsgi==4.5.14"
         ]
     },
-    cmdclass={
-        'install': PostInstallCommand,
-        'compile': Compile,
-        'build_ext': _build_ext,
-        'build_sphinx': BuildDoc
-    },
+    cmdclass=cmdclass,
     command_options={
         'build_sphinx': {
             'project': ('setup.py', name),
