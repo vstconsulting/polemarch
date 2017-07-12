@@ -101,6 +101,8 @@ class TaskFilter(_BaseFilter):
 
 
 class HistoryFilter(_BaseFilter):
+    playbook__not = CharFilter(method=name_filter)
+    playbook = CharFilter(method=name_filter)
     start_time__gt = IsoDateTimeFilter(name="start_time",
                                        lookup_expr=('gt'))
     stop_time__gt = IsoDateTimeFilter(name="stop_time",
