@@ -240,6 +240,11 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
         {
             if(pmGroups.model.items[item_id])
             { 
+                if(!pmGroups.model.items[item_id].groups)
+                {
+                    pmGroups.model.items[item_id].groups = []
+                }
+                
                 for(var i in groups_ids)
                 {
                     pmGroups.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
@@ -281,6 +286,11 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
         {
             if(pmGroups.model.items[item_id])
             { 
+                if(!pmGroups.model.items[item_id].hosts)
+                {
+                    pmGroups.model.items[item_id].hosts = []
+                }
+                
                 for(var i in hosts_ids)
                 {
                     pmGroups.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
