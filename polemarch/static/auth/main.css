@@ -119,8 +119,7 @@ h3 {
     margin: 0 auto;
 }
 
-.mobile-index-body {
-    height: calc(100% - 38px);
+.mobile-index-body { 
 }
 
 .mobile-index-body-doctor {
@@ -159,6 +158,12 @@ h3 {
     text-align: center;
     color: #575757;
     margin-bottom: 20px;
+}
+
+@media (max-width: 480px) {
+    .mobile-index-body-inner h1 {
+        font-size: 64px;
+    }
 }
 
 .mobile-index-body-inner form {
