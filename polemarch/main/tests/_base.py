@@ -53,7 +53,10 @@ class BaseTestCase(TestCase):
         response = request(url, *args, **kwargs)
         self.assertRCode(response, code)
         try:
-            return json.loads(response.rendered_content.decode())
+            return json.loads(response.rendered_content.decode()) \
+                if (response.status_code != 404 and
+                    getattr(response, "rendered_content", False)) \
+                else str(response.content.decode('utf-8'))
         except ValueError:
             return None
 
@@ -67,9 +70,14 @@ class BaseTestCase(TestCase):
         :param code: - expected code
         :return: None
         '''
-        self.assertEqual(resp.status_code, code,
-                         "{} != {}\n{}".format(resp.status_code, code,
-                                               resp.rendered_content.decode()))
+        err_msg = "{} != {}\n{}".format(
+            resp.status_code, code,
+            resp.rendered_content.decode()
+            if (resp.status_code != 404 and
+                getattr(resp, "rendered_content", False))
+            else resp.content
+        )
+        self.assertEqual(resp.status_code, code, err_msg)
 
     def post_result(self, url, code=None, *args, **kwargs):
         return self.get_result("post", url, code, *args, **kwargs)

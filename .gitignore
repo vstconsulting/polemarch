@@ -1,4 +1,5 @@
 *.pyc
+*.c
 *.retry
 __pycache__
 .tox
@@ -19,3 +20,4 @@ index.html
 .idea/*
 /polemarch.egg-info/
 /polemarch/projects/
+doc/_build

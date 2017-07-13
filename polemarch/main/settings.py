@@ -15,8 +15,10 @@ import sys
 
 from configparser import ConfigParser, NoSectionError
 
+from . import __file__ as file
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(file)))
 PY_VER = sys.version_info[0]
 TMP_DIR = "/tmp"
 __kwargs = dict(HOME=BASE_DIR, PY=PY_VER, TMP=TMP_DIR)
@@ -56,9 +58,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
     'crispy_forms',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
+    'docs',
     'polemarch.main',
     'polemarch.api',
 ]
@@ -107,7 +112,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'polemarch.main.wsgi.application'
 
-
+import pymysql
+pymysql.install_as_MySQLdb()
 try:
     __DB_SETTINGS = {k.upper():v.format(**__kwargs) for k,v in config.items('database')}
     if not __DB_SETTINGS: raise NoSectionError('database')
@@ -192,13 +198,21 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = config.get("web", "static_files_url", fallback="/static/")
-STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
 
 STATICFILES_FINDERS = (
   'django.contrib.staticfiles.finders.FileSystemFinder',
   'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+# Documentation files
+# http://django-docs.readthedocs.io/en/latest/#docs-access-optional
+DOCS_ROOT = os.path.join(BASE_DIR, 'doc/html')
+DOCS_ACCESS = 'public'
+DOC_URL = "/docs/"
 
 # Celery settings
 
@@ -218,7 +232,7 @@ CELERY_RESULT_BACKEND = config.get("rpc", "result_backend", fallback="file:///tm
 CELERY_WORKER_CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 CELERY_BROKER_HEARTBEAT = config.getint("rpc", "heartbeat", fallback=10)
-CELERY_BEAT_SCHEDULER = 'polemarch.main.celery_beat_scheduler:SingletonPersistentScheduler'
+CELERY_BEAT_SCHEDULER = 'polemarch.main.celery_beat_scheduler:SingletonDatabaseScheduler'
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_EXPIRES = config.getint("rpc", "results_expiry_days", fallback=10)
@@ -288,51 +302,6 @@ CACHES = {
 
 CREATE_INSTANCE_ATTEMPTS = config.getint("rpc", "create_instance_attempts", fallback=10)
 CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
-
-
-# Integrations settings
-__INTEGRATIONS = {
-        "Default": {
-            "BACKEND": "polemarch.main.environments.default.Integration"
-        },
-        "OpenStack": {
-            "BACKEND": "polemarch.main.environments.openstack.Integration"
-        },
-        "Amazon": {
-            "BACKEND": "polemarch.main.environments.amazon.Integration",
-            "OPTIONS": {
-                "images": [('CentOS 7', 'ami-d2c924b2')],
-                "flavors": [
-                            ('t2.micro', 't2.micro'),
-                            ('t2.small', 't2.small'),
-                            ('t2.medium', 't2.medium'),
-                            ('t2.large', 't2.large'),
-                            ('t2.xlarge', 't2.xlarge'),
-                            ('t2.2xlarge', 't2.2xlarge'),
-                            ('m3.medium', 'm3.medium'),
-                            ('m3.large', 'm3.large'),
-                            ('m3.xlarge', 'm3.xlarge'),
-                            ('m3.2xlarge', 'm3.2xlarge'),
-                           ]
-            }
-        },
-        "Docker": {
-            "BACKEND": "polemarch.main.environments.dockera.Integration",
-            "OPTIONS": {
-                "images": ["vstconsulting/centos7-ssh-password"]
-            }
-        },
-}
-INTEGRATIONS = dict()
-__INTEG_ON = [item for item in config.get("main",
-                                          "integrations",
-                                          fallback="Default,OpenStack,"
-                                                   "Amazon").split(",")
-              if item != ""]
-for __integration in __INTEGRATIONS:
-    if __integration in __INTEG_ON:
-        INTEGRATIONS[__integration] = __INTEGRATIONS[__integration]
-
 
 REPO_BACKENDS = {
     "GIT": {

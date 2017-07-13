@@ -1,11 +1,11 @@
 from django.conf import settings
+from django.test import Client
 from django.contrib.auth.hashers import make_password
 
 from .tasks import ApiTasksTestCase, \
     ApiPeriodicTasksTestCase
 from ..utils import redirect_stdany
 from ._base import BaseTestCase, User, json
-from .envs import ApiEnvsTestCase
 from .inventory import (ApiHostsTestCase, ApiGroupsTestCase,
                         ApiInventoriesTestCase)
 from .project import ApiProjectsTestCase
@@ -18,6 +18,7 @@ class ApiUsersTestCase(BaseTestCase):
         client = self._login()
         response = self.client.get('/login/')
         self.assertRedirects(response, "/")
+        self.result(client.delete, '/api/v1/token/', 400)
         self._logout(client)
         data = dict(username="sometestuser",
                     email="admin@test.lan",
@@ -33,6 +34,47 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertRedirects(response, self.login_url + '?next=/')
         response = self.client.get('/help/')
         self.assertEqual(response.status_code, 200)
+
+        client = Client()
+        data = {'username': self.user.data['username'],
+                'password': self.user.data['password']}
+        result = self.result(client.post, '/api/v1/token/', data=data)
+        self.assertIn("token", result)
+        headers = dict(
+            HTTP_AUTHORIZATION="Token {}".format(result['token']),
+            content_type="application/json"
+        )
+        response = client.get('/api/v1/', **headers)
+        self.assertEqual(response.status_code, 200)
+        response = client.get('/api/v1/')
+        self.assertNotEqual(response.status_code, 200)
+        result = self.result(client.delete, '/api/v1/token/', 204, **headers)
+        self.assertIn("detail", result)
+        response = client.get('/api/v1/', **headers)
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_is_active(self):
+        client = self._login()
+        AUTH_PASSWORD_VALIDATORS = settings.AUTH_PASSWORD_VALIDATORS
+        AUTH_PASSWORD_VALIDATORS[1]["OPTIONS"]["min_length"] = 5
+        with self.settings(AUTH_PASSWORD_VALIDATORS=AUTH_PASSWORD_VALIDATORS):
+            userdata = {"passwords": "ab",
+                        "is_active": True,
+                        "first_name": "user_f_name",
+                        "last_name": "user_l_name",
+                        "email": "test@domain.lan"
+                        }
+            self.result(client.post, "/api/v1/users/", 400, userdata)
+        passwd = 'eadgbe'
+        userdata = dict(username="testuser4", password=make_password(passwd),
+                        raw_password=True, is_active=False)
+        self.result(client.post, "/api/v1/users/", 201, userdata)
+        client = Client()
+        data = {'username': userdata['username'],
+                'password': userdata['password']}
+        client.post('/login/', data=data)
+        response = client.get('/')
+        self.assertRedirects(response, self.login_url + '?next=/')
 
     def test_api_users_get(self):
         client = self._login()
@@ -66,29 +108,6 @@ class ApiUsersTestCase(BaseTestCase):
         user = User.objects.get(username=userdata['username'])
         self.assertTrue(user.check_password(userdata['password']))
         self._logout(client)
-
-    def test_api_user_set_password(self):
-        client = self._login()
-        result = self.result(client.post, "/api/v1/users/", 201,
-                             {"username": "test_user2",
-                              "password": "eadgbe",
-                              "is_active": True,
-                              "first_name": "user_f_name",
-                              "last_name": "user_l_name",
-                              "email": "test@domain.lan"
-                              })
-        id = str(result['id'])
-        self.result(client.post, "/api/v1/users/{}/set_password/".format(id),
-                    200, {"password": "123"})
-        self._logout(client)
-        client = self.client
-        client.login(**{'username': result['username'],
-                        'password': "123"})
-        self.result(client.post, "/api/v1/users/{}/set_password/".format(id),
-                    200, {"password": "888"})
-        url = "/api/v1/users/{}/".format(1)
-        response = client.post(url + "set_password/", {"password": "123"})
-        self.assertTrue(response.status_code in [403, 401])
 
     def test_api_user_update(self):
         client = self._login()
@@ -166,7 +185,7 @@ class ApiUsersTestCase(BaseTestCase):
         self._logout(client)
 
 
-class APITestCase(ApiUsersTestCase, ApiEnvsTestCase,
+class APITestCase(ApiUsersTestCase,
                   ApiHostsTestCase, ApiGroupsTestCase,
                   ApiInventoriesTestCase, ApiProjectsTestCase,
                   ApiTasksTestCase, ApiPeriodicTasksTestCase):
@@ -176,7 +195,7 @@ class APITestCase(ApiUsersTestCase, ApiEnvsTestCase,
     def test_api_versions_list(self):
         client = self._login()
         result = self.result(client.get, "/api/")
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 2)
         self.assertTrue(result.get('v1', False))
         self._logout(client)
 
@@ -185,7 +204,6 @@ class APITestCase(ApiUsersTestCase, ApiEnvsTestCase,
         result = self.result(client.get, "/api/v1/")
         self.assertTrue(result.get('users', False))
         self.assertTrue(result.get('hosts', False))
-        self.assertTrue(result.get('environments', False))
 
     def test_api_router(self):
         client = self._login()

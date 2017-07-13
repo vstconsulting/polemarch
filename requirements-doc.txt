@@ -1,0 +1,4 @@
+# Docs
+sphinx
+sphinx-autobuild
+sphinxcontrib-httpdomain

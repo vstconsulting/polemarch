@@ -9,12 +9,13 @@ from ..models import Project
 class ApiProjectsTestCase(_ApiGHBaseTestCase):
     def setUp(self):
         super(ApiProjectsTestCase, self).setUp()
-        self.prj1 = Project.objects.create(name="First project",
+        self.prj1 = Project.objects.create(name="First_project",
                                            repository="git@ex.us:dir/rep1.git",
                                            vars=dict(repo_type="TEST"))
-        self.prj2 = Project.objects.create(name="Second project",
+        self.prj2 = Project.objects.create(name="Second_project",
                                            repository="git@ex.us:dir/rep2.git",
-                                           vars=dict(repo_type="TEST"))
+                                           vars=dict(repo_type="TEST",
+                                                     some_arg="search_arg"))
 
     def test_create_delete_project(self):
         url = "/api/v1/projects/"
@@ -22,6 +23,10 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         self.details_test(url + "{}/".format(self.prj1.id),
                           name=self.prj1.name,
                           repository="git@ex.us:dir/rep1.git")
+
+        result = self.get_result("get", url)
+        for pr in result['results']:
+            self.assertEqual(pr['type'], "TEST")
 
         result = self.get_result("get", url+"supported-repos/")
         self.assertCount(result, 3)
@@ -49,7 +54,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
             self.assertTrue(not os.path.exists(proj_obj.path + file))
         self.assertEqual(Project.objects.filter(id__in=results_id).count(), 0)
 
-        repo_url = "git@git.vst.lan:cepreu/ansible-experiments.git"
+        repo_url = "git@sdf:cepreu/ansible-experiments.git"
         data = dict(name="GitProject{}".format(sys.version_info[0]),
                     repository=repo_url,
                     vars=dict(repo_type="GIT",
@@ -58,7 +63,16 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         with self.settings(LOG_LEVEL="CRITICAL"):
             prj_id = self.get_result("post", url, data=json.dumps(data))['id']
         self.get_result("delete", url + "{}/".format(prj_id))
+        # Unsupported repos error
+        data = dict(name="asdad", repository="kflk")
+        self.get_result("post", url, 415, data=json.dumps(data))
         logging.disable(logging.NOTSET)
+
+        self._filter_test(url, dict(name__not="First_project"), 4)
+        self._filter_test(url, dict(name="Prj"), 3)
+        self._filter_test(url, dict(status="OK", name__not="First_project"), 4)
+        self._filter_vars(url, "repo_type:TEST", 5)
+        self._filter_vars(url, "some_arg:search_arg", 1)
 
     def test_inventories_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer

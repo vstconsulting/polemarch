@@ -30,16 +30,7 @@ polemarch.opt.host = "//"+window.location.host
 polemarch.model = {}
 
 polemarch.model.nowTime = 0;
-
-polemarch.model.userslist = []
-polemarch.model.users = {}
-
-polemarch.model.hostslist = []
-polemarch.model.hosts = {}
-
-polemarch.model.groupslist = []
-polemarch.model.groups = {} 
-
+    
 polemarch.start = function(options)
 {
     for(var i in options)
@@ -56,7 +47,7 @@ polemarch.start = function(options)
 
     spajs.init({
         holder: polemarch.opt.holder,
-        menuId_url: "spa",
+        menu_url: undefined,
         useHistoryApi:true
     })
 
@@ -88,82 +79,207 @@ polemarch.start = function(options)
     });
 
 
-    spajs.addMenu({
-        id:"home",
-        name:"home",
+    /*spajs.addMenu({
+        id:"home", 
         urlregexp:[/^(home|)$/],
         onOpen:polemarch.showHome
-    })
-
-
+    })*/
+ 
     // users
     spajs.addMenu({
-        id:"users",
-        name:"users",
-        urlregexp:[/^users$/],
-        onOpen:pmUsers.showList
+        id:"users", 
+        urlregexp:[/^users$/, /^user$/, /^users\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmUsers.showList(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"users-search", 
+        urlregexp:[/^users\/search\/([A-z0-9 %\-.]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmUsers.showSearchResults(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
-        id:"user",
-        name:"user",
-        urlregexp:[/^user-([0-9]+)$/],
-        onOpen:pmUsers.showItem
+        id:"user", 
+        urlregexp:[/^user\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmUsers.showItem(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
-        id:"newuser",
-        name:"newuser",
+        id:"newuser", 
         urlregexp:[/^new-user$/],
-        onOpen:pmUsers.showNewItemPage
+        onOpen:function(holder, menuInfo, data){return pmUsers.showNewItemPage(holder, menuInfo, data);}
     })
 
  
     // hosts
     spajs.addMenu({
-        id:"hosts",
-        name:"hosts",
-        urlregexp:[/^hosts$/],
-        onOpen:pmHosts.showList
+        id:"hosts", 
+        urlregexp:[/^hosts$/, /^host$/, /^hosts\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHosts.showList(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"hosts-search", 
+        urlregexp:[/^hosts\/search\/([A-z0-9 %\-.]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHosts.showSearchResults(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
-        id:"host",
-        name:"host",
-        urlregexp:[/^host-([0-9]+)$/],
-        onOpen:pmHosts.showItem
+        id:"host", 
+        urlregexp:[/^host\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHosts.showItem(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
-        id:"newHost",
-        name:"newHost",
-        urlregexp:[/^new-host$/, /^new-host-for-group-([0-9]+)$/],
-        onOpen:pmHosts.showNewItemPage
+        id:"newHost", 
+        urlregexp:[/^new-host$/, /^([A-z0-9_]+)\/([0-9]+)\/new-host$/],
+        onOpen:function(holder, menuInfo, data){return pmHosts.showNewItemPage(holder, menuInfo, data);}
     })
 
 
     // groups
     spajs.addMenu({
-        id:"groups",
-        name:"groups",
-        urlregexp:[/^groups$/],
-        onOpen:pmGroups.showList
-    })
-
-    spajs.addMenu({
-        id:"group",
-        name:"group",
-        urlregexp:[/^group-([0-9]+)$/],
-        onOpen:pmGroups.showItem
-    })
-
-    spajs.addMenu({
-        id:"newGroup",
-        name:"newGroup",
-        urlregexp:[/^new-group$/, /^new-group-for-group-([0-9]+)$/],
-        onOpen:pmGroups.showNewItemPage
+        id:"groups", 
+        urlregexp:[/^groups$/, /^group$/, /^groups\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmGroups.showList(holder, menuInfo, data);}
     })
     
+    spajs.addMenu({
+        id:"groups-search", 
+        urlregexp:[/^groups\/search\/([A-z0-9 %\-.]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmGroups.showSearchResults(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"group", 
+        urlregexp:[/^group\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmGroups.showItem(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"newGroup", 
+        urlregexp:[/^new-group$/, /^([A-z0-9_]+)\/([0-9]+)\/new-group$/],
+        onOpen:function(holder, menuInfo, data){return pmGroups.showNewItemPage(holder, menuInfo, data);}
+    })
+    
+    // inventories
+    spajs.addMenu({
+        id:"inventories", 
+        urlregexp:[/^inventories$/, /^inventory$/, /^inventories\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showList(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"inventories-search", 
+        urlregexp:[/^inventories\/search\/([A-z0-9 %\-.]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showSearchResults(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"inventory", 
+        urlregexp:[/^inventory\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showItem(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"newInventory", 
+        urlregexp:[/^new-inventory$/, /^([A-z0-9_]+)\/([0-9]+)\/new-inventory$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showNewItemPage(holder, menuInfo, data);}
+    })
+    
+    // projects
+    spajs.addMenu({
+        id:"projects", 
+        urlregexp:[/^(home|)$/, /^projects$/, /^project$/, /^projects\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmProjects.showUpdatedList(holder, menuInfo, data);},
+        onClose:function(){return pmProjects.stopUpdates();},
+    })
+ 
+    spajs.addMenu({
+        id:"projects-search", 
+        urlregexp:[/^projects\/search\/([A-z0-9 %\-.]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmProjects.showSearchResults(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"project", 
+        urlregexp:[/^project\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmProjects.openItem(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"newProject", 
+        urlregexp:[/^new-project$/],
+        onOpen:function(holder, menuInfo, data){return pmProjects.openNewItemPage(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"project-run-playbook", 
+        urlregexp:[/^project\/([0-9]+)\/playbook\/run$/],
+        onOpen:function(holder, menuInfo, data){return pmProjects.openRunPlaybookPage(holder, menuInfo, data);}
+    })
+    
+    // tasks
+    spajs.addMenu({
+        id:"PeriodicTasks", 
+        urlregexp:[/^project\/([0-9]+)\/periodic-tasks$/, /^project\/([0-9]+)\/periodic-task$/, /^project\/([0-9]+)\/periodic-tasks\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showList(holder, menuInfo, data);} 
+    })
+    
+    spajs.addMenu({
+        id:"PeriodicTasks-search", 
+        urlregexp:[/^project\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResults(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"PeriodicTask", 
+        urlregexp:[/^project\/([0-9]+)\/periodic-task\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showItem(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"newPeriodicTask", 
+        urlregexp:[/^project\/([0-9]+)\/new-periodic-tasks$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showNewItemPage(holder, menuInfo, data);}
+    })
+    
+    // history
+    spajs.addMenu({
+        id:"history", 
+        urlregexp:[/^history$/, /^history\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showList(holder, menuInfo, data);}, 
+    })
+    
+    spajs.addMenu({
+        id:"history-search", 
+        urlregexp:[/^history\/search\/([A-z0-9 %\-.]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResults(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"history-item", 
+        urlregexp:[/^history\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItem(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"history-item-in-project", 
+        urlregexp:[/^project\/([0-9]+)\/history\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInProjects(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"project-history",  
+        urlregexp:[/^project\/([0-9]+)\/history$/, /^project\/([0-9]+)\/history\/(page)\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showListInProjects(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"project-history-search", 
+        urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInProjects(holder, menuInfo, data);}
+    })
     
     spajs.openMenuFromUrl()
 }
@@ -175,6 +291,11 @@ polemarch.showHome = function(holder, menuInfo, data)
 
 polemarch.showErrors = function(res)
 {
+    if(!res)
+    {
+        return true;
+    }
+    
     if(res.responseJSON)
     {
         res = res.responseJSON

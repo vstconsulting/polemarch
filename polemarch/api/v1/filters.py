@@ -1,18 +1,26 @@
 # pylint: disable=import-error
 from rest_framework import filters
-from django_filters import (NumberFilter, CharFilter, IsoDateTimeFilter)
+from django_filters import (CharFilter, IsoDateTimeFilter)
 from django.contrib.auth.models import User
 from ...main import models
 
 
-def extra_filter(queryset, field, value):
+def _extra_search(queryset, field, value, stype):
     vals = field.split("__")
     field, tp = vals[0], (list(vals)[1:2] + [""])[0]
-    field += "__in"
-    value = value.split(",")
+    field += "__{}".format(stype)
+    value = value.split(",") if stype == "in" else value
     if tp.upper() == "NOT":
         return queryset.exclude(**{field: value})
     return queryset.filter(**{field: value})
+
+
+def extra_filter(queryset, field, value):
+    return _extra_search(queryset, field, value, "in")
+
+
+def name_filter(queryset, field, value):
+    return _extra_search(queryset, field, value, "contains")
 
 
 def variables_filter(queryset, field, value):
@@ -24,10 +32,10 @@ def variables_filter(queryset, field, value):
 
 
 class _BaseFilter(filters.FilterSet):
-    id        = NumberFilter(method=extra_filter)
-    id__not   = NumberFilter(method=extra_filter)
-    name__not = CharFilter(method=extra_filter)
-    name      = CharFilter(method=extra_filter)
+    id        = CharFilter(method=extra_filter)
+    id__not   = CharFilter(method=extra_filter)
+    name__not = CharFilter(method=name_filter)
+    name      = CharFilter(method=name_filter)
 
 
 class UserFilter(filters.FilterSet):
@@ -69,15 +77,20 @@ class InventoryFilter(_BaseHGIFilter):
                   'name',)
 
 
-class ProjectFilter(_BaseFilter):
+class ProjectFilter(_BaseHGIFilter):
+    status        = CharFilter(method=extra_filter)
+    status__not   = CharFilter(method=extra_filter)
 
     class Meta:
         model = models.Project
         fields = ('id',
-                  'name',)
+                  'name',
+                  'status',)
 
 
 class TaskFilter(_BaseFilter):
+    playbook__not = CharFilter(method=name_filter)
+    playbook      = CharFilter(method=name_filter)
 
     class Meta:
         model = models.Task
@@ -88,6 +101,8 @@ class TaskFilter(_BaseFilter):
 
 
 class HistoryFilter(_BaseFilter):
+    playbook__not = CharFilter(method=name_filter)
+    playbook = CharFilter(method=name_filter)
     start_time__gt = IsoDateTimeFilter(name="start_time",
                                        lookup_expr=('gt'))
     stop_time__gt = IsoDateTimeFilter(name="stop_time",
@@ -123,11 +138,3 @@ class PeriodicTaskFilter(_BaseFilter):
                   'playbook',
                   'type',
                   'project')
-
-
-class EnvironmentsFilter(filters.FilterSet):
-    class Meta:
-        model = models.Environment
-        fields = ('id',
-                  'type',
-                  'name',)

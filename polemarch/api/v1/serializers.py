@@ -4,6 +4,7 @@ import json
 
 import six
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.db.models import Q
 
 from rest_framework import serializers
@@ -48,16 +49,17 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id',
                   'username',
                   'is_active',
+                  'is_staff',
                   'url',)
-        read_only_fields = ('is_staff',
-                            'is_superuser',)
+        read_only_fields = ('is_superuser',)
 
     def create(self, data):
         if not self.context['request'].user.is_staff:
             raise exceptions.PermissionDenied
-        valid_fields = ['username', 'password',
+        valid_fields = ['username', 'password', 'is_active', 'is_staff',
                         "email", "first_name", "last_name"]
-        creditals = {d: data[d] for d in valid_fields if data.get(d, False)}
+        creditals = {d: data[d] for d in valid_fields
+                     if data.get(d, None) is not None}
         raw_passwd = self.initial_data.get("raw_password", "False")
         user = super(UserSerializer, self).create(creditals)
         if not raw_passwd == "True":
@@ -116,22 +118,6 @@ class OneUserSerializer(UserSerializer):
                             'date_joined',)
 
 
-class EnvironmentSerializer(serializers.ModelSerializer):
-    data = DictField(required=False)
-    hosts = serializers.HyperlinkedRelatedField(many=True,
-                                                read_only=True,
-                                                view_name='host-detail')
-
-    class Meta:
-        model = models.Environment
-        fields = ('id',
-                  'name',
-                  'type',
-                  'key',
-                  'data',
-                  'hosts')
-
-
 class HistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.History
@@ -140,7 +126,8 @@ class HistorySerializer(serializers.ModelSerializer):
                   "playbook",
                   "status",
                   "start_time",
-                  "stop_time")
+                  "stop_time",
+                  "url")
 
 
 class OneHistorySerializer(serializers.ModelSerializer):
@@ -152,8 +139,18 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "status",
                   "start_time",
                   "stop_time",
+                  "inventory",
                   "raw_inventory",
-                  "raw_stdout")
+                  "raw_args",
+                  "raw_stdout",
+                  "url")
+
+
+class HistoryLinesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.HistoryLines
+        fields = ("line_number",
+                  "line",)
 
 
 class VariableSerializer(serializers.ModelSerializer):
@@ -194,7 +191,7 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         data["not_found"] = data["total"] - data["operated"]
         return Response(data, status=code)
 
-    def __do_with_vars(self, method_name, *args, **kwargs):
+    def _do_with_vars(self, method_name, *args, **kwargs):
         method = getattr(super(_WithVariablesSerializer, self), method_name)
         instance = method(*args, **kwargs)
         if method.__name__ == "create":
@@ -204,6 +201,7 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
             )
         return instance
 
+    @transaction.atomic()
     def _operate(self, request, attr, obj_list):
         action = self.operations[request.method]
         tp = getattr(self.instance, attr)
@@ -221,11 +219,13 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         return self._response(request.data, obj_list)
 
     def create(self, validated_data):
-        return self.__do_with_vars("create", validated_data=validated_data)
+        return self._do_with_vars("create", validated_data=validated_data)
 
     def update(self, instance, validated_data):
-        return self.__do_with_vars("update", instance,
-                                   validated_data=validated_data)
+        if "children" in validated_data:
+            raise exceptions.ValidationError("Children not allowed to update.")
+        return self._do_with_vars("update", instance,
+                                  validated_data=validated_data)
 
     def permissions(self, request):
         pms = models.TypesPermissions.objects.filter(user__id__in=request.data)
@@ -234,15 +234,12 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
 
 class HostSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
-    environment = ModelRelatedField(required=False,
-                                    model=models.Environment)
 
     class Meta:
         model = models.Host
         fields = ('id',
                   'name',
                   'type',
-                  'environment',
                   'vars',
                   'url',)
 
@@ -255,7 +252,6 @@ class OneHostSerializer(HostSerializer):
         fields = ('id',
                   'name',
                   'type',
-                  'environment',
                   'vars',
                   'url',)
 
@@ -265,6 +261,8 @@ class TaskSerializer(_WithVariablesSerializer):
         model = models.Task
         fields = ('id',
                   'name',
+                  'playbook',
+                  'project',
                   'url',)
 
 
@@ -280,35 +278,37 @@ class OneTaskSerializer(TaskSerializer):
                   'project',
                   'url',)
 
-    def execute(self, request):
-        inventory_id = int(request.data["inventory_id"])
-        self.instance.execute(inventory_id)
-        data = dict(detail="Started at inventory {}.".format(inventory_id))
-        return Response(data, 201)
-
 
 class PeriodicTaskSerializer(_WithVariablesSerializer):
+    vars = DictField(required=False, write_only=True)
     schedule = serializers.CharField(allow_blank=True)
 
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
-                  'type',
-                  'schedule',
-                  'playbook',
-                  'inventory',
-                  'url',)
-
-
-class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
-    class Meta:
-        model = models.PeriodicTask
-        fields = ('id',
+                  'name',
                   'type',
                   'schedule',
                   'playbook',
                   'project',
                   'inventory',
+                  'vars',
+                  'url',)
+
+
+class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
+    vars = DictField(required=False)
+
+    class Meta:
+        model = models.PeriodicTask
+        fields = ('id',
+                  'name',
+                  'type',
+                  'schedule',
+                  'playbook',
+                  'project',
+                  'inventory',
+                  'vars',
                   'url',)
 
 
@@ -397,6 +397,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
 
 class ProjectSerializer(_InventoryOperations):
     status = serializers.CharField(read_only=True)
+    type   = serializers.CharField(read_only=True)
     vars   = DictField(required=False, write_only=True)
 
     class Meta:
@@ -404,8 +405,14 @@ class ProjectSerializer(_InventoryOperations):
         fields = ('id',
                   'name',
                   'status',
+                  'type',
                   'vars',
                   'url',)
+
+    @transaction.atomic
+    def _do_with_vars(self, *args, **kw):
+        instance = super(ProjectSerializer, self)._do_with_vars(*args, **kw)
+        return instance if instance.repo_class else None
 
 
 class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
@@ -429,7 +436,16 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     def inventories_operations(self, request):
         return self.get_operation(request, attr="inventories")
 
+    @transaction.atomic()
     def sync(self):
         self.instance.start_repo_task("sync")
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
+
+    def execute(self, request):
+        data = dict(request.data)
+        inventory_id = int(data.pop("inventory"))
+        playbook_name = str(data.pop("playbook"))
+        self.instance.execute(playbook_name, inventory_id, **data)
+        rdata = dict(detail="Started at inventory {}.".format(inventory_id))
+        return Response(rdata, 201)

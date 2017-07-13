@@ -1,14 +1,12 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
-import json
 import logging
-import six
 
-from .base import BModel, BManager, BQuerySet, models
-from .vars import _AbstractModel, _AbstractInventoryQuerySet
+from .base import BManager, models
+from .vars import _AbstractModel, _AbstractVarsQuerySet
 from ...main import exceptions as ex
-from ..utils import ModelHandlers, get_render
+from ..utils import get_render
 
 logger = logging.getLogger("polemarch")
 
@@ -35,66 +33,7 @@ class CiclicDependencyError(ex.PMException):
 
 
 # Block of models
-class EnvironmentManager(BManager.from_queryset(BQuerySet)):
-    # pylint: disable=no-member
-    handlers = ModelHandlers("INTEGRATIONS")
-
-    def get_integrations(self):
-        return {name: integ.required_fields() for name, integ in self.handlers}
-
-    def create(self, **kwargs):
-        kwargs.pop("id", None)
-        service_env = self.model(**kwargs)
-        service_env.integration.is_valid()
-        service_env.integration.prepare_environment()
-        service_env.save()
-        return service_env
-
-
-class Environment(BModel):
-    objects    = EnvironmentManager()
-    handlers   = ModelHandlers("INTEGRATIONS")
-    name       = models.CharField(max_length=40,
-                                  unique=True)
-    type       = models.CharField(max_length=20,
-                                  default="Default")
-    key        = models.CharField(max_length=2048,
-                                  blank=True,
-                                  null=True)
-    _data      = models.CharField(max_length=2048,
-                                  default="{}",
-                                  db_column='data')
-
-    def __unicode__(self):  # pragma: no cover
-        return "{}:{}".format(self.name,
-                              self.type)
-
-    @property
-    def data(self):
-        return self._data
-
-    @data.setter
-    def data(self, value):
-        if isinstance(value, (list, dict, tuple)):
-            self._data = json.dumps(value)
-        elif isinstance(value, (six.text_type, six.string_types)):
-            try:
-                self._data = json.dumps(json.loads(value)) if value else '{}'
-            except ValueError as err:
-                raise ex.PMException("{}. Data: {}".format(err, value))
-        else:
-            raise ex.PMException("Unknown `data` field type.")
-
-    @property
-    def integration(self):
-        return self.handlers(self.type, self)
-
-    @property
-    def additionals(self):
-        return self.integration.additionals()
-
-
-class HostQuerySet(_AbstractInventoryQuerySet):
+class HostQuerySet(_AbstractVarsQuerySet):
     # pylint: disable=no-member
     pass
 
@@ -103,23 +42,12 @@ class Host(_AbstractModel):
     objects     = BManager.from_queryset(HostQuerySet)()
     type        = models.CharField(max_length=5,
                                    default="HOST")
-    environment = models.ForeignKey(Environment,
-                                    blank=True,
-                                    null=True)
 
     class Meta:
         default_related_name = "hosts"
 
     def __unicode__(self):
         return "{}".format(self.name)
-
-    @property
-    def integration(self):
-        env = self.environment or Environment(name="NullEnv")
-        return ModelHandlers("INTEGRATIONS").get_object(env.type, env)
-
-    def prepare(self):
-        self.integration.prepare_service(self)
 
     def toString(self, var_sep=" "):
         hvars, key = self.get_generated_vars()
@@ -128,7 +56,7 @@ class Host(_AbstractModel):
                               self.vars_string(hvars, var_sep)), key
 
 
-class GroupQuerySet(_AbstractInventoryQuerySet):
+class GroupQuerySet(_AbstractVarsQuerySet):
     # pylint: disable=no-member
 
     def get_subgroups_id(self, accumulated=None, tp="parents"):
@@ -187,7 +115,7 @@ class Group(_AbstractModel):
 
 
 class Inventory(_AbstractModel):
-    objects     = BManager.from_queryset(_AbstractInventoryQuerySet)()
+    objects     = BManager.from_queryset(_AbstractVarsQuerySet)()
     hosts       = models.ManyToManyField(Host)
     groups      = models.ManyToManyField(Group)
 

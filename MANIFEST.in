@@ -1,8 +1,16 @@
 include polemarch/README.md
 include polemarch/main/settings.ini
+include polemarch/main/tests/exemplary_complex_inventory
 include requirements.txt
+include requirements-git.txt
+include requirements-doc.txt
 recursive-include etc *
+recursive-include polemarch/*.c *
+recursive-include polemarch/doc/html *
+recursive-include polemarch/*.so *
 recursive-include polemarch/static *
 recursive-include polemarch/*/templates *
 recursive-include initbin *
 include Makefile
+include deb.mk
+include rpm.mk

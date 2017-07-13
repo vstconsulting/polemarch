@@ -1,82 +1,104 @@
-# pylint: disable=protected-access
+# pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
-import uuid
 import logging
-import subprocess
-
 import sys
+import uuid
+from collections import namedtuple, OrderedDict
 from os.path import dirname
 
-from django.utils import timezone
 from celery.schedules import crontab
+from django.db import transaction
+from django.utils import timezone
 
-from polemarch.main.utils import tmp_file
-from .base import BModel, models
 from . import Inventory
+from .base import BModel, BManager, BQuerySet, models
+from .vars import _AbstractModel, _AbstractVarsQuerySet
 from .projects import Project
-from ...main import exceptions as ex
-from ..tasks import ExecuteAnsibleTask
+from ...main.utils import tmp_file, CmdExecutor, CalledProcessError
 
 logger = logging.getLogger("polemarch")
+AnsibleExtra = namedtuple('AnsibleExtraArgs', [
+    'args',
+    'files',
+])
 
 
-# Block of abstract models
-class ExecuteStatusHandler:
-    # pylint: disable=old-style-class
-    _playbooks = dict()
-    _ok = dict(err=False)
-    _other = {OSError: {'err': ex.AnsibleNotFoundException}}
-    _retcodes = {"other": {"err": ex.NodeFailedException},
-                 4: {"err": ex.NodeOfflineException}}
+# Classes and methods for support
+class Executor(CmdExecutor):
+    def __init__(self, history):
+        super(Executor, self).__init__()
+        self.history = history
+        self.counter = 0
 
-    def __init__(self, **kwargs):
-        self.status_logics = self.logic(**kwargs)
+    @property
+    def output(self):
+        return self.history.raw_stdout
 
-    def get_raise(self, service, exception=None, playbook=""):
-        self.service = service
-        if exception:
-            return self.callproc_error(playbook, exception) or \
-                   self.other_error(exception) or exception
+    @output.setter
+    def output(self, value):
+        pass
 
-    def handler(self, logic, exception, output):
-        self.service.set_status(logic["status"])
-        if isinstance(logic['err'], bool) and logic['err']:
-            return exception  # pragma: no cover
-        elif issubclass(logic['err'], Exception):
-            return logic['err'](output)
+    def write_output(self, line):
+        self.counter += 1
+        self.history.raw_history_line.create(history=self.history,
+                                             line_number=self.counter,
+                                             line=line+"\n")
 
-    def callproc_error(self, playbook, exception):
-        if not isinstance(exception, subprocess.CalledProcessError):
-            return
-        pblogic = list(pb for pb in self.status_logics["playbooks"]
-                       if pb in playbook)
-        if any(pblogic):
-            logic = self.status_logics["playbooks"][pblogic[0]]
-        elif exception.returncode in self.status_logics["retcodes"]:
-            logic = self.status_logics["retcodes"][exception.returncode]
+
+def __parse_extra_args(project, **extra):
+    extra_args, files = list(), list()
+    for key, value in extra.items():
+        if key in ["extra_vars", "extra-vars"]:
+            key = "extra-vars"
+        elif key == "verbose":
+            continue
+        elif key in ["key_file", "key-file"]:
+            if "BEGIN RSA PRIVATE KEY" in value:
+                kfile = tmp_file()
+                kfile.write(value)
+                files.append(kfile)
+                value = "{}/{}".format(project.path, kfile.name)
+            key = "key-file"
+        extra_args.append("--{}".format(key))
+        extra_args += [str(value)] if value else []
+    return AnsibleExtra(extra_args, files)
+
+
+def run_ansible_playbook(task, inventory, **extra_args):
+    # pylint: disable=too-many-locals
+    history_kwargs = dict(playbook=task.playbook, start_time=timezone.now(),
+                          inventory=inventory, project=task.project,
+                          raw_stdout="")
+    history_kwargs["raw_inventory"], key_files = inventory.get_inventory()
+    history = History.objects.create(status="RUN", **history_kwargs)
+    path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
+    path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
+    inventory_file = tmp_file()
+    inventory_file.write(history.raw_inventory)
+    status = "OK"
+    try:
+        extra = __parse_extra_args(project=task.project, **extra_args)
+        args = [path_to_ansible, path_to_playbook, '-i',
+                inventory_file.name, '-v'] + extra.args
+        history.raw_args = " ".join(args)
+        history.raw_stdout = Executor(history).execute(args)
+    except CalledProcessError as exception:
+        history.raw_stdout = str(exception.output)
+        if exception.returncode == 4:
+            status = "OFFLINE"
         else:
-            logic = self.status_logics["retcodes"]["other"]
-        return self.handler(logic, exception, exception.output)
-
-    def other_error(self, exception):
-        logic = self.status_logics['other'].get(exception.__class__, None)
-        if logic is None:
-            return
-        return self.handler(logic, exception, str(exception))
-
-    @staticmethod
-    def logic(**kwargs):
-        kwargs.pop('self', None)
-        defaults = ExecuteStatusHandler
-        result = dict(ok=defaults._ok.copy(),
-                      other=defaults._other.copy(),
-                      playbooks=defaults._playbooks.copy(),
-                      retcodes=defaults._retcodes.copy())
-        result['retcodes'].update(kwargs.pop("retcodes", {}))
-        result['playbooks'].update(kwargs.pop("playbooks", {}))
-        result.update(kwargs)
-        return result
+            status = "ERROR"
+    except Exception as exception:  # pragma: no cover
+        history.raw_stdout = history.raw_stdout + str(exception)
+        status = "ERROR"
+    finally:
+        inventory_file.close()
+        for key_file in key_files:
+            key_file.close()
+        history.stop_time = timezone.now()
+        history.status = status
+        history.save()
 
 
 # Block of real models
@@ -92,43 +114,13 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)
 
-    def execute(self, inventory_id):
-        # pylint: disable=no-member
-        inventory = Inventory.objects.get(id=inventory_id)
-        ExecuteAnsibleTask.delay(self, inventory.id)
-
-    def run_ansible_playbook(self, inventory):
-        start_time = timezone.now()
-        path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
-        path_to_playbook = "{}/{}".format(self.project.path, self.playbook)
-        inventory_text, key_files = inventory.get_inventory()
-        inventory_file = tmp_file()
-        inventory_file.write(inventory_text)
-        args = [path_to_ansible, path_to_playbook, '-i',
-                inventory_file.name]
-        status = "OK"
-        try:
-            output = subprocess.check_output(args, stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError as e:
-            output = str(e.output)
-            if e.returncode == 4:
-                status = "OFFLINE"
-            else:
-                status = "ERROR"
-        inventory_file.close()
-        for key_file in key_files:
-            key_file.close()
-        stop_time = timezone.now()
-        History.objects.create(playbook=self.playbook,
-                               start_time=start_time,
-                               stop_time=stop_time,
-                               raw_stdout=output,
-                               raw_inventory=inventory_text,
-                               status=status,
-                               project=self.project)
+    def run_ansible_playbook(self, inventory, **extra):
+        run_ansible_playbook(self, inventory, **extra)
 
 
-class PeriodicTask(BModel):
+# noinspection PyTypeChecker
+class PeriodicTask(_AbstractModel):
+    objects     = BManager.from_queryset(_AbstractVarsQuerySet)()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
                                     related_query_name="periodic_tasks")
     playbook    = models.CharField(max_length=256)
@@ -147,11 +139,11 @@ class PeriodicTask(BModel):
         'day_of_month': {"max_": 31, "min_": 1},
         'month_of_year': {"max_": 12, "min_": 1}}
     time_types_list = [
-        'minute', 'hour', "day_of_week", 'day_of_month', 'month_of_year'
+        'minute', 'hour', 'day_of_month', 'month_of_year', "day_of_week"
     ]
 
     @property
-    def _crontab_kwargs(self):
+    def crontab_kwargs(self):
         kwargs, index, fields = dict(), 0, self.schedule.split(" ")
         for field_name in self.time_types_list:
             if index < len(fields) and len(fields[index]) > 0:
@@ -161,25 +153,88 @@ class PeriodicTask(BModel):
             index += 1
         return kwargs
 
+    def get_vars(self):
+        qs = self.variables.order_by("key")
+        return OrderedDict(qs.values_list('key', 'value'))
+
     def get_schedule(self):
         if self.type == "CRONTAB":
-            return crontab(**self._crontab_kwargs)
+            return crontab(**self.crontab_kwargs)
         return float(self.schedule)
+
+    def execute(self):
+        # pylint: disable=no-member
+        self.run_ansible_playbook()
+
+    def run_ansible_playbook(self):
+        run_ansible_playbook(self, self.inventory, **self.vars)
+
+
+class HistoryQuerySet(BQuerySet):
+    use_for_related_fields = True
+
+    def create(self, **kwargs):
+        raw_stdout = kwargs.pop("raw_stdout", None)
+        history = super(HistoryQuerySet, self).create(**kwargs)
+        if raw_stdout:
+            history.raw_stdout = raw_stdout
+        return history
 
 
 class History(BModel):
+    objects       = HistoryQuerySet.as_manager()
     project       = models.ForeignKey(Project,
                                       on_delete=models.CASCADE,
                                       related_query_name="history")
+    inventory     = models.ForeignKey(Inventory,
+                                      on_delete=models.CASCADE,
+                                      related_query_name="history",
+                                      blank=True, null=True, default=None)
     playbook      = models.CharField(max_length=256)
     start_time    = models.DateTimeField(default=timezone.now)
     stop_time     = models.DateTimeField(blank=True, null=True)
-    raw_stdout    = models.TextField()
-    raw_inventory = models.TextField()
+    raw_args      = models.TextField(default="")
+    raw_inventory = models.TextField(default="")
     status        = models.CharField(max_length=50)
 
     class Meta:
         default_related_name = "history"
+        ordering = ["-id"]
         index_together = [
-            ["id", "project", "playbook", "status", "start_time", "stop_time"]
+            ["id", "project", "playbook", "status", "inventory",
+             "start_time", "stop_time"]
+        ]
+
+    @property
+    def raw_stdout(self):
+        return "\n".join(self.raw_history_line
+                         .values_list("line", flat=True)[:10000000])
+
+    @raw_stdout.setter
+    @transaction.atomic
+    def raw_stdout(self, lines):
+        counter = 0
+        del self.raw_stdout
+        for line in lines.split("\n"):
+            counter += 1
+            self.raw_history_line.create(history=self, line_number=counter,
+                                         line=line)
+
+    @raw_stdout.deleter
+    def raw_stdout(self):
+        self.raw_history_line.all().delete()
+
+
+class HistoryLines(BModel):
+    line         = models.TextField(default="")
+    line_number  = models.IntegerField(default=0)
+    history      = models.ForeignKey(History,
+                                     on_delete=models.CASCADE,
+                                     related_query_name="raw_history_line")
+
+    class Meta:
+        default_related_name = "raw_history_line"
+        index_together = [
+            ["history"], ["line_number"],
+            ["history", "line_number"]
         ]

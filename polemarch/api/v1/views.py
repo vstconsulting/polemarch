@@ -1,12 +1,26 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 from django.db import transaction
-from rest_framework import permissions, exceptions as excepts
+from django.http import HttpResponse
+from rest_framework import exceptions as excepts
+from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
 from .. import base
+from ..permissions import SuperUserPermission
 from . import filters
 from . import serializers
+
+
+class TokenView(token_views.ObtainAuthToken):
+    def delete(self, request, *args, **kwargs):
+        token = request.auth
+        if token:
+            key = token.key
+            token.delete()
+            return Response(dict(detail="Token {} removed.".format(key)),
+                            status=204)
+        raise excepts.ParseError("Token not found.")
 
 
 class UserViewSet(base.ModelViewSetSet):
@@ -14,17 +28,7 @@ class UserViewSet(base.ModelViewSetSet):
     serializer_class = serializers.UserSerializer
     serializer_class_one = serializers.OneUserSerializer
     filter_class = filters.UserFilter
-
-    @detail_route(methods=['post'],
-                  permission_classes=[permissions.IsAuthenticated])
-    def set_password(self, request, pk=None):
-        user = self.get_object()
-        if not self.request.user.is_superuser and user != request.user:
-            raise excepts.PermissionDenied  # pragma: no cover
-        data = request.data
-        user.set_password(data['password'])
-        user.save()
-        return Response({"status": user.password})
+    permission_classes = (SuperUserPermission,)
 
     def destroy(self, request, *args, **kwargs):
         user = self.get_object()
@@ -52,20 +56,6 @@ class UserViewSet(base.ModelViewSetSet):
         return Response(serializer.data)
 
 
-class EnvironmentViewSet(base.ModelViewSetSet):
-    model = serializers.models.Environment
-    serializer_class = serializers.EnvironmentSerializer
-    filter_class = filters.EnvironmentsFilter
-
-    @list_route(methods=['post'])
-    def additionals(self, request):
-        return Response(self.model(**request.data).additionals)
-
-    @list_route(methods=['get'])
-    def types(self, request):
-        return Response(self.model.objects.get_integrations())
-
-
 class HostViewSet(base.ModelViewSetSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
@@ -73,41 +63,35 @@ class HostViewSet(base.ModelViewSetSet):
     filter_class = filters.HostFilter
 
 
-class GroupViewSet(base.ModelViewSetSet):
+class _GroupedViewSet(object):
+    # pylint: disable=no-member
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def hosts(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.hosts_operations(request)
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def groups(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.groups_operations(request)
+
+
+class GroupViewSet(base.ModelViewSetSet, _GroupedViewSet):
     model = serializers.models.Group
     serializer_class = serializers.GroupSerializer
     serializer_class_one = serializers.OneGroupSerializer
     filter_class = filters.GroupFilter
 
-    @detail_route(methods=["post", "put", "delete", "get"])
-    def hosts(self, request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object())
-        return serializer.hosts_operations(request)
 
-    @detail_route(methods=["post", "put", "delete", "get"])
-    def groups(self, request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object())
-        return serializer.groups_operations(request)
-
-
-class InventoryViewSet(base.ModelViewSetSet):
+class InventoryViewSet(base.ModelViewSetSet, _GroupedViewSet):
     model = serializers.models.Inventory
     serializer_class = serializers.InventorySerializer
     serializer_class_one = serializers.OneInventorySerializer
     filter_class = filters.InventoryFilter
 
-    @detail_route(methods=["post", "put", "delete", "get"])
-    def hosts(self, request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object())
-        return serializer.hosts_operations(request)
 
-    @detail_route(methods=["post", "put", "delete", "get"])
-    def groups(self, request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object())
-        return serializer.groups_operations(request)
-
-
-class ProjectViewSet(base.ModelViewSetSet):
+class ProjectViewSet(base.ModelViewSetSet, _GroupedViewSet):
     model = serializers.models.Project
     serializer_class = serializers.ProjectSerializer
     serializer_class_one = serializers.OneProjectSerializer
@@ -118,16 +102,6 @@ class ProjectViewSet(base.ModelViewSetSet):
         return Response(self.model.handlers.keys())
 
     @detail_route(methods=["post", "put", "delete", "get"])
-    def hosts(self, request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object())
-        return serializer.hosts_operations(request)
-
-    @detail_route(methods=["post", "put", "delete", "get"])
-    def groups(self, request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object())
-        return serializer.groups_operations(request)
-
-    @detail_route(methods=["post", "put", "delete", "get"])
     def inventories(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
         return serializer.inventories_operations(request)
@@ -136,16 +110,16 @@ class ProjectViewSet(base.ModelViewSetSet):
     def sync(self, request, *args, **kwargs):
         return self.get_serializer(self.get_object()).sync()
 
+    @detail_route(methods=["post"])
+    def execute(self, request, *args, **kwargs):
+        return self.get_serializer(self.get_object()).execute(request)
+
 
 class TaskViewSet(base.ReadOnlyModelViewSet):
     model = serializers.models.Task
     serializer_class = serializers.TaskSerializer
     serializer_class_one = serializers.OneTaskSerializer
     filter_class = filters.TaskFilter
-
-    @detail_route(methods=["post"])
-    def execute(self, request, *args, **kwargs):
-        return self.get_serializer(self.get_object()).execute(request)
 
 
 class PeriodicTaskViewSet(base.ModelViewSetSet):
@@ -160,3 +134,15 @@ class HistoryViewSet(base.HistoryModelViewSet):
     serializer_class = serializers.HistorySerializer
     serializer_class_one = serializers.OneHistorySerializer
     filter_class = filters.HistoryFilter
+
+    @detail_route(methods=["get"])
+    def raw(self, request, *args, **kwargs):
+        obj = self.get_object()
+        return HttpResponse(obj.raw_stdout, content_type="text/plain")
+
+    @detail_route(methods=["get"])
+    def lines(self, request, *args, **kwargs):
+        return self.get_paginated_route_response(
+            self.get_object().raw_history_line.order_by("-line_number"),
+            serializers.HistoryLinesSerializer
+        )

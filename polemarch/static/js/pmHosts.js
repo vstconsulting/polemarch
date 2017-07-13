@@ -1,124 +1,35 @@
 
-var pmHosts = new pmItems()  
+var pmHosts = new pmItems()
 
-pmHosts.showList = function(holder, menuInfo, data)
-{
-    return $.when(pmHosts.loadAllItems()).done(function()
-    {
-        $(holder).html(spajs.just.render('hosts_list', {}))
-    }).fail(function()
-    {
-        $.notify("", "error");
-    })
-}
-
-pmHosts.showItem = function(holder, menuInfo, data)
-{
-    console.log(menuInfo, data)
-    
-    return $.when(pmHosts.loadItem(data.reg[1])).done(function()
-    {
-        $(holder).html(spajs.just.render('host_page', {item_id:data.reg[1]}))
-    }).fail(function()
-    {
-        $.notify("", "error");
-    })
-}
-
-pmHosts.showNewItemPage = function(holder, menuInfo, data)
-{ 
-    $(holder).html(spajs.just.render('new_host_page', {parent_group:data.reg[1]}))
-}
-
+pmHosts.model.name = "hosts"
+jsonEditor.options[pmHosts.model.name] = jsonEditor.options['item'];
+  
 /**
- * Обновляет поле модел polemarch.model.hostslist и ложит туда список пользователей 
- * Обновляет поле модел polemarch.model.hosts и ложит туда список инфу о пользователях по их id
- */
-pmHosts.loadAllItems = function()
-{
-    return jQuery.ajax({
-        url: "/api/v1/hosts/",
-        type: "GET",
-        contentType:'application/json',
-        data: "",
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
-        {
-            console.log("update Items", data)
-            polemarch.model.hostslist = data
-            polemarch.model.hosts = {}
-            
-            for(var i in data.results)
-            {
-                var val = data.results[i]
-                polemarch.model.hosts[val.id] = val
-            }
-        },
-        error:function(e)
-        {
-            console.log(e)
-            polemarch.showErrors(e)
-        }
-    });
-}
-
-/**
- * Обновляет поле модел polemarch.model.hosts[item_id] и ложит туда пользователя
- */
-pmHosts.loadItem = function(item_id)
-{
-    return jQuery.ajax({
-        url: "/api/v1/hosts/"+item_id+"/",
-        type: "GET",
-        contentType:'application/json',
-        data: "",
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
-        {
-            console.log("loadUser", data)
-            polemarch.model.hosts[item_id] = data
-        },
-        error:function(e)
-        {
-            console.log(e)
-            polemarch.showErrors(e)
-        }
-    });
-}
-
-
-/** 
  * @return $.Deferred
  */
-pmHosts.addItem = function(parent_group)
+pmHosts.addItem = function(parent_type, parent_item)
 {
     var def = new $.Deferred();
 
     var data = {}
 
     data.name = $("#new_host_name").val()
-    data.type = $("#new_host_type").val() 
-    data.vars = pmHosts.jsonEditorGetValues()
-    
-    // @todo Добавить валидацию диапазонов "127.0.1.[5:6]" и 127.0.1.1, 127.0.1.2 
-    if(!data.name || !this.validateHostName(data.name))
+    data.type = $("#new_host_type").val()
+    data.vars = jsonEditor.jsonEditorGetValues()
+
+    if(data.type == "HOST"  && (!data.name || !this.validateHostName(data.name)))
     {
         $.notify("Invalid value in filed name", "error");
         return;
     }
- 
+    else if(data.type == "RANGE"  && (!data.name || !this.validateRangeName(data.name)))
+    {
+        $.notify("Invalid value in filed name", "error");
+        return;
+    }
+
     $.ajax({
-        url: "/api/v1/hosts/",
+        url: "/api/v1/"+this.model.name+"/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
@@ -129,25 +40,50 @@ pmHosts.addItem = function(parent_group)
             }
         },
         success: function(data)
-        {
-            console.log("addItem", data); 
+        { 
             $.notify("Host created", "success");
-            
-            if(parent_group)
+
+            if(parent_item)
             {
-                $.when(pmGroups.setSubHosts(parent_group, [data.id])).always(function(){
-                    $.when(spajs.open({ menuId:"group-"+parent_group})).always(function(){
+                if(parent_type == 'group')
+                {
+                    $.when(pmGroups.addSubHosts(parent_item, [data.id])).always(function(){
+                        $.when(spajs.open({ menuId:"group/"+parent_item})).always(function(){
+                            def.resolve()
+                        })
+                    })
+                }
+                else if(parent_type == 'inventory')
+                {
+                    $.when(pmInventories.addSubHosts(parent_item, [data.id])).always(function(){
+                        $.when(spajs.open({ menuId:"inventory/"+parent_item})).always(function(){
+                            def.resolve()
+                        })
+                    })
+                }
+                else if(parent_type == 'project')
+                {
+                    $.when(pmProjects.addSubHosts(parent_item, [data.id])).always(function(){
+                        $.when(spajs.open({ menuId:"project/"+parent_item})).always(function(){
+                            def.resolve()
+                        })
+                    })
+                }
+                else
+                {
+                    console.error("Не известный parent_type", parent_type)
+                    $.when(spajs.open({ menuId:"host/"+data.id})).always(function(){
                         def.resolve()
                     })
-                })
+                }
             }
             else
             {
-                $.when(spajs.open({ menuId:"host-"+data.id})).always(function(){
+                $.when(spajs.open({ menuId:"host/"+data.id})).always(function(){
                     def.resolve()
                 })
             }
-            
+
         },
         error:function(e)
         {
@@ -157,8 +93,8 @@ pmHosts.addItem = function(parent_group)
     });
     return def.promise();
 }
-    
-/** 
+
+/**
  * @return $.Deferred
  */
 pmHosts.updateItem = function(item_id)
@@ -167,17 +103,28 @@ pmHosts.updateItem = function(item_id)
 
     data.name = $("#host_"+item_id+"_name").val()
     data.type = $("#host_"+item_id+"_type").val()
-    data.vars = pmHosts.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues()
 
     // @todo Добавить валидацию диапазонов "127.0.1.[5:6]" и 127.0.1.1, 127.0.1.2
-    if(!data.name || !this.validateHostName(data.name))
+    if(data.type == 'HOST')
     {
-        $.notify("Invalid value in filed name", "error");
-        return;
+        if(!data.name || !this.validateHostName(data.name) )
+        {
+            $.notify("Invalid value in filed name", "error");
+            return;
+        }
     }
- 
+    else
+    {  
+        if(!data.name || !this.validateRangeName(data.name) )
+        {
+            $.notify("Invalid value in filed name", "error");
+            return;
+        }
+    }
+
     return $.ajax({
-        url: "/api/v1/hosts/"+item_id+"/",
+        url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data:JSON.stringify(data),
@@ -188,8 +135,7 @@ pmHosts.updateItem = function(item_id)
             }
         },
         success: function(data)
-        {
-            console.log("updateItem", data); 
+        { 
             $.notify("Save", "success");
         },
         error:function(e)
@@ -199,34 +145,28 @@ pmHosts.updateItem = function(item_id)
     });
 }
 
-/** 
- * @return $.Deferred
- */
-pmHosts.deleteItem = function(item_id)
+/*
+ * 
+detail:"database is locked"
+error_type:"OperationalError"
+ * 
+for(var i =0; i< 10000; i++)
 {
-    if(!confirm("Are you sure?"))
-    {
-        return;
-    }
-
-    return $.ajax({
-        url: "/api/v1/hosts/"+item_id+"/",
-        type: "DELETE",
-        contentType:'application/json',
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+setTimeout(function(){
+    name = Math.random()+"-"+Math.random()
+    name = name.replace(/\./g, "")
+    $.ajax({
+            url: "/api/v1/hosts/",
+            type: "POST",
+            contentType:'application/json',
+            data: JSON.stringify({name:name, type:"HOST"}),
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:/.test(settings.url) || /^https:/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
             }
-        },
-        success: function(data)
-        {
-            console.log("deleteItem", data);
-            spajs.open({ menuId:"hosts"})
-        },
-        error:function(e)
-        {
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
-} 
+    })
+}, i*400);
+}
+ */ 

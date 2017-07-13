@@ -224,6 +224,8 @@ function qunitAddTests()
     qunitAddTests_users()
     qunitAddTests_hosts()
     qunitAddTests_groups()
+    qunitAddTests_inventories()
+    qunitAddTests_projects()
 }
 
 /**
@@ -294,8 +296,8 @@ function qunitAddTests_users()
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
-        // с адресом http://192.168.0.12:8080/?spa=user-5
-        var userId = /user-([0-9]+)/.exec(window.location.href)[1]
+        // с адресом http://192.168.0.12:8080/?user-5
+        var userId = /user\/([0-9]+)/.exec(window.location.href)[1]
 
         $("#user_"+userId+"_username").val("test2-user-"+t);
         $("#user_"+userId+"_password").val("test2-user-"+t);
@@ -318,8 +320,8 @@ function qunitAddTests_users()
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
-        // с адресом http://192.168.0.12:8080/?spa=user-5
-        var userId = /user-([0-9]+)/.exec(window.location.href)[1]
+        // с адресом http://192.168.0.12:8080/?user-5
+        var userId = /user\/([0-9]+)/.exec(window.location.href)[1]
 
         // Удаление пользователя.
         $.when(pmUsers.deleteItem(userId, true)).done(function()
@@ -354,6 +356,21 @@ function qunitAddTests_hosts()
         })
     });
 
+    syncQUnit.addTest('hosts_page', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"hosts/page/999"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню hosts');
+            render("hosts_page_999", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню hosts');
+            render("hosts_page_999", 1000, done)
+        })
+    });
+    
     syncQUnit.addTest('new-host', function ( assert )
     {
         var done = assert.async();
@@ -375,10 +392,10 @@ function qunitAddTests_hosts()
 
     syncQUnit.addTest('new-host-save', function ( assert )
     {
-        // Предполагается что мы от прошлого теста попали на страницу создания пользователя
+        // Предполагается что мы от прошлого теста попали на страницу создания хоста
         var done = assert.async();
 
-        // Заполнение формы с данными пользователя
+        // Заполнение формы с данными хоста
         $("#new_host_name").val("test-host-"+t);
         $("#new_host_type").val("HOST");
 
@@ -391,7 +408,7 @@ function qunitAddTests_hosts()
         pmHosts.jsonEditorAddVar();
 
 
-        // Отправка формы с данными пользователя
+        // Отправка формы с данными хоста
         $.when(pmHosts.addItem()).done(function()
         {
             assert.ok(true, 'Успешно host add Item');
@@ -407,9 +424,9 @@ function qunitAddTests_hosts()
     {
         var done = assert.async();
 
-        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
-        // с адресом http://192.168.0.12:8080/?spa=host-5
-        var itemId = /host-([0-9]+)/.exec(window.location.href)[1]
+        // Предполагается что мы от прошлого теста попали на страницу редактирования хоста
+        // с адресом http://192.168.0.12:8080/?host-5
+        var itemId = /host\/([0-9]+)/.exec(window.location.href)[1]
 
         $("#host_"+itemId+"_name").val("test2-hosts-"+t);
 
@@ -432,11 +449,11 @@ function qunitAddTests_hosts()
     {
         var done = assert.async();
 
-        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
-        // с адресом http://192.168.0.12:8080/?spa=host-5
-        var itemId = /host-([0-9]+)/.exec(window.location.href)[1]
+        // Предполагается что мы от прошлого теста попали на страницу редактирования хоста
+        // с адресом http://192.168.0.12:8080/?host-5
+        var itemId = /host\/([0-9]+)/.exec(window.location.href)[1]
 
-        // Удаление пользователя.
+        // Удаление хоста.
         $.when(pmHosts.deleteItem(itemId, true)).done(function()
         {
             assert.ok(true, 'Успешно delete add Item');
@@ -454,6 +471,27 @@ function qunitAddTests_hosts()
  */
 function qunitAddTests_groups()
 {
+    syncQUnit.addTest('validateHostName', function ( assert ) {
+        var done = assert.async();
+
+        assert.ok(!pmGroups.validateHostName(), 'Host')
+        assert.ok(!pmGroups.validateRangeName(), 'Range')
+
+        assert.ok(pmGroups.validateHostName("192.168.0.12"), 'Host 192.168.0.12')
+        assert.ok(pmGroups.validateHostName("local"), 'Host local')
+        assert.ok(pmGroups.validateHostName("loc.ru"), 'Host loc.ru')
+
+        assert.ok(pmGroups.validateRangeName("192.168.0.12"), 'Range 192.168.0.12')
+        assert.ok(pmGroups.validateRangeName("local"), 'Range local')
+        assert.ok(pmGroups.validateRangeName("loc.ru"), 'Range loc.ru')
+
+        assert.ok(pmGroups.validateRangeName("19[2:7].168.0.12"), 'Range 19[2:7].168.0.12')
+        assert.ok(pmGroups.validateRangeName("loc[a:f]l"), 'Range loc[a:f]l')
+        assert.ok(pmGroups.validateRangeName("loc.[a:f]u"), 'Range loc.[a:f]u')
+
+        done();
+    });
+
     syncQUnit.addTest('groups', function ( assert )
     {
         var done = assert.async();
@@ -490,11 +528,11 @@ function qunitAddTests_groups()
 
     syncQUnit.addTest('new-group-save', function ( assert )
     {
-        // Предполагается что мы от прошлого теста попали на страницу создания пользователя
+        // Предполагается что мы от прошлого теста попали на страницу создания группы
         var done = assert.async();
 
-        // Заполнение формы с данными пользователя
-        $("#new_group_name").val("test-group-"+t); 
+        // Заполнение формы с данными группы
+        $("#new_group_name").val("test-group-"+t);
 
         $("#new_json_name").val("test1");
         $("#new_json_value").val("val1");
@@ -505,14 +543,14 @@ function qunitAddTests_groups()
         pmGroups.jsonEditorAddVar();
 
 
-        // Отправка формы с данными пользователя
+        // Отправка формы с данными группы
         $.when(pmGroups.addItem()).done(function()
         {
             assert.ok(true, 'Успешно group add Item');
             render("groups-add-new-group", 1000, done)
         }).fail(function()
         {
-            assert.ok(false, 'Ошибка при user add Item');
+            assert.ok(false, 'Ошибка при group add Item');
             render("groups-add-new-group", 1000, done)
         })
     });
@@ -521,9 +559,9 @@ function qunitAddTests_groups()
     {
         var done = assert.async();
 
-        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
-        // с адресом http://192.168.0.12:8080/?spa=group-5
-        var itemId = /group-([0-9]+)/.exec(window.location.href)[1]
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
 
         $("#group_"+itemId+"_name").val("test2-group-"+t);
 
@@ -546,11 +584,11 @@ function qunitAddTests_groups()
     {
         var done = assert.async();
 
-        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
-        // с адресом http://192.168.0.12:8080/?spa=group-5
-        var itemId = /group-([0-9]+)/.exec(window.location.href)[1]
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
 
-        // Удаление пользователя.
+        // Удаление группы.
         $.when(pmGroups.deleteItem(itemId, true)).done(function()
         {
             assert.ok(true, 'Успешно delete add Item');
@@ -562,6 +600,233 @@ function qunitAddTests_groups()
     });
 }
 
+
+/**
+ * Тестирование inventories
+ */
+function qunitAddTests_inventories()
+{ 
+    syncQUnit.addTest('inventories', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"inventories"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню inventories');
+            render("inventories", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню inventories');
+            render("inventories", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('new-inventory', function ( assert )
+    {
+        var done = assert.async();
+
+        // Открытие пункта меню new-inventory
+        $.when(spajs.open({ menuId:"new-inventory"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-inventory');
+            render("groups-new-inventory", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню new-inventory');
+            render("groups-new-inventory", 1000, done)
+        })
+    });
+
+    var t = new Date();
+    t = t.getTime()
+
+    syncQUnit.addTest('new-inventory-save', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания inventory
+        var done = assert.async();
+
+        // Заполнение формы с данными inventory
+        $("#new_inventory_name").val("test-inventory-"+t);
+
+        $("#new_json_name").val("test1");
+        $("#new_json_value").val("val1");
+        pmInventories.jsonEditorAddVar();
+
+        $("#new_json_name").val("test2");
+        $("#new_json_value").val("val2");
+        pmInventories.jsonEditorAddVar();
+
+
+        // Отправка формы с данными inventory
+        $.when(pmInventories.addItem()).done(function()
+        {
+            assert.ok(true, 'Успешно inventory add Item');
+            render("groups-add-new-inventory", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при inventory add Item');
+            render("groups-add-new-inventory", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('update-inventory', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования inventory
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+
+        $("#inventory_"+itemId+"_name").val("test2-inventory-"+t);
+
+        $("#new_json_name").val("test3");
+        $("#new_json_value").val("val3");
+        pmInventories.jsonEditorAddVar();
+
+
+        $.when(pmInventories.updateItem(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно update add Item');
+            render("inventories-update-inventory", 1000, done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при update add Item');
+            render("inventories-update-inventory", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('delete-inventory', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования inventory
+        // с адресом http://192.168.0.12:8080/?inventory-5
+        var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+
+        // Удаление inventory.
+        $.when(pmInventories.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete Item');
+            render("inventories-delete-inventory", 1000, done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete Item');
+            render("inventories-delete-inventory", 1000, done)
+        })
+    });
+}
+
+/**
+ * Тестирование projects
+ */
+function qunitAddTests_projects()
+{ 
+    syncQUnit.addTest('projects', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"projects"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню projects');
+            render("projects", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню projects');
+            render("projects", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('new-project', function ( assert )
+    {
+        var done = assert.async();
+
+        // Открытие пункта меню new-project
+        $.when(spajs.open({ menuId:"new-project"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-project');
+            render("groups-new-project", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню new-project');
+            render("groups-new-project", 1000, done)
+        })
+    });
+
+    var t = new Date();
+    t = t.getTime()
+
+    syncQUnit.addTest('new-project-save', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        // Заполнение формы с данными project
+        $("#new_project_name").val("test-project-"+t);
+        $("#new_project_repository").val("git://test-project-"+t);
+
+        $("#new_json_name").val("test1");
+        $("#new_json_value").val("val1");
+        pmProjects.jsonEditorAddVar();
+
+        $("#new_json_name").val("test2");
+        $("#new_json_value").val("val2");
+        pmProjects.jsonEditorAddVar();
+
+
+        // Отправка формы с данными project
+        $.when(pmProjects.addItem()).done(function()
+        {
+            assert.ok(true, 'Успешно project add Item');
+            render("groups-add-new-project", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при project add Item');
+            render("groups-add-new-project", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('update-project', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+
+        $("#project_"+itemId+"_name").val("test2-project-"+t);
+
+        $("#new_json_name").val("test3");
+        $("#new_json_value").val("val3");
+        pmProjects.jsonEditorAddVar();
+
+
+        $.when(pmProjects.updateItem(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно update add Item');
+            render("projects-update-project", 1000, done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при update add Item');
+            render("projects-update-project", 1000, done)
+        })
+    });
+
+    syncQUnit.addTest('delete-project', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?project-5
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+
+        // Удаление project.
+        $.when(pmProjects.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete Item');
+            render("projects-delete-project", 1000, done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete Item');
+            render("projects-delete-project", 1000, done)
+        })
+    });
+}
 
 $(document).ready(function()
 {

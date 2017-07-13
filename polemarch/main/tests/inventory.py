@@ -49,6 +49,14 @@ class _ApiGHBaseTestCase(BaseTestCase):
                                 "task", "schedule", "type")
 
     def _filter_test(self, base_url, variables, count):
+        filter_url = "{}?".format(base_url)
+        for key, value in variables.items():
+            filter_url += "{}={}&".format(key, value)
+        result = self.get_result("get", filter_url)
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(result["count"], count, result)
+
+    def _filter_vars(self, base_url, variables, count):
         filter_url = "{}?variables={}".format(base_url, variables)
         result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
@@ -89,10 +97,10 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
 
     def test_filter_host(self):
         base_url = "/api/v1/hosts/"
-        filter_url = "{}?name=127.0.0.1,hostonlocal".format(base_url)
+        filter_url = "{}?name=hostonlocal".format(base_url)
         result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
-        self.assertEqual(result["count"], 2)
+        self.assertEqual(result["count"], 1)
 
         filter_url = "{}?name__not=127.0.0.1".format(base_url)
         result = self.get_result("get", filter_url)
@@ -110,8 +118,17 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         ]
         results_id = self.mass_create(base_url, hosts_d, "name", "vars")
 
-        self._filter_test(base_url, "ansible_port:222,ansible_user:one", 2)
-        self._filter_test(base_url, "ansible_port:221,ansible_user:rh", 2)
+        self._filter_vars(base_url, "ansible_port:222,ansible_user:one", 2)
+        self._filter_vars(base_url, "ansible_port:221,ansible_user:rh", 2)
+
+        filter_data = dict(
+            filter=dict(variables__key="ansible_port", variables__value="222"),
+            exclude=dict(variables__key="ansible_user", variables__value="rh")
+        )
+        result = self.get_result("post", base_url+"filter/", code=200,
+                                 data=json.dumps(filter_data))
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(result["count"], 2, result)
 
         for host_id in results_id:
             self.get_result("delete", base_url + "{}/".format(host_id))
@@ -157,6 +174,18 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
                                  data=json.dumps([groups[1].id]))
         self.assertEqual(result["error_type"], "CiclicDependencyError")
 
+        # Fix for clear group if CiclicDependencyError
+        g1 = Group.objects.create(name="base_01")
+        g2 = Group.objects.create(name="base_02", children=True)
+        g3 = Group.objects.create(name="base_03", children=True)
+        g3.groups.add(g2)
+        g2.groups.add(g1)
+        test_url = "{}{}/groups/".format(url, g2.id)
+        result = self.get_result("post", test_url, 400,
+                                 data=json.dumps([g3.id]))
+        self.assertEqual(result["error_type"], "CiclicDependencyError")
+        self.assertCount(g2.groups.all(), 1)
+
     def test_create_delete_group(self):
         url = "/api/v1/groups/"
         self.list_test(url, Group.objects.count())
@@ -187,6 +216,10 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
                    dict(name="hostlocl", type="HOST", vars=self.vars3),
                    dict(name="127.0.1.[5:6]", type="RANGE", vars=self.vars2)]
         hosts_id = self._create_hosts(d_hosts)
+
+        # Check childrens flag update
+        self.get_result("patch", url+"{}/".format(groups_id[3]), 400,
+                        data=json.dumps(dict(children=False)))
 
         # Test for group with hosts
         # Just put two hosts in group
@@ -226,7 +259,7 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
 
     def test_filter_group(self):
         base_url = "/api/v1/groups/"
-        filter_url = "{}?name=base_one,base_two".format(base_url)
+        filter_url = "{}?name=base_t".format(base_url)
         result = self.get_result("get", filter_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 2)
@@ -247,8 +280,8 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         ]
         results_id = self.mass_create(base_url, groups_d, "name", "vars")
 
-        self._filter_test(base_url, "ansible_port:222,ansible_user:one", 2)
-        self._filter_test(base_url, "ansible_port:221,ansible_user:rh", 2)
+        self._filter_vars(base_url, "ansible_port:222,ansible_user:one", 2)
+        self._filter_vars(base_url, "ansible_port:221,ansible_user:rh", 2)
 
         for group_id in results_id:
             self.get_result("delete", base_url + "{}/".format(group_id))
@@ -325,7 +358,7 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
 
     def test_filter_inventory(self):
         base_url = "/api/v1/inventories/"
-        f_url = "{}?name=First_inventory,Second_inventory".format(base_url)
+        f_url = "{}?name=_inventory".format(base_url)
         result = self.get_result("get", f_url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 2)
@@ -346,8 +379,8 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         ]
         results_id = self.mass_create(base_url, inventories_d, "name", "vars")
 
-        self._filter_test(base_url, "ansible_port:222,ansible_user:one", 2)
-        self._filter_test(base_url, "ansible_port:221,ansible_user:rh", 2)
+        self._filter_vars(base_url, "ansible_port:222,ansible_user:one", 2)
+        self._filter_vars(base_url, "ansible_port:221,ansible_user:rh", 2)
 
         for inventory_id in results_id:
             self.get_result("delete", base_url + "{}/".format(inventory_id))
