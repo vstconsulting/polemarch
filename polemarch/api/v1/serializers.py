@@ -146,6 +146,13 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "url")
 
 
+class HistoryLinesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.HistoryLines
+        fields = ("line_number",
+                  "line",)
+
+
 class VariableSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Variable

@@ -35,6 +35,18 @@ class GenericViewSet(viewsets.GenericViewSet):
             self.queryset = self._get_extra_queryset()
         return super(GenericViewSet, self).get_queryset()
 
+    def get_paginated_route_response(self, queryset, serializer_class=None):
+        if serializer_class is None:
+            serializer_class = self.get_serializer_class()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = serializer_class(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = serializer_class(queryset, many=True)
+        return Response(serializer.data)
+
     @detail_route(methods=["post", "put", "delete", "get"])
     def permissions(self, request, pk=None):
         # pylint: disable=unused-argument
