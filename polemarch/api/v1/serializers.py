@@ -58,7 +58,8 @@ class UserSerializer(serializers.ModelSerializer):
             raise exceptions.PermissionDenied
         valid_fields = ['username', 'password', 'is_active', 'is_staff',
                         "email", "first_name", "last_name"]
-        creditals = {d: data[d] for d in valid_fields if data.get(d, False)}
+        creditals = {d: data[d] for d in valid_fields
+                     if data.get(d, None) is not None}
         raw_passwd = self.initial_data.get("raw_password", "False")
         user = super(UserSerializer, self).create(creditals)
         if not raw_passwd == "True":
@@ -143,6 +144,13 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "raw_args",
                   "raw_stdout",
                   "url")
+
+
+class HistoryLinesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.HistoryLines
+        fields = ("line_number",
+                  "line",)
 
 
 class VariableSerializer(serializers.ModelSerializer):

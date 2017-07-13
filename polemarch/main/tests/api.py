@@ -53,6 +53,29 @@ class ApiUsersTestCase(BaseTestCase):
         response = client.get('/api/v1/', **headers)
         self.assertNotEqual(response.status_code, 200)
 
+    def test_is_active(self):
+        client = self._login()
+        AUTH_PASSWORD_VALIDATORS = settings.AUTH_PASSWORD_VALIDATORS
+        AUTH_PASSWORD_VALIDATORS[1]["OPTIONS"]["min_length"] = 5
+        with self.settings(AUTH_PASSWORD_VALIDATORS=AUTH_PASSWORD_VALIDATORS):
+            userdata = {"passwords": "ab",
+                        "is_active": True,
+                        "first_name": "user_f_name",
+                        "last_name": "user_l_name",
+                        "email": "test@domain.lan"
+                        }
+            self.result(client.post, "/api/v1/users/", 400, userdata)
+        passwd = 'eadgbe'
+        userdata = dict(username="testuser4", password=make_password(passwd),
+                        raw_password=True, is_active=False)
+        self.result(client.post, "/api/v1/users/", 201, userdata)
+        client = Client()
+        data = {'username': userdata['username'],
+                'password': userdata['password']}
+        client.post('/login/', data=data)
+        response = client.get('/')
+        self.assertRedirects(response, self.login_url + '?next=/')
+
     def test_api_users_get(self):
         client = self._login()
         result = self.result(client.get, "/api/v1/users/")

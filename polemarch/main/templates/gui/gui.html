@@ -8,7 +8,7 @@
     <section class="content-header">
         <h1>
             History
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -51,17 +51,25 @@
                                         <div class="ico-on fa fa-toggle-on"></div>
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
+                                    <th class="hidden-xs">Project</th>
                                     <th>Playbook</th>
-                                    <th>Status</th>
-                                    <th>time</th>
+                                    <th style="width: 100px;">Status</th>
+                                    <th style="width: 160px;" class="hidden-xs">Start time</th>
+                                    <th style="width: 160px;" class="hidden-xs">End time</th>
                                 </tr>
                                 <% for(var i in pmHistory.model.itemslist.results){  valid = pmHistory.model.itemslist.results[i].id; %>
                                     <tr 
                                         class="item-row item-<%- valid %>  <%- pmHistory.model.selectedItems.justClass(valid, 'selected') %>"
                                         data-id="<%- valid %>" >
-                                        <td class=""  onclick="pmHistory.toggleSelect(<%- valid %>); return false;">
+                                        <td onclick="pmHistory.toggleSelect(<%- valid %>); return false;">
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" >
+                                                    <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
+                                            </a>
                                         </td>
                                         <td>
                                             <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
@@ -70,10 +78,11 @@
                                         <td>
                                             <%- pmHistory.model.itemslist.results[i].status %>
                                         </td>
-                                        <td>
-                                            <%- pmHistory.model.itemslist.results[i].start_time %>
-                                            -
-                                            <%- pmHistory.model.itemslist.results[i].stop_time %>
+                                        <td class="hidden-xs">
+                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <%- moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
                                     </tr>
                                 <% } %>
@@ -110,7 +119,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             History
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -156,8 +165,9 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Playbook</th>
-                                    <th>Status</th>
-                                    <th>time</th>
+                                    <th style="width: 100px;">Status</th>
+                                    <th style="width: 160px;" class="hidden-xs">Start time</th>
+                                    <th style="width: 160px;" class="hidden-xs">End time</th>
                                 </tr>
                                 <% for(var i in pmHistory.model.itemslist.results){  valid = pmHistory.model.itemslist.results[i].id; %>
                                     <tr 
@@ -174,10 +184,11 @@
                                         <td>
                                             <%- pmHistory.model.itemslist.results[i].status %>
                                         </td>
-                                        <td>
-                                            <%- pmHistory.model.itemslist.results[i].start_time %>
-                                            -
-                                            <%- pmHistory.model.itemslist.results[i].stop_time %>
+                                        <td class="hidden-xs">
+                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <%- moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
                                     </tr>
                                 <% } %>
@@ -212,8 +223,7 @@
             <a href="<%- polemarch.opt.host %>/?history"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmHistory.model.items[item_id].playbook %>
-            <small>v1</small>
+            <%- pmHistory.model.items[item_id].playbook %> 
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -230,12 +240,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Task<br>
-                        <div class="box-tools pull-right">
-
-
-
-                        </div>
+                        Task<br> 
                     </div>
                     <div class="box-body">
                         <div class="row">
@@ -289,12 +294,42 @@
                                 <div class="help-block"></div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="form-group col-lg-12">
-                                <label class="control-label" >Inventory</label>
-                                <pre style="overflow: auto; max-height: 600px;"><%- pmHistory.model.items[item_id].raw_inventory %></pre>
+                         
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info collapsed-box">
+                    <div class="box-header with-border collapsed-box">
+                        Inventory<br> 
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button> 
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row"> 
+                            <div class="form-group col-lg-12"> 
+                                <pre
+                                id="raw_inventory-pre"
+                                style="overflow: auto; max-height: 600px;" ><%- pmHistory.model.items[item_id].raw_inventory %></pre>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        stdout<br> 
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button> 
+                        </div>
+                    </div>
+                    <div class="box-body">
                         <div class="row">
                             <div class="form-group col-lg-12">
                                 <label class="control-label" >stdout 
@@ -318,8 +353,7 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/history"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmHistory.model.items[item_id].playbook %>
-            <small>v1</small>
+            <%- pmHistory.model.items[item_id].playbook %> 
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -397,12 +431,41 @@
                                 <div class="help-block"></div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="form-group col-lg-12">
-                                <label class="control-label" >Inventory</label>
-                                <pre style="overflow: auto; max-height: 600px;"><%- pmHistory.model.items[item_id].raw_inventory %></pre>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info collapsed-box">
+                    <div class="box-header with-border collapsed-box">
+                        Inventory<br> 
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button> 
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row"> 
+                            <div class="form-group col-lg-12"> 
+                                <pre
+                                id="raw_inventory-pre"
+                                style="overflow: auto; max-height: 600px;" ><%- pmHistory.model.items[item_id].raw_inventory %></pre>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        stdout<br> 
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button> 
+                        </div>
+                    </div>
+                    <div class="box-body">
                         <div class="row">
                             <div class="form-group col-lg-12">
                                 <label class="control-label" >stdout 
@@ -427,14 +490,14 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            Periodic tasks list
-            <small>v1</small>
+            Periodic tasks
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[project_id].name %>`</a></li>
-            <li class="active">Periodic tasks list</li>
+            <li class="active">Periodic tasks</li>
         </ol>
     </section>
 
@@ -476,7 +539,8 @@
                                         <div class="ico-on fa fa-toggle-on"></div>
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
-                                    <th>Playbook</th>
+                                    <th>Name</th>
+                                    <th style="width: 400px;" class="visible-lg">Playbook</th>
                                     <th style="width: 95px;" class="hidden-xs">Type</th>
                                     <th style="width: 95px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
@@ -490,6 +554,10 @@
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
                                         <td>
+                                            <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('name') %></a>
+                                        </td>
+                                        <td class="visible-lg">
                                             <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('playbook') %></a>
                                         </td>
@@ -552,7 +620,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmPeriodicTasks.model.items[item_id].playbook %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -715,7 +783,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new periodic task
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -858,12 +926,12 @@
 <script type="text/x-just" data-just="projects_list">
     <section class="content-header">
         <h1>
-            Projects list
-            <small>v1</small>
+            Projects
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Projects list</li>
+            <li class="active">Projects</li>
         </ol>
     </section>
 
@@ -944,20 +1012,7 @@
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/playbook/run'}); return false;" >Run playbook</a>
-                                                    </li>
-                                                    <li role="separator" class="divider"></li>
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-group'}); return false;" >Create sub group</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-host'}); return false;" >Create sub host</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-inventory'}); return false;" >Create sub inventory</a>
-                                                    </li>
+                                                    </li> 
                                                     <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="#"
@@ -1007,7 +1062,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmProjects.model.items[item_id].name %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -1018,14 +1073,42 @@
 
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmProjects.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save project</button>
-        <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="btn btn-warning" >Sync</button>
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="btn btn-info" >Run playbook</button>
+        <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-warning" >Sync</button>
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="hidden-sm hidden-xs btn btn-info" >Run playbook</button>
         <!--<button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-periodic-tasks'});  return false;" class="btn btn-info" >Create periodic tasks</button>-->
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/periodic-tasks'});  return false;" class="btn btn-info" >Periodic tasks</button>
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/history'});  return false;" class="btn btn-info" >History</button>
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/periodic-tasks'});  return false;" class="hidden-sm hidden-xs btn btn-info" >Periodic tasks</button>
+        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/history'});  return false;" class="hidden-sm hidden-xs btn btn-info" >History</button>
 
 
-        <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove project</button>
+        <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-danger" >Remove project</button>
+        
+        
+        <div class="btn-group visible-sm visible-xs" role="group" style="float: right;" >
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li>
+                    <a href="#" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'}); return false;" >Run playbook</a> 
+                </li>
+                <li>
+                    <a href="#" onclick="spajs.open({ menuId:'project/<%- item_id %>/periodic-tasks'}); return false;" >Periodic tasks</a> 
+                </li>
+                <li>
+                    <a href="#" onclick="spajs.open({ menuId:'project/<%- item_id %>/history'}); return false;" >History</a> 
+                </li> 
+                <li role="separator" class="divider"></li> 
+                <li>
+                    <a href="#" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" >Sync</a> 
+                </li> 
+                <li role="separator" class="divider"></li> 
+                <li>
+                    <a href="#" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" >Remove project</a> 
+                </li>
+            </ul>
+        </div>
+        
         <br>
         <br>
         <div class="row">
@@ -1067,9 +1150,10 @@
                     </div>
                 </div>
             </section>
-            <%= jsonEditor.editor(pmProjects.model.items[item_id].vars, {block:'projects'}) %>
+            <%= jsonEditor.editor(pmProjects.model.items[item_id].vars, {block:'projects', hideAddVarsForm:true}) %>
         </div>
 
+        <!--
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -1117,25 +1201,25 @@
                                             onclick="spajs.showLoader(pmProjects.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Edit existings groups</button>
-                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
+                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Create new group</button>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Edit existings hosts</button>
-                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
+                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Create new host</button>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmProjects.showAddSubInventoriesForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Edit existings inventory</button>
-                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-inventory'}); return false;" class="btn btn-primary" >Add new inventory</button>
+                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-inventory'}); return false;" class="btn btn-primary" >Create new inventory</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
-        </div>
+        </div>-->
     </section>
 </script>
 
@@ -1147,11 +1231,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new project
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
             <li class="active">Create new project</li>
         </ol>
     </section>
@@ -1196,7 +1280,7 @@
                 </div>
             </section>
 
-            <%= jsonEditor.editor({'repo_type':'GIT', 'repo_password':''}, {block:'projects'}) %>
+            <%= jsonEditor.editor({'repo_type':'GIT', 'repo_password':''}, {block:'projects', hideAddVarsForm:true}) %>
         </div>
     </section>
 </script>
@@ -1308,13 +1392,13 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Project `<%- pmProjects.model.items[item_id].name %>` run playbook options
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[item_id].name %>`</a></li>
-            <li class="active">Project tasks list</li>
+            <li class="active">Project tasks</li>
         </ol>
     </section>
 
@@ -1367,12 +1451,12 @@
 <script type="text/x-just" data-just="inventories_list">
     <section class="content-header">
         <h1>
-            Inventories list
-            <small>v1</small>
+            Inventories
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Inventories list</li>
+            <li class="active">Inventories</li>
         </ol>
     </section>
 
@@ -1502,7 +1586,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmInventories.model.items[item_id].name %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -1577,16 +1661,46 @@
                                     <button
                                             type="button"
                                             onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
-                                            class="btn btn-primary"
+                                            class="btn btn-primary hidden-xs"
                                             >Edit existings groups</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
+                                            
+                                    <button type="button" 
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;" 
+                                            class="btn btn-primary hidden-xs"
+                                            >Create new group</button>
+                                            
+                                    <div style="margin-top:10px;" class="hidden-xs hidden-md hidden-lg"></div>
 
                                     <button type="button"
                                             onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
-                                            class="btn btn-primary"
+                                            class="btn btn-primary hidden-xs"
                                             >Edit existings hosts</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
+                                            
+                                    <button type="button"
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;"
+                                            class="btn btn-primary hidden-xs" 
+                                            >Create new host</button>
 
+                                    <button
+                                            type="button"
+                                            onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary btn-block visible-xs"
+                                            >Edit existings groups</button>
+                                            
+                                    <button type="button" 
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;" 
+                                            class="btn btn-primary btn-block visible-xs"
+                                            >Create new group</button>
+
+                                    <button type="button"
+                                            onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary btn-block visible-xs"
+                                            >Edit existings hosts</button>
+                                            
+                                    <button type="button"
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;"
+                                            class="btn btn-primary btn-block visible-xs" 
+                                            >Create new host</button>
                             </div>
                         </div>
                     </div>
@@ -1604,11 +1718,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new inventory
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" >Inventories list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" >Inventories</a></li>
             <li class="active">Create new inventory</li>
         </ol>
     </section>
@@ -1713,12 +1827,12 @@
 <script type="text/x-just" data-just="users_list">
     <section class="content-header">
         <h1>
-            Users list
-            <small>v1</small>
+            Users
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Users list</li>
+            <li class="active">Users</li>
         </ol>
     </section>
 
@@ -1832,11 +1946,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmUsers.model.items[item_id].username %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?users"  onclick="return spajs.openURL(this.href);" >Users list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?users"  onclick="return spajs.openURL(this.href);" >Users</a></li>
             <li class="active"><%- pmUsers.model.items[item_id].username %></li>
         </ol>
     </section>
@@ -1893,14 +2007,19 @@
                                 <input type="text" class="form-control" placeholder="Enter last name" id="user_<%- pmUsers.model.items[item_id].id %>_last_name" value="<%- pmUsers.model.items[item_id].last_name %>" >
                                 <div class="help-block"></div>
                             </div>
-
-                            <div class="form-group col-lg-2">
+ 
+                            <div class="form-group col-lg-2 boolean-select">
                                 <label class="control-label" >Active</label>
-                                <select class="form-control" id="user_<%- pmUsers.model.items[item_id].id %>_is_active">
-                                    <option value="true" <%if(pmUsers.model.items[item_id].is_active){ %> selected <% } %> >True</option>
-                                    <option value="false" <%if(!pmUsers.model.items[item_id].is_active){ %> selected <% } %> >False</option>
-                                </select>
-                                <div class="help-block"></div>
+                                <div class="form-control <% if(pmUsers.model.items[item_id].is_active){ %>selected<% } %>"
+                                        onclick="$(this).toggleClass('selected');"
+                                        onselectstart="return false"
+                                        onmousedown="return false"
+                                        style="cursor: pointer;"
+                                        id="user_<%- pmUsers.model.items[item_id].id %>_is_active"  >
+                                    <div class="ico-on fa fa-toggle-on"></div>
+                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                    <div class="boolean-title" >Boolean value</div>
+                                </div>
                             </div>
                             <!--
                             <div class="form-group col-lg-2">
@@ -1929,11 +2048,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new user
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" >Users list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" >Users</a></li>
             <li class="active">Create new user</li>
         </ol>
     </section>
@@ -1994,15 +2113,19 @@
                                 </select>
                                 <div class="help-block"></div>
                             </div>-->
-
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-2 boolean-select">
                                 <label class="control-label" >Active</label>
-                                <select class="form-control" id="new_user_is_active" >
-                                    <option value="true" selected >True</option>
-                                    <option value="false" >False</option>
-                                </select>
-                                <div class="help-block"></div>
-                            </div>
+                                <div class="form-control selected"
+                                        onclick="$(this).toggleClass('selected');"
+                                        onselectstart="return false"
+                                        onmousedown="return false"
+                                        style="cursor: pointer;"
+                                        id="new_user_is_active"  >
+                                    <div class="ico-on fa fa-toggle-on"></div>
+                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                    <div class="boolean-title" >Boolean value</div>
+                                </div>
+                            </div> 
                         </div>
 
                     </div>
@@ -2018,12 +2141,12 @@
 <script type="text/x-just" data-just="hosts_list">
     <section class="content-header">
         <h1>
-            Hosts list
-            <small>v1</small>
+            Hosts
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Hosts list</li>
+            <li class="active">Hosts</li>
         </ol>
     </section>
 
@@ -2141,7 +2264,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmHosts.model.items[item_id].name %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -2198,11 +2321,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new host
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" >Hosts list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" >Hosts</a></li>
             <li class="active">Create new host</li>
         </ol>
     </section>
@@ -2259,6 +2382,9 @@
                     <span class="input-group-addon" onclick="$('#crontabEditor-gui').toggle();" >
                         <span class="glyphicon glyphicon-pencil"></span>
                     </span>
+                </div>
+                <div class="help-block">
+                    Time must be specified in UTC
                 </div>
             </div>
         </div>
@@ -2479,13 +2605,13 @@
                     <% if(thisOpt.type == 'boolean' ){ %> boolean-select <% } %>"
                 id="json_<%- name %>_line">
             <label
-                    class="col-sm-2 control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
+                    class=" col-sm-4 col-lg-3 control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
                     for="#json_<%- name %>"
                     style="word-wrap: break-word;"
                 >
                 <%- name %>
             </label>
-            <div class="input-group col-sm-10"  >
+            <div class="input-group  col-sm-8 col-lg-9 "  >
                     <% if(thisOpt.type == 'select' ){ %>
                         <select class="form-control jsonEditor-data"
                                 id="json_<%- name %>_value"
@@ -2505,8 +2631,7 @@
                                data-json-name="<%- name %>"
                                >
                     <% } else if(thisOpt.type == 'boolean' ){ %>
-                        <div class="form-control jsonEditor-data <% if(value && value != 'False'){ %>selected<% } %>"
-                                onclick="$(this).toggleClass('selected');"
+                        <div class="form-control jsonEditor-data selected"
                                 onselectstart="return false"
                                 onmousedown="return false"
                                 style="cursor: pointer;"
@@ -2545,7 +2670,7 @@
                     <% } %>
             </div>
             <% if(thisOpt.help){ %>
-                <span class="col-sm-10 col-sm-offset-2 help-block" style="padding-left: 0px;"
+                <span class="col-sm-8 col-lg-9 col-lg-offset-3 col-sm-offset-4 help-block" style="padding-left: 0px;"
                                 onmouseenter="$(this).children().popover();">
                     <%- thisOpt.help %>
                     <% if(thisOpt.help){ %>
@@ -2562,12 +2687,12 @@
         </div>
     <% }else{ %>
         <div class="form-group col-lg-12" id="json_<%- name %>_line">
-            <label class="control-label col-sm-2 <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
+            <label class="control-label  col-sm-4 col-lg-3 <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
                     for="#json_<%- name %>"
                     style="word-wrap: break-word;">
                 <%- name %>
             </label>
-            <div class="input-group col-sm-10">
+            <div class="input-group  col-sm-8 col-lg-9">
                 <input type="text"
                        placeholder="Enter value"
                        id="json_<%- name %>_value"
@@ -2606,45 +2731,47 @@
     </div>
 </section>
 
-<section class="col-lg-12">
-    <div class="box box-info">
-        <div class="box-header with-border">
-            <%- opt.title2 %><br>
-        </div>
-        <div class="box-body">
-            <div class="row">
-                <div class="form-group col-lg-12">
-                    <label class="col-sm-1 control-label">
-                        Name
-                    </label>
-                    <div class="input-group col-sm-11"  >
-                        <input type="text" placeholder="Enter name" id="new_json_name" value=""  class="form-control" >
-                        <div class="help-block"></div>
+<% if(!opt.hideAddVarsForm){ %>
+    <section class="col-lg-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <%- opt.title2 %><br>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="form-group col-lg-12">
+                        <label class=" col-sm-2 col-lg-2 control-label">
+                            Name
+                        </label>
+                        <div class="input-group  col-sm-10 col-lg-10"  >
+                            <input type="text" placeholder="Enter name" id="new_json_name" value=""  class="form-control" >
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="form-group col-lg-12">
+                        <label class="col-sm-2 col-lg-2 control-label">
+                            Value
+                        </label>
+                        <div class="input-group col-sm-10 col-lg-10"  >
+                            <textarea placeholder="Enter value" id="new_json_value" class="form-control"  style="resize:vertical;"></textarea>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-lg-1">
+                        <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>');" >Add varible</span>
                     </div>
                 </div>
             </div>
-
-
-            <div class="row">
-                <div class="form-group col-lg-12">
-                    <label class="col-sm-1 control-label">
-                        Value
-                    </label>
-                    <div class="input-group col-sm-11"  >
-                        <textarea placeholder="Enter value" id="new_json_value" class="form-control"  style="resize:vertical;"></textarea>
-                        <div class="help-block"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="form-group col-lg-1">
-                    <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>');" >Add varible</span>
-                </div>
-            </div>
         </div>
-    </div>
-</section>
+    </section>
+<% } %>
 </script>
 
 
@@ -2653,12 +2780,12 @@
 <script type="text/x-just" data-just="groups_list">
     <section class="content-header">
         <h1>
-            Groups list
-            <small>v1</small>
+            Groups
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Groups list</li>
+            <li class="active">Groups</li>
         </ol>
     </section>
 
@@ -2792,11 +2919,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmGroups.model.items[item_id].name %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?groups"  onclick="return spajs.openURL(this.href);" >Groups list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?groups"  onclick="return spajs.openURL(this.href);" >Groups</a></li>
             <li class="active"><%- pmGroups.model.items[item_id].name %></li>
         </ol>
     </section>
@@ -2880,13 +3007,13 @@
                                             onclick="spajs.showLoader(pmGroups.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Edit existings groups</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Add new group</button>
+                                            <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Create new group</button>
                                 <% }else{ %>
                                     <button type="button"
                                             onclick="spajs.showLoader(pmGroups.showAddSubHostsForm(<%- item_id %>)); return false;"
                                             class="btn btn-primary"
                                             >Edit existings hosts</button>
-                                            <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Add new host</button>
+                                            <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Create new host</button>
                                 <% } %>
                             </div>
                         </div>
@@ -2974,11 +3101,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new group
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" >Groups list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" >Groups</a></li>
             <li class="active">Create new group</li>
         </ol>
     </section>
@@ -3029,7 +3156,7 @@
 <script type="text/x-just" data-just="home_page">
     <section class="content-header">
         <h1>
-            Test <small>v1</small>
+            Test 
         </h1>
         <ol class="breadcrumb">
             <li><i class="fa fa-dashboard"></i> Home</li>

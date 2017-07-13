@@ -139,3 +139,10 @@ class HistoryViewSet(base.HistoryModelViewSet):
     def raw(self, request, *args, **kwargs):
         obj = self.get_object()
         return HttpResponse(obj.raw_stdout, content_type="text/plain")
+
+    @detail_route(methods=["get"])
+    def lines(self, request, *args, **kwargs):
+        return self.get_paginated_route_response(
+            self.get_object().raw_history_line.order_by("-line_number"),
+            serializers.HistoryLinesSerializer
+        )
