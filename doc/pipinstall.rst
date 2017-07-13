@@ -25,7 +25,7 @@ to do:
 
    .. sourcecode:: bash
 
-      pip install polemarch-0.0.1.tar.gz --user
+      pip install polemarch --user
 
    **Caution**: without ``--user`` switch this operation installs many binaries
    in system ``bin`` folder and many python libraries in system ``lib`` folder.

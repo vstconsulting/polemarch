@@ -10,7 +10,7 @@ PIPARGS = --index-url=http://pipc.vst.lan:8001/simple/ --trusted-host pipc.vst.l
 ARCHIVE = $(NAME)-$(VER).tar.gz
 LICENSE = AGPL-3+
 define DESCRIPTION
- Infrastructure Heat Service for orchestration infrastructure by ansible.
+ Polemarch is service for orchestration infrastructure by ansible.
  Simply WEB gui for orchestration infrastructure by ansible playbooks.
 endef
 export DESCRIPTION
