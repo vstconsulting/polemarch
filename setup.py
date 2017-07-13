@@ -102,7 +102,7 @@ class Compile(_sdist):
 name = 'polemarch'
 version = polemarch.__version__
 lic = 'AGPLv3+'
-description = ('Polemarch is ansible based service for orcestration '
+description = ('Polemarch is ansible based service for orchestration '
                'infrastructure.')
 author = 'VST Consulting'
 author_email = 'sergey.k@vstconsulting.net'
@@ -127,7 +127,7 @@ setup(
     long_description=README,
     author=author,
     author_email=author_email,
-    url="https://github.com/vstconsulting/polemarch",
+    url="https://gitlab.com/vstconsulting/polemarch",
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
