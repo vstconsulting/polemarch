@@ -8,7 +8,7 @@
     <section class="content-header">
         <h1>
             History
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -79,10 +79,10 @@
                                             <%- pmHistory.model.itemslist.results[i].status %>
                                         </td>
                                         <td class="hidden-xs">
-                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY H:m:s") %>
+                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
                                         <td class="hidden-xs">
-                                            <%- moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY H:m:s") %>
+                                            <%- moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
                                     </tr>
                                 <% } %>
@@ -119,7 +119,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             History
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -185,10 +185,10 @@
                                             <%- pmHistory.model.itemslist.results[i].status %>
                                         </td>
                                         <td class="hidden-xs">
-                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY H:m:s") %>
+                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
                                         <td class="hidden-xs">
-                                            <%- moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY H:m:s") %>
+                                            <%- moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
                                     </tr>
                                 <% } %>
@@ -223,8 +223,7 @@
             <a href="<%- polemarch.opt.host %>/?history"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmHistory.model.items[item_id].playbook %>
-            <small>v1</small>
+            <%- pmHistory.model.items[item_id].playbook %> 
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -354,8 +353,7 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/history"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmHistory.model.items[item_id].playbook %>
-            <small>v1</small>
+            <%- pmHistory.model.items[item_id].playbook %> 
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -492,14 +490,14 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            Periodic tasks list
-            <small>v1</small>
+            Periodic tasks
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[project_id].name %>`</a></li>
-            <li class="active">Periodic tasks list</li>
+            <li class="active">Periodic tasks</li>
         </ol>
     </section>
 
@@ -541,7 +539,8 @@
                                         <div class="ico-on fa fa-toggle-on"></div>
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
-                                    <th>Playbook</th>
+                                    <th>Name</th>
+                                    <th style="width: 400px;" class="visible-lg">Playbook</th>
                                     <th style="width: 95px;" class="hidden-xs">Type</th>
                                     <th style="width: 95px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
@@ -555,6 +554,10 @@
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
                                         <td>
+                                            <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('name') %></a>
+                                        </td>
+                                        <td class="visible-lg">
                                             <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('playbook') %></a>
                                         </td>
@@ -617,7 +620,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmPeriodicTasks.model.items[item_id].playbook %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -780,7 +783,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new periodic task
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -923,12 +926,12 @@
 <script type="text/x-just" data-just="projects_list">
     <section class="content-header">
         <h1>
-            Projects list
-            <small>v1</small>
+            Projects
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Projects list</li>
+            <li class="active">Projects</li>
         </ol>
     </section>
 
@@ -1009,20 +1012,7 @@
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.open({ menuId:'project/<%- valid %>/playbook/run'}); return false;" >Run playbook</a>
-                                                    </li>
-                                                    <li role="separator" class="divider"></li>
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-group'}); return false;" >Create sub group</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-host'}); return false;" >Create sub host</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/new-inventory'}); return false;" >Create sub inventory</a>
-                                                    </li>
+                                                    </li> 
                                                     <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="#"
@@ -1072,7 +1062,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmProjects.model.items[item_id].name %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -1241,11 +1231,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new project
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
             <li class="active">Create new project</li>
         </ol>
     </section>
@@ -1402,13 +1392,13 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Project `<%- pmProjects.model.items[item_id].name %>` run playbook options
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[item_id].name %>`</a></li>
-            <li class="active">Project tasks list</li>
+            <li class="active">Project tasks</li>
         </ol>
     </section>
 
@@ -1461,12 +1451,12 @@
 <script type="text/x-just" data-just="inventories_list">
     <section class="content-header">
         <h1>
-            Inventories list
-            <small>v1</small>
+            Inventories
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Inventories list</li>
+            <li class="active">Inventories</li>
         </ol>
     </section>
 
@@ -1596,7 +1586,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmInventories.model.items[item_id].name %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -1728,11 +1718,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new inventory
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" >Inventories list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" >Inventories</a></li>
             <li class="active">Create new inventory</li>
         </ol>
     </section>
@@ -1837,12 +1827,12 @@
 <script type="text/x-just" data-just="users_list">
     <section class="content-header">
         <h1>
-            Users list
-            <small>v1</small>
+            Users
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Users list</li>
+            <li class="active">Users</li>
         </ol>
     </section>
 
@@ -1956,11 +1946,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmUsers.model.items[item_id].username %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?users"  onclick="return spajs.openURL(this.href);" >Users list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?users"  onclick="return spajs.openURL(this.href);" >Users</a></li>
             <li class="active"><%- pmUsers.model.items[item_id].username %></li>
         </ol>
     </section>
@@ -2058,11 +2048,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new user
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" >Users list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" >Users</a></li>
             <li class="active">Create new user</li>
         </ol>
     </section>
@@ -2151,12 +2141,12 @@
 <script type="text/x-just" data-just="hosts_list">
     <section class="content-header">
         <h1>
-            Hosts list
-            <small>v1</small>
+            Hosts
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Hosts list</li>
+            <li class="active">Hosts</li>
         </ol>
     </section>
 
@@ -2274,7 +2264,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmHosts.model.items[item_id].name %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -2331,11 +2321,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new host
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" >Hosts list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" >Hosts</a></li>
             <li class="active">Create new host</li>
         </ol>
     </section>
@@ -2790,12 +2780,12 @@
 <script type="text/x-just" data-just="groups_list">
     <section class="content-header">
         <h1>
-            Groups list
-            <small>v1</small>
+            Groups
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Groups list</li>
+            <li class="active">Groups</li>
         </ol>
     </section>
 
@@ -2929,11 +2919,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmGroups.model.items[item_id].name %>
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?groups"  onclick="return spajs.openURL(this.href);" >Groups list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?groups"  onclick="return spajs.openURL(this.href);" >Groups</a></li>
             <li class="active"><%- pmGroups.model.items[item_id].name %></li>
         </ol>
     </section>
@@ -3111,11 +3101,11 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             Create new group
-            <small>v1</small>
+            
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" >Groups list</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" >Groups</a></li>
             <li class="active">Create new group</li>
         </ol>
     </section>
@@ -3166,7 +3156,7 @@
 <script type="text/x-just" data-just="home_page">
     <section class="content-header">
         <h1>
-            Test <small>v1</small>
+            Test 
         </h1>
         <ol class="breadcrumb">
             <li><i class="fa fa-dashboard"></i> Home</li>
