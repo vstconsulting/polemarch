@@ -15,7 +15,7 @@ pmUsers.addItem = function()
     data.first_name = $("#new_user_first_name").val()
     data.last_name = $("#new_user_last_name").val()
     data.username = $("#new_user_username").val()
-    data.is_active = $("#new_user_is_active").val() == "true"
+    data.is_active = $("#new_user_is_active").hasClass('selected') 
     data.is_staff = true // $("#new_user_is_staff").val()
     data.password = $("#new_user_password").val()
 
@@ -45,8 +45,7 @@ pmUsers.addItem = function()
             }
         },
         success: function(data)
-        {
-            console.log("user add", data); 
+        { 
             $.notify("User created", "success");
             $.when(spajs.open({ menuId:"user/"+data.id})).always(function(){
                 def.resolve()
@@ -73,7 +72,7 @@ pmUsers.updateItem = function(item_id)
     data.first_name = $("#user_"+item_id+"_first_name").val()
     data.last_name = $("#user_"+item_id+"_last_name").val()
     data.username = $("#user_"+item_id+"_username").val()
-    data.is_active = $("#user_"+item_id+"_is_active").val() == "true"
+    data.is_active = $("#user_"+item_id+"_is_active").hasClass('selected') 
     data.is_staff = true // $("#user_"+item_id+"_is_staff").val()
 
     if(!data.username)
@@ -100,13 +99,12 @@ pmUsers.updateItem = function(item_id)
             }
         },
         success: function(data)
-        {
-            console.log("user update", data); 
+        { 
             $.notify("Save", "success");
         },
         error:function(e)
         {
-            console.log("user "+item_id+" update error - " + JSON.stringify(e)); 
+            console.warn("user "+item_id+" update error - " + JSON.stringify(e)); 
             polemarch.showErrors(e.responseJSON)
         }
     });

@@ -696,7 +696,7 @@ if(!window.spajs)
 
         if(spajs.currentOpenMenu && menuInfo.id == spajs.currentOpenMenu.id && !opt.reopen)
         {
-            console.warn("Повторное открытие меню", menuInfo)
+            //console.warn("Повторное открытие меню", menuInfo)
             def.reject()
             return def.promise();
         }
@@ -730,7 +730,7 @@ if(!window.spajs)
 
         if(spajs.currentOpenMenu && spajs.currentOpenMenu.onClose)
         {
-            console.log("onClose", spajs.currentOpenMenu)
+            //console.log("onClose", spajs.currentOpenMenu)
             spajs.currentOpenMenu.onClose(menuInfo);
         }
 
@@ -744,14 +744,14 @@ if(!window.spajs)
         }
 
 
-        console.log("onOpen", menuInfo)
+        //console.log("onOpen", menuInfo)
         if(spajs.currentOpenMenu && spajs.currentOpenMenu.id)
         {
             $("body").removeClass("spajs-active-"+spajs.currentOpenMenu.id)
         }
         else
         {
-            console.error("Не удалён предыдущий класс меню", spajs.currentOpenMenu, menuInfo)
+            //error("Не удалён предыдущий класс меню", spajs.currentOpenMenu, menuInfo)
         }
         $(spajs.opt.holder).addClass("spajs-active-"+menuInfo.id);
 
@@ -762,12 +762,12 @@ if(!window.spajs)
             // in-loading
             $("body").addClass("in-loading")
 
-            console.time("Mopen")
+            //console.time("Mopen")
             jQuery("#spajs-menu-"+menuInfo.id).addClass("menu-loading")
             setTimeout(function(){
                 $.when(res).done(function()
                 {
-                    console.timeEnd("Mopen")
+                    //console.timeEnd("Mopen")
                     jQuery("#spajs-menu-"+menuInfo.id).removeClass("menu-loading")
 
                     // in-loading
@@ -775,7 +775,7 @@ if(!window.spajs)
                     def.resolve()
                 }).fail(function()
                 {
-                    console.timeEnd("Mopen")
+                    //console.timeEnd("Mopen")
                     jQuery("#spajs-menu-"+menuInfo.id).removeClass("menu-loading")
 
                     // in-loading
@@ -978,280 +978,7 @@ if(!window.spajs)
         */
         return this;
     };
-
-
-
-    //******************************************************************************
-    //* Пользователи
-    //******************************************************************************
-
-    spajs.users = function()
-    {
-        return this;
-    }
-
-    spajs.opt.users = {}
-    spajs.opt.users.URL_getUserInfo = "/index.php?cultivate=RoomChat.getUserInfo"
-
-    spajs.opt.users.selfInfo = {}
-
-
-    /**
-     * Если информация о пользователе не получена, например он удалён. То будут подставлены данные отсюда.
-     * @type object
-     */
-    spajs.opt.users.deleted_user = {
-        avatar_url:"",
-        page_url:"#",
-        status:"active",
-        user_id:"0",
-
-        login:"",
-        about_me:gettext("User deleted"),
-        name:gettext("Herostrat - a resident of the Chinese city of Ephesus"),
-        company:"",
-        last_online_time: "-1"
-    }
-
-    /**
-     * Идентификатор пользователя под которым мы авторизованы в чате или 0
-     * @type Number
-     */
-    spajs.users.allUsersInfo = {}
-    spajs.users.queryArray = []
-
-    /**
-     * Устанавливает статус Offline для всех контактов.
-     */
-    spajs.users.setAllUsersAsOffline = function()
-    {
-        var time = new Date();
-        var nowTime = time.getTime()/1000;
-
-        var updateUsers = []
-        for(var i in spajs.users.allUsersInfo)
-        {
-            if(spajs.users.allUsersInfo[i].last_online_time === undefined)
-            {
-                continue;
-            }
-
-            if(spajs.users.allUsersInfo[i].last_online_time === 0)
-            {
-                updateUsers.push(spajs.users.allUsersInfo[i])
-                spajs.users.allUsersInfo[i].last_online_time = nowTime
-            }
-        }
-
-        // Уведомим всех о том что обновлена информация о пользователях
-        tabSignal.emit("onUpdateUsersInfo", {users: updateUsers})
-    }
-
-    /**
-     *  Мёржим присланую информацию о пользователях с локальными данными
-     *  @return {Integer} Количество реально добавленых пользователей информации о которых раньше небыло.
-     *  @private
-     */
-    spajs.users.addUsersInfo = function(usersArray)
-    {
-        var count = 0;
-        // Мёржим присланую информацию о пользователях с локальными данными
-        for(var i in usersArray)
-        {
-            if(isNaN(parseInt(i)) || usersArray[i] === undefined)
-            {
-                continue;
-            }
-
-            if(!spajs.users.allUsersInfo[usersArray[i].user_id])
-            {
-                spajs.users.allUsersInfo[usersArray[i].user_id] = usersArray[i]
-                count++;
-                continue;
-            }
-
-            // Мёржим инфу о пользователе а не просто заменяем
-            // Таким образом можно обновить не все поля а только часть
-            for(var j in usersArray[i])
-            {
-                spajs.users.allUsersInfo[usersArray[i].user_id][j] = usersArray[i][j]
-                continue;
-            }
-        }
-
-        // Уведомим всех о том что обновлена информация о пользователях
-        tabSignal.emit("onUpdateUsersInfo", {users:usersArray})
-
-        return count;
-    }
-
-    /**
-     * Возвращает информцию о пользователи из локальной памяти, а если её там нет то вернёт описание профиля по умолчанию
-     * @param {Integer} user_id
-     * @returns {spajs.opt.users.deleted_user}
-     * @public
-     */
-    spajs.users.getUserInfoById = function(user_id)
-    {
-        if(spajs.users.allUsersInfo[user_id])
-        {
-            return spajs.users.allUsersInfo[user_id];
-        }
-
-        //console.log("Не найден пользователь", user_id)
-        return spajs.opt.users.deleted_user
-    }
-
-    /**
-     * Выполнит проверку на предмет того имеется ли инфа о пользователе в памяти или нет
-     * @param {integer} user_id идентификатор пользователя
-     * @returns {Boolean}
-     */
-    spajs.users.isHasUserInfo = function(user_id)
-    {
-        if(spajs.users.allUsersInfo[user_id])
-        {
-            return true;
-        }
-
-        return false
-    }
-
-    spajs.users.queryArray = []
-    /**
-     * Отправляет запрос к серверу на получение информации о пользователях по их идентификаторам.
-     * Отправляет запрос не сразу а с задержкой 300 милисекунд. Таким образом 2 и более вызова этой функции с интервалом менее 200 мс создадут всего одно обращение к серверу
-     * @private
-     * @param {array} idsArray массив идентификаторов пользователей
-     * @param {function} callBack
-     * @param {object} params Дополнительные параметры которые будут переданы в callBack функцию при вызове
-     */
-    spajs.users.getUsersInfoByIdsFromServer = function(idsArray, callBack, params)
-    {
-        if(callBack === undefined)
-        {
-            callBack = function(){}
-        }
-
-        // Проверяем нету ли данных в кеше
-        var resUserInfo = []
-        for(var i in idsArray)
-        {
-            if(!spajs.users.allUsersInfo[idsArray[i]])
-            {
-                break;
-            }
-
-            resUserInfo.push(spajs.users.allUsersInfo[idsArray[i]])
-        }
-
-        if(resUserInfo.length === idsArray.length )
-        {
-            // Все запрошенные данные уже есть локально.
-            if(callBack) callBack(resUserInfo, params);
-            return;
-        }
-
-        spajs.users.queryArray.push({
-            idsArray: idsArray,
-            callBack: callBack,
-            params:params
-        })
-
-        if(spajs.users.timerId)
-        {
-            clearTimeout(spajs.users.timerId)
-        }
-
-        spajs.users.timerId = setTimeout(function()
-        {
-            var userData = []
-
-            for(var j in spajs.users.queryArray)
-            {
-                for(var i in spajs.users.queryArray[j].idsArray)
-                {
-                    var val = spajs.users.queryArray[j].idsArray[i];
-                    var info = spajs.users.allUsersInfo[val]
-                    if(info || $.inArray(val, userData) !== -1)
-                    {
-                        // Проверяем нету ли данных в кеше и исключаем из запроса те id для которых есть кеш
-                        continue;
-                    }
-
-                    userData.push(val);
-                }
-            }
-
-            var lastQuery = spajs.users.queryArray.slice();
-            spajs.users.queryArray = []
-
-            if(userData.length === 0)
-            {
-                // Все запрошенные данные уже есть локально.
-                for(var i in lastQuery)
-                {
-                    if(!lastQuery[i].callBack)
-                    {
-                        continue;
-                    }
-
-                    var resUserInfo = []
-                    for(var j in lastQuery[i].idsArray)
-                    {
-                        resUserInfo.push(spajs.users.allUsersInfo[lastQuery[i].idsArray[j]])
-                    }
-
-                    lastQuery[i].callBack(resUserInfo, lastQuery[i].params);
-
-                }
-                return;
-            }
-
-            spajs.ajax.Call({
-                reTryInOnline:true,
-                url: spajs.opt.users.URL_getUserInfo,
-                type: "POST",
-                dataType:'json',
-                data:"ids="+userData.join(","),
-                success: function(res)
-                {
-                    if(spajs.ajax.ErrorTest(res))
-                    {
-                        return;
-                    }
-
-                    for(var i in res)
-                    {
-                        spajs.users.allUsersInfo[res[i].user_id] = res[i]
-                    }
-
-                    for(var i in lastQuery)
-                    {
-                        if(!lastQuery[i].callBack)
-                        {
-                            continue;
-                        }
-
-                        var resUserInfo = []
-                        for(var j in lastQuery[i].idsArray)
-                        {
-                            resUserInfo.push(spajs.users.allUsersInfo[lastQuery[i].idsArray[j]])
-                        }
-
-                        lastQuery[i].callBack(resUserInfo, lastQuery[i].params);
-                    }
-                },
-                error:function(res)
-                {
-                    // @todo Придумать обработку такой ситуации
-                    console.error("getUsersInfoByIdsFromServer Error");
-                }
-            });
-        }, 200)
-    }
-
-
+ 
     //******************************************************************************
     //* Функции для работы с ajax запросами
     //******************************************************************************

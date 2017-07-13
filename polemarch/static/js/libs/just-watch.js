@@ -59,7 +59,7 @@ var justReactive = {
     ],
     megreFunc:function(obj, prop, newval)
     {
-        console.log("megreFunc", obj[prop], newval)
+        //console.log("megreFunc", obj[prop], newval)
         if(typeof obj[prop] != "object")
         {
             obj[prop] = newval;

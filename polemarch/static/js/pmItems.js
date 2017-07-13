@@ -121,7 +121,7 @@ function pmItems()
     this.showItem = function(holder, menuInfo, data)
     {
         var thisObj = this;
-        console.log(menuInfo, data)
+        //console.log(menuInfo, data)
 
         return $.when(this.loadItem(data.reg[1])).done(function()
         {
@@ -171,7 +171,7 @@ function pmItems()
             },
             success: function(data)
             {
-                console.log("update Items", data)
+                //console.log("update Items", data)
                 thisObj.model.itemslist = data
                 thisObj.model.itemslist.limit = limit
                 thisObj.model.itemslist.offset = offset
@@ -186,7 +186,7 @@ function pmItems()
             },
             error:function(e)
             {
-                console.log(e)
+                console.warn(e)
                 polemarch.showErrors(e)
             }
         });
@@ -224,7 +224,7 @@ function pmItems()
             },
             success: function(data)
             {
-                console.log("update Items", data)
+                //console.log("update Items", data)
                 thisObj.model.itemslist = data
                 //thisObj.model.items = {}
 
@@ -236,7 +236,7 @@ function pmItems()
             },
             error:function(e)
             {
-                console.log(e)
+                console.warn(e)
                 polemarch.showErrors(e)
             }
         });
@@ -273,12 +273,12 @@ function pmItems()
             },
             success: function(data)
             {
-                console.log("loadUser", data)
+                //console.log("loadUser", data)
                 thisObj.model.items[item_id] = data
             },
             error:function(e)
             {
-                console.log(e)
+                console.warn(e)
                 polemarch.showErrors(e)
             }
         });
@@ -295,7 +295,7 @@ function pmItems()
         }
         var thisObj = this;
         return $.when(this.deleteItemQuery(item_id)).done(function(data){
-            console.log("deleteItem", data);
+            //console.log("deleteItem", data);
             spajs.open({ menuId:thisObj.model.name})
         }).fail(function(e){
             polemarch.showErrors(e.responseJSON)

@@ -72,7 +72,7 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
 pmHistory.showItemInProjects = function(holder, menuInfo, data)
 {
     var thisObj = this;
-    console.log(menuInfo, data)
+    //console.log(menuInfo, data)
 
     return $.when(this.loadItem(data.reg[2]), pmProjects.loadItem(data.reg[1])).done(function()
     {
@@ -105,7 +105,7 @@ pmHistory.loadItem = function(item_id)
         },
         success: function(data)
         {
-            console.log("loadUser", data)
+            //console.log("loadUser", data)
             thisObj.model.items[item_id] = data
             $.when(pmProjects.loadItem(data.project)).done(function(){
                 def.resolve()
@@ -115,7 +115,7 @@ pmHistory.loadItem = function(item_id)
         },
         error:function(e)
         {
-            console.log(e)
+            console.warn("pmHistory.loadItem", e)
             polemarch.showErrors(e)
             def.reject()
         }
@@ -157,7 +157,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
         },
         success: function(data)
         {
-            console.log("update Items", data)
+            //console.log("update Items", data)
             thisObj.model.itemslist = data
             //thisObj.model.items = {}
 
@@ -181,7 +181,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
         },
         error:function(e)
         {
-            console.log(e)
+            console.warn(e)
             polemarch.showErrors(e)
             def.reject()
         }
@@ -221,7 +221,7 @@ pmHistory.loadItems = function(limit, offset)
         },
         success: function(data)
         {
-            console.log("update Items", data)
+            //console.log("update Items", data)
             thisObj.model.itemslist = data
             thisObj.model.itemslist.limit = limit
             thisObj.model.itemslist.offset = offset
@@ -248,7 +248,7 @@ pmHistory.loadItems = function(limit, offset)
         },
         error:function(e)
         {
-            console.log(e)
+            console.warn(e)
             polemarch.showErrors(e)
             def.reject()
         }
