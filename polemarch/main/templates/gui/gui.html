@@ -1963,14 +1963,19 @@
                                 <input type="text" class="form-control" placeholder="Enter last name" id="user_<%- pmUsers.model.items[item_id].id %>_last_name" value="<%- pmUsers.model.items[item_id].last_name %>" >
                                 <div class="help-block"></div>
                             </div>
-
-                            <div class="form-group col-lg-2">
+ 
+                            <div class="form-group col-lg-2 boolean-select">
                                 <label class="control-label" >Active</label>
-                                <select class="form-control" id="user_<%- pmUsers.model.items[item_id].id %>_is_active">
-                                    <option value="true" <%if(pmUsers.model.items[item_id].is_active){ %> selected <% } %> >True</option>
-                                    <option value="false" <%if(!pmUsers.model.items[item_id].is_active){ %> selected <% } %> >False</option>
-                                </select>
-                                <div class="help-block"></div>
+                                <div class="form-control <% if(pmUsers.model.items[item_id].is_active){ %>selected<% } %>"
+                                        onclick="$(this).toggleClass('selected');"
+                                        onselectstart="return false"
+                                        onmousedown="return false"
+                                        style="cursor: pointer;"
+                                        id="user_<%- pmUsers.model.items[item_id].id %>_is_active"  >
+                                    <div class="ico-on fa fa-toggle-on"></div>
+                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                    <div class="boolean-title" >Boolean value</div>
+                                </div>
                             </div>
                             <!--
                             <div class="form-group col-lg-2">
@@ -2064,15 +2069,19 @@
                                 </select>
                                 <div class="help-block"></div>
                             </div>-->
-
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-2 boolean-select">
                                 <label class="control-label" >Active</label>
-                                <select class="form-control" id="new_user_is_active" >
-                                    <option value="true" selected >True</option>
-                                    <option value="false" >False</option>
-                                </select>
-                                <div class="help-block"></div>
-                            </div>
+                                <div class="form-control selected"
+                                        onclick="$(this).toggleClass('selected');"
+                                        onselectstart="return false"
+                                        onmousedown="return false"
+                                        style="cursor: pointer;"
+                                        id="new_user_is_active"  >
+                                    <div class="ico-on fa fa-toggle-on"></div>
+                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                    <div class="boolean-title" >Boolean value</div>
+                                </div>
+                            </div> 
                         </div>
 
                     </div>
@@ -2329,6 +2338,9 @@
                     <span class="input-group-addon" onclick="$('#crontabEditor-gui').toggle();" >
                         <span class="glyphicon glyphicon-pencil"></span>
                     </span>
+                </div>
+                <div class="help-block">
+                    Time must be specified in UTC
                 </div>
             </div>
         </div>

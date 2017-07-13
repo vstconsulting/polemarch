@@ -33,8 +33,7 @@ pmInventories.addItem = function(parent_type, parent_item)
             }
         },
         success: function(data)
-        {
-            console.log("inventory add", data); 
+        { 
             $.notify("inventory created", "success");
             
             if(parent_item)
@@ -95,13 +94,12 @@ pmInventories.updateItem = function(item_id)
             }
         },
         success: function(data)
-        {
-            console.log("user inventory", data); 
+        { 
             $.notify("Save", "success");
         },
         error:function(e)
         {
-            console.log("inventory "+item_id+" update error - " + JSON.stringify(e)); 
+            console.warn("inventory "+item_id+" update error - " + JSON.stringify(e)); 
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -210,13 +208,12 @@ pmInventories.setSubGroups = function(item_id, groups_ids)
                 {
                     pmInventories.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
                 }
-            }
-            console.log("group update", data);
+            } 
             $.notify("Save", "success");
         },
         error:function(e)
         {
-            console.log("group "+item_id+" update error - " + JSON.stringify(e));
+            console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -252,13 +249,12 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
                 {
                     pmInventories.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
                 }
-            }
-            console.log("inventories update", data);
+            } 
             $.notify("Save", "success");
         },
         error:function(e)
         {
-            console.log("group "+item_id+" update error - " + JSON.stringify(e));
+            console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -294,12 +290,12 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
                     pmInventories.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
                 }
             }
-            console.log("group update", data);
+            
             $.notify("Save", "success");
         },
         error:function(e)
         {
-            console.log("group "+item_id+" update error - " + JSON.stringify(e));
+            console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -335,12 +331,12 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
                     pmInventories.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
                 }
             }
-            console.log("inventories update", data);
+            
             $.notify("Save", "success");
         },
         error:function(e)
         {
-            console.log("group "+item_id+" update error - " + JSON.stringify(e));
+            console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });

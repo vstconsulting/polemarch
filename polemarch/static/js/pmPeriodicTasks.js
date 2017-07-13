@@ -71,9 +71,9 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
             },
             onSelect: function(event, term, item)
             {
-                console.log('onSelect', term, item);
-                var value = $(event.target).attr('data-value');
-                $("#new_periodic-tasks_playbook").val($(event.target).text());
+                $("#new_periodic-tasks_playbook").val($(item).text());
+                //console.log('onSelect', term, item);
+                //var value = $(item).attr('data-value');   
             },
             source: function(term, response)
             {
@@ -99,8 +99,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
 
 pmPeriodicTasks.showItem = function(holder, menuInfo, data)
 {
-    var thisObj = this;
-    console.log(menuInfo, data)
+    var thisObj = this; 
     var item_id = data.reg[2];
     var project_id = data.reg[1];
 
@@ -121,9 +120,9 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
             },
             onSelect: function(event, term, item)
             {
-                console.log('onSelect', term, item);
-                var value = $(event.target).attr('data-value');
-                $("#periodic-tasks_"+item_id+"_playbook").val($(event.target).text());
+                $("#periodic-tasks_"+item_id+"_playbook").val($(item).text());
+                //console.log('onSelect', term, item);
+                //var value = $(item).attr('data-value');  
             },
             source: function(term, response)
             {
@@ -187,8 +186,7 @@ pmPeriodicTasks.addItem = function(project_id)
             }
         },
         success: function(data)
-        {
-            console.log("addItem", data);
+        { 
             $.notify("periodic task created", "success");
 
             $.when(spajs.open({ menuId:"project/"+project_id+"/periodic-task/"+data.id})).always(function(){
@@ -239,8 +237,7 @@ pmPeriodicTasks.updateItem = function(item_id)
             }
         },
         success: function(data)
-        {
-            console.log("updateItem", data);
+        { 
             $.notify("Save", "success");
         },
         error:function(e)

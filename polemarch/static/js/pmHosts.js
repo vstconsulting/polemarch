@@ -40,8 +40,7 @@ pmHosts.addItem = function(parent_type, parent_item)
             }
         },
         success: function(data)
-        {
-            console.log("addItem", data);
+        { 
             $.notify("Host created", "success");
 
             if(parent_item)
@@ -136,8 +135,7 @@ pmHosts.updateItem = function(item_id)
             }
         },
         success: function(data)
-        {
-            console.log("updateItem", data);
+        { 
             $.notify("Save", "success");
         },
         error:function(e)

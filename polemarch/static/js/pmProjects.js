@@ -57,14 +57,13 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
             menuClass:'playbook-autocomplete',
             renderItem: function(item, search)
             {
-                return '<div class="autocomplete-suggestion" data-value="' + item.playbook + '">' + item.playbook + '</div>';
+                return '<div class="autocomplete-suggestion" data-value="' + item.playbook + '" >' + item.playbook + '</div>';
             },
             onSelect: function(event, term, item)
             {
-                console.log('onSelect', term, item);
-                var value = $(event.target).attr('data-value');
-                $("#playbook-autocomplete").val($(event.target).text());
-                //$("#city-id").val(value);
+                $("#playbook-autocomplete").val($(item).text());
+                //console.log('onSelect', term, item);
+                //var value = $(item).attr('data-value'); 
             },
             source: function(term, response)
             {
@@ -175,7 +174,7 @@ pmProjects.updateItem = function(item_id)
         },
         error:function(e)
         {
-            console.log("project "+item_id+" update error - " + JSON.stringify(e));
+            console.warn("project "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -335,13 +334,12 @@ pmProjects.setSubInventories = function(item_id, inventories_ids)
                 {
                     pmProjects.model.items[item_id].inventories.push(pmInventories.model.items[inventories_ids[i]])
                 }
-            }
-            console.log("inventories update", data);
+            } 
             $.notify("Save", "success");
         },
         error:function(e)
         {
-            console.log("inventories "+item_id+" update error - " + JSON.stringify(e));
+            console.warn("inventories "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -377,13 +375,12 @@ pmProjects.setSubGroups = function(item_id, groups_ids)
                 {
                     pmProjects.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
                 }
-            }
-            console.log("group update", data);
+            } 
             $.notify("Save", "success");
         },
         error:function(e)
         {
-            console.log("group "+item_id+" update error - " + JSON.stringify(e));
+            console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -423,7 +420,7 @@ pmProjects.setSubHosts = function(item_id, hosts_ids)
         },
         error:function(e)
         {
-            console.log("project "+item_id+" update error - " + JSON.stringify(e));
+            console.warn("project "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -458,13 +455,12 @@ pmProjects.addSubInventories = function(item_id, inventories_ids)
                 {
                     pmProjects.model.items[item_id].inventories.push(pmInventories.model.items[inventories_ids[i]])
                 }
-            }
-            console.log("inventories update", data);
+            } 
             $.notify("Save", "success");
         },
         error:function(e)
         {
-            console.log("inventories "+item_id+" update error - " + JSON.stringify(e));
+            console.warn("inventories "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -499,13 +495,12 @@ pmProjects.addSubGroups = function(item_id, groups_ids)
                 {
                     pmProjects.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
                 }
-            }
-            console.log("group update", data);
+            } 
             $.notify("Save", "success");
         },
         error:function(e)
         {
-            console.log("group "+item_id+" update error - " + JSON.stringify(e));
+            console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -544,7 +539,7 @@ pmProjects.addSubHosts = function(item_id, hosts_ids)
         },
         error:function(e)
         {
-            console.log("project "+item_id+" update error - " + JSON.stringify(e));
+            console.warn("project "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -571,7 +566,7 @@ pmProjects.syncRepo = function(item_id)
         },
         error:function(e)
         {
-            console.log("project "+item_id+" sync error - " + JSON.stringify(e));
+            console.warn("project "+item_id+" sync error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -603,7 +598,7 @@ pmProjects.supportedRepos = function()
         },
         error:function(e)
         {
-            console.log("project "+item_id+" sync error - " + JSON.stringify(e));
+            console.warn("project "+item_id+" sync error - " + JSON.stringify(e));
         }
     });
 }
