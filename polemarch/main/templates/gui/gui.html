@@ -51,11 +51,11 @@
                                         <div class="ico-on fa fa-toggle-on"></div>
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
-                                    <th class="hidden-xs">Project</th>
+                                    <th class="hidden-xs hidden-sm">Project</th>
                                     <th>Playbook</th>
                                     <th style="width: 100px;">Status</th>
                                     <th style="width: 160px;" class="hidden-xs">Start time</th>
-                                    <th style="width: 160px;" class="hidden-xs">End time</th>
+                                    <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
                                 </tr>
                                 <% for(var i in pmHistory.model.itemslist.results){  valid = pmHistory.model.itemslist.results[i].id; %>
                                     <tr 
@@ -65,7 +65,7 @@
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
-                                        <td class="hidden-xs">
+                                        <td class="hidden-xs hidden-sm">
                                             <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" >
                                                     <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
@@ -81,7 +81,7 @@
                                         <td class="hidden-xs">
                                             <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
-                                        <td class="hidden-xs">
+                                        <td class="hidden-xs hidden-sm">
                                             <%- moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
                                     </tr>
@@ -167,7 +167,7 @@
                                     <th>Playbook</th>
                                     <th style="width: 100px;">Status</th>
                                     <th style="width: 160px;" class="hidden-xs">Start time</th>
-                                    <th style="width: 160px;" class="hidden-xs">End time</th>
+                                    <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
                                 </tr>
                                 <% for(var i in pmHistory.model.itemslist.results){  valid = pmHistory.model.itemslist.results[i].id; %>
                                     <tr 
@@ -187,7 +187,7 @@
                                         <td class="hidden-xs">
                                             <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
-                                        <td class="hidden-xs">
+                                        <td class="hidden-xs hidden-sm">
                                             <%- moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
                                     </tr>
@@ -540,7 +540,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 400px;" class="visible-lg">Playbook</th>
+                                    <th style="width: 400px;" class="hidden-sm visible-lg">Playbook</th>
                                     <th style="width: 95px;" class="hidden-xs">Type</th>
                                     <th style="width: 95px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
@@ -557,7 +557,7 @@
                                             <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('name') %></a>
                                         </td>
-                                        <td class="visible-lg">
+                                        <td class="hidden-sm visible-lg">
                                             <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('playbook') %></a>
                                         </td>
