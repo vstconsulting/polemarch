@@ -37,6 +37,7 @@ AutoProv: No
 Requires: python, openssl-devel
 Requires: httpd, httpd-devel, logrotate
 Requires: python-virtualenv
+Requires: git
 
 
 %description
