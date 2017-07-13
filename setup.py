@@ -27,7 +27,7 @@ else:
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-RMF = os.path.join(os.path.dirname(__file__), 'polemarch/README.md')
+RMF = os.path.join(os.path.dirname(__file__), 'README.rst')
 with open(RMF) as readme:
     README = readme.read()
 
@@ -102,7 +102,8 @@ class Compile(_sdist):
 name = 'polemarch'
 version = polemarch.__version__
 lic = 'AGPLv3+'
-description = 'Polemarch is ansible based for orcestration infrastructure.'
+description = ('Polemarch is ansible based service for orcestration '
+               'infrastructure.')
 author = 'VST Consulting'
 author_email = 'sergey.k@vstconsulting.net'
 
@@ -126,10 +127,14 @@ setup(
     long_description=README,
     author=author,
     author_email=author_email,
+    url="https://github.com/vstconsulting/polemarch",
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 1.{8-11}',
+        'Framework :: Django :: 1.8',
+        'Framework :: Django :: 1.9',
+        'Framework :: Django :: 1.10',
+        'Framework :: Django :: 1.11',
         'Operating System :: OS Independent',
         'Programming Language :: Cython',
         'Programming Language :: Python',
