@@ -1,8 +1,33 @@
+from collections import namedtuple
+import six
 from django.contrib.auth.models import User
 from django.db.models import Q
 from rest_framework import viewsets
-from rest_framework.response import Response
+from rest_framework.response import Response as RestResponse
 from rest_framework.decorators import detail_route, list_route
+
+
+_ResponseClass = namedtuple("ResponseData", [
+    "data", "status"
+])
+
+
+class Response(_ResponseClass):
+
+    def _asdict(self):
+        data = super(Response, self)._asdict()
+        data["status"] = data.get("status", 200)
+        if isinstance(data["data"], six.string_types):
+            data["data"] = dict(detail=self.data)
+        return data
+
+    @property
+    def resp(self):
+        return RestResponse(**self._asdict())
+
+    @property
+    def resp_dict(self):
+        return self._asdict()
 
 
 class GenericViewSet(viewsets.GenericViewSet):
@@ -45,7 +70,7 @@ class GenericViewSet(viewsets.GenericViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = serializer_class(queryset, many=True)
-        return Response(serializer.data)
+        return RestResponse(serializer.data)
 
     @detail_route(methods=["post", "put", "delete", "get"])
     def permissions(self, request, pk=None):
@@ -65,7 +90,7 @@ class GenericViewSet(viewsets.GenericViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return RestResponse(serializer.data)
 
 
 class ReadOnlyModelViewSet(GenericViewSet,

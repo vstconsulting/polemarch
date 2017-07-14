@@ -279,7 +279,7 @@ class OneTaskSerializer(TaskSerializer):
                   'url',)
 
 
-class PeriodicTaskSerializer(_WithVariablesSerializer):
+class PeriodictaskSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
     schedule = serializers.CharField(allow_blank=True)
 
@@ -296,7 +296,7 @@ class PeriodicTaskSerializer(_WithVariablesSerializer):
                   'url',)
 
 
-class OnePeriodicTaskSerializer(PeriodicTaskSerializer):
+class OnePeriodictaskSerializer(PeriodictaskSerializer):
     vars = DictField(required=False)
 
     class Meta:

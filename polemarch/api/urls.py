@@ -19,6 +19,7 @@ routerv1.register(r'tasks', v1.TaskViewSet)
 routerv1.register(r'periodic-tasks', v1.PeriodicTaskViewSet)
 routerv1.register(r'history', v1.HistoryViewSet)
 routerv1.register_view(r'token', v1.TokenView)
+routerv1.register_view(r'_bulk', v1.BulkViewSet)
 
 # Register routers
 router.register_router(r'v1/', routerv1)

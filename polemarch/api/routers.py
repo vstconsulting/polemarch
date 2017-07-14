@@ -3,14 +3,15 @@ from collections import OrderedDict
 
 from django.conf.urls import include, url
 
-from rest_framework.response import Response
 from rest_framework import routers
+
+from .base import Response
 
 
 class _AbstractRouter(routers.DefaultRouter):
-    custom_urls = []
 
     def __init__(self, *args, **kwargs):
+        self.custom_urls = list()
         self.permission_classes = kwargs.pop("perms", None)
         super(_AbstractRouter, self).__init__(*args, **kwargs)
 
@@ -27,7 +28,7 @@ class _AbstractRouter(routers.DefaultRouter):
 
     def register_view(self, prefix, view, name=None):
         if name is None:
-            name = view().get_view_name()
+            name = view().get_view_name().lower()
         self.custom_urls.append((prefix, view, name))
 
 
@@ -44,13 +45,28 @@ class APIRouter(_AbstractRouter):
             root_view_name = self.root_view_name
             if self.permission_classes:
                 permission_classes = self.permission_classes
+            custom_urls = self.custom_urls
 
             def get_view_name(self): return self.root_view_name
+
+            def get(self, request, *args, **kwargs):
+                registers = super(API, self).get(request, *args, **kwargs)
+                routers_list = OrderedDict()
+                for prefix, _, name in self.custom_urls:
+                    fpath = request.get_full_path().split("?")
+                    path = request.build_absolute_uri(fpath[0]) + prefix
+                    if len(fpath) > 1:
+                        path += "?{}".format(fpath[1])
+                    routers_list[name] = path
+                routers_list.update(registers.data)
+                return Response(routers_list, 200).resp
 
         return API.as_view(api_root_dict=api_root_dict)
 
     def get_urls(self):
         urls = super(APIRouter, self).get_urls()
+        for prefix, view, _ in self.custom_urls:
+            urls.append(url("^{}/$".format(prefix), view.as_view()))
         return urls
 
 
@@ -81,7 +97,7 @@ class MainRouter(_AbstractRouter):
                         path += "?{}".format(fpath[1])
                     routers_list[name] = path
                 routers_list.update(registers.data)
-                return Response(routers_list)
+                return Response(routers_list, 200).resp
 
         return API.as_view(api_root_dict=api_root_dict)
 

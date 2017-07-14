@@ -197,7 +197,7 @@ class APITestCase(ApiUsersTestCase,
     def test_api_versions_list(self):
         client = self._login()
         result = self.result(client.get, "/api/")
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 1)
         self.assertTrue(result.get('v1', False))
         self._logout(client)
 
@@ -206,6 +206,14 @@ class APITestCase(ApiUsersTestCase,
         result = self.result(client.get, "/api/v1/")
         self.assertTrue(result.get('users', False))
         self.assertTrue(result.get('hosts', False))
+        self.assertTrue(result.get('groups', False))
+        self.assertTrue(result.get('inventories', False))
+        self.assertTrue(result.get('projects', False))
+        self.assertTrue(result.get('tasks', False))
+        self.assertTrue(result.get('periodic-tasks', False))
+        self.assertTrue(result.get('history', False))
+        self.assertTrue(result.get('bulk', False))
+        self.assertTrue(result.get('token', False))
 
     def test_api_router(self):
         client = self._login()
