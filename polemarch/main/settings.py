@@ -163,8 +163,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.AdminRenderer',
-        # 'rest_framework.renderers.BrowsableAPIRenderer',
+        # 'rest_framework.renderers.AdminRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "polemarch.api.permissions.ModelPermission",
