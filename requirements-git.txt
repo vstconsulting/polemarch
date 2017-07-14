@@ -1,2 +1,2 @@
 # git+http://git.vst.lan/vst/celery.git#egg=celery-4.0.3
-http://git.vst.lan/vst/celery/repository/archive.zip?ref=master#egg=celery-4.0.3
+http://gitlab.com/vstconsulting/celery/repository/archive.zip?ref=master#egg=celery-4.0.3

@@ -9,6 +9,7 @@ from ._base import BaseTestCase, User, json
 from .inventory import (ApiHostsTestCase, ApiGroupsTestCase,
                         ApiInventoriesTestCase)
 from .project import ApiProjectsTestCase
+from .bulk import ApiBulkTestCase
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -188,7 +189,8 @@ class ApiUsersTestCase(BaseTestCase):
 class APITestCase(ApiUsersTestCase,
                   ApiHostsTestCase, ApiGroupsTestCase,
                   ApiInventoriesTestCase, ApiProjectsTestCase,
-                  ApiTasksTestCase, ApiPeriodicTasksTestCase):
+                  ApiTasksTestCase, ApiPeriodicTasksTestCase,
+                  ApiBulkTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 
