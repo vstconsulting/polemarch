@@ -46,7 +46,7 @@ jsonEditor.options['item']['ansible_ssh_pass'] = {
 }
 
 jsonEditor.options['item']['ansible_ssh_private_key_file'] = {
-    type:'textarea',
+    type:'textfile',
     help:'Inventory Parameter - ansible_ssh_private_key_file',
     helpcontent:'Private key file used by ssh. Useful if using multiple keys and you don’t want to use SSH agent.'
 }
@@ -568,3 +568,25 @@ jsonEditor.jsonEditorAddVar = function(optionsblock)
     $("#jsonEditorVarList").append(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock}))
 }
 
+jsonEditor.loadFile = function(event, element)
+{
+    console.log("jsonEditor.loadFile", event.target.files) 
+    for(var i=0; i<event.target.files.length; i++)
+    { 
+        if( event.target.files[i].size > 1024*1024*1)
+        { 
+            $.notify("File too large", "error");
+            console.log("File too large " + event.target.files[i].size) 
+            continue;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function(e)
+        {
+            $(element).val(e.target.result)
+        }
+        
+        reader.readAsText(event.target.files[i]); 
+        return;
+    }
+}
