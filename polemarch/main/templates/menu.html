@@ -3,8 +3,7 @@
 {% load rest_framework %}
 {% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
  
-    {% if user.is_authenticated %} 
-    <li><a href="/help/"  ><i class="fa fa-info"></i> <span>Help</span></a></li>
+    {% if user.is_authenticated %}  
     <li><a href="/api/"><i class="glyphicon glyphicon-star"></i> <span>{% trans 'API' %}</span></a></li>
     {% endif %}
     
