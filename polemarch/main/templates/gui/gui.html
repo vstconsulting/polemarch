@@ -2601,7 +2601,7 @@
 
     <% if(jsonEditor.options[optionsblock] && jsonEditor.options[optionsblock][name]){ thisOpt = jsonEditor.options[optionsblock][name]; %>
         <div class="form-group
-                    <% if(thisOpt.type == 'textarea' ){ %> col-lg-12 <% }else{ %> col-lg-12 <% } %>
+                    <% if(thisOpt.type == 'textarea' || thisOpt.type == 'textfile' ){ %> col-lg-12 <% }else{ %> col-lg-12 <% } %>
                     <% if(thisOpt.type == 'boolean' ){ %> boolean-select <% } %>"
                 id="json_<%- name %>_line">
             <label
@@ -2611,38 +2611,22 @@
                 >
                 <%- name %>
             </label>
-            <div class="input-group  col-sm-8 col-lg-9 "  >
-                    <% if(thisOpt.type == 'select' ){ %>
-                        <select class="form-control jsonEditor-data"
-                                id="json_<%- name %>_value"
-                                data-json-name="<%- name %>"
-                                data-type="<%- thisOpt.type %>" >
-                            <% for(var i in thisOpt.options){ %>
-                               <option value="<%- thisOpt.options[i] %>" <% if(value == thisOpt.options[i]){ %>selected<% } %>><%- thisOpt.options[i] %></option>
-                            <% } %>
-                        </select>
-                    <% } else if(thisOpt.type == 'password' ){ %>
-                        <input type="password"
-                               placeholder="Enter value"
-                               data-type="<%- thisOpt.type %>"
-                               id="json_<%- name %>_value"
-                               value="<%- value %>"
-                               class="form-control jsonEditor-data"
-                               data-json-name="<%- name %>"
-                               >
-                    <% } else if(thisOpt.type == 'boolean' ){ %>
-                        <div class="form-control jsonEditor-data selected"
-                                onselectstart="return false"
-                                onmousedown="return false"
-                                style="cursor: pointer;"
-                                id="json_<%- name %>_value"
-                                data-json-name="<%- name %>"
-                                data-type="<%- thisOpt.type %>" >
-                            <div class="ico-on fa fa-toggle-on"></div>
-                            <div class="ico-off fa  fa-toggle-off"></div>
-                            <div class="boolean-title" >Boolean value</div>
-                        </div>
-                    <% } else if(thisOpt.type == 'textarea' ){ %>
+            <div class="input-group col-xs-12 col-sm-8 col-lg-9 "  >
+            
+                    <% if(thisOpt.type == 'textfile' ){ %>
+                
+                
+                        <% if(!thisOpt.required){ %>
+                            <span class="btn btn-default btn-right" onclick="$('#json_<%- name %>_line').remove()" style="float: right; margin-left: 10px;" >
+                                <span class="glyphicon glyphicon-remove"></span>
+                            </span>
+                        <% } %>
+                        
+                        <span class="btn btn-default btn-right textfile"style="float: right; margin-left: 10px;" >
+                            <input type="file" class="input-file"  onchange="jsonEditor.loadFile(event, '#json_<%- name %>_value');"  >
+                            <span class="glyphicon glyphicon-file"></span> 
+                        </span>
+                        <div style="clear: both; padding-top: 10px;" ></div>
                         <textarea
                                data-type="<%- thisOpt.type %>"
                                placeholder="Enter value"
@@ -2653,21 +2637,63 @@
                                style="resize:vertical;"
                                ><%- value %></textarea>
                     <% } else { %>
-                        <input type="text"
-                               data-type="text"
-                               placeholder="Enter value"
-                               id="json_<%- name %>_value"
-                               value="<%- value %>"
-                               class="form-control jsonEditor-data"
-                               data-json-name="<%- name %>"
-                               >
-                    <% } %>
+                            <% if(thisOpt.type == 'select' ){ %>
+                                <select class="form-control jsonEditor-data"
+                                        id="json_<%- name %>_value"
+                                        data-json-name="<%- name %>"
+                                        data-type="<%- thisOpt.type %>" >
+                                    <% for(var i in thisOpt.options){ %>
+                                       <option value="<%- thisOpt.options[i] %>" <% if(value == thisOpt.options[i]){ %>selected<% } %>><%- thisOpt.options[i] %></option>
+                                    <% } %>
+                                </select>
+                            <% } else if(thisOpt.type == 'password' ){ %>
+                                <input type="password"
+                                       placeholder="Enter value"
+                                       data-type="<%- thisOpt.type %>"
+                                       id="json_<%- name %>_value"
+                                       value="<%- value %>"
+                                       class="form-control jsonEditor-data"
+                                       data-json-name="<%- name %>"
+                                       >
+                            <% } else if(thisOpt.type == 'boolean' ){ %>
+                                <div class="form-control jsonEditor-data selected"
+                                        onselectstart="return false"
+                                        onmousedown="return false"
+                                        style="cursor: pointer;"
+                                        id="json_<%- name %>_value"
+                                        data-json-name="<%- name %>"
+                                        data-type="<%- thisOpt.type %>" >
+                                    <div class="ico-on fa fa-toggle-on"></div>
+                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                    <div class="boolean-title" >Boolean value</div>
+                                </div>
+                            <% } else if(thisOpt.type == 'textarea' ){ %>
+                                <textarea
+                                       data-type="<%- thisOpt.type %>"
+                                       placeholder="Enter value"
+                                       id="json_<%- name %>_value"
+                                       class="form-control jsonEditor-data"
+                                       data-json-name="<%- name %>"
+                                       rows="4"
+                                       style="resize:vertical;"
+                                       ><%- value %></textarea>
+                            <% } else { %>
+                                <input type="text"
+                                       data-type="text"
+                                       placeholder="Enter value"
+                                       id="json_<%- name %>_value"
+                                       value="<%- value %>"
+                                       class="form-control jsonEditor-data"
+                                       data-json-name="<%- name %>"
+                                       >
+                            <% } %>
 
-                    <% if(!thisOpt.required){ %>
-                        <span class="input-group-addon  btn btn-danger" onclick="$('#json_<%- name %>_line').remove()">
-                            <span class="glyphicon glyphicon-remove"></span>
-                        </span>
-                    <% } %>
+                            <% if(!thisOpt.required){ %>
+                                <span class="input-group-addon  btn btn-danger" onclick="$('#json_<%- name %>_line').remove()">
+                                    <span class="glyphicon glyphicon-remove"></span>
+                                </span>
+                            <% } %>
+                    <% } %>     
             </div>
             <% if(thisOpt.help){ %>
                 <span class="col-sm-8 col-lg-9 col-lg-offset-3 col-sm-offset-4 help-block" style="padding-left: 0px;"
@@ -2743,7 +2769,7 @@
                         <label class=" col-sm-2 col-lg-2 control-label">
                             Name
                         </label>
-                        <div class="input-group  col-sm-10 col-lg-10"  >
+                        <div class="input-group  col-sm-10 col-lg-10 col-xs-12"  >
                             <input type="text" placeholder="Enter name" id="new_json_name" value=""  class="form-control" >
                             <div class="help-block"></div>
                         </div>
@@ -2756,7 +2782,7 @@
                         <label class="col-sm-2 col-lg-2 control-label">
                             Value
                         </label>
-                        <div class="input-group col-sm-10 col-lg-10"  >
+                        <div class="input-group col-sm-10 col-lg-10 col-xs-12"  >
                             <textarea placeholder="Enter value" id="new_json_value" class="form-control"  style="resize:vertical;"></textarea>
                             <div class="help-block"></div>
                         </div>
