@@ -11,7 +11,7 @@ Red Hat/CentOS installation
 
    .. sourcecode:: bash
 
-      sudo yum localinstall polemarch-0.0.1-2612.x86_64.rpm.
+      sudo yum localinstall polemarch-0.0.2-0.x86_64.rpm.
 
 3. Run services with commands
 
@@ -23,6 +23,13 @@ Red Hat/CentOS installation
 That's it. Polemarch web panel on 8080 port. Default administrative account is
 admin/admin.
 
+Note: If you using authentication by password at some of your machines
+managed by Polemarch, you also must install ``sshpass`` package because it
+required for ansible to autheticate via ssh by password. It available in
+EPEL for Red Hat/CentOS. Also you can use specify ``connection`` command line
+argument during playbook run as ``paramiko``. When ansible uses paramiko to
+make ssh connection, ``sshpass`` not necessary.
+
 Ubuntu/Debian installation
 --------------------------
 
@@ -32,7 +39,7 @@ Ubuntu/Debian installation
 
    .. sourcecode:: bash
 
-      sudo dpkg -i polemarch_0.0.1-1_amd64.deb || sudo apt-get install -f
+      sudo dpkg -i polemarch_0.0.2-1_amd64.deb || sudo apt-get install -f
 
 3. Run services with commands
 

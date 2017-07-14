@@ -19,7 +19,15 @@ to do:
 
    * Python development headers (``python-dev`` in Ubuntu).
 
+   * Openssl development headers (``libssl-dev`` in Ubuntu).
+
    * libffi (``libffi-dev`` in Ubuntu).
+
+   Optional:
+
+   * ``git`` to get working git import.
+
+   * ``sshpass`` to get working ssh password auth during playbook execution.
 
 2. Run installation:
 
