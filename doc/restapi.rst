@@ -113,7 +113,7 @@ Hosts
 
    .. sourcecode:: http
 
-      GET /api/v1/hosts/12 HTTP/1.1
+      GET /api/v1/hosts/12/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -258,7 +258,7 @@ Hosts
 
    .. sourcecode:: http
 
-      PATCH /api/v1/hosts/12 HTTP/1.1
+      PATCH /api/v1/hosts/12/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -301,7 +301,7 @@ Groups
 
    .. sourcecode:: http
 
-      GET /api/v1/groups/12 HTTP/1.1
+      GET /api/v1/groups/12/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -461,7 +461,7 @@ Groups
 
    .. sourcecode:: http
 
-      PATCH /api/v1/groups/3 HTTP/1.1
+      PATCH /api/v1/groups/3/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -555,7 +555,7 @@ Inventories
 
    .. sourcecode:: http
 
-      GET /api/v1/inventories/8 HTTP/1.1
+      GET /api/v1/inventories/8/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -690,7 +690,7 @@ Inventories
 
    .. sourcecode:: http
 
-      PATCH /api/v1/inventories/9 HTTP/1.1
+      PATCH /api/v1/inventories/9/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -761,7 +761,7 @@ Projects
 
    .. sourcecode:: http
 
-      GET /api/v1/projects/5 HTTP/1.1
+      GET /api/v1/projects/5/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -941,7 +941,7 @@ Projects
 
    .. sourcecode:: http
 
-      PATCH /api/v1/projects/9 HTTP/1.1
+      PATCH /api/v1/projects/9/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1097,7 +1097,7 @@ Tasks
 
    .. sourcecode:: http
 
-      GET /api/v1/tasks/5 HTTP/1.1
+      GET /api/v1/tasks/5/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1168,7 +1168,7 @@ Periodic tasks
 
    .. sourcecode:: http
 
-      GET /api/v1/periodic-tasks/10 HTTP/1.1
+      GET /api/v1/periodic-tasks/10/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1345,7 +1345,7 @@ Periodic tasks
 
    .. sourcecode:: http
 
-      PATCH /api/v1/periodic-tasks/14 HTTP/1.1
+      PATCH /api/v1/periodic-tasks/14/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1617,7 +1617,7 @@ It can be represented in such more formal way:
 
    .. sourcecode:: http
 
-      GET /api/v1/hosts/12 HTTP/1.1
+      GET /api/v1/hosts/12/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1649,7 +1649,7 @@ It can be represented in such more formal way:
 
    .. sourcecode:: http
 
-      PATCH /api/v1/hosts/12 HTTP/1.1
+      PATCH /api/v1/hosts/12/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1819,7 +1819,7 @@ Users
 
    .. sourcecode:: http
 
-      GET /api/v1/users/3 HTTP/1.1
+      GET /api/v1/users/3/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
