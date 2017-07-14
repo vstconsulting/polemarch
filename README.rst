@@ -91,7 +91,7 @@ How to participate
 If you found some bug in the codebase or documentation or want some
 improvement in project, you can easily do it myself. Here is how to proceed:
 
-1. Create (or find if already exist) and issue at
+1. Create (or find if already exist) an issue at
 https://gitlab.com/vstconsulting/polemarch for problem you want to solve. Maybe
 somebody is working on that or maybe during discussion will become clear that
 is not a problem.
@@ -147,7 +147,7 @@ Python dependencies:
       ~/.local/bin/celery -A polemarch.celery_app:app worker -l INFO -B -S django
 
 7. You may also want to change ``./polemarch/main/settings.ini`` to enable
-   ``debug`` setting and changle ``log_level`` for easy debugging.
+   ``debug`` setting and to change ``log_level`` for easy debugging.
 
 8. Write tests for your changes and changes itself (we prefer TDD approach).
    Execute those tests with all other Polemarch's tests by:
@@ -156,7 +156,7 @@ Python dependencies:
 
       make test
 
-   This command also doing PEP8 check of codebase and static analyze with
+   This command also doing PEP8 check of codebase and static analyzing with
    pylint and flake. Make sure that your code meet those checks.
 
 9. Reflect your changes in documentation (if needed). Build documentation, read
@@ -166,12 +166,12 @@ Python dependencies:
 
       make docs
 
-10. Make you commit. We prefer commit messages with briefly explains your
+10. Make commit. We prefer commit messages with briefly explains your
     changes. Bad: "issue #1" or "fix". Good: "fix end slashes for GET in docs".
 
 11. Create pull request and refer it in issue.
 
-Keep in mind, that we expect that all your changes are MIT-licensed to prevent
-project from any license problems in future.
+**ATTENTION**: Keep in mind, that we expect that all your changes are
+MIT-licensed to prevent any license problems to project in future.
 
 That's it. Thank you for your contribution.
