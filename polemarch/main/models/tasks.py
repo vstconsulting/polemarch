@@ -65,13 +65,10 @@ def __parse_extra_args(project, **extra):
     return AnsibleExtra(extra_args, files)
 
 
-def run_ansible_playbook(task, inventory, task_id, **extra_args):
+def run_ansible_playbook(task, inventory, history, **extra_args):
     # pylint: disable=too-many-locals
-    history_kwargs = dict(playbook=task.playbook, start_time=timezone.now(),
-                          inventory=inventory, project=task.project,
-                          raw_stdout="", task_id=task_id)
-    history_kwargs["raw_inventory"], key_files = inventory.get_inventory()
-    history = History.objects.create(status="RUN", **history_kwargs)
+    history.raw_inventory, key_files = inventory.get_inventory()
+    history.save()
     path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
     path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
     inventory_file = tmp_file()

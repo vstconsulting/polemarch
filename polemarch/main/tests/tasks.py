@@ -228,6 +228,16 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         )
         self.assertEqual(result["detail"], "Empty playbook name.")
 
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_cancel_task(self, subprocess_function):
+        inv, _ = self.create_inventory()
+        result = self.post_result(
+            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            data=json.dumps(dict(inventory=inv, playbook="first.yml")))
+        history = self.get_result("get",
+            "/api/v1/history/{}/".format(result["history_id"]))
+        self.assertEquals(history["playbook"], "first.yml")
+
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
     def setUp(self):

@@ -2,7 +2,9 @@
 from __future__ import unicode_literals
 
 import logging
+
 from django.conf import settings
+from django.utils import timezone
 
 from . import hosts as hosts_models
 from .vars import _AbstractModel, _AbstractVarsQuerySet, BManager, models
@@ -60,7 +62,14 @@ class Project(_AbstractModel):
             raise PMException("Empty playbook name.")
         from ..tasks import ExecuteAnsibleTask
         inventory = hosts_models.Inventory.objects.get(id=inventory_id)
-        ExecuteAnsibleTask.delay(self, playbook_name, inventory, **extra)
+        from .tasks import History
+        history_kwargs = dict(playbook=playbook_name, start_time=timezone.now(),
+                              inventory=inventory, project=self,
+                              raw_stdout="")
+        history = History.objects.create(status="RUN", **history_kwargs)
+        ExecuteAnsibleTask.delay(self, playbook_name, inventory,
+                                 history, **extra)
+        return history.id
 
     def set_status(self, status):
         self.status = status
