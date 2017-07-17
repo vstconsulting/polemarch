@@ -20,3 +20,7 @@ class SuperUserPermission(ModelPermission):
         elif request.user == obj:
             return True
         return False
+
+
+class StaffPermission(permissions.IsAdminUser):
+    pass

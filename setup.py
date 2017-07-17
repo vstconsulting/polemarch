@@ -1,7 +1,12 @@
 import os
 import sys
 
-from sphinx.setup_command import BuildDoc
+try:
+    from sphinx.setup_command import BuildDoc
+    has_sphinx = True
+except ImportError:
+    has_sphinx = False
+
 from setuptools import find_packages, setup
 from setuptools.command.install import install
 from setuptools.command.build_ext import build_ext as _build_ext
@@ -22,7 +27,7 @@ else:
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-RMF = os.path.join(os.path.dirname(__file__), 'polemarch/README.md')
+RMF = os.path.join(os.path.dirname(__file__), 'README.rst')
 with open(RMF) as readme:
     README = readme.read()
 
@@ -97,9 +102,19 @@ class Compile(_sdist):
 name = 'polemarch'
 version = polemarch.__version__
 lic = 'AGPLv3+'
-description = 'Polemarch is ansible based for orcestration infrastructure.'
+description = ('Polemarch is ansible based service for orchestration '
+               'infrastructure.')
 author = 'VST Consulting'
 author_email = 'sergey.k@vstconsulting.net'
+
+cmdclass = {
+    'install': PostInstallCommand,
+    'compile': Compile,
+    'build_ext': _build_ext
+}
+
+if has_sphinx:
+    cmdclass['build_sphinx'] = BuildDoc
 
 setup(
     name=name,
@@ -112,10 +127,14 @@ setup(
     long_description=README,
     author=author,
     author_email=author_email,
+    url="https://gitlab.com/vstconsulting/polemarch",
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 1.{8-11}',
+        'Framework :: Django :: 1.8',
+        'Framework :: Django :: 1.9',
+        'Framework :: Django :: 1.10',
+        'Framework :: Django :: 1.11',
         'Operating System :: OS Independent',
         'Programming Language :: Cython',
         'Programming Language :: Python',
@@ -142,12 +161,7 @@ setup(
             "mod_wsgi==4.5.14"
         ]
     },
-    cmdclass={
-        'install': PostInstallCommand,
-        'compile': Compile,
-        'build_ext': _build_ext,
-        'build_sphinx': BuildDoc
-    },
+    cmdclass=cmdclass,
     command_options={
         'build_sphinx': {
             'project': ('setup.py', name),

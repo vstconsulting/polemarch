@@ -272,11 +272,17 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                                    stop_time=now() - timedelta(hours=34),
                                    **self.default_kwargs),
         ]
+        self.default_kwargs["raw_stdout"] = "one\ntwo\nthree\nfour"
+        self.default_kwargs["playbook"] = "task2.yml"
+        self.historys.append(History.objects.create(
+            status="ERROR", start_time=now() - timedelta(hours=35),
+            stop_time=now() - timedelta(hours=34), **self.default_kwargs)
+        )
 
     def test_history_of_executions(self):
         url = "/api/v1/history/"
         df = "%Y-%m-%dT%H:%M:%S.%fZ"
-        self.list_test(url, 3)
+        self.list_test(url, len(self.historys))
         self.details_test(url + "{}/".format(self.historys[0].id),
                           playbook="task.yml",
                           status="OK", project=self.ph.id,
@@ -310,6 +316,12 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                         405, data=dict(**self.default_kwargs))
         self.get_result("put", url + "{}/".format(self.historys[0].id),
                         405, data=dict(**self.default_kwargs))
+
+        # Lines pagination
+        lines_url = url+"{}/lines/?limit=2".format(self.historys[3].id)
+        result = self.get_result("get", lines_url)
+        self.assertEqual(result["count"], 4, result)
+        self.assertCount(result["results"], 2)
 
         self.get_result("delete", url + "{}/".format(self.historys[0].id))
 

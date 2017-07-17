@@ -1,13 +1,12 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 from django.db import transaction
 from django.http import HttpResponse
-from rest_framework import exceptions as excepts
+from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
-from rest_framework.response import Response
 
 from .. import base
-from ..permissions import SuperUserPermission
+from ..permissions import SuperUserPermission, StaffPermission
 from . import filters
 from . import serializers
 
@@ -18,8 +17,7 @@ class TokenView(token_views.ObtainAuthToken):
         if token:
             key = token.key
             token.delete()
-            return Response(dict(detail="Token {} removed.".format(key)),
-                            status=204)
+            return base.Response("Token {} removed.".format(key), 204).resp
         raise excepts.ParseError("Token not found.")
 
 
@@ -33,8 +31,7 @@ class UserViewSet(base.ModelViewSetSet):
     def destroy(self, request, *args, **kwargs):
         user = self.get_object()
         if user == request.user:
-            return Response({"details": "Could not remove youself."},
-                            status=409)
+            return base.Response("Could not remove youself.", 409).resp
         else:
             return super(UserViewSet, self).destroy(request, *args, **kwargs)
 
@@ -53,7 +50,7 @@ class UserViewSet(base.ModelViewSetSet):
             raise Exception("Invalid data was sended.")
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        return Response(serializer.data)
+        return base.Response(serializer.data, 200).resp
 
 
 class HostViewSet(base.ModelViewSetSet):
@@ -99,7 +96,7 @@ class ProjectViewSet(base.ModelViewSetSet, _GroupedViewSet):
 
     @list_route(methods=["get"], url_path="supported-repos")
     def supported_repos(self, request):
-        return Response(self.model.handlers.keys())
+        return base.Response(self.model.handlers.keys(), 200).resp
 
     @detail_route(methods=["post", "put", "delete", "get"])
     def inventories(self, request, *args, **kwargs):
@@ -124,8 +121,8 @@ class TaskViewSet(base.ReadOnlyModelViewSet):
 
 class PeriodicTaskViewSet(base.ModelViewSetSet):
     model = serializers.models.PeriodicTask
-    serializer_class = serializers.PeriodicTaskSerializer
-    serializer_class_one = serializers.OnePeriodicTaskSerializer
+    serializer_class = serializers.PeriodictaskSerializer
+    serializer_class_one = serializers.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
 
 
@@ -139,3 +136,73 @@ class HistoryViewSet(base.HistoryModelViewSet):
     def raw(self, request, *args, **kwargs):
         obj = self.get_object()
         return HttpResponse(obj.raw_stdout, content_type="text/plain")
+
+    @detail_route(methods=["get"])
+    def lines(self, request, *args, **kwargs):
+        return self.get_paginated_route_response(
+            self.get_object().raw_history_line.order_by("-line_number"),
+            serializers.HistoryLinesSerializer
+        )
+
+
+class BulkViewSet(rest_views.APIView):
+    permission_classes = (StaffPermission,)
+
+    _op_types = {
+        "add": "perform_create",
+        "set": "perform_update",
+        "del": "perform_delete"
+    }
+    _allowed_types = [
+        'host', 'group', 'inventory', 'project', 'periodictask'
+    ]
+
+    def get_serializer_class(self, item):
+        if item not in self._allowed_types:
+            raise excepts.UnsupportedMediaType(media_type=item)
+        item = "One{}Serializer".format(item.title())
+        return getattr(serializers, item)
+
+    def get_serializer(self, *args, **kwargs):
+        kwargs["context"] = {'request': self.request}
+        return self.get_serializer_class(kwargs.pop("item"))(*args, **kwargs)
+
+    def get_object(self, item, pk):
+        serializer_class = self.get_serializer_class(item)
+        model = serializer_class.Meta.model
+        return model.objects.get(pk=pk)
+
+    def perform_create(self, item, data):
+        serializer = self.get_serializer(data=data, item=item)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return base.Response(serializer.data, 201).resp_dict
+
+    def perform_update(self, item, pk, data):
+        instance = self.get_object(item, pk)
+        serializer = self.get_serializer(instance, data=data, partial=True,
+                                         item=item)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return base.Response(serializer.data, 200).resp_dict
+
+    def perform_delete(self, item, pk):
+        instance = self.get_object(item, pk)
+        instance.delete()
+        return base.Response("Ok", 200).resp_dict
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        operations = request.data
+        results = []
+        for operation in operations:
+            perf_method = getattr(self, self._op_types[operation.pop("type")])
+            results.append(perf_method(**operation))
+        return base.Response(results, 200).resp
+
+    def get(self, request):
+        response = {
+            "allowed_types": self._allowed_types,
+            "operations_types": self._op_types.keys(),
+        }
+        return base.Response(response, 200).resp

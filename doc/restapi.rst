@@ -113,7 +113,7 @@ Hosts
 
    .. sourcecode:: http
 
-      GET /api/v1/hosts/12 HTTP/1.1
+      GET /api/v1/hosts/12/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -258,7 +258,7 @@ Hosts
 
    .. sourcecode:: http
 
-      PATCH /api/v1/hosts/12 HTTP/1.1
+      PATCH /api/v1/hosts/12/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -301,7 +301,7 @@ Groups
 
    .. sourcecode:: http
 
-      GET /api/v1/groups/12 HTTP/1.1
+      GET /api/v1/groups/12/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -461,7 +461,7 @@ Groups
 
    .. sourcecode:: http
 
-      PATCH /api/v1/groups/3 HTTP/1.1
+      PATCH /api/v1/groups/3/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -555,7 +555,7 @@ Inventories
 
    .. sourcecode:: http
 
-      GET /api/v1/inventories/8 HTTP/1.1
+      GET /api/v1/inventories/8/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -690,7 +690,7 @@ Inventories
 
    .. sourcecode:: http
 
-      PATCH /api/v1/inventories/9 HTTP/1.1
+      PATCH /api/v1/inventories/9/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -761,7 +761,7 @@ Projects
 
    .. sourcecode:: http
 
-      GET /api/v1/projects/5 HTTP/1.1
+      GET /api/v1/projects/5/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -941,7 +941,7 @@ Projects
 
    .. sourcecode:: http
 
-      PATCH /api/v1/projects/9 HTTP/1.1
+      PATCH /api/v1/projects/9/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1097,7 +1097,7 @@ Tasks
 
    .. sourcecode:: http
 
-      GET /api/v1/tasks/5 HTTP/1.1
+      GET /api/v1/tasks/5/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1168,7 +1168,7 @@ Periodic tasks
 
    .. sourcecode:: http
 
-      GET /api/v1/periodic-tasks/10 HTTP/1.1
+      GET /api/v1/periodic-tasks/10/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1345,7 +1345,7 @@ Periodic tasks
 
    .. sourcecode:: http
 
-      PATCH /api/v1/periodic-tasks/14 HTTP/1.1
+      PATCH /api/v1/periodic-tasks/14/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1386,7 +1386,7 @@ History records
 
    .. sourcecode:: http
 
-      GET /api/v1/history/1 HTTP/1.1
+      GET /api/v1/history/1/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1431,6 +1431,78 @@ History records
 
    :arg id: id of history record.
 
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/history/1/raw/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: text
+
+        PLAY [all] *********************************************************************
+
+        TASK [Gathering Facts] *********************************************************
+
+        ok: [chat.vstconsulting.net]
+
+        ok: [pipc.vst.lan]
+
+        ok: [git.vst.lan]
+
+        ok: [git-ci-2]
+
+        ok: [git-ci-1]
+
+        ok: [redmine.vst.lan]
+
+        ok: [test2.vst.lan]
+
+        ok: [test.vst.lan]
+        ......
+
+.. http:get:: /api/v1/history/{id}/lines/
+
+   List of history record lines. |pagination_def|
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/history/1/lines/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+            "count": 4,
+            "next": null,
+            "previous": null,
+            "results": [
+                {
+                    "line_number": 4,
+                    "line": ""
+                },
+                {
+                    "line_number": 3,
+                    "line": "ERROR! the playbook: /home/centos/test/polemarch/projects/1/test.yml could not be found"
+                },
+                {
+                    "line_number": 2,
+                    "line": ""
+                },
+                {
+                    "line_number": 1,
+                    "line": "Using /etc/ansible/ansible.cfg as config file"
+                }
+            ]
+        }
 
 .. http:get:: /api/v1/history/
 
@@ -1545,7 +1617,7 @@ It can be represented in such more formal way:
 
    .. sourcecode:: http
 
-      GET /api/v1/hosts/12 HTTP/1.1
+      GET /api/v1/hosts/12/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1577,7 +1649,7 @@ It can be represented in such more formal way:
 
    .. sourcecode:: http
 
-      PATCH /api/v1/hosts/12 HTTP/1.1
+      PATCH /api/v1/hosts/12/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1747,7 +1819,7 @@ Users
 
    .. sourcecode:: http
 
-      GET /api/v1/users/3 HTTP/1.1
+      GET /api/v1/users/3/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 

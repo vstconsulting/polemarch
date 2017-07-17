@@ -1,4 +1,4 @@
 # Docs
 sphinx
 sphinx-autobuild
-sphinxcontrib.httpdomain
+sphinxcontrib-httpdomain

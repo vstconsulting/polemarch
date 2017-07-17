@@ -112,7 +112,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'polemarch.main.wsgi.application'
 
-
+import pymysql
+pymysql.install_as_MySQLdb()
 try:
     __DB_SETTINGS = {k.upper():v.format(**__kwargs) for k,v in config.items('database')}
     if not __DB_SETTINGS: raise NoSectionError('database')
@@ -163,7 +164,7 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.AdminRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
+        # 'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "polemarch.api.permissions.ModelPermission",

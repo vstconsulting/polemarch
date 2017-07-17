@@ -13,7 +13,7 @@ from .vars import Variable
 from .hosts import Host, Group, Inventory
 from .projects import Project
 from .users import TypesPermissions
-from .tasks import Task, PeriodicTask, History
+from .tasks import Task, PeriodicTask, History, HistoryLines
 from ..validators import validate_hostname
 from ..utils import raise_context
 
