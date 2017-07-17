@@ -68,10 +68,10 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         self.get_result("post", url, 415, data=json.dumps(data))
         logging.disable(logging.NOTSET)
 
-        self._filter_test(url, dict(name__not="First_project"), 4)
+        self._filter_test(url, dict(name__not="First_project"), 5)
         self._filter_test(url, dict(name="Prj"), 3)
-        self._filter_test(url, dict(status="OK", name__not="First_project"), 4)
-        self._filter_vars(url, "repo_type:TEST", 5)
+        self._filter_test(url, dict(status="OK", name__not="First_project"), 5)
+        self._filter_vars(url, "repo_type:TEST", 6)
         self._filter_vars(url, "some_arg:search_arg", 1)
 
     def test_inventories_in_project(self):

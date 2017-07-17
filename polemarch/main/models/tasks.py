@@ -180,9 +180,12 @@ class Template(BModel):
             ["id", "name", "kind"]
         ]
 
-    template_data_types = [
-        "TASK", "HOST", "GROUP"
-    ]
+    template_fields = {}
+    template_fields["Task"] = ["playbook", "vars", "inventory", "project"]
+    template_fields["PeriodicTask"] = [] + template_fields["Task"]
+    template_fields["PeriodicTask"] += ["type", "name", "schedule"]
+    template_fields["Host"] = ["name", "vars"]
+    template_fields["Group"] = template_fields["Host"] + ["children"]
 
     @property
     def data(self):

@@ -364,7 +364,7 @@ class ModelHandlers(object):
         except KeyError or ImportError:
             msg = "{} ({})".format(name, self.err_message) if self.err_message\
                                                            else name
-            raise ex.UnknownModelHandlerException(msg)
+            raise ex.UnknownTypeException(msg)
 
     def opts(self, name):
         return self.list().get(name, {}).get('OPTIONS', {})

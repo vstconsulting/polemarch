@@ -235,7 +235,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
             "/api/v1/projects/{}/execute/".format(self.task_project.id),
             data=json.dumps(dict(inventory=inv, playbook="first.yml")))
         history = self.get_result("get",
-            "/api/v1/history/{}/".format(result["history_id"]))
+                                  "/api/v1/history/{}/".format(
+                                      result["history_id"]
+                                  ))
         self.assertEquals(history["playbook"], "first.yml")
 
 
@@ -392,7 +394,7 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase):
         )
         self.tmplt_data = dict(
             name="test_tmplt",
-            kind="TASK",
+            kind="Task",
             data=dict(
                 playbook="test.yml",
                 vars=dict(
@@ -417,6 +419,10 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase):
                         data=json.dumps(dict(name="test_tmplt")))
         self.details_test(url + "{}/".format(self.job_template.id),
                           name="test_tmplt", **tmplt_data)
+        self.get_result("patch", url + "{}/".format(self.job_template.id),
+                        400, data=json.dumps(dict(data=dict(test=1, tst=2))))
+        self.get_result("patch", url + "{}/".format(self.job_template.id),
+                        415, data=json.dumps(dict(kind="Test")))
 
         data = [dict(name="tmplt-{}".format(i), **tmplt_data)
                 for i in range(5)]
@@ -428,4 +434,4 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase):
         self.assertEqual(count, 0)
 
         result = self.get_result("get", url+"supported-types/")
-        self.assertEqual(result, Template.template_data_types)
+        self.assertEqual(result, Template.template_fields)

@@ -153,7 +153,7 @@ class TemplateViewSet(base.ModelViewSetSet):
 
     @list_route(methods=["get"], url_path="supported-types")
     def supported_types(self, request):
-        return base.Response(self.model.template_data_types, 200).resp
+        return base.Response(self.model.template_fields, 200).resp
 
 
 class BulkViewSet(rest_views.APIView):
