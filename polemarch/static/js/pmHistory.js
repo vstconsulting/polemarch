@@ -125,7 +125,7 @@ pmHistory.loadItem = function(item_id)
 }
 
 pmHistory.sendSearchQuery = function(query, limit, offset)
-{
+{ 
     if(!limit)
     {
         limit = 999;
@@ -158,6 +158,8 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
         success: function(data)
         {
             //console.log("update Items", data)
+            data.limit = limit
+            data.offset = offset
             thisObj.model.itemslist = data
             //thisObj.model.items = {}
 
@@ -195,7 +197,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
  * Обновляет поле модел this.model.items и ложит туда список инфу о пользователях по их id
  */
 pmHistory.loadItems = function(limit, offset)
-{
+{ 
     if(!limit)
     {
         limit = 30;
@@ -222,9 +224,9 @@ pmHistory.loadItems = function(limit, offset)
         success: function(data)
         {
             //console.log("update Items", data)
-            thisObj.model.itemslist = data
-            thisObj.model.itemslist.limit = limit
-            thisObj.model.itemslist.offset = offset
+            data.limit = limit
+            data.offset = offset
+            thisObj.model.itemslist = data 
             //thisObj.model.items = {}
 
             var projects = [];

@@ -172,9 +172,9 @@ function pmItems()
             success: function(data)
             {
                 //console.log("update Items", data)
-                thisObj.model.itemslist = data
-                thisObj.model.itemslist.limit = limit
-                thisObj.model.itemslist.offset = offset
+                data.limit = limit
+                data.offset = offset
+                thisObj.model.itemslist = data 
                 //thisObj.model.items = {}
 
                 for(var i in data.results)
@@ -225,6 +225,8 @@ function pmItems()
             success: function(data)
             {
                 //console.log("update Items", data)
+                data.limit = limit
+                data.offset = offset
                 thisObj.model.itemslist = data
                 //thisObj.model.items = {}
 
@@ -381,14 +383,18 @@ function pmItems()
         });
     }
 
-    this.updateList = function(limit, offset)
+    this.updateList = function(menuInfo, data, searchFunction)
     {
         var thisObj = this;
-        $.when(this.loadItems(limit, offset)).always(function(){
-            thisObj.model.updateTimeoutId = setTimeout(
-                    function(limit, offset){
-                        thisObj.updateList(limit, offset)
-                    }, 1000, limit, offset)
+        $.when(searchFunction(menuInfo, data)).always(function()
+        {
+            if(thisObj.model.updateTimeoutId)
+            {
+                clearTimeout(thisObj.model.updateTimeoutId)
+            }
+            thisObj.model.updateTimeoutId = setTimeout(function(){
+                thisObj.updateList(menuInfo, data, searchFunction)
+            }, 1000)
         })
     }
 
@@ -398,20 +404,43 @@ function pmItems()
         this.model.updateTimeoutId = undefined;
     }
     
-    this.showUpdatedList = function(holder, menuInfo, data)
+    /**
+     * Обновляемый список
+     * @param {string} holder пареметры навигации из spajs
+     * @param {object} menuInfo пареметры навигации из spajs
+     * @param {object} data пареметры навигации из spajs
+     * @param {string} functionName имя функции объекта для рендера страницы
+     * @param {function} searchFunction функция поиска новых данных
+     * @returns {$.Deferred}
+     */
+    this.showUpdatedList = function(holder, menuInfo, data, functionName, searchFunction)
     {
         var thisObj = this;
-        return $.when(this.showList(holder, menuInfo, data)).always(function()
+        if(functionName == undefined)
         {
-            var offset = 0
-            var limit = this.pageSize;
-            if(data.reg && data.reg[1] > 0)
+            functionName = "showList"
+        }
+        
+        if(searchFunction == undefined)
+        {
+            searchFunction = function(menuInfo, data)
             {
-                offset = this.pageSize*(data.reg[1] - 1);
+                var offset = 0
+                var limit = thisObj.pageSize;
+                if(data.reg && data.reg[1] > 0)
+                {
+                    offset = thisObj.pageSize*(data.reg[1] - 1);
+                }
+                
+                return thisObj.loadItems(limit, offset)
             }
-            thisObj.model.updateTimeoutId = setTimeout(function(limit, offset){
-                thisObj.updateList(limit, offset);
-            }, 1000, limit, offset) 
+        }
+        
+        return $.when(this[functionName](holder, menuInfo, data)).always(function()
+        { 
+            thisObj.model.updateTimeoutId = setTimeout(function(){
+                thisObj.updateList(menuInfo, data, searchFunction);
+            }, 1000) 
         }).promise();
     }
 

@@ -696,7 +696,7 @@ if(!window.spajs)
 
         if(spajs.currentOpenMenu && menuInfo.id == spajs.currentOpenMenu.id && !opt.reopen)
         {
-            //console.warn("Повторное открытие меню", menuInfo)
+            console.warn("Повторное открытие меню", menuInfo)
             def.reject()
             return def.promise();
         }
