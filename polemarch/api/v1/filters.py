@@ -137,7 +137,8 @@ class HistoryFilter(_BaseFilter):
                   'project',
                   'status',
                   'start_time',
-                  'stop_time',)
+                  'stop_time',
+                  'task_id',)
 
 
 class PeriodicTaskFilter(_BaseFilter):
