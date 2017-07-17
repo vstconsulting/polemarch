@@ -2,14 +2,15 @@ from django.conf import settings
 from django.test import Client
 from django.contrib.auth.hashers import make_password
 
-from .tasks import ApiTasksTestCase, \
-    ApiPeriodicTasksTestCase
 from ..utils import redirect_stdany
 from ._base import BaseTestCase, User, json
-from .inventory import (ApiHostsTestCase, ApiGroupsTestCase,
-                        ApiInventoriesTestCase)
 from .project import ApiProjectsTestCase
 from .bulk import ApiBulkTestCase
+from .inventory import (ApiHostsTestCase, ApiGroupsTestCase,
+                        ApiInventoriesTestCase)
+from .tasks import (ApiTasksTestCase,
+                    ApiPeriodicTasksTestCase,
+                    ApiTemplateTestCase)
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -190,7 +191,7 @@ class APITestCase(ApiUsersTestCase,
                   ApiHostsTestCase, ApiGroupsTestCase,
                   ApiInventoriesTestCase, ApiProjectsTestCase,
                   ApiTasksTestCase, ApiPeriodicTasksTestCase,
-                  ApiBulkTestCase):
+                  ApiBulkTestCase, ApiTemplateTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 

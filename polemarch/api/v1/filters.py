@@ -38,6 +38,16 @@ class _BaseFilter(filters.FilterSet):
     name      = CharFilter(method=name_filter)
 
 
+class TemplateFilter(_BaseFilter):
+    class Meta:
+        model = models.Template
+        fields = (
+            'id',
+            'name',
+            'kind',
+        )
+
+
 class UserFilter(filters.FilterSet):
     class Meta:
         model = User

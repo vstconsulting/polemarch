@@ -145,6 +145,17 @@ class HistoryViewSet(base.HistoryModelViewSet):
         )
 
 
+class TemplateViewSet(base.ModelViewSetSet):
+    model = serializers.models.Template
+    serializer_class = serializers.TemplateSerializer
+    serializer_class_one = serializers.OneTemplateSerializer
+    filter_class = filters.TemplateFilter
+
+    @list_route(methods=["get"], url_path="supported-types")
+    def supported_types(self, request):
+        return base.Response(self.model.template_data_types, 200).resp
+
+
 class BulkViewSet(rest_views.APIView):
     permission_classes = (StaffPermission,)
 

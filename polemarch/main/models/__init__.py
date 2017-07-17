@@ -13,7 +13,7 @@ from .vars import Variable
 from .hosts import Host, Group, Inventory
 from .projects import Project
 from .users import TypesPermissions
-from .tasks import Task, PeriodicTask, History, HistoryLines
+from .tasks import Task, PeriodicTask, History, HistoryLines, Template
 from ..validators import validate_hostname
 from ..utils import raise_context
 
@@ -51,6 +51,11 @@ def validate_hosts(instance, **kwargs):
         validate_hostname(instance.name)
     elif instance.variables.filter(key="ansible_host").count():
         validate_hostname(instance.variables.get("ansible_host"))
+
+
+@receiver(signals.pre_save, sender=Template)
+def validate_template(instance, **kwargs):
+    pass
 
 
 @receiver(signals.pre_delete, sender=Project)

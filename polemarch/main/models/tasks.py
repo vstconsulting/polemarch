@@ -7,6 +7,9 @@ import uuid
 from collections import namedtuple, OrderedDict
 from os.path import dirname
 
+import json
+
+import six
 from celery.schedules import crontab
 from django.db import transaction
 from django.utils import timezone
@@ -168,6 +171,38 @@ class PeriodicTask(_AbstractModel):
 
     def run_ansible_playbook(self):
         run_ansible_playbook(self, self.inventory, **self.vars)
+
+
+class Template(BModel):
+    name          = models.CharField(max_length=512)
+    kind          = models.CharField(max_length=32)
+    template_data = models.TextField(default="")
+
+    class Meta:
+        index_together = [
+            ["id", "name", "kind"]
+        ]
+
+    template_data_types = [
+        "TASK", "HOST", "GROUP"
+    ]
+
+    @property
+    def data(self):
+        return json.loads(self.template_data)
+
+    @data.setter
+    def data(self, value):
+        if isinstance(value, (six.string_types, six.text_type)):
+            self.template_data = json.dumps(json.loads(json.dumps(value)))
+        elif isinstance(value, (dict, OrderedDict, list)):
+            self.template_data = json.dumps(value)
+        else:
+            raise ValueError("Unknown data type set.")
+
+    @data.deleter
+    def data(self):
+        self.template_data = ""
 
 
 class HistoryQuerySet(BQuerySet):

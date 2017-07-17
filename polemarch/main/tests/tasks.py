@@ -13,7 +13,7 @@ except ImportError:
     from unittest.mock import patch
 
 from ..models import Project
-from ..models import Task, PeriodicTask, History, Inventory
+from ..models import Task, PeriodicTask, History, Inventory, Template
 
 from .inventory import _ApiGHBaseTestCase
 
@@ -368,3 +368,54 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         # test with with no project
         data = dict(playbook="p1.yml", schedule="30 */4", type="CRONTAB")
         self.get_result("post", url, 400, data=json.dumps(data))
+
+
+class ApiTemplateTestCase(_ApiGHBaseTestCase):
+    def setUp(self):
+        super(ApiTemplateTestCase, self).setUp()
+
+        self.pr_tmplt = Project.objects.create(**dict(
+                name="TmpltProject",
+                repository="git@ex.us:dir/rep3.git",
+                vars=dict(repo_type="TEST")
+            )
+        )
+        self.tmplt_data = dict(
+            name="test_tmplt",
+            kind="TASK",
+            data=dict(
+                playbook="test.yml",
+                vars=dict(
+                    connection="paramiko",
+                    tags="update",
+                )
+            )
+        )
+        self.job_template = Template.objects.create(**self.tmplt_data)
+
+    def test_templates(self):
+        url = "/api/v1/templates/"
+        self.list_test(url, Template.objects.all().count())
+        self.details_test(url + "{}/".format(self.job_template.id),
+                          **self.tmplt_data)
+
+        tmplt_data = dict()
+        tmplt_data.update(self.tmplt_data)
+        del tmplt_data["name"]
+
+        self.get_result("patch", url + "{}/".format(self.job_template.id),
+                        data=json.dumps(dict(name="test_tmplt")))
+        self.details_test(url + "{}/".format(self.job_template.id),
+                          name="test_tmplt", **tmplt_data)
+
+        data = [dict(name="tmplt-{}".format(i), **tmplt_data)
+                for i in range(5)]
+        results_id = self.mass_create(url, data, "name", *tmplt_data.keys())
+
+        for project_id in results_id:
+            self.get_result("delete", url + "{}/".format(project_id))
+        count = Template.objects.filter(id__in=results_id).count()
+        self.assertEqual(count, 0)
+
+        result = self.get_result("get", url+"supported-types/")
+        self.assertEqual(result, Template.template_data_types)
