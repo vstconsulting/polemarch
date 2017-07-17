@@ -142,6 +142,7 @@ release_deb:
   stage: release
   only:
    - tags
+  image: onegreyonewhite/tox:ubuntu
   script:
    - make deb
   allow_failure: false
