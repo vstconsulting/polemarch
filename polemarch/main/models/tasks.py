@@ -65,11 +65,11 @@ def __parse_extra_args(project, **extra):
     return AnsibleExtra(extra_args, files)
 
 
-def run_ansible_playbook(task, inventory, **extra_args):
+def run_ansible_playbook(task, inventory, task_id, **extra_args):
     # pylint: disable=too-many-locals
     history_kwargs = dict(playbook=task.playbook, start_time=timezone.now(),
                           inventory=inventory, project=task.project,
-                          raw_stdout="")
+                          raw_stdout="",)# task_id=task_id)
     history_kwargs["raw_inventory"], key_files = inventory.get_inventory()
     history = History.objects.create(status="RUN", **history_kwargs)
     path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
@@ -114,8 +114,8 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)
 
-    def run_ansible_playbook(self, inventory, **extra):
-        run_ansible_playbook(self, inventory, **extra)
+    def run_ansible_playbook(self, inventory, task_id, **extra):
+        run_ansible_playbook(self, inventory, task_id, **extra)
 
 
 # noinspection PyTypeChecker
@@ -196,6 +196,8 @@ class History(BModel):
     raw_args      = models.TextField(default="")
     raw_inventory = models.TextField(default="")
     status        = models.CharField(max_length=50)
+    task_id       = models.CharField(max_length=50, default=None,
+                                     blank=True, null=True)
 
     class Meta:
         default_related_name = "history"
