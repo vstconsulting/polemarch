@@ -210,7 +210,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                         history.start_time <= history.stop_time)
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
-        #self.assertIsNotNone(history.task_id)
+        self.assertIsNotNone(history.task_id)
         History.objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, None), "OFFLINE")

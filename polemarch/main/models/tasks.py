@@ -69,7 +69,7 @@ def run_ansible_playbook(task, inventory, task_id, **extra_args):
     # pylint: disable=too-many-locals
     history_kwargs = dict(playbook=task.playbook, start_time=timezone.now(),
                           inventory=inventory, project=task.project,
-                          raw_stdout="",)# task_id=task_id)
+                          raw_stdout="", task_id=task_id)
     history_kwargs["raw_inventory"], key_files = inventory.get_inventory()
     history = History.objects.create(status="RUN", **history_kwargs)
     path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
