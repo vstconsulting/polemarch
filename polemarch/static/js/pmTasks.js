@@ -29,10 +29,21 @@ pmTasks.execute = function(project_id, inventory, playbook)
                 xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
             }
         },
-        success: function(data)
+        success: function(data) 
         {
-            $.notify("Started", "success");
-            def.resolve();
+            $.notify("Started", "success"); 
+            if(data && data.history_id)
+            { 
+                $.when(spajs.open({ menuId:"project/"+project_id+"/history/"+data.history_id}) ).done(function(){
+                    def.resolve()
+                }).fail(function(){
+                    def.reject()
+                })
+            }
+            else
+            {
+                def.reject()
+            }
         },
         error:function(e)
         {

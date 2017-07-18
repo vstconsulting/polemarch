@@ -1,7 +1,8 @@
 
 var pmHistory = new pmItems()
 
-pmHistory.model.name = "history"
+pmHistory.model.name = "history" 
+pmHistory.model.linePerPage = 30;
 
 pmHistory.showSearchResults = function(holder, menuInfo, data)
 {
@@ -18,7 +19,7 @@ pmHistory.showSearchResults = function(holder, menuInfo, data)
 pmHistory.search = function(project_id, query)
 {
     if(!project_id)
-    { 
+    {
         if(!query || !trim(query))
         {
             return spajs.open({ menuId:this.model.name, reopen:true});
@@ -26,14 +27,14 @@ pmHistory.search = function(project_id, query)
 
         return spajs.open({ menuId:this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
     }
-    
+
     if(!query || !trim(query))
     {
         return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name, reopen:true});
     }
 
     return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
-} 
+}
 
 pmHistory.showListInProjects = function(holder, menuInfo, data)
 {
@@ -68,15 +69,58 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
     })
 }
 
-    
+
 pmHistory.showItemInProjects = function(holder, menuInfo, data)
 {
     var thisObj = this;
     //console.log(menuInfo, data)
+    var project_id = data.reg[1];
+    var item_id = data.reg[2];
+    return $.when(this.loadItem(item_id), pmProjects.loadItem(project_id)).done(function()
+    { 
+        $(holder).html(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
 
-    return $.when(this.loadItem(data.reg[2]), pmProjects.loadItem(data.reg[1])).done(function()
-    {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:data.reg[2], project_id:data.reg[1]}))
+        pmHistory.loadNewLines(item_id)
+
+        var content = $('#history-stdout')
+        content.scroll(function()
+        {
+            // End of the document reached?
+            if (content.scrollTop() < 150)
+            {
+                if(pmHistory.stdout_minline <= 1)
+                {
+                    return;
+                } 
+
+                if(pmHistory.inLoadTopData)
+                {
+                    return;
+                }
+ 
+                //pmHistory.lastContentScrollHeight = $('#history-stdout').prop('scrollHeight') - content.scrollTop() + 100;
+
+                pmHistory.inLoadTopData = true;
+                 
+                var stdout_minline = pmHistory.model.items[item_id].stdout_minline;
+                $.when(thisObj.loadLines(item_id, stdout_minline - pmHistory.model.linePerPage, pmHistory.model.linePerPage, 0)).always(function()
+                { 
+                    
+                    for(var i = stdout_minline; i > stdout_minline - pmHistory.model.linePerPage; i = i -1)
+                    {
+                        if(thisObj.model.items[item_id].stdout[i] != undefined)
+                        {
+                            $("#history-stdout").prepend("[Top::"+i+"]"+ thisObj.model.items[item_id].stdout[i]+"<br>") 
+                        }
+                    } 
+                    
+                    pmHistory.inLoadTopData = false;
+                })  
+            }
+        });
+        
+        
+        
     }).fail(function()
     {
         $.notify("", "error");
@@ -91,7 +135,7 @@ pmHistory.loadItem = function(item_id)
 {
     var def = new $.Deferred();
     var thisObj = this;
-     
+
     jQuery.ajax({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "GET",
@@ -111,7 +155,7 @@ pmHistory.loadItem = function(item_id)
                 def.resolve()
             }).fail(function(){
                 def.reject()
-            }) 
+            })
         },
         error:function(e)
         {
@@ -120,12 +164,12 @@ pmHistory.loadItem = function(item_id)
             def.reject()
         }
     });
-     
+
     return def.promise();
 }
 
 pmHistory.sendSearchQuery = function(query, limit, offset)
-{ 
+{
     if(!limit)
     {
         limit = 999;
@@ -139,7 +183,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
     var q = [];
     for(var i in query)
     {
-        q.push(encodeURIComponent(i)+"="+encodeURIComponent(query[i])) 
+        q.push(encodeURIComponent(i)+"="+encodeURIComponent(query[i]))
     }
 
     var def = new $.Deferred();
@@ -168,18 +212,18 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
             {
                 var val = data.results[i]
                 thisObj.model.items[val.id] = val
-                
+
                 if(!pmProjects.model.items[val.project] && projects.indexOf(val.project) == -1)
                 {
-                    projects.push(val.project)    
+                    projects.push(val.project)
                 }
             }
-            
+
             $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
                 def.resolve()
             }).fail(function(){
                 def.reject()
-            }) 
+            })
         },
         error:function(e)
         {
@@ -188,7 +232,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
             def.reject()
         }
     });
-     
+
     return def.promise();
 }
 
@@ -197,7 +241,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
  * Обновляет поле модел this.model.items и ложит туда список инфу о пользователях по их id
  */
 pmHistory.loadItems = function(limit, offset)
-{ 
+{
     if(!limit)
     {
         limit = 30;
@@ -209,7 +253,7 @@ pmHistory.loadItems = function(limit, offset)
     }
 
     var def = new $.Deferred();
-    var thisObj = this; 
+    var thisObj = this;
     jQuery.ajax({
         url: "/api/v1/"+this.model.name+"/",
         type: "GET",
@@ -226,7 +270,7 @@ pmHistory.loadItems = function(limit, offset)
             //console.log("update Items", data)
             data.limit = limit
             data.offset = offset
-            thisObj.model.itemslist = data 
+            thisObj.model.itemslist = data
             //thisObj.model.items = {}
 
             var projects = [];
@@ -235,18 +279,18 @@ pmHistory.loadItems = function(limit, offset)
                 var val = data.results[i]
                 thisObj.model.items.justWatch(val.id);
                 thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
-                
+
                 if(!pmProjects.model.items[val.project] && projects.indexOf(val.project) == -1)
                 {
-                    projects.push(val.project)    
+                    projects.push(val.project)
                 }
             }
-            
+
             $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
                 def.resolve()
             }).fail(function(){
                 def.reject()
-            }) 
+            })
         },
         error:function(e)
         {
@@ -255,6 +299,138 @@ pmHistory.loadItems = function(limit, offset)
             def.reject()
         }
     });
-     
+
+    return def.promise();
+}
+
+pmHistory.IntervalLoadLines = function(item_id)
+{
+    $.when(pmHistory.loadLines(item_id, 10, 0)).always(function(){
+        
+    }) 
+}
+
+pmHistory.stopUpdates = function()
+{
+    clearTimeout(this.model.updateTimeoutId)
+    this.model.updateTimeoutId = undefined; 
+    
+    clearTimeout(this.model.loadNewLines_timeoutId)
+    this.model.loadNewLines_timeoutId = undefined; 
+}
+
+pmHistory.loadNewLines = function(item_id)
+{ 
+    var thisObj = this;
+    var last_stdout_maxline = this.model.items[item_id].stdout_maxline;
+    if(!last_stdout_maxline)
+    {
+        last_stdout_maxline = 0;
+    }
+    
+    $.when(this.loadLines(item_id, last_stdout_maxline, pmHistory.model.linePerPage, 0)).always(function()
+    {
+        var addData = false;
+        var needScrollDowun = $('#history-stdout').prop('scrollHeight') - $('#history-stdout').scrollTop() -  $("#history-stdout").css('height').replace("px", "")/1 < 100
+        for(var i = last_stdout_maxline+1; i <= thisObj.model.items[item_id].stdout_maxline; i++)
+        {
+            if(thisObj.model.items[item_id].stdout[i] != undefined)
+            {
+                $("#history-stdout").append("["+i+"]"+thisObj.model.items[item_id].stdout[i]+"<br>")
+                addData = true;
+            }
+        } 
+        
+        if( addData && needScrollDowun)
+        {
+            // Прокручиваем в низ только если и так скрол был не сильно приподнят
+            thisObj.scrollBottom()
+        }
+        
+        if(thisObj.model.items[item_id].status == 'RUN' && false)
+        {
+            thisObj.loadNewLines_timeoutId = setTimeout(function(){
+                thisObj.loadNewLines(item_id)
+            }, 1000)
+        }
+    }) 
+}
+
+pmHistory.scrollBottom = function()
+{
+    jQuery('#history-stdout').scrollTop(9999999);
+}
+/**
+ * Обновляет поле модел this.model.itemslist и ложит туда список пользователей
+ * Обновляет поле модел this.model.items и ложит туда список инфу о пользователях по их id
+ */
+pmHistory.loadLines = function(item_id, after, limit, offset)
+{
+    if(!limit)
+    {
+        limit = 30;
+    }
+
+    if(!offset)
+    {
+        offset = 0;
+    }
+    
+    if(!after)
+    {
+        after = 0;
+    }
+    
+    var def = new $.Deferred(); 
+    jQuery.ajax({
+        url: "/api/v1/history/"+item_id+"/lines",
+        type: "GET",
+        contentType:'application/json',
+        data: "format=json&limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset)+"&after="+encodeURIComponent(after),
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            if(!pmHistory.model.items[item_id].stdout)
+            {
+                pmHistory.model.items[item_id].stdout = {}
+                pmHistory.model.items[item_id].stdout_count = 0
+                pmHistory.model.items[item_id].stdout_maxline = 0
+                pmHistory.model.items[item_id].stdout_minline = 999999999
+            }
+            
+            pmHistory.model.items[item_id].stdout_count = data.count; 
+            for(var i in data.results)
+            {
+                var line_number = data.results[i].line_number
+                
+                if(pmHistory.model.items[item_id].stdout_maxline < line_number)
+                {
+                    pmHistory.model.items[item_id].stdout_maxline = line_number;
+                }
+                
+                if(pmHistory.model.items[item_id].stdout_minline > line_number)
+                {
+                    pmHistory.model.items[item_id].stdout_minline = line_number;
+                }
+                
+                pmHistory.model.items[item_id].stdout[line_number] = data.results[i].line
+            }
+            
+            def.resolve()
+            
+        },
+        error:function(e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+            def.reject()
+        }
+    });
+
     return def.promise();
 }

@@ -261,13 +261,15 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"history-item", 
         urlregexp:[/^history\/([0-9]+)$/], 
-        onOpen:function(holder, menuInfo, data){return pmHistory.showItem(holder, menuInfo, data);}
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItem(holder, menuInfo, data);},
+        onClose:function(){return pmHistory.stopUpdates();}
     })
     
     spajs.addMenu({
         id:"history-item-in-project", 
         urlregexp:[/^project\/([0-9]+)\/history\/([0-9]+)$/], 
-        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInProjects(holder, menuInfo, data);}
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInProjects(holder, menuInfo, data);},
+        onClose:function(){return pmHistory.stopUpdates();}
     })
     
     spajs.addMenu({

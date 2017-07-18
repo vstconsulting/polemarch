@@ -345,7 +345,9 @@
                                             target="_blank"
                                             download="stdout-<%- pmHistory.model.items[item_id].playbook %>-<%- pmHistory.model.items[item_id].start_time %>.log"
                                             >Full raw stdout</a>)</label>
-                                <pre style="overflow: auto; max-height: 600px;"><%- pmHistory.model.items[item_id].raw_stdout %></pre>
+                                <pre 
+                                    style="overflow: auto; max-height: 600px;"
+                                    id="history-stdout"></pre>
                             </div>
                         </div>
                     </div>
@@ -481,7 +483,9 @@
                                             target="_blank"
                                             download="stdout-<%- pmHistory.model.items[item_id].playbook %>-<%- pmHistory.model.items[item_id].start_time %>.log"
                                             >Full raw stdout</a>)</label>
-                                <pre style="overflow: auto; max-height: 600px;"><%- pmHistory.model.items[item_id].raw_stdout %></pre>
+                                <pre 
+                                    style="overflow: auto; max-height: 300px;"
+                                    id="history-stdout"></pre>
                             </div>
                         </div>
                     </div>

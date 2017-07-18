@@ -401,7 +401,7 @@ function pmItems()
     this.stopUpdates = function()
     {
         clearTimeout(this.model.updateTimeoutId)
-        this.model.updateTimeoutId = undefined;
+        this.model.updateTimeoutId = undefined; 
     }
     
     /**
