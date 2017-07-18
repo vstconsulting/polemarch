@@ -1687,6 +1687,7 @@ History records
    List of history record lines. |pagination_def|
 
    :query after: filter lines to return lines after this number.
+   :query before: filter lines to return lines before this number.
 
    Example request:
 

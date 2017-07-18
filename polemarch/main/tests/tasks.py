@@ -335,10 +335,13 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 4, result)
         self.assertCount(result["results"], 2)
-        lines_url = url + "{}/lines/?after=2".format(self.historys[3].id)
+        lines_url = url
+        lines_url += "{}/lines/?after=2&before=4".format(self.historys[3].id)
         result = self.get_result("get", lines_url)
-        self.assertEqual(result["count"], 2, result)
-        self.assertCount(result["results"], 2)
+        self.assertEqual(result["count"], 1, result)
+        self.assertCount(result["results"], 1)
+        line_number = result["results"][0]["line_number"]
+        self.assertEqual(line_number, 3, result)
 
         self.get_result("delete", url + "{}/".format(self.historys[0].id))
 
