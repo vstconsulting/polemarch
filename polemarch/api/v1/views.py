@@ -9,6 +9,7 @@ from .. import base
 from ..permissions import SuperUserPermission, StaffPermission
 from . import filters
 from . import serializers
+from ...celery_app import app
 
 
 class TokenView(token_views.ObtainAuthToken):
@@ -143,6 +144,13 @@ class HistoryViewSet(base.HistoryModelViewSet):
             self.get_object().raw_history_line.order_by("-line_number"),
             serializers.HistoryLinesSerializer
         )
+
+    @detail_route(methods=["post"])
+    def cancel(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # TODO: test if gap here and we try to cancel ended task
+        app.control.revoke(obj.task_id, terminate=True)
+        return base.Response("Task canceled: {}".format(obj.task_id), 200).resp
 
 
 class BulkViewSet(rest_views.APIView):

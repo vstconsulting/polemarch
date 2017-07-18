@@ -234,9 +234,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         result = self.post_result(
             "/api/v1/projects/{}/execute/".format(self.task_project.id),
             data=json.dumps(dict(inventory=inv, playbook="first.yml")))
+        history_id = result["history_id"]
         history = self.get_result("get",
-            "/api/v1/history/{}/".format(result["history_id"]))
+                                  "/api/v1/history/{}/".format(history_id))
         self.assertEquals(history["playbook"], "first.yml")
+        self.get_result("post",
+                        "/api/v1/history/{}/cancel/".format(history_id),
+                        200)#405) FIXME: test it needed
 
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
