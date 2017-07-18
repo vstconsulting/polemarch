@@ -7,6 +7,9 @@ import uuid
 from collections import namedtuple, OrderedDict
 from os.path import dirname
 
+import json
+
+import six
 from celery.schedules import crontab
 from django.db import transaction
 from django.utils import timezone
@@ -65,13 +68,10 @@ def __parse_extra_args(project, **extra):
     return AnsibleExtra(extra_args, files)
 
 
-def run_ansible_playbook(task, inventory, **extra_args):
+def run_ansible_playbook(task, inventory, history, **extra_args):
     # pylint: disable=too-many-locals
-    history_kwargs = dict(playbook=task.playbook, start_time=timezone.now(),
-                          inventory=inventory, project=task.project,
-                          raw_stdout="")
-    history_kwargs["raw_inventory"], key_files = inventory.get_inventory()
-    history = History.objects.create(status="RUN", **history_kwargs)
+    history.raw_inventory, key_files = inventory.get_inventory()
+    history.save()
     path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
     path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
     inventory_file = tmp_file()
@@ -114,8 +114,8 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)
 
-    def run_ansible_playbook(self, inventory, **extra):
-        run_ansible_playbook(self, inventory, **extra)
+    def run_ansible_playbook(self, inventory, task_id, **extra):
+        run_ansible_playbook(self, inventory, task_id, **extra)
 
 
 # noinspection PyTypeChecker
@@ -170,6 +170,41 @@ class PeriodicTask(_AbstractModel):
         run_ansible_playbook(self, self.inventory, **self.vars)
 
 
+class Template(BModel):
+    name          = models.CharField(max_length=512)
+    kind          = models.CharField(max_length=32)
+    template_data = models.TextField(default="")
+
+    class Meta:
+        index_together = [
+            ["id", "name", "kind"]
+        ]
+
+    template_fields = {}
+    template_fields["Task"] = ["playbook", "vars", "inventory", "project"]
+    template_fields["PeriodicTask"] = [] + template_fields["Task"]
+    template_fields["PeriodicTask"] += ["type", "name", "schedule"]
+    template_fields["Host"] = ["name", "vars"]
+    template_fields["Group"] = template_fields["Host"] + ["children"]
+
+    @property
+    def data(self):
+        return json.loads(self.template_data)
+
+    @data.setter
+    def data(self, value):
+        if isinstance(value, (six.string_types, six.text_type)):
+            self.template_data = json.dumps(json.loads(json.dumps(value)))
+        elif isinstance(value, (dict, OrderedDict, list)):
+            self.template_data = json.dumps(value)
+        else:
+            raise ValueError("Unknown data type set.")
+
+    @data.deleter
+    def data(self):
+        self.template_data = ""
+
+
 class HistoryQuerySet(BQuerySet):
     use_for_related_fields = True
 
@@ -196,6 +231,8 @@ class History(BModel):
     raw_args      = models.TextField(default="")
     raw_inventory = models.TextField(default="")
     status        = models.CharField(max_length=50)
+    task_id       = models.CharField(max_length=50, default=None,
+                                     blank=True, null=True)
 
     class Meta:
         default_related_name = "history"

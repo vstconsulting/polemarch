@@ -141,8 +141,20 @@ class HistoryViewSet(base.HistoryModelViewSet):
     def lines(self, request, *args, **kwargs):
         return self.get_paginated_route_response(
             self.get_object().raw_history_line.order_by("-line_number"),
-            serializers.HistoryLinesSerializer
+            serializers.HistoryLinesSerializer,
+            filters.HistoryLinesFilter
         )
+
+
+class TemplateViewSet(base.ModelViewSetSet):
+    model = serializers.models.Template
+    serializer_class = serializers.TemplateSerializer
+    serializer_class_one = serializers.OneTemplateSerializer
+    filter_class = filters.TemplateFilter
+
+    @list_route(methods=["get"], url_path="supported-kinds")
+    def supported_kinds(self, request):
+        return base.Response(self.model.template_fields, 200).resp
 
 
 class BulkViewSet(rest_views.APIView):

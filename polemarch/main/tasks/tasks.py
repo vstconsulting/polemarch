@@ -48,10 +48,16 @@ class ScheduledTask(BaseTask):
 
 @task(app, ignore_result=True, bind=True)
 class ExecuteAnsibleTask(BaseTask):
-    def __init__(self, app, project, playbook, inventory, *args, **kwargs):
+    def __init__(self, app, project, playbook, inventory, history,
+                 *args, **kwargs):
         super(self.__class__, self).__init__(app, *args, **kwargs)
         self.inventory = inventory
+        self.history = history
         self.job = Task(playbook=playbook, project=project)
 
     def run(self):
-        self.job.run_ansible_playbook(self.inventory, **self.kwargs)
+        task_id = self.app.app.current_worker_task.request.id
+        self.history.task_id = task_id
+        self.job.run_ansible_playbook(self.inventory,
+                                      self.history,
+                                      **self.kwargs)

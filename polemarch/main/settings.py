@@ -163,8 +163,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.AdminRenderer',
-        # 'rest_framework.renderers.BrowsableAPIRenderer',
+        # 'rest_framework.renderers.AdminRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "polemarch.api.permissions.ModelPermission",
@@ -308,10 +308,8 @@ REPO_BACKENDS = {
         "BACKEND": "polemarch.main.repo_backends.Git",
         "OPTIONS": {
             "CLONE_KWARGS": {
-                "depth": 1
             },
             "FETCH_KWARGS": {
-                "depth": 1
             },
             "GIT_ENV": {
                 "GLOBAL": {

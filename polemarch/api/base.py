@@ -60,7 +60,20 @@ class GenericViewSet(viewsets.GenericViewSet):
             self.queryset = self._get_extra_queryset()
         return super(GenericViewSet, self).get_queryset()
 
-    def get_paginated_route_response(self, queryset, serializer_class=None):
+    def filter_route_queryset(self, queryset, filter_classes=None):
+        if filter_classes is not None:
+            if not isinstance(filter_classes, (list, tuple)):
+                filter_classes = [filter_classes]
+            for filter_class in list(filter_classes):
+                queryset = filter_class(self.request.query_params,
+                                        queryset=queryset,
+                                        request=self.request).qs
+        return queryset
+
+    def get_paginated_route_response(self, queryset, serializer_class=None,
+                                     filter_classes=None):
+        queryset = self.filter_route_queryset(queryset, filter_classes)
+
         if serializer_class is None:
             serializer_class = self.get_serializer_class()
 
