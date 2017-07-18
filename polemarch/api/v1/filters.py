@@ -1,6 +1,6 @@
 # pylint: disable=import-error
 from rest_framework import filters
-from django_filters import (CharFilter, IsoDateTimeFilter)
+from django_filters import (CharFilter, NumberFilter, IsoDateTimeFilter)
 from django.contrib.auth.models import User
 from ...main import models
 
@@ -149,3 +149,13 @@ class PeriodicTaskFilter(_BaseFilter):
                   'playbook',
                   'type',
                   'project')
+
+
+class HistoryLinesFilter(filters.FilterSet):
+    after = NumberFilter(name="line_number", lookup_expr=('gt'))
+
+    class Meta:
+        model = models.HistoryLines
+        fields = (
+            'line_number',
+        )

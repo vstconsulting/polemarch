@@ -335,6 +335,10 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 4, result)
         self.assertCount(result["results"], 2)
+        lines_url = url + "{}/lines/?after=2".format(self.historys[3].id)
+        result = self.get_result("get", lines_url)
+        self.assertEqual(result["count"], 2, result)
+        self.assertCount(result["results"], 2)
 
         self.get_result("delete", url + "{}/".format(self.historys[0].id))
 
@@ -433,5 +437,5 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase):
         count = Template.objects.filter(id__in=results_id).count()
         self.assertEqual(count, 0)
 
-        result = self.get_result("get", url+"supported-types/")
+        result = self.get_result("get", url+"supported-kinds/")
         self.assertEqual(result, Template.template_fields)
