@@ -26,7 +26,8 @@ Features
 Red Hat/CentOS installation
 ---------------------------
 
-1. Download rpm from official site.
+1. Download rpm from official site:
+   https://github.com/vstconsulting/polemarch/releases
 
 2. Install it with command
 
@@ -54,7 +55,8 @@ make ssh connection, ``sshpass`` not necessary.
 Ubuntu/Debian installation
 --------------------------
 
-1. Download deb from official site.
+1. Download deb from official site:
+   https://github.com/vstconsulting/polemarch/releases
 
 2. Install it with command
 
