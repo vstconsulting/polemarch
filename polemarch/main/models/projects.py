@@ -68,7 +68,7 @@ class Project(_AbstractModel):
                               inventory=inventory,
                               project=self,
                               raw_stdout="")
-        history = History.objects.create(status="RUN", **history_kwargs)
+        history = History.objects.create(status="DELAY", **history_kwargs)
         ExecuteAnsibleTask.delay(self, playbook_name, inventory,
                                  history, **extra)
         return history.id

@@ -46,7 +46,7 @@ class Executor(CmdExecutor):
         self.counter += 1
         self.history.raw_history_line.create(history=self.history,
                                              line_number=self.counter,
-                                             line=line+"\n")
+                                             line=line)
 
 
 def __parse_extra_args(project, **extra):
@@ -71,6 +71,7 @@ def __parse_extra_args(project, **extra):
 def run_ansible_playbook(task, inventory, history, **extra_args):
     # pylint: disable=too-many-locals
     history.raw_inventory, key_files = inventory.get_inventory()
+    history.status = "RUN"
     history.save()
     path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
     path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
@@ -82,7 +83,7 @@ def run_ansible_playbook(task, inventory, history, **extra_args):
         args = [path_to_ansible, path_to_playbook, '-i',
                 inventory_file.name, '-v'] + extra.args
         history.raw_args = " ".join(args)
-        history.raw_stdout = Executor(history).execute(args)
+        history.raw_stdout = Executor(history).execute(args, history.id)
     except CalledProcessError as exception:
         history.raw_stdout = str(exception.output)
         if exception.returncode == 4:
@@ -114,8 +115,8 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)
 
-    def run_ansible_playbook(self, inventory, task_id, **extra):
-        run_ansible_playbook(self, inventory, task_id, **extra)
+    def run_ansible_playbook(self, inventory, history, **extra):
+        run_ansible_playbook(self, inventory, history, **extra)
 
 
 # noinspection PyTypeChecker
@@ -231,8 +232,6 @@ class History(BModel):
     raw_args      = models.TextField(default="")
     raw_inventory = models.TextField(default="")
     status        = models.CharField(max_length=50)
-    task_id       = models.CharField(max_length=50, default=None,
-                                     blank=True, null=True)
 
     class Meta:
         default_related_name = "history"
