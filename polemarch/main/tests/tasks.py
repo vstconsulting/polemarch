@@ -13,7 +13,7 @@ except ImportError:
     from unittest.mock import patch
 
 from ..models import Project
-from ..models import Task, PeriodicTask, History, Inventory
+from ..models import Task, PeriodicTask, History, Inventory, Template
 
 from .inventory import _ApiGHBaseTestCase
 
@@ -234,9 +234,10 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         result = self.post_result(
             "/api/v1/projects/{}/execute/".format(self.task_project.id),
             data=json.dumps(dict(inventory=inv, playbook="first.yml")))
-        history_id = result["history_id"]
         history = self.get_result("get",
-                                  "/api/v1/history/{}/".format(history_id))
+                                  "/api/v1/history/{}/".format(
+                                      result["history_id"]
+                                  ))
         self.assertEquals(history["playbook"], "first.yml")
         self.get_result("post",
                         "/api/v1/history/{}/cancel/".format(history_id),
@@ -337,6 +338,10 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 4, result)
         self.assertCount(result["results"], 2)
+        lines_url = url + "{}/lines/?after=2".format(self.historys[3].id)
+        result = self.get_result("get", lines_url)
+        self.assertEqual(result["count"], 2, result)
+        self.assertCount(result["results"], 2)
 
         self.get_result("delete", url + "{}/".format(self.historys[0].id))
 
@@ -382,3 +387,58 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         # test with with no project
         data = dict(playbook="p1.yml", schedule="30 */4", type="CRONTAB")
         self.get_result("post", url, 400, data=json.dumps(data))
+
+
+class ApiTemplateTestCase(_ApiGHBaseTestCase):
+    def setUp(self):
+        super(ApiTemplateTestCase, self).setUp()
+
+        self.pr_tmplt = Project.objects.create(**dict(
+                name="TmpltProject",
+                repository="git@ex.us:dir/rep3.git",
+                vars=dict(repo_type="TEST")
+            )
+        )
+        self.tmplt_data = dict(
+            name="test_tmplt",
+            kind="Task",
+            data=dict(
+                playbook="test.yml",
+                vars=dict(
+                    connection="paramiko",
+                    tags="update",
+                )
+            )
+        )
+        self.job_template = Template.objects.create(**self.tmplt_data)
+
+    def test_templates(self):
+        url = "/api/v1/templates/"
+        self.list_test(url, Template.objects.all().count())
+        self.details_test(url + "{}/".format(self.job_template.id),
+                          **self.tmplt_data)
+
+        tmplt_data = dict()
+        tmplt_data.update(self.tmplt_data)
+        del tmplt_data["name"]
+
+        self.get_result("patch", url + "{}/".format(self.job_template.id),
+                        data=json.dumps(dict(name="test_tmplt")))
+        self.details_test(url + "{}/".format(self.job_template.id),
+                          name="test_tmplt", **tmplt_data)
+        self.get_result("patch", url + "{}/".format(self.job_template.id),
+                        400, data=json.dumps(dict(data=dict(test=1, tst=2))))
+        self.get_result("patch", url + "{}/".format(self.job_template.id),
+                        415, data=json.dumps(dict(kind="Test")))
+
+        data = [dict(name="tmplt-{}".format(i), **tmplt_data)
+                for i in range(5)]
+        results_id = self.mass_create(url, data, "name", *tmplt_data.keys())
+
+        for project_id in results_id:
+            self.get_result("delete", url + "{}/".format(project_id))
+        count = Template.objects.filter(id__in=results_id).count()
+        self.assertEqual(count, 0)
+
+        result = self.get_result("get", url+"supported-kinds/")
+        self.assertEqual(result, Template.template_fields)

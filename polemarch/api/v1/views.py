@@ -142,7 +142,8 @@ class HistoryViewSet(base.HistoryModelViewSet):
     def lines(self, request, *args, **kwargs):
         return self.get_paginated_route_response(
             self.get_object().raw_history_line.order_by("-line_number"),
-            serializers.HistoryLinesSerializer
+            serializers.HistoryLinesSerializer,
+            filters.HistoryLinesFilter
         )
 
     @detail_route(methods=["post"])
@@ -151,6 +152,17 @@ class HistoryViewSet(base.HistoryModelViewSet):
         # TODO: test if gap here and we try to cancel ended task
         app.control.revoke(obj.task_id, terminate=True)
         return base.Response("Task canceled: {}".format(obj.task_id), 200).resp
+
+
+class TemplateViewSet(base.ModelViewSetSet):
+    model = serializers.models.Template
+    serializer_class = serializers.TemplateSerializer
+    serializer_class_one = serializers.OneTemplateSerializer
+    filter_class = filters.TemplateFilter
+
+    @list_route(methods=["get"], url_path="supported-kinds")
+    def supported_kinds(self, request):
+        return base.Response(self.model.template_fields, 200).resp
 
 
 class BulkViewSet(rest_views.APIView):

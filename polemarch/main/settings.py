@@ -308,10 +308,8 @@ REPO_BACKENDS = {
         "BACKEND": "polemarch.main.repo_backends.Git",
         "OPTIONS": {
             "CLONE_KWARGS": {
-                "depth": 1
             },
             "FETCH_KWARGS": {
-                "depth": 1
             },
             "GIT_ENV": {
                 "GLOBAL": {

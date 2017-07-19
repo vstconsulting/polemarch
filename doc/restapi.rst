@@ -1123,10 +1123,10 @@ Tasks
 
    List tasks. |pagination_def|
 
-   :query id: id of project if we want to filter by it.
-   :query name: name of project if we want to filter by it.
-   :query id__not: id of project, which we want to filter out.
-   :query name__not: name of project, which we want to filter out.
+   :query id: id of task if we want to filter by it.
+   :query name: name of task if we want to filter by it.
+   :query id__not: id of task, which we want to filter out.
+   :query name__not: name of task, which we want to filter out.
    :query playbook: filter by name of playbook.
    :query project: filter by id of project.
 
@@ -1227,8 +1227,8 @@ Periodic tasks
 
    List of periodic tasks. |pagination_def|
 
-   :query id: id of project if we want to filter by it.
-   :query id__not: id of project, which we want to filter out.
+   :query id: id of template if we want to filter by it.
+   :query id__not: id of template, which we want to filter out.
    :query playbook: filter by playbook.
    :query type: filter by ``type``.
    :query project: filter by project id.
@@ -1237,7 +1237,7 @@ Periodic tasks
 
    .. sourcecode:: http
 
-      GET /api/v1/projects/?project=7 HTTP/1.1
+      GET /api/v1/periodic-tasks/?project=7 HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1373,6 +1373,224 @@ Periodic tasks
 
    |ptask_details_ref|
 
+Templates
+---------
+
+.. http:get:: /api/v1/templates/{id}/
+
+   Get template with details.
+
+   :arg id: id of template.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/templates/1/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+            "id": 1,
+            "name": "test_tmplt",
+            "kind": "Task",
+            "data": {
+                "playbook": "test.yml",
+                "vars": {
+                    "connection": "paramiko"
+                }
+            }
+        }
+
+   :>json number id: id of template.
+   :>json string name: name of template.
+   :>json string kind: |template_kind_details|
+   :>json string data: |template_data_details|
+
+.. |template_details_ref| replace:: **Response JSON Object:** response json
+   fields same as in :http:get:`/api/v1/templates/{id}/`.
+
+.. |template_kind_details| replace:: Kind of template. Supported kinds
+   could see in :http:get:`/api/v1/templates/supported-kinds/`.
+
+.. |template_data_details| replace:: JSON structure of template. Supported
+   fields could see in :http:get:`/api/v1/templates/supported-kinds/`.
+
+
+.. http:get:: /api/v1/templates/
+
+   Get list of templates. |pagination_def|
+
+   :query id: id of project if we want to filter by it.
+   :query id__not: id of project, which we want to filter out.
+   :query name: filter by name.
+   :query kind: filter by ``kind``.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/templates/?kind=Task HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+            "count": 1,
+            "next": null,
+            "previous": null,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "test_tmplt",
+                    "kind": "Task"
+                }
+            ]
+        }
+
+   |template_details_ref|
+
+.. http:delete:: /api/v1/templates/{id}/
+
+   Delete periodic task.
+
+   :arg id: id of periodic task.
+
+.. http:post:: /api/v1/templates/
+
+   Create template
+
+   :<json string kind: |template_kind_details|
+   :<json string data: |template_data_details|
+   :<json string name: template name.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/templates/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+         "name": "test",
+         "kind": "Task",
+         "data": {
+            "playbook": "test.yml",
+            "vars": {
+                  "connection": "paramiko"
+            }
+         }
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "id": 2,
+        "name": "test",
+        "kind": "Task",
+        "data": {
+            "playbook": "test.yml",
+            "vars": {
+                "connection": "paramiko"
+            }
+        }
+    }
+
+   |template_details_ref|
+
+.. http:patch:: /api/v1/templates/{id}/
+
+   Update template. If update data, should send full template data.
+   |patch_reminder|
+
+   :arg id: id of template.
+
+   **Request JSON Object:**
+   request json fields same as in :http:post:`/api/v1/templates/`
+
+   Example request:
+
+   .. sourcecode:: http
+
+      PATCH /api/v1/templates/2/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+          "name": "test_new_name"
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "id": 2,
+        "name": "test_new_name",
+        "kind": "Task",
+        "data": {
+            "playbook": "test.yml",
+            "vars": {
+                "connection": "paramiko"
+            }
+        }
+    }
+
+   |template_details_ref|
+
+.. http:get:: /api/v1/templates/supported-kinds/
+
+   List of supported kinds.|pagination_def|
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/history/supported-kinds/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+            "Task": [
+                "playbook",
+                "vars",
+                "inventory",
+                "project"
+            ],
+            "Host": [
+                "name",
+                "vars"
+            ],
+            "PeriodicTask": [
+                "playbook",
+                "vars",
+                "inventory",
+                "project",
+                "type",
+                "name",
+                "schedule"
+            ],
+            "Group": [
+                "name",
+                "vars",
+                "children"
+            ]
+        }
+
 History records
 ---------------
 
@@ -1468,11 +1686,13 @@ History records
 
    List of history record lines. |pagination_def|
 
+   :query after: filter lines to return lines after this number.
+
    Example request:
 
    .. sourcecode:: http
 
-      GET /api/v1/history/1/lines/ HTTP/1.1
+      GET /api/v1/history/1/lines/?after=2 HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1481,7 +1701,7 @@ History records
    .. sourcecode:: js
 
         {
-            "count": 4,
+            "count": 2,
             "next": null,
             "previous": null,
             "results": [
@@ -1492,14 +1712,6 @@ History records
                 {
                     "line_number": 3,
                     "line": "ERROR! the playbook: /home/centos/test/polemarch/projects/1/test.yml could not be found"
-                },
-                {
-                    "line_number": 2,
-                    "line": ""
-                },
-                {
-                    "line_number": 1,
-                    "line": "Using /etc/ansible/ansible.cfg as config file"
                 }
             ]
         }
@@ -1697,7 +1909,7 @@ there is filtering by variables possible in get requests like this:
 .. _sublists:
 
 Sublists
----------
+--------
 
 .. |sublists_details| replace:: See :ref:`sublists` for details.
 

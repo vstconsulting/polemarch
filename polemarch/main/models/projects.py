@@ -63,8 +63,10 @@ class Project(_AbstractModel):
         from ..tasks import ExecuteAnsibleTask
         inventory = hosts_models.Inventory.objects.get(id=inventory_id)
         from .tasks import History
-        history_kwargs = dict(playbook=playbook_name, start_time=timezone.now(),
-                              inventory=inventory, project=self,
+        history_kwargs = dict(playbook=playbook_name,
+                              start_time=timezone.now(),
+                              inventory=inventory,
+                              project=self,
                               raw_stdout="")
         history = History.objects.create(status="RUN", **history_kwargs)
         ExecuteAnsibleTask.delay(self, playbook_name, inventory,
