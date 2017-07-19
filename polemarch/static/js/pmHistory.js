@@ -158,7 +158,7 @@ pmHistory.bindStdoutUpdates = function(item_id)
                 {
                     if(thisObj.model.items[item_id].stdout[i] != undefined)
                     {
-                        $("#history-stdout").prepend("<div>"+thisObj.model.items[item_id].stdout[i]+"</div>") 
+                        $("#history-stdout").prepend("<div>"+thisObj.model.items[item_id].stdout[i]+"&nbsp;</div>") 
                     }
                 } 
 
@@ -188,9 +188,17 @@ pmHistory.loadItem = function(item_id)
             }
         },
         success: function(data)
-        {
-            //console.log("loadUser", data)
-            thisObj.model.items[item_id] = data
+        { 
+            if(!thisObj.model.items[item_id])
+            {
+                thisObj.model.items[item_id] = {}
+            }
+            
+            for(var i in data)
+            {
+                thisObj.model.items[item_id][i] = data[i]
+            }
+            
             $.when(pmProjects.loadItem(data.project)).done(function(){
                 def.resolve()
             }).fail(function(){
@@ -361,7 +369,7 @@ pmHistory.loadNewLines = function(item_id)
         last_stdout_maxline = 0;
     }
     
-    $.when(this.loadLines(item_id, {after:last_stdout_maxline, limit:pmHistory.model.linePerPage})).always(function()
+    $.when(this.loadItem(item_id), this.loadLines(item_id, {after:last_stdout_maxline, limit:pmHistory.model.linePerPage})).always(function()
     {
         var addData = false;
         var needScrollDowun = $('#history-stdout').prop('scrollHeight') - $('#history-stdout').scrollTop() -  $("#history-stdout").css('height').replace("px", "")/1 < 100
@@ -369,7 +377,7 @@ pmHistory.loadNewLines = function(item_id)
         {
             if(thisObj.model.items[item_id].stdout[i] != undefined)
             {
-                $("#history-stdout").append("<div>"+thisObj.model.items[item_id].stdout[i]+"</div>")
+                $("#history-stdout").append("<div>"+thisObj.model.items[item_id].stdout[i]+"&nbsp;</div>")
                 addData = true;
             }
         } 
