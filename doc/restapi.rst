@@ -1049,7 +1049,7 @@ Projects
 
 .. http:post:: /api/v1/projects/{id}/execute/
 
-   Execute ansible playbook.
+   Execute ansible playbook. Returns history id for watching execution process.
 
    :arg id: id of project.
    :<json number inventory: inventory to execute playbook at.
@@ -1081,7 +1081,8 @@ Projects
    .. sourcecode:: js
 
         {
-           "detail":"Started at inventory 13."
+           "detail":"Started at inventory 13.",
+           "history_id": 87
         }
 
 Tasks
@@ -1642,6 +1643,27 @@ History records
 .. |history_details_ref| replace:: **Response JSON Object:** response json fields
    same as in :http:get:`/api/v1/history/{id}/`.
 
+.. http:post:: /api/v1/history/{id}/cancel/
+
+   Cancel currently executed task.
+
+   :arg id: id of history record.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/history/1/cancel/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+            "detail": "Task canceled: 1"
+        }
 
 .. http:get:: /api/v1/history/{id}/raw/
 

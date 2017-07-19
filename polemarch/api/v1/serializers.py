@@ -153,7 +153,6 @@ class HistorySerializer(serializers.ModelSerializer):
                   "status",
                   "start_time",
                   "stop_time",
-                  "task_id",
                   "url")
 
 
@@ -170,7 +169,6 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "raw_inventory",
                   "raw_args",
                   "raw_stdout",
-                  "task_id",
                   "url")
 
 

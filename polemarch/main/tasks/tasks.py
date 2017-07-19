@@ -56,8 +56,6 @@ class ExecuteAnsibleTask(BaseTask):
         self.job = Task(playbook=playbook, project=project)
 
     def run(self):
-        task_id = self.app.app.current_worker_task.request.id
-        self.history.task_id = task_id
         self.job.run_ansible_playbook(self.inventory,
                                       self.history,
                                       **self.kwargs)

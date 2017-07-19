@@ -210,7 +210,6 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                         history.start_time <= history.stop_time)
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
-        self.assertIsNotNone(history.task_id)
         History.objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, None), "OFFLINE")
@@ -239,6 +238,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                                       result["history_id"]
                                   ))
         self.assertEquals(history["playbook"], "first.yml")
+        self.get_result("post",
+                        "/api/v1/history/{}/cancel/".format(history['id']),
+                        200)
 
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
