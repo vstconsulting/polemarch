@@ -146,3 +146,12 @@ case "$$1" in
 esac
 endef
 export DEBIAN_POSTRM
+
+define DEBIAN_CHANGELOG
+$(NAME) ($(VER)-$(RELEASE)) unstable; urgency=low
+
+  * this changelog is generated automatically. See official site for actual list of changes.
+
+ -- Sergey K. <sergey.k@vstconsulting.net>  Wed, 19 Jul 2017 6:41:48 +0000
+endef
+export DEBIAN_CHANGELOG
