@@ -5,7 +5,7 @@ from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 
-from ...main.utils import CmdExecutor, Lock
+from ...main.utils import CmdExecutor, KVExchanger
 from .. import base
 from ..permissions import SuperUserPermission, StaffPermission
 from . import filters
@@ -149,7 +149,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
     @detail_route(methods=["post"])
     def cancel(self, request, *args, **kwargs):
         obj = self.get_object()
-        Lock.cache.add(CmdExecutor.CANCEL_PREFIX + str(obj.id), 10)
+        KVExchanger(CmdExecutor.CANCEL_PREFIX + str(obj.id)).send(True, 10)
         return base.Response("Task canceled: {}".format(obj.id), 200).resp
 
 

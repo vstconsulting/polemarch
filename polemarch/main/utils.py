@@ -116,7 +116,12 @@ class CmdExecutor(object):
                 timeout = 1
             yield line
 
-    def execute(self, cmd, cancel_id):
+    def line_handler(self, proc, line):
+        # pylint: disable=unused-argument
+        if line is not None:
+            self.write_output(line)
+
+    def execute(self, cmd):
         '''
         Execute commands and output this
 
@@ -128,14 +133,8 @@ class CmdExecutor(object):
         self.output = ""
         proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, universal_newlines=True)
         for line in self._unbuffered(proc):
-            must_cancel = Lock.cache.get(self.CANCEL_PREFIX + str(cancel_id))
-            if must_cancel is not None:
-                self.write_output("\n[ERROR]: User interrupted execution")
-                proc.kill()
-                proc.wait()
+            if self.line_handler(proc, line):
                 break
-            if line is not None:
-                self.write_output(line)
         retcode = proc.poll()
         if retcode:
             raise CalledProcessError(retcode, cmd, output=self.output)
@@ -212,7 +211,38 @@ class tmp_file_context(object):
             os.remove(self.tmp.name)
 
 
-class Lock(object):
+class KVExchanger(object):
+    '''
+    Class for transmit data using key-value fast (cache-like) storage between
+    Polemarch's services. Uses same cache-backend as Lock.
+    '''
+    TIMEOUT = 60
+    PREFIX = "polemarch_exchange_"
+
+    try:
+        cache = caches["locks"]
+    except InvalidCacheBackendError:
+        cache = caches["default"]
+
+    def __init__(self, key, timeout=None):
+        self.key = self.PREFIX + str(key)
+        self.timeout = timeout if timeout else self.TIMEOUT
+
+    def send(self, value, ttl=None):
+        ttl = self.timeout if ttl is None else ttl
+        return self.cache.add(self.key, value, ttl)
+
+    def prolong(self):
+        payload = self.cache.get(self.key)
+        self.cache.set(self.key, payload, self.timeout)
+
+    def get(self):
+        value = self.cache.get(self.key)
+        self.cache.delete(self.key)
+        return value
+
+
+class Lock(KVExchanger):
     '''
     Lock class for multi-jobs workflow.
 
@@ -228,11 +258,6 @@ class Lock(object):
     class AcquireLockException(ex.PMException):
         pass
 
-    try:
-        cache = caches["locks"]
-    except InvalidCacheBackendError:
-        cache = caches["default"]
-
     def __init__(self, id, payload=None, repeat=1, err_msg="",
                  timeout=None):
         # pylint: disable=too-many-arguments
@@ -245,18 +270,14 @@ class Lock(object):
         :param err_msg: -- message for AcquireLockException error.
         :type err_msg: str
         '''
-        self.timeout = timeout if timeout else self.TIMEOUT
+        super(Lock, self).__init__(id, timeout)
         self.id, start = None, time.time()
         while time.time() - start <= repeat:
-            if self.cache.add(self.PREFIX + str(id), payload, self.timeout):
+            if self.send(payload):
                 self.id = id
                 return
             time.sleep(0.01)
         raise self.AcquireLockException(err_msg)
-
-    def prolong(self):
-        payload = self.cache.get(self.PREFIX + str(self.id))
-        self.cache.set(self.PREFIX + str(self.id), payload, self.timeout)
 
     def __enter__(self):
         return self
@@ -265,7 +286,7 @@ class Lock(object):
         self.release()
 
     def release(self):
-        self.cache.delete(self.PREFIX + str(self.id))
+        self.cache.delete(self.key)
 
     def __del__(self):
         self.release()

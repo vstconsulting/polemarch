@@ -18,7 +18,8 @@ from . import Inventory
 from .base import BModel, BManager, BQuerySet, models
 from .vars import _AbstractModel, _AbstractVarsQuerySet
 from .projects import Project
-from ...main.utils import tmp_file, CmdExecutor, CalledProcessError
+from ...main.utils import (tmp_file, CmdExecutor,
+                           KVExchanger, CalledProcessError)
 
 logger = logging.getLogger("polemarch")
 AnsibleExtra = namedtuple('AnsibleExtraArgs', [
@@ -41,6 +42,15 @@ class Executor(CmdExecutor):
     @output.setter
     def output(self, value):
         pass
+
+    def line_handler(self, proc, line):
+        cancel = KVExchanger(self.CANCEL_PREFIX + str(self.history.id)).get()
+        if cancel is not None:
+            self.write_output("\n[ERROR]: User interrupted execution")
+            proc.kill()
+            proc.wait()
+            return True
+        return super(Executor, self).line_handler(proc, line)
 
     def write_output(self, line):
         self.counter += 1
@@ -83,7 +93,7 @@ def run_ansible_playbook(task, inventory, history, **extra_args):
         args = [path_to_ansible, path_to_playbook, '-i',
                 inventory_file.name, '-v'] + extra.args
         history.raw_args = " ".join(args)
-        history.raw_stdout = Executor(history).execute(args, history.id)
+        history.raw_stdout = Executor(history).execute(args)
     except CalledProcessError as exception:
         history.raw_stdout = str(exception.output)
         if exception.returncode == 4:
