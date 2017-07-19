@@ -353,7 +353,7 @@ pmHistory.stopUpdates = function()
 }
 
 pmHistory.loadNewLines = function(item_id)
-{ 
+{  
     var thisObj = this;
     var last_stdout_maxline = this.model.items[item_id].stdout_maxline;
     if(!last_stdout_maxline)
@@ -380,7 +380,7 @@ pmHistory.loadNewLines = function(item_id)
             thisObj.scrollBottom()
         }
         
-        if(thisObj.model.items[item_id].status == 'RUN' && thisObj.model.items[item_id].status == 'DELAY')
+        if(thisObj.model.items[item_id].status == 'RUN' || thisObj.model.items[item_id].status == 'DELAY')
         {
             thisObj.loadNewLines_timeoutId = setTimeout(function(){
                 thisObj.loadNewLines(item_id)
