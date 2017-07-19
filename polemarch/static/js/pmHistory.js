@@ -2,7 +2,7 @@
 var pmHistory = new pmItems()
 
 pmHistory.model.name = "history" 
-pmHistory.model.linePerPage = 30;
+pmHistory.model.linePerPage = 100;
 
 pmHistory.cancelTask = function(item_id)
 { 
@@ -158,7 +158,7 @@ pmHistory.bindStdoutUpdates = function(item_id)
                 {
                     if(thisObj.model.items[item_id].stdout[i] != undefined)
                     {
-                        $("#history-stdout").prepend(thisObj.model.items[item_id].stdout[i]) 
+                        $("#history-stdout").prepend("<div>"+thisObj.model.items[item_id].stdout[i]+"</div>") 
                     }
                 } 
 
@@ -369,7 +369,7 @@ pmHistory.loadNewLines = function(item_id)
         {
             if(thisObj.model.items[item_id].stdout[i] != undefined)
             {
-                $("#history-stdout").append(thisObj.model.items[item_id].stdout[i])
+                $("#history-stdout").append("<div>"+thisObj.model.items[item_id].stdout[i]+"</div>")
                 addData = true;
             }
         } 
