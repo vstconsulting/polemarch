@@ -70,6 +70,22 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
 }
 
 
+pmHistory.showItem = function(holder, menuInfo, data)
+{
+    var thisObj = this;
+    //console.log(menuInfo, data)
+
+    var item_id = data.reg[1];
+    return $.when(this.loadItem(item_id)).done(function()
+    {
+        $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
+        pmHistory.bindStdoutUpdates(item_id)
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
 pmHistory.showItemInProjects = function(holder, menuInfo, data)
 {
     var thisObj = this;
@@ -79,54 +95,54 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
     return $.when(this.loadItem(item_id), pmProjects.loadItem(project_id)).done(function()
     { 
         $(holder).html(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
-
-        pmHistory.loadNewLines(item_id)
-
-        var content = $('#history-stdout')
-        content.scroll(function()
-        {
-            // End of the document reached?
-            if (content.scrollTop() < 150)
-            {
-                if(pmHistory.stdout_minline <= 1)
-                {
-                    return;
-                } 
-
-                if(pmHistory.inLoadTopData)
-                {
-                    return;
-                }
- 
-                //pmHistory.lastContentScrollHeight = $('#history-stdout').prop('scrollHeight') - content.scrollTop() + 100;
-
-                pmHistory.inLoadTopData = true;
-                 
-                var stdout_minline = pmHistory.model.items[item_id].stdout_minline;
-                $.when(thisObj.loadLines(item_id, stdout_minline - pmHistory.model.linePerPage, pmHistory.model.linePerPage, 0)).always(function()
-                { 
-                    
-                    for(var i = stdout_minline; i > stdout_minline - pmHistory.model.linePerPage; i = i -1)
-                    {
-                        if(thisObj.model.items[item_id].stdout[i] != undefined)
-                        {
-                            $("#history-stdout").prepend("[Top::"+i+"]"+ thisObj.model.items[item_id].stdout[i]+"<br>") 
-                        }
-                    } 
-                    
-                    pmHistory.inLoadTopData = false;
-                })  
-            }
-        });
-        
-        
-        
+        pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
     {
         $.notify("", "error");
     })
 }
 
+pmHistory.bindStdoutUpdates = function(item_id)
+{
+    var thisObj = this;
+    this.loadNewLines(item_id) 
+    var content = $('#history-stdout')
+    content.scroll(function()
+    {
+        // End of the document reached?
+        if (content.scrollTop() < 150)
+        {
+            if(thisObj.stdout_minline <= 1)
+            {
+                return;
+            } 
+
+            if(thisObj.inLoadTopData)
+            {
+                return;
+            }
+
+            //pmHistory.lastContentScrollHeight = $('#history-stdout').prop('scrollHeight') - content.scrollTop() + 100;
+
+            thisObj.inLoadTopData = true;
+
+            var stdout_minline = thisObj.model.items[item_id].stdout_minline;
+            $.when(thisObj.loadLines(item_id, {before:stdout_minline, limit:thisObj.model.linePerPage})).always(function()
+            { 
+
+                for(var i = stdout_minline-1; i > stdout_minline - thisObj.model.linePerPage; i = i -1)
+                {
+                    if(thisObj.model.items[item_id].stdout[i] != undefined)
+                    {
+                        $("#history-stdout").prepend(thisObj.model.items[item_id].stdout[i]) 
+                    }
+                } 
+
+                thisObj.inLoadTopData = false;
+            })  
+        }
+    });
+}
 
 /**
  * Обновляет поле модел this.model.items[item_id] и ложит туда пользователя
@@ -302,14 +318,7 @@ pmHistory.loadItems = function(limit, offset)
 
     return def.promise();
 }
-
-pmHistory.IntervalLoadLines = function(item_id)
-{
-    $.when(pmHistory.loadLines(item_id, 10, 0)).always(function(){
-        
-    }) 
-}
-
+ 
 pmHistory.stopUpdates = function()
 {
     clearTimeout(this.model.updateTimeoutId)
@@ -328,7 +337,7 @@ pmHistory.loadNewLines = function(item_id)
         last_stdout_maxline = 0;
     }
     
-    $.when(this.loadLines(item_id, last_stdout_maxline, pmHistory.model.linePerPage, 0)).always(function()
+    $.when(this.loadLines(item_id, {after:last_stdout_maxline, limit:pmHistory.model.linePerPage})).always(function()
     {
         var addData = false;
         var needScrollDowun = $('#history-stdout').prop('scrollHeight') - $('#history-stdout').scrollTop() -  $("#history-stdout").css('height').replace("px", "")/1 < 100
@@ -336,7 +345,7 @@ pmHistory.loadNewLines = function(item_id)
         {
             if(thisObj.model.items[item_id].stdout[i] != undefined)
             {
-                $("#history-stdout").append("["+i+"]"+thisObj.model.items[item_id].stdout[i]+"<br>")
+                $("#history-stdout").append(thisObj.model.items[item_id].stdout[i])
                 addData = true;
             }
         } 
@@ -347,7 +356,7 @@ pmHistory.loadNewLines = function(item_id)
             thisObj.scrollBottom()
         }
         
-        if(thisObj.model.items[item_id].status == 'RUN' && false)
+        if(thisObj.model.items[item_id].status == 'RUN' && thisObj.model.items[item_id].status == 'DELAY')
         {
             thisObj.loadNewLines_timeoutId = setTimeout(function(){
                 thisObj.loadNewLines(item_id)
@@ -364,29 +373,26 @@ pmHistory.scrollBottom = function()
  * Обновляет поле модел this.model.itemslist и ложит туда список пользователей
  * Обновляет поле модел this.model.items и ложит туда список инфу о пользователях по их id
  */
-pmHistory.loadLines = function(item_id, after, limit, offset)
+pmHistory.loadLines = function(item_id, opt)
 {
-    if(!limit)
+    if(!opt.limit)
     {
-        limit = 30;
+        opt.limit = 30;
     }
 
-    if(!offset)
+    if(!opt.offset)
     {
-        offset = 0;
+        opt.offset = 0;
     }
-    
-    if(!after)
-    {
-        after = 0;
-    }
-    
+     
+    opt.format = 'json';
+     
     var def = new $.Deferred(); 
     jQuery.ajax({
         url: "/api/v1/history/"+item_id+"/lines",
         type: "GET",
         contentType:'application/json',
-        data: "format=json&limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset)+"&after="+encodeURIComponent(after),
+        data: opt,
         beforeSend: function(xhr, settings) {
             if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
                 // Only send the token to relative URLs i.e. locally.
