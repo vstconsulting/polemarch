@@ -3,8 +3,7 @@ var pmTasks = new pmItems()
 
 pmTasks.model.name = "tasks"
 
-
-pmTasks.execute = function(project_id, inventory, playbook)
+pmTasks.execute = function(project_id, inventory, playbook, data_vars)
 {
     var def = new $.Deferred();
     if(!playbook)
@@ -14,14 +13,32 @@ pmTasks.execute = function(project_id, inventory, playbook)
         return def.promise();
     }
 
-    var data = jsonEditor.jsonEditorGetValues();
-    data.playbook = playbook
-    data.inventory = inventory
+    if(!project_id)
+    {
+        $.notify("Invalid filed `project` ", "error");
+        def.reject();
+        return;
+    }
+
+    if(!inventory)
+    {
+        $.notify("Invalid filed `inventory` ", "error");
+        def.reject();
+        return;
+    }
+
+    if(data_vars == undefined)
+    {
+        data_vars = jsonEditor.jsonEditorGetValues();
+    }
+    
+    data_vars.playbook = playbook
+    data_vars.inventory = inventory
 
     $.ajax({
         url: "/api/v1/projects/"+project_id+"/execute/",
         type: "POST",
-        data:JSON.stringify(data),
+        data:JSON.stringify(data_vars),
         contentType:'application/json',
         beforeSend: function(xhr, settings) {
             if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {

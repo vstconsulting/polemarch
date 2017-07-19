@@ -298,6 +298,32 @@ polemarch.start = function(options)
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInProjects(holder, menuInfo, data);}
     })
     
+    
+    // Tasks Templates
+    spajs.addMenu({
+        id:"tasks", 
+        urlregexp:[/^templates$/, /^tasks\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showList(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"tasks-search", 
+        urlregexp:[/^templates\/search\/([A-z0-9 %\-.]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showSearchResults(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"task-item", 
+        urlregexp:[/^template\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showItem(holder, menuInfo, data);}, 
+    })
+    
+    spajs.addMenu({
+        id:"task-new", 
+        urlregexp:[/^template\/new-task$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showNewItemPage(holder, menuInfo, data);}
+    })
+    
     spajs.openMenuFromUrl()
 }
 

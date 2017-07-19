@@ -4,6 +4,30 @@ var pmHistory = new pmItems()
 pmHistory.model.name = "history" 
 pmHistory.model.linePerPage = 30;
 
+pmHistory.cancelTask = function(item_id)
+{ 
+    return $.ajax({
+        url: "/api/v1/history/"+item_id+"/cancel/",
+        type: "POST", 
+        contentType:'application/json',
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data) 
+        {
+            $.notify("Cancel", "success");  
+        },
+        error:function(e)
+        { 
+            polemarch.showErrors(e.responseJSON)
+        }
+    }) 
+}
+
+
 pmHistory.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;

@@ -442,3 +442,47 @@ table{
     opacity: 0;
     cursor: pointer;
 }
+
+.history-status{
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.history-status-OFFLINE{
+    color: #9e9e9e;  
+}
+
+.history-status-RUN{
+    color: #0085ff;
+}
+
+.history-status-ERROR{
+    color: #ff5252; 
+}
+
+.history-status-DELAY{
+    color: #808419;
+}
+
+.history-status-OK{
+    color: #276900;
+}
+
+.project-status{
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.project-status-SYNC{
+    color: #f40;
+}
+
+.project-status-WAIT_SYNC{
+    color: #0085ff;
+}
+
+.project-status-OK{
+    color: #276900;
+}
