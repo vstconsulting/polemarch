@@ -1,6 +1,6 @@
 # pylint: disable=import-error
 from rest_framework import filters
-from django_filters import (CharFilter, IsoDateTimeFilter)
+from django_filters import (CharFilter, NumberFilter, IsoDateTimeFilter)
 from django.contrib.auth.models import User
 from ...main import models
 
@@ -36,6 +36,16 @@ class _BaseFilter(filters.FilterSet):
     id__not   = CharFilter(method=extra_filter)
     name__not = CharFilter(method=name_filter)
     name      = CharFilter(method=name_filter)
+
+
+class TemplateFilter(_BaseFilter):
+    class Meta:
+        model = models.Template
+        fields = (
+            'id',
+            'name',
+            'kind',
+        )
 
 
 class UserFilter(filters.FilterSet):
@@ -127,7 +137,7 @@ class HistoryFilter(_BaseFilter):
                   'project',
                   'status',
                   'start_time',
-                  'stop_time',)
+                  'stop_time')
 
 
 class PeriodicTaskFilter(_BaseFilter):
@@ -138,3 +148,14 @@ class PeriodicTaskFilter(_BaseFilter):
                   'playbook',
                   'type',
                   'project')
+
+
+class HistoryLinesFilter(filters.FilterSet):
+    after  = NumberFilter(name="line_number", lookup_expr=('gt'))
+    before = NumberFilter(name="line_number", lookup_expr=('lt'))
+
+    class Meta:
+        model = models.HistoryLines
+        fields = (
+            'line_number',
+        )

@@ -39,6 +39,32 @@ class DictField(serializers.CharField):
 
 
 # Serializers
+class TemplateSerializer(serializers.ModelSerializer):
+    data = DictField(required=True, write_only=True)
+
+    class Meta:
+        model = models.Template
+        fields = (
+            'id',
+            'name',
+            'kind',
+            'data',
+        )
+
+
+class OneTemplateSerializer(TemplateSerializer):
+    data = DictField(required=True)
+
+    class Meta:
+        model = models.Template
+        fields = (
+            'id',
+            'name',
+            'kind',
+            'data',
+        )
+
+
 class UserSerializer(serializers.ModelSerializer):
 
     class UserExist(exceptions.ValidationError):
@@ -446,6 +472,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         data = dict(request.data)
         inventory_id = int(data.pop("inventory"))
         playbook_name = str(data.pop("playbook"))
-        self.instance.execute(playbook_name, inventory_id, **data)
-        rdata = dict(detail="Started at inventory {}.".format(inventory_id))
+        history_id = self.instance.execute(playbook_name, inventory_id, **data)
+        rdata = dict(detail="Started at inventory {}.".format(inventory_id),
+                     history_id=history_id)
         return Response(rdata, 201)

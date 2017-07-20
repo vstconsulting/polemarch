@@ -29,7 +29,7 @@ def polemarch_exception_handler(exc, context):
             errors = {'other_errors': errors}  # pragma: no cover
         return Response({"detail": errors},
                         status=status.HTTP_400_BAD_REQUEST)
-    elif isinstance(exc, mexcs.UnknownModelHandlerException):
+    elif isinstance(exc, mexcs.UnknownTypeException):
         return Response({"detail": exc.msg},
                         status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
     elif not isinstance(exc, default_exc) and isinstance(exc, Exception):

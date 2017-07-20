@@ -1,14 +1,19 @@
 # pylint: disable=invalid-name,ungrouped-imports
 from __future__ import unicode_literals
 
-import contextlib
-import os
 import sys
-import tempfile
 import time
 import traceback
-from os.path import dirname
 from subprocess import CalledProcessError, Popen, PIPE, STDOUT
+from threading import Thread
+
+import os
+import tempfile
+from os.path import dirname
+try:
+    from Queue import Queue, Empty
+except ImportError:
+    from queue import Queue, Empty
 
 import six
 from django.conf import settings
@@ -75,6 +80,7 @@ class CmdExecutor(object):
     '''
     Command executor with realtime output write
     '''
+    CANCEL_PREFIX = "CANCEL_EXECUTE_"
     newlines = ['\n', '\r\n', '\r']
 
     def __init__(self):
@@ -88,25 +94,33 @@ class CmdExecutor(object):
         :rtype: None
         '''
         self.output += line
-        self.output += "\n"
+
+    def _enqueue_output(self, out, queue):
+        line = out.readline()
+        while line != '':
+            queue.put(line)
+            line = out.readline()
+        out.close()
 
     def _unbuffered(self, proc, stream='stdout'):
         stream = getattr(proc, stream)
-        with contextlib.closing(stream):
-            while True:
-                out = []
-                last = stream.read(1)
-                # Don't loop forever
-                if last == '' and proc.poll() is not None:
-                    break
-                while last not in self.newlines:
-                    # Don't loop forever
-                    if last == '' and proc.poll() is not None:
-                        break
-                    out.append(last)
-                    last = stream.read(1)
-                out = ''.join(out)
-                yield out
+        q = Queue()
+        t = Thread(target=self._enqueue_output, args=(stream, q))
+        t.start()
+        timeout = 0
+        while timeout == 0 or proc.poll() is None:
+            try:
+                line = q.get(timeout=timeout).rstrip()
+                timeout = 0
+            except Empty:
+                line = None
+                timeout = 1
+            yield line
+
+    def line_handler(self, proc, line):
+        # pylint: disable=unused-argument
+        if line is not None:
+            self.write_output(line)
 
     def execute(self, cmd):
         '''
@@ -120,7 +134,8 @@ class CmdExecutor(object):
         self.output = ""
         proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, universal_newlines=True)
         for line in self._unbuffered(proc):
-            self.write_output(line)
+            if self.line_handler(proc, line):
+                break
         retcode = proc.poll()
         if retcode:
             raise CalledProcessError(retcode, cmd, output=self.output)
@@ -197,7 +212,38 @@ class tmp_file_context(object):
             os.remove(self.tmp.name)
 
 
-class Lock(object):
+class KVExchanger(object):
+    '''
+    Class for transmit data using key-value fast (cache-like) storage between
+    Polemarch's services. Uses same cache-backend as Lock.
+    '''
+    TIMEOUT = 60
+    PREFIX = "polemarch_exchange_"
+
+    try:
+        cache = caches["locks"]
+    except InvalidCacheBackendError:
+        cache = caches["default"]
+
+    def __init__(self, key, timeout=None):
+        self.key = self.PREFIX + str(key)
+        self.timeout = timeout if timeout else self.TIMEOUT
+
+    def send(self, value, ttl=None):
+        ttl = self.timeout if ttl is None else ttl
+        return self.cache.add(self.key, value, ttl)
+
+    def prolong(self):
+        payload = self.cache.get(self.key)
+        self.cache.set(self.key, payload, self.timeout)
+
+    def get(self):
+        value = self.cache.get(self.key)
+        self.cache.delete(self.key)
+        return value
+
+
+class Lock(KVExchanger):
     '''
     Lock class for multi-jobs workflow.
 
@@ -208,14 +254,10 @@ class Lock(object):
     TIMEOUT = 60*60*24
     GLOBAL = "global-deploy"
     SCHEDULER = "celery-beat"
+    PREFIX = "polemarch_lock_"
 
     class AcquireLockException(ex.PMException):
         pass
-
-    try:
-        cache = caches["locks"]
-    except InvalidCacheBackendError:
-        cache = caches["default"]
 
     def __init__(self, id, payload=None, repeat=1, err_msg="",
                  timeout=None):
@@ -229,18 +271,14 @@ class Lock(object):
         :param err_msg: -- message for AcquireLockException error.
         :type err_msg: str
         '''
-        self.timeout = timeout if timeout else self.TIMEOUT
+        super(Lock, self).__init__(id, timeout)
         self.id, start = None, time.time()
         while time.time() - start <= repeat:
-            if self.cache.add(id, payload, self.timeout):
+            if self.send(payload):
                 self.id = id
                 return
             time.sleep(0.01)
         raise self.AcquireLockException(err_msg)
-
-    def prolong(self):
-        payload = self.cache.get(self.id)
-        self.cache.set(self.id, payload, self.timeout)
 
     def __enter__(self):
         return self
@@ -249,7 +287,7 @@ class Lock(object):
         self.release()
 
     def release(self):
-        self.cache.delete(self.id)
+        self.cache.delete(self.key)
 
     def __del__(self):
         self.release()
@@ -364,7 +402,7 @@ class ModelHandlers(object):
         except KeyError or ImportError:
             msg = "{} ({})".format(name, self.err_message) if self.err_message\
                                                            else name
-            raise ex.UnknownModelHandlerException(msg)
+            raise ex.UnknownTypeException(msg)
 
     def opts(self, name):
         return self.list().get(name, {}).get('OPTIONS', {})

@@ -58,13 +58,7 @@ var justReactive = {
         'unshift'
     ],
     megreFunc:function(obj, prop, newval)
-    { 
-        if(typeof obj != "object" )
-        {
-            obj = {}
-        }
-        
-        //console.log("megreFunc", obj[prop], newval)
+    {  
         if(typeof obj[prop] != "object")
         {
             obj[prop] = newval;
@@ -80,7 +74,15 @@ var justReactive = {
         for(var i in newval)
         {
             v1arr[i] = true;
-            justReactive.megreFunc(obj[prop], i, newval[i]);
+             
+            if(typeof obj[prop] == "object" && obj[prop] != null && typeof newval[i] == "object" && newval[i] != null)
+            {
+                justReactive.megreFunc(obj[prop], i, newval[i]);
+            }
+            else
+            {
+                obj[prop][i] = newval[i];
+            }
         }
         
         for(var i in v1arr)

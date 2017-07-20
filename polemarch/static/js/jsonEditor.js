@@ -40,7 +40,7 @@ jsonEditor.options['item']['ansible_user'] = {
 }
 
 jsonEditor.options['item']['ansible_ssh_pass'] = {
-    type:'text',
+    type:'password',
     help:'Inventory Parameter - ansible_ssh_pass',
     helpcontent:'The ssh password to use (never store this variable in plain text; always use a vault.)'
 }
@@ -106,7 +106,7 @@ jsonEditor.options['item']['ansible_become_user'] = {
 }
 
 jsonEditor.options['item']['ansible_become_pass'] = {
-    type:'text',
+    type:'password',
     help:'Inventory Parameter - ansible_become_pass',
     helpcontent:'Equivalent to ansible_sudo_pass or ansible_su_pass, allows you to set the privilege escalation password (never store this variable in plain text; always use a vault.)'
 }
@@ -248,7 +248,7 @@ jsonEditor.options['tasks']['module-path'] = {
 }
 
 jsonEditor.options['tasks']['new-vault-password-file'] = {
-    type:'textarea',
+    type:'textfile',
     help:'--new-vault-password-file=NEW_VAULT_PASSWORD_FILE',
     helpcontent:"new vault password file for rekey",
     alias:''
@@ -297,7 +297,7 @@ jsonEditor.options['tasks']['tags'] = {
 }
 
 jsonEditor.options['tasks']['vault-password-file'] = {
-    type:'textarea',
+    type:'textfile',
     help:'--vault-password-file=VAULT_PASSWORD_FILE',
     helpcontent:"vault password file",
     alias:''
@@ -347,7 +347,7 @@ jsonEditor.options['tasks']['ask-pass'] = {
 }
 
 jsonEditor.options['tasks']['private-key'] = {
-    type:'textarea',
+    type:'textfile',
     help:'--private-key=PRIVATE_KEY_FILE, --key-file=PRIVATE_KEY_FILE',
     helpcontent:"use this file to authenticate the connection\n<br><i>Connection options group: control as whom and how to connect to hosts</i>",
     alias:''

@@ -3,25 +3,42 @@ var pmTasks = new pmItems()
 
 pmTasks.model.name = "tasks"
 
-
-pmTasks.execute = function(project_id, inventory, playbook)
-{ 
-    var def = new $.Deferred(); 
+pmTasks.execute = function(project_id, inventory, playbook, data_vars)
+{
+    var def = new $.Deferred();
     if(!playbook)
-    { 
+    {
         $.notify("Playbook name is empty", "error");
         def.reject();
         return def.promise();
     }
+
+    if(!project_id)
+    {
+        $.notify("Invalid filed `project` ", "error");
+        def.reject();
+        return;
+    }
+
+    if(!inventory)
+    {
+        $.notify("Invalid filed `inventory` ", "error");
+        def.reject();
+        return;
+    }
+
+    if(data_vars == undefined)
+    {
+        data_vars = jsonEditor.jsonEditorGetValues();
+    }
     
-    var data = jsonEditor.jsonEditorGetValues();
-    data.playbook = playbook
-    data.inventory = inventory
-    
+    data_vars.playbook = playbook
+    data_vars.inventory = inventory
+
     $.ajax({
         url: "/api/v1/projects/"+project_id+"/execute/",
         type: "POST",
-        data:JSON.stringify(data),
+        data:JSON.stringify(data_vars),
         contentType:'application/json',
         beforeSend: function(xhr, settings) {
             if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
@@ -29,18 +46,29 @@ pmTasks.execute = function(project_id, inventory, playbook)
                 xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
             }
         },
-        success: function(data)
+        success: function(data) 
         {
-            $.notify("Started", "success");
-            def.resolve();
+            $.notify("Started", "success"); 
+            if(data && data.history_id)
+            { 
+                $.when(spajs.open({ menuId:"project/"+project_id+"/history/"+data.history_id}) ).done(function(){
+                    def.resolve()
+                }).fail(function(){
+                    def.reject()
+                })
+            }
+            else
+            {
+                def.reject()
+            }
         },
         error:function(e)
         {
-            def.reject() 
+            def.reject()
             polemarch.showErrors(e.responseJSON)
         }
     })
-    
+
     return def.promise();
 }
 
@@ -77,15 +105,14 @@ pmTasks.loadItems = function(limit, offset)
         success: function(data)
         {
             //console.log("update Items", data)
-            thisObj.model.itemslist = data
-            thisObj.model.itemslist.limit = limit
-            thisObj.model.itemslist.offset = offset
-            
+            data.limit = limit
+            data.offset = offset
+            thisObj.model.itemslist = data 
 
             for(var i in data.results)
             {
                 data.results[i].id = data.results[i].playbook
-                var val = data.results[i] 
+                var val = data.results[i]
                 thisObj.model.items.justWatch(val.id);
                 thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
             }
@@ -113,7 +140,7 @@ pmTasks.sendSearchQuery = function(query, limit, offset)
     var q = [];
     for(var i in query)
     {
-        q.push(encodeURIComponent(i)+"="+encodeURIComponent(query[i])) 
+        q.push(encodeURIComponent(i)+"="+encodeURIComponent(query[i]))
     }
 
     var thisObj = this;
@@ -131,13 +158,13 @@ pmTasks.sendSearchQuery = function(query, limit, offset)
         success: function(data)
         {
             //console.log("update Items", data)
-            thisObj.model.itemslist = data 
+            thisObj.model.itemslist = data
 
             for(var i in data.results)
             {
                 data.results[i].id = data.results[i].playbook
-                
-                var val = data.results[i]  
+
+                var val = data.results[i]
                 thisObj.model.items[val.id] = val
             }
         },
@@ -148,4 +175,3 @@ pmTasks.sendSearchQuery = function(query, limit, offset)
         }
     });
 }
- 

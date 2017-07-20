@@ -5,6 +5,7 @@ from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 
+from ...main.utils import CmdExecutor, KVExchanger
 from .. import base
 from ..permissions import SuperUserPermission, StaffPermission
 from . import filters
@@ -141,8 +142,26 @@ class HistoryViewSet(base.HistoryModelViewSet):
     def lines(self, request, *args, **kwargs):
         return self.get_paginated_route_response(
             self.get_object().raw_history_line.order_by("-line_number"),
-            serializers.HistoryLinesSerializer
+            serializers.HistoryLinesSerializer,
+            filters.HistoryLinesFilter
         )
+
+    @detail_route(methods=["post"])
+    def cancel(self, request, *args, **kwargs):
+        obj = self.get_object()
+        KVExchanger(CmdExecutor.CANCEL_PREFIX + str(obj.id)).send(True, 10)
+        return base.Response("Task canceled: {}".format(obj.id), 200).resp
+
+
+class TemplateViewSet(base.ModelViewSetSet):
+    model = serializers.models.Template
+    serializer_class = serializers.TemplateSerializer
+    serializer_class_one = serializers.OneTemplateSerializer
+    filter_class = filters.TemplateFilter
+
+    @list_route(methods=["get"], url_path="supported-kinds")
+    def supported_kinds(self, request):
+        return base.Response(self.model.template_fields, 200).resp
 
 
 class BulkViewSet(rest_views.APIView):
