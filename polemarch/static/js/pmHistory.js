@@ -18,7 +18,7 @@ pmHistory.cancelTask = function(item_id)
         },
         success: function(data) 
         {
-            $.notify("Cancel", "success");  
+            $.notify("Task cenceled!", "warning");
         },
         error:function(e)
         { 
