@@ -124,7 +124,7 @@ class Git(_Base):  # pragma: no cover
             repo = self.make_clone(env)[0]
         with repo.git.custom_environment(**env):
             kwargs = self.options.get("FETCH_KWARGS", dict())
-            fetch_result = repo.remotes.origin.fetch(**kwargs)
+            fetch_result = repo.remotes.origin.pull(**kwargs)
         return repo, fetch_result
 
     def _with_password(self, tmp, env_vars):
