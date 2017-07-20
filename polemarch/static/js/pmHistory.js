@@ -421,7 +421,7 @@ pmHistory.loadLines = function(item_id, opt)
      
     var def = new $.Deferred(); 
     jQuery.ajax({
-        url: "/api/v1/history/"+item_id+"/lines",
+        url: "/api/v1/history/"+item_id+"/lines/",
         type: "GET",
         contentType:'application/json',
         data: opt,
