@@ -96,15 +96,16 @@ class CmdExecutor(object):
         self.output += line
 
     def _enqueue_output(self, out, queue):
-        for line in out:
+        line = out.readline()
+        while line != '':
             queue.put(line)
+            line = out.readline()
         out.close()
 
     def _unbuffered(self, proc, stream='stdout'):
         stream = getattr(proc, stream)
         q = Queue()
         t = Thread(target=self._enqueue_output, args=(stream, q))
-        t.daemon = True
         t.start()
         timeout = 0
         while timeout == 0 or proc.poll() is None:
