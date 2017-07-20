@@ -56,21 +56,32 @@ class Project(_AbstractModel):
     def type(self):
         return self.variables.get(key="repo_type").value
 
-    def execute(self, playbook_name, inventory_id, **extra):
-        # pylint: disable=no-member
+    def _prepare_task(self, playbook_name, inventory_id, **extra):
         if not playbook_name:
             raise PMException("Empty playbook name.")
-        from ..tasks import ExecuteAnsibleTask
-        inventory = hosts_models.Inventory.objects.get(id=inventory_id)
         from .tasks import History
+        inventory = hosts_models.Inventory.objects.get(id=inventory_id)
         history_kwargs = dict(playbook=playbook_name,
                               start_time=timezone.now(),
                               inventory=inventory,
                               project=self,
                               raw_stdout="")
         history = History.objects.create(status="DELAY", **history_kwargs)
-        ExecuteAnsibleTask.delay(self, playbook_name, inventory,
-                                 history, **extra)
+        kwargs = dict(project=self, playbook=playbook_name,
+                      inventory=inventory, history=history)
+        kwargs.update(extra)
+        return kwargs
+
+    def execute(self, playbook_name, inventory_id, **extra):
+        # pylint: disable=no-member
+        from ..tasks import ExecuteAnsibleTask
+        sync = extra.pop("sync", False)
+        kwargs = self._prepare_task(playbook_name, inventory_id, **extra)
+        history = kwargs['history']
+        if sync:
+            ExecuteAnsibleTask(**kwargs)
+        else:
+            ExecuteAnsibleTask.delay(**kwargs)
         return history.id
 
     def set_status(self, status):

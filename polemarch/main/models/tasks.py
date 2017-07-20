@@ -178,7 +178,8 @@ class PeriodicTask(_AbstractModel):
         self.run_ansible_playbook()
 
     def run_ansible_playbook(self):
-        run_ansible_playbook(self, self.inventory, **self.vars)
+        self.project.execute(self.playbook, self.inventory.id,
+                             sync=True, **self.vars)
 
 
 class Template(BModel):
