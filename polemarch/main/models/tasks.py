@@ -98,6 +98,8 @@ def run_ansible_playbook(task, inventory, history, **extra_args):
         history.raw_stdout = str(exception.output)
         if exception.returncode == 4:
             status = "OFFLINE"
+        elif exception.returncode == -9:
+            status = "INTERRUPTED"
         else:
             status = "ERROR"
     except Exception as exception:  # pragma: no cover
