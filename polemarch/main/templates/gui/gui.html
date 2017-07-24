@@ -108,13 +108,13 @@
             <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            Template `<%- pmTasksTemplates.model.items[item_id].name %>` run playbook options
+            <span class="h1-header" >Template `<%- pmTasksTemplates.model.items[item_id].name %>` run playbook options</span>
             
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li> 
-            <li class="active">Template `<%- pmTasksTemplates.model.items[item_id].name %>`</li>
+            <li class="active"><%- pmTasksTemplates.model.items[item_id].name.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -196,7 +196,7 @@
             <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            New template for run playbook
+            <span class="h1-header" >New template for run playbook</span>
             
         </h1>
         <ol class="breadcrumb">
@@ -274,8 +274,7 @@
 <script type="text/x-just" data-just="history_list">
     <section class="content-header">
         <h1>
-            History
-            
+            History 
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -389,13 +388,12 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            History
-            
+            <span class="h1-header" >History</span>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[project_id].name %>`</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[project_id].name.slice(0, 20) %></a></li>
             <li class="active">History</li>
         </ol>
     </section>
@@ -501,12 +499,13 @@
             <a href="<%- polemarch.opt.host %>/?history"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmHistory.model.items[item_id].playbook %> 
+            
+            <span class="h1-header" ><%- pmHistory.model.items[item_id].playbook %></span>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?history"  onclick="return spajs.openURL(this.href);" >History</a></li>
-            <li class="active"><%- pmHistory.model.items[item_id].playbook %></li>
+            <li class="active"><%- pmHistory.model.items[item_id].playbook.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -628,14 +627,15 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/history"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmHistory.model.items[item_id].playbook %> 
+             
+            <span class="h1-header" ><%- pmHistory.model.items[item_id].playbook %></span>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[project_id].name %>`</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[project_id].name.slice(0, 20) %></a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/history"  onclick="return spajs.openURL(this.href);" >History</a></li>
-            <li class="active"><%- pmHistory.model.items[item_id].playbook %></li>
+            <li class="active"><%- pmHistory.model.items[item_id].playbook.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -758,13 +758,13 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            Periodic tasks
-            
+             
+            <span class="h1-header" >Periodic tasks</span>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[project_id].name %>`</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[project_id].name.slice(0, 20) %></a></li>
             <li class="active">Periodic tasks</li>
         </ol>
     </section>
@@ -887,15 +887,15 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmPeriodicTasks.model.items[item_id].playbook %>
+            <span class="h1-header" ><%- pmPeriodicTasks.model.items[item_id].playbook %></span>
             
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[project_id].name %>`</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[project_id].name.slice(0, 20) %></a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" >Periodic tasks</a></li>
-            <li class="active"><%- pmPeriodicTasks.model.items[item_id].playbook %></li>
+            <li class="active"><%- pmPeriodicTasks.model.items[item_id].playbook.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -1051,15 +1051,16 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            Create new periodic task
+            
+            <span class="h1-header" >Create new periodic task</span>
             
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[project_id].name %>`</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[project_id].name.slice(0, 20) %></a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" >Periodic tasks</a></li>
-            <li class="active">Create new periodic task</li>
+            <li class="active">New periodic task</li>
         </ol>
     </section>
 
@@ -1330,13 +1331,14 @@
             <a href="<%- polemarch.opt.host %>/?projects"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmProjects.model.items[item_id].name %>
+            
+            <span class="h1-header" ><%- pmProjects.model.items[item_id].name %></span>
             
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects"  onclick="return spajs.openURL(this.href);" >Projects</a></li>
-            <li class="active"><%- pmProjects.model.items[item_id].name %></li>
+            <li class="active"><%- pmProjects.model.items[item_id].name.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -1499,7 +1501,8 @@
             <a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            Create new project
+            
+            <span class="h1-header" >Create new project</span>
             
         </h1>
         <ol class="breadcrumb">
@@ -1660,13 +1663,14 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            Project `<%- pmProjects.model.items[item_id].name %>` run playbook options
+            
+            <span class="h1-header" >Project `<%- pmProjects.model.items[item_id].name %>` run playbook options</span>
             
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" >Project `<%- pmProjects.model.items[item_id].name %>`</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[item_id].name.slice(0, 20) %></a></li>
             <li class="active">Project tasks</li>
         </ol>
     </section>
@@ -1853,13 +1857,14 @@
             <a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmInventories.model.items[item_id].name %>
+            
+            <span class="h1-header" ><%- pmInventories.model.items[item_id].name %></span>
             
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" >Inventories</a></li>
-            <li class="active"><%- pmInventories.model.items[item_id].name %></li>
+            <li class="active"><%- pmInventories.model.items[item_id].name.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -1985,7 +1990,8 @@
             <a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            Create new inventory
+            
+            <span class="h1-header" >Create new inventory</span>
             
         </h1>
         <ol class="breadcrumb">
@@ -2213,13 +2219,14 @@
             <a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmUsers.model.items[item_id].username %>
+            
+            <span class="h1-header" ><%- pmUsers.model.items[item_id].username %></span>
             
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?users"  onclick="return spajs.openURL(this.href);" >Users</a></li>
-            <li class="active"><%- pmUsers.model.items[item_id].username %></li>
+            <li class="active"><%- pmUsers.model.items[item_id].username.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -2315,7 +2322,8 @@
             <a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            Create new user
+            
+            <span class="h1-header" >Create new user</span>
             
         </h1>
         <ol class="breadcrumb">
@@ -2531,13 +2539,14 @@
             <a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmHosts.model.items[item_id].name %>
+            
+            <span class="h1-header" ><%- pmHosts.model.items[item_id].name %></span>
             
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?hosts"  onclick="return spajs.openURL(this.href);" >Hosts</a></li>
-            <li class="active"><%- pmHosts.model.items[item_id].name %></li>
+            <li class="active"><%- pmHosts.model.items[item_id].name.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -2588,7 +2597,8 @@
             <a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            Create new host
+            
+            <span class="h1-header" >Create new host</span>
             
         </h1>
         <ol class="breadcrumb">
@@ -3212,13 +3222,14 @@
             <a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <%- pmGroups.model.items[item_id].name %>
+            
+            <span class="h1-header" ><%- pmGroups.model.items[item_id].name %></span>
             
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?groups"  onclick="return spajs.openURL(this.href);" >Groups</a></li>
-            <li class="active"><%- pmGroups.model.items[item_id].name %></li>
+            <li class="active"><%- pmGroups.model.items[item_id].name.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -3394,7 +3405,8 @@
             <a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            Create new group
+            
+            <span class="h1-header" >Create new group</span>
             
         </h1>
         <ol class="breadcrumb">
@@ -3447,87 +3459,30 @@
 
 
 <!-- Страница тестовая -->
-<script type="text/x-just" data-just="home_page">
+<script type="text/x-just" data-just="dashboard_page">
     <section class="content-header">
         <h1>
-            Test 
+            Dashboard 
         </h1>
-        <ol class="breadcrumb">
-            <li><i class="fa fa-dashboard"></i> Home</li>
-            <li class="active">Backup</li>
+        <ol class="breadcrumb"> 
+            <li class="active">Dashboard</li>
         </ol>
     </section>
 
     <section class="content">
         <div class="row">
-            <div class="col-md-6">
-                <div class="box box-success">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Save backup</h3>
+            <div class="col-lg-2 col-xs-4"> 
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3>150</h3> 
+                        <p>New Orders</p>
                     </div>
-                    <div class="box-body">
-                        <a href="/api/backup/?format=json" class="btn btn-block btn-success btn-lg">Save backup</a>
+                    <div class="icon">
+                        <i class="ion ion-bag"></i>
                     </div>
+                    <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                 </div>
             </div>
-
-            <div class="col-md-6">
-                <div class="box box-danger">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Upload backup</h3>
-                    </div>
-                        <input
-                            type="file"
-                            onchange="cloudDns.onSelectBackup(event)"
-                            style="position: absolute; width: 100%; cursor: pointer; height: 46px; opacity: 0; margin-top: 10px;" />
-                    <div class="box-body">
-                        <a href="#" class="btn btn-block btn-warning btn-lg">Select backup</a>
-
-                        <div id="backup-info" style="display:none;margin-top:10px;" >
-                            <table class="table" >
-                                <tbody>
-                                    <tr>
-                                        <td  style="min-width: 140px;" >
-                                            Name
-                                        </td>
-                                        <td id="backup-info-name"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            Size
-                                        </td>
-                                        <td id="backup-info-size"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            Last modified date
-                                        </td>
-                                        <td id="backup-info-lastModifiedDate"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <br>
-                            <a href="#" class="btn btn-block btn-danger btn-lg" onclick="cloudDns.uploadBackup(); return false;">Upload backup</a>
-                        </div>
-
-                        <table style="display:none;margin-top:10px;" id="backup-progress-status" class="table" >
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="progress progress-xs progress-striped ">
-                                            <div class="progress-bar progress-bar-primary active" style="width: 0%" id="backup-progress-bar"></div>
-                                        </div>
-                                    </td>
-                                    <td style="width: 45px;">
-                                        <span class="badge bg-light-blue" id="backup-progress-value" >0%</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div
         </div>
     </section>
 </script>

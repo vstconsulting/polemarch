@@ -79,12 +79,12 @@ polemarch.start = function(options)
     });
 
 
-    /*spajs.addMenu({
+    spajs.addMenu({
         id:"home", 
         urlregexp:[/^(home|)$/],
-        onOpen:polemarch.showHome
-    })*/
- 
+        onOpen:function(holder, menuInfo, data){return pmDashboard.open(holder, menuInfo, data);}
+    })
+    
     // users
     spajs.addMenu({
         id:"users", 
@@ -190,7 +190,7 @@ polemarch.start = function(options)
     // projects
     spajs.addMenu({
         id:"projects", 
-        urlregexp:[/^(home|)$/, /^projects$/, /^project$/, /^projects\/page\/([0-9]+)$/],
+        urlregexp:[/^projects$/, /^project$/, /^projects\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmProjects.showUpdatedList(holder, menuInfo, data);},
         onClose:function(){return pmProjects.stopUpdates();},
     })
@@ -326,12 +326,7 @@ polemarch.start = function(options)
     
     spajs.openMenuFromUrl()
 }
-
-polemarch.showHome = function(holder, menuInfo, data)
-{
-    $(holder).html(spajs.just.render('home_page', {}))
-}
-
+ 
 polemarch.showErrors = function(res)
 {
     if(!res)

@@ -503,3 +503,11 @@ table{
     max-height: 300px;
     background: #fff;
 }
+
+
+@media (min-width: 992px) {
+    .h1-header{
+        display: inline-table;
+        max-width: calc(100% - 300px);
+    }
+}
