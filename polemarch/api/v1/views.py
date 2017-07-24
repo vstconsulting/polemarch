@@ -237,9 +237,9 @@ class ModuleExecuteViewSet(QuerySetMixin, rest_views.APIView):
         self.queryset = self.get_queryset()
         data = request.data
         try:
-           data['module_args'] = data.pop('args')
+            data['module_args'] = data.pop('args')
         except KeyError:
-           data['module_args'] = None
+            data['module_args'] = None
         inventory = self.queryset.get(id=data['inventory'])
 
         return base.Response(inventory.execute_ansible_module(**data),
