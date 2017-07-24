@@ -1,13 +1,11 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 from django.db import transaction
 from django.http import HttpResponse
-from django.utils import timezone
 from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 
-from ...main.tasks import ExecuteAnsibleModule
-from ...main.models import Inventory, History
+from ...main.models import Inventory
 from ..base import QuerySetMixin
 from ...main.utils import CmdExecutor, KVExchanger
 from .. import base
@@ -236,21 +234,13 @@ class ModuleExecuteViewSet(QuerySetMixin, rest_views.APIView):
 
     def post(self, request, *args, **kwargs):
         # pylint: disable=no-member
-        data = request.data
-        inventory_id = data.pop('inventory')
-        module = data.pop('module')
-        group = data.pop('group')
-        module_args = data.pop('args')
         self.queryset = self.get_queryset()
-        inventory = self.queryset.get(id=inventory_id)
-        history_kwargs = dict(name=module,
-                              start_time=timezone.now(),
-                              inventory=inventory,
-                              raw_stdout="",
-                              kind="MODULE")
-        history = History.objects.create(status="DELAY", **history_kwargs)
-        ExecuteAnsibleModule.delay(group, module, inventory, history,
-                                   module_args, **data)
-        rdata = dict(detail="Started at inventory {}.".format(inventory_id),
-                     history_id=history.id)
-        return base.Response(rdata, 201).resp
+        data = request.data
+        try:
+           data['module_args'] = data.pop('args')
+        except KeyError:
+           data['module_args'] = None
+        inventory = self.queryset.get(id=data['inventory'])
+
+        return base.Response(inventory.execute_ansible_module(**data),
+                             201).resp
