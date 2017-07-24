@@ -58,33 +58,36 @@ var justReactive = {
         'unshift'
     ],
     megreFunc:function(obj, prop, newval)
-    {  
-        if(typeof obj[prop] != "object")
+    {
+        if(typeof obj[prop] != "object" || obj[prop] == null)
         {
             obj[prop] = newval;
+            obj.justWatch(prop);
             return;
         }
-        
+
         var v1arr = {}
         for(var i in obj[prop])
         {
             v1arr[i] = false;
         }
-        
+
         for(var i in newval)
         {
             v1arr[i] = true;
-             
-            if(typeof obj[prop] == "object" && obj[prop] != null && typeof newval[i] == "object" && newval[i] != null)
+
+            if(typeof newval[i] == "object" && newval[i] != null)
             {
                 justReactive.megreFunc(obj[prop], i, newval[i]);
+                obj[prop].justWatch(i);
             }
             else
             {
                 obj[prop][i] = newval[i];
+                obj[prop].justWatch(i);
             }
         }
-        
+
         for(var i in v1arr)
         {
             if(!v1arr[i])
@@ -284,10 +287,10 @@ var justReactive = {
                     if(val && val.__add_justHtml_test === "__justReactive_test")
                     {
                         if(val.type == "watch")
-                        { 
+                        {
                             return val;
                         }
-                        
+
                         // Добавление точки отслеживания, значение не меняем.
                         //console.log("setter add", newval);
                         newval.just_ids.push({
@@ -316,7 +319,7 @@ var justReactive = {
                     {
                         //newval.val = val;
                         justReactive.megreFunc(newval, 'val', val);
-                        
+
                         if(Array.isArray(val))
                         {
                             for(var i in justReactive.methods)
@@ -329,8 +332,8 @@ var justReactive = {
                     // Обновляем значения в DOM не сразу а с задержкой в 10мс
                     // для того чтоб если они ещё раз изменятся за менее чем
                     // 10мс не дёргать DOM в целях оптимизации
-                    // newval.timeoutId = setTimeout(justReactive.applyFunc, 10, val, newval) 
-                    
+                    // newval.timeoutId = setTimeout(justReactive.applyFunc, 10, val, newval)
+
                     justReactive.applyFunc(val, newval)
                     return val;
                 }
@@ -475,7 +478,10 @@ Object.defineProperty(Object.prototype, "justNotClass", {
     }
 });
 
-// Проставляет значение как css class
+/**
+ * Проставляет значение как css class
+ * @example <%- pmHistory.model.items[item_id].justClassName('status', function(v){ return "history-status-"+v}) %>
+ */
 Object.defineProperty(Object.prototype, "justClassName", {
     enumerable: false
   , configurable: true
@@ -499,7 +505,10 @@ Object.defineProperty(Object.prototype, "justAttr", {
   , value: function(prop, attrName, callBack, customData){ return justReactive.setValue.apply(this, [{type:'attr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
 });
 
-//  Добавление точки отслеживания 
+/**
+ * Добавление точки отслеживания
+ * @example this.model.items.justWatch(item_id);
+ */
 Object.defineProperty(Object.prototype, "justWatch", {
     enumerable: false
   , configurable: true
@@ -508,11 +517,49 @@ Object.defineProperty(Object.prototype, "justWatch", {
     {
         return justReactive.setValue.apply(this, [{
                 type:'watch',
-                prop:prop
+                prop:prop,
+                deep:false
             }])
     }
 });
 
+/**
+ * Добавление точки отслеживания рекурсивно
+ * @example this.model.items.justWatch(item_id);
+ */
+Object.defineProperty(Object.prototype, "justDeepWatch", {
+    enumerable: false
+  , configurable: true
+  , writable: false
+  , value: function(prop)
+    {
+        var deepWatch = function(obj, prop)
+        {
+            if(typeof obj[prop] != "object" || obj[prop] == null)
+            {
+                obj.justWatch(prop);
+                return;
+            }
+
+            for(var i in obj[prop])
+            {
+                if(typeof obj[prop][i] == "object" && obj[prop][i] != null)
+                {
+                    deepWatch(obj[prop], i);
+                    obj[prop].justWatch(i);
+                }
+                else
+                {
+                    obj[prop].justWatch(i);
+                }
+            }
+        }
+
+        deepWatch(this, prop)
+        return true;
+    }
+});
+ 
 /*
  * https://gist.github.com/eligrey/384583
  *
@@ -590,12 +637,12 @@ function isObject(item) {
  */
 function mergeDeep(target, ...sources) {
   if (!sources.length) return target;
-  
+
   if(target === undefined)
   {
       target = sources.shift();
   }
-  
+
   const source = sources.shift();
 
   if (isObject(target) && isObject(source)) {

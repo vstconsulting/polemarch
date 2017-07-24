@@ -528,7 +528,7 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Status</label>
                                 <div 
-                                        class="form-control disabled history-status history-status-<%- pmHistory.model.items[item_id].status %>"
+                                        class="form-control disabled history-status <%- pmHistory.model.items[item_id].justClassName('status', function(v){ return "history-status-"+v}) %>"
                                         disabled=""
                                         maxlength="255"> 
                                         <%= pmHistory.model.items[item_id].justText('status') %>  
@@ -555,11 +555,12 @@
                             </div>
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Stop time</label>
-                                <input type="text"
-                                        value="<%- pmHistory.model.items[item_id].stop_time || '' %>"
+                                <div 
                                         class="form-control disabled"
                                         disabled=""
-                                        maxlength="255">
+                                        maxlength="255"> 
+                                        <%= pmHistory.model.items[item_id].justText('stop_time') %>   
+                                </div>
                                 <div class="help-block"></div>
                             </div>
                         </div>
@@ -649,24 +650,17 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Task<br>
-                        <div class="box-tools pull-right">
-
-
-
-                        </div>
+                        Task<br> 
                     </div>
                     <div class="box-body"> 
                         <div class="row">
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Status</label>
                                 <div 
-                                        class="form-control disabled history-status history-status-<%- pmHistory.model.items[item_id].status %>"
+                                        class="form-control disabled history-status <%- pmHistory.model.items[item_id].justClassName('status', function(v){ return "history-status-"+v}) %>"
                                         disabled=""
-                                        maxlength="255">
-                                        <~ pmHistory.model.items[item_id]>
-                                            <%= pmHistory.model.items[item_id].justText('status') %> 
-                                        <~>
+                                        maxlength="255"> 
+                                        <%= pmHistory.model.items[item_id].justText('status') %>  
                                 </div>
                                 <div class="help-block"></div>
                             </div>
@@ -691,11 +685,12 @@
                             </div>
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Stop time</label>
-                                <input type="text"
-                                        value="<%- pmHistory.model.items[item_id].stop_time || '' %>"
+                                <div 
                                         class="form-control disabled"
                                         disabled=""
-                                        maxlength="255">
+                                        maxlength="255">  
+                                        <%= pmHistory.model.items[item_id].justText('stop_time') %>   
+                                </div>
                                 <div class="help-block"></div>
                             </div>
                         </div>

@@ -3,7 +3,8 @@ var pmHistory = new pmItems()
 
 pmHistory.model.name = "history" 
 pmHistory.model.linePerPage = 100;
-
+pmHistory.justDeepWatch('model');
+      
 pmHistory.cancelTask = function(item_id)
 { 
     return $.ajax({
@@ -148,12 +149,15 @@ pmHistory.bindStdoutUpdates = function(item_id)
 
             //pmHistory.lastContentScrollHeight = $('#history-stdout').prop('scrollHeight') - content.scrollTop() + 100;
 
-            thisObj.inLoadTopData = true;
-
-            var stdout_minline = thisObj.model.items[item_id].stdout_minline;
+            var stdout_minline = thisObj.model.items[item_id].stdout_minline; 
+            if(stdout_minline <= 1)
+            {
+                return;
+            }
+ 
+            thisObj.inLoadTopData = true; 
             $.when(thisObj.loadLines(item_id, {before:stdout_minline, limit:thisObj.model.linePerPage})).always(function()
-            { 
-
+            {  
                 for(var i = stdout_minline-1; i > stdout_minline - thisObj.model.linePerPage; i = i -1)
                 {
                     if(thisObj.model.items[item_id].stdout[i] != undefined)
@@ -188,16 +192,11 @@ pmHistory.loadItem = function(item_id)
             }
         },
         success: function(data)
-        { 
-            if(!thisObj.model.items[item_id])
-            {
-                thisObj.model.items[item_id] = {}
-            }
+        {  
+            data.test = Math.random();
             
-            for(var i in data)
-            {
-                thisObj.model.items[item_id][i] = data[i]
-            }
+            pmHistory.model.items.justWatch(item_id);
+            thisObj.model.items[item_id] = data;
             
             $.when(pmProjects.loadItem(data.project)).done(function(){
                 def.resolve()
