@@ -32,7 +32,18 @@ pmPeriodicTasks.execute = function(project_id, item_id)
         success: function(data)
         {
             $.notify("Started", "success");
-            def.resolve();
+            if(data && data.history_id)
+            {
+                $.when(spajs.open({ menuId:"project/"+project_id+"/history/"+data.history_id}) ).done(function(){
+                    def.resolve()
+                }).fail(function(){
+                    def.reject()
+                })
+            }
+            else
+            {
+                def.reject()
+            }
         },
         error:function(e)
         {

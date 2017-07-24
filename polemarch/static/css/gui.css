@@ -453,6 +453,10 @@ table{
     color: #9e9e9e;  
 }
 
+.history-status-INTERRUPTED{
+    color: #9b97e4;
+}
+
 .history-status-RUN{
     color: #0085ff;
 }

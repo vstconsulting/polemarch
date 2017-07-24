@@ -98,6 +98,8 @@ def run_ansible_playbook(task, inventory, history, **extra_args):
         history.raw_stdout = str(exception.output)
         if exception.returncode == 4:
             status = "OFFLINE"
+        elif exception.returncode == -9:
+            status = "INTERRUPTED"
         else:
             status = "ERROR"
     except Exception as exception:  # pragma: no cover
@@ -178,7 +180,8 @@ class PeriodicTask(_AbstractModel):
         self.run_ansible_playbook()
 
     def run_ansible_playbook(self):
-        run_ansible_playbook(self, self.inventory, **self.vars)
+        self.project.execute(self.playbook, self.inventory.id,
+                             sync=True, **self.vars)
 
 
 class Template(BModel):

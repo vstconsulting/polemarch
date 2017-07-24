@@ -19,7 +19,7 @@ pmHistory.cancelTask = function(item_id)
         },
         success: function(data)
         {
-            $.notify("Cancel", "success");
+            $.notify("Task cenceled!", "warning");
         },
         error:function(e)
         {
@@ -510,7 +510,7 @@ pmHistory.loadLines = function(item_id, opt)
 
     var def = new $.Deferred();
     jQuery.ajax({
-        url: "/api/v1/history/"+item_id+"/lines",
+        url: "/api/v1/history/"+item_id+"/lines/",
         type: "GET",
         contentType:'application/json',
         data: opt,

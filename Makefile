@@ -86,7 +86,6 @@ deb:
 	rm -rf debian
 	mkdir debian
 	# create needed files
-	cp changelog debian/
 	echo 9 > debian/compat
 	echo "$$DEBIAN_CONTROL" > debian/control
 	echo "$$DEBIAN_COPYRIGHT" > debian/copyright
@@ -95,6 +94,7 @@ deb:
 	echo "$$DEBIAN_POSTINST" > debian/postinst
 	echo "$$DEBIAN_PRERM" > debian/prerm
 	echo "$$DEBIAN_POSTRM" > debian/postrm
+	echo "$$DEBIAN_CHANGELOG" > debian/changelog
 	chmod +x debian/rules
 	chmod +x debian/preinst
 	chmod +x debian/postinst

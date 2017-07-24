@@ -73,7 +73,8 @@
                                             <%- pmTasksTemplates.model.itemslist.results[i].kind %>
                                         </td> -->
                                         <td>
-                                            <a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTasksTemplates.execute(val.id)); return false;">Execute</a>
+                                            <!--<a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTasksTemplates.execute(val.id)); return false;">Execute</a>-->
+                                            <a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTasksTemplates.execute(<%- val.id %>)); return false;">Execute</a>
                                         </td>
                                     </tr>
                                 <% } %>
@@ -847,7 +848,7 @@
                                                 <ul class="dropdown-menu dropdown-menu-right">
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.showLoader(pmPeriodicTasks.syncRepo(<%- valid %>)); return false;" >Sync</a>
+                                                            onclick="spajs.showLoader(pmPeriodicTasks.deleteItem(<%- valid %>)); return false;" >Delete</a>
                                                     </li>
                                                 </ul>
                                             </div>
