@@ -335,7 +335,7 @@
                                             </td>
                                             <td>
                                                 <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
-                                                        onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].playbook %></a>
+                                                        onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].name %></a>
                                             </td>
                                             <td class="hidden-xs hidden-sm">
                                                 <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>" class="item-name"
@@ -450,7 +450,7 @@
                                             </td>
                                             <td>
                                                 <a href="/?project/<%- project_id %>/history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
-                                                        onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].playbook %></a>
+                                                        onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].name %></a>
                                             </td>
                                             <td class="status-<%- pmHistory.model.itemslist.results[i].status %> history-status-<%- pmHistory.model.itemslist.results[i].status %>" >
                                                 <%- pmHistory.model.itemslist.results[i].status %>
@@ -501,12 +501,12 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             
-            <span class="h1-header" ><%- pmHistory.model.items[item_id].playbook %></span>
+            <span class="h1-header" ><%- pmHistory.model.items[item_id].name %></span>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?history"  onclick="return spajs.openURL(this.href);" >History</a></li>
-            <li class="active"><%- pmHistory.model.items[item_id].playbook.slice(0, 20) %></li>
+            <li class="active"><%- pmHistory.model.items[item_id].name.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -541,7 +541,7 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Playbook</label>
                                 <input type="text"
-                                        value="<%- pmHistory.model.items[item_id].playbook %>"
+                                        value="<%- pmHistory.model.items[item_id].name %>"
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
@@ -608,7 +608,7 @@
                                 <label class="control-label" >stdout 
                                     (<a href="<%- pmHistory.model.items[item_id].url %>raw/" 
                                             target="_blank"
-                                            download="stdout-<%- pmHistory.model.items[item_id].playbook %>-<%- pmHistory.model.items[item_id].start_time %>.log"
+                                            download="stdout-<%- pmHistory.model.items[item_id].name %>-<%- pmHistory.model.items[item_id].start_time %>.log"
                                             >Full raw stdout</a>)</label>
                                 <pre 
                                     class="history-stdout"  
@@ -629,14 +629,14 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
              
-            <span class="h1-header" ><%- pmHistory.model.items[item_id].playbook %></span>
+            <span class="h1-header" ><%- pmHistory.model.items[item_id].name %></span>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[project_id].name.slice(0, 20) %></a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/history"  onclick="return spajs.openURL(this.href);" >History</a></li>
-            <li class="active"><%- pmHistory.model.items[item_id].playbook.slice(0, 20) %></li>
+            <li class="active"><%- pmHistory.model.items[item_id].name.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -672,7 +672,7 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Playbook</label>
                                 <input type="text"
-                                        value="<%- pmHistory.model.items[item_id].playbook %>"
+                                        value="<%- pmHistory.model.items[item_id].name %>"
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
@@ -738,7 +738,7 @@
                                 <label class="control-label" >stdout 
                                     (<a href="<%- pmHistory.model.items[item_id].url %>raw/" 
                                             target="_blank"
-                                            download="stdout-<%- pmHistory.model.items[item_id].playbook %>-<%- pmHistory.model.items[item_id].start_time %>.log"
+                                            download="stdout-<%- pmHistory.model.items[item_id].name %>-<%- pmHistory.model.items[item_id].start_time %>.log"
                                             >Full raw stdout</a>)</label>
                                 <pre 
                                     class="history-stdout"  

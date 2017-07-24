@@ -89,6 +89,47 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.assertEquals(result[1], "somekey")
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_execute_module(self, subprocess_function):
+        inv1, h1 = self.create_inventory()
+        # mock side effect to get ansible-playbook args for assertions in test
+        result = ["", ""]
+
+        def side_effect(call_args, *args, **kwargs):
+            # check additional args
+            self.assertIn("--user", call_args)
+            self.assertIn("mysuperuser", call_args)
+            # check inventory
+            inventory_path = call_args[3]
+            with open(inventory_path, 'r') as inventory_file:
+                inventory = inventory_file.read().split('\n')
+                l = lambda x: x.startswith('127.')
+                result[0] = list(filter(l, inventory))[0]
+                key_path = result[0].split("=")[-1]
+                with open(key_path, 'r') as key_file:
+                    result[1] = key_file.read()
+        subprocess_function.side_effect = side_effect
+        # test that can't execute without inventory
+        self.post_result(
+            "/api/v1/execute_module/",
+            400, data=json.dumps(dict(inventory=1100500, module="shell",
+                                 group="all", args="ls -la")))
+        # test simple execution
+        answer = self.post_result(
+            "/api/v1/execute_module/",
+            data=json.dumps(dict(inventory=inv1, module="shell",
+                                 group="all", args="ls -la",
+                                 user="mysuperuser")))
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertTrue(call_args[0].endswith("ansible"))
+        self.assertTrue(call_args[1].endswith("all"))
+        self.assertTrue(result[0].startswith(self.correct_simple_inventory))
+        self.assertEquals(result[1], "somekey")
+        history = History.objects.get(id=answer["history_id"])
+        self.assertEquals(history.kind, "MODULE")
+        self.assertEquals(history.name, "shell")
+
+    @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_complex_inventory_execute(self, subprocess_function):
         inventory_data = dict(name="Inv1",
                               vars={"ansible_ssh_private_key_file": "ikey",
@@ -172,7 +213,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
             self.assertEquals(history.status, status)
 
         def get_history_item():
-            histories = History.objects.filter(playbook="other/playbook.yml")
+            histories = History.objects.filter(name="other/playbook.yml")
             self.assertEquals(histories.count(), 1)
             history = histories[0]
             # History.objects.all().delete()
@@ -237,7 +278,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                                   "/api/v1/history/{}/".format(
                                       result["history_id"]
                                   ))
-        self.assertEquals(history["playbook"], "first.yml")
+        self.assertEquals(history["name"], "first.yml")
         self.get_result("post",
                         "/api/v1/history/{}/cancel/".format(history['id']),
                         200)
@@ -270,7 +311,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         self.ph = Project.objects.create(name="Prj_History",
                                          repository=repo,
                                          vars=dict(repo_type="TEST"))
-        self.default_kwargs = dict(project=self.ph, playbook="task.yml",
+        self.default_kwargs = dict(project=self.ph, name="task.yml",
                                    raw_inventory="inventory",
                                    raw_stdout="text")
         self.historys = [
@@ -288,7 +329,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                                    **self.default_kwargs),
         ]
         self.default_kwargs["raw_stdout"] = "one\ntwo\nthree\nfour"
-        self.default_kwargs["playbook"] = "task2.yml"
+        self.default_kwargs["name"] = "task2.yml"
         self.historys.append(History.objects.create(
             status="ERROR", start_time=now() - timedelta(hours=35),
             stop_time=now() - timedelta(hours=34), **self.default_kwargs)
@@ -299,7 +340,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         df = "%Y-%m-%dT%H:%M:%S.%fZ"
         self.list_test(url, len(self.historys))
         self.details_test(url + "{}/".format(self.historys[0].id),
-                          playbook="task.yml",
+                          name="task.yml",
                           status="OK", project=self.ph.id,
                           start_time=self.historys[0].start_time.strftime(df),
                           stop_time=self.historys[0].stop_time.strftime(df),
@@ -308,7 +349,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)
 
-        res = self.get_result("get", "{}?playbook={}".format(url, "task.yml"))
+        res = self.get_result("get", "{}?name={}".format(url, "task.yml"))
         self.assertEqual(res["count"], 3, res)
 
         res = self.get_result("get", "{}?project={}".format(url, self.ph.id))

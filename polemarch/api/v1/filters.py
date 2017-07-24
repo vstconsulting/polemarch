@@ -111,8 +111,8 @@ class TaskFilter(_BaseFilter):
 
 
 class HistoryFilter(_BaseFilter):
-    playbook__not = CharFilter(method=name_filter)
-    playbook = CharFilter(method=name_filter)
+    name__not = CharFilter(method=name_filter)
+    name = CharFilter(method=name_filter)
     start_time__gt = IsoDateTimeFilter(name="start_time",
                                        lookup_expr=('gt'))
     stop_time__gt = IsoDateTimeFilter(name="stop_time",
@@ -133,7 +133,7 @@ class HistoryFilter(_BaseFilter):
     class Meta:
         model = models.History
         fields = ('id',
-                  'playbook',
+                  'name',
                   'project',
                   'status',
                   'start_time',

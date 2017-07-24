@@ -71,26 +71,27 @@ def __parse_extra_args(project, **extra):
                 kfile = tmp_file()
                 kfile.write(value)
                 files.append(kfile)
-                value = "{}/{}".format(project.path, kfile.name)
+                value = kfile.name
+            else:
+                value = "{}/{}".format(project.path, value)
             key = "key-file"
         extra_args.append("--{}".format(key))
         extra_args += [str(value)] if value else []
     return AnsibleExtra(extra_args, files)
 
 
-def run_ansible_playbook(task, inventory, history, **extra_args):
-    # pylint: disable=too-many-locals
+def run_ansible_executable(executable, task, inventory,
+                           history, **extra_args):
     history.raw_inventory, key_files = inventory.get_inventory()
     history.status = "RUN"
     history.save()
-    path_to_ansible = dirname(sys.executable) + "/ansible-playbook"
-    path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
+    path_to_ansible = dirname(sys.executable) + "/" + executable
     inventory_file = tmp_file()
     inventory_file.write(history.raw_inventory)
     status = "OK"
     try:
-        extra = __parse_extra_args(project=task.project, **extra_args)
-        args = [path_to_ansible, path_to_playbook, '-i',
+        extra = __parse_extra_args(project=history.project, **extra_args)
+        args = [path_to_ansible, task, '-i',
                 inventory_file.name, '-v'] + extra.args
         history.raw_args = " ".join(args)
         history.raw_stdout = Executor(history).execute(args)
@@ -112,6 +113,20 @@ def run_ansible_playbook(task, inventory, history, **extra_args):
         history.stop_time = timezone.now()
         history.status = status
         history.save()
+
+
+def run_ansible(group, module, inventory, history, module_args, **extra_args):
+    extra_args['module-name'] = module
+    if module_args is not None:
+        extra_args['args'] = module_args
+    run_ansible_executable("ansible", group,
+                           inventory, history, **extra_args)
+
+
+def run_ansible_playbook(task, inventory, history, **extra_args):
+    path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
+    run_ansible_executable("ansible-playbook", path_to_playbook,
+                           inventory, history, **extra_args)
 
 
 # Block of real models
@@ -234,12 +249,14 @@ class History(BModel):
     objects       = HistoryQuerySet.as_manager()
     project       = models.ForeignKey(Project,
                                       on_delete=models.CASCADE,
-                                      related_query_name="history")
+                                      related_query_name="history",
+                                      null=True)
     inventory     = models.ForeignKey(Inventory,
                                       on_delete=models.CASCADE,
                                       related_query_name="history",
                                       blank=True, null=True, default=None)
-    playbook      = models.CharField(max_length=256)
+    name          = models.CharField(max_length=256)
+    kind          = models.CharField(max_length=50, default="PLAYBOOK")
     start_time    = models.DateTimeField(default=timezone.now)
     stop_time     = models.DateTimeField(blank=True, null=True)
     raw_args      = models.TextField(default="")
@@ -250,7 +267,7 @@ class History(BModel):
         default_related_name = "history"
         ordering = ["-id"]
         index_together = [
-            ["id", "project", "playbook", "status", "inventory",
+            ["id", "project", "name", "status", "inventory",
              "start_time", "stop_time"]
         ]
 
