@@ -486,3 +486,20 @@ table{
 .project-status-OK{
     color: #276900;
 }
+
+
+
+.stdout-line .S{color:red}/* Строки красные */
+.stdout-line .func{color:blue}/* Юзер-функции синие */
+.stdout-line .C{color:orange}/* Комменты оранжевые */
+.stdout-line .kwrd{font-weight:bold}/* Ключевые слова полужирные */
+.stdout-line .R{color:gray} /*Серые регвыражения */
+.stdout-line.fatal{
+    background: #ffe7e7;
+}
+
+.history-stdout{
+    overflow: auto;
+    max-height: 300px;
+    background: #fff;
+}

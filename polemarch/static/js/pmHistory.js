@@ -1,15 +1,15 @@
 
 var pmHistory = new pmItems()
 
-pmHistory.model.name = "history" 
-pmHistory.model.linePerPage = 100;
+pmHistory.model.name = "history"
+pmHistory.model.linePerPage = 130;
 pmHistory.justDeepWatch('model');
-      
+
 pmHistory.cancelTask = function(item_id)
-{ 
+{
     return $.ajax({
         url: "/api/v1/history/"+item_id+"/cancel/",
-        type: "POST", 
+        type: "POST",
         contentType:'application/json',
         beforeSend: function(xhr, settings) {
             if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
@@ -17,15 +17,15 @@ pmHistory.cancelTask = function(item_id)
                 xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
             }
         },
-        success: function(data) 
+        success: function(data)
         {
-            $.notify("Cancel", "success");  
+            $.notify("Cancel", "success");
         },
         error:function(e)
-        { 
+        {
             polemarch.showErrors(e.responseJSON)
         }
-    }) 
+    })
 }
 
 
@@ -118,7 +118,7 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
     var project_id = data.reg[1];
     var item_id = data.reg[2];
     return $.when(this.loadItem(item_id), pmProjects.loadItem(project_id)).done(function()
-    { 
+    {
         $(holder).html(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
@@ -130,45 +130,51 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
 pmHistory.bindStdoutUpdates = function(item_id)
 {
     var thisObj = this;
-    this.loadNewLines(item_id) 
-    var content = $('#history-stdout')
-    content.scroll(function()
+    $.when(this.loadNewLines(item_id)).always(function()
     {
-        // End of the document reached?
-        if (content.scrollTop() < 150)
+        var content = $('#history-stdout')
+        content.scroll(function()
         {
-            if(thisObj.stdout_minline <= 1)
+            // End of the document reached?
+            if (content.scrollTop() < 150)
             {
-                return;
-            } 
-
-            if(thisObj.inLoadTopData)
-            {
-                return;
-            }
-
-            //pmHistory.lastContentScrollHeight = $('#history-stdout').prop('scrollHeight') - content.scrollTop() + 100;
-
-            var stdout_minline = thisObj.model.items[item_id].stdout_minline; 
-            if(stdout_minline <= 1)
-            {
-                return;
-            }
- 
-            thisObj.inLoadTopData = true; 
-            $.when(thisObj.loadLines(item_id, {before:stdout_minline, limit:thisObj.model.linePerPage})).always(function()
-            {  
-                for(var i = stdout_minline-1; i > stdout_minline - thisObj.model.linePerPage; i = i -1)
+                if(thisObj.stdout_minline <= 1)
                 {
-                    if(thisObj.model.items[item_id].stdout[i] != undefined)
-                    {
-                        $("#history-stdout").prepend("<div>"+thisObj.model.items[item_id].stdout[i]+"&nbsp;</div>") 
-                    }
-                } 
+                    return;
+                }
 
-                thisObj.inLoadTopData = false;
-            })  
-        }
+                if(thisObj.inLoadTopData)
+                {
+                    return;
+                }
+
+                //pmHistory.lastContentScrollHeight = $('#history-stdout').prop('scrollHeight') - content.scrollTop() + 100;
+
+                var stdout_minline = thisObj.model.items[item_id].stdout_minline;
+                if(stdout_minline <= 1)
+                {
+                    return;
+                }
+
+                thisObj.inLoadTopData = true;
+                $.when(thisObj.loadLines(item_id, {before:stdout_minline, limit:thisObj.model.linePerPage})).always(function()
+                {
+                    for(var i = stdout_minline-1; i > stdout_minline - thisObj.model.linePerPage; i = i -1)
+                    {
+                        if(thisObj.model.items[item_id].stdout[i] != undefined)
+                        {
+                            $("#history-stdout").prepend(pmHistory.getLine(item_id, i))
+                        }
+                    }
+
+                    thisObj.inLoadTopData = false;
+                    if(content.scrollTop() < 10)
+                    {
+                        content.scrollTop(20)
+                    }
+                })
+            }
+        });
     });
 }
 
@@ -192,12 +198,22 @@ pmHistory.loadItem = function(item_id)
             }
         },
         success: function(data)
-        {  
+        {
             data.test = Math.random();
+
             
-            pmHistory.model.items.justWatch(item_id);
-            thisObj.model.items[item_id] = data;
+            if(!thisObj.model.items[item_id])
+            {
+                thisObj.model.items[item_id] = {}
+            }
             
+            for(var i in data)
+            {
+                thisObj.model.items[item_id][i] = data[i]
+            }
+            
+            pmHistory.model.items.justWatch(item_id); 
+
             $.when(pmProjects.loadItem(data.project)).done(function(){
                 def.resolve()
             }).fail(function(){
@@ -349,51 +365,125 @@ pmHistory.loadItems = function(limit, offset)
 
     return def.promise();
 }
- 
+
 pmHistory.stopUpdates = function()
 {
     clearTimeout(this.model.updateTimeoutId)
-    this.model.updateTimeoutId = undefined; 
-    
+    this.model.updateTimeoutId = undefined;
+
     clearTimeout(this.model.loadNewLines_timeoutId)
-    this.model.loadNewLines_timeoutId = undefined; 
+    this.model.loadNewLines_timeoutId = undefined;
+}
+
+pmHistory.Syntax = function(code)
+{
+	var comments	= [];	// Тут собираем все каменты
+	var strings		= [];	// Тут собираем все строки
+	var res			= [];	// Тут собираем все RegExp
+	var all			= { 'C': comments, 'S': strings, 'R': res };
+	var safe		= { '<': '<', '>': '>', '&': '&' };
+
+	return code
+	// Маскируем HTML
+		.replace(/[<>&]/g, function (m)
+			{ return safe[m]; })
+	// Убираем каменты
+		.replace(/\/\*[\s\S]*\*\//g, function(m)
+			{ var l=comments.length; comments.push(m); return '~~~C'+l+'~~~';   })
+		.replace(/([^\\])\/\/[^\n]*\n/g, function(m, f)
+			{ var l=comments.length; comments.push(m); return f+'~~~C'+l+'~~~'; })
+	// Убираем regexp
+		.replace(/\/(\\\/|[^\/\n])*\/[gim]{0,3}/g, function(m)
+			{ var l=res.length; res.push(m); return '~~~R'+l+'~~~';   })
+	// Убираем строки
+		.replace(/([^\\])((?:'(?:\\'|[^'])*')|(?:"(?:\\"|[^"])*"))/g, function(m, f, s)
+			{ var l=strings.length; strings.push(s); return f+'~~~S'+l+'~~~'; })
+	// Выделяем ключевые слова
+		.replace(/(var|function|typeof|new|return|if|for|in|while|break|do|continue|switch|case)([^a-z0-9\$_])/gi,
+			'<span class="kwrd">$1</span>$2')
+	// Выделяем скобки
+		.replace(/(\{|\}|\]|\[|\|)/gi,
+			'<span class="gly">$1</span>')
+	// Выделяем имена функций
+		.replace(/([a-z\_\$][a-z0-9_]*)[\s]*\(/gi,
+			'<span class="func">$1</span>(')
+	// Возвращаем на место каменты, строки, RegExp
+		.replace(/~~~([CSR])(\d+)~~~/g, function(m, t, i)
+			{ return '<span class="'+t+'">'+all[t][i]+'</span>'; })
+	// Выставляем переводы строк
+		.replace(/\n/g,
+			'<br/>')
+	// Табуляцию заменяем неразрывными пробелами
+		.replace(/\t/g,
+			'&nbsp;&nbsp;&nbsp;&nbsp;');
+}
+
+pmHistory.getLine = function(item_id, line_id)
+{
+    var line = this.model.items[item_id].stdout[line_id]
+    if(/^fatal:/.test(line.text))
+    {
+        line.fatal = 'fatal';
+    }
+    else
+    {
+        line.fatal = '';
+    }
+
+    return spajs.just.render(this.model.name+'_stdout_line', {line:line})
 }
 
 pmHistory.loadNewLines = function(item_id)
-{  
+{
     var thisObj = this;
     var last_stdout_maxline = this.model.items[item_id].stdout_maxline;
     if(!last_stdout_maxline)
     {
         last_stdout_maxline = 0;
     }
-    
-    $.when(this.loadItem(item_id), this.loadLines(item_id, {after:last_stdout_maxline, limit:pmHistory.model.linePerPage})).always(function()
+
+    return $.when(this.loadItem(item_id), this.loadLines(item_id, {after:last_stdout_maxline, limit:pmHistory.model.linePerPage})).always(function()
     {
         var addData = false;
         var needScrollDowun = $('#history-stdout').prop('scrollHeight') - $('#history-stdout').scrollTop() -  $("#history-stdout").css('height').replace("px", "")/1 < 100
-        for(var i = last_stdout_maxline+1; i <= thisObj.model.items[item_id].stdout_maxline; i++)
+
+        if(last_stdout_maxline == 0)
         {
-            if(thisObj.model.items[item_id].stdout[i] != undefined)
+            for(var i in thisObj.model.items[item_id].stdout)
             {
-                $("#history-stdout").append("<div>"+thisObj.model.items[item_id].stdout[i]+"&nbsp;</div>")
-                addData = true;
+                if(thisObj.model.items[item_id].stdout[i] != undefined)
+                {
+                    $("#history-stdout").append(pmHistory.getLine(item_id, i))
+                    addData = true;
+                }
             }
-        } 
-        
+        }
+        else
+        {
+            for(var i = last_stdout_maxline+1; i <= thisObj.model.items[item_id].stdout_maxline; i++)
+            {
+                if(thisObj.model.items[item_id].stdout[i] != undefined)
+                {
+                    $("#history-stdout").append(pmHistory.getLine(item_id, i))
+                    addData = true;
+                }
+            }
+        }
+
+
         if( addData && needScrollDowun)
         {
             // Прокручиваем в низ только если и так скрол был не сильно приподнят
             thisObj.scrollBottom()
         }
-        
+
         if(thisObj.model.items[item_id].status == 'RUN' || thisObj.model.items[item_id].status == 'DELAY')
         {
             thisObj.loadNewLines_timeoutId = setTimeout(function(){
                 thisObj.loadNewLines(item_id)
             }, 1000)
         }
-    }) 
+    }).promise()
 }
 
 pmHistory.scrollBottom = function()
@@ -415,10 +505,10 @@ pmHistory.loadLines = function(item_id, opt)
     {
         opt.offset = 0;
     }
-     
+
     opt.format = 'json';
-     
-    var def = new $.Deferred(); 
+
+    var def = new $.Deferred();
     jQuery.ajax({
         url: "/api/v1/history/"+item_id+"/lines",
         type: "GET",
@@ -439,27 +529,27 @@ pmHistory.loadLines = function(item_id, opt)
                 pmHistory.model.items[item_id].stdout_maxline = 0
                 pmHistory.model.items[item_id].stdout_minline = 999999999
             }
-            
-            pmHistory.model.items[item_id].stdout_count = data.count; 
+
+            pmHistory.model.items[item_id].stdout_count = data.count;
             for(var i in data.results)
             {
                 var line_number = data.results[i].line_number
-                
+
                 if(pmHistory.model.items[item_id].stdout_maxline < line_number)
                 {
                     pmHistory.model.items[item_id].stdout_maxline = line_number;
                 }
-                
+
                 if(pmHistory.model.items[item_id].stdout_minline > line_number)
                 {
                     pmHistory.model.items[item_id].stdout_minline = line_number;
                 }
-                
-                pmHistory.model.items[item_id].stdout[line_number] = data.results[i].line
+
+                pmHistory.model.items[item_id].stdout[line_number] = {id:line_number, text:data.results[i].line}
             }
-            
+
             def.resolve()
-            
+
         },
         error:function(e)
         {
