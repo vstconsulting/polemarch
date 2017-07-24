@@ -1821,6 +1821,54 @@ History records
 
 .. _variables:
 
+Execute ansible module
+----------------------
+
+.. http:post:: /api/v1/execute_module/
+
+   Execute ansible module. Just like running ``ansible -m {something}`` by
+   hands. You can quickly do something with ansible without boring and time
+   consuming work with repository/projects/playbooks etc.
+
+   :<json number inventory: inventory to execute at.
+   :<json string module: name of module (like ``ping``, ``shell`` and so on).
+     You can use any of modules available in ansible.
+   :<json string group: to which group in your inventory it must be executed.
+     Use ``all`` for all hosts in inventory.
+   :<json string args: which args must be passed to module. Just raw string
+     with arguments. You can specify here contains of ``args`` option. For
+     example ``ls -la`` for ``shell`` module.
+   :<json *: any number parameters with any name and string or number type. All
+     those parameters just passes as additional command line arguments to
+     ``ansible-playbook`` utility during execution, so you can use this feature
+     to widely customize of ansible behaviour. For any ``key:value`` in command
+     line will be ``--key value``. If you want only key without a value
+     (``--become`` option for example), just pass ``null`` as value.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/execute_module/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+        {
+           "inventory":3,
+           "module":"shell",
+           "group":"all",
+           "args":"ls -la"
+        }
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "detail":"Started at inventory 13.",
+           "history_id": 87
+        }
+
 Variables
 ---------
 

@@ -4,7 +4,7 @@ import logging
 from ...celery_app import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
-from ..models.tasks import Task
+from ..models.tasks import Task, run_ansible
 
 logger = logging.getLogger("polemarch")
 
@@ -59,3 +59,20 @@ class ExecuteAnsibleTask(BaseTask):
         self.job.run_ansible_playbook(self.inventory,
                                       self.history,
                                       **self.kwargs)
+
+
+@task(app, ignore_result=True, bind=True)
+class ExecuteAnsibleModule(BaseTask):
+    def __init__(self, app, group, module, inventory, history, module_args,
+                 *args, **kwargs):
+        # pylint: disable=too-many-arguments
+        super(self.__class__, self).__init__(app, *args, **kwargs)
+        self.group = group
+        self.module = module
+        self.inventory = inventory
+        self.history = history
+        self.module_args = module_args
+
+    def run(self):
+        run_ansible(self.group, self.module, self.inventory, self.history,
+                    self.module_args, **self.kwargs)

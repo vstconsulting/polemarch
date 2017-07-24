@@ -2,7 +2,8 @@ from collections import namedtuple
 import six
 from django.contrib.auth.models import User
 from django.db.models import Q
-from rest_framework import viewsets
+from django.db.models.query import QuerySet
+from rest_framework import viewsets, views as rest_views
 from rest_framework.response import Response as RestResponse
 from rest_framework.decorators import detail_route, list_route
 
@@ -30,15 +31,22 @@ class Response(_ResponseClass):
         return self._asdict()
 
 
-class GenericViewSet(viewsets.GenericViewSet):
-    serializer_class_one = None
+class QuerySetMixin(rest_views.APIView):
+    queryset = None
     model = None
 
-    def get_serializer_class(self):
-        if self.kwargs.get("pk", False) or self.action == "create":
-            if self.serializer_class_one is not None:
-                return self.serializer_class_one
-        return super(GenericViewSet, self).get_serializer_class()
+    def _base_get_queryset(self):
+        assert self.queryset is not None, (
+            "'%s' should either include a `queryset` attribute, "
+            "or override the `get_queryset()` method."
+            % self.__class__.__name__
+        )
+
+        queryset = self.queryset
+        if isinstance(queryset, QuerySet):
+            # Ensure queryset is re-evaluated on each request.
+            queryset = queryset.all()
+        return queryset
 
     def _get_extra_queryset(self):
         aval_projs = self.request.user.related_objects.values_list('projects',
@@ -58,7 +66,18 @@ class GenericViewSet(viewsets.GenericViewSet):
             self.queryset = self.model.objects.all()
         if not self.request.user.is_staff and self.queryset.model != User:
             self.queryset = self._get_extra_queryset()
-        return super(GenericViewSet, self).get_queryset()
+        return self._base_get_queryset()
+
+
+class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
+    serializer_class_one = None
+    model = None
+
+    def get_serializer_class(self):
+        if self.kwargs.get("pk", False) or self.action == "create":
+            if self.serializer_class_one is not None:
+                return self.serializer_class_one
+        return super(GenericViewSet, self).get_serializer_class()
 
     def filter_route_queryset(self, queryset, filter_classes=None):
         if filter_classes is not None:
