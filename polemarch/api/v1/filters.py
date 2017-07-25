@@ -134,6 +134,7 @@ class HistoryFilter(_BaseFilter):
         model = models.History
         fields = ('id',
                   'name',
+                  'kind',
                   'project',
                   'status',
                   'start_time',

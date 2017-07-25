@@ -1616,25 +1616,31 @@ History records
         {
            "id":1,
            "project":2,
-           "playbook":"task.yml",
+           "name":"task.yml",
            "status":"OK",
+           "kind": "PLAYBOOK",
            "start_time":"2017-07-02T12:48:11.922761Z",
            "stop_time":"2017-07-02T13:48:11.922777Z",
            "raw_inventory":"inventory",
+           "raw_args": "ansible-playbook main.yml -i /tmp/tmpvMIwMg -v",
            "raw_stdout":"text"
         }
 
    :>json number id: id of history record.
    :>json number project: id of project, which record belongs to.
-   :>json string playbook: name of executed playbook.
-   :>json string status: either ``OK``, ``STOP`` or ``ERROR``, which indicates
-     different results of execution (good, interrupted by user, failure
-     correspondingly).
+   :>json string name: name of executed playbook or module.
+   :>json string kind: either was run of ``ansible-playbook`` (``PLAYBOOK``) or
+     ``ansible`` (``MODULE``).
+   :>json string status: either ``DELAY``, ``OK``, ``INTERRUPTED``, ``RUN``,
+     ``OFFLINE`` or ``ERROR``, which indicates different results of execution
+     (scheduled for run, good, interrupted by user, currently running,
+     can't connect to node, failure).
    :>json string start_time: time, when playbook execution was started.
    :>json string stop_time: time, when playbook execution was ended (normally
      or not)
    :>json string raw_inventory: Ansible inventory, which used for execution. It
      is generates from on of Polemarch's :ref:`inventory`
+   :>json string raw_args: ansible command line during execution.
    :>json string raw_stdout: what Ansible wrote to stdout and stderr during
      execution. The size is limited to 10M characters. Full output
      in :http:get:`/api/v1/history/{id}/raw/`.
@@ -1761,7 +1767,8 @@ History records
     to specified.
    :query stop_time__lte: filter records whose ``stop_time`` less or equal
     to specified.
-   :query playbook: filter by ``playbook``.
+   :query name: filter by ``name``.
+   :query kind: filter by ``kind``.
    :query project: filter by ``project``.
    :query status: filter by ``status``.
    :query start_time: get records only with ``start_time`` equal to specified.
@@ -1780,33 +1787,29 @@ History records
    .. sourcecode:: js
 
         {
-           "count":3,
+           "count":2,
            "next":null,
            "previous":null,
            "results":[
               {
-                 "id":1,
-                 "project":2,
-                 "playbook":"task.yml",
-                 "status":"OK",
-                 "start_time":"2017-07-02T12:48:11.922761Z",
-                 "stop_time":"2017-07-02T13:48:11.922777Z"
+                 "id": 121,
+                 "project": 3,
+                 "name": "main.yml",
+                 "kind": "PLAYBOOK",
+                 "status": "OK",
+                 "start_time": "2017-07-24T06:39:52.052504Z",
+                 "stop_time": "2017-07-24T06:41:06.521813Z",
+                 "url": "http://localhost:8000/api/v1/history/121/"
               },
               {
-                 "id":2,
-                 "project":2,
-                 "playbook":"task.yml",
-                 "status":"STOP",
-                 "start_time":"2017-07-02T02:48:11.923896Z",
-                 "stop_time":"2017-07-02T03:48:11.923908Z"
-              },
-              {
-                 "id":3,
-                 "project":2,
-                 "playbook":"task.yml",
-                 "status":"ERROR",
-                 "start_time":"2017-07-01T16:48:11.924959Z",
-                 "stop_time":"2017-07-01T17:48:11.924973Z"
+                 "id": 118,
+                 "project": null,
+                 "name": "ping",
+                 "kind": "MODULE",
+                 "status": "OK",
+                 "start_time": "2017-07-24T06:27:40.481588Z",
+                 "stop_time": "2017-07-24T06:27:42.499873Z",
+                 "url": "http://localhost:8000/api/v1/history/118/"
               }
            ]
         }
@@ -1865,7 +1868,7 @@ Execute ansible module
    .. sourcecode:: js
 
         {
-           "detail":"Started at inventory 13.",
+           "detail":"Started at inventory 3.",
            "history_id": 87
         }
 
