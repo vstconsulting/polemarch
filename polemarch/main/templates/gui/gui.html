@@ -325,11 +325,11 @@
                                         <th style="width: 160px;" class="hidden-xs">Start time</th>
                                         <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
                                     </tr> 
-                                    <% for(var i in pmHistory.model.itemslist.results){  valid = pmHistory.model.itemslist.results[i].id; %>
+                                    <% for(var i in pmHistory.model.itemslist.results){  val = pmHistory.model.itemslist.results[i]; %>
                                         <tr 
-                                            class="item-row item-<%- valid %>  <%- pmHistory.model.selectedItems.justClass(valid, 'selected') %>"
-                                            data-id="<%- valid %>" >
-                                            <td onclick="pmHistory.toggleSelect(<%- valid %>); return false;">
+                                            class="item-row item-<%- val.id %>  <%- pmHistory.model.selectedItems.justClass(val.id, 'selected') %>"
+                                            data-id="<%- val.id %>" >
+                                            <td onclick="pmHistory.toggleSelect(<%- val.id %>); return false;">
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
@@ -338,10 +338,12 @@
                                                         onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].name %></a>
                                             </td>
                                             <td class="hidden-xs hidden-sm">
-                                                <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>" class="item-name"
-                                                        onclick="return spajs.openURL(this.href);" >
-                                                        <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
-                                                </a>
+                                                <% if(pmProjects.model.items[val.project]){ %> 
+                                                    <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>" class="item-name"
+                                                            onclick="return spajs.openURL(this.href);" >
+                                                            <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
+                                                    </a>
+                                                <% } %>
                                             </td>
                                             <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> history-status-<%- pmHistory.model.itemslist.results[i].status %>" >
                                                 <%- pmHistory.model.itemslist.results[i].status %>
@@ -1724,8 +1726,7 @@
 <script type="text/x-just" data-just="inventories_list">
     <section class="content-header">
         <h1>
-            Inventories
-            
+            Inventories 
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
@@ -1771,9 +1772,8 @@
                                         <div class="ico-on fa fa-toggle-on"></div>
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
-                                    <th>Name</th>
-                                    <th style="width: 360px;" class="hidden-xs">Actions</th>
-                                    <th style="width: 95px;" class="visible-xs">Actions</th>
+                                    <th>Name</th> 
+                                    <th style="width: 105px;">Actions</th>
                                 </tr>
                                 <% for(var i in pmInventories.model.itemslist.results){ %>
                                     <tr
@@ -1786,22 +1786,8 @@
                                         <td>
                                             <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%- pmInventories.model.itemslist.results[i].name %></a>
-                                        </td>
-                                        <td class="hidden-xs">
-                                            <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
-                                                class="btn btn-danger"
-                                                onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
-
-                                            <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
-                                                class="btn btn-primary"
-                                                onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-group'}); return false;" >Create sub group</a>
-
-                                            <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
-                                                class="btn btn-primary"
-                                                onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-host'}); return false;" >Create sub host</a>
-
-                                        </td>
-                                        <td class="visible-xs">
+                                        </td> 
+                                        <td>
                                             <div class="btn-group" role="group">
                                                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     Actions
@@ -1810,15 +1796,21 @@
                                                 <ul class="dropdown-menu dropdown-menu-right">
                                                     <li>
                                                         <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
-                                                            onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
                                                             onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-group'}); return false;" >Create sub group</a>
                                                     </li>
                                                     <li>
                                                         <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
                                                             onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-host'}); return false;" >Create sub host</a>
+                                                    </li>
+                                                    <li role="separator" class="divider"></li>
+                                                    <li>
+                                                        <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/ansible-module/run'}); return false;" >Execute ansible module</a>
+                                                    </li>
+                                                    <li role="separator" class="divider"></li>
+                                                    <li>
+                                                        <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -1852,6 +1844,99 @@
 </script>
 
 <!-- Страница inventory -->
+<script type="text/x-just" data-just="module_run_page"> 
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?inventory/<%- item_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+            <span class="h1-header" >Execute ansible module</span>
+            
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" >Inventories</a></li> 
+            <li><a href="<%- polemarch.opt.host %>/?inventory/<%- item_id %>" onclick="return spajs.openURL(this.href);" ><%- pmInventories.model.items[item_id].name.slice(0, 20) %></a></li> 
+            <li class="active">Execute ansible module</li>
+        </ol>
+    </section>
+
+    <section class="content"> 
+        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute(<%- item_id %>, $('#group-autocomplete').val(), $('#module-autocomplete').val())); return false;" class="btn btn-primary" >Execute</button>
+        
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Execute ansible module
+                    </div>
+                    <div class="box-body">
+                    
+                        <!--<div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Template name</label>
+                                <input type="text"
+                                        placeholder="Enter name"
+                                        id="TasksTemplates-name"
+                                        value="pmTasksTemplates.model.items[item_id].name"
+                                        class="form-control"
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>--> 
+                        <div class="row"> 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Group</label>
+                                <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
+                                    <option value="all" selected>All</option> 
+                                    <% for(var i in pmInventories.model.items[item_id].groups){ %>
+                                        <option value="<%- pmInventories.model.items[item_id].groups[i].name %>" ><%- pmInventories.model.items[item_id].groups[i].name %></option>
+                                    <% } %>
+                                </select>
+                                <div class="help-block">
+                                    <% if(!pmInventories.model.items[item_id].groups.length){ %>
+                                            <span class="error-note" >In inventory <%- pmInventories.model.items[item_id].name %> has no any groups</span>
+                                    <% } %>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Module</label>
+                                <input type="text"
+                                        class="module-autocomplete form-control"
+                                        id="module-autocomplete"
+                                        value="">
+                            </div> 
+                        </div>
+                        
+                        <div class="row" >
+                            <div class="col-lg-12">
+                                <div class="">
+                                    <label class="control-label" >Args</label>
+                                    <input type="text" 
+                                            class="form-control"
+                                            value=""
+                                            id="module-args-string"
+                                            onchange=""
+                                            onpaste=""  >
+                                   <!--<span class="input-group-addon" onclick=" " >
+                                         <span class="glyphicon glyphicon-pencil"></span>
+                                    </span>-->
+                                </div>
+                                <div class="help-block">
+                                    args (string) – which args must be passed to module. Just raw string with arguments. You can specify here contains of args option. For example ls -la for shell module.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div> 
+    </section>
+</script>
+<!-- Страница inventory -->
 <script type="text/x-just" data-just="inventories_page">
     <section class="content-header">
         <h1>
@@ -1871,6 +1956,7 @@
 
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmInventories.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save inventory</button>
+        <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/ansible-module/run'});  return false;" class="btn btn-info" >Execute ansible module</button>
         <button type="button" onclick="spajs.showLoader(pmInventories.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove inventory</button>
         <br>
         <br>
@@ -3472,16 +3558,60 @@
 
     <section class="content">
         <div class="row">
-            <div class="col-lg-2 col-xs-4"> 
+            <div class="col-lg-1 col-xs-2"> 
                 <div class="small-box bg-aqua">
                     <div class="inner">
-                        <h3>150</h3> 
-                        <p>New Orders</p>
-                    </div>
-                    <div class="icon">
-                        <i class="ion ion-bag"></i>
-                    </div>
-                    <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                        <h3><%= pmDashboard.model.count.justText('projects') %></h3> 
+                        <p>Projects</p>
+                    </div>  
+                </div>
+            </div>
+            <div class="col-lg-1 col-xs-2"> 
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('projects') %></h3> 
+                        <p>Projects</p>
+                    </div>  
+                </div>
+            </div>
+            <div class="col-lg-1 col-xs-2"> 
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('inventories') %></h3> 
+                        <p>Inventories</p>
+                    </div>  
+                </div>
+            </div>
+            <div class="col-lg-1 col-xs-2"> 
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('hosts') %></h3> 
+                        <p>Hosts</p>
+                    </div>  
+                </div>
+            </div>
+            <div class="col-lg-1 col-xs-2"> 
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('groups') %></h3> 
+                        <p>Groups</p>
+                    </div>  
+                </div>
+            </div>
+            <div class="col-lg-1 col-xs-2"> 
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('users') %></h3> 
+                        <p>Users</p>
+                    </div>  
+                </div>
+            </div>
+            <div class="col-lg-1 col-xs-2"> 
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('history') %></h3> 
+                        <p>History</p>
+                    </div>  
                 </div>
             </div>
         </div>

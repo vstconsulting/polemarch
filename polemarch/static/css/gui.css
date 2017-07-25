@@ -462,7 +462,7 @@ table{
 }
 
 .history-status-ERROR{
-    color: #ff5252; 
+    
 }
 
 .history-status-DELAY{
@@ -512,6 +512,10 @@ table{
 @media (min-width: 992px) {
     .h1-header{
         display: inline-table;
-        max-width: calc(100% - 300px);
+        max-width: calc(100% - 360px);
     }
+}
+ 
+.error-note{
+    color: #ff5252; 
 }

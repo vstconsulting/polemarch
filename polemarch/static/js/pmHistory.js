@@ -214,11 +214,18 @@ pmHistory.loadItem = function(item_id)
             
             pmHistory.model.items.justWatch(item_id); 
 
-            $.when(pmProjects.loadItem(data.project)).done(function(){
+            if(data.project && !pmProjects.model.items[data.project])
+            {
+                $.when(pmProjects.loadItem(data.project)).done(function(){
+                    def.resolve()
+                }).fail(function(){
+                    def.reject()
+                })
+            }
+            else
+            {
                 def.resolve()
-            }).fail(function(){
-                def.reject()
-            })
+            }
         },
         error:function(e)
         {
@@ -276,7 +283,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
                 var val = data.results[i]
                 thisObj.model.items[val.id] = val
 
-                if(!pmProjects.model.items[val.project] && projects.indexOf(val.project) == -1)
+                if(val.project && !pmProjects.model.items[val.project] && projects.indexOf(val.project) == -1)
                 {
                     projects.push(val.project)
                 }
@@ -343,7 +350,7 @@ pmHistory.loadItems = function(limit, offset)
                 thisObj.model.items.justWatch(val.id);
                 thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
 
-                if(!pmProjects.model.items[val.project] && projects.indexOf(val.project) == -1)
+                if(val.project && !pmProjects.model.items[val.project] && projects.indexOf(val.project) == -1)
                 {
                     projects.push(val.project)
                 }
