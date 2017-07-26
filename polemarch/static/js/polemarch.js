@@ -329,6 +329,12 @@ polemarch.start = function(options)
         urlregexp:[/^template\/new-task$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showNewItemPage(holder, menuInfo, data);}
     })
+     
+    spajs.addMenu({
+        id:"module-new", 
+        urlregexp:[/^template\/new-module$/],
+        onOpen:function(holder, menuInfo, data){return pmModuleTemplates.showNewItemPage(holder, menuInfo, data);}
+    })
     
     spajs.openMenuFromUrl()
 }

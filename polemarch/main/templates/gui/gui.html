@@ -17,6 +17,7 @@
 
     <section class="content">
         <button type="button" onclick="spajs.open({ menuId:'template/new-task'});  return false;" class="btn btn-primary" >Create task template</button>
+        <button type="button" onclick="spajs.open({ menuId:'template/new-module'});  return false;" class="btn btn-primary" >Create module template</button>
         <br>
         <br>
         <div class="row">
@@ -102,7 +103,124 @@
         </div>
     </section>
 </script>
+    
+<script type="text/x-just" data-just="templates_new_module_page">
+<section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+            <span class="h1-header" >New template for run module</span>
+            
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li> 
+            <li class="active">New module template</li>
+        </ol>
+    </section>
 
+    <section class="content"> 
+        <button type="button" onclick="spajs.showLoader(pmModuleTemplates.addItem()); return false;" class="btn btn-primary" >Create</button> 
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Run module template
+                    </div>
+                    <div class="box-body">
+                    
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Template name</label>
+                                <input type="text"
+                                        placeholder="Enter name"
+                                        id="TasksTemplates-name"
+                                        value=""
+                                        class="form-control"
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>  
+                             
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Inventory</label>
+                                <select 
+                                    class="form-control select2"
+                                    id="inventories-autocomplete"
+                                    data-placeholder="Select inventory"
+                                    style="width:100%"
+                                    onchange="pmModuleTemplates.selectInventory(this.value);"
+                                >
+                                    <option selected value="0" >Not set</option>  
+                                    <% for(var i in pmInventories.model.items){ %>
+                                        <option   
+                                            value="<%- pmInventories.model.items[i].id %>"
+                                            ><%- pmInventories.model.items[i].name %></option>
+                                    <% } %>
+                                </select>
+                            </div>  
+                        
+                            <~ pmTasksTemplates.model.selectedInventory>
+                                <% if(!pmTasksTemplates.model.selectedInventory){ %>
+
+                                <% }else{ %> 
+                                    <div class="form-group col-lg-2">
+                                        <label class="control-label" >Group</label>
+                                        <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
+                                            <option value="all" selected>All</option> 
+                                            <% for(var i in pmInventories.model.items[pmTasksTemplates.model.selectedInventory].groups){ %>
+                                                <option value="<%- pmInventories.model.items[pmTasksTemplates.model.selectedInventory].groups[i].name %>" ><%- pmInventories.model.items[pmTasksTemplates.model.selectedInventory].groups[i].name %></option>
+                                            <% } %>
+                                        </select>
+                                        <div class="help-block">
+                                            <% if(!pmInventories.model.items[pmTasksTemplates.model.selectedInventory].groups.length){ %>
+                                                    <span class="error-note" >In inventory <%- pmInventories.model.items[pmTasksTemplates.model.selectedInventory].name %> has no any groups</span>
+                                            <% } %>
+                                        </div>
+                                    </div>  
+                                <% } %> 
+                            <~>
+                        </div>  
+                        
+                        <div class="row"> 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Module</label>
+                                <input type="text"
+                                        class="module-autocomplete form-control"
+                                        id="module-autocomplete"
+                                        value="">
+                            </div> 
+                        </div>
+                        <div class="row" >
+                            <div class="col-lg-12">
+                                <div class="">
+                                    <label class="control-label" >Args</label>
+                                    <input type="text" 
+                                            class="form-control"
+                                            value=""
+                                            id="module-args-string"
+                                            onchange=""
+                                            onpaste=""  >
+                                   <!--<span class="input-group-addon" onclick=" " >
+                                         <span class="glyphicon glyphicon-pencil"></span>
+                                    </span>-->
+                                </div>
+                                <div class="help-block">
+                                    args (string) – which args must be passed to module. Just raw string with arguments. You can specify here contains of args option. For example ls -la for shell module.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div> 
+    </section>
+</script>
+    
 <script type="text/x-just" data-just="templates_page">
 <section class="content-header">
         <h1>
@@ -1878,19 +1996,7 @@
                         Execute ansible module
                     </div>
                     <div class="box-body">
-                    
-                        <!--<div class="row">
-                            <div class="form-group col-lg-2">
-                                <label class="control-label" >Template name</label>
-                                <input type="text"
-                                        placeholder="Enter name"
-                                        id="TasksTemplates-name"
-                                        value="pmTasksTemplates.model.items[item_id].name"
-                                        class="form-control"
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-                        </div>--> 
+                     
                         <div class="row"> 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Group</label>

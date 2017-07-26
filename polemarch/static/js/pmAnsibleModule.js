@@ -21,11 +21,7 @@ pmAnsibleModule.showInInventory = function(holder, menuInfo, data)
         $.notify("", "error");
     })
 }
-
-pmAnsibleModule.getDataVars = function(){
-    return $("#module-args-string").val();
-}
-
+ 
 pmAnsibleModule.execute = function(inventory_id, group, module, data_vars)
 {
     var def = new $.Deferred();
@@ -52,7 +48,7 @@ pmAnsibleModule.execute = function(inventory_id, group, module, data_vars)
     
     if(!data_vars)
     {  
-        data_vars = this.getDataVars();
+        data_vars = $("#module-args-string").val();
     }
  
     var data = {}

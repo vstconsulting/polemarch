@@ -1,6 +1,8 @@
 
 var pmTasksTemplates = new pmItems()
 pmTasksTemplates.model.name = "templates" 
+pmTasksTemplates.model.selectedInventory = 0
+pmModuleTemplates.model.kind = "Task"
 
 pmTasksTemplates.execute = function(item_id)
 {
@@ -172,7 +174,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
     
     return def.promise()
 }
-
+ 
 /**
  * @return $.Deferred
  */
@@ -182,7 +184,7 @@ pmTasksTemplates.addItem = function()
     var data = {}
 
     data.name = $("#TasksTemplates-name").val()
-    data.kind = "Task"
+    data.kind = pmModuleTemplates.model.kind
     data.data = {
         playbook:$("#playbook-autocomplete").val(),
         inventory:$("#inventories-autocomplete").val(),
@@ -234,7 +236,7 @@ pmTasksTemplates.updateItem = function(item_id)
     var data = {}
 
     data.name = $("#TasksTemplates-name").val()
-    data.kind = "Task"
+    data.kind = pmModuleTemplates.model.kind
     data.data = {
         playbook:$("#playbook-autocomplete").val(),
         inventory:$("#inventories-autocomplete").val(),
