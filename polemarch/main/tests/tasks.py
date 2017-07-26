@@ -522,3 +522,23 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase):
 
         result = self.get_result("get", url+"supported-kinds/")
         self.assertEqual(result, Template.template_fields)
+
+        ptask_template_data = dict(
+            name="test_ptask_template",
+            kind="PeriodicTask",
+            data=dict(
+                mode="ping",
+                type="INTERVAL",
+                name="somename",
+                project=2222332221,
+                kind="MODULE",
+                inventory=222233222,
+                schedule="12",
+                vars=dict(
+                    group="all"
+                )
+            )
+        )
+        ptask_template = Template.objects.create(**ptask_template_data)
+        self.details_test(url + "{}/".format(ptask_template.id),
+                          **ptask_template_data)

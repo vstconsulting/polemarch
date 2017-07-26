@@ -210,7 +210,6 @@ class PeriodicTask(_AbstractModel):
                              sync=True, **self.vars)
 
 
-# FIXME: should adapt to module changes
 class Template(BModel):
     name          = models.CharField(max_length=512)
     kind          = models.CharField(max_length=32)
@@ -223,8 +222,10 @@ class Template(BModel):
 
     template_fields = {}
     template_fields["Task"] = ["playbook", "vars", "inventory", "project"]
-    template_fields["PeriodicTask"] = [] + template_fields["Task"]
-    template_fields["PeriodicTask"] += ["type", "name", "schedule"]
+    template_fields["PeriodicTask"] = ["type", "name", "schedule", "inventory",
+                                       "kind", "mode", "project", "vars"]
+    template_fields["Module"] = ["inventory", "module", "group", "args",
+                                 "vars"]
     template_fields["Host"] = ["name", "vars"]
     template_fields["Group"] = template_fields["Host"] + ["children"]
 
