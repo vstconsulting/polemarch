@@ -106,7 +106,7 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
 
         url = "/api/v1/periodic-tasks/"
         inventory = Inventory.objects.create()
-        data = dict(playbook="p1.yml",
+        data = dict(mode="p1.yml",
                     schedule="10",
                     type="INTERVAL",
                     project=project_id,

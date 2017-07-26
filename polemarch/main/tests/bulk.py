@@ -81,7 +81,7 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
         models.PeriodicTask.objects.all().delete()
         data = dict(name="periodic-task", project=self.prj1.id,
                     type="INTERVAL", schedule="10", inventory=self.inv2.id,
-                    playbook="ok.yml")
+                    mode="ok.yml")
         new = dict(name="new-periodic-task")
         self.abstract_test_bulk(
             data, new, "/api/v1/periodic-tasks/", "periodictask"

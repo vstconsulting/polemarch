@@ -126,7 +126,7 @@ Python dependencies:
 
    .. sourcecode:: bash
 
-      pip install -r requirements.txt -r requirements-doc.txt -r requirements-git.txt tox --user
+      pip install -r requirements-git.txt -r requirements.txt -r requirements-doc.txt tox --user
 
 5. Initialize empty database with all required stuff (tables and so on)
    for Polemarch:

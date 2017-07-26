@@ -296,13 +296,13 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         project = Project.objects.get(id=self.periodic_project_id)
         self.inventory = Inventory.objects.create()
 
-        self.ptask1 = PeriodicTask.objects.create(playbook="p1.yml",
+        self.ptask1 = PeriodicTask.objects.create(mode="p1.yml",
                                                   name="test",
                                                   schedule="10",
                                                   type="INTERVAL",
                                                   project=project,
                                                   inventory=self.inventory)
-        self.ptask2 = PeriodicTask.objects.create(playbook="p2.yml",
+        self.ptask2 = PeriodicTask.objects.create(mode="p2.yml",
                                                   name="test",
                                                   schedule="10",
                                                   type="INTERVAL",
@@ -314,7 +314,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         self.default_kwargs = dict(project=self.ph, name="task.yml",
                                    raw_inventory="inventory",
                                    raw_stdout="text")
-        self.historys = [
+        self.histories = [
             History.objects.create(status="OK",
                                    start_time=now() - timedelta(hours=15),
                                    stop_time=now() - timedelta(hours=14),
@@ -330,7 +330,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         ]
         self.default_kwargs["raw_stdout"] = "one\ntwo\nthree\nfour"
         self.default_kwargs["name"] = "task2.yml"
-        self.historys.append(History.objects.create(
+        self.histories.append(History.objects.create(
             status="ERROR", start_time=now() - timedelta(hours=35),
             stop_time=now() - timedelta(hours=34), **self.default_kwargs)
         )
@@ -338,12 +338,12 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
     def test_history_of_executions(self):
         url = "/api/v1/history/"
         df = "%Y-%m-%dT%H:%M:%S.%fZ"
-        self.list_test(url, len(self.historys))
-        self.details_test(url + "{}/".format(self.historys[0].id),
+        self.list_test(url, len(self.histories))
+        self.details_test(url + "{}/".format(self.histories[0].id),
                           name="task.yml",
                           status="OK", project=self.ph.id,
-                          start_time=self.historys[0].start_time.strftime(df),
-                          stop_time=self.historys[0].stop_time.strftime(df),
+                          start_time=self.histories[0].start_time.strftime(df),
+                          stop_time=self.histories[0].stop_time.strftime(df),
                           raw_inventory="inventory", raw_stdout="text")
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
@@ -353,40 +353,40 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         self.assertEqual(res["count"], 3, res)
 
         res = self.get_result("get", "{}?project={}".format(url, self.ph.id))
-        self.assertEqual(res["count"], len(self.historys), res)
+        self.assertEqual(res["count"], len(self.histories), res)
 
-        st = self.historys[1].start_time.strftime(df)
+        st = self.histories[1].start_time.strftime(df)
         res = self.get_result("get", "{}?start_time__gte={}".format(url, st))
         self.assertEqual(res["count"], 2, res)
         res = self.get_result("get", "{}?start_time__gt={}".format(url, st))
         self.assertEqual(res["count"], 1, res)
 
-        st = self.historys[1].stop_time.strftime(df)
+        st = self.histories[1].stop_time.strftime(df)
         res = self.get_result("get", "{}?stop_time__gte={}".format(url, st))
         self.assertEqual(res["count"], 2, res)
         res = self.get_result("get", "{}?stop_time__gt={}".format(url, st))
         self.assertEqual(res["count"], 1, res)
 
         self.get_result("post", url, 405, data=dict(**self.default_kwargs))
-        self.get_result("patch", url + "{}/".format(self.historys[0].id),
+        self.get_result("patch", url + "{}/".format(self.histories[0].id),
                         405, data=dict(**self.default_kwargs))
-        self.get_result("put", url + "{}/".format(self.historys[0].id),
+        self.get_result("put", url + "{}/".format(self.histories[0].id),
                         405, data=dict(**self.default_kwargs))
 
         # Lines pagination
-        lines_url = url+"{}/lines/?limit=2".format(self.historys[3].id)
+        lines_url = url+"{}/lines/?limit=2".format(self.histories[3].id)
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 4, result)
         self.assertCount(result["results"], 2)
         lines_url = url
-        lines_url += "{}/lines/?after=2&before=4".format(self.historys[3].id)
+        lines_url += "{}/lines/?after=2&before=4".format(self.histories[3].id)
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 1, result)
         self.assertCount(result["results"], 1)
         line_number = result["results"][0]["line_number"]
         self.assertEqual(line_number, 3, result)
 
-        self.get_result("delete", url + "{}/".format(self.historys[0].id))
+        self.get_result("delete", url + "{}/".format(self.histories[0].id))
 
         self.change_identity()
         self.list_test(url, 0)
@@ -395,26 +395,26 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         url = "/api/v1/periodic-tasks/"
         self.list_test(url, PeriodicTask.objects.all().count())
         self.details_test(url + "{}/".format(self.ptask1.id),
-                          playbook="p1.yml",
+                          mode="p1.yml",
                           schedule="10",
                           type="INTERVAL",
                           project=self.periodic_project_id)
 
         variables = {"syntax-check": None, "limit": "host-1"}
-        data = [dict(playbook="p1.yml", schedule="10", type="INTERVAL",
+        data = [dict(mode="p1.yml", schedule="10", type="INTERVAL",
                      project=self.periodic_project_id,
                      inventory=self.inventory.id, name="one", vars=variables),
-                dict(playbook="p2.yml",
+                dict(mode="p2.yml",
                      schedule="* */2 1-15 * sun,fri",
                      type="CRONTAB", project=self.periodic_project_id,
                      inventory=self.inventory.id, name="two", vars=variables),
-                dict(playbook="p1.yml", schedule="", type="CRONTAB",
+                dict(mode="p1.yml", schedule="", type="CRONTAB",
                      project=self.periodic_project_id,
                      inventory=self.inventory.id, name="thre", vars=variables),
-                dict(playbook="p1.yml", schedule="30 */4", type="CRONTAB",
+                dict(mode="p1.yml", schedule="30 */4", type="CRONTAB",
                      project=self.periodic_project_id,
                      inventory=self.inventory.id, name="four", vars=variables)]
-        results_id = self.mass_create(url, data, "playbook", "schedule",
+        results_id = self.mass_create(url, data, "mode", "schedule",
                                       "type", "project", "name", "vars")
 
         for project_id in results_id:
@@ -423,13 +423,50 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         self.assertEqual(count, 0)
 
         # test with bad value
-        data = dict(playbook="p1.yml", schedule="30 */4 foo", type="CRONTAB",
+        data = dict(mode="p1.yml", schedule="30 */4 foo", type="CRONTAB",
                     project=self.periodic_project_id)
         self.get_result("post", url, 400, data=json.dumps(data))
 
         # test with with no project
-        data = dict(playbook="p1.yml", schedule="30 */4", type="CRONTAB")
+        data = dict(mode="p1.yml", schedule="30 */4", type="CRONTAB")
         self.get_result("post", url, 400, data=json.dumps(data))
+
+    def test_create_delete_periodic_task_module(self):
+        details = dict(mode="ping",
+                       name="test",
+                       schedule="10",
+                       kind="MODULE",
+                       type="INTERVAL",
+                       inventory=self.inventory)
+        ptask = PeriodicTask.objects.create(**details)
+        details['inventory'] = self.inventory.id
+        url = "/api/v1/periodic-tasks/"
+        self.details_test(url + "{}/".format(ptask.id), **details)
+        variables = {"args": "ls -la", "group": "all"}
+        data = [dict(mode="shell", schedule="10", type="INTERVAL",
+                     project=self.periodic_project_id,
+                     kind="MODULE",
+                     inventory=self.inventory.id, name="one", vars=variables),
+                dict(mode="shell",
+                     schedule="* */2 1-15 * sun,fri",
+                     kind="MODULE",
+                     type="CRONTAB", project=self.periodic_project_id,
+                     inventory=self.inventory.id, name="two", vars=variables),
+                dict(mode="shell", schedule="", type="CRONTAB",
+                     project=self.periodic_project_id,
+                     kind="MODULE",
+                     inventory=self.inventory.id, name="thre", vars=variables),
+                dict(mode="shell", schedule="30 */4", type="CRONTAB",
+                     project=self.periodic_project_id,
+                     kind="MODULE",
+                     inventory=self.inventory.id, name="four", vars=variables)]
+        results_id = self.mass_create(url, data, "mode", "schedule",
+                                      "type", "project", "name", "vars",
+                                      "kind")
+        for project_id in results_id:
+            self.get_result("delete", url + "{}/".format(project_id))
+        count = PeriodicTask.objects.filter(id__in=results_id).count()
+        self.assertEqual(count, 0)
 
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase):

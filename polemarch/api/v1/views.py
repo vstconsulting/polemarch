@@ -1,7 +1,6 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 from django.db import transaction
 from django.http import HttpResponse
-from django.utils import timezone
 from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
@@ -237,10 +236,7 @@ class ModuleExecuteViewSet(QuerySetMixin, rest_views.APIView):
         # pylint: disable=no-member
         self.queryset = self.get_queryset()
         data = request.data
-        try:
-            data['module_args'] = data.pop('args')
-        except KeyError:
-            data['module_args'] = None
+        data['module_args'] = data.pop('args', None) or None
         inventory = self.queryset.get(id=data['inventory'])
 
         return base.Response(inventory.execute_ansible_module(**data),

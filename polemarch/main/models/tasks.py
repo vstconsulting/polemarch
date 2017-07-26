@@ -150,8 +150,10 @@ class Task(BModel):
 class PeriodicTask(_AbstractModel):
     objects     = BManager.from_queryset(_AbstractVarsQuerySet)()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
-                                    related_query_name="periodic_tasks")
-    playbook    = models.CharField(max_length=256)
+                                    related_query_name="periodic_tasks",
+                                    blank=True, null=True)
+    mode        = models.CharField(max_length=256)
+    kind        = models.CharField(max_length=50, default="PLAYBOOK")
     inventory   = models.ForeignKey(Inventory, on_delete=models.CASCADE,
                                     related_query_name="periodic_tasks")
     schedule    = models.CharField(max_length=4*1024)
@@ -191,14 +193,24 @@ class PeriodicTask(_AbstractModel):
         return float(self.schedule)
 
     def execute(self):
-        # pylint: disable=no-member
-        self.run_ansible_playbook()
+        if self.kind == "PLAYBOOK":
+            self.run_ansible_playbook()
+        elif self.kind == "MODULE":
+            self.run_ansible_module()
+
+    def run_ansible_module(self):
+        kwargs = dict(group=self.vars.pop("group"),
+                      module=self.mode,
+                      module_args=self.vars.pop('args', None) or None)
+        kwargs.update(self.vars)
+        self.inventory.execute_ansible_module(**kwargs)
 
     def run_ansible_playbook(self):
-        self.project.execute(self.playbook, self.inventory.id,
+        self.project.execute(self.mode, self.inventory.id,
                              sync=True, **self.vars)
 
 
+# FIXME: should adapt to module changes
 class Template(BModel):
     name          = models.CharField(max_length=512)
     kind          = models.CharField(max_length=32)

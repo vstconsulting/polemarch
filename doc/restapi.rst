@@ -1181,7 +1181,8 @@ Periodic tasks
            "id":10,
            "type":"CRONTAB",
            "schedule":"60* */2 sun,fri 1-15 *",
-           "playbook":"collect_data.yml",
+           "mode":"collect_data.yml",
+           "kind":"PLAYBOOK",
            "project":7,
            "inventory":8,
            "vars":{
@@ -1193,7 +1194,9 @@ Periodic tasks
    :>json number id: id of periodic task.
    :>json string type: |ptask_type_details|
    :>json string schedule: |ptask_schedule_details|
-   :>json string playbook: playbook to run periodically.
+   :>json string mode: playbook or module to run periodically.
+   :>json string kind: either this task is playbook run (``PLAYBOOK``) or
+     module run (``MODULE``).
    :>json number project: id of project which this task belongs to.
    :>json number inventory: id of inventory for which must execute playbook.
    :>json object vars: |ptask_vars_def|
@@ -1230,7 +1233,8 @@ Periodic tasks
 
    :query id: id of template if we want to filter by it.
    :query id__not: id of template, which we want to filter out.
-   :query playbook: filter by playbook.
+   :query mode: filter by playbook or module name.
+   :query kind: filter by kind of task.
    :query type: filter by ``type``.
    :query project: filter by project id.
 
@@ -1255,7 +1259,8 @@ Periodic tasks
                  "id":10,
                  "type":"INTERVAL",
                  "schedule":"60",
-                 "playbook":"collect_data.yml",
+                 "mode":"collect_data.yml",
+                 "kind":"PLAYBOOK",
                  "inventory":8,
                  "vars":{
 
@@ -1266,7 +1271,8 @@ Periodic tasks
                  "id":11,
                  "type":"CRONTAB",
                  "schedule":"* */2 sun,fri 1-15 *",
-                 "playbook":"do_greatest_evil.yml",
+                 "mode":"do_greatest_evil.yml",
+                 "kind":"PLAYBOOK",
                  "inventory":8,
                  "vars":{
 
@@ -1290,7 +1296,14 @@ Periodic tasks
 
    :<json string type: |ptask_type_details|
    :<json string schedule: |ptask_schedule_details|
-   :<json string playbook: playbook to run periodically.
+   :<json string mode: playbook or module to run periodically. Depends on value
+     of ``kind`` field.
+   :<json string kind: Optional argument. Either this task is playbook run
+     (``PLAYBOOK``) or module run (``MODULE``). If omitted, will be default -
+     ``PLAYBOOK``. Module tasks also requires two variables for execution:
+     ``args`` for module-specific args (can be omitted or empty string) and
+     ``group`` to specify for which group in inventory module must run. If you
+     forget to specify group, your task will fail.
    :<json number project: id of project, which task belongs to.
    :<json number inventory: id of inventory to run playbook on.
    :<json object vars: |ptask_vars_def|
@@ -1306,7 +1319,7 @@ Periodic tasks
       {
           "type": "INTERVAL",
           "schedule": "25",
-          "playbook": "touch_the_clouds.yml",
+          "mode": "touch_the_clouds.yml",
           "project": 7,
           "inventory": 8
           "vars":{
@@ -1322,7 +1335,8 @@ Periodic tasks
         "id": 14,
         "type": "INTERVAL",
         "schedule": "25",
-        "playbook": "touch_the_clouds.yml",
+        "mode": "touch_the_clouds.yml",
+        "kind": "PLAYBOOK",
         "project": 7,
         "inventory": 8,
         "vars":{
@@ -1353,7 +1367,7 @@ Periodic tasks
       {
           "type": "INTERVAL",
           "schedule": "25",
-          "playbook": "touch_the_clouds.yml",
+          "mode": "touch_the_clouds.yml",
           "project": 7,
           "inventory": 8
       }
@@ -1366,7 +1380,8 @@ Periodic tasks
         "id": 14,
         "type": "INTERVAL",
         "schedule": "25",
-        "playbook": "touch_the_clouds.yml",
+        "mode": "touch_the_clouds.yml",
+        "kind": "PLAYBOOK",
         "project": 7,
         "inventory": 8,
         "url": "http://127.0.0.1:8080/api/v1/periodic-tasks/14/?format=api"

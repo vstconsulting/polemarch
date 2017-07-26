@@ -146,7 +146,8 @@ class PeriodicTaskFilter(_BaseFilter):
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
-                  'playbook',
+                  'mode',
+                  'kind',
                   'type',
                   'project')
 
