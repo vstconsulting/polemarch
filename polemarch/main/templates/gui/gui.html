@@ -149,7 +149,8 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Project</label>
                                 <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
-                                      
+                                     
+                                    <option <% if(!pmTasksTemplates.model.items[item_id].data.project){ %> selected <% } %> value="0" >Not set</option>  
                                     <% for(var i in pmProjects.model.items){ %>
                                         <option
                                             <% if(pmTasksTemplates.model.items[item_id].data.project == pmProjects.model.items[i].id){ %>  selected  <% } %>        
@@ -162,8 +163,8 @@
                         <div class="row"> 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Inventory</label>
-                                <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
-                                      
+                                <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" > 
+                                    <option <% if(!pmTasksTemplates.model.items[item_id].data.inventory){ %> selected <% } %> value="0" >Not set</option> 
                                     <% for(var i in pmInventories.model.items){ %>
                                         <option
                                             <% if(pmTasksTemplates.model.items[item_id].data.inventory == pmInventories.model.items[i].id){ %>  selected  <% } %>        
@@ -233,6 +234,7 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Project</label>
                                 <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
+                                    <option selected value="0" >Not set</option>  
                                     <% for(var i in pmProjects.model.items){ %>
                                         <option  
                                             value="<%- pmProjects.model.items[i].id %>"
@@ -245,6 +247,7 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Inventory</label>
                                 <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
+                                    <option selected value="0" >Not set</option>  
                                     <% for(var i in pmInventories.model.items){ %>
                                         <option   
                                             value="<%- pmInventories.model.items[i].id %>"
@@ -319,8 +322,8 @@
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </th>
-                                        <th>Playbook</th>
-                                        <th class="hidden-xs hidden-sm">Project</th>
+                                        <th>Name</th>
+                                        <th class="hidden-xs hidden-sm">Type</th>
                                         <th style="width: 110px;">Status</th>
                                         <th style="width: 160px;" class="hidden-xs">Start time</th>
                                         <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
@@ -341,8 +344,10 @@
                                                 <% if(pmProjects.model.items[val.project]){ %> 
                                                     <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>" class="item-name"
                                                             onclick="return spajs.openURL(this.href);" >
-                                                            <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
+                                                            Project: <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
                                                     </a>
+                                                <% }else{ %>
+                                                    Module
                                                 <% } %>
                                             </td>
                                             <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> history-status-<%- pmHistory.model.itemslist.results[i].status %>" >
