@@ -2,7 +2,9 @@
 var pmTasksTemplates = new pmItems()
 pmTasksTemplates.model.name = "templates" 
 pmTasksTemplates.model.selectedInventory = 0
-pmModuleTemplates.model.kind = "Task"
+
+// Поддерживаемые kind /api/v1/templates/supported-kinds/
+pmTasksTemplates.model.kind = "Task"
 
 pmTasksTemplates.execute = function(item_id)
 {

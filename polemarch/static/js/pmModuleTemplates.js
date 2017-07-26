@@ -3,6 +3,8 @@ var pmModuleTemplates = Object.create(pmTasksTemplates);
 
 pmModuleTemplates.model.name = "templates"
 pmModuleTemplates.model.selectedInventory = 0
+
+// Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmModuleTemplates.model.kind = "module"
 
 pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
