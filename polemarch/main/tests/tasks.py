@@ -127,7 +127,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.assertEquals(result[1], "somekey")
         history = History.objects.get(id=answer["history_id"])
         self.assertEquals(history.kind, "MODULE")
-        self.assertEquals(history.name, "shell")
+        self.assertEquals(history.mode, "shell")
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_complex_inventory_execute(self, subprocess_function):
@@ -213,7 +213,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
             self.assertEquals(history.status, status)
 
         def get_history_item():
-            histories = History.objects.filter(name="other/playbook.yml")
+            histories = History.objects.filter(mode="other/playbook.yml")
             self.assertEquals(histories.count(), 1)
             history = histories[0]
             # History.objects.all().delete()
@@ -278,7 +278,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                                   "/api/v1/history/{}/".format(
                                       result["history_id"]
                                   ))
-        self.assertEquals(history["name"], "first.yml")
+        self.assertEquals(history["mode"], "first.yml")
         self.get_result("post",
                         "/api/v1/history/{}/cancel/".format(history['id']),
                         200)
@@ -311,7 +311,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         self.ph = Project.objects.create(name="Prj_History",
                                          repository=repo,
                                          vars=dict(repo_type="TEST"))
-        self.default_kwargs = dict(project=self.ph, name="task.yml",
+        self.default_kwargs = dict(project=self.ph, mode="task.yml",
                                    raw_inventory="inventory",
                                    raw_stdout="text")
         self.histories = [
@@ -329,7 +329,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                                    **self.default_kwargs),
         ]
         self.default_kwargs["raw_stdout"] = "one\ntwo\nthree\nfour"
-        self.default_kwargs["name"] = "task2.yml"
+        self.default_kwargs["mode"] = "task2.yml"
         self.histories.append(History.objects.create(
             status="ERROR", start_time=now() - timedelta(hours=35),
             stop_time=now() - timedelta(hours=34), **self.default_kwargs)
@@ -340,7 +340,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         df = "%Y-%m-%dT%H:%M:%S.%fZ"
         self.list_test(url, len(self.histories))
         self.details_test(url + "{}/".format(self.histories[0].id),
-                          name="task.yml",
+                          mode="task.yml",
                           status="OK", project=self.ph.id,
                           start_time=self.histories[0].start_time.strftime(df),
                           stop_time=self.histories[0].stop_time.strftime(df),
@@ -349,7 +349,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)
 
-        res = self.get_result("get", "{}?name={}".format(url, "task.yml"))
+        res = self.get_result("get", "{}?mode={}".format(url, "task.yml"))
         self.assertEqual(res["count"], 3, res)
 
         res = self.get_result("get", "{}?project={}".format(url, self.ph.id))

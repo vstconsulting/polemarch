@@ -149,7 +149,7 @@ class HistorySerializer(serializers.ModelSerializer):
         model = models.History
         fields = ("id",
                   "project",
-                  "name",
+                  "mode",
                   "kind",
                   "status",
                   "start_time",
@@ -162,7 +162,7 @@ class OneHistorySerializer(serializers.ModelSerializer):
         model = models.History
         fields = ("id",
                   "project",
-                  "name",
+                  "mode",
                   "kind",
                   "status",
                   "start_time",

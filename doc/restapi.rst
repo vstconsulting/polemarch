@@ -1631,7 +1631,7 @@ History records
         {
            "id":1,
            "project":2,
-           "name":"task.yml",
+           "mode":"task.yml",
            "status":"OK",
            "kind": "PLAYBOOK",
            "start_time":"2017-07-02T12:48:11.922761Z",
@@ -1643,7 +1643,7 @@ History records
 
    :>json number id: id of history record.
    :>json number project: id of project, which record belongs to.
-   :>json string name: name of executed playbook or module.
+   :>json string mode: name of executed playbook or module.
    :>json string kind: either was run of ``ansible-playbook`` (``PLAYBOOK``) or
      ``ansible`` (``MODULE``).
    :>json string status: either ``DELAY``, ``OK``, ``INTERRUPTED``, ``RUN``,
@@ -1782,7 +1782,7 @@ History records
     to specified.
    :query stop_time__lte: filter records whose ``stop_time`` less or equal
     to specified.
-   :query name: filter by ``name``.
+   :query mode: filter by ``mode``.
    :query kind: filter by ``kind``.
    :query project: filter by ``project``.
    :query status: filter by ``status``.
@@ -1809,7 +1809,7 @@ History records
               {
                  "id": 121,
                  "project": 3,
-                 "name": "main.yml",
+                 "mode": "main.yml",
                  "kind": "PLAYBOOK",
                  "status": "OK",
                  "start_time": "2017-07-24T06:39:52.052504Z",
@@ -1819,7 +1819,7 @@ History records
               {
                  "id": 118,
                  "project": null,
-                 "name": "ping",
+                 "mode": "ping",
                  "kind": "MODULE",
                  "status": "OK",
                  "start_time": "2017-07-24T06:27:40.481588Z",

@@ -153,7 +153,7 @@ class Inventory(_AbstractModel):
         from ...main.tasks import ExecuteAnsibleModule
         from . import History
         kwargs['inventory'] = self
-        history_kwargs = dict(name=kwargs['module'],
+        history_kwargs = dict(mode=kwargs['module'],
                               start_time=timezone.now(),
                               inventory=self,
                               raw_stdout="",
