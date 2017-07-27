@@ -542,3 +542,20 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase):
         ptask_template = Template.objects.create(**ptask_template_data)
         self.details_test(url + "{}/".format(ptask_template.id),
                           **ptask_template_data)
+
+        module_template_data = dict(
+            name="test_ptask_template",
+            kind="Module",
+            data=dict(
+                module="shell",
+                group="all",
+                inventory=222233222,
+                args="ls -la",
+                vars=dict(
+                    user="centos"
+                )
+            )
+        )
+        module_template = Template.objects.create(**module_template_data)
+        self.details_test(url + "{}/".format(module_template.id),
+                          **module_template_data)
