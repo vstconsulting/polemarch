@@ -124,6 +124,29 @@ notes:\
 }
 
 
+pmModuleTemplates.execute = function(item_id)
+{
+    var thisObj = this;
+    var def = new $.Deferred();
+    $.when(this.loadItem(item_id)).done(function()
+    { 
+        var val = thisObj.model.items[item_id]
+        $.when(pmAnsibleModule.execute(val.data.inventory, val.data.group, val.data.module, val.data.args, val.data.vars)).done(function()
+        {  
+            def.resolve();
+        }).fail(function()
+        {
+            def.reject();
+        })
+         
+    }).fail(function()
+    {
+        def.reject();
+    })
+    
+    return def.promise()
+}
+
 
 pmModuleTemplates.showItem = function(holder, menuInfo, data)
 { 
@@ -148,7 +171,7 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
                 menuClass:'module-autocomplete',
                 renderItem: function(item, search)
                 {
-                    return '<div class="autocomplete-suggestion" data-value="' + item.playbook + '" >' + item.playbook + '</div>';
+                    return '<div class="autocomplete-suggestion" data-value="' + item.name + '" >' + item.name + '</div>';
                 },
                 onSelect: function(event, term, item)
                 {
@@ -205,7 +228,7 @@ pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
             menuClass:'module-autocomplete',
             renderItem: function(item, search)
             {
-                return '<div class="autocomplete-suggestion" data-value="' + item.playbook + '" >' + item.playbook + '</div>';
+                return '<div class="autocomplete-suggestion" data-value="' + item.name + '" >' + item.name + '</div>';
             },
             onSelect: function(event, term, item)
             {
@@ -289,6 +312,7 @@ pmModuleTemplates.addItem = function()
         return;
     }
 
+    var thisObj = this;
     $.ajax({
         url: "/api/v1/templates/",
         type: "POST",
@@ -303,7 +327,7 @@ pmModuleTemplates.addItem = function()
         success: function(data)
         {
             $.notify("template created", "success");
-            $.when(spajs.open({ menuId:"template/"+data.id})).always(function(){
+            $.when(spajs.open({ menuId:"template/"+thisObj.model.kind+"/"+data.id})).always(function(){
                 def.resolve()
             })
         },
