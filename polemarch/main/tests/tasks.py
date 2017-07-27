@@ -313,7 +313,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                                          vars=dict(repo_type="TEST"))
         self.default_kwargs = dict(project=self.ph, name="task.yml",
                                    raw_inventory="inventory",
-                                   raw_stdout="text")
+                                   raw_stdout="text", inventory=self.inventory)
         self.histories = [
             History.objects.create(status="OK",
                                    start_time=now() - timedelta(hours=15),
@@ -344,7 +344,8 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                           status="OK", project=self.ph.id,
                           start_time=self.histories[0].start_time.strftime(df),
                           stop_time=self.histories[0].stop_time.strftime(df),
-                          raw_inventory="inventory", raw_stdout="text")
+                          raw_inventory="inventory", raw_stdout="text",
+                          inventory=self.inventory.id)
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)

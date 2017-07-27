@@ -152,6 +152,7 @@ class HistorySerializer(serializers.ModelSerializer):
                   "name",
                   "kind",
                   "status",
+                  "inventory",
                   "start_time",
                   "stop_time",
                   "url")

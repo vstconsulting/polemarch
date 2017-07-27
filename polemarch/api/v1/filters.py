@@ -137,6 +137,7 @@ class HistoryFilter(_BaseFilter):
                   'kind',
                   'project',
                   'status',
+                  'inventory',
                   'start_time',
                   'stop_time')
 
