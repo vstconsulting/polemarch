@@ -21,12 +21,8 @@ pmAnsibleModule.showInInventory = function(holder, menuInfo, data)
         $.notify("", "error");
     })
 }
-
-pmAnsibleModule.getDataVars = function(){
-    return $("#module-args-string").val();
-}
-
-pmAnsibleModule.execute = function(inventory_id, group, module, data_vars)
+ 
+pmAnsibleModule.execute = function(inventory_id, group, module, data_args, data_vars)
 {
     var def = new $.Deferred();
     if(!group)
@@ -50,16 +46,21 @@ pmAnsibleModule.execute = function(inventory_id, group, module, data_vars)
         return;
     }
     
-    if(!data_vars)
+    if(!data_args)
     {  
-        data_vars = this.getDataVars();
+        data_args = $("#module-args-string").val();
     }
  
-    var data = {}
+    var data = data_vars
+    if(!data_vars)
+    {  
+        data = jsonEditor.jsonEditorGetValues();
+    }
+    
     data.inventory = inventory_id
     data.module = module
     data.group = group
-    data.args = data_vars
+    data.args = data_args
 
     $.ajax({
         url: "/api/v1/execute_module/",

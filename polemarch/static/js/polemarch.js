@@ -319,8 +319,8 @@ polemarch.start = function(options)
     })
     
     spajs.addMenu({
-        id:"task-item", 
-        urlregexp:[/^template\/([0-9]+)$/], 
+        id:"Task-item", 
+        urlregexp:[/^template\/Task\/([0-9]+)$/], 
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showItem(holder, menuInfo, data);}, 
     })
     
@@ -328,6 +328,18 @@ polemarch.start = function(options)
         id:"task-new", 
         urlregexp:[/^template\/new-task$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showNewItemPage(holder, menuInfo, data);}
+    })
+     
+    spajs.addMenu({
+        id:"Module-item", 
+        urlregexp:[/^template\/Module\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmModuleTemplates.showItem(holder, menuInfo, data);}, 
+    })
+    
+    spajs.addMenu({
+        id:"module-new", 
+        urlregexp:[/^template\/new-module$/],
+        onOpen:function(holder, menuInfo, data){return pmModuleTemplates.showNewItemPage(holder, menuInfo, data);}
     })
     
     spajs.openMenuFromUrl()

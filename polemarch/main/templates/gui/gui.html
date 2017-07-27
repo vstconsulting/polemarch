@@ -17,6 +17,7 @@
 
     <section class="content">
         <button type="button" onclick="spajs.open({ menuId:'template/new-task'});  return false;" class="btn btn-primary" >Create task template</button>
+        <button type="button" onclick="spajs.open({ menuId:'template/new-module'});  return false;" class="btn btn-primary" >Create module template</button>
         <br>
         <br>
         <div class="row">
@@ -54,7 +55,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th class="hidden-xs hidden-sm">Name</th>
-                                    <!--<th>Kind</th> -->
+                                    <th style="width: 105px;">Kind</th> 
                                     <th style="width: 105px;" >Actions</th> 
                                 </tr> 
                                 <% for(var i in pmTasksTemplates.model.itemslist.results){  val = pmTasksTemplates.model.itemslist.results[i]; %>
@@ -66,15 +67,14 @@
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td> 
                                         <td>
-                                            <a href="/?template/<%- pmTasksTemplates.model.itemslist.results[i].id %>" class="item-name"
-                                                    onclick="return spajs.openURL(this.href);" ><%- pmTasksTemplates.model.itemslist.results[i].name %></a>
+                                            <a href="/?template/<%- val.kind %>/<%- val.id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- val.name %></a>
                                         </td>
-                                        <!--<td>
-                                            <%- pmTasksTemplates.model.itemslist.results[i].kind %>
-                                        </td> -->
                                         <td>
-                                            <!--<a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTasksTemplates.execute(val.id)); return false;">Execute</a>-->
-                                            <a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTasksTemplates.execute(<%- val.id %>)); return false;">Execute</a>
+                                            <%- val.kind %>
+                                        </td> 
+                                        <td> 
+                                            <a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTemplates.model.kindObjects[val.kind].execute(<%- val.id %>)); return false;">Execute</a>
                                         </td>
                                     </tr>
                                 <% } %>
@@ -102,9 +102,258 @@
         </div>
     </section>
 </script>
-
-<script type="text/x-just" data-just="templates_page">
+    
+<script type="text/x-just" data-just="templates_module_page">
 <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+            <span class="h1-header" >Module template `<%- pmModuleTemplates.model.items[item_id].name %>`</span>
+            
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li> 
+            <li class="active"><%- pmModuleTemplates.model.items[item_id].name.slice(0, 20) %></li>
+        </ol>
+    </section>
+
+    <section class="content"> 
+        <button type="button" onclick="spajs.showLoader(pmModuleTemplates.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save</button>
+        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute($('#inventories-autocomplete').val(), $('#group-autocomplete').val(), $('#module-autocomplete').val(), $('#module-args-string').val(), jsonEditor.jsonEditorGetValues())); return false;"
+               class="btn btn-warning" >Execute</button>
+                                        
+        <button type="button" onclick="spajs.showLoader(pmModuleTemplates.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Run module template
+                    </div>
+                    <div class="box-body">
+                    
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Template name</label>
+                                <input type="text"
+                                        placeholder="Enter name"
+                                        id="Templates-name"
+                                        value="<%- pmModuleTemplates.model.items[item_id].name %>"
+                                        class="form-control"
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>  
+                             
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Inventory</label>
+                                <select 
+                                    class="form-control select2"
+                                    id="inventories-autocomplete"
+                                    data-placeholder="Select inventory"
+                                    style="width:100%"
+                                    onchange="pmModuleTemplates.selectInventory(this.value);"
+                                >
+                                    <option value="0" >Not set</option>  
+                                    <% for(var i in pmInventories.model.items){ %>
+                                        <option  
+                                            <% if(pmInventories.model.items[i].id == pmModuleTemplates.model.items[item_id].data.inventory ){ %>selected<% } %>
+                                            value="<%- pmInventories.model.items[i].id %>"
+                                            ><%- pmInventories.model.items[i].name %></option>
+                                    <% } %>
+                                </select>
+                            </div>  
+                        
+                            <~ pmModuleTemplates.model.selectedInventory>
+                                <% if(!pmModuleTemplates.model.selectedInventory){ %>
+
+                                <% }else{ %> 
+                                    <div class="form-group col-lg-2">
+                                        <label class="control-label" >Group</label>
+                                        <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
+                                            <option value="all">All</option>  
+                                            <% for(var i in pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups){ %>
+                                                <option 
+                                                    <% if(pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name == pmModuleTemplates.model.items[item_id].data.group ){ %>selected<% } %>
+                                                    value="<%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %>" >
+                                                        <%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %>
+                                                    </option>
+                                            <% } %>
+                                        </select>
+                                        <div class="help-block">
+                                            <% if(!pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups.length){ %>
+                                                    <span class="error-note" >In inventory <%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].name %> has no any groups</span>
+                                            <% } %>
+                                        </div>
+                                    </div>  
+                                <% } %> 
+                            <~>
+                        </div>  
+                        
+                        <div class="row"> 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Module</label>
+                                <input type="text"
+                                        class="module-autocomplete form-control"
+                                        id="module-autocomplete"
+                                        value="<%- pmModuleTemplates.model.items[item_id].data.module %>">
+                            </div> 
+                        </div>
+                        <div class="row" >
+                            <div class="col-lg-12">
+                                <div class="">
+                                    <label class="control-label" >Args</label>
+                                    <input type="text" 
+                                            class="form-control"
+                                            value="<%- pmModuleTemplates.model.items[item_id].data.args %>"
+                                            id="module-args-string"
+                                            onchange=""
+                                            onpaste=""  >
+                                   <!--<span class="input-group-addon" onclick=" " >
+                                         <span class="glyphicon glyphicon-pencil"></span>
+                                    </span>-->
+                                </div>
+                                <div class="help-block">
+                                    args (string) – which args must be passed to module. Just raw string with arguments. You can specify here contains of args option. For example ls -la for shell module.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div> 
+        <div class="row">
+            <%= jsonEditor.editor(pmModuleTemplates.model.items[item_id].data.vars, {block:'module', title1:'Arguments', title2:'Adding new argument'}) %>
+        </div>
+    </section>
+</script>
+    
+<script type="text/x-just" data-just="templates_new_module_page">
+<section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+            <span class="h1-header" >New template for run module</span>
+            
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li> 
+            <li class="active">New module template</li>
+        </ol>
+    </section>
+
+    <section class="content"> 
+        <button type="button" onclick="spajs.showLoader(pmModuleTemplates.addItem()); return false;" class="btn btn-primary" >Create</button> 
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Run module template
+                    </div>
+                    <div class="box-body">
+                    
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Template name</label>
+                                <input type="text"
+                                        placeholder="Enter name"
+                                        id="Templates-name"
+                                        value=""
+                                        class="form-control"
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>  
+                             
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Inventory</label>
+                                <select 
+                                    class="form-control select2"
+                                    id="inventories-autocomplete"
+                                    data-placeholder="Select inventory"
+                                    style="width:100%"
+                                    onchange="pmModuleTemplates.selectInventory(this.value);"
+                                >
+                                    <option selected value="0" >Not set</option>  
+                                    <% for(var i in pmInventories.model.items){ %>
+                                        <option   
+                                            value="<%- pmInventories.model.items[i].id %>"
+                                            ><%- pmInventories.model.items[i].name %></option>
+                                    <% } %>
+                                </select>
+                            </div>  
+                        
+                            <~ pmModuleTemplates.model.selectedInventory>
+                                <% if(!pmModuleTemplates.model.selectedInventory){ %>
+
+                                <% }else{ %> 
+                                    <div class="form-group col-lg-2">
+                                        <label class="control-label" >Group</label>
+                                        <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
+                                            <option value="all" selected>All</option> 
+                                            <% for(var i in pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups){ %>
+                                                <option value="<%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %>" ><%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %></option>
+                                            <% } %>
+                                        </select>
+                                        <div class="help-block">
+                                            <% if(!pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups.length){ %>
+                                                    <span class="error-note" >In inventory <%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].name %> has no any groups</span>
+                                            <% } %>
+                                        </div>
+                                    </div>  
+                                <% } %> 
+                            <~>
+                        </div>  
+                        
+                        <div class="row"> 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Module</label>
+                                <input type="text"
+                                        class="module-autocomplete form-control"
+                                        id="module-autocomplete"
+                                        value="">
+                            </div> 
+                        </div>
+                        <div class="row" >
+                            <div class="col-lg-12">
+                                <div class="">
+                                    <label class="control-label" >Args</label>
+                                    <input type="text" 
+                                            class="form-control"
+                                            value=""
+                                            id="module-args-string"
+                                            onchange=""
+                                            onpaste=""  >
+                                   <!--<span class="input-group-addon" onclick=" " >
+                                         <span class="glyphicon glyphicon-pencil"></span>
+                                    </span>-->
+                                </div>
+                                <div class="help-block">
+                                    args (string) – which args must be passed to module. Just raw string with arguments. You can specify here contains of args option. For example ls -la for shell module.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div> 
+        <div class="row">
+            <%= jsonEditor.editor({}, {block:'tasks', title1:'Arguments', title2:'Adding new argument'}) %>
+        </div>
+    </section>
+</script>
+        
+<script type="text/x-just" data-just="templates_page">
+    <section class="content-header">
         <h1>
             <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
@@ -140,7 +389,7 @@
                                 <label class="control-label" >Template name</label>
                                 <input type="text"
                                         placeholder="Enter name"
-                                        id="TasksTemplates-name"
+                                        id="Templates-name"
                                         value="<%- pmTasksTemplates.model.items[item_id].name %>"
                                         class="form-control"
                                         maxlength="255">
@@ -149,7 +398,8 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Project</label>
                                 <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
-                                      
+                                     
+                                    <option <% if(!pmTasksTemplates.model.items[item_id].data.project){ %> selected <% } %> value="0" >Not set</option>  
                                     <% for(var i in pmProjects.model.items){ %>
                                         <option
                                             <% if(pmTasksTemplates.model.items[item_id].data.project == pmProjects.model.items[i].id){ %>  selected  <% } %>        
@@ -162,8 +412,8 @@
                         <div class="row"> 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Inventory</label>
-                                <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
-                                      
+                                <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" > 
+                                    <option <% if(!pmTasksTemplates.model.items[item_id].data.inventory){ %> selected <% } %> value="0" >Not set</option> 
                                     <% for(var i in pmInventories.model.items){ %>
                                         <option
                                             <% if(pmTasksTemplates.model.items[item_id].data.inventory == pmInventories.model.items[i].id){ %>  selected  <% } %>        
@@ -224,7 +474,7 @@
                                 <label class="control-label" >Template name</label>
                                 <input type="text"
                                         placeholder="Enter name"
-                                        id="TasksTemplates-name"
+                                        id="Templates-name"
                                         value=""
                                         class="form-control"
                                         maxlength="255">
@@ -233,6 +483,7 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Project</label>
                                 <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
+                                    <option selected value="0" >Not set</option>  
                                     <% for(var i in pmProjects.model.items){ %>
                                         <option  
                                             value="<%- pmProjects.model.items[i].id %>"
@@ -245,6 +496,7 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Inventory</label>
                                 <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
+                                    <option selected value="0" >Not set</option>  
                                     <% for(var i in pmInventories.model.items){ %>
                                         <option   
                                             value="<%- pmInventories.model.items[i].id %>"
@@ -319,8 +571,8 @@
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </th>
-                                        <th>Playbook</th>
-                                        <th class="hidden-xs hidden-sm">Project</th>
+                                        <th>Name</th>
+                                        <th class="hidden-xs hidden-sm">Type</th>
                                         <th style="width: 110px;">Status</th>
                                         <th style="width: 160px;" class="hidden-xs">Start time</th>
                                         <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
@@ -341,8 +593,10 @@
                                                 <% if(pmProjects.model.items[val.project]){ %> 
                                                     <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>" class="item-name"
                                                             onclick="return spajs.openURL(this.href);" >
-                                                            <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
+                                                            Project: <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
                                                     </a>
+                                                <% }else{ %>
+                                                    Module
                                                 <% } %>
                                             </td>
                                             <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> history-status-<%- pmHistory.model.itemslist.results[i].status %>" >
@@ -1873,19 +2127,7 @@
                         Execute ansible module
                     </div>
                     <div class="box-body">
-                    
-                        <!--<div class="row">
-                            <div class="form-group col-lg-2">
-                                <label class="control-label" >Template name</label>
-                                <input type="text"
-                                        placeholder="Enter name"
-                                        id="TasksTemplates-name"
-                                        value="pmTasksTemplates.model.items[item_id].name"
-                                        class="form-control"
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-                        </div>--> 
+                     
                         <div class="row"> 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Group</label>
@@ -1934,6 +2176,9 @@
                 </div>
             </section>
         </div> 
+        <div class="row">
+            <%= jsonEditor.editor({}, {block:'module', title1:'Arguments', title2:'Adding new argument'}) %>
+        </div>
     </section>
 </script>
 <!-- Страница inventory -->
@@ -3565,15 +3810,7 @@
                         <p>Projects</p>
                     </div>  
                 </div>
-            </div>
-            <div class="col-lg-1 col-xs-2"> 
-                <div class="small-box bg-aqua">
-                    <div class="inner">
-                        <h3><%= pmDashboard.model.count.justText('projects') %></h3> 
-                        <p>Projects</p>
-                    </div>  
-                </div>
-            </div>
+            </div> 
             <div class="col-lg-1 col-xs-2"> 
                 <div class="small-box bg-aqua">
                     <div class="inner">
@@ -3613,6 +3850,10 @@
                         <p>History</p>
                     </div>  
                 </div>
+            </div>
+            
+            <div class="col-lg-6 col-xs-12">  
+                <div id="c3-history-chart"></div>  
             </div>
         </div>
     </section>
