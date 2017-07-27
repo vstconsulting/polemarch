@@ -59,74 +59,93 @@ class Executor(CmdExecutor):
                                              line=line)
 
 
-def __parse_extra_args(project, **extra):
-    extra_args, files = list(), list()
-    for key, value in extra.items():
-        if key in ["extra_vars", "extra-vars"]:
-            key = "extra-vars"
-        elif key == "verbose":
-            continue
-        elif key in ["key_file", "key-file"]:
-            if "BEGIN RSA PRIVATE KEY" in value:
-                kfile = tmp_file()
-                kfile.write(value)
-                files.append(kfile)
-                value = kfile.name
-            else:
-                value = "{}/{}".format(project.path, value)
-            key = "key-file"
-        extra_args.append("--{}".format(key))
-        extra_args += [str(value)] if value else []
-    return AnsibleExtra(extra_args, files)
+class AnsibleCommand(object):
+    command_type = None
 
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
 
-def run_ansible_executable(executable, task, inventory,
-                           history, **extra_args):
-    history.raw_inventory, key_files = inventory.get_inventory()
-    history.status = "RUN"
-    history.save()
-    path_to_ansible = dirname(sys.executable) + "/" + executable
-    inventory_file = tmp_file()
-    inventory_file.write(history.raw_inventory)
-    status = "OK"
-    try:
-        extra = __parse_extra_args(project=history.project, **extra_args)
-        args = [path_to_ansible, task, '-i',
-                inventory_file.name, '-v'] + extra.args
-        history.raw_args = " ".join(args)
-        history.raw_stdout = Executor(history).execute(args)
-    except CalledProcessError as exception:
-        history.raw_stdout = str(exception.output)
-        if exception.returncode == 4:
-            status = "OFFLINE"
-        elif exception.returncode == -9:
-            status = "INTERRUPTED"
-        else:
-            status = "ERROR"
-    except Exception as exception:  # pragma: no cover
-        history.raw_stdout = history.raw_stdout + str(exception)
-        status = "ERROR"
-    finally:
-        inventory_file.close()
-        for key_file in key_files:
-            key_file.close()
-        history.stop_time = timezone.now()
-        history.status = status
+    def __parse_extra_args(self, **extra):
+        extra_args, files = list(), list()
+        for key, value in extra.items():
+            if key in ["extra_vars", "extra-vars"]:
+                key = "extra-vars"
+            elif key == "verbose":
+                continue
+            elif key in ["key_file", "key-file"]:
+                if "BEGIN RSA PRIVATE KEY" in value:
+                    kfile = tmp_file()
+                    kfile.write(value)
+                    files.append(kfile)
+                    value = kfile.name
+                else:
+                    value = "{}/{}".format(self.workdir, value)
+                key = "key-file"
+            extra_args.append("--{}".format(key))
+            extra_args += [str(value)] if value else []
+        return AnsibleExtra(extra_args, files)
+
+    def get_workdir(self):
+        return "/tmp"
+
+    @property
+    def workdir(self):
+        return self.get_workdir()
+
+    def execute(self, target, inventory, history, **extra_args):
+        self.project = history.project
+        history.raw_inventory, key_files = inventory.get_inventory()
+        history.status = "RUN"
         history.save()
+        path_to_ansible = dirname(sys.executable) + "/" + self.command_type
+        inventory_file = tmp_file()
+        inventory_file.write(history.raw_inventory)
+        status = "OK"
+        try:
+            extra = self.__parse_extra_args(**extra_args)
+            args = [path_to_ansible, target, '-i',
+                    inventory_file.name, '-v'] + extra.args
+            history.raw_args = " ".join(args)
+            history.raw_stdout = Executor(history).execute(args, self.workdir)
+        except CalledProcessError as exception:
+            history.raw_stdout = str(exception.output)
+            if exception.returncode == 4:
+                status = "OFFLINE"
+            elif exception.returncode == -9:
+                status = "INTERRUPTED"
+            else:
+                status = "ERROR"
+        except Exception as exception:  # pragma: no cover
+            history.raw_stdout = history.raw_stdout + str(exception)
+            status = "ERROR"
+        finally:
+            inventory_file.close()
+            for key_file in key_files:
+                key_file.close()
+            history.stop_time = timezone.now()
+            history.status = status
+            history.save()
+
+    def run(self):
+        return self.execute(*self.args, **self.kwargs)
 
 
-def run_ansible(group, module, inventory, history, module_args, **extra_args):
-    extra_args['module-name'] = module
-    if module_args is not None:
-        extra_args['args'] = module_args
-    run_ansible_executable("ansible", group,
-                           inventory, history, **extra_args)
+class AnsiblePlaybook(AnsibleCommand):
+    command_type = "ansible-playbook"
+
+    def get_workdir(self):
+        return self.project.path
 
 
-def run_ansible_playbook(task, inventory, history, **extra_args):
-    path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
-    run_ansible_executable("ansible-playbook", path_to_playbook,
-                           inventory, history, **extra_args)
+class AnsibleModule(AnsibleCommand):
+    command_type = "ansible"
+
+    def __init__(self, module, module_args, *args, **kwargs):
+        kwargs['module-name'] = module
+        if module_args is not None:
+            kwargs['args'] = module_args
+        super(AnsibleModule, self).__init__(*args, **kwargs)
 
 
 # Block of real models
@@ -143,7 +162,8 @@ class Task(BModel):
         return str(self.name)
 
     def run_ansible_playbook(self, inventory, history, **extra):
-        run_ansible_playbook(self, inventory, history, **extra)
+        target = "{}/{}".format(self.project.path, self.playbook)
+        AnsiblePlaybook(target, inventory, history, **extra).run()
 
 
 # noinspection PyTypeChecker

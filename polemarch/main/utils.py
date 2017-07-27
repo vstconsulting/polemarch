@@ -122,17 +122,20 @@ class CmdExecutor(object):
         if line is not None:
             self.write_output(line)
 
-    def execute(self, cmd):
+    def execute(self, cmd, cwd):
         '''
         Execute commands and output this
 
         :param cmd: -- list of cmd command and arguments
         :type cmd: list
+        :param cwd: -- workdir for executions
+        :type cwd: str
         :return: -- string with full output
         :rtype: str
         '''
         self.output = ""
-        proc = Popen(cmd, stdout=PIPE, stderr=STDOUT, universal_newlines=True)
+        proc = Popen(cmd, stdout=PIPE, stderr=STDOUT,
+                     universal_newlines=True, cwd=cwd)
         for line in self._unbuffered(proc):
             if self.line_handler(proc, line):
                 break
