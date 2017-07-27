@@ -1,70 +1,13 @@
 
+var pmModuleTemplates = Object.create(pmTemplates);
+
 var pmTasksTemplates = new pmItems()
-pmTasksTemplates.model.name = "templates" 
-pmTasksTemplates.model.selectedInventory = 0
+pmTasksTemplates.model.name = "templates"  
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmTasksTemplates.model.kind = "Task"
-
-pmTasksTemplates.execute = function(item_id)
-{
-    var def = new $.Deferred();
-    $.when(this.loadItem(item_id)).done(function()
-    { 
-        var val = pmTasksTemplates.model.items[item_id]
-        $.when(pmTasks.execute(val.data.project, val.data.inventory, val.data.playbook, val.data.vars)).done(function()
-        {  
-            def.resolve();
-        }).fail(function()
-        {
-            def.reject();
-        })
-         
-    }).fail(function()
-    {
-        def.reject();
-    })
-    
-    return def.promise()
-}
-
-pmTasksTemplates.showSearchResults = function(holder, menuInfo, data)
-{
-    var thisObj = this;
-    var query = decodeURIComponent(data.reg[1]) 
-    
-    return $.when(this.sendSearchQuery({kind:"Task", name:query})).done(function()
-    {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:query}))
-    }).fail(function()
-    {
-        $.notify("", "error");
-    })
-}
-
-pmTasksTemplates.showList = function(holder, menuInfo, data)
-{
-    var thisObj = this;
-    var offset = 0
-    var limit = this.pageSize;
-    if(data.reg && data.reg[1] > 0)
-    {
-        offset = this.pageSize*(data.reg[1] - 1);
-    }
-
-    return $.when(this.sendSearchQuery({kind:"Task"}, limit, offset)).done(function()
-    {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:""}))
-
-        thisObj.model.selectedCount = $('.multiple-select .selected').length;
-
-    }).fail(function()
-    {
-        $.notify("", "error");
-    })
-}
-
-
+pmTemplates.model.kindObjects[pmTasksTemplates.model.kind] = pmTasksTemplates
+  
 pmTasksTemplates.showItem = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
@@ -185,8 +128,8 @@ pmTasksTemplates.addItem = function()
     var def = new $.Deferred();
     var data = {}
 
-    data.name = $("#TasksTemplates-name").val()
-    data.kind = pmModuleTemplates.model.kind
+    data.name = $("#Templates-name").val()
+    data.kind = this.model.kind
     data.data = {
         playbook:$("#playbook-autocomplete").val(),
         inventory:$("#inventories-autocomplete").val(),
@@ -237,7 +180,7 @@ pmTasksTemplates.updateItem = function(item_id)
 {
     var data = {}
 
-    data.name = $("#TasksTemplates-name").val()
+    data.name = $("#Templates-name").val()
     data.kind = pmModuleTemplates.model.kind
     data.data = {
         playbook:$("#playbook-autocomplete").val(),
