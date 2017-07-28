@@ -69,6 +69,10 @@
             {% else %}
                 var is_superuser = false
             {% endif %}
+            
+            window.pmStaticPath = "{% static '' %}";
+            window.isDebug = {% if debug %}true{% else %}false{% endif %}
+            
         </script>
            
         <script src="{% static 'js/libs/c3/d3.min.js' %}"></script> 
@@ -104,10 +108,7 @@
         <script src="{% static 'js/pmModuleTemplates.js' %}"></script>
         <script src="{% static 'js/pmAnsibleModule.js' %}"></script>
         <script src="{% static 'js/pmDashboard.js' %}"></script>
-
-        <script>
-            window.pmStaticPath = "{% static '' %}";
-        </script> 
+  
         {% block custom_style %}
         {% endblock %}
       {% endblock %}
@@ -185,12 +186,14 @@
                 <div class="pull-right hidden-xs">
                     <b>Version</b> {{polemarch_version}}
                 </div>
-                <div class="pull-right hidden-xs">
-                    <b><a href="#" 
-                          style="color:#ccc;" 
-                          onclick="$('body').append('<script src=\'' + window.pmStaticPath + 'js/tests/qUnitTest.js\'></script>')" >Test qUnit</a></b>
-                    &nbsp;&nbsp;&nbsp;
-                </div>
+                {% if debug %} 
+                    <div class="pull-right hidden-xs">
+                        <b><a href="#" 
+                              style="color:#ccc;" 
+                              onclick="$('body').append('<script src=\'' + window.pmStaticPath + 'js/tests/qUnitTest.js\'></script>')" >Test qUnit</a></b>
+                        &nbsp;&nbsp;&nbsp;
+                    </div>
+                {% endif %}
                 <br>
             </footer>
         </div>

@@ -43,7 +43,7 @@ class ScheduledTask(BaseTask):
     def run(self):
         from ..models import PeriodicTask
         task = PeriodicTask.objects.get(id=self.job_id)
-        task.execute_palybook()
+        task.execute()
 
 
 class _ExecuteAnsible(BaseTask):

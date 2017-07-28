@@ -194,3 +194,18 @@ class Tar(_ArchiveRepo):  # pragma: no cover
             shutil.move(path + ".bak", path)
         else:
             shutil.rmtree(path + ".bak")
+
+
+class Manual(_Base):
+    def make_clone(self, options):
+        try:
+            os.mkdir(self.path)
+        except OSError as oserror:  # pragma: nocov
+            if oserror.errno == os.errno.EEXIST:
+                self.delete()
+                return self.make_clone(options)
+            raise
+        return None, None
+
+    def make_update(self, options):
+        return None, None

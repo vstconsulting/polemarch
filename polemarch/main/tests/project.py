@@ -29,10 +29,11 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
             self.assertEqual(pr['type'], "TEST")
 
         result = self.get_result("get", url+"supported-repos/")
-        self.assertCount(result, 3)
+        self.assertCount(result, 4)
         self.assertIn("TEST", result, result)
         self.assertIn("GIT", result, result)
         self.assertIn("TAR", result, result)
+        self.assertIn("MANUAL", result, result)
 
         data = [dict(name="Prj3", repository="git@ex.us:dir/rep3.git",
                      vars=dict(repo_type="TEST", repo_password="1234")),
@@ -96,3 +97,30 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         # Full update list of project
         self._compare_list(url, "put", 200, prj_id, inventories_id,
                            "inventories", inventories_id)
+
+    def test_manual_repo(self):
+        url = "/api/v1/projects/"
+        task_url = "/api/v1/tasks/?project={}"
+        project_url = "/api/v1/projects/{}/"
+
+        data = dict(name="Manual project", repository="manual",
+                    vars=dict(repo_type="MANUAL"))
+        prj_id = self.mass_create(url, [data], "name", "repository")[0]
+        project = Project.objects.get(pk=prj_id)
+        self.assertEqual(project.vars["repo_type"], "MANUAL")
+        self.assertEqual(project.status, "OK")
+        task_url = task_url.format(project.id)
+        project_url = project_url.format(project.id)
+
+        def check_tasks(count):
+            result = self.get_result("get", task_url)
+            self.assertEqual(result["count"], count)
+            self.assertCount(result['results'], count)
+
+        check_tasks(0)
+        with open(project.path+"/test.yml", "w") as f:
+            f.write("some_playbook")
+        self.get_result("post", project_url + "sync/", 200)
+        check_tasks(1)
+
+        self.get_result("delete", project_url)

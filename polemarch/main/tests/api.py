@@ -10,7 +10,8 @@ from .inventory import (ApiHostsTestCase, ApiGroupsTestCase,
                         ApiInventoriesTestCase)
 from .tasks import (ApiTasksTestCase,
                     ApiPeriodicTasksTestCase,
-                    ApiTemplateTestCase)
+                    ApiTemplateTestCase,
+                    ApiHistoryTestCase)
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -191,7 +192,7 @@ class APITestCase(ApiUsersTestCase,
                   ApiHostsTestCase, ApiGroupsTestCase,
                   ApiInventoriesTestCase, ApiProjectsTestCase,
                   ApiTasksTestCase, ApiPeriodicTasksTestCase,
-                  ApiBulkTestCase, ApiTemplateTestCase):
+                  ApiBulkTestCase, ApiTemplateTestCase, ApiHistoryTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 

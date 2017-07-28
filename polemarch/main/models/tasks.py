@@ -87,15 +87,12 @@ class PeriodicTask(AbstractModel):
             self.run_ansible_module()
 
     def run_ansible_module(self):
-        kwargs = dict(group=self.vars.pop("group"),
-                      module=self.mode,
-                      module_args=self.vars.pop('args', None) or None)
-        kwargs.update(self.vars)
-        self.inventory.execute_ansible_module(**kwargs)
+        self.project.execute_ansible_playbook(self.mode, self.inventory.id,
+                                              sync=True, **self.vars)
 
     def run_ansible_playbook(self):
-        self.project.execute(self.mode, self.inventory.id,
-                             sync=True, **self.vars)
+        self.project.execute_ansible_playbook(self.mode, self.inventory.id,
+                                              sync=True, **self.vars)
 
 
 class Template(BModel):
