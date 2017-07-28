@@ -4,7 +4,7 @@ import logging
 from ...celery_app import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
-from ..models.tasks import Task, AnsibleModule
+from ..models.utils import AnsibleModule, AnsiblePlaybook
 
 logger = logging.getLogger("polemarch")
 
@@ -43,31 +43,31 @@ class ScheduledTask(BaseTask):
     def run(self):
         from ..models import PeriodicTask
         task = PeriodicTask.objects.get(id=self.job_id)
-        task.execute()
+        task.execute_palybook()
 
 
 @task(app, ignore_result=True, bind=True)
-class ExecuteAnsibleTask(BaseTask):
-    def __init__(self, app, project, playbook, inventory, history,
+class ExecuteAnsiblePlaybook(BaseTask):
+    def __init__(self, app, target, inventory, history,
                  *args, **kwargs):
         super(self.__class__, self).__init__(app, *args, **kwargs)
         self.inventory = inventory
         self.history = history
-        self.job = Task(playbook=playbook, project=project)
+        self.project = self.history.project
+        self.ansible_playbook = AnsiblePlaybook(target, inventory, history,
+                                                **kwargs)
 
     def run(self):
-        self.job.run_ansible_playbook(self.inventory,
-                                      self.history,
-                                      **self.kwargs)
+        self.ansible_playbook.run()
 
 
 @task(app, ignore_result=True, bind=True)
 class ExecuteAnsibleModule(BaseTask):
-    def __init__(self, app, group, module, inventory, history, module_args,
-                 *args, **kwargs):
+    def __init__(self, app, group, target, inventory, history, args,
+                 *pargs, **kwargs):
         # pylint: disable=too-many-arguments
-        super(self.__class__, self).__init__(app, *args, **kwargs)
-        self.ansible_module = AnsibleModule(module, module_args, group,
+        super(self.__class__, self).__init__(app, *pargs, **kwargs)
+        self.ansible_module = AnsibleModule(target, args, group,
                                             inventory, history, **kwargs)
 
     def run(self):

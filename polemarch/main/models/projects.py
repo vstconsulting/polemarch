@@ -7,16 +7,17 @@ from django.conf import settings
 from django.utils import timezone
 
 from . import hosts as hosts_models
-from .vars import _AbstractModel, _AbstractVarsQuerySet, BManager, models
+from .vars import AbstractModel, AbstractVarsQuerySet, BManager, models
 from ..exceptions import PMException
 from ..utils import ModelHandlers
+from ..tasks import ExecuteAnsiblePlaybook, ExecuteAnsibleModule
 
 
 logger = logging.getLogger("polemarch")
 PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
 
 
-class ProjectQuerySet(_AbstractVarsQuerySet):
+class ProjectQuerySet(AbstractVarsQuerySet):
     handlers = ModelHandlers("REPO_BACKENDS", "'repo_type' variable needed!")
 
     def create(self, **kwargs):
@@ -25,7 +26,7 @@ class ProjectQuerySet(_AbstractVarsQuerySet):
         return project
 
 
-class Project(_AbstractModel):
+class Project(AbstractModel):
     objects     = BManager.from_queryset(ProjectQuerySet)()
     handlers    = objects._queryset_class.handlers
     repository  = models.CharField(max_length=2*1024)
@@ -56,32 +57,41 @@ class Project(_AbstractModel):
     def type(self):
         return self.variables.get(key="repo_type").value
 
-    def _prepare_task(self, playbook_name, inventory_id, **extra):
-        if not playbook_name:
-            raise PMException("Empty playbook name.")
+    def _prepare_kw(self, mod_name, inventory_id, kind, **extra):
+        if not mod_name:
+            raise PMException("Empty playbook/module name.")
         from .tasks import History
         inventory = hosts_models.Inventory.objects.get(id=inventory_id)
-        history_kwargs = dict(name=playbook_name,
+        history_kwargs = dict(name=mod_name,
                               start_time=timezone.now(),
                               inventory=inventory,
                               project=self,
+                              kind=kind,
                               raw_stdout="")
         history = History.objects.create(status="DELAY", **history_kwargs)
-        kwargs = dict(project=self, playbook=playbook_name,
-                      inventory=inventory, history=history)
+        kwargs = dict(target=mod_name, inventory=inventory, history=history)
         kwargs.update(extra)
         return kwargs
 
-    def execute(self, playbook_name, inventory_id, **extra):
+    def execute_ansible_playbook(self, playbook, inventory_id, **extra):
         # pylint: disable=no-member
-        from ..tasks import ExecuteAnsibleTask
         sync = extra.pop("sync", False)
-        kwargs = self._prepare_task(playbook_name, inventory_id, **extra)
+        kwargs = self._prepare_kw(playbook, inventory_id, "PLAYBOOK", **extra)
         history = kwargs['history']
         if sync:
-            ExecuteAnsibleTask(**kwargs)
+            ExecuteAnsiblePlaybook(**kwargs)
         else:
-            ExecuteAnsibleTask.delay(**kwargs)
+            ExecuteAnsiblePlaybook.delay(**kwargs)
+        return history.id
+
+    def execute_ansible_module(self, module, inventory_id, **extra):
+        sync = extra.pop("sync", False)
+        kwargs = self._prepare_kw(module, inventory_id, "MODULE", **extra)
+        history = kwargs['history']
+        if sync:
+            ExecuteAnsibleModule(**kwargs)
+        else:
+            ExecuteAnsibleModule.delay(**kwargs)
         return history.id
 
     def set_status(self, status):

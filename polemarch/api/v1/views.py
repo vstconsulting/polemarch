@@ -5,8 +5,6 @@ from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 
-from ...main.models import Inventory
-from ..base import QuerySetMixin
 from ...main.utils import CmdExecutor, KVExchanger
 from .. import base
 from ..permissions import SuperUserPermission, StaffPermission
@@ -110,9 +108,13 @@ class ProjectViewSet(base.ModelViewSetSet, _GroupedViewSet):
     def sync(self, request, *args, **kwargs):
         return self.get_serializer(self.get_object()).sync()
 
-    @detail_route(methods=["post"])
-    def execute(self, request, *args, **kwargs):
-        return self.get_serializer(self.get_object()).execute(request)
+    @detail_route(methods=["post"], url_path="execute-playbook")
+    def execute_playbook(self, request, *args, **kwargs):
+        return self.get_serializer(self.get_object()).execute_playbook(request)
+
+    @detail_route(methods=["post"], url_path="execute-module")
+    def execute_module(self, request, *args, **kwargs):
+        return self.get_serializer(self.get_object()).execute_module(request)
 
 
 class TaskViewSet(base.ReadOnlyModelViewSet):
@@ -227,17 +229,3 @@ class BulkViewSet(rest_views.APIView):
             "operations_types": self._op_types.keys(),
         }
         return base.Response(response, 200).resp
-
-
-class ModuleExecuteViewSet(QuerySetMixin, rest_views.APIView):
-    model = Inventory
-
-    def post(self, request, *args, **kwargs):
-        # pylint: disable=no-member
-        self.queryset = self.get_queryset()
-        data = request.data
-        data['module_args'] = data.pop('args', None) or None
-        inventory = self.queryset.get(id=data['inventory'])
-
-        return base.Response(inventory.execute_ansible_module(**data),
-                             201).resp

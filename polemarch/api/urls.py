@@ -21,7 +21,6 @@ routerv1.register(r'templates', v1.TemplateViewSet)
 routerv1.register(r'history', v1.HistoryViewSet)
 routerv1.register_view(r'token', v1.TokenView)
 routerv1.register_view(r'_bulk', v1.BulkViewSet)
-routerv1.register_view(r'execute_module', v1.ModuleExecuteViewSet)
 
 # Register routers
 router.register_router(r'v1/', routerv1)

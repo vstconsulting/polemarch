@@ -62,6 +62,7 @@ extensions_dict = dict((
     ("polemarch.main.models.hosts", ["polemarch/main/models/hosts"+ext]),
     ("polemarch.main.models.projects", ["polemarch/main/models/projects"+ext]),
     ("polemarch.main.models.tasks", ["polemarch/main/models/tasks"+ext]),
+    ("polemarch.main.models.utils", ["polemarch/main/models/utils"+ext]),
     ("polemarch.main.models.users", ["polemarch/main/models/users"+ext]),
     ("polemarch.main.models.vars", ["polemarch/main/models/vars"+ext]),
     ("polemarch.main.tasks.tasks", ["polemarch/main/tasks/tasks"+ext]),
