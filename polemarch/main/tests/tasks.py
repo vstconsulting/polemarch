@@ -1,5 +1,4 @@
 import json
-import os
 import re
 
 from datetime import timedelta
@@ -186,10 +185,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
             data=json.dumps(dict(inventory=inv1, playbook="first.yml")))
         # check that inventory text is correct
         inventory = result[0]
-        file_path = os.path.dirname(os.path.abspath(__file__))
-        file_path += "/exemplary_complex_inventory"
-        with open(file_path, 'r') as inventory_file:
-            exemplary = inventory_file.read()
+        exemplary = self._get_string_from_file("exemplary_complex_inventory")
         inventory = re.sub("ansible_ssh_private_key_file=/.*",
                            "ansible_ssh_private_key_file=PATH",
                            inventory)
@@ -311,88 +307,6 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                                                   type="INTERVAL",
                                                   project=project,
                                                   inventory=self.inventory)
-        self.ph = Project.objects.create(name="Prj_History",
-                                         repository=repo,
-                                         vars=dict(repo_type="TEST"))
-        self.default_kwargs = dict(project=self.ph, name="task.yml",
-                                   raw_inventory="inventory",
-                                   raw_stdout="text")
-        self.histories = [
-            History.objects.create(status="OK",
-                                   start_time=now() - timedelta(hours=15),
-                                   stop_time=now() - timedelta(hours=14),
-                                   **self.default_kwargs),
-            History.objects.create(status="STOP",
-                                   start_time=now() - timedelta(hours=25),
-                                   stop_time=now() - timedelta(hours=24),
-                                   **self.default_kwargs),
-            History.objects.create(status="ERROR",
-                                   start_time=now() - timedelta(hours=35),
-                                   stop_time=now() - timedelta(hours=34),
-                                   **self.default_kwargs),
-        ]
-        self.default_kwargs["raw_stdout"] = "one\ntwo\nthree\nfour"
-        self.default_kwargs["name"] = "task2.yml"
-        self.histories.append(History.objects.create(
-            status="ERROR", start_time=now() - timedelta(hours=35),
-            stop_time=now() - timedelta(hours=34), **self.default_kwargs)
-        )
-
-    def test_history_of_executions(self):
-        url = "/api/v1/history/"
-        df = "%Y-%m-%dT%H:%M:%S.%fZ"
-        self.list_test(url, len(self.histories))
-        self.details_test(url + "{}/".format(self.histories[0].id),
-                          name="task.yml",
-                          status="OK", project=self.ph.id,
-                          start_time=self.histories[0].start_time.strftime(df),
-                          stop_time=self.histories[0].stop_time.strftime(df),
-                          raw_inventory="inventory", raw_stdout="text")
-
-        result = self.get_result("get", "{}?status={}".format(url, "OK"))
-        self.assertEqual(result["count"], 1, result)
-
-        res = self.get_result("get", "{}?name={}".format(url, "task.yml"))
-        self.assertEqual(res["count"], 3, res)
-
-        res = self.get_result("get", "{}?project={}".format(url, self.ph.id))
-        self.assertEqual(res["count"], len(self.histories), res)
-
-        st = self.histories[1].start_time.strftime(df)
-        res = self.get_result("get", "{}?start_time__gte={}".format(url, st))
-        self.assertEqual(res["count"], 2, res)
-        res = self.get_result("get", "{}?start_time__gt={}".format(url, st))
-        self.assertEqual(res["count"], 1, res)
-
-        st = self.histories[1].stop_time.strftime(df)
-        res = self.get_result("get", "{}?stop_time__gte={}".format(url, st))
-        self.assertEqual(res["count"], 2, res)
-        res = self.get_result("get", "{}?stop_time__gt={}".format(url, st))
-        self.assertEqual(res["count"], 1, res)
-
-        self.get_result("post", url, 405, data=dict(**self.default_kwargs))
-        self.get_result("patch", url + "{}/".format(self.histories[0].id),
-                        405, data=dict(**self.default_kwargs))
-        self.get_result("put", url + "{}/".format(self.histories[0].id),
-                        405, data=dict(**self.default_kwargs))
-
-        # Lines pagination
-        lines_url = url+"{}/lines/?limit=2".format(self.histories[3].id)
-        result = self.get_result("get", lines_url)
-        self.assertEqual(result["count"], 4, result)
-        self.assertCount(result["results"], 2)
-        lines_url = url
-        lines_url += "{}/lines/?after=2&before=4".format(self.histories[3].id)
-        result = self.get_result("get", lines_url)
-        self.assertEqual(result["count"], 1, result)
-        self.assertCount(result["results"], 1)
-        line_number = result["results"][0]["line_number"]
-        self.assertEqual(line_number, 3, result)
-
-        self.get_result("delete", url + "{}/".format(self.histories[0].id))
-
-        self.change_identity()
-        self.list_test(url, 0)
 
     def test_create_delete_periodic_task(self):
         url = "/api/v1/periodic-tasks/"
@@ -603,7 +517,7 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         df = "%Y-%m-%dT%H:%M:%S.%fZ"
         self.list_test(url, len(self.histories))
         self.details_test(url + "{}/".format(self.histories[0].id),
-                          name="task.yml",
+                          mode="task.yml",
                           status="OK", project=self.ph.id,
                           start_time=self.histories[0].start_time.strftime(df),
                           stop_time=self.histories[0].stop_time.strftime(df),
@@ -613,7 +527,7 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)
 
-        res = self.get_result("get", "{}?name={}".format(url, "task.yml"))
+        res = self.get_result("get", "{}?mode={}".format(url, "task.yml"))
         self.assertEqual(res["count"], 3, res)
 
         res = self.get_result("get", "{}?project={}".format(url, self.ph.id))
@@ -654,3 +568,36 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
 
         self.change_identity()
         self.list_test(url, 0)
+
+    def test_history_facts(self):
+        history_kwargs = dict(project=self.ph, mode="setup",
+                              kind="MODULE",
+                              raw_inventory="inventory",
+                              raw_stdout="text",
+                              inventory=self.history_inventory,
+                              status="OK",
+                              start_time=now() - timedelta(hours=15),
+                              stop_time=now() - timedelta(hours=14))
+        history = History.objects.create(**history_kwargs)
+        stdout = self._get_string_from_file("facts_stdout")
+        history.raw_stdout = stdout
+        history.save()
+        url = "/api/v1/history/{}/facts/".format(history.id)
+        parsed = self.get_result("get", url)
+        self.assertCount(parsed, 4)
+        self.assertTrue(parsed['172.16.1.31']['success'])
+        self.assertTrue(parsed['172.16.1.29']['success'])
+        self.assertFalse(parsed['172.16.1.32']['success'])
+        self.assertFalse(parsed['172.16.1.30']['success'])
+        self.assertEquals(parsed['172.16.1.31']['facts']['ansible_memfree_mb'],
+                          736)
+        self.assertIn('No route to host',
+                      parsed['172.16.1.30']['details']['msg'])
+        for status in ['RUN', 'DELAY']:
+            history.status = status
+            history.save()
+            self.get_result("get", url, code=424)
+        history.status = "OK"
+        history.kind = "PLAYBOOK"
+        history.save()
+        self.get_result("get", url, code=404)

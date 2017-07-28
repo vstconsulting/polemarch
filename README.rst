@@ -6,7 +6,7 @@ Simply WEB gui for orchestration infrastructure by ansible playbooks.
 
 Official site: https://gitlab.com/vstconsulting/polemarch
 
-.. image:: doc/screencast.gif
+.. image:: https://raw.githubusercontent.com/vstconsulting/polemarch/master/doc/screencast.gif
    :alt: interface of Polemarch
    :width: 100%
 

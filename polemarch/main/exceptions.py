@@ -25,3 +25,11 @@ class NodeOfflineException(PMException):
 
 class AnsibleNotFoundException(PMException):
     pass
+
+
+class DataNotReady(PMException):
+    pass
+
+
+class NotApplicable(PMException):
+    pass

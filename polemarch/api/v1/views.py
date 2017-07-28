@@ -156,6 +156,11 @@ class HistoryViewSet(base.HistoryModelViewSet):
         KVExchanger(CmdExecutor.CANCEL_PREFIX + str(obj.id)).send(True, 10)
         return base.Response("Task canceled: {}".format(obj.id), 200).resp
 
+    @detail_route(methods=["get"])
+    def facts(self, request, *args, **kwargs):
+        objs = self.get_serializer(self.get_object()).get_facts(request)
+        return base.Response(objs, 200).resp
+
 
 class TemplateViewSet(base.ModelViewSetSet):
     model = serializers.models.Template

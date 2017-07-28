@@ -13,6 +13,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from . import Inventory
+from ..exceptions import DataNotReady, NotApplicable
 from .base import BModel, BManager, BQuerySet, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project
@@ -161,6 +162,11 @@ class History(BModel):
     raw_inventory = models.TextField(default="")
     status        = models.CharField(max_length=50)
 
+    class NoFactsAvailableException(NotApplicable):
+        def __init__(self):
+            msg = "Facts can be gathered only by setup module."
+            super(History.NoFactsAvailableException, self).__init__(msg)
+
     class Meta:
         default_related_name = "history"
         ordering = ["-id"]
@@ -168,6 +174,33 @@ class History(BModel):
             ["id", "project", "mode", "status", "inventory",
              "start_time", "stop_time"]
         ]
+
+    @property
+    def facts(self):
+        if self.status not in ['OK', 'ERROR', 'OFFLINE']:
+            raise DataNotReady("Execution still in process.")
+        if self.kind != 'MODULE':
+            raise self.NoFactsAvailableException()
+        if self.mode != 'setup':
+            raise self.NoFactsAvailableException()
+        data = self.raw_stdout
+        decoder = json.JSONDecoder()
+        objs = {}
+        while len(data) > 0:
+            host, data = data.split("{", 1)
+            host, result = host.split('|', 1)
+            host = host.strip()
+            result = 'SUCCESS' in result
+            data = '{' + data
+            obj, pos = decoder.raw_decode(data)
+            dic = dict(success=result)
+            if result:
+                dic['facts'] = obj['ansible_facts']
+            else:
+                dic['details'] = obj
+            objs[host] = dic
+            data = data[pos:].strip()
+        return objs
 
     @property
     def raw_stdout(self):
