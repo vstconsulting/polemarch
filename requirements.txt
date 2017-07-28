@@ -1,6 +1,6 @@
 # Main
 configparser==3.5.0b2
-celery<=4.0.3
+celery>4.0.3,<=4.1.0
 six
 sqlalchemy
 ansible>=2.1, <=2.2.1
