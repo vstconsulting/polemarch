@@ -128,8 +128,9 @@ class AnsiblePlaybook(AnsibleCommand):
 class AnsibleModule(AnsibleCommand):
     command_type = "ansible"
 
-    def __init__(self, module, module_args, *args, **kwargs):
-        kwargs['module-name'] = module
-        if module_args is not None:
-            kwargs['args'] = module_args
-        super(AnsibleModule, self).__init__(*args, **kwargs)
+    def __init__(self, target, *pargs, **kwargs):
+        kwargs['module-name'] = target
+        super(AnsibleModule, self).__init__(*pargs, **kwargs)
+
+    def execute(self, group, *args, **extra_args):
+        return super(AnsibleModule, self).execute(group, *args, **extra_args)

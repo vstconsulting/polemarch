@@ -57,7 +57,7 @@ class Project(AbstractModel):
     def type(self):
         return self.variables.get(key="repo_type").value
 
-    def _prepare_kw(self, mod_name, inventory_id, kind, **extra):
+    def _prepare_kw(self, kind, mod_name, inventory_id, **extra):
         if not mod_name:
             raise PMException("Empty playbook/module name.")
         from .tasks import History
@@ -73,26 +73,23 @@ class Project(AbstractModel):
         kwargs.update(extra)
         return kwargs
 
-    def execute_ansible_playbook(self, playbook, inventory_id, **extra):
-        # pylint: disable=no-member
+    def _execute(self, kind, task_class, *args, **extra):
         sync = extra.pop("sync", False)
-        kwargs = self._prepare_kw(playbook, inventory_id, "PLAYBOOK", **extra)
+        kwargs = self._prepare_kw(kind, *args, **extra)
         history = kwargs['history']
         if sync:
-            ExecuteAnsiblePlaybook(**kwargs)
+            task_class(**kwargs)
         else:
-            ExecuteAnsiblePlaybook.delay(**kwargs)
+            task_class.delay(**kwargs)
         return history.id
 
+    def execute_ansible_playbook(self, playbook, inventory_id, **extra):
+        return self._execute("PLAYBOOK", ExecuteAnsiblePlaybook,
+                             playbook, inventory_id, **extra)
+
     def execute_ansible_module(self, module, inventory_id, **extra):
-        sync = extra.pop("sync", False)
-        kwargs = self._prepare_kw(module, inventory_id, "MODULE", **extra)
-        history = kwargs['history']
-        if sync:
-            ExecuteAnsibleModule(**kwargs)
-        else:
-            ExecuteAnsibleModule.delay(**kwargs)
-        return history.id
+        return self._execute("MODULE", ExecuteAnsibleModule,
+                             module, inventory_id, **extra)
 
     def set_status(self, status):
         self.status = status

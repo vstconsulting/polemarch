@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 import logging
 
-from django.utils import timezone
-
 from .base import BManager, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex

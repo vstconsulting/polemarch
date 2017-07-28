@@ -46,29 +46,20 @@ class ScheduledTask(BaseTask):
         task.execute_palybook()
 
 
-@task(app, ignore_result=True, bind=True)
-class ExecuteAnsiblePlaybook(BaseTask):
-    def __init__(self, app, target, inventory, history,
-                 *args, **kwargs):
-        super(self.__class__, self).__init__(app, *args, **kwargs)
-        self.inventory = inventory
-        self.history = history
-        self.project = self.history.project
-        self.ansible_playbook = AnsiblePlaybook(target, inventory, history,
-                                                **kwargs)
+class _ExecuteAnsible(BaseTask):
+    ansible_class = None
 
     def run(self):
-        self.ansible_playbook.run()
+        # pylint: disable=not-callable
+        ansible_object = self.ansible_class(*self.args, **self.kwargs)
+        ansible_object.run()
 
 
 @task(app, ignore_result=True, bind=True)
-class ExecuteAnsibleModule(BaseTask):
-    def __init__(self, app, group, target, inventory, history, args,
-                 *pargs, **kwargs):
-        # pylint: disable=too-many-arguments
-        super(self.__class__, self).__init__(app, *pargs, **kwargs)
-        self.ansible_module = AnsibleModule(target, args, group,
-                                            inventory, history, **kwargs)
+class ExecuteAnsiblePlaybook(_ExecuteAnsible):
+    ansible_class = AnsiblePlaybook
 
-    def run(self):
-        self.ansible_module.run()
+
+@task(app, ignore_result=True, bind=True)
+class ExecuteAnsibleModule(_ExecuteAnsible):
+    ansible_class = AnsibleModule
