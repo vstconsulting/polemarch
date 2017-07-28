@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 import logging
 
-from django.utils import timezone
-
 from .base import BManager, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex
@@ -148,19 +146,3 @@ class Inventory(AbstractModel):
                          dict(groups=groups_strings, hosts=hosts_strings,
                               vars=self.vars_string(hvars, "\n")))
         return inv, keys
-
-    def execute_ansible_module(self, **kwargs):
-        from ...main.tasks import ExecuteAnsibleModule
-        from . import History
-        kwargs['inventory'] = self
-        history_kwargs = dict(name=kwargs['module'],
-                              start_time=timezone.now(),
-                              inventory=self,
-                              raw_stdout="",
-                              kind="MODULE")
-        history = History.objects.create(status="DELAY", **history_kwargs)
-        kwargs['history'] = history
-        ExecuteAnsibleModule.delay(**kwargs)
-        rdata = dict(detail="Started at inventory {}.".format(self.id),
-                     history_id=history.id)
-        return rdata
