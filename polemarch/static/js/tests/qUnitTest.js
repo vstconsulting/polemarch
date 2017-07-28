@@ -32,17 +32,10 @@ function render(name, time, callback)
 }
 
 function saveReport()
-{
+{ 
+    $("body").html('<div id="qunit">'+$("#qunit").html()+'</div>'); 
+    $("body").append('<link rel="stylesheet" href="'+window.pmStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">')
     console.log("saveReport")
-}
-
-/**
- * Тестовый тест, чтоб было видно что тесты вообще хоть как то работают.
- */
-function trim(s)
-{
-    if(s) return s.replace(/^ */g, "").replace(/ *$/g, "")
-    return '';
 }
 
 /**
@@ -50,8 +43,8 @@ function trim(s)
  */
 function injectQunit()
 {
-    $("body").append('<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.2.1.css">')
-    $("body").append('<script src="https://code.jquery.com/qunit/qunit-2.2.1.js"></script>')
+    $("body").append('<link rel="stylesheet" href="'+window.pmStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">')
+    $("body").append('<script src="'+ window.pmStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.js"></script>')
     $("body").append('<div id="qunit"></div><div id="qunit-fixture"></div>')
 
     var intervalId = setInterval(function()
@@ -85,9 +78,10 @@ function injectQunit()
             };
 
             console.log( JSON.stringify( result, null, 2 ) );
-            saveReport()
+ 
             if(!syncQUnit.nextTest())
             {
+                saveReport()
                 render("ok-done", 0, window.close)
             }
         })
@@ -118,8 +112,8 @@ syncQUnit.nextTest = function(name, test)
 
     var test = syncQUnit.testsArray.shift()
 
-    console.log("Тест "+test.name+", осталось "+syncQUnit.testsArray.length+" тестов")
-
+    $.notify("Test "+test.name+", "+syncQUnit.testsArray.length+" tests remain", "warn");
+    
     QUnit.test(test.name, test.test);
     //syncQUnit.nextTest()
     //QUnit.start()
@@ -129,86 +123,6 @@ syncQUnit.nextTest = function(name, test)
 ///////////////////////////////////////////////
 // Функции тестирования
 ///////////////////////////////////////////////
-
-/**
- *  Авторизация, тестирование авторизации
- */
-function startTest()
-{
-    if(window.phantomjs_step === undefined)
-    {
-                console.log("Тест 9");
-        setTimeout(startTest, 300)
-        return;
-    }
-
-                console.log("Тест 8");
-    console.log("ready: " + window.location.href);
-    if(window.location.pathname === "/")
-    {
-                console.log("Тест 1");
-        if(window.phantomjs_step < 2)
-        {
-            console.log("Тест формы авторизации завален [3]");
-            window.close()
-        }
-                console.log("Тест 2");
-
-        console.log("Тест формы авторизации шаг 2");
-        jQuery.ajax({
-            url: "/api/v1/users/",
-            type: "GET",
-            contentType:'application/json',
-            data: "",
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                }
-            },
-            success: function(data)
-            {
-                console.log("Тест формы авторизации пройден");
-                injectQunit();
-                //window.close()
-            },
-            error:function(e)
-            {
-                console.log("Тест формы авторизации завален [2]");
-                window.close()
-            }
-        });
-    }
-    else
-    {
-                console.log("Тест 7");
-        console.log("Тест формы авторизации, window.phantomjs_step = " + window.phantomjs_step);
-        render("authTest-"+window.phantomjs_step)
-        if(window.phantomjs_step == 1)
-        {
-                console.log("Тест 3");
-            // Тест формы авторизации
-            $("#username").val('admin')
-            $("#password").val('nopassword')
-            $(".form-signin").submit()
-        }
-        else if(window.phantomjs_step == 2)
-        {
-                console.log("Тест 4");
-            // Тест формы авторизации
-            $("#username").val('admin')
-            $("#password").val('admin')
-            $(".form-signin").submit()
-        }
-        else if(window.phantomjs_step > 2)
-        {
-                console.log("Тест 5");
-            console.log("Тест формы авторизации завален [1]");
-            window.close()
-        }
-        console.log("Тест 6");
-    }
-}
 
 /**
  * В этой функции должны быть qunit тесты для приложения
@@ -379,7 +293,7 @@ function qunitAddTests_hosts()
             render("hosts_page_999", 1000, done)
         })
     });
-    
+
     syncQUnit.addTest('new-host', function ( assert )
     {
         var done = assert.async();
@@ -614,7 +528,7 @@ function qunitAddTests_groups()
  * Тестирование inventories
  */
 function qunitAddTests_inventories()
-{ 
+{
     syncQUnit.addTest('inventories', function ( assert )
     {
         var done = assert.async();
@@ -727,7 +641,7 @@ function qunitAddTests_inventories()
  * Тестирование projects
  */
 function qunitAddTests_projects()
-{ 
+{
     syncQUnit.addTest('projects', function ( assert )
     {
         var done = assert.async();
@@ -837,7 +751,4 @@ function qunitAddTests_projects()
     });
 }
 
-$(document).ready(function()
-{
-    startTest()
-})
+    injectQunit()

@@ -127,7 +127,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.assertEquals(result[1], "somekey")
         history = History.objects.get(id=answer["history_id"])
         self.assertEquals(history.kind, "MODULE")
-        self.assertEquals(history.name, "shell")
+        self.assertEquals(history.mode, "shell")
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_complex_inventory_execute(self, subprocess_function):
@@ -215,7 +215,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
             self.assertEquals(history.status, status)
 
         def get_history_item():
-            histories = History.objects.filter(name="other/playbook.yml")
+            histories = History.objects.filter(mode="other/playbook.yml")
             self.assertEquals(histories.count(), 1)
             history = histories[0]
             # History.objects.all().delete()
@@ -281,7 +281,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                                   "/api/v1/history/{}/".format(
                                       result["history_id"]
                                   ))
-        self.assertEquals(history["name"], "first.yml")
+        self.assertEquals(history["mode"], "first.yml")
         self.get_result("post",
                         "/api/v1/history/{}/cancel/".format(history['id']),
                         200)

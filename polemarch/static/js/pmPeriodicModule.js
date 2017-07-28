@@ -1,9 +1,9 @@
 
-var pmPeriodicTasks = new pmItems()
+var pmPeriodicModule = new pmItems()
 
-pmPeriodicTasks.model.name = "periodic-tasks"
+pmPeriodicModule.model.name = "periodic-tasks"
 
-pmPeriodicTasks.execute = function(project_id, item_id)
+pmPeriodicModule.execute = function(project_id, item_id)
 {
     var def = new $.Deferred();
 
@@ -55,7 +55,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
     return def.promise();
 }
 
-pmPeriodicTasks.showList = function(holder, menuInfo, data)
+pmPeriodicModule.showList = function(holder, menuInfo, data)
 {
     var thisObj = this;
     var offset = 0
@@ -78,7 +78,7 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
     })
 }
 
-pmPeriodicTasks.search = function(project_id, query)
+pmPeriodicModule.search = function(project_id, query)
 {
     if(!query || !trim(query))
     {
@@ -88,7 +88,7 @@ pmPeriodicTasks.search = function(project_id, query)
     return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
 }
 
-pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
+pmPeriodicModule.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
     var project_id = data.reg[1];
@@ -101,7 +101,7 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
     })
 }
 
-pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
+pmPeriodicModule.showNewItemPage = function(holder, menuInfo, data)
 {
     var project_id = data.reg[1];
     var thisObj = this;
@@ -149,13 +149,13 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
     })
 }
 
-pmPeriodicTasks.showItem = function(holder, menuInfo, data)
+pmPeriodicModule.showItem = function(holder, menuInfo, data)
 {
     var thisObj = this; 
     var item_id = data.reg[2];
     var project_id = data.reg[1];
 
-    return $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
+    return $.when(pmPeriodicModule.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
 
@@ -202,7 +202,7 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
 /**
  * @return $.Deferred
  */
-pmPeriodicTasks.addItem = function(project_id)
+pmPeriodicModule.addItem = function(project_id)
 {
     var def = new $.Deferred();
 
@@ -257,7 +257,7 @@ pmPeriodicTasks.addItem = function(project_id)
 /**
  * @return $.Deferred
  */
-pmPeriodicTasks.updateItem = function(item_id)
+pmPeriodicModule.updateItem = function(item_id)
 {
     var data = {}
 

@@ -23,7 +23,7 @@ pmTemplates.showSearchResults = function(holder, menuInfo, data)
     })
 }
 
-pmTasksTemplates.showList = function(holder, menuInfo, data)
+pmTemplates.showList = function(holder, menuInfo, data)
 {
     var thisObj = this;
     var offset = 0

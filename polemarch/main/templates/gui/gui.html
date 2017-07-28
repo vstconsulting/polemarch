@@ -428,7 +428,7 @@
                                 <input type="text"
                                         class="playbook-autocomplete form-control"
                                         id="playbook-autocomplete"
-                                        value="<% if(pmTasksTemplates.model.items[item_id].data.playbook){ %><%- pmTasksTemplates.model.items[item_id].data.playbook %><% } %>">
+                                        value="<% if(pmTasksTemplates.model.items[item_id].data.mode){ %><%- pmTasksTemplates.model.items[item_id].data.mode %><% } %>">
                             </div> 
                         </div>
                     </div>
@@ -1084,7 +1084,7 @@
                                         </td>
                                         <td class="hidden-sm visible-lg">
                                             <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
-                                                    onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('playbook') %></a>
+                                                    onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('mode') %></a>
                                         </td>
                                         <td class="hidden-xs">
                                             <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
@@ -1144,7 +1144,7 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <span class="h1-header" ><%- pmPeriodicTasks.model.items[item_id].playbook %></span>
+            <span class="h1-header" ><%- pmPeriodicTasks.model.items[item_id].mode %></span>
             
         </h1>
         <ol class="breadcrumb">
@@ -1152,7 +1152,7 @@
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[project_id].name.slice(0, 20) %></a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" >Periodic tasks</a></li>
-            <li class="active"><%- pmPeriodicTasks.model.items[item_id].playbook.slice(0, 20) %></li>
+            <li class="active"><%- pmPeriodicTasks.model.items[item_id].mode.slice(0, 20) %></li>
         </ol>
     </section>
 
@@ -1194,7 +1194,7 @@
                                 <input type="text"
                                         placeholder="Enter playbook name"
                                         id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_playbook"
-                                        value="<%- pmPeriodicTasks.model.items[item_id].playbook %>"
+                                        value="<%- pmPeriodicTasks.model.items[item_id].mode %>"
                                         class="form-control"
                                         maxlength="255">
                                 <div class="help-block"></div>

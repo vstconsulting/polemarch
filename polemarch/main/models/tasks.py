@@ -153,7 +153,7 @@ class History(BModel):
                                       on_delete=models.CASCADE,
                                       related_query_name="history",
                                       blank=True, null=True, default=None)
-    name          = models.CharField(max_length=256)
+    mode          = models.CharField(max_length=256)
     kind          = models.CharField(max_length=50, default="PLAYBOOK")
     start_time    = models.DateTimeField(default=timezone.now)
     stop_time     = models.DateTimeField(blank=True, null=True)
@@ -165,7 +165,7 @@ class History(BModel):
         default_related_name = "history"
         ordering = ["-id"]
         index_together = [
-            ["id", "project", "name", "status", "inventory",
+            ["id", "project", "mode", "status", "inventory",
              "start_time", "stop_time"]
         ]
 
