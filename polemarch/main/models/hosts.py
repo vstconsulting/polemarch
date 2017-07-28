@@ -3,10 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
-from django.utils import timezone
-
 from .base import BManager, models
-from .vars import _AbstractModel, _AbstractVarsQuerySet
+from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex
 from ..utils import get_render
 
@@ -35,12 +33,12 @@ class CiclicDependencyError(ex.PMException):
 
 
 # Block of models
-class HostQuerySet(_AbstractVarsQuerySet):
+class HostQuerySet(AbstractVarsQuerySet):
     # pylint: disable=no-member
     pass
 
 
-class Host(_AbstractModel):
+class Host(AbstractModel):
     objects     = BManager.from_queryset(HostQuerySet)()
     type        = models.CharField(max_length=5,
                                    default="HOST")
@@ -58,7 +56,7 @@ class Host(_AbstractModel):
                               self.vars_string(hvars, var_sep)), key
 
 
-class GroupQuerySet(_AbstractVarsQuerySet):
+class GroupQuerySet(AbstractVarsQuerySet):
     # pylint: disable=no-member
 
     def get_subgroups_id(self, accumulated=None, tp="parents"):
@@ -85,7 +83,7 @@ class GroupQuerySet(_AbstractVarsQuerySet):
         return subgroups
 
 
-class Group(_AbstractModel):
+class Group(AbstractModel):
     CiclicDependencyError = CiclicDependencyError
     objects     = BManager.from_queryset(GroupQuerySet)()
     hosts       = models.ManyToManyField(Host)
@@ -116,8 +114,8 @@ class Group(_AbstractModel):
         return get_render("models/group", data), keys
 
 
-class Inventory(_AbstractModel):
-    objects     = BManager.from_queryset(_AbstractVarsQuerySet)()
+class Inventory(AbstractModel):
+    objects     = BManager.from_queryset(AbstractVarsQuerySet)()
     hosts       = models.ManyToManyField(Host)
     groups      = models.ManyToManyField(Group)
 
@@ -148,19 +146,3 @@ class Inventory(_AbstractModel):
                          dict(groups=groups_strings, hosts=hosts_strings,
                               vars=self.vars_string(hvars, "\n")))
         return inv, keys
-
-    def execute_ansible_module(self, **kwargs):
-        from ...main.tasks import ExecuteAnsibleModule
-        from . import History
-        kwargs['inventory'] = self
-        history_kwargs = dict(mode=kwargs['module'],
-                              start_time=timezone.now(),
-                              inventory=self,
-                              raw_stdout="",
-                              kind="MODULE")
-        history = History.objects.create(status="DELAY", **history_kwargs)
-        kwargs['history'] = history
-        ExecuteAnsibleModule.delay(**kwargs)
-        rdata = dict(detail="Started at inventory {}.".format(self.id),
-                     history_id=history.id)
-        return rdata

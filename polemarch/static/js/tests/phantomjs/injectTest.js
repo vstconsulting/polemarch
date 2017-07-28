@@ -137,18 +137,22 @@ function startTest()
 {
     if(window.phantomjs_step === undefined)
     {
+                console.log("Тест 9");
         setTimeout(startTest, 300)
         return;
     }
 
+                console.log("Тест 8");
     console.log("ready: " + window.location.href);
     if(window.location.pathname === "/")
     {
+                console.log("Тест 1");
         if(window.phantomjs_step < 2)
         {
             console.log("Тест формы авторизации завален [3]");
             window.close()
         }
+                console.log("Тест 2");
 
         console.log("Тест формы авторизации шаг 2");
         jQuery.ajax({
@@ -177,10 +181,12 @@ function startTest()
     }
     else
     {
+                console.log("Тест 7");
         console.log("Тест формы авторизации, window.phantomjs_step = " + window.phantomjs_step);
         render("authTest-"+window.phantomjs_step)
         if(window.phantomjs_step == 1)
         {
+                console.log("Тест 3");
             // Тест формы авторизации
             $("#username").val('admin')
             $("#password").val('nopassword')
@@ -188,6 +194,7 @@ function startTest()
         }
         else if(window.phantomjs_step == 2)
         {
+                console.log("Тест 4");
             // Тест формы авторизации
             $("#username").val('admin')
             $("#password").val('admin')
@@ -195,9 +202,11 @@ function startTest()
         }
         else if(window.phantomjs_step > 2)
         {
+                console.log("Тест 5");
             console.log("Тест формы авторизации завален [1]");
             window.close()
         }
+        console.log("Тест 6");
     }
 }
 
@@ -401,11 +410,11 @@ function qunitAddTests_hosts()
 
         $("#new_json_name").val("test1");
         $("#new_json_value").val("val1");
-        pmHosts.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
         $("#new_json_name").val("test2");
         $("#new_json_value").val("val2");
-        pmHosts.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
 
         // Отправка формы с данными хоста
@@ -432,7 +441,7 @@ function qunitAddTests_hosts()
 
         $("#new_json_name").val("test3");
         $("#new_json_value").val("val3");
-        pmHosts.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
 
         $.when(pmHosts.updateItem(itemId)).done(function()
@@ -536,11 +545,11 @@ function qunitAddTests_groups()
 
         $("#new_json_name").val("test1");
         $("#new_json_value").val("val1");
-        pmGroups.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
         $("#new_json_name").val("test2");
         $("#new_json_value").val("val2");
-        pmGroups.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
 
         // Отправка формы с данными группы
@@ -567,7 +576,7 @@ function qunitAddTests_groups()
 
         $("#new_json_name").val("test3");
         $("#new_json_value").val("val3");
-        pmGroups.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
 
         $.when(pmGroups.updateItem(itemId)).done(function()
@@ -650,11 +659,11 @@ function qunitAddTests_inventories()
 
         $("#new_json_name").val("test1");
         $("#new_json_value").val("val1");
-        pmInventories.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
         $("#new_json_name").val("test2");
         $("#new_json_value").val("val2");
-        pmInventories.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
 
         // Отправка формы с данными inventory
@@ -681,7 +690,7 @@ function qunitAddTests_inventories()
 
         $("#new_json_name").val("test3");
         $("#new_json_value").val("val3");
-        pmInventories.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
 
         $.when(pmInventories.updateItem(itemId)).done(function()
@@ -764,11 +773,11 @@ function qunitAddTests_projects()
 
         $("#new_json_name").val("test1");
         $("#new_json_value").val("val1");
-        pmProjects.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
         $("#new_json_name").val("test2");
         $("#new_json_value").val("val2");
-        pmProjects.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
 
         // Отправка формы с данными project
@@ -795,7 +804,7 @@ function qunitAddTests_projects()
 
         $("#new_json_name").val("test3");
         $("#new_json_value").val("val3");
-        pmProjects.jsonEditorAddVar();
+        jsonEditor.jsonEditorAddVar();
 
 
         $.when(pmProjects.updateItem(itemId)).done(function()

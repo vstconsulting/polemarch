@@ -4,7 +4,7 @@ import logging
 from ...celery_app import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
-from ..models.tasks import Task, run_ansible
+from ..models.utils import AnsibleModule, AnsiblePlaybook
 
 logger = logging.getLogger("polemarch")
 
@@ -43,36 +43,23 @@ class ScheduledTask(BaseTask):
     def run(self):
         from ..models import PeriodicTask
         task = PeriodicTask.objects.get(id=self.job_id)
-        task.execute()
+        task.execute_palybook()
+
+
+class _ExecuteAnsible(BaseTask):
+    ansible_class = None
+
+    def run(self):
+        # pylint: disable=not-callable
+        ansible_object = self.ansible_class(*self.args, **self.kwargs)
+        ansible_object.run()
 
 
 @task(app, ignore_result=True, bind=True)
-class ExecuteAnsibleTask(BaseTask):
-    def __init__(self, app, project, playbook, inventory, history,
-                 *args, **kwargs):
-        super(self.__class__, self).__init__(app, *args, **kwargs)
-        self.inventory = inventory
-        self.history = history
-        self.job = Task(playbook=playbook, project=project)
-
-    def run(self):
-        self.job.run_ansible_playbook(self.inventory,
-                                      self.history,
-                                      **self.kwargs)
+class ExecuteAnsiblePlaybook(_ExecuteAnsible):
+    ansible_class = AnsiblePlaybook
 
 
 @task(app, ignore_result=True, bind=True)
-class ExecuteAnsibleModule(BaseTask):
-    def __init__(self, app, group, module, inventory, history, module_args,
-                 *args, **kwargs):
-        # pylint: disable=too-many-arguments
-        super(self.__class__, self).__init__(app, *args, **kwargs)
-        self.group = group
-        self.module = module
-        self.inventory = inventory
-        self.history = history
-        self.module_args = module_args
-
-    def run(self):
-        run_ansible(self.group, self.module, self.inventory, self.history,
-                    self.module_args, **self.kwargs)
+class ExecuteAnsibleModule(_ExecuteAnsible):
+    ansible_class = AnsibleModule

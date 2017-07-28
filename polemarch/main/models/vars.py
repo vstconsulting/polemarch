@@ -31,13 +31,13 @@ class Variable(BModel):
         return "{}={}".format(self.key, self.value)
 
 
-class _AbstractVarsQuerySet(BQuerySet):
+class AbstractVarsQuerySet(BQuerySet):
     use_for_related_fields = True
 
     @transaction.atomic
     def create(self, **kwargs):
         variables = kwargs.pop("vars", None)
-        obj = super(_AbstractVarsQuerySet, self).create(**kwargs)
+        obj = super(AbstractVarsQuerySet, self).create(**kwargs)
         if variables is not None:
             if isinstance(variables, (string_types, text_type)):
                 variables = json.loads(variables)
@@ -51,8 +51,8 @@ class _AbstractVarsQuerySet(BQuerySet):
         return qs
 
 
-class _AbstractModel(BModel):
-    objects     = BManager.from_queryset(_AbstractVarsQuerySet)
+class AbstractModel(BModel):
+    objects     = BManager.from_queryset(AbstractVarsQuerySet)
     name        = models.CharField(max_length=512,
                                    default=uuid.uuid1)
     variables   = GenericRelation(Variable, related_query_name="variables",

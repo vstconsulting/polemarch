@@ -25,12 +25,12 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                      vars=dict(repo_type="TEST"))]
         self.project_id = self.mass_create("/api/v1/projects/", data,
                                            "name", "repository")[0]
-        self.task_project = Project.objects.get(id=self.project_id)
+        self.task_proj = Project.objects.get(id=self.project_id)
 
         self.task1 = Task.objects.create(playbook="first.yml",
-                                         project=self.task_project)
+                                         project=self.task_proj)
         self.task2 = Task.objects.create(playbook="second.yml",
-                                         project=self.task_project)
+                                         project=self.task_proj)
 
     def test_get_tasks(self):
         url = "/api/v1/tasks/"
@@ -75,11 +75,11 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         subprocess_function.side_effect = side_effect
         # test that can't execute without inventory
         self.post_result(
-            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
             400, data=json.dumps(dict(inventory=1100500)))
         # test simple execution
         self.post_result(
-            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
             data=json.dumps(dict(inventory=inv1, playbook="first.yml")))
         self.assertEquals(subprocess_function.call_count, 1)
         call_args = subprocess_function.call_args[0][0]
@@ -110,12 +110,12 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         subprocess_function.side_effect = side_effect
         # test that can't execute without inventory
         self.post_result(
-            "/api/v1/execute_module/",
+            "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
             400, data=json.dumps(dict(inventory=1100500, module="shell",
                                  group="all", args="ls -la")))
         # test simple execution
         answer = self.post_result(
-            "/api/v1/execute_module/",
+            "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
             data=json.dumps(dict(inventory=inv1, module="shell",
                                  group="all", args="ls -la",
                                  user="mysuperuser")))
@@ -182,7 +182,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                 result[0] = inventory
         subprocess_function.side_effect = side_effect
         self.post_result(
-            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
             data=json.dumps(dict(inventory=inv1, playbook="first.yml")))
         # check that inventory text is correct
         inventory = result[0]
@@ -204,8 +204,10 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         def check_status(exception, status):
             error = exception
             subprocess_function.side_effect = error
+            url = "/api/v1/projects/{}/execute-playbook/"
+            url = url.format(self.task_proj.id)
             self.post_result(
-                "/api/v1/projects/{}/execute/".format(self.task_project.id),
+                url,
                 data=json.dumps(dict(inventory=inv1,
                                      playbook="other/playbook.yml"))
             )
@@ -233,7 +235,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         # check good run (without any problems)
         start_time = now()
         self.post_result(
-            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
             data=json.dumps(dict(inventory=inv1, playbook="other/playbook.yml",
                                  limit="limited-hosts", user="some-def-user",
                                  extra_vars=extra_vars, key_file=key_file))
@@ -261,18 +263,19 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
 
         result = self.get_result(
             "post",
-            "/api/v1/projects/{}/execute/".format(self.task_project.id), 400,
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            400,
             data=json.dumps(dict(inventory=inv1, playbook="",
                                  limit="limited-hosts", user="some-def-user",
                                  extra_vars=extra_vars, key_file=key_file))
         )
-        self.assertEqual(result["detail"], "Empty playbook name.")
+        self.assertEqual(result["detail"], "Empty playbook/module name.")
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_cancel_task(self, subprocess_function):
         inv, _ = self.create_inventory()
         result = self.post_result(
-            "/api/v1/projects/{}/execute/".format(self.task_project.id),
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
             data=json.dumps(dict(inventory=inv, playbook="first.yml")))
         history = self.get_result("get",
                                   "/api/v1/history/{}/".format(
@@ -313,7 +316,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                                          vars=dict(repo_type="TEST"))
         self.default_kwargs = dict(project=self.ph, mode="task.yml",
                                    raw_inventory="inventory",
-                                   raw_stdout="text")
+                                   raw_stdout="text", inventory=self.inventory)
         self.histories = [
             History.objects.create(status="OK",
                                    start_time=now() - timedelta(hours=15),
@@ -344,7 +347,8 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
                           status="OK", project=self.ph.id,
                           start_time=self.histories[0].start_time.strftime(df),
                           stop_time=self.histories[0].stop_time.strftime(df),
-                          raw_inventory="inventory", raw_stdout="text")
+                          raw_inventory="inventory", raw_stdout="text",
+                          inventory=self.inventory.id)
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)

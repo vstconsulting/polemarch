@@ -1047,7 +1047,7 @@ Projects
            "detail":"Sync with git@ex.us:dir/rep1.git."
         }
 
-.. http:post:: /api/v1/projects/{id}/execute/
+.. http:post:: /api/v1/projects/{id}/execute-playbook/
 
    Execute ansible playbook. Returns history id for watching execution process.
 
@@ -1065,7 +1065,7 @@ Projects
 
    .. sourcecode:: http
 
-      POST /api/v1/projects/1/execute/ HTTP/1.1
+      POST /api/v1/projects/1/execute-playbook/ HTTP/1.1
       Host: example.com
       Accept: application/json, text/javascript
 
@@ -1082,6 +1082,51 @@ Projects
 
         {
            "detail":"Started at inventory 13.",
+           "history_id": 87
+        }
+
+.. http:post:: /api/v1/projects/{id}/execute-module/
+
+   Execute ansible module. Just like running ``ansible -m {something}`` by
+   hands. You can quickly do something with ansible without boring and time
+   consuming work with playbooks etc.
+
+   :<json number inventory: inventory to execute at.
+   :<json string module: name of module (like ``ping``, ``shell`` and so on).
+     You can use any of modules available in ansible.
+   :<json string group: to which group in your inventory it must be executed.
+     Use ``all`` for all hosts in inventory.
+   :<json string args: which args must be passed to module. Just raw string
+     with arguments. You can specify here contains of ``args`` option. For
+     example ``ls -la`` for ``shell`` module.
+   :<json *: any number parameters with any name and string or number type. All
+     those parameters just passes as additional command line arguments to
+     ``ansible-playbook`` utility during execution, so you can use this feature
+     to widely customize of ansible behaviour. For any ``key:value`` in command
+     line will be ``--key value``. If you want only key without a value
+     (``--become`` option for example), just pass ``null`` as value.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/projects/1/execute-module/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+        {
+           "inventory":3,
+           "module":"shell",
+           "group":"all",
+           "args":"ls -la"
+        }
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "detail":"Started at inventory 3.",
            "history_id": 87
         }
 
@@ -1198,7 +1243,7 @@ Periodic tasks
    :>json string kind: either this task is playbook run (``PLAYBOOK``) or
      module run (``MODULE``).
    :>json number project: id of project which this task belongs to.
-   :>json number inventory: id of inventory for which must execute playbook.
+   :>json number inventory: id of inventory for which must execute_playbook playbook.
    :>json object vars: |ptask_vars_def|
    :>json string url: url to this specific periodic task.
 
@@ -1842,50 +1887,7 @@ History records
 Execute ansible module
 ----------------------
 
-.. http:post:: /api/v1/execute_module/
 
-   Execute ansible module. Just like running ``ansible -m {something}`` by
-   hands. You can quickly do something with ansible without boring and time
-   consuming work with repository/projects/playbooks etc.
-
-   :<json number inventory: inventory to execute at.
-   :<json string module: name of module (like ``ping``, ``shell`` and so on).
-     You can use any of modules available in ansible.
-   :<json string group: to which group in your inventory it must be executed.
-     Use ``all`` for all hosts in inventory.
-   :<json string args: which args must be passed to module. Just raw string
-     with arguments. You can specify here contains of ``args`` option. For
-     example ``ls -la`` for ``shell`` module.
-   :<json *: any number parameters with any name and string or number type. All
-     those parameters just passes as additional command line arguments to
-     ``ansible-playbook`` utility during execution, so you can use this feature
-     to widely customize of ansible behaviour. For any ``key:value`` in command
-     line will be ``--key value``. If you want only key without a value
-     (``--become`` option for example), just pass ``null`` as value.
-
-   Example request:
-
-   .. sourcecode:: http
-
-      POST /api/v1/execute_module/ HTTP/1.1
-      Host: example.com
-      Accept: application/json, text/javascript
-
-        {
-           "inventory":3,
-           "module":"shell",
-           "group":"all",
-           "args":"ls -la"
-        }
-
-   Results:
-
-   .. sourcecode:: js
-
-        {
-           "detail":"Started at inventory 3.",
-           "history_id": 87
-        }
 
 Variables
 ---------

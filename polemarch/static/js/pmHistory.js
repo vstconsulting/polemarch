@@ -32,7 +32,7 @@ pmHistory.cancelTask = function(item_id)
 pmHistory.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
-    return $.when(this.sendSearchQuery({playbook:decodeURIComponent(data.reg[1])})).done(function()
+    return $.when(this.sendSearchQuery({mode:decodeURIComponent(data.reg[1])})).done(function()
     {
         $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
     }).fail(function()
@@ -85,7 +85,7 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
 {
     var thisObj = this;
     var project_id = data.reg[1];
-    return $.when(this.sendSearchQuery({playbook: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
+    return $.when(this.sendSearchQuery({mode: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).html(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
     }).fail(function()
@@ -159,11 +159,17 @@ pmHistory.bindStdoutUpdates = function(item_id)
                 thisObj.inLoadTopData = true;
                 $.when(thisObj.loadLines(item_id, {before:stdout_minline, limit:thisObj.model.linePerPage})).always(function()
                 {
+                    var history_stdout = $("#history-stdout");
+                    if(!history_stdout || !history_stdout.length)
+                    {
+                        return;
+                    }
+                    
                     for(var i = stdout_minline-1; i > stdout_minline - thisObj.model.linePerPage; i = i -1)
                     {
                         if(thisObj.model.items[item_id].stdout[i] != undefined)
                         {
-                            $("#history-stdout").prepend(pmHistory.getLine(item_id, i))
+                            history_stdout.prepend(pmHistory.getLine(item_id, i))
                         }
                     }
 
@@ -452,7 +458,13 @@ pmHistory.loadNewLines = function(item_id)
     return $.when(this.loadItem(item_id), this.loadLines(item_id, {after:last_stdout_maxline, limit:pmHistory.model.linePerPage})).always(function()
     {
         var addData = false;
-        var needScrollDowun = $('#history-stdout').prop('scrollHeight') - $('#history-stdout').scrollTop() -  $("#history-stdout").css('height').replace("px", "")/1 < 100
+        var history_stdout = $("#history-stdout");
+        if(!history_stdout || !history_stdout.length)
+        {
+            return;
+        }
+        
+        var needScrollDowun = $('#history-stdout').prop('scrollHeight') - $('#history-stdout').scrollTop() -  history_stdout.css('height').replace("px", "")/1 < 100
 
         if(last_stdout_maxline == 0)
         {
@@ -460,7 +472,7 @@ pmHistory.loadNewLines = function(item_id)
             {
                 if(thisObj.model.items[item_id].stdout[i] != undefined)
                 {
-                    $("#history-stdout").append(pmHistory.getLine(item_id, i))
+                    history_stdout.append(pmHistory.getLine(item_id, i))
                     addData = true;
                 }
             }
@@ -471,7 +483,7 @@ pmHistory.loadNewLines = function(item_id)
             {
                 if(thisObj.model.items[item_id].stdout[i] != undefined)
                 {
-                    $("#history-stdout").append(pmHistory.getLine(item_id, i))
+                    history_stdout.append(pmHistory.getLine(item_id, i))
                     addData = true;
                 }
             }

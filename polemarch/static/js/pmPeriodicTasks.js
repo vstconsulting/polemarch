@@ -209,7 +209,7 @@ pmPeriodicTasks.addItem = function(project_id)
     var data = {}
 
     data.project = project_id
-    data.playbook = $("#new_periodic-tasks_playbook").val()
+    data.mode = $("#new_periodic-tasks_playbook").val()
     data.name = $("#new_periodic-tasks_name").val()
     data.type = $("#new_periodic-tasks_type").val()
     data.inventory = $("#new_periodic-tasks_inventory").val()
@@ -261,7 +261,7 @@ pmPeriodicTasks.updateItem = function(item_id)
 {
     var data = {}
 
-    data.playbook = $("#periodic-tasks_"+item_id+"_playbook").val()
+    data.mode = $("#periodic-tasks_"+item_id+"_playbook").val()
     data.type = $("#periodic-tasks_"+item_id+"_type").val()
     data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
     data.name = $("#periodic-tasks_"+item_id+"_name").val()

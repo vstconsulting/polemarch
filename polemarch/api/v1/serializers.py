@@ -152,6 +152,7 @@ class HistorySerializer(serializers.ModelSerializer):
                   "mode",
                   "kind",
                   "status",
+                  "inventory",
                   "start_time",
                   "stop_time",
                   "url")
@@ -472,11 +473,18 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
 
-    def execute(self, request):
+    def _execution(self, kind, request):
         data = dict(request.data)
         inventory_id = int(data.pop("inventory"))
-        playbook_name = str(data.pop("playbook"))
-        history_id = self.instance.execute(playbook_name, inventory_id, **data)
+        target = str(data.pop(kind))
+        action = getattr(self.instance, "execute_ansible_{}".format(kind))
+        history_id = action(target, inventory_id, **data)
         rdata = dict(detail="Started at inventory {}.".format(inventory_id),
                      history_id=history_id)
         return Response(rdata, 201)
+
+    def execute_playbook(self, request):
+        return self._execution("playbook", request)
+
+    def execute_module(self, request):
+        return self._execution("module", request)

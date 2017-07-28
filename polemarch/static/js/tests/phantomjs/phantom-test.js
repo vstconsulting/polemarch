@@ -20,7 +20,7 @@ function printArgs() {
 }
 
 function saveReport(page) {
-
+ 
     var report = page.evaluate(function() {
         return $("#qunit").html();
     });
@@ -51,18 +51,31 @@ var page = require('webpage').create();
 
 page.viewportSize = { width: 800, height: 600 };
 
-/*page.onInitialized = function() {
+page.onInitialized = function() {
     console.log("page.onInitialized");
     printArgs.apply(this, arguments);
+};
+
+page.onResourceRequested = function (request) {
+    console.log('Request ' + JSON.stringify(request, undefined, 4));
 };
 
 page.onLoadStarted = function() {
     console.log("page.onLoadStarted");
     printArgs.apply(this, arguments);
-};*/
+};/**/
+
+page.onError = function (msg, trace) {
+    console.log("page.onError");
+    console.log(msg);
+    trace.forEach(function(item) {
+        console.log('  ', item.file, ':', item.line);
+    });
+};
 
 page.onLoadFinished = function()
 {
+    console.log("\x1b[1;34monLoadFinished:\x1b[0m" + JSON.stringify(arguments));
     if(arguments[0] == "success")
     {
         console.log("\x1b[1;32m"+arguments[0] + " page load finished\x1b[0m");
@@ -107,7 +120,7 @@ page.onResourceReceived = function() {
 page.onResourceRequested = function() {
     if(/\.[^\.]{1,4}$/mgi.test(arguments[0].url) || /GET data/mgi.test(arguments[0].url))
     {
-        return;
+      //  return;
     }
     console.log("\n"+arguments[0].method+ " " + arguments[0].url);
     if(arguments[0].postData)
@@ -132,8 +145,10 @@ page.onClosing = function()
 var countRender = 0;
 
 // window.console.log(msg);
-page.onConsoleMessage = function()
+page.onConsoleMessage = function(msg)
 {
+
+    console.log("\x1b[1;34mConsole message:\x1b[0m" + JSON.stringify(arguments));
     if(/^render ([A-z0-9\-_]+)$/.test(arguments[0]))
     {
         countRender++;
@@ -153,12 +168,12 @@ page.onConsoleMessage = function()
 
     if(/ReferenceError:/igm.test(message))
     {
-        phantom.exit();
+        //phantom.exit();
     }
 
     if(/TypeError:/igm.test(message))
     {
-        phantom.exit();
+        //phantom.exit();
     }
 
     console.log("\x1b[1;34mConsole message:\x1b[0m" + message);

@@ -2,10 +2,8 @@
 from __future__ import unicode_literals
 
 import logging
-import sys
 import uuid
-from collections import namedtuple, OrderedDict
-from os.path import dirname
+from collections import OrderedDict
 
 import json
 
@@ -16,117 +14,10 @@ from django.utils import timezone
 
 from . import Inventory
 from .base import BModel, BManager, BQuerySet, models
-from .vars import _AbstractModel, _AbstractVarsQuerySet
+from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project
-from ...main.utils import (tmp_file, CmdExecutor,
-                           KVExchanger, CalledProcessError)
 
 logger = logging.getLogger("polemarch")
-AnsibleExtra = namedtuple('AnsibleExtraArgs', [
-    'args',
-    'files',
-])
-
-
-# Classes and methods for support
-class Executor(CmdExecutor):
-    def __init__(self, history):
-        super(Executor, self).__init__()
-        self.history = history
-        self.counter = 0
-
-    @property
-    def output(self):
-        return self.history.raw_stdout
-
-    @output.setter
-    def output(self, value):
-        pass
-
-    def line_handler(self, proc, line):
-        cancel = KVExchanger(self.CANCEL_PREFIX + str(self.history.id)).get()
-        if cancel is not None:
-            self.write_output("\n[ERROR]: User interrupted execution")
-            proc.kill()
-            proc.wait()
-            return True
-        return super(Executor, self).line_handler(proc, line)
-
-    def write_output(self, line):
-        self.counter += 1
-        self.history.raw_history_line.create(history=self.history,
-                                             line_number=self.counter,
-                                             line=line)
-
-
-def __parse_extra_args(project, **extra):
-    extra_args, files = list(), list()
-    for key, value in extra.items():
-        if key in ["extra_vars", "extra-vars"]:
-            key = "extra-vars"
-        elif key == "verbose":
-            continue
-        elif key in ["key_file", "key-file"]:
-            if "BEGIN RSA PRIVATE KEY" in value:
-                kfile = tmp_file()
-                kfile.write(value)
-                files.append(kfile)
-                value = kfile.name
-            else:
-                value = "{}/{}".format(project.path, value)
-            key = "key-file"
-        extra_args.append("--{}".format(key))
-        extra_args += [str(value)] if value else []
-    return AnsibleExtra(extra_args, files)
-
-
-def run_ansible_executable(executable, task, inventory,
-                           history, **extra_args):
-    history.raw_inventory, key_files = inventory.get_inventory()
-    history.status = "RUN"
-    history.save()
-    path_to_ansible = dirname(sys.executable) + "/" + executable
-    inventory_file = tmp_file()
-    inventory_file.write(history.raw_inventory)
-    status = "OK"
-    try:
-        extra = __parse_extra_args(project=history.project, **extra_args)
-        args = [path_to_ansible, task, '-i',
-                inventory_file.name, '-v'] + extra.args
-        history.raw_args = " ".join(args)
-        history.raw_stdout = Executor(history).execute(args)
-    except CalledProcessError as exception:
-        history.raw_stdout = str(exception.output)
-        if exception.returncode == 4:
-            status = "OFFLINE"
-        elif exception.returncode == -9:
-            status = "INTERRUPTED"
-        else:
-            status = "ERROR"
-    except Exception as exception:  # pragma: no cover
-        history.raw_stdout = history.raw_stdout + str(exception)
-        status = "ERROR"
-    finally:
-        inventory_file.close()
-        for key_file in key_files:
-            key_file.close()
-        history.stop_time = timezone.now()
-        history.status = status
-        history.save()
-
-
-def run_ansible(group, module, inventory, history, module_args, **extra_args):
-    extra_args['module-name'] = module
-    if module_args is not None:
-        extra_args['args'] = module_args
-    run_ansible_executable("ansible", group,
-                           inventory, history, **extra_args)
-
-
-def run_ansible_playbook(task, inventory, history, **extra_args):
-    path_to_playbook = "{}/{}".format(task.project.path, task.playbook)
-    run_ansible_executable("ansible-playbook", path_to_playbook,
-                           inventory, history, **extra_args)
 
 
 # Block of real models
@@ -142,13 +33,10 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)
 
-    def run_ansible_playbook(self, inventory, history, **extra):
-        run_ansible_playbook(self, inventory, history, **extra)
-
 
 # noinspection PyTypeChecker
-class PeriodicTask(_AbstractModel):
-    objects     = BManager.from_queryset(_AbstractVarsQuerySet)()
+class PeriodicTask(AbstractModel):
+    objects     = BManager.from_queryset(AbstractVarsQuerySet)()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
                                     related_query_name="periodic_tasks",
                                     blank=True, null=True)
