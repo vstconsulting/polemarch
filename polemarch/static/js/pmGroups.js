@@ -3,8 +3,11 @@ var pmGroups = new pmItems()
 pmGroups.model.name = "groups"
 jsonEditor.options[pmGroups.model.name] = jsonEditor.options['item'];
  
+
 /**
- * @return $.Deferred
+ * @param {string} parent_type 
+ * @param {integer} parent_item 
+ * @return $.Deferred 
  */
 pmGroups.addItem = function(parent_type, parent_item)
 {

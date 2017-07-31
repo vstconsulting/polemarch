@@ -156,7 +156,7 @@ function qunitAddTests()
  */
 function qunitAddTests_users()
 {
-    syncQUnit.addTest('users', function ( assert )
+    syncQUnit.addTest('Открытие списка пользователей', function ( assert )
     {
         var done = assert.async();
 
@@ -171,7 +171,7 @@ function qunitAddTests_users()
         })
     });
 
-    syncQUnit.addTest('new-user', function ( assert )
+    syncQUnit.addTest('Открытие страницы добавления пользователя', function ( assert )
     {
         var done = assert.async();
 
@@ -190,7 +190,7 @@ function qunitAddTests_users()
     var t = new Date();
     t = t.getTime()
 
-    syncQUnit.addTest('new-user-save', function ( assert )
+    syncQUnit.addTest('Создание пользователя', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания пользователя
         var done = assert.async();
@@ -214,7 +214,7 @@ function qunitAddTests_users()
         })
     });
 
-    syncQUnit.addTest('update-user', function ( assert )
+    syncQUnit.addTest('Изменение пользователя', function ( assert )
     {
         var done = assert.async();
 
@@ -238,7 +238,7 @@ function qunitAddTests_users()
         })
     });
 
-    syncQUnit.addTest('delete-user', function ( assert )
+    syncQUnit.addTest('Удаление пользователя', function ( assert )
     {
         var done = assert.async();
 
@@ -264,7 +264,7 @@ function qunitAddTests_users()
  */
 function qunitAddTests_hosts()
 {
-    syncQUnit.addTest('hosts', function ( assert )
+    syncQUnit.addTest('Открытие списка хостов', function ( assert )
     {
         var done = assert.async();
 
@@ -279,7 +279,7 @@ function qunitAddTests_hosts()
         })
     });
 
-    syncQUnit.addTest('hosts_page', function ( assert )
+    syncQUnit.addTest('Постраничная навигация хостов', function ( assert )
     {
         var done = assert.async();
 
@@ -294,7 +294,7 @@ function qunitAddTests_hosts()
         })
     });
 
-    syncQUnit.addTest('new-host', function ( assert )
+    syncQUnit.addTest('Страница создания хоста', function ( assert )
     {
         var done = assert.async();
 
@@ -313,7 +313,7 @@ function qunitAddTests_hosts()
     var t = new Date();
     t = t.getTime()
 
-    syncQUnit.addTest('new-host-save', function ( assert )
+    syncQUnit.addTest('Создание хоста', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания хоста
         var done = assert.async();
@@ -343,7 +343,7 @@ function qunitAddTests_hosts()
         })
     });
 
-    syncQUnit.addTest('update-host', function ( assert )
+    syncQUnit.addTest('Изменение хоста', function ( assert )
     {
         var done = assert.async();
 
@@ -368,7 +368,7 @@ function qunitAddTests_hosts()
         })
     });
 
-    syncQUnit.addTest('delete-host', function ( assert )
+    syncQUnit.addTest('Удаление хоста', function ( assert )
     {
         var done = assert.async();
 
@@ -394,7 +394,7 @@ function qunitAddTests_hosts()
  */
 function qunitAddTests_groups()
 {
-    syncQUnit.addTest('validateHostName', function ( assert ) {
+    syncQUnit.addTest('Проверка функции validateHostName', function ( assert ) {
         var done = assert.async();
 
         assert.ok(!pmGroups.validateHostName(), 'Host')
@@ -415,7 +415,7 @@ function qunitAddTests_groups()
         done();
     });
 
-    syncQUnit.addTest('groups', function ( assert )
+    syncQUnit.addTest('Список групп', function ( assert )
     {
         var done = assert.async();
 
@@ -430,7 +430,7 @@ function qunitAddTests_groups()
         })
     });
 
-    syncQUnit.addTest('new-host', function ( assert )
+    syncQUnit.addTest('Страница создания группы', function ( assert )
     {
         var done = assert.async();
 
@@ -449,7 +449,7 @@ function qunitAddTests_groups()
     var t = new Date();
     t = t.getTime()
 
-    syncQUnit.addTest('new-group-save', function ( assert )
+    syncQUnit.addTest('Сохранение группы', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания группы
         var done = assert.async();
@@ -465,6 +465,7 @@ function qunitAddTests_groups()
         $("#new_json_value").val("val2");
         jsonEditor.jsonEditorAddVar();
 
+        $("#new_group_children").addClass('selected');
 
         // Отправка формы с данными группы
         $.when(pmGroups.addItem()).done(function()
@@ -478,7 +479,7 @@ function qunitAddTests_groups()
         })
     });
 
-    syncQUnit.addTest('update-group', function ( assert )
+    syncQUnit.addTest('Обновление группы', function ( assert )
     {
         var done = assert.async();
 
@@ -502,15 +503,75 @@ function qunitAddTests_groups()
             render("groups-update-group", 1000, done)
         })
     });
-
-    syncQUnit.addTest('delete-group', function ( assert )
+ 
+    syncQUnit.addTest('Открытие страницы создания подгруппы', function ( assert )
     {
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования группы
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+        
+        // Открытие пункта меню new-host
+        $.when(spajs.open({ menuId:"group/"+itemId+"/new-group"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню создания подгруппы new-group');
+            render("groups-new-sub-group", 1000, done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню создания подгруппы new-group');
+            render("groups-new-sub-group", 1000, done)
+        }) 
+    });
+    
+    syncQUnit.addTest('Сохранение подгруппы', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания группы
+        var done = assert.async();
 
+        // Заполнение формы с данными группы
+        $("#new_group_name").val("test-sub-group-"+t);
+
+        $("#new_json_name").val("test1");
+        $("#new_json_value").val("val1");
+        jsonEditor.jsonEditorAddVar();
+
+        $("#new_json_name").val("test2");
+        $("#new_json_value").val("val2");
+        jsonEditor.jsonEditorAddVar();
+ 
+        var master_group_itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+
+        // Отправка формы с данными группы
+        $.when(pmGroups.addItem('group', master_group_itemId)).done(function()
+        {
+            var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+            if(master_group_itemId != itemId)
+            {
+                assert.ok(false, 'Ошибка при добавлении подгруппы ' + master_group_itemId +"!="+ itemId); 
+                render("groups-add-new-sub-group", 1000, done)
+            }
+            else
+            {
+                assert.ok(true, 'Успешно group sub add Item');
+                render("groups-add-new-sub-group", 1000, done)
+            }
+            
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при group sub add Item');
+            render("groups-add-new-sub-group", 1000, done)
+        })
+    });
+    
+    syncQUnit.addTest('Удаление группы', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+  
         // Удаление группы.
         $.when(pmGroups.deleteItem(itemId, true)).done(function()
         {

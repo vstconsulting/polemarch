@@ -134,7 +134,11 @@ function pmItems()
     
     this.showNewItemPage = function(holder, menuInfo, data)
     {
+        var def = new $.Deferred();
         $(holder).html(spajs.just.render(this.model.name+'_new_page', {parent_item:data.reg[2], parent_type:data.reg[1]}))
+        
+        def.resolve()
+        return def.promise();
     }
 
     this.loadAllItems = function()
