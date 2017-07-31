@@ -762,7 +762,7 @@ function qunitAddTests_inventories()
  */
 function qunitAddTests_projects()
 {
-    syncQUnit.addTest('projects', function ( assert )
+    syncQUnit.addTest('Список проектов', function ( assert )
     {
         var done = assert.async();
 
@@ -777,7 +777,7 @@ function qunitAddTests_projects()
         })
     });
 
-    syncQUnit.addTest('new-project', function ( assert )
+    syncQUnit.addTest('Новый проект', function ( assert )
     {
         var done = assert.async();
 
@@ -796,7 +796,7 @@ function qunitAddTests_projects()
     var t = new Date();
     t = t.getTime()
 
-    syncQUnit.addTest('new-project-save', function ( assert )
+    syncQUnit.addTest('Сохранение проекта', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания project
         var done = assert.async();
@@ -826,7 +826,7 @@ function qunitAddTests_projects()
         })
     });
 
-    syncQUnit.addTest('update-project', function ( assert )
+    syncQUnit.addTest('Изменение проекта', function ( assert )
     {
         var done = assert.async();
 
@@ -851,7 +851,52 @@ function qunitAddTests_projects()
         })
     });
 
-    syncQUnit.addTest('delete-project', function ( assert )
+    syncQUnit.addTest('Проверка добавления невалидных подгрупп к project', function ( assert )
+    {
+        var done = assert.async();
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+        $.when(pmProjects.addSubGroups(itemId, [999999])).done(function()
+        {
+            assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
+            done()
+        }).fail(function()
+        {
+            assert.ok(true, 'Проверка добавления невалидных подгрупп успешна');
+            done()
+        })
+    })
+
+    syncQUnit.addTest('Проверка добавления невалидных хостов к project', function ( assert )
+    {
+        var done = assert.async();
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+        $.when(pmProjects.addSubHosts(itemId, [999999])).done(function()
+        {
+            assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
+            done()
+        }).fail(function()
+        {
+            assert.ok(true, 'Проверка добавления невалидных хостов успешна');
+            done()
+        })
+    })
+    
+    syncQUnit.addTest('Проверка добавления невалидных inventory к project', function ( assert )
+    {
+        var done = assert.async();
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+        $.when(pmProjects.addSubInventories(itemId, [999999])).done(function()
+        {
+            assert.ok(false, 'Ошибка при добавлении inventory 999999 вроде бы нет');
+            done()
+        }).fail(function()
+        {
+            assert.ok(true, 'Проверка добавления невалидных inventory успешна');
+            done()
+        })
+    })
+    
+    syncQUnit.addTest('Удаление проекта', function ( assert )
     {
         var done = assert.async();
 

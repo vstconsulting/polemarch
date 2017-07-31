@@ -436,7 +436,8 @@ pmProjects.addSubInventories = function(item_id, inventories_ids)
         inventories_ids = []
     }
 
-    return $.ajax({
+    var def = new $.Deferred();
+    $.ajax({
         url: "/api/v1/projects/"+item_id+"/inventories/",
         type: "POST",
         contentType:'application/json',
@@ -449,6 +450,13 @@ pmProjects.addSubInventories = function(item_id, inventories_ids)
         },
         success: function(data)
         {
+            if(data.not_found > 0)
+            {
+                $.notify("Item not found", "error");
+                def.reject()
+                return;
+            }
+            
             if(pmProjects.model.items[item_id])
             { 
                 for(var i in inventories_ids)
@@ -457,13 +465,16 @@ pmProjects.addSubInventories = function(item_id, inventories_ids)
                 }
             } 
             $.notify("Save", "success");
+            def.resolve()
         },
         error:function(e)
         {
             console.warn("inventories "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
+            def.reject()
         }
     });
+    return def.promise();
 }
 
 /**
@@ -476,7 +487,8 @@ pmProjects.addSubGroups = function(item_id, groups_ids)
         groups_ids = []
     }
 
-    return $.ajax({
+    var def = new $.Deferred();
+    $.ajax({
         url: "/api/v1/projects/"+item_id+"/groups/",
         type: "POST",
         contentType:'application/json',
@@ -489,6 +501,13 @@ pmProjects.addSubGroups = function(item_id, groups_ids)
         },
         success: function(data)
         {
+            if(data.not_found > 0)
+            {
+                $.notify("Item not found", "error");
+                def.reject()
+                return;
+            }
+            
             if(pmProjects.model.items[item_id])
             { 
                 for(var i in groups_ids)
@@ -497,13 +516,16 @@ pmProjects.addSubGroups = function(item_id, groups_ids)
                 }
             } 
             $.notify("Save", "success");
+            def.resolve()
         },
         error:function(e)
         {
             console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
+            def.reject()
         }
     });
+    return def.promise();
 }
 
 /**
@@ -515,7 +537,8 @@ pmProjects.addSubHosts = function(item_id, hosts_ids)
     {
         hosts_ids = []
     }
-    return $.ajax({
+    var def = new $.Deferred();
+    $.ajax({
         url: "/api/v1/projects/"+item_id+"/hosts/",
         type: "POST",
         contentType:'application/json',
@@ -528,6 +551,13 @@ pmProjects.addSubHosts = function(item_id, hosts_ids)
         },
         success: function(data)
         {
+            if(data.not_found > 0)
+            {
+                $.notify("Item not found", "error");
+                def.reject()
+                return;
+            }
+            
             if(pmProjects.model.items[item_id])
             { 
                 for(var i in hosts_ids)
@@ -536,13 +566,16 @@ pmProjects.addSubHosts = function(item_id, hosts_ids)
                 }
             }
             $.notify("Save", "success");
+            def.resolve()
         },
         error:function(e)
         {
             console.warn("project "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
+            def.reject()
         }
     });
+    return def.promise();
 }
 
 /**
