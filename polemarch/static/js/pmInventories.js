@@ -270,7 +270,8 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
         groups_ids = []
     }
 
-    return $.ajax({
+    var def = new $.Deferred();
+    $.ajax({
         url: "/api/v1/inventories/"+item_id+"/groups/",
         type: "POST",
         contentType:'application/json',
@@ -283,6 +284,13 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
         },
         success: function(data)
         { 
+            if(data.not_found > 0)
+            {
+                $.notify("Item not found", "error");
+                def.reject()
+                return;
+            }
+            
             if(pmInventories.model.items[item_id])
             { 
                 if(!pmInventories.model.items[item_id].groups)
@@ -297,13 +305,16 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
             }
             
             $.notify("Save", "success");
+            def.resolve()
         },
         error:function(e)
         {
             console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
+            def.reject()
         }
     });
+    return def.promise();
 }
  
 /**
@@ -316,7 +327,8 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
         hosts_ids = []
     }
 
-    return $.ajax({
+    var def = new $.Deferred();
+    $.ajax({
         url: "/api/v1/inventories/"+item_id+"/hosts/",
         type: "POST",
         contentType:'application/json',
@@ -329,6 +341,13 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
         },
         success: function(data)
         {
+            if(data.not_found > 0)
+            {
+                $.notify("Item not found", "error");
+                def.reject()
+                return;
+            }
+            
             if(pmInventories.model.items[item_id])
             { 
                 if(!pmInventories.model.items[item_id].hosts)
@@ -343,11 +362,14 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
             }
             
             $.notify("Save", "success");
+            def.resolve()
         },
         error:function(e)
         {
             console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
+            def.reject()
         }
     });
+    return def.promise();
 }

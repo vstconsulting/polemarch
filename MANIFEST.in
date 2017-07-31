@@ -2,6 +2,7 @@ include polemarch/README.md
 include README.rst
 include polemarch/main/settings.ini
 include polemarch/main/tests/exemplary_complex_inventory
+include polemarch/main/tests/facts_stdout
 include requirements.txt
 include requirements-git.txt
 include requirements-doc.txt

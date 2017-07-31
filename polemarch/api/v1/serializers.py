@@ -174,6 +174,9 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "raw_stdout",
                   "url")
 
+    def get_facts(self, request):
+        return self.instance.facts
+
 
 class HistoryLinesSerializer(serializers.ModelSerializer):
     class Meta:

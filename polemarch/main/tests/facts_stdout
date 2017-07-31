@@ -1,0 +1,24 @@
+172.16.1.29 | SUCCESS => {
+    "ansible_facts": {
+        "ansible_memfree_mb": 526
+    },
+    "changed": false
+}
+172.16.1.31 | SUCCESS => {
+    "ansible_facts": {
+        "ansible_memfree_mb": 736
+    },
+    "changed": false
+}
+172.16.1.30 | UNREACHABLE! => {
+    "changed": false,
+    "msg": "Failed to connect to the host via ssh: ssh: connect to host 172.16.1.30 port 22: No route to host\r\n",
+    "unreachable": true
+}
+172.16.1.32 | FAILED! => {
+    "changed": false,
+    "failed": true,
+    "module_stderr": "Shared connection to 172.16.1.32 closed.\r\n",
+    "module_stdout": "/bin/sh: /usr/bin/python: No such file or directory\r\n",
+    "msg": "MODULE FAILURE"
+}

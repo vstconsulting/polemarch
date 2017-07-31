@@ -4,17 +4,19 @@ variables:
   TESTS: "polemarch.main.tests"
 
 stages:
+  - code_standarts
   - build
   - test
   - packaging-test
-  - code_standarts
   - release
 
 
 .branch_tests_template: &branch_tests
   stage: test
+  variables:
+    TOX_ENVS: ""
   script:
-   - make test
+   - make test ENVS=$TOX_ENVS
    - make build-clean
    - coverage html
   artifacts:
@@ -55,8 +57,22 @@ stages:
 
 # Branch tests
 ###########################################
-default_tests:
+code_style:
+  stage: code_standarts
+  script:
+   - make test ENVS=pep,flake,pylint
+  only:
+    - /^issue_.*$/
+
+py27-django18-coverage:
   <<: *branch_tests
+  variables:
+    TOX_ENVS: "$CI_BUILD_NAME"
+
+py34-django111-coverage:
+  <<: *branch_tests
+  variables:
+    TOX_ENVS: "$CI_BUILD_NAME"
 
 default_rpm_tests:
   <<: *packing-test
@@ -111,17 +127,19 @@ pep8_checks:
   stage: code_standarts
   only:
    - master
+   - developer
   script:
    - make test ENVS=pep,flake
-  allow_failure: true
+  allow_failure: false
 
 pylint_checks:
   stage: code_standarts
   only:
    - master
+   - developer
   script:
    - make test ENVS=pylint
-  allow_failure: true
+  allow_failure: false
 
 
 # Realese
@@ -151,12 +169,11 @@ release_deb:
     paths:
     - dist/
 
-release_pypi:
-  stage: release
-  only:
-   - tags
-  script:
-   - python2 setup.py compile
-   # Firstly manualy
-   # - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
-  allow_failure: false
+#release_pypi:
+#  stage: release
+#  only:
+#   - tags
+#  script:
+#   - python2 setup.py compile
+#   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
+#  allow_failure: false

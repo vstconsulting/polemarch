@@ -32,8 +32,8 @@ function render(name, time, callback)
 }
 
 function saveReport()
-{ 
-    $("body").html('<div id="qunit">'+$("#qunit").html()+'</div>'); 
+{
+    $("body").html('<div id="qunit">'+$("#qunit").html()+'</div>');
     $("body").append('<link rel="stylesheet" href="'+window.pmStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">')
     console.log("saveReport")
 }
@@ -78,7 +78,7 @@ function injectQunit()
             };
 
             console.log( JSON.stringify( result, null, 2 ) );
- 
+
             if(!syncQUnit.nextTest())
             {
                 saveReport()
@@ -113,7 +113,7 @@ syncQUnit.nextTest = function(name, test)
     var test = syncQUnit.testsArray.shift()
 
     $.notify("Test "+test.name+", "+syncQUnit.testsArray.length+" tests remain", "warn");
-    
+
     QUnit.test(test.name, test.test);
     //syncQUnit.nextTest()
     //QUnit.start()
@@ -503,7 +503,7 @@ function qunitAddTests_groups()
             render("groups-update-group", 1000, done)
         })
     });
- 
+
     syncQUnit.addTest('Открытие страницы создания подгруппы', function ( assert )
     {
         var done = assert.async();
@@ -511,7 +511,7 @@ function qunitAddTests_groups()
         // Предполагается что мы от прошлого теста попали на страницу редактирования группы
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
-        
+
         // Открытие пункта меню new-host
         $.when(spajs.open({ menuId:"group/"+itemId+"/new-group"})).done(function()
         {
@@ -521,9 +521,9 @@ function qunitAddTests_groups()
         {
             assert.ok(false, 'Ошибка при открытиии меню создания подгруппы new-group');
             render("groups-new-sub-group", 1000, done)
-        }) 
+        })
     });
-    
+
     syncQUnit.addTest('Сохранение подгруппы', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания группы
@@ -539,7 +539,7 @@ function qunitAddTests_groups()
         $("#new_json_name").val("test2");
         $("#new_json_value").val("val2");
         jsonEditor.jsonEditorAddVar();
- 
+
         var master_group_itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
 
         // Отправка формы с данными группы
@@ -548,7 +548,7 @@ function qunitAddTests_groups()
             var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
             if(master_group_itemId != itemId)
             {
-                assert.ok(false, 'Ошибка при добавлении подгруппы ' + master_group_itemId +"!="+ itemId); 
+                assert.ok(false, 'Ошибка при добавлении подгруппы ' + master_group_itemId +"!="+ itemId);
                 render("groups-add-new-sub-group", 1000, done)
             }
             else
@@ -556,14 +556,44 @@ function qunitAddTests_groups()
                 assert.ok(true, 'Успешно group sub add Item');
                 render("groups-add-new-sub-group", 1000, done)
             }
-            
+
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при group sub add Item');
             render("groups-add-new-sub-group", 1000, done)
         })
     });
-    
+
+    syncQUnit.addTest('Проверка добавления невалидных подгрупп', function ( assert )
+    {
+        var done = assert.async();
+        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+        $.when(pmGroups.addSubGroups(itemId, [999999])).done(function()
+        {
+            assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
+            done()
+        }).fail(function()
+        {
+            assert.ok(true, 'Проверка добавления невалидных подгрупп успешна');
+            done()
+        })
+    })
+
+    syncQUnit.addTest('Проверка добавления невалидных хостов', function ( assert )
+    {
+        var done = assert.async();
+        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+        $.when(pmGroups.addSubHosts(itemId, [999999])).done(function()
+        {
+            assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
+            done()
+        }).fail(function()
+        {
+            assert.ok(true, 'Проверка добавления невалидных хостов успешна');
+            done()
+        })
+    })
+
     syncQUnit.addTest('Удаление группы', function ( assert )
     {
         var done = assert.async();
@@ -571,7 +601,7 @@ function qunitAddTests_groups()
         // Предполагается что мы от прошлого теста попали на страницу редактирования группы
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
-  
+
         // Удаление группы.
         $.when(pmGroups.deleteItem(itemId, true)).done(function()
         {
@@ -590,7 +620,7 @@ function qunitAddTests_groups()
  */
 function qunitAddTests_inventories()
 {
-    syncQUnit.addTest('inventories', function ( assert )
+    syncQUnit.addTest('Список инвенториев', function ( assert )
     {
         var done = assert.async();
 
@@ -605,7 +635,7 @@ function qunitAddTests_inventories()
         })
     });
 
-    syncQUnit.addTest('new-inventory', function ( assert )
+    syncQUnit.addTest('Страница нового inventory', function ( assert )
     {
         var done = assert.async();
 
@@ -624,7 +654,7 @@ function qunitAddTests_inventories()
     var t = new Date();
     t = t.getTime()
 
-    syncQUnit.addTest('new-inventory-save', function ( assert )
+    syncQUnit.addTest('Сохранение нового inventory', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания inventory
         var done = assert.async();
@@ -653,7 +683,7 @@ function qunitAddTests_inventories()
         })
     });
 
-    syncQUnit.addTest('update-inventory', function ( assert )
+    syncQUnit.addTest('Обновление inventory', function ( assert )
     {
         var done = assert.async();
 
@@ -667,7 +697,6 @@ function qunitAddTests_inventories()
         $("#new_json_value").val("val3");
         jsonEditor.jsonEditorAddVar();
 
-
         $.when(pmInventories.updateItem(itemId)).done(function()
         {
             assert.ok(true, 'Успешно update add Item');
@@ -678,7 +707,37 @@ function qunitAddTests_inventories()
         })
     });
 
-    syncQUnit.addTest('delete-inventory', function ( assert )
+    syncQUnit.addTest('Проверка добавления невалидных подгрупп к inventory', function ( assert )
+    {
+        var done = assert.async();
+        var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+        $.when(pmInventories.addSubGroups(itemId, [999999])).done(function()
+        {
+            assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
+            done()
+        }).fail(function()
+        {
+            assert.ok(true, 'Проверка добавления невалидных подгрупп успешна');
+            done()
+        })
+    })
+
+    syncQUnit.addTest('Проверка добавления невалидных хостов к inventory', function ( assert )
+    {
+        var done = assert.async();
+        var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+        $.when(pmInventories.addSubHosts(itemId, [999999])).done(function()
+        {
+            assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
+            done()
+        }).fail(function()
+        {
+            assert.ok(true, 'Проверка добавления невалидных хостов успешна');
+            done()
+        })
+    })
+
+    syncQUnit.addTest('Удаление inventory', function ( assert )
     {
         var done = assert.async();
 

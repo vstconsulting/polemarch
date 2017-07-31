@@ -228,7 +228,8 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
         groups_ids = []
     }
 
-    return $.ajax({
+    var def = new $.Deferred();
+    $.ajax({
         url: "/api/v1/groups/"+item_id+"/groups/",
         type: "POST",
         contentType:'application/json',
@@ -241,6 +242,13 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
         },
         success: function(data)
         {
+            if(data.not_found > 0)
+            {
+                $.notify("Item not found", "error");
+                def.reject()
+                return;
+            }
+            
             if(pmGroups.model.items[item_id])
             { 
                 if(!pmGroups.model.items[item_id].groups)
@@ -255,13 +263,16 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
             }
             //console.log("group update", data);
             $.notify("Save", "success");
+            def.resolve()
         },
         error:function(e)
         {
             console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
+            def.reject()
         }
     });
+    return def.promise();
 }
  
 /**
@@ -274,7 +285,8 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
         hosts_ids = []
     }
 
-    return $.ajax({
+    var def = new $.Deferred();
+    $.ajax({
         url: "/api/v1/groups/"+item_id+"/hosts/",
         type: "POST",
         contentType:'application/json',
@@ -287,6 +299,13 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
         },
         success: function(data)
         {
+            if(data.not_found > 0)
+            {
+                $.notify("Item not found", "error");
+                def.reject()
+                return;
+            }
+            
             if(pmGroups.model.items[item_id])
             { 
                 if(!pmGroups.model.items[item_id].hosts)
@@ -301,13 +320,16 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
             }
             //console.log("group update", data);
             $.notify("Save", "success");
+            def.resolve()
         },
         error:function(e)
         {
             console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
+            def.reject()
         }
     });
+    return def.promise();
 }
 
 /**
