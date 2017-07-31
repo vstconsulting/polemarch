@@ -36,7 +36,7 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
     data_vars.inventory = inventory
 
     $.ajax({
-        url: "/api/v1/projects/"+project_id+"/execute/",
+        url: "/api/v1/projects/"+project_id+"/execute-playbook/",
         type: "POST",
         data:JSON.stringify(data_vars),
         contentType:'application/json',

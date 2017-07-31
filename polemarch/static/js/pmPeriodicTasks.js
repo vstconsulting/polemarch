@@ -19,7 +19,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
     }
      
     $.ajax({
-        url: "/api/v1/projects/"+project_id+"/execute/",
+        url: "/api/v1/projects/"+project_id+"/execute-playbook/",
         type: "POST",
         data:JSON.stringify(data),
         contentType:'application/json',
