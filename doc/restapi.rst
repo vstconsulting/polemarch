@@ -1882,12 +1882,65 @@ History records
 
    :arg id: id of record.
 
+.. http:get:: /api/v1/history/{id}/facts/
+
+   Get facts gathered during execution of ``setup`` module.
+
+   :arg id: id of history record.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/history/1/facts/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+           "172.16.1.29":{
+              "status":"SUCCESS",
+              "ansible_facts":{
+                 "ansible_memfree_mb":526
+              },
+              "changed":false
+           },
+           "172.16.1.31":{
+              "status":"SUCCESS",
+              "ansible_facts":{
+                 "ansible_memfree_mb":736
+              },
+              "changed":false
+           },
+           "172.16.1.30":{
+              "status":"UNREACHABLE!",
+              "changed":false,
+              "msg":"Failed to connect to the host via ssh: ssh: connect to host 172.16.1.30 port 22: No route to host\r\n",
+              "unreachable":true
+           },
+           "172.16.1.32":{
+              "status":"FAILED!",
+              "changed":false,
+              "failed":true,
+              "module_stderr":"Shared connection to 172.16.1.32 closed.\r\n",
+              "module_stdout":"/bin/sh: /usr/bin/python: No such file or directory\r\n",
+              "msg":"MODULE FAILURE"
+           }
+        }
+
+   :statuscode 200: no error
+   :statuscode 404: there is no facts. Either incorrect history id or kind not
+    ``MODULE`` and/or module is not ``setup``. Facts can be gathered only
+    by running ``setup`` module. See
+    :http:post:`/api/v1/projects/{id}/execute-module/` for details about
+    modules run.
+   :statuscode 424: facts still not ready because module is currently running
+    or only scheduled for run.
+
 .. _variables:
-
-Execute ansible module
-----------------------
-
-
 
 Variables
 ---------

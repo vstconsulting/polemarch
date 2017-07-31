@@ -585,14 +585,14 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         url = "/api/v1/history/{}/facts/".format(history.id)
         parsed = self.get_result("get", url)
         self.assertCount(parsed, 4)
-        self.assertTrue(parsed['172.16.1.31']['success'])
-        self.assertTrue(parsed['172.16.1.29']['success'])
-        self.assertFalse(parsed['172.16.1.32']['success'])
-        self.assertFalse(parsed['172.16.1.30']['success'])
-        self.assertEquals(parsed['172.16.1.31']['facts']['ansible_memfree_mb'],
-                          736)
+        self.assertEquals(parsed['172.16.1.31']['status'], 'SUCCESS')
+        self.assertEquals(parsed['172.16.1.29']['status'], 'SUCCESS')
+        self.assertEquals(parsed['172.16.1.32']['status'], 'FAILED!')
+        self.assertEquals(parsed['172.16.1.30']['status'], 'UNREACHABLE!')
+        self.assertEquals(parsed['172.16.1.31']['ansible_facts']
+                          ['ansible_memfree_mb'], 736)
         self.assertIn('No route to host',
-                      parsed['172.16.1.30']['details']['msg'])
+                      parsed['172.16.1.30']['msg'])
         for status in ['RUN', 'DELAY']:
             history.status = status
             history.save()
