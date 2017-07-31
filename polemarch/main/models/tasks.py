@@ -181,8 +181,8 @@ class History(BModel):
         def jsonify(match):
             source = str(match.group(0))
             result = ', "' + source
-            result = re.sub(" \| ", '":{ "status": "', result)
-            result = re.sub(" => {", '",', result)
+            result = re.sub(r" \| ", '":{ "status": "', result)
+            result = re.sub(r" => {", '",', result)
             return result
 
         if self.status not in ['OK', 'ERROR', 'OFFLINE']:
@@ -192,7 +192,7 @@ class History(BModel):
         if self.mode != 'setup':
             raise self.NoFactsAvailableException()
         data = self.raw_stdout
-        result = re.sub("[^|^\n]+\|[^{]+{\n", jsonify, data)
+        result = re.sub(r"[^|^\n]+\|[^{]+{\n", jsonify, data)
         result = "{" + result[1:] + "}"
         return json.loads(result)
 
