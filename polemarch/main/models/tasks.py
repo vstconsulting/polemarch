@@ -7,12 +7,14 @@ from collections import OrderedDict
 
 import json
 
+import re
 import six
 from celery.schedules import crontab
 from django.db import transaction
 from django.utils import timezone
 
 from . import Inventory
+from ..exceptions import DataNotReady, NotApplicable
 from .base import BModel, BManager, BQuerySet, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project
@@ -161,6 +163,11 @@ class History(BModel):
     raw_inventory = models.TextField(default="")
     status        = models.CharField(max_length=50)
 
+    class NoFactsAvailableException(NotApplicable):
+        def __init__(self):
+            msg = "Facts can be gathered only by setup module."
+            super(History.NoFactsAvailableException, self).__init__(msg)
+
     class Meta:
         default_related_name = "history"
         ordering = ["-id"]
@@ -168,6 +175,26 @@ class History(BModel):
             ["id", "project", "mode", "status", "inventory",
              "start_time", "stop_time"]
         ]
+
+    @property
+    def facts(self):
+        def jsonify(match):
+            source = str(match.group(0))
+            result = ', "' + source
+            result = re.sub(r" \| ", '":{ "status": "', result)
+            result = re.sub(r" => {", '",', result)
+            return result
+
+        if self.status not in ['OK', 'ERROR', 'OFFLINE']:
+            raise DataNotReady("Execution still in process.")
+        if self.kind != 'MODULE':
+            raise self.NoFactsAvailableException()
+        if self.mode != 'setup':
+            raise self.NoFactsAvailableException()
+        data = self.raw_stdout
+        result = re.sub(r"[^|^\n]+\|[^{]+{\n", jsonify, data)
+        result = "{" + result[1:] + "}"
+        return json.loads(result)
 
     @property
     def raw_stdout(self):

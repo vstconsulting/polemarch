@@ -1,6 +1,7 @@
 import json  # noqa: F401
 import random
 import string
+import os
 
 import six
 from django.db import transaction
@@ -16,6 +17,12 @@ class BaseTestCase(TestCase):
         self.user = self._create_user()
         self.login_url = getattr(settings, 'LOGIN_URL', '/login/')
         self.logout_url = getattr(settings, 'LOGOUT_URL', '/logout/')
+
+    def _get_string_from_file(self, name):
+        file_path = os.path.dirname(os.path.abspath(__file__))
+        file_path += "/" + name
+        with open(file_path, 'r') as inventory_file:
+            return inventory_file.read()
 
     def change_identity(self, is_super_user=False):
         old_user = self.user

@@ -62,7 +62,7 @@ class Project(AbstractModel):
             raise PMException("Empty playbook/module name.")
         from .tasks import History
         inventory = hosts_models.Inventory.objects.get(id=inventory_id)
-        history_kwargs = dict(name=mod_name,
+        history_kwargs = dict(mode=mod_name,
                               start_time=timezone.now(),
                               inventory=inventory,
                               project=self,
