@@ -519,3 +519,7 @@ table{
 .error-note{
     color: #ff5252; 
 }
+
+.item-name{
+    word-wrap: break-word;
+}

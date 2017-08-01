@@ -1066,6 +1066,7 @@
                                     </th>
                                     <th>Name</th>
                                     <th style="width: 400px;" class="hidden-sm visible-lg">Playbook</th>
+                                    <th style="width: 95px;" class="hidden-xs">Kind</th>
                                     <th style="width: 95px;" class="hidden-xs">Type</th>
                                     <th style="width: 95px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
@@ -1085,6 +1086,10 @@
                                         <td class="hidden-sm visible-lg">
                                             <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('mode') %></a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('kind') %></a>
                                         </td>
                                         <td class="hidden-xs">
                                             <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
@@ -1186,10 +1191,22 @@
                                         maxlength="255">
                                 <div class="help-block"></div>
                             </div>
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Kind</label>
+                                <select class="form-control"
+                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_kind"
+                                        data-placeholder="Select kind"
+                                        onchange="pmPeriodicTasks.model.items[<%- item_id %>].type = this.value;"
+                                        style="width:100%" >
+                                    <option value="PLAYBOOK" <% if(pmPeriodicTasks.model.items[item_id].kind == 'PLAYBOOK'){ %>selected<% } %> >Playbook</option>
+                                    <option value="MODULE" <% if(pmPeriodicTasks.model.items[item_id].kind == 'MODULE'){ %>selected<% } %> >Module</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div>
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
                                 <label class="control-label" >Playbook</label>
                                 <input type="text"
                                         placeholder="Enter playbook name"
@@ -1200,6 +1217,17 @@
                                 <div class="help-block"></div>
                             </div>
 
+                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
+                                <label class="control-label" >Module</label>
+                                <input type="text"
+                                        placeholder="Enter module name"
+                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_module"
+                                        value="<%- pmPeriodicTasks.model.items[item_id].mode %>"
+                                        class="form-control"
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                            
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Inventory</label>
 
@@ -1342,14 +1370,38 @@
                                         maxlength="255">
                                 <div class="help-block"></div>
                             </div>
+
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Kind</label>
+                                <select class="form-control"
+                                        id="new_periodic-tasks_kind"
+                                        data-placeholder="Select kind"
+                                        onchange="pmPeriodicTasks.model.newitem.kind = this.value;"
+                                        style="width:100%" >
+                                    <option value="PLAYBOOK" selected >Playbook</option>
+                                    <option value="MODULE" >Module</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div>
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
                                 <label class="control-label" >Playbook</label>
                                 <input type="text"
                                         placeholder="Enter playbook name"
                                         id="new_periodic-tasks_playbook"
+                                        value=""
+                                        class="form-control"
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
+                                <label class="control-label" >Module</label>
+                                <input type="text"
+                                        placeholder="Enter module name"
+                                        id="new_periodic-tasks_module"
                                         value=""
                                         class="form-control"
                                         maxlength="255">
@@ -1755,7 +1807,7 @@
                     </div>
                 </div>
             </section>
-        </div> 
+        </div>
     </section>
 </script>
 
@@ -2167,7 +2219,7 @@
                                                     <span class="error-note" >In inventory <%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].name %> has no any groups</span>
                                             <% } %>
                                         </div>
-                                    </div> 
+                                    </div>
                                 <% } %>
                             <~>
                         </div>
