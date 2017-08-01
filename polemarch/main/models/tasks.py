@@ -111,7 +111,7 @@ class Template(BModel):
     template_fields["PeriodicTask"] = ["type", "name", "schedule", "inventory",
                                        "kind", "mode", "project", "vars"]
     template_fields["Module"] = ["inventory", "module", "group", "args",
-                                 "vars"]
+                                 "vars", "project"]
     template_fields["Host"] = ["name", "vars"]
     template_fields["Group"] = template_fields["Host"] + ["children"]
 
