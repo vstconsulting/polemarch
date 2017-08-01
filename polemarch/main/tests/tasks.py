@@ -128,14 +128,15 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         self.assertEquals(history.kind, "MODULE")
         self.assertEquals(history.mode, "shell")
         # test simple execution without args
-        for arg_option in ["", None]:
+        kw_list = [dict(args=""), dict(args=None), dict()]
+        for kwargs in kw_list:
             subprocess_function.reset_mock()
             proj_id = self.task_proj.id
             answer = self.post_result(
                 "/api/v1/projects/{}/execute-module/".format(proj_id),
                 data=json.dumps(dict(inventory=inv1, module="ping",
-                                     group="all", args=arg_option,
-                                     user="mysuperuser")))
+                                     group="all", user="mysuperuser",
+                                     **kwargs)))
             self.assertEquals(subprocess_function.call_count, 1)
             call_args = subprocess_function.call_args[0][0]
             self.assertNotIn("--args", call_args)

@@ -130,8 +130,8 @@ class AnsibleModule(AnsibleCommand):
 
     def __init__(self, target, *pargs, **kwargs):
         kwargs['module-name'] = target
-        if not kwargs['args']:
-            kwargs.pop('args')
+        if not kwargs.get('args', None):
+            kwargs.pop('args', None)
         super(AnsibleModule, self).__init__(*pargs, **kwargs)
 
     def execute(self, group, *args, **extra_args):
