@@ -347,6 +347,10 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         # test with with no project
         data = dict(mode="p1.yml", schedule="30 */4", type="CRONTAB")
         self.get_result("post", url, 400, data=json.dumps(data))
+        data = dict(mode="p1.yml", schedule="30 */4", type="crontab",
+                    project=self.periodic_project_id,
+                    inventory=self.inventory.id, name="four", vars=variables)
+        self.get_result("post", url, 415, data=json.dumps(data))
 
     def test_create_delete_periodic_task_module(self):
         details = dict(mode="ping",

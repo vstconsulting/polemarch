@@ -49,6 +49,9 @@ class PeriodicTask(AbstractModel):
     schedule    = models.CharField(max_length=4*1024)
     type        = models.CharField(max_length=10)
 
+    kinds = ["PLAYBOOK", "MODULE"]
+    types = ["CRONTAB", "INTERVAL"]
+
     class Meta:
         default_related_name = "periodic_tasks"
 
