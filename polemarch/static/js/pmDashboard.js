@@ -55,33 +55,48 @@ pmDashboard.open  = function(holder, menuInfo, data)
                 columns: [
                     ['time']
                 ],
-                type: 'area-spline',
+                //type: 'area-spline',
+                type: 'area',
             },
             axis: {
                 x: {
                     type: 'timeseries',
                     tick: {
-                        format: '%Y-%m-%d %H:%m:%S'
+                        format: '%Y-%m-%d'
                     }
                 }
             }
         });
-
-        tasks_start_x = ['time'];
-        tasks_start_data = ['tasks'];
-
+ 
+        tasks_data = {} 
         for(var i in pmHistory.model.items)
         {
             var val = pmHistory.model.items[i]
             var time = new Date(val.start_time)
-            //tasks_start_x.push(moment(Math.floor(time.getTime()/3600)*3600).format("MM/DD/YYYY"));
-            tasks_start_x.push(time.getTime());
-            tasks_start_data.push(1);
+            time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
+            
+            if(!tasks_data[time])
+            {
+                tasks_data[time] = 1
+            }
+            else
+            {
+                tasks_data[time] += 1
+            } 
         }
+        
+        chart_tasks_start_x = ['time'];
+        chart_tasks_data = ['tasks'];
 
+        for(var i in tasks_data)
+        {
+            chart_tasks_start_x.push(i/1);
+            chart_tasks_data.push(tasks_data[i]/1);
+        }
+        
         history_chart.load({
             columns: [
-                tasks_start_x,tasks_start_data
+                chart_tasks_start_x,chart_tasks_data
             ]
         });
     })

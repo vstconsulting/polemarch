@@ -3,23 +3,41 @@ var pmPeriodicTasks = new pmItems()
 
 pmPeriodicTasks.model.name = "periodic-tasks"
 
+
+
 pmPeriodicTasks.execute = function(project_id, item_id)
 {
     var def = new $.Deferred();
 
     var data = jsonEditor.jsonEditorGetValues();
-    data.playbook = $("#periodic-tasks_"+item_id+"_playbook").val()
     data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
 
-    if(!data.playbook)
+    var kind = 'execute-playbook'
+    if($("#periodic-tasks_"+item_id+"_kind").val() == 'MODULE')
     {
-        $.notify("Playbook name is empty", "error");
-        def.reject();
-        return def.promise();
+        kind = 'execute-module'
+        data.module = $("#periodic-tasks_"+item_id+"_module").val()
+        if(!data.module)
+        {
+            $.notify("Module name is empty", "error");
+            def.reject();
+            return def.promise();
+        }
     }
-     
+    else
+    {
+        data.playbook = $("#periodic-tasks_"+item_id+"_playbook").val()
+        if(!data.playbook)
+        {
+            $.notify("Playbook name is empty", "error");
+            def.reject();
+            return def.promise();
+        }
+    }
+
+
     $.ajax({
-        url: "/api/v1/projects/"+project_id+"/execute/",
+        url: "/api/v1/projects/"+project_id+"/"+kind+"/",
         type: "POST",
         data:JSON.stringify(data),
         contentType:'application/json',
@@ -107,7 +125,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
     var thisObj = this;
     return $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
-        thisObj.model.newitem = {type:'INTERVAL'}
+        thisObj.model.newitem = {type:'INTERVAL', kind:'PLAYBOOK'}
         $(holder).html(spajs.just.render(thisObj.model.name+'_new_page', {project_id:project_id}))
 
         $('#new_periodic-tasks_inventory').select2();
@@ -125,7 +143,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
             {
                 $("#new_periodic-tasks_playbook").val($(item).text());
                 //console.log('onSelect', term, item);
-                //var value = $(item).attr('data-value');   
+                //var value = $(item).attr('data-value');
             },
             source: function(term, response)
             {
@@ -151,7 +169,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
 
 pmPeriodicTasks.showItem = function(holder, menuInfo, data)
 {
-    var thisObj = this; 
+    var thisObj = this;
     var item_id = data.reg[2];
     var project_id = data.reg[1];
 
@@ -174,7 +192,7 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
             {
                 $("#periodic-tasks_"+item_id+"_playbook").val($(item).text());
                 //console.log('onSelect', term, item);
-                //var value = $(item).attr('data-value');  
+                //var value = $(item).attr('data-value');
             },
             source: function(term, response)
             {
@@ -209,10 +227,33 @@ pmPeriodicTasks.addItem = function(project_id)
     var data = {}
 
     data.project = project_id
-    data.mode = $("#new_periodic-tasks_playbook").val()
+
     data.name = $("#new_periodic-tasks_name").val()
     data.type = $("#new_periodic-tasks_type").val()
     data.inventory = $("#new_periodic-tasks_inventory").val()
+
+    data.kind = $("#new_periodic-tasks_kind").val()
+
+    if(data.kind == "MODULE")
+    {
+        data.mode = $("#new_periodic-tasks_module").val()
+        if(!data.mode)
+        {
+            $.notify("Module name is empty", "error");
+            def.reject();
+            return def.promise();
+        }
+    }
+    else
+    {
+        data.mode = $("#new_periodic-tasks_playbook").val()
+        if(!data.mode)
+        {
+            $.notify("Playbook name is empty", "error");
+            def.reject();
+            return def.promise();
+        }
+    }
 
     if(data.type == "CRONTAB")
     {
@@ -238,7 +279,7 @@ pmPeriodicTasks.addItem = function(project_id)
             }
         },
         success: function(data)
-        { 
+        {
             $.notify("periodic task created", "success");
 
             $.when(spajs.open({ menuId:"project/"+project_id+"/periodic-task/"+data.id})).always(function(){
@@ -261,10 +302,32 @@ pmPeriodicTasks.updateItem = function(item_id)
 {
     var data = {}
 
-    data.mode = $("#periodic-tasks_"+item_id+"_playbook").val()
     data.type = $("#periodic-tasks_"+item_id+"_type").val()
     data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
     data.name = $("#periodic-tasks_"+item_id+"_name").val()
+
+    data.kind = $("#periodic-tasks_"+item_id+"_kind").val()
+
+    if(data.kind == "MODULE")
+    {
+        data.mode = $("#periodic-tasks_"+item_id+"_module").val()
+        if(!data.mode)
+        {
+            $.notify("Module name is empty", "error");
+            def.reject();
+            return def.promise();
+        }
+    }
+    else
+    {
+        data.mode = $("#periodic-tasks_"+item_id+"_playbook").val()
+        if(!data.mode)
+        {
+            $.notify("Playbook name is empty", "error");
+            def.reject();
+            return def.promise();
+        }
+    }
 
     if(data.type == "CRONTAB")
     {
@@ -289,7 +352,7 @@ pmPeriodicTasks.updateItem = function(item_id)
             }
         },
         success: function(data)
-        { 
+        {
             $.notify("Save", "success");
         },
         error:function(e)

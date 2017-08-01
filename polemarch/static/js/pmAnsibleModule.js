@@ -2,27 +2,53 @@
 var pmAnsibleModule = { 
     pageSize:20,
     model:{
-        name:"module"
+        name:"module",
+        selectedInventory:0
     }
 }
  
 jsonEditor.options[pmAnsibleModule.model.name] = jsonEditor.options['item'];
   
-pmAnsibleModule.showInInventory = function(holder, menuInfo, data)
+pmModuleTemplates.selectInventory = function(inventory_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    inventory_id = inventory_id/1
+    if(inventory_id)
+    {
+        $.when(pmInventories.loadItem(inventory_id)).done(function(){
+            thisObj.model.selectedInventory = inventory_id;
+            def.resolve();
+        }).fail(function(){
+            def.reject();
+        });
+    }
+    else
+    {
+        thisObj.model.selectedInventory = 0;
+        def.resolve();
+    }
+    return def.promise()
+}
+
+pmAnsibleModule.showInProject = function(holder, menuInfo, data)
 {
     var thisObj = this;
-    var inventory_id = data.reg[1]  
+    var project_id = data.reg[1]  
     
-    return $.when(pmInventories.loadItem(inventory_id)).done(function()
+    return $.when(pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_run_page', {item_id:inventory_id}))
+        $(holder).html(spajs.just.render(thisObj.model.name+'_run_page', {item_id:project_id}))
+        
+        $("#inventories-autocomplete").select2(); 
+
     }).fail(function()
     {
         $.notify("", "error");
     })
 }
  
-pmAnsibleModule.execute = function(inventory_id, group, module, data_args, data_vars)
+pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data_args, data_vars)
 {
     var def = new $.Deferred();
     if(!group)
@@ -57,13 +83,13 @@ pmAnsibleModule.execute = function(inventory_id, group, module, data_args, data_
         data = jsonEditor.jsonEditorGetValues();
     }
     
-    data.inventory = inventory_id
+    data.inventory = inventory_id/1
     data.module = module
     data.group = group
     data.args = data_args
 
     $.ajax({
-        url: "/api/v1/execute_module/",
+        url: "/api/v1/projects/"+project_id+"/execute-module/",
         type: "POST",
         data:JSON.stringify(data),
         contentType:'application/json',
@@ -75,9 +101,9 @@ pmAnsibleModule.execute = function(inventory_id, group, module, data_args, data_
         },
         success: function(data) 
         {
-            $.notify("Started", "success"); 
             if(data && data.history_id)
             { 
+                $.notify("Started", "success"); 
                 $.when(spajs.open({ menuId:"history/"+data.history_id}) ).done(function(){
                     def.resolve()
                 }).fail(function(){

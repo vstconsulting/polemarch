@@ -182,12 +182,6 @@ polemarch.start = function(options)
     })
 
     spajs.addMenu({
-        id:"inventory-ansible-module-run", 
-        urlregexp:[/^inventory\/([0-9]+)\/ansible-module\/run$/],
-        onOpen:function(holder, menuInfo, data){return pmAnsibleModule.showInInventory(holder, menuInfo, data);}
-    })
-    
-    spajs.addMenu({
         id:"newInventory", 
         urlregexp:[/^new-inventory$/, /^([A-z0-9_]+)\/([0-9]+)\/new-inventory$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showNewItemPage(holder, menuInfo, data);}
@@ -223,6 +217,12 @@ polemarch.start = function(options)
         id:"project-run-playbook", 
         urlregexp:[/^project\/([0-9]+)\/playbook\/run$/],
         onOpen:function(holder, menuInfo, data){return pmProjects.openRunPlaybookPage(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"project-ansible-module-run", 
+        urlregexp:[/^project\/([0-9]+)\/ansible-module\/run$/],
+        onOpen:function(holder, menuInfo, data){return pmAnsibleModule.showInProject(holder, menuInfo, data);}
     })
     
     // tasks
