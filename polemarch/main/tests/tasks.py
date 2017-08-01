@@ -127,6 +127,19 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         history = History.objects.get(id=answer["history_id"])
         self.assertEquals(history.kind, "MODULE")
         self.assertEquals(history.mode, "shell")
+        # test simple execution without args
+        kw_list = [dict(args=""), dict(args=None), dict()]
+        for kwargs in kw_list:
+            subprocess_function.reset_mock()
+            proj_id = self.task_proj.id
+            answer = self.post_result(
+                "/api/v1/projects/{}/execute-module/".format(proj_id),
+                data=json.dumps(dict(inventory=inv1, module="ping",
+                                     group="all", user="mysuperuser",
+                                     **kwargs)))
+            self.assertEquals(subprocess_function.call_count, 1)
+            call_args = subprocess_function.call_args[0][0]
+            self.assertNotIn("--args", call_args)
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_complex_inventory_execute(self, subprocess_function):
@@ -347,6 +360,10 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         # test with with no project
         data = dict(mode="p1.yml", schedule="30 */4", type="CRONTAB")
         self.get_result("post", url, 400, data=json.dumps(data))
+        data = dict(mode="p1.yml", schedule="30 */4", type="crontab",
+                    project=self.periodic_project_id,
+                    inventory=self.inventory.id, name="four", vars=variables)
+        self.get_result("post", url, 415, data=json.dumps(data))
 
     def test_create_delete_periodic_task_module(self):
         details = dict(mode="ping",
@@ -585,14 +602,14 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         url = "/api/v1/history/{}/facts/".format(history.id)
         parsed = self.get_result("get", url)
         self.assertCount(parsed, 4)
-        self.assertTrue(parsed['172.16.1.31']['success'])
-        self.assertTrue(parsed['172.16.1.29']['success'])
-        self.assertFalse(parsed['172.16.1.32']['success'])
-        self.assertFalse(parsed['172.16.1.30']['success'])
-        self.assertEquals(parsed['172.16.1.31']['facts']['ansible_memfree_mb'],
-                          736)
+        self.assertEquals(parsed['172.16.1.31']['status'], 'SUCCESS')
+        self.assertEquals(parsed['172.16.1.29']['status'], 'SUCCESS')
+        self.assertEquals(parsed['172.16.1.32']['status'], 'FAILED!')
+        self.assertEquals(parsed['172.16.1.30']['status'], 'UNREACHABLE!')
+        self.assertEquals(parsed['172.16.1.31']['ansible_facts']
+                          ['ansible_memfree_mb'], 736)
         self.assertIn('No route to host',
-                      parsed['172.16.1.30']['details']['msg'])
+                      parsed['172.16.1.30']['msg'])
         for status in ['RUN', 'DELAY']:
             history.status = status
             history.save()

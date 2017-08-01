@@ -43,6 +43,8 @@ class Host(AbstractModel):
     type        = models.CharField(max_length=5,
                                    default="HOST")
 
+    types = ["HOST", "RANGE"]
+
     class Meta:
         default_related_name = "hosts"
 

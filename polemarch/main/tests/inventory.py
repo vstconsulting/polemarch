@@ -95,6 +95,9 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
             self.get_result("delete", url + "{}/".format(host_id))
         self.assertEqual(Host.objects.filter(id__in=results_id).count(), 0)
 
+        data = dict(name="127.0.1.1", type="host", vars=self.vars)
+        self.get_result("post", url, 415, data=json.dumps(data))
+
     def test_filter_host(self):
         base_url = "/api/v1/hosts/"
         filter_url = "{}?name=hostonlocal".format(base_url)

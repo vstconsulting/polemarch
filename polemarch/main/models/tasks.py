@@ -7,6 +7,7 @@ from collections import OrderedDict
 
 import json
 
+import re
 import six
 from celery.schedules import crontab
 from django.db import transaction
@@ -47,6 +48,9 @@ class PeriodicTask(AbstractModel):
                                     related_query_name="periodic_tasks")
     schedule    = models.CharField(max_length=4*1024)
     type        = models.CharField(max_length=10)
+
+    kinds = ["PLAYBOOK", "MODULE"]
+    types = ["CRONTAB", "INTERVAL"]
 
     class Meta:
         default_related_name = "periodic_tasks"
@@ -177,6 +181,13 @@ class History(BModel):
 
     @property
     def facts(self):
+        def jsonify(match):
+            source = str(match.group(0))
+            result = ', "' + source
+            result = re.sub(r" \| ", '":{ "status": "', result)
+            result = re.sub(r" => {", '",', result)
+            return result
+
         if self.status not in ['OK', 'ERROR', 'OFFLINE']:
             raise DataNotReady("Execution still in process.")
         if self.kind != 'MODULE':
@@ -184,23 +195,9 @@ class History(BModel):
         if self.mode != 'setup':
             raise self.NoFactsAvailableException()
         data = self.raw_stdout
-        decoder = json.JSONDecoder()
-        objs = {}
-        while len(data) > 0:
-            host, data = data.split("{", 1)
-            host, result = host.split('|', 1)
-            host = host.strip()
-            result = 'SUCCESS' in result
-            data = '{' + data
-            obj, pos = decoder.raw_decode(data)
-            dic = dict(success=result)
-            if result:
-                dic['facts'] = obj['ansible_facts']
-            else:
-                dic['details'] = obj
-            objs[host] = dic
-            data = data[pos:].strip()
-        return objs
+        result = re.sub(r"[^|^\n]+\|[^{]+{\n", jsonify, data)
+        result = "{" + result[1:] + "}"
+        return json.loads(result)
 
     @property
     def raw_stdout(self):

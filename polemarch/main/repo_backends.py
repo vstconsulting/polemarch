@@ -90,6 +90,9 @@ class _Base(object):
     def get(self):
         return self._make_operations(self.make_update)
 
+    def check(self):
+        pass
+
 
 class Git(_Base):  # pragma: no cover
     _fetch_statuses = [

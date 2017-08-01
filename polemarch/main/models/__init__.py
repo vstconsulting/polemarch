@@ -37,6 +37,13 @@ def check_circular_deps(instance, action, pk_set, *args, **kw):
 
 
 @receiver(signals.pre_save, sender=PeriodicTask)
+def validate_types(instance, **kwargs):
+    if instance.kind not in instance.kinds or \
+                    instance.type not in instance.types:
+        raise UnknownTypeException(instance.kind, "Unknown kind {}.")
+
+
+@receiver(signals.pre_save, sender=PeriodicTask)
 def validate_crontab(instance, **kwargs):
     try:
         instance.get_schedule()
@@ -52,6 +59,12 @@ def validate_hosts(instance, **kwargs):
         validate_hostname(instance.name)
     elif instance.variables.filter(key="ansible_host").count():
         validate_hostname(instance.variables.get("ansible_host"))
+
+
+@receiver(signals.pre_save, sender=Host)
+def validate_type(instance, **kwargs):
+    if instance.type not in instance.types:
+        raise UnknownTypeException(instance.type)
 
 
 @receiver(signals.pre_save, sender=Template)
