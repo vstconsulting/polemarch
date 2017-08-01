@@ -127,6 +127,18 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         history = History.objects.get(id=answer["history_id"])
         self.assertEquals(history.kind, "MODULE")
         self.assertEquals(history.mode, "shell")
+        # test simple execution without args
+        for arg_option in ["", None]:
+            subprocess_function.reset_mock()
+            proj_id = self.task_proj.id
+            answer = self.post_result(
+                "/api/v1/projects/{}/execute-module/".format(proj_id),
+                data=json.dumps(dict(inventory=inv1, module="ping",
+                                     group="all", args=arg_option,
+                                     user="mysuperuser")))
+            self.assertEquals(subprocess_function.call_count, 1)
+            call_args = subprocess_function.call_args[0][0]
+            self.assertNotIn("--args", call_args)
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_complex_inventory_execute(self, subprocess_function):
