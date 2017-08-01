@@ -82,7 +82,8 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"home", 
         urlregexp:[/^(home|)$/],
-        onOpen:function(holder, menuInfo, data){return pmDashboard.open(holder, menuInfo, data);}
+        onOpen:function(holder, menuInfo, data){return pmDashboard.open(holder, menuInfo, data);},
+        onClose:function(){return pmDashboard.stopUpdates();},
     })
     
     // users

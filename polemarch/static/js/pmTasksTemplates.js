@@ -205,21 +205,22 @@ pmTasksTemplates.updateItem = function(item_id)
     var data = {}
 
     data.name = $("#Templates-name").val()
-    data.kind = pmModuleTemplates.model.kind
+    data.kind = this.model.kind
     data.data = {
-        playbook:$("#playbook-autocomplete").val(),
-        inventory:$("#inventories-autocomplete").val(),
-        project:$("#projects-autocomplete").val(),
+        inventory:$("#inventories-autocomplete").val()/1,
         vars:jsonEditor.jsonEditorGetValues() 
     } 
      
+    data.data.playbook = $("#playbook-autocomplete").val()
+    data.data.project = $("#projects-autocomplete").val()/1
+
     if(!data.name)
     {
         console.warn("Invalid value in filed name")
         $.notify("Invalid value in filed name", "error");
         return;
     }
-
+ 
     return $.ajax({
         url: "/api/v1/templates/"+item_id+"/",
         type: "PATCH",

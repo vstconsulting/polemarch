@@ -64,6 +64,13 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
         def.reject();
         return;
     }
+    
+    if(!project_id)
+    {
+        $.notify("Invalid filed `project` ", "error");
+        def.reject();
+        return;
+    }
 
     if(!module)
     {
@@ -88,6 +95,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
     data.group = group
     data.args = data_args
 
+    debugger;
     $.ajax({
         url: "/api/v1/projects/"+project_id+"/execute-module/",
         type: "POST",

@@ -129,32 +129,32 @@ pmModuleTemplates.execute = function(item_id)
     var thisObj = this;
     var def = new $.Deferred();
     $.when(this.loadItem(item_id)).done(function()
-    { 
+    {
         var val = thisObj.model.items[item_id]
-        $.when(pmAnsibleModule.execute(val.data.inventory, val.data.group, val.data.module, val.data.args, val.data.vars)).done(function()
-        {  
+        $.when(pmAnsibleModule.execute(val.data.project, val.data.inventory, val.data.group, val.data.module, val.data.args, val.data.vars)).done(function()
+        {
             def.resolve();
         }).fail(function()
         {
             def.reject();
         })
-         
+
     }).fail(function()
     {
         def.reject();
     })
-    
+
     return def.promise()
 }
 
 
 pmModuleTemplates.showItem = function(holder, menuInfo, data)
-{ 
+{
     var item_id = data.reg[1]
- 
+
     var def = new $.Deferred();
     var thisObj = this;
-    $.when(pmInventories.loadAllItems(), pmModuleTemplates.loadItem(item_id)).done(function()
+    $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems(), pmModuleTemplates.loadItem(item_id)).done(function()
     {
         $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).done(function()
         {
@@ -175,7 +175,7 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
                 },
                 onSelect: function(event, term, item)
                 {
-                    $("#module-autocomplete").val($(item).text()); 
+                    $("#module-autocomplete").val($(item).text());
                 },
                 source: function(term, response)
                 {
@@ -207,13 +207,13 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
     })
 
     return def.promise()
-} 
+}
 
 pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
     var thisObj = this;
-    $.when(pmInventories.loadAllItems()).done(function()
+    $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems()).done(function()
     {
         $(holder).html(spajs.just.render(thisObj.model.name+'_new_module_page', {}))
 
@@ -232,7 +232,7 @@ pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
             },
             onSelect: function(event, term, item)
             {
-                $("#module-autocomplete").val($(item).text()); 
+                $("#module-autocomplete").val($(item).text());
             },
             source: function(term, response)
             {
@@ -299,6 +299,7 @@ pmModuleTemplates.addItem = function()
     data.data = {
         module:$("#module-autocomplete").val(),
         inventory:$("#inventories-autocomplete").val(),
+        project:$("#projects-autocomplete").val(),
         group:$("#group-autocomplete").val(),
         args:$("#module-args-string").val(),
         vars:jsonEditor.jsonEditorGetValues(),
@@ -353,6 +354,7 @@ pmModuleTemplates.updateItem = function(item_id)
     data.data = {
         module:$("#module-autocomplete").val(),
         inventory:$("#inventories-autocomplete").val(),
+        project:$("#projects-autocomplete").val(),
         group:$("#group-autocomplete").val(),
         args:$("#module-args-string").val(),
         vars:jsonEditor.jsonEditorGetValues(),
@@ -364,7 +366,8 @@ pmModuleTemplates.updateItem = function(item_id)
         $.notify("Invalid value in filed name", "error");
         return;
     }
-
+    
+    debugger;
     return $.ajax({
         url: "/api/v1/templates/"+item_id+"/",
         type: "PATCH",

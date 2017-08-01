@@ -121,7 +121,7 @@
 
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmModuleTemplates.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save</button>
-        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute($('#inventories-autocomplete').val(), $('#group-autocomplete').val(), $('#module-autocomplete').val(), $('#module-args-string').val(), jsonEditor.jsonEditorGetValues())); return false;"
+        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), $('#group-autocomplete').val(), $('#module-autocomplete').val(), $('#module-args-string').val(), jsonEditor.jsonEditorGetValues())); return false;"
                class="btn btn-warning" >Execute</button>
 
         <button type="button" onclick="spajs.showLoader(pmModuleTemplates.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove</button>
@@ -147,6 +147,18 @@
                                 <div class="help-block"></div>
                             </div>
 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Project</label>
+                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
+                                    <option selected value="0" >Not set</option>
+                                    <% for(var i in pmProjects.model.items){ %>
+                                        <option
+                                            <% if(pmProjects.model.items[i].id == pmModuleTemplates.model.items[item_id].data.project ){ %>selected<% } %>
+                                            value="<%- pmProjects.model.items[i].id %>"
+                                            ><%- pmProjects.model.items[i].name %></option>
+                                    <% } %>
+                                </select>
+                            </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-lg-2">
@@ -272,6 +284,17 @@
                                 <div class="help-block"></div>
                             </div>
 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Project</label>
+                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
+                                    <option selected value="0" >Not set</option>
+                                    <% for(var i in pmProjects.model.items){ %>
+                                        <option 
+                                            value="<%- pmProjects.model.items[i].id %>"
+                                            ><%- pmProjects.model.items[i].name %></option>
+                                    <% } %>
+                                </select>
+                            </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-lg-2">
@@ -818,7 +841,7 @@
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
-                                        <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return moment(v).format('MM/DD/YYYY HH:mm:ss')}) %>
+                                        <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return v ? moment(v).format('MM/DD/YYYY HH:mm:ss') : ''; }) %>
                                 </div>
                                 <div class="help-block"></div>
                             </div>
@@ -949,7 +972,7 @@
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
-                                        <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return moment(v).format('MM/DD/YYYY HH:mm:ss')}) %>
+                                        <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return  v ? moment(v).format('MM/DD/YYYY HH:mm:ss') : '' }) %>
                                 </div>
                                 <div class="help-block"></div>
                             </div>
@@ -1227,7 +1250,7 @@
                                         maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-                            
+
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Inventory</label>
 
@@ -1412,6 +1435,7 @@
                                 <label class="control-label" >Inventory</label>
 
                                 <select class="form-control select2"
+                                        onchange="pmPeriodicTasks.selectInventory(this.value);"
                                         id="new_periodic-tasks_inventory"
                                         data-placeholder="Select inventory"
                                         style="width:100%" >
@@ -1422,7 +1446,30 @@
                                     <% } %>
                                 </select>
                                 <div class="help-block"></div>
-                            </div>
+                            </div> 
+                        </div>
+
+                        <div class="row">
+                            <~ pmPeriodicTasks.model.selectedInventory>
+                                <% if(!pmPeriodicTasks.model.selectedInventory){ %>
+
+                                <% }else{ %>
+                                    <div class="form-group col-lg-2">
+                                        <label class="control-label" >Group</label>
+                                        <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
+                                            <option value="all" selected>All</option>
+                                            <% for(var i in pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups){ %>
+                                                <option value="<%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups[i].name %>" ><%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups[i].name %></option>
+                                            <% } %>
+                                        </select>
+                                        <div class="help-block">
+                                            <% if(!pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups.length){ %>
+                                                    <span class="error-note" >In inventory <%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].name %> has no any groups</span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                <% } %>
+                            <~>
                         </div>
 
                         <div class="row">
@@ -3887,6 +3934,18 @@
             <div class="col-lg-2 col-sm-4 col-xs-6">
                 <div class="small-box bg-aqua">
                     <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('templates') %></h3>
+                        <p>Templates</p>
+                    </div>
+                    <div class="icon hidden-xs" style="top: 0px;">
+                        <i class="glyphicon glyphicon-cog"></i>
+                    </div>
+                    <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
                         <h3><%= pmDashboard.model.count.justText('projects') %></h3>
                         <p>Projects</p>
                     </div>
@@ -3944,37 +4003,25 @@
                     <a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
                 </div>
             </div>
-            <div class="col-lg-2 col-sm-4 col-xs-6">
-                <div class="small-box bg-aqua">
-                    <div class="inner">
-                        <h3><%= pmDashboard.model.count.justText('history') %></h3>
-                        <p>History</p>
-                    </div>
-                    <div class="icon hidden-xs" style="top: 0px;">
-                        <i class="glyphicon glyphicon-calendar"></i>
-                    </div>
-                    <a href="<%- polemarch.opt.host %>/?history" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
-        </div> 
+        </div>
         <div class="row">
             <div class="col-lg-12 col-xs-12">
                 <div class="box box-info">
                     <div class="box-header ui-sortable-handle" style="cursor: move;">
-                        <i class="fa fa-th"></i> 
-                        <h3 class="box-title">Tasks history</h3> 
+                        <i class="fa fa-th"></i>
+                        <h3 class="box-title">Tasks history</h3>
                         <!--
                         <div class="box-tools pull-right">
                             <button type="button" class="btn btn-sm" data-widget="collapse"><i class="fa fa-minus"></i></button>
                             <button type="button" class="btn btn-sm" data-widget="remove"><i class="fa fa-times"></i></button>
-                        </div> -->                   
+                        </div> -->
                     </div>
                     <div class="box-body border-radius-none">
                         <div id="c3-history-chart"></div>
                     </div>
-                    <!-- /.box-body --> 
-                </div> 
-            </div> 
+                    <!-- /.box-body -->
+                </div>
+            </div>
         </div>
     </section>
 </script>

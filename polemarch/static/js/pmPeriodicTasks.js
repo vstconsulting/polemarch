@@ -1,8 +1,31 @@
 
 var pmPeriodicTasks = new pmItems()
 
-pmPeriodicTasks.model.name = "periodic-tasks"
+pmPeriodicTasks.model.name = "periodic-tasks"  
+pmPeriodicTasks.model.selectedInventory = 0;
 
+
+pmPeriodicTasks.selectInventory = function(inventory_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    inventory_id = inventory_id/1
+    if(inventory_id)
+    {
+        $.when(pmInventories.loadItem(inventory_id)).done(function(){
+            thisObj.model.selectedInventory = inventory_id;
+            def.resolve();
+        }).fail(function(){
+            def.reject();
+        });
+    }
+    else
+    {
+        thisObj.model.selectedInventory = 0;
+        def.resolve();
+    }
+    return def.promise()
+}
 
 
 pmPeriodicTasks.execute = function(project_id, item_id)

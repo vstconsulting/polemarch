@@ -19,7 +19,7 @@ pmHistory.cancelTask = function(item_id)
         },
         success: function(data)
         {
-            $.notify("Task cenceled!", "warning");
+            $.notify("Task canceled!", "warning");
         },
         error:function(e)
         {
