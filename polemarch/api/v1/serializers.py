@@ -476,7 +476,8 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
 
-    def _execution(self, kind, data):
+    def _execution(self, kind, request):
+        data = dict(request.data)
         inventory_id = int(data.pop("inventory"))
         target = str(data.pop(kind))
         action = getattr(self.instance, "execute_ansible_{}".format(kind))
@@ -486,11 +487,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         return Response(rdata, 201)
 
     def execute_playbook(self, request):
-        data = dict(request.data)
-        return self._execution("playbook", data)
+        return self._execution("playbook", request)
 
     def execute_module(self, request):
-        data = dict(request.data)
-        if not data['args']:
-            data.pop('args')
-        return self._execution("module", data)
+        return self._execution("module", request)
