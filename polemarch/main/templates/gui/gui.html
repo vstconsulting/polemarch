@@ -806,7 +806,7 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Start time</label>
                                 <input type="text"
-                                        value="<%- pmHistory.model.items[item_id].start_time %>"
+                                        value="<%- moment(pmHistory.model.items[item_id].start_time).format('MM/DD/YYYY HH:mm:ss') %>"
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
@@ -818,7 +818,7 @@
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
-                                        <%= pmHistory.model.items[item_id].justText('stop_time') %>
+                                        <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return moment(v).format('MM/DD/YYYY HH:mm:ss')}) %>
                                 </div>
                                 <div class="help-block"></div>
                             </div>
@@ -937,7 +937,7 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Start time</label>
                                 <input type="text"
-                                        value="<%- pmHistory.model.items[item_id].start_time %>"
+                                        value="<%- moment(pmHistory.model.items[item_id].start_time).format('MM/DD/YYYY HH:mm:ss') %>"
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
@@ -949,7 +949,7 @@
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
-                                        <%= pmHistory.model.items[item_id].justText('stop_time') %>
+                                        <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return moment(v).format('MM/DD/YYYY HH:mm:ss')}) %>
                                 </div>
                                 <div class="help-block"></div>
                             </div>
