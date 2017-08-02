@@ -199,7 +199,8 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
     return $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
-
+        pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory)
+        
         $('#periodic-tasks_'+item_id+'_inventory').select2();
 
         new autoComplete({
@@ -253,8 +254,23 @@ pmPeriodicTasks.addItem = function(project_id)
 
     data.name = $("#new_periodic-tasks_name").val()
     data.type = $("#new_periodic-tasks_type").val()
-    data.inventory = $("#new_periodic-tasks_inventory").val()
+    data.inventory = $("#new_periodic-tasks_inventory").val() 
 
+    if(!data.name)
+    {
+        $.notify("Invalid filed `name` ", "error");
+        def.reject();
+        return;
+    }
+    
+    if(!data.inventory)
+    {
+        $.notify("Invalid filed `inventory` ", "error");
+        def.reject();
+        return;
+    }
+    
+    
     data.kind = $("#new_periodic-tasks_kind").val()
 
     if(data.kind == "MODULE")
@@ -285,10 +301,18 @@ pmPeriodicTasks.addItem = function(project_id)
     else
     {
         data.schedule = $("#new_periodic-tasks_schedule_INTERVAL").val()
+        if(!data.schedule)
+        {
+            $.notify("Invalid filed `Interval schedule` ", "error");
+            def.reject();
+            return;
+        }
     }
 
     data.vars = jsonEditor.jsonEditorGetValues()
 
+    data.vars.group = $("#group-autocomplete").val()
+    data.vars.args =  $("#module-args-string").val();
 
     $.ajax({
         url: "/api/v1/"+this.model.name+"/",
@@ -331,6 +355,21 @@ pmPeriodicTasks.updateItem = function(item_id)
 
     data.kind = $("#periodic-tasks_"+item_id+"_kind").val()
 
+    if(!data.name)
+    {
+        $.notify("Invalid filed `name` ", "error");
+        def.reject();
+        return;
+    }
+    
+    if(!data.inventory)
+    {
+        $.notify("Invalid filed `inventory` ", "error");
+        def.reject();
+        return;
+    }
+    
+    
     if(data.kind == "MODULE")
     {
         data.mode = $("#periodic-tasks_"+item_id+"_module").val()
@@ -359,9 +398,18 @@ pmPeriodicTasks.updateItem = function(item_id)
     else
     {
         data.schedule = $("#periodic-tasks_"+item_id+"_schedule_INTERVAL").val()
+        if(!data.schedule)
+        {
+            $.notify("Invalid filed `Interval schedule` ", "error");
+            def.reject();
+            return;
+        }
     }
 
     data.vars = jsonEditor.jsonEditorGetValues()
+    
+    data.vars.group = $("#group-autocomplete").val()
+    data.vars.args =  $("#module-args-string").val();
 
     return $.ajax({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",

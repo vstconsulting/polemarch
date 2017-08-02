@@ -1255,6 +1255,7 @@
                                 <label class="control-label" >Inventory</label>
 
                                 <select class="form-control select2"
+                                        onchange="pmPeriodicTasks.selectInventory(this.value);"
                                         id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_inventory"
                                         data-placeholder="Select inventory"
                                         style="width:100%" >
@@ -1269,6 +1270,48 @@
                             </div>
                         </div>
 
+                        <div class="row">
+                            <~ pmPeriodicTasks.model.selectedInventory>
+                                <% if(!pmPeriodicTasks.model.selectedInventory){ %>
+
+                                <% }else{ %>
+                                    <div class="form-group col-lg-2">
+                                        <label class="control-label" >Group</label>
+                                        <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
+                                            <option value="all" selected>All</option>
+                                            <% for(var i in pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups){ %>
+                                                <option value="<%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups[i].name %>" 
+                                                        <% if(pmPeriodicTasks.model.items[item_id].group == pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups[i].name){ %>selected<% } %>
+                                                        ><%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups[i].name %></option>
+                                            <% } %>
+                                        </select>
+                                        <div class="help-block">
+                                            <% if(!pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups.length){ %>
+                                                    <span class="error-note" >In inventory <%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].name %> has no any groups</span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                <% } %>
+                            <~>
+                        </div>
+                        
+                        <div class="row <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %> " >
+                            <div class="col-lg-12">
+                                <div class="">
+                                    <label class="control-label" >Args</label>
+                                    <input type="text"
+                                            class="form-control"
+                                            value="<%- pmPeriodicTasks.model.items[item_id].args %>"
+                                            id="module-args-string"
+                                            onchange=""
+                                            onpaste=""  > 
+                                </div>
+                                <div class="help-block">
+                                    args (string) – which args must be passed to module. Just raw string with arguments. You can specify here contains of args option. For example ls -la for shell module.
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="row">
 
                             <div class="form-group col-lg-2">
@@ -1439,6 +1482,7 @@
                                         id="new_periodic-tasks_inventory"
                                         data-placeholder="Select inventory"
                                         style="width:100%" >
+                                        <option disabled selected>Not set</option>
                                     <% for(var i in pmInventories.model.items){ %>
                                         <option
                                             value="<%- pmInventories.model.items[i].id %>"
@@ -1472,6 +1516,23 @@
                             <~>
                         </div>
 
+                        <div class="row <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %> " >
+                            <div class="col-lg-12">
+                                <div class="">
+                                    <label class="control-label" >Args</label>
+                                    <input type="text"
+                                            class="form-control"
+                                            value=""
+                                            id="module-args-string"
+                                            onchange=""
+                                            onpaste=""  > 
+                                </div>
+                                <div class="help-block">
+                                    args (string) – which args must be passed to module. Just raw string with arguments. You can specify here contains of args option. For example ls -la for shell module.
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="row">
 
                             <div class="form-group col-lg-2">
