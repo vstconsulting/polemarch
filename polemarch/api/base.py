@@ -93,8 +93,13 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
                                      filter_classes=None):
         queryset = self.filter_route_queryset(queryset, filter_classes)
 
-        if serializer_class is None:
-            serializer_class = self.get_serializer_class()
+        # TODO: discuss this removal with onegrey:
+        # argument: even when you have this and call
+        # get_paginated_route_response(..., None, ...) in
+        # HistoryViewSet.lines() it is still not working (incorrect serializer
+        # assumed and method fails further)
+        # if serializer_class is None:
+        #    serializer_class = self.get_serializer_class()
 
         page = self.paginate_queryset(queryset)
         if page is not None:

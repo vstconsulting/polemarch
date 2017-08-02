@@ -1,3 +1,4 @@
+from ...api.v1.views import HostViewSet
 from ._base import BaseTestCase, json
 from ..models import Host, Group, Inventory
 
@@ -135,6 +136,23 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
 
         for host_id in results_id:
             self.get_result("delete", base_url + "{}/".format(host_id))
+
+    def test_pagination_off_hosts(self):
+        base_url = "/api/v1/hosts/"
+        clazz = HostViewSet.pagination_class
+        HostViewSet.pagination_class = None
+        hosts_d = [
+            dict(name="h1", vars=dict(ansible_port="222", ansible_user="one")),
+            dict(name="h2", vars=dict(ansible_port="221", ansible_user="one")),
+        ]
+        self.mass_create(base_url, hosts_d, "name", "vars")
+        filter_data = dict(
+            filter=dict(variables__key="ansible_port", variables__value="222")
+        )
+        result = self.get_result("post", base_url+"filter/", code=200,
+                                 data=json.dumps(filter_data))
+        self.assertCount(result, 1)
+        HostViewSet.pagination_class = clazz
 
     def test_update_host(self):
         url = "/api/v1/hosts/{}/".format(self.h1.id)
