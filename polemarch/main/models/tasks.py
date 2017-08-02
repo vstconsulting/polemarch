@@ -92,8 +92,8 @@ class PeriodicTask(AbstractModel):
             self.run_ansible_module()
 
     def run_ansible_module(self):
-        self.project.execute_ansible_playbook(self.mode, self.inventory.id,
-                                              sync=True, **self.vars)
+        self.project.execute_ansible_module(self.mode, self.inventory.id,
+                                            sync=True, **self.vars)
 
     def run_ansible_playbook(self):
         self.project.execute_ansible_playbook(self.mode, self.inventory.id,
