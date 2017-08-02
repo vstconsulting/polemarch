@@ -55,7 +55,7 @@ polemarch.start = function(options)
     {
         var t = new Date();
         polemarch.model.nowTime = t.getTime();
-    }, 1000)
+    }, 5001)
 
 
     $("body").touchwipe({

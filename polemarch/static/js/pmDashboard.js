@@ -51,9 +51,10 @@ pmDashboard.updateData = function()
     $.when(pmHistory.sendSearchQuery({start_time__lt:moment().subtract(14, 'days').format("YYYY-MM-DD")+"T00:00:00.000000Z"})).done(function()
     { 
         tasks_data = {} 
-        for(var i in pmHistory.model.items)
+        tasks_data_t = []
+        for(var i = 0; i< pmHistory.model.itemslist.results.length; i++)
         {
-            var val = pmHistory.model.items[i]
+            var val = pmHistory.model.itemslist.results[i]
             var time = new Date(val.start_time)
             time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
             
@@ -65,14 +66,20 @@ pmDashboard.updateData = function()
             {
                 tasks_data[time] += 1
             } 
+            tasks_data_t.push(time)
         } 
         
+        tasks_data_t.sort(function(a, b) {
+            return a - b;
+        });
+
         chart_tasks_start_x = ['time'];
         chart_tasks_data = ['tasks'];
 
         var last_tasks_data_index = 0;
-        for(var i in tasks_data)
+        for(var j in tasks_data_t)
         {
+            i = tasks_data_t[j]
             while (chart_tasks_data.length < 14)
             { 
                 if(last_tasks_data_index == 0)
@@ -106,7 +113,7 @@ pmDashboard.updateData = function()
     
     this.model.updateTimeoutId = setTimeout(function(){
         pmDashboard.updateData()
-    }, 1000*30)
+    }, 5001*30)
 }
 
 pmDashboard.open  = function(holder, menuInfo, data)

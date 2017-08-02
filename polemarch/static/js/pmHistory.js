@@ -500,7 +500,7 @@ pmHistory.loadNewLines = function(item_id)
         {
             thisObj.loadNewLines_timeoutId = setTimeout(function(){
                 thisObj.loadNewLines(item_id)
-            }, 1000)
+            }, 5001)
         }
     }).promise()
 }

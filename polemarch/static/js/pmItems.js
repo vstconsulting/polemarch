@@ -398,7 +398,7 @@ function pmItems()
             }
             thisObj.model.updateTimeoutId = setTimeout(function(){
                 thisObj.updateList(menuInfo, data, searchFunction)
-            }, 1000)
+            }, 5001)
         })
     }
 
@@ -444,7 +444,7 @@ function pmItems()
         { 
             thisObj.model.updateTimeoutId = setTimeout(function(){
                 thisObj.updateList(menuInfo, data, searchFunction);
-            }, 1000) 
+            }, 5001) 
         }).promise();
     }
 

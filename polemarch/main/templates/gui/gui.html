@@ -1489,7 +1489,7 @@
                             </div> 
                         </div>
 
-                        <div class="row">
+                        <div class="row <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
                             <~ pmPeriodicTasks.model.selectedInventory>
                                 <% if(!pmPeriodicTasks.model.selectedInventory){ %>
 
