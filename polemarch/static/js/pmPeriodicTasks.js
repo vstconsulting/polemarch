@@ -46,6 +46,8 @@ pmPeriodicTasks.execute = function(project_id, item_id)
             def.reject();
             return def.promise();
         }
+        data.group = $("#group-autocomplete").val()
+        data.args = $("#module-args-string").val()
     }
     else
     {
@@ -58,7 +60,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
         }
     }
 
-
+    debugger;
     $.ajax({
         url: "/api/v1/projects/"+project_id+"/"+kind+"/",
         type: "POST",
@@ -311,9 +313,11 @@ pmPeriodicTasks.addItem = function(project_id)
 
     data.vars = jsonEditor.jsonEditorGetValues()
 
-    data.vars.group = $("#group-autocomplete").val()
-    data.vars.args =  $("#module-args-string").val();
-
+    if(data.kind == "MODULE")
+    {
+        data.vars.group = $("#group-autocomplete").val()
+        data.vars.args =  $("#module-args-string").val();
+    }
     $.ajax({
         url: "/api/v1/"+this.model.name+"/",
         type: "POST",
@@ -340,6 +344,47 @@ pmPeriodicTasks.addItem = function(project_id)
         }
     });
     return def.promise();
+}
+
+pmPeriodicTasks.loadItem = function(item_id)
+{
+    var thisObj = this;
+    return jQuery.ajax({
+        url: "/api/v1/"+this.model.name+"/"+item_id+"/",
+        type: "GET",
+        contentType:'application/json',
+        data: "",
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            debugger;
+            if(data.kind == "MODULE")
+            {
+                if(data && data.vars && data.vars.group !== undefined)
+                {
+                    data.group = data.vars.group
+                    delete data.vars.group
+                }
+
+                if(data && data.vars && data.vars.args !== undefined)
+                {
+                    data.args = data.vars.args
+                    delete data.vars.args
+                }
+            }
+            thisObj.model.items[item_id] = data
+        },
+        error:function(e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+        }
+    });
 }
 
 /**
@@ -408,9 +453,11 @@ pmPeriodicTasks.updateItem = function(item_id)
 
     data.vars = jsonEditor.jsonEditorGetValues()
     
-    data.vars.group = $("#group-autocomplete").val()
-    data.vars.args =  $("#module-args-string").val();
-
+    if(data.kind == "MODULE")
+    {
+        data.vars.group = $("#group-autocomplete").val()
+        data.vars.args =  $("#module-args-string").val();
+    }
     return $.ajax({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "PATCH",

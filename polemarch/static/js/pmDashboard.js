@@ -48,31 +48,8 @@ pmDashboard.updateData = function()
         thisObj.model.count.templates = pmTemplates.model.itemslist.count;
     }) 
     
-    $.when(pmHistory.loadItems(100)).done(function()
-    {
-        if(!pmHistory.model.historyChart)
-        {
-            pmHistory.model.historyChart = c3.generate({
-                bindto: '#c3-history-chart',
-                data: {
-                    x: 'time',
-                    columns: [
-                        ['time']
-                    ],
-                    //type: 'area-spline',
-                    type: 'area',
-                },
-                axis: {
-                    x: {
-                        type: 'timeseries',
-                        tick: {
-                            format: '%Y-%m-%d'
-                        }
-                    }
-                }
-            });
-        }
- 
+    $.when(pmHistory.sendSearchQuery({start_time__lt:moment().subtract(14, 'days').format("YYYY-MM-DD")+"T00:00:00.000000Z"})).done(function()
+    { 
         tasks_data = {} 
         for(var i in pmHistory.model.items)
         {
@@ -88,18 +65,39 @@ pmDashboard.updateData = function()
             {
                 tasks_data[time] += 1
             } 
-        }
+        } 
         
         chart_tasks_start_x = ['time'];
         chart_tasks_data = ['tasks'];
 
+        var last_tasks_data_index = 0;
         for(var i in tasks_data)
         {
+            while (chart_tasks_data.length < 14)
+            { 
+                if(last_tasks_data_index == 0)
+                {
+                    break;
+                }
+                
+                var next_tasks_data_index = last_tasks_data_index/1+(3600*24*1000) 
+                if(next_tasks_data_index < i/1)
+                { 
+                    chart_tasks_start_x.push(next_tasks_data_index/1);
+                    chart_tasks_data.push(0);
+                }
+                else
+                {
+                    break;
+                } 
+                last_tasks_data_index = next_tasks_data_index;
+            }
             chart_tasks_start_x.push(i/1);
             chart_tasks_data.push(tasks_data[i]/1);
+            last_tasks_data_index = i;
         }
         
-        pmHistory.model.historyChart.load({
+        pmDashboard.model.historyChart.load({
             columns: [
                 chart_tasks_start_x,chart_tasks_data
             ]
@@ -116,4 +114,24 @@ pmDashboard.open  = function(holder, menuInfo, data)
     var thisObj = this 
     pmDashboard.updateData()
     $(holder).html(spajs.just.render('dashboard_page', {})) 
+    
+    pmDashboard.model.historyChart = c3.generate({
+        bindto: '#c3-history-chart',
+        data: {
+            x: 'time',
+            columns: [
+                ['time']
+            ],
+            //type: 'area-spline',
+            type: 'area',
+        },
+        axis: {
+            x: {
+                type: 'timeseries',
+                tick: {
+                    format: '%Y-%m-%d'
+                }
+            }
+        }
+    });
 }
