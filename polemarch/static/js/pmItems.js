@@ -279,19 +279,7 @@ function pmItems()
             },
             success: function(data)
             {
-                //console.log("loadUser", data)
-                if(data && data.vars && data.vars.group)
-                {
-                    data.group = data.vars.group
-                    delete data.vars.group
-                }
-                
-                if(data && data.vars && data.vars.args)
-                {
-                    data.args = data.vars.args
-                    delete data.vars.args
-                }
-                
+                //console.log("loadUser", data) 
                 thisObj.model.items[item_id] = data
             },
             error:function(e)

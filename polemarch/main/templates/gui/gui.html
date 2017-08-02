@@ -451,7 +451,7 @@
                                 <input type="text"
                                         class="playbook-autocomplete form-control"
                                         id="playbook-autocomplete"
-                                        value="<% if(pmTasksTemplates.model.items[item_id].data.mode){ %><%- pmTasksTemplates.model.items[item_id].data.mode %><% } %>">
+                                        value="<% if(pmTasksTemplates.model.items[item_id].data.playbook){ %><%- pmTasksTemplates.model.items[item_id].data.playbook %><% } %>">
                             </div>
                         </div>
                     </div>
@@ -586,7 +586,6 @@
 
                     </div>
                     <div class="box-body">
-                        <~ pmHistory.model.itemslist>
                             <table class="table table-bordered multiple-select">
                                 <tbody>
                                     <tr>
@@ -623,21 +622,18 @@
                                                 <% } %>
                                             </td>
                                             <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> history-status-<%- pmHistory.model.itemslist.results[i].status %>" >
-                                                <%- pmHistory.model.itemslist.results[i].status %>
+                                                <%= pmHistory.model.items[val.id].justText('status') %>
                                             </td>
                                             <td class="hidden-xs">
                                                 <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
                                             </td>
                                             <td class="hidden-xs hidden-sm">
-                                                <% if(pmHistory.model.itemslist.results[i].stop_time != null){ %>
-                                                    <%- moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY HH:mm:ss") %>
-                                                <% } %>
+                                                <%= pmHistory.model.items[val.id].justText('stop_time', function(v){ return v ? moment(v).format("MM/DD/YYYY HH:mm:ss") : ''; }) %> 
                                             </td>
                                         </tr>
                                     <% } %>
                                 </tbody>
                             </table>
-                        <~>
                     </div>
                     <div class="box-footer clearfix">
                         <div class="btn-group <%- pmHistory.model.justNotClass('selectedCount', 'hide') %>" role="group">
@@ -1219,7 +1215,7 @@
                                 <select class="form-control"
                                         id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_kind"
                                         data-placeholder="Select kind"
-                                        onchange="pmPeriodicTasks.model.items[<%- item_id %>].type = this.value;"
+                                        onchange="pmPeriodicTasks.model.items[<%- item_id %>].kind = this.value;"
                                         style="width:100%" >
                                     <option value="PLAYBOOK" <% if(pmPeriodicTasks.model.items[item_id].kind == 'PLAYBOOK'){ %>selected<% } %> >Playbook</option>
                                     <option value="MODULE" <% if(pmPeriodicTasks.model.items[item_id].kind == 'MODULE'){ %>selected<% } %> >Module</option>
@@ -1270,7 +1266,7 @@
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="row <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %> ">
                             <~ pmPeriodicTasks.model.selectedInventory>
                                 <% if(!pmPeriodicTasks.model.selectedInventory){ %>
 
@@ -1301,7 +1297,7 @@
                                     <label class="control-label" >Args</label>
                                     <input type="text"
                                             class="form-control"
-                                            value="<%- pmPeriodicTasks.model.items[item_id].args %>"
+                                            value="<% if(pmPeriodicTasks.model.items[item_id].args){ %><%- pmPeriodicTasks.model.items[item_id].args %><% } %>"
                                             id="module-args-string"
                                             onchange=""
                                             onpaste=""  > 
