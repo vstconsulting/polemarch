@@ -151,11 +151,11 @@
                                 <label class="control-label" >Project</label>
                                 <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
                                     <option selected value="0" >Not set</option>
-                                    <% for(var i in pmProjects.model.items){ %>
+                                    <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
-                                            <% if(pmProjects.model.items[i].id == pmModuleTemplates.model.items[item_id].data.project ){ %>selected<% } %>
-                                            value="<%- pmProjects.model.items[i].id %>"
-                                            ><%- pmProjects.model.items[i].name %></option>
+                                            <% if(pmProjects.model.itemslist.results[i].id == pmModuleTemplates.model.items[item_id].data.project ){ %>selected<% } %>
+                                            value="<%- pmProjects.model.itemslist.results[i].id %>"
+                                            ><%- pmProjects.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
                             </div>
@@ -171,11 +171,11 @@
                                     onchange="pmModuleTemplates.selectInventory(this.value);"
                                 >
                                     <option value="0" >Not set</option>
-                                    <% for(var i in pmInventories.model.items){ %>
+                                    <% for(var i in pmInventories.model.itemslist.results){ %>
                                         <option
-                                            <% if(pmInventories.model.items[i].id == pmModuleTemplates.model.items[item_id].data.inventory ){ %>selected<% } %>
-                                            value="<%- pmInventories.model.items[i].id %>"
-                                            ><%- pmInventories.model.items[i].name %></option>
+                                            <% if(pmInventories.model.itemslist.results[i].id == pmModuleTemplates.model.items[item_id].data.inventory ){ %>selected<% } %>
+                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
+                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
                             </div>
@@ -288,10 +288,10 @@
                                 <label class="control-label" >Project</label>
                                 <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
                                     <option selected value="0" >Not set</option>
-                                    <% for(var i in pmProjects.model.items){ %>
+                                    <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option 
-                                            value="<%- pmProjects.model.items[i].id %>"
-                                            ><%- pmProjects.model.items[i].name %></option>
+                                            value="<%- pmProjects.model.itemslist.results[i].id %>"
+                                            ><%- pmProjects.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
                             </div>
@@ -307,10 +307,10 @@
                                     onchange="pmModuleTemplates.selectInventory(this.value);"
                                 >
                                     <option selected value="0" >Not set</option>
-                                    <% for(var i in pmInventories.model.items){ %>
+                                    <% for(var i in pmInventories.model.itemslist.results){ %>
                                         <option
-                                            value="<%- pmInventories.model.items[i].id %>"
-                                            ><%- pmInventories.model.items[i].name %></option>
+                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
+                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
                             </div>
@@ -423,11 +423,11 @@
                                 <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
 
                                     <option <% if(!pmTasksTemplates.model.items[item_id].data.project){ %> selected <% } %> value="0" >Not set</option>
-                                    <% for(var i in pmProjects.model.items){ %>
+                                    <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
-                                            <% if(pmTasksTemplates.model.items[item_id].data.project == pmProjects.model.items[i].id){ %>  selected  <% } %>
-                                            value="<%- pmProjects.model.items[i].id %>"
-                                            ><%- pmProjects.model.items[i].name %></option>
+                                            <% if(pmTasksTemplates.model.itemslist.results[item_id].data.project == pmProjects.model.items[i].id){ %>  selected  <% } %>
+                                            value="<%- pmProjects.model.itemslist.results[i].id %>"
+                                            ><%- pmProjects.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
                             </div>
@@ -437,11 +437,11 @@
                                 <label class="control-label" >Inventory</label>
                                 <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
                                     <option <% if(!pmTasksTemplates.model.items[item_id].data.inventory){ %> selected <% } %> value="0" >Not set</option>
-                                    <% for(var i in pmInventories.model.items){ %>
+                                    <% for(var i in pmInventories.model.itemslist.results){ %>
                                         <option
                                             <% if(pmTasksTemplates.model.items[item_id].data.inventory == pmInventories.model.items[i].id){ %>  selected  <% } %>
-                                            value="<%- pmInventories.model.items[i].id %>"
-                                            ><%- pmInventories.model.items[i].name %></option>
+                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
+                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
                             </div>
@@ -507,10 +507,10 @@
                                 <label class="control-label" >Project</label>
                                 <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
                                     <option selected value="0" >Not set</option>
-                                    <% for(var i in pmProjects.model.items){ %>
+                                    <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
-                                            value="<%- pmProjects.model.items[i].id %>"
-                                            ><%- pmProjects.model.items[i].name %></option>
+                                            value="<%- pmProjects.model.itemslist.results[i].id %>"
+                                            ><%- pmProjects.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
                             </div>
@@ -520,10 +520,10 @@
                                 <label class="control-label" >Inventory</label>
                                 <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
                                     <option selected value="0" >Not set</option>
-                                    <% for(var i in pmInventories.model.items){ %>
+                                    <% for(var i in pmInventories.model.itemslist.results){ %>
                                         <option
-                                            value="<%- pmInventories.model.items[i].id %>"
-                                            ><%- pmInventories.model.items[i].name %></option>
+                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
+                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
                             </div>
@@ -1475,10 +1475,10 @@
                                         data-placeholder="Select inventory"
                                         style="width:100%" >
                                         <option disabled selected>Not set</option>
-                                    <% for(var i in pmInventories.model.items){ %>
+                                    <% for(var i in pmInventories.model.itemslist.results){ %>
                                         <option
-                                            value="<%- pmInventories.model.items[i].id %>"
-                                            ><%- pmInventories.model.items[i].name %></option>
+                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
+                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
                                 <div class="help-block"></div>
@@ -2109,10 +2109,10 @@
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Inventory</label>
                                 <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
-                                    <% for(var i in pmInventories.model.items){ %>
+                                    <% for(var i in pmInventories.model.itemslist.results){ %>
                                         <option
-                                            value="<%- pmInventories.model.items[i].id %>"
-                                            ><%- pmInventories.model.items[i].name %></option>
+                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
+                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
                             </div>
@@ -2294,10 +2294,10 @@
                                     onchange="pmModuleTemplates.selectInventory(this.value);"
                                 >
                                     <option selected value="0" >Not set</option>
-                                    <% for(var i in pmInventories.model.items){ %>
+                                    <% for(var i in pmInventories.model.itemslist.results){ %>
                                         <option
-                                            value="<%- pmInventories.model.items[i].id %>"
-                                            ><%- pmInventories.model.items[i].name %></option>
+                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
+                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
                             </div>
