@@ -295,11 +295,18 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
                 }
             }
 
-            $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
+            if(projects.length > 0)
+            {
+                $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
+                    def.resolve()
+                }).fail(function(){
+                    def.reject()
+                })
+            }
+            else
+            {
                 def.resolve()
-            }).fail(function(){
-                def.reject()
-            })
+            }
         },
         error:function(e)
         {
@@ -361,12 +368,19 @@ pmHistory.loadItems = function(limit, offset)
                     projects.push(val.project)
                 }
             }
-
-            $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
+            
+            if(projects.length)
+            {
+                $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
+                    def.resolve()
+                }).fail(function(){
+                    def.reject()
+                })
+            }
+            else
+            {
                 def.resolve()
-            }).fail(function(){
-                def.reject()
-            })
+            }
         },
         error:function(e)
         {
@@ -448,7 +462,7 @@ pmHistory.getLine = function(item_id, line_id)
 
 pmHistory.loadNewLines = function(item_id)
 {
-    var thisObj = this;
+    var thisObj = this; 
     var last_stdout_maxline = this.model.items[item_id].stdout_maxline;
     if(!last_stdout_maxline)
     {
@@ -500,7 +514,7 @@ pmHistory.loadNewLines = function(item_id)
         {
             thisObj.loadNewLines_timeoutId = setTimeout(function(){
                 thisObj.loadNewLines(item_id)
-            }, 1000)
+            }, 5001)
         }
     }).promise()
 }
