@@ -74,7 +74,7 @@
                                             <%- val.kind %>
                                         </td>
                                         <td>
-                                            <a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTemplates.model.kindObjects[val.kind].execute(<%- val.id %>)); return false;">Execute</a>
+                                            <a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- val.kind %>'].execute(<%- val.id %>)); return false;">Execute</a>
                                         </td>
                                     </tr>
                                 <% } %>

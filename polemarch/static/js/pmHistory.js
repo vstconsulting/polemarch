@@ -128,9 +128,9 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
 }
 
 pmHistory.bindStdoutUpdates = function(item_id)
-{
+{ 
     var thisObj = this;
-    $.when(this.loadNewLines(item_id)).always(function()
+    $.when(this.loadNewLines(item_id, 0)).always(function()
     {
         var content = $('#history-stdout')
         content.scroll(function()
@@ -460,10 +460,15 @@ pmHistory.getLine = function(item_id, line_id)
     return spajs.just.render(this.model.name+'_stdout_line', {line:line})
 }
 
-pmHistory.loadNewLines = function(item_id)
+pmHistory.loadNewLines = function(item_id, last_stdout_maxline)
 {
     var thisObj = this; 
-    var last_stdout_maxline = this.model.items[item_id].stdout_maxline;
+    
+    if(last_stdout_maxline === undefined)
+    {
+        last_stdout_maxline = this.model.items[item_id].stdout_maxline;
+    }
+    
     if(!last_stdout_maxline)
     {
         last_stdout_maxline = 0;
@@ -528,7 +533,7 @@ pmHistory.scrollBottom = function()
  * Обновляет поле модел this.model.items и ложит туда список инфу о пользователях по их id
  */
 pmHistory.loadLines = function(item_id, opt)
-{
+{ 
     if(!opt.limit)
     {
         opt.limit = 30;
