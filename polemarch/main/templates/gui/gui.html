@@ -425,7 +425,7 @@
                                     <option <% if(!pmTasksTemplates.model.items[item_id].data.project){ %> selected <% } %> value="0" >Not set</option>
                                     <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
-                                            <% if(pmTasksTemplates.model.itemslist.results[item_id].data.project == pmProjects.model.items[i].id){ %>  selected  <% } %>
+                                            <% if(pmTasksTemplates.model.items[item_id].data.project == pmProjects.model.itemslist.results[i].id){ %>  selected  <% } %>
                                             value="<%- pmProjects.model.itemslist.results[i].id %>"
                                             ><%- pmProjects.model.itemslist.results[i].name %></option>
                                     <% } %>
@@ -439,7 +439,7 @@
                                     <option <% if(!pmTasksTemplates.model.items[item_id].data.inventory){ %> selected <% } %> value="0" >Not set</option>
                                     <% for(var i in pmInventories.model.itemslist.results){ %>
                                         <option
-                                            <% if(pmTasksTemplates.model.items[item_id].data.inventory == pmInventories.model.items[i].id){ %>  selected  <% } %>
+                                            <% if(pmTasksTemplates.model.items[item_id].data.inventory == pmInventories.model.itemslist.results[i].id){ %>  selected  <% } %>
                                             value="<%- pmInventories.model.itemslist.results[i].id %>"
                                             ><%- pmInventories.model.itemslist.results[i].name %></option>
                                     <% } %>
