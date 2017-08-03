@@ -48,10 +48,21 @@ pmDashboard.updateData = function()
         thisObj.model.count.templates = pmTemplates.model.itemslist.count;
     }) 
     
-    $.when(pmHistory.sendSearchQuery({start_time__lt:moment().subtract(14, 'days').format("YYYY-MM-DD")+"T00:00:00.000000Z"})).done(function()
+    var startTime = moment().subtract(14, 'days').format("YYYY-MM-DD")+"T00:00:00.000000Z"
+    $.when(pmHistory.sendSearchQuery({start_time__gt:startTime})).done(function()
     { 
         tasks_data = {} 
         tasks_data_t = []
+        
+        var time = new Date(startTime)
+        time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24; 
+        for(var i = 0; i< 14; i++)
+        {  
+            tasks_data[time] = 0;
+            tasks_data_t.push(time)
+            time+=(3600*24*1000) 
+        }
+        
         for(var i = 0; i< pmHistory.model.itemslist.results.length; i++)
         {
             var val = pmHistory.model.itemslist.results[i]
@@ -61,47 +72,26 @@ pmDashboard.updateData = function()
             if(!tasks_data[time])
             {
                 tasks_data[time] = 1
+                tasks_data_t.push(time)
             }
             else
             {
                 tasks_data[time] += 1
             } 
-            tasks_data_t.push(time)
         } 
         
-        tasks_data_t.sort(function(a, b) {
-            return a - b;
-        });
+        //tasks_data_t.sort(function(a, b) {
+        //    return a - b;
+        //});
 
         chart_tasks_start_x = ['time'];
         chart_tasks_data = ['tasks'];
 
-        var last_tasks_data_index = 0;
         for(var j in tasks_data_t)
         {
-            i = tasks_data_t[j]
-            while (chart_tasks_data.length < 14)
-            { 
-                if(last_tasks_data_index == 0)
-                {
-                    break;
-                }
-                
-                var next_tasks_data_index = last_tasks_data_index/1+(3600*24*1000) 
-                if(next_tasks_data_index < i/1)
-                { 
-                    chart_tasks_start_x.push(next_tasks_data_index/1);
-                    chart_tasks_data.push(0);
-                }
-                else
-                {
-                    break;
-                } 
-                last_tasks_data_index = next_tasks_data_index;
-            }
-            chart_tasks_start_x.push(i/1);
-            chart_tasks_data.push(tasks_data[i]/1);
-            last_tasks_data_index = i;
+            var time = tasks_data_t[j] 
+            chart_tasks_start_x.push(time/1);
+            chart_tasks_data.push(tasks_data[time]/1); 
         }
         
         pmDashboard.model.historyChart.load({

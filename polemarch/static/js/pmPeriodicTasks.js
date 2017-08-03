@@ -361,8 +361,7 @@ pmPeriodicTasks.loadItem = function(item_id)
             }
         },
         success: function(data)
-        {
-            debugger;
+        { 
             if(data.kind == "MODULE")
             {
                 if(data && data.vars && data.vars.group !== undefined)

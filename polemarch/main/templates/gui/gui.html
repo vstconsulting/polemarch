@@ -701,48 +701,44 @@
                         <% } %>
 
                     </div>
-                    <div class="box-body">
-                        <~ pmHistory.model.itemslist>
-                            <table class="table table-bordered multiple-select">
-                                <tbody>
-                                    <tr>
-                                        <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmHistory.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                    <div class="box-body"> 
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmHistory.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
+                                    <th>Playbook</th>
+                                    <th style="width: 110px;">Status</th>
+                                    <th style="width: 160px;" class="hidden-xs">Start time</th>
+                                    <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
+                                </tr>
+                                <% for(var i in pmHistory.model.itemslist.results){  val = pmHistory.model.itemslist.results[i]; %>
+                                    <tr
+                                        class="item-row item-<%- val.id %>  <%- pmHistory.model.selectedItems.justClass(val.id, 'selected') %>"
+                                        data-id="<%- val.id %>" >
+                                        <td class=""  onclick="pmHistory.toggleSelect(<%- val.id %>); return false;">
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
-                                        </th>
-                                        <th>Playbook</th>
-                                        <th style="width: 110px;">Status</th>
-                                        <th style="width: 160px;" class="hidden-xs">Start time</th>
-                                        <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
+                                        </td>
+                                        <td>
+                                            <a href="/?project/<%- project_id %>/history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].mode %></a>
+                                        </td>
+                                        <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> history-status-<%- pmHistory.model.itemslist.results[i].status %>" >
+                                            <%= pmHistory.model.items[val.id].justText('status') %>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
+                                        </td>
+                                        <td class="hidden-xs hidden-sm">
+                                            <%= pmHistory.model.items[val.id].justText('stop_time', function(v){ return v ? moment(v).format("MM/DD/YYYY HH:mm:ss") : ''; }) %> 
+                                        </td>
                                     </tr>
-                                    <% for(var i in pmHistory.model.itemslist.results){  valid = pmHistory.model.itemslist.results[i].id; %>
-                                        <tr
-                                            class="item-row item-<%- valid %>  <%- pmHistory.model.selectedItems.justClass(valid, 'selected') %>"
-                                            data-id="<%- valid %>" >
-                                            <td class=""  onclick="pmHistory.toggleSelect(<%- valid %>); return false;">
-                                                <div class="ico-on fa fa-toggle-on"></div>
-                                                <div class="ico-off fa  fa-toggle-off"></div>
-                                            </td>
-                                            <td>
-                                                <a href="/?project/<%- project_id %>/history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
-                                                        onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].mode %></a>
-                                            </td>
-                                            <td class="status-<%- pmHistory.model.itemslist.results[i].status %> history-status-<%- pmHistory.model.itemslist.results[i].status %>" >
-                                                <%- pmHistory.model.itemslist.results[i].status %>
-                                            </td>
-                                            <td class="hidden-xs">
-                                                <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
-                                            </td>
-                                            <td class="hidden-xs hidden-sm">
-                                                <% if(pmHistory.model.itemslist.results[i].stop_time != null){   %>
-                                                    <%-  moment(pmHistory.model.itemslist.results[i].stop_time).format("MM/DD/YYYY HH:mm:ss") %>
-                                                <% } %>
-                                            </td>
-                                        </tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        <~>
+                                <% } %>
+                            </tbody>
+                        </table> 
                     </div>
                     <div class="box-footer clearfix">
                         <div class="btn-group <%- pmHistory.model.justNotClass('selectedCount', 'hide') %>" role="group">
