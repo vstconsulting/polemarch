@@ -37,29 +37,11 @@ class ServiceCommand(BaseCommand):
     def handle(self, *args, **options):
         LOG_LEVEL = settings.LOG_LEVEL
         if options.get('log-level', False):
-            LOG_LEVEL = options.get('log-level', LOG_LEVEL)  # pragma: no cover
+            LOG_LEVEL = options.get('log-level', LOG_LEVEL)
         logger.setLevel(LOG_LEVEL.upper())
         self.LOG_LEVEL = LOG_LEVEL.upper()
 
     def get_version(self):
-        return u'IHService {c}, Django {d.__version__}'.format(
+        return u'Polemarch {c}, Django {d.__version__}'.format(
             c=__version__, d=django,
         )
-
-    def _print(self, info=""):
-        self.stdout.write(str(info))  # pragma: no cover
-
-    def _success(self, info=""):
-        try:  # pragma: no cover
-            self._print(self.style.SUCCESS(info))
-        except:
-            self._print(self.style.MIGRATE_SUCCESS(info))
-
-    def _info(self, info=""):
-        self._print(self.style.HTTP_INFO(info))
-
-    def _error(self, info=""):
-        self._print(self.style.ERROR(info))
-
-    def _warning(self, info=""):
-        self._print(self.style.WARNING(info))

@@ -14,18 +14,22 @@ from rest_framework.response import Response
 from ...main import models
 
 
+# NOTE: we can freely remove that because according to real behaviour all our
+#  models always have queryset at this stage, so this code actually doing
+# nothing
+#
 # Serializers field for usability
-class ModelRelatedField(serializers.PrimaryKeyRelatedField):
-    def __init__(self, **kwargs):
-        model = kwargs.pop("model", None)
-        assert not ((model is not None or self.queryset is not None) and
-                    kwargs.get('read_only', None)), (
-            'Relational fields should not provide a `queryset` or `model`'
-            ' argument, when setting read_only=`True`.'
-        )
-        if model is not None:
-            kwargs["queryset"] = model.objects.all()
-        super(ModelRelatedField, self).__init__(**kwargs)
+# class ModelRelatedField(serializers.PrimaryKeyRelatedField):
+#     def __init__(self, **kwargs):
+#         model = kwargs.pop("model", None)
+#         assert not ((model is not None or self.queryset is not None) and
+#                     kwargs.get('read_only', None)), (
+#             'Relational fields should not provide a `queryset` or `model`'
+#             ' argument, when setting read_only=`True`.'
+#         )
+#         if model is not None:
+#             kwargs["queryset"] = model.objects.all()
+#         super(ModelRelatedField, self).__init__(**kwargs)
 
 
 class DictField(serializers.CharField):
@@ -106,7 +110,9 @@ class UserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if not self.context['request'].user.is_staff and \
                         instance.id != self.context['request'].user.id:
-            raise exceptions.PermissionDenied
+            # can't be tested because PATCH from non privileged user to other
+            # user fails at self.get_object() in View
+            raise exceptions.PermissionDenied  # nocv
         instance.username = validated_data.get('username',
                                                instance.username)
         instance.is_active = validated_data.get('is_active',
@@ -192,7 +198,8 @@ class VariableSerializer(serializers.ModelSerializer):
                   'value',)
 
     def to_representation(self, instance):
-        return {instance.key: instance.value}
+        # we are not using that. This function here just in case.
+        return {instance.key: instance.value}  # nocv
 
 
 class _WithVariablesSerializer(serializers.ModelSerializer):
@@ -299,7 +306,7 @@ class TaskSerializer(_WithVariablesSerializer):
 
 
 class OneTaskSerializer(TaskSerializer):
-    project = ModelRelatedField(read_only=True)
+    # project = ModelRelatedField(read_only=True) see note to ModelRelatedField
     playbook = serializers.CharField(read_only=True)
 
     class Meta:

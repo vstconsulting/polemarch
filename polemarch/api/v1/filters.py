@@ -24,11 +24,11 @@ def name_filter(queryset, field, value):
 
 
 def variables_filter(queryset, field, value):
-    if field == "variables":
-        items = value.split(",")
-        kwargs = {item.split(":")[0]: item.split(":")[1] for item in items}
-        return queryset.var_filter(**kwargs)
-    return queryset.filter(**dict(field=value))
+    # filter applicable only to variables
+    # pylint: disable=unused-argument
+    items = value.split(",")
+    kwargs = {item.split(":")[0]: item.split(":")[1] for item in items}
+    return queryset.var_filter(**kwargs)
 
 
 class _BaseFilter(filters.FilterSet):

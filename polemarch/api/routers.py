@@ -24,7 +24,10 @@ class _AbstractRouter(routers.DefaultRouter):
                 'not automatically determine the name from the viewset, as ' \
                 'it does not have a `.queryset` or `.model` attribute.'
             return model._meta.object_name.lower()
-        return super(_AbstractRouter, self).get_default_base_name(viewset)
+        # can't be tested because this initialization takes place before any
+        # test code can be run
+        return super(_AbstractRouter,
+                     self).get_default_base_name(viewset)  # nocv
 
     def register_view(self, prefix, view, name=None):
         if name is None:
@@ -111,5 +114,7 @@ class MainRouter(_AbstractRouter):
         for prefix, router, _ in self.routers:
             urls.append(url(prefix, include(router.urls)))
         for prefix, view, _ in self.custom_urls:
-            urls.append(url(prefix, view.as_view()))
+            # can't be tested because this initialization takes place before
+            # any test code can be run
+            urls.append(url(prefix, view.as_view()))  # nocv
         return urls

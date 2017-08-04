@@ -85,6 +85,25 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertEqual(result['count'], 2, result)
         self._logout(client)
 
+    def test_nonadmin_user_access_to_himself(self):
+        self.change_identity()
+        selfurl = "/api/v1/users/{}/".format(self.user.id)
+        self.get_result("patch", selfurl, 200)
+
+    def test_nonoprivileged_userwork_restriction(self):
+        url = "/api/v1/users/"
+        self.change_identity(is_super_user=True)
+        olduser = self.user
+        self.change_identity()
+        # can't create users
+        passwd = "some_pass"
+        userdata = dict(username="testuser4", password=make_password(passwd),
+                        raw_password=True, is_active=False)
+        self.get_result("post", url, code=403, data=userdata)
+        # can't modify other users
+        self.get_result("patch", "{}{}/".format(url, olduser.id),
+                        code=403, data=json.dumps(userdata))
+
     def test_api_users_password_settings(self):
         client = self._login()
         AUTH_PASSWORD_VALIDATORS = settings.AUTH_PASSWORD_VALIDATORS
