@@ -65,6 +65,12 @@ var justReactive = {
         }
         
         var res = Object.getOwnPropertyDescriptor(obj, prop);
+        if(!res)
+        {
+            obj[prop] = newval;
+            obj.justWatch(prop);
+        }
+        
         if(res.hasOwnProperty('get') || res.hasOwnProperty('set'))
         {
             obj[prop] = newval;

@@ -38,9 +38,11 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[1]
     $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
+        thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
+        
         $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id})) 
         $("#inventories-autocomplete").select2();
-        $("#projects-autocomplete").select2();
+        //$("#projects-autocomplete").select2();
 
         new autoComplete({
             selector: '#playbook-autocomplete',
@@ -66,7 +68,7 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
                 for(var i in pmTasks.model.items)
                 {
                     var val = pmTasks.model.items[i]
-                    if(val.name.toLowerCase().indexOf(term) != -1)
+                    if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
                     {
                         matches.push(val)
                     }
@@ -87,6 +89,13 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
     return def.promise()
 }
     
+pmTasksTemplates.selectProject = function(project_id){
+    console.log("select project", project_id)
+    $(".autocomplete-suggestion").hide()
+    $(".playbook-project-"+project_id).show()
+    pmTasksTemplates.model.selectedProject = project_id
+}
+
 pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
@@ -96,7 +105,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
         $(holder).html(spajs.just.render(thisObj.model.name+'_new_page', {}))
         
         $("#inventories-autocomplete").select2();
-        $("#projects-autocomplete").select2();
+        //$("#projects-autocomplete").select2();
 
         new autoComplete({
             selector: '#playbook-autocomplete',
@@ -106,7 +115,12 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
             menuClass:'playbook-autocomplete',
             renderItem: function(item, search)
             {
-                return '<div class="autocomplete-suggestion" data-value="' + item.playbook + '" >' + item.playbook + '</div>';
+                var style = "";
+                if(thisObj.model.selectedProject != item.project)
+                {
+                    style = "style='disolay:none'"
+                }
+                return '<div class="autocomplete-suggestion playbook-project-' + item.project + ' " '+style+' data-value="' + item.playbook + '" >' + item.playbook + '</div>';
             },
             onSelect: function(event, term, item)
             {
@@ -122,7 +136,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
                 for(var i in pmTasks.model.items)
                 {
                     var val = pmTasks.model.items[i]
-                    if(val.name.toLowerCase().indexOf(term) != -1)
+                    if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
                     {
                         matches.push(val)
                     }

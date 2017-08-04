@@ -420,8 +420,12 @@
                             </div>
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Project</label>
-                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
-
+                                <select
+                                onchange="pmTasksTemplates.selectProject(this.value);"
+                                class="form-control select2" 
+                                id="projects-autocomplete"
+                                data-placeholder="Select project"
+                                style="width:100%" > 
                                     <option <% if(!pmTasksTemplates.model.items[item_id].data.project){ %> selected <% } %> value="0" >Not set</option>
                                     <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
@@ -464,7 +468,7 @@
     </section>
 </script>
 
-<script type="text/x-just" data-just="templates_new_page">
+<script type="text/x-just" data-just="new_page">
 <section class="content-header">
         <h1>
             <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
@@ -505,7 +509,12 @@
                             </div>
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Project</label>
-                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
+                                <select
+                                onchange="pmTasksTemplates.selectProject(this.value);"
+                                class="form-control select2" 
+                                id="projects-autocomplete"
+                                data-placeholder="Select project"
+                                style="width:100%" >
                                     <option selected value="0" >Not set</option>
                                     <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
