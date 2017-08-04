@@ -57,8 +57,20 @@ var justReactive = {
         'unshift',
         'unshift'
     ],
-    megreFunc:function(obj, prop, newval)
+    megreFunc:function(obj, prop, newval, level)
     {
+        if(!level)
+        {
+            level = 0;
+        }
+        
+        var res = Object.getOwnPropertyDescriptor(obj, prop);
+        if(res.hasOwnProperty('get') || res.hasOwnProperty('set'))
+        {
+            obj[prop] = newval;
+            return;
+        }
+        
         if(typeof obj[prop] != "object" || obj[prop] == null)
         {
             obj[prop] = newval;
@@ -78,7 +90,10 @@ var justReactive = {
 
             if(typeof newval[i] == "object" && newval[i] != null)
             {
-                justReactive.megreFunc(obj[prop], i, newval[i]);
+                if(level < 100)
+                {
+                    justReactive.megreFunc(obj[prop], i, newval[i], level+1);
+                }
                 obj[prop].justWatch(i);
             }
             else
@@ -236,6 +251,7 @@ var justReactive = {
             }
         }
     },
+    defaultcallBack:function(val){ return val;},
     setValue:function (opt)
     {
         /*
@@ -246,10 +262,10 @@ var justReactive = {
 
         if(!opt.callBack)
         {
-            opt.callBack = function(val){ return val;}
+            opt.callBack = justReactive.defaultcallBack
         }
-
-        var thisObj = this[opt.prop]
+        
+        var oldValue = this[opt.prop]
 
         // Проверка того нетули уже наблюдения за этим объектом
         // Так как если уже стоит сеттер от just-watch то после присвоения
@@ -260,21 +276,24 @@ var justReactive = {
         {
             // Значение поменялось на __justReactive_test значит нашего
             //  сетора небыло и надо его поставить.
-            this[opt.prop] = thisObj
+            this[opt.prop] = oldValue
             var newval = {
-                val:this[opt.prop],
-                just_ids:[{id:id, callBack:opt.callBack, type:opt.type, className:opt.className, attrName:opt.attrName, customData:opt.customData}],
+                val:oldValue,
+                just_ids:[
+                    {
+                        id:id, 
+                        callBack:opt.callBack,
+                        type:opt.type, 
+                        className:opt.className, 
+                        attrName:opt.attrName,
+                        customData:opt.customData
+                    }
+                ],
             }
 
             // Удаляем оригинальное значение
             if (delete this[opt.prop])
             {
-                // гетер
-                var getter = function ()
-                {
-                    return newval.val;
-                }
-
                 // сетор
                 var setter = function (val)
                 {
@@ -304,10 +323,10 @@ var justReactive = {
                         return val;
                     }
 
-                    if(newval.timeoutId)
-                    {
-                        clearTimeout(newval.timeoutId)
-                    }
+                    //if(newval.timeoutId)
+                    //{
+                    //    clearTimeout(newval.timeoutId)
+                    //}
 
                     if(val === "__justReactive_update")
                     {
@@ -340,7 +359,9 @@ var justReactive = {
 
                 // Вписываем свои гетер и сетор
                 Object.defineProperty(this, opt.prop, {
-                          get: getter
+                          get: function (){
+                                    return newval.val;
+                               }
                         , set: setter
                         , enumerable: true
                         , configurable: true
