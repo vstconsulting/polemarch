@@ -69,11 +69,15 @@ var justReactive = {
         {
             obj[prop] = newval;
             obj.justWatch(prop);
+            return;
         }
         
         if(res.hasOwnProperty('get') || res.hasOwnProperty('set'))
         {
-            obj[prop] = newval;
+            if(obj[prop] !== newval)
+            {
+                obj[prop] = newval;
+            }
             return;
         }
         
