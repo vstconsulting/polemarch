@@ -134,5 +134,8 @@ class AnsibleModule(AnsibleCommand):
             kwargs.pop('args', None)
         super(AnsibleModule, self).__init__(*pargs, **kwargs)
 
+    def get_workdir(self):
+        return self.project.path
+
     def execute(self, group, *args, **extra_args):
         return super(AnsibleModule, self).execute(group, *args, **extra_args)

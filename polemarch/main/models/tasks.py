@@ -11,6 +11,7 @@ import re
 import six
 from celery.schedules import crontab
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from . import Inventory
@@ -181,22 +182,21 @@ class History(BModel):
 
     @property
     def facts(self):
-        def jsonify(match):
-            source = str(match.group(0))
-            result = ', "' + source
-            result = re.sub(r" \| ", '":{ "status": "', result)
-            result = re.sub(r" => {", '",', result)
-            return result
-
         if self.status not in ['OK', 'ERROR', 'OFFLINE']:
             raise DataNotReady("Execution still in process.")
-        if self.kind != 'MODULE':
+        if self.kind != 'MODULE' or self.mode != 'setup':
             raise self.NoFactsAvailableException()
-        if self.mode != 'setup':
-            raise self.NoFactsAvailableException()
-        data = self.raw_stdout
-        result = re.sub(r"[^|^\n]+\|[^{]+{\n", jsonify, data)
-        result = "{" + result[1:] + "}"
+        qs = self.raw_history_line.all()
+        qs = qs.exclude(Q(line__contains="No config file") |
+                        Q(line__contains="as config file"))
+        data = "\n".join(qs.values_list("line", flat=True)) + "\n"
+        regex = (
+            r"^([\S]{1,})\s\|\s([\S]{1,}) \=>"
+            r" \{\s([^\r]*?\"[\w]{1,}\"\: .*?\s)\}\s"
+        )
+        subst = '"\\1": {\n\t"status": "\\2", \n\\3},'
+        result = re.sub(regex, subst, data, 0, re.MULTILINE)
+        result = "{" + result[:-1] + "}"
         return json.loads(result)
 
     @property
