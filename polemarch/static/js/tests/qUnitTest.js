@@ -151,6 +151,8 @@ function qunitAddTests()
     qunitAddTests_groups()
     qunitAddTests_inventories()
     qunitAddTests_projects()
+    qunitAddTests_templates_task()
+    qunitAddTests_templates_modules()
 }
 
 /**
@@ -1053,8 +1055,7 @@ function qunitAddTests_projects()
     });
 
     syncQUnit.addTest('Изменение periodic task', function ( assert )
-    {
-        debugger;
+    { 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
         var taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
         // Предполагается что мы от прошлого теста попали на страницу создания inventory
@@ -1084,6 +1085,24 @@ function qunitAddTests_projects()
         })
     });
 
+    syncQUnit.addTest('Удаление periodic task', function ( assert )
+    { 
+        var done = assert.async();
+ 
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+        var taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
+
+        // Удаление project.
+        $.when(pmPeriodicTasks.deleteItem(taskId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete Item');
+            render(done)
+        })
+    });
+    
     syncQUnit.addTest('Страница списка periodic task', function ( assert )
     {
         var done = assert.async();
@@ -1119,4 +1138,205 @@ function qunitAddTests_projects()
     });
 }
 
+function qunitAddTests_templates_task(){
+    
+    syncQUnit.addTest('Список шаблонов', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"templates"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню templates');
+            render("projects", done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню templates');
+            render("projects", done)
+        })
+    });
+
+    syncQUnit.addTest('Новый template/new-task', function ( assert )
+    {
+        var done = assert.async();
+
+        // Открытие пункта меню new-project
+        $.when(spajs.open({ menuId:"template/new-task"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-project');
+            render("groups-new-project", done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню new-project');
+            render("groups-new-project", done)
+        })
+    });
+
+    var t = new Date();
+    t = t.getTime()
+
+    syncQUnit.addTest('Сохранение шаблона задачи', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        // Заполнение формы с данными project
+        $("#Templates-name").val("test-template-"+t); 
+        
+        // Отправка формы с данными project
+        $.when(pmTasksTemplates.addItem()).done(function()
+        {
+            assert.ok(true, 'Успешно template add Item');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при template add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Изменение шаблона', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
+
+        $("#playbook-autocomplete").val("test2-playbook-"+t);
+
+        $("#new_json_name").val("test3");
+        $("#new_json_value").val("val3");
+        jsonEditor.jsonEditorAddVar();
+
+
+        $.when(pmTasksTemplates.updateItem(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно update add Item');
+            render("projects-update-project", done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при update add Item');
+            render("projects-update-project", done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление шаблона', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?project-5
+        var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
+
+        // Удаление project.
+        $.when(pmTasksTemplates.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete Item');
+            render(done)
+        })
+    });
+}
+
+function qunitAddTests_templates_modules(){
+    
+    syncQUnit.addTest('Список шаблонов', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"templates"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню templates');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню templates');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Новый template/new-module', function ( assert )
+    {
+        var done = assert.async();
+
+        // Открытие пункта меню new-project
+        $.when(spajs.open({ menuId:"template/new-task"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-project');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню new-project');
+            render(done)
+        })
+    });
+
+    var t = new Date();
+    t = t.getTime()
+
+    syncQUnit.addTest('Сохранение шаблона модуля', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        // Заполнение формы с данными project
+        $("#Templates-name").val("test-template-"+t); 
+        
+        // Отправка формы с данными project
+        $.when(pmTasksTemplates.addItem()).done(function()
+        {
+            assert.ok(true, 'Успешно template add Item');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при template add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Изменение шаблона', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
+
+        $("#module-autocomplete").val("test2-playbook-"+t);
+
+        $("#new_json_name").val("test3");
+        $("#new_json_value").val("val3");
+        jsonEditor.jsonEditorAddVar();
+
+
+        $.when(pmTasksTemplates.updateItem(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно update add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при update add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление шаблона', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?project-5
+        var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
+
+        // Удаление project.
+        $.when(pmTasksTemplates.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete Item');
+            render(done)
+        })
+    });
+}
     injectQunit()
