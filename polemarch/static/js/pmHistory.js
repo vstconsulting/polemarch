@@ -75,6 +75,28 @@ pmHistory.showListInProjects = function(holder, menuInfo, data)
     return $.when(this.sendSearchQuery({project:project_id}, limit, offset), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).html(spajs.just.render(thisObj.model.name+'_listInProjects', {query:"", project_id:project_id}))
+        thisObj.model.selectedCount = $('.multiple-select .selected').length;
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showListInInventory = function(holder, menuInfo, data)
+{
+    var thisObj = this;
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[2] > 0)
+    {
+        offset = this.pageSize*(data.reg[2] - 1);
+    }
+    var inventory_id = data.reg[1];
+
+    return $.when(this.sendSearchQuery({inventory:inventory_id}, limit, offset)).done(function()
+    {
+        $(holder).html(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id}))
+        thisObj.model.selectedCount = $('.multiple-select .selected').length;
     }).fail(function()
     {
         $.notify("", "error");

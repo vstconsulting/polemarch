@@ -194,6 +194,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
 
 pmPeriodicTasks.showItem = function(holder, menuInfo, data)
 {
+    var def = new $.Deferred();
     var thisObj = this;
     var item_id = data.reg[2];
     var project_id = data.reg[1];
@@ -236,10 +237,16 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
                 response(matches);
             }
         });
+        
+        def.resolve();
+        
     }).fail(function()
     {
         $.notify("", "error");
+        def.reject();
     })
+            
+    return def.promise()
 }
 
 
@@ -262,14 +269,14 @@ pmPeriodicTasks.addItem = function(project_id)
     {
         $.notify("Invalid filed `name` ", "error");
         def.reject();
-        return;
+        return def.promise();
     }
     
     if(!data.inventory)
     {
         $.notify("Invalid filed `inventory` ", "error");
         def.reject();
-        return;
+        return def.promise();
     }
     
     
@@ -307,7 +314,7 @@ pmPeriodicTasks.addItem = function(project_id)
         {
             $.notify("Invalid filed `Interval schedule` ", "error");
             def.reject();
-            return;
+            return def.promise();
         }
     }
 
@@ -387,6 +394,7 @@ pmPeriodicTasks.loadItem = function(item_id)
 }
 
 /**
+ * @param {integer} item_id идентификатор PeriodicTask
  * @return $.Deferred
  */
 pmPeriodicTasks.updateItem = function(item_id)

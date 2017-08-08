@@ -771,6 +771,112 @@
     </section>
 </script>
 
+<!-- Список history -->
+<script type="text/x-just" data-just="history_listInInventory">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+            <span class="h1-header" >History</span>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[project_id].name.slice(0, 20) %></a></li>
+            <li class="active">History</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        History
+                        <div class="input-group col-lg-2" style="float: right;">
+                            <input
+                                type="text"
+                                id="search-query-input"
+                                placeholder="Search by playbook name"
+                                class="form-control"
+                                maxlength="255"
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmHistory.search(<%- project_id %>, $('#search-query-input').val()));"
+                            >
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmHistory.search(<%- project_id %>, $('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
+                            </div>
+                        </div>
+                        <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
+                            </div>
+                        <% } %>
+
+                    </div>
+                    <div class="box-body"> 
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmHistory.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
+                                    <th>Playbook</th>
+                                    <th style="width: 110px;">Status</th>
+                                    <th style="width: 160px;" class="hidden-xs">Start time</th>
+                                    <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
+                                </tr>
+                                <% for(var i in pmHistory.model.itemslist.results){  val = pmHistory.model.itemslist.results[i]; %>
+                                    <tr
+                                        class="item-row item-<%- val.id %>  <%- pmHistory.model.selectedItems.justClass(val.id, 'selected') %>"
+                                        data-id="<%- val.id %>" >
+                                        <td class=""  onclick="pmHistory.toggleSelect(<%- val.id %>); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td>
+                                            <a href="/?project/<%- project_id %>/history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].mode %></a>
+                                        </td>
+                                        <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> history-status-<%- pmHistory.model.itemslist.results[i].status %>" >
+                                            <%= pmHistory.model.items[val.id].justText('status') %>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
+                                        </td>
+                                        <td class="hidden-xs hidden-sm">
+                                            <%= pmHistory.model.items[val.id].justText('stop_time', function(v){ return v ? moment(v).format("MM/DD/YYYY HH:mm:ss") : ''; }) %> 
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table> 
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="btn-group <%- pmHistory.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= pmHistory.model.justText('selectedCount') %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#" onclick="pmHistory.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
+                                <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
+                        <% } %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+    
+    
 <script type="text/x-just" data-just="history_stdout_line"><span class="stdout-line <%- line.fatal %>" ><%= pmHistory.Syntax(line.text) %></span>
 </script>
 
