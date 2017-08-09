@@ -830,6 +830,7 @@ function qunitAddTests_projects()
         })
     });
 
+    var project_id = undefined
     syncQUnit.addTest('Изменение проекта', function ( assert )
     {
         var done = assert.async();
@@ -837,7 +838,8 @@ function qunitAddTests_projects()
         // Предполагается что мы от прошлого теста попали на страницу редактирования project
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-
+        project_id = itemId;
+        
         $("#project_"+itemId+"_name").val("test2-project-"+t);
 
         $("#new_json_name").val("test3");
@@ -855,6 +857,7 @@ function qunitAddTests_projects()
         })
     });
 
+/*
     syncQUnit.addTest('Проверка добавления невалидных подгрупп к project', function ( assert )
     {
         var done = assert.async();
@@ -899,7 +902,7 @@ function qunitAddTests_projects()
             render(done)
         })
     })
-
+*/
     syncQUnit.addTest('Страница Run playbook', function ( assert )
     {
         var done = assert.async();
@@ -944,7 +947,7 @@ function qunitAddTests_projects()
             render(done)
         })
     })
-
+/*
     syncQUnit.addTest('Страница нового inventory для проекта', function ( assert )
     {
         var done = assert.async();
@@ -994,13 +997,59 @@ function qunitAddTests_projects()
             render("project-add-new-inventory", done)
         })
     });
+*/
+    syncQUnit.addTest('Страница нового inventory', function ( assert )
+    {
+        var done = assert.async();
+
+        // Открытие пункта меню new-inventory
+        $.when(spajs.open({ menuId:"new-inventory"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-inventory');
+            render("groups-new-inventory", done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню new-inventory');
+            render("groups-new-inventory", done)
+        })
+    });
+ 
+    var inventory_id = undefined;
+    syncQUnit.addTest('Сохранение нового inventory', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания inventory
+        var done = assert.async();
+
+        // Заполнение формы с данными inventory
+        $("#new_inventory_name").val("test-inventory-"+t);
+
+        $("#new_json_name").val("test1");
+        $("#new_json_value").val("val1");
+        jsonEditor.jsonEditorAddVar();
+
+        $("#new_json_name").val("test2");
+        $("#new_json_value").val("val2");
+        jsonEditor.jsonEditorAddVar();
+
+
+        // Отправка формы с данными inventory
+        $.when(pmInventories.addItem()).done(function()
+        { 
+            inventory_id = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+            assert.ok(true, 'Успешно inventory add Item');
+            render("groups-add-new-inventory", done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при inventory add Item');
+            render("groups-add-new-inventory", done)
+        })
+    });
 
 
     syncQUnit.addTest('Страница Create new periodic task', function ( assert )
     {
-        var done = assert.async();
-        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(spajs.open({ menuId:'project/'+itemId+'/new-periodic-tasks'})).done(function()
+        var done = assert.async(); 
+        $.when(spajs.open({ menuId:'project/'+project_id+'/new-periodic-tasks'})).done(function()
         {
             assert.ok(true, 'Страница открылась');
             render(done)

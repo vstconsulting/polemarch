@@ -93,7 +93,7 @@ pmHistory.showListInInventory = function(holder, menuInfo, data)
     }
     var inventory_id = data.reg[1];
 
-    return $.when(this.sendSearchQuery({inventory:inventory_id}, limit, offset)).done(function()
+    return $.when(this.sendSearchQuery({inventory:inventory_id}, limit, offset), pmInventories.loadItem(inventory_id)).done(function()
     {
         $(holder).html(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id}))
         thisObj.model.selectedCount = $('.multiple-select .selected').length;
