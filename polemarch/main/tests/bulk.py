@@ -87,6 +87,25 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
             data, new, "/api/v1/periodic-tasks/", "periodictask"
         )
 
+    def test_bulk_templates(self):
+        models.Template.objects.all().delete()
+        data = dict(
+            name="test_tmplt",
+            kind="Task",
+            data=dict(
+                playbook="test.yml",
+                vars=dict(
+                    connection="paramiko",
+                    tags="update",
+                )
+            )
+        )
+        new = dict(**data)
+        new["name"] = "test2_tmplt"
+        self.abstract_test_bulk(
+            data, new, "/api/v1/templates/", "template"
+        )
+
     def test_bulk_unsupported(self):
         data = dict(username="some_user", password="some_password")
         bulk_data = [
@@ -101,6 +120,7 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
         self.assertIn("inventory", result["allowed_types"])
         self.assertIn("project", result["allowed_types"])
         self.assertIn("periodictask", result["allowed_types"])
+        self.assertIn("template", result["allowed_types"])
         self.assertIn("add", result["operations_types"])
         self.assertIn("set", result["operations_types"])
         self.assertIn("del", result["operations_types"])
