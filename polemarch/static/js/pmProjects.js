@@ -102,7 +102,24 @@ pmProjects.addItem = function()
 
     data.name = $("#new_project_name").val()
     data.repository = $("#new_project_repository").val()
-    data.vars = jsonEditor.jsonEditorGetValues()
+    data.vars = {
+        repo_type:$("#new_project_type").val(),
+        repo_password:$("#new_project_password").val(),
+    }
+    
+    if(!data.repository)
+    {
+        if(data.vars.repo_type == "MANUAL")
+        {
+            data.repository = "MANUAL"
+        }
+        else
+        {
+            $.notify("Invalid value in filed `Repository URL`", "error");
+            def.reject()
+            return def.promise();
+        }
+    }
 
     if(!data.name)
     {
@@ -147,7 +164,6 @@ pmProjects.updateItem = function(item_id)
     var data = {}
 
     data.name = $("#project_"+item_id+"_name").val()
-    data.vars = jsonEditor.jsonEditorGetValues()
     data.repository = $("#project_"+item_id+"_repository").val()
 
     if(!data.name)
@@ -156,6 +172,26 @@ pmProjects.updateItem = function(item_id)
         $.notify("Invalid value in filed name", "error");
         return;
     }
+    
+    data.vars = {
+        repo_type:$("#project_"+item_id+"_type").val(),
+        repo_password:$("#project_"+item_id+"_password").val(),
+    }
+    
+    if(!data.repository)
+    {
+        if(data.vars.repo_type == "MANUAL")
+        {
+            data.repository = "MANUAL"
+        }
+        else
+        {
+            $.notify("Invalid value in filed `Repository URL`", "error");
+            def.reject()
+            return def.promise();
+        }
+    }
+
 
     return $.ajax({
         url: "/api/v1/projects/"+item_id+"/",
@@ -623,6 +659,7 @@ pmProjects.supportedRepos = function()
         success: function(data)
         {
             pmProjects.model.supportedRepos = data;
+            pmProjects.model.repository_type = data[0]
             jsonEditor.options['projects'].repo_type = {
                 type:'select',
                 options:pmProjects.model.supportedRepos,
