@@ -167,11 +167,11 @@ function qunitAddTests_users()
         $.when(spajs.open({ menuId:"users"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню users');
-            render("users", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню users');
-            render("users", done)
+            render(done)
         })
     });
 
@@ -183,11 +183,11 @@ function qunitAddTests_users()
         $.when(spajs.open({ menuId:"new-user"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню new-user');
-            render("users-new-user", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню new-user');
-            render("users-new-user", done)
+            render(done)
         })
     });
 
@@ -210,11 +210,11 @@ function qunitAddTests_users()
         $.when(pmUsers.addItem()).done(function()
         {
             assert.ok(true, 'Успешно user add Item');
-            render("users-add-new-user", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при user add Item');
-            render("users-add-new-user", done)
+            render(done)
         })
     });
 
@@ -235,10 +235,10 @@ function qunitAddTests_users()
         $.when(pmUsers.updateItem(userId)).done(function()
         {
             assert.ok(true, 'Успешно update add Item');
-            render("users-update-user", done)
+            render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при update add Item');
-            render("users-update-user", done)
+            render(done)
         })
     });
 
@@ -254,10 +254,10 @@ function qunitAddTests_users()
         $.when(pmUsers.deleteItem(userId, true)).done(function()
         {
             assert.ok(true, 'Успешно delete add Item');
-            render("users-delete-user", done)
+            render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при delete add Item');
-            render("users-delete-user", done)
+            render(done)
         })
     });
 }
@@ -275,11 +275,11 @@ function qunitAddTests_hosts()
         $.when(spajs.open({ menuId:"hosts"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню hosts');
-            render("hosts", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню hosts');
-            render("hosts", done)
+            render(done)
         })
     });
 
@@ -290,11 +290,11 @@ function qunitAddTests_hosts()
         $.when(spajs.open({ menuId:"hosts/page/999"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню hosts');
-            render("hosts_page_999", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню hosts');
-            render("hosts_page_999", done)
+            render(done)
         })
     });
 
@@ -306,11 +306,11 @@ function qunitAddTests_hosts()
         $.when(spajs.open({ menuId:"new-host"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню new-host');
-            render("hosts-new-host", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню new-host');
-            render("hosts-new-host", done)
+            render(done)
         })
     });
 
@@ -339,11 +339,11 @@ function qunitAddTests_hosts()
         $.when(pmHosts.addItem()).done(function()
         {
             assert.ok(true, 'Успешно host add Item');
-            render("hosts-add-new-host", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при user add Item');
-            render("hosts-add-new-host", done)
+            render(done)
         })
     });
 
@@ -365,10 +365,10 @@ function qunitAddTests_hosts()
         $.when(pmHosts.updateItem(itemId)).done(function()
         {
             assert.ok(true, 'Успешно update add Item');
-            render("hosts-update-host", done)
+            render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при update add Item');
-            render("hosts-update-host", done)
+            render(done)
         })
     });
 
@@ -384,10 +384,10 @@ function qunitAddTests_hosts()
         $.when(pmHosts.deleteItem(itemId, true)).done(function()
         {
             assert.ok(true, 'Успешно delete add Item');
-            render("hosts-delete-host", done)
+            render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при delete add Item');
-            render("hosts-delete-host", done)
+            render(done)
         })
     });
 }
@@ -426,11 +426,11 @@ function qunitAddTests_groups()
         $.when(spajs.open({ menuId:"groups"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню groups');
-            render("groups", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню groups');
-            render("groups", done)
+            render(done)
         })
     });
 
@@ -442,11 +442,11 @@ function qunitAddTests_groups()
         $.when(spajs.open({ menuId:"new-group"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню new-group');
-            render("groups-new-group", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню new-group');
-            render("groups-new-group", done)
+            render(done)
         })
     });
 
@@ -475,11 +475,11 @@ function qunitAddTests_groups()
         $.when(pmGroups.addItem()).done(function()
         {
             assert.ok(true, 'Успешно group add Item');
-            render("groups-add-new-group", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при group add Item');
-            render("groups-add-new-group", done)
+            render(done)
         })
     });
 
@@ -501,10 +501,10 @@ function qunitAddTests_groups()
         $.when(pmGroups.updateItem(itemId)).done(function()
         {
             assert.ok(true, 'Успешно update add Item');
-            render("groups-update-group", done)
+            render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при update add Item');
-            render("groups-update-group", done)
+            render(done)
         })
     });
 
@@ -520,11 +520,11 @@ function qunitAddTests_groups()
         $.when(spajs.open({ menuId:"group/"+itemId+"/new-group"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню создания подгруппы new-group');
-            render("groups-new-sub-group", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню создания подгруппы new-group');
-            render("groups-new-sub-group", done)
+            render(done)
         })
     });
 
@@ -553,18 +553,18 @@ function qunitAddTests_groups()
             if(master_group_itemId != itemId)
             {
                 assert.ok(false, 'Ошибка при добавлении подгруппы ' + master_group_itemId +"!="+ itemId);
-                render("groups-add-new-sub-group", done)
+                render(done)
             }
             else
             {
                 assert.ok(true, 'Успешно group sub add Item');
-                render("groups-add-new-sub-group", done)
+                render(done)
             }
 
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при group sub add Item');
-            render("groups-add-new-sub-group", done)
+            render(done)
         })
     });
 
@@ -610,10 +610,10 @@ function qunitAddTests_groups()
         $.when(pmGroups.deleteItem(itemId, true)).done(function()
         {
             assert.ok(true, 'Успешно delete add Item');
-            render("groups-delete-group", done)
+            render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при delete add Item');
-            render("groups-delete-group", done)
+            render(done)
         })
     });
 }
@@ -631,11 +631,11 @@ function qunitAddTests_inventories()
         $.when(spajs.open({ menuId:"inventories"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню inventories');
-            render("inventories", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню inventories');
-            render("inventories", done)
+            render(done)
         })
     });
 
@@ -647,11 +647,11 @@ function qunitAddTests_inventories()
         $.when(spajs.open({ menuId:"new-inventory"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню new-inventory');
-            render("groups-new-inventory", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню new-inventory');
-            render("groups-new-inventory", done)
+            render(done)
         })
     });
 
@@ -679,11 +679,11 @@ function qunitAddTests_inventories()
         $.when(pmInventories.addItem()).done(function()
         {
             assert.ok(true, 'Успешно inventory add Item');
-            render("groups-add-new-inventory", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при inventory add Item');
-            render("groups-add-new-inventory", done)
+            render(done)
         })
     });
 
@@ -704,10 +704,10 @@ function qunitAddTests_inventories()
         $.when(pmInventories.updateItem(itemId)).done(function()
         {
             assert.ok(true, 'Успешно update add Item');
-            render("inventories-update-inventory", done)
+            render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при update add Item');
-            render("inventories-update-inventory", done)
+            render(done)
         })
     });
 
@@ -753,10 +753,10 @@ function qunitAddTests_inventories()
         $.when(pmInventories.deleteItem(itemId, true)).done(function()
         {
             assert.ok(true, 'Успешно delete Item');
-            render("inventories-delete-inventory", done)
+            render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при delete Item');
-            render("inventories-delete-inventory", done)
+            render(done)
         })
     });
 }
@@ -773,11 +773,11 @@ function qunitAddTests_projects()
         $.when(spajs.open({ menuId:"projects"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню projects');
-            render("projects", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню projects');
-            render("projects", done)
+            render(done)
         })
     });
 
@@ -789,11 +789,11 @@ function qunitAddTests_projects()
         $.when(spajs.open({ menuId:"new-project"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню new-project');
-            render("groups-new-project", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню new-project');
-            render("groups-new-project", done)
+            render(done)
         })
     });
 
@@ -822,11 +822,11 @@ function qunitAddTests_projects()
         $.when(pmProjects.addItem()).done(function()
         {
             assert.ok(true, 'Успешно project add Item');
-            render("groups-add-new-project", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при project add Item');
-            render("groups-add-new-project", done)
+            render(done)
         })
     });
 
@@ -850,10 +850,10 @@ function qunitAddTests_projects()
         $.when(pmProjects.updateItem(itemId)).done(function()
         {
             assert.ok(true, 'Успешно update add Item');
-            render("projects-update-project", done)
+            render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при update add Item');
-            render("projects-update-project", done)
+            render(done)
         })
     });
 
@@ -957,11 +957,11 @@ function qunitAddTests_projects()
         $.when(spajs.open({ menuId:'project/'+itemId+"/new-inventory"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню new-inventory');
-            render("project-new-inventory", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню new-inventory');
-            render("project-new-inventory", done)
+            render(done)
         })
     });
 
@@ -990,11 +990,11 @@ function qunitAddTests_projects()
         $.when(pmInventories.addItem('project', itemId)).done(function()
         {
             assert.ok(true, 'Успешно inventory add Item');
-            render("project-add-new-inventory", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при inventory add Item');
-            render("project-add-new-inventory", done)
+            render(done)
         })
     });
 */
@@ -1006,11 +1006,11 @@ function qunitAddTests_projects()
         $.when(spajs.open({ menuId:"new-inventory"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню new-inventory');
-            render("groups-new-inventory", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню new-inventory');
-            render("groups-new-inventory", done)
+            render(done)
         })
     });
  
@@ -1037,11 +1037,11 @@ function qunitAddTests_projects()
         { 
             inventory_id = /inventory\/([0-9]+)/.exec(window.location.href)[1]
             assert.ok(true, 'Успешно inventory add Item');
-            render("groups-add-new-inventory", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при inventory add Item');
-            render("groups-add-new-inventory", done)
+            render(done)
         })
     });
 
@@ -1091,11 +1091,11 @@ function qunitAddTests_projects()
             $.when(pmPeriodicTasks.addItem(itemId)).done(function()
             { 
                 assert.ok(true, 'Успешно project add pmPeriodicTasks');
-                render("groups-add-new-project", done)
+                render(done)
             }).fail(function()
             { 
                 assert.ok(false, 'Ошибка при project add pmPeriodicTasks');
-                render("groups-add-new-project", done)
+                render(done)
             })
         }).fail(function()
         {
@@ -1126,11 +1126,11 @@ function qunitAddTests_projects()
         $.when(pmPeriodicTasks.updateItem(taskId)).done(function()
         {
             assert.ok(true, 'Успешно update Periodic Task');
-            render("project-add-update-Task", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при update Periodic Task');
-            render("project-add-update-Task", done)
+            render(done)
         })
     });
 
@@ -1179,10 +1179,10 @@ function qunitAddTests_projects()
         $.when(pmProjects.deleteItem(itemId, true)).done(function()
         {
             assert.ok(true, 'Успешно delete Item');
-            render("projects-delete-project", done)
+            render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при delete Item');
-            render("projects-delete-project", done)
+            render(done)
         })
     });
 }
@@ -1196,11 +1196,11 @@ function qunitAddTests_templates_task(){
         $.when(spajs.open({ menuId:"templates"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню templates');
-            render("projects", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню templates');
-            render("projects", done)
+            render(done)
         })
     });
 
@@ -1212,11 +1212,11 @@ function qunitAddTests_templates_task(){
         $.when(spajs.open({ menuId:"template/new-task"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню new-project');
-            render("groups-new-project", done)
+            render(done)
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при открытиии меню new-project');
-            render("groups-new-project", done)
+            render(done)
         })
     });
 
@@ -1261,10 +1261,10 @@ function qunitAddTests_templates_task(){
         $.when(pmTasksTemplates.updateItem(itemId)).done(function()
         {
             assert.ok(true, 'Успешно update add Item');
-            render("projects-update-project", done)
+            render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при update add Item');
-            render("projects-update-project", done)
+            render(done)
         })
     });
 
@@ -1388,4 +1388,46 @@ function qunitAddTests_templates_modules(){
         })
     });
 }
+
+
+function qunitAddTests_history()
+{
+    syncQUnit.addTest('Страница history', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"history"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню history');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии меню history');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница history', function ( assert )
+    {
+        var done = assert.async();
+        
+        if(!pmHistory.model.itemslist.results.length)
+        {
+            assert.ok(true, 'Нет истории.');
+            render(done)
+        }
+
+        $.when(spajs.open({ menuId:"history/"+pmHistory.model.itemslist.results[0].id+"/"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыта страница history');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при открытиии страницы '+pmHistory.model.itemslist.results[0].id+' history');
+            render(done)
+        })
+    });
+    
+}
+
     injectQunit()
