@@ -42,7 +42,7 @@ pmTemplates.showList = function(holder, menuInfo, data)
     }).fail(function()
     {
         $.notify("", "error");
-    })
+    }).promise()
 }
 
    

@@ -2,6 +2,40 @@
 
 {% block script %}
 
+<!-- Список templates_list -->
+<script type="text/x-just" data-just="templates_widget"> 
+    <section class="col-lg-6 col-sm-12 col-xs-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                Templates <%- kind %>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr> 
+                            <th>Name</th>
+                            <th style="width: 105px;" >Actions</th>
+                        </tr>
+                        <% for(var i in pmTasksTemplates.model.itemslist.results){  val = pmTasksTemplates.model.itemslist.results[i]; %>
+                            <tr
+                                class="item-row item-<%- val.id %>"
+                                data-id="<%- val.id %>" >
+                                <td>
+                                    <a href="/?template/<%- val.kind %>/<%- val.id %>" class="item-name"
+                                            onclick="return spajs.openURL(this.href);" ><%- val.name %></a>
+                                </td> 
+                                <td>
+                                    <a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- val.kind %>'].execute(<%- val.id %>)); return false;">Execute</a>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div> 
+        </div>
+    </section> 
+</script>
+
 
 <!-- Список templates_list -->
 <script type="text/x-just" data-just="templates_list">
@@ -4229,11 +4263,11 @@
                     <div class="box-header ui-sortable-handle" style="cursor: move;">
                         <i class="fa fa-th"></i>
                         <h3 class="box-title">Tasks history</h3>
-                        <!--
+                        <!-- 
                         <div class="box-tools pull-right">
                             <button type="button" class="btn btn-sm" data-widget="collapse"><i class="fa fa-minus"></i></button>
                             <button type="button" class="btn btn-sm" data-widget="remove"><i class="fa fa-times"></i></button>
-                        </div> -->
+                        </div>-->
                     </div>
                     <div class="box-body border-radius-none">
                         <div id="c3-history-chart"></div>
@@ -4241,6 +4275,11 @@
                     <!-- /.box-body -->
                 </div>
             </div>
+        </div>
+        
+        <div class="row"> 
+            <div id="pmTasksTemplates-showTaskWidget"></div> 
+            <div id="pmTasksTemplates-showModuleWidget"></div> 
         </div>
     </section>
 </script>

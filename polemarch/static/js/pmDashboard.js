@@ -109,9 +109,12 @@ pmDashboard.updateData = function()
 pmDashboard.open  = function(holder, menuInfo, data)
 {
     var thisObj = this 
-    pmDashboard.updateData()
+    this.updateData()
     $(holder).html(spajs.just.render('dashboard_page', {})) 
     
+    pmTasksTemplates.showTaskWidget($("#pmTasksTemplates-showTaskWidget"));
+    pmTasksTemplates.showModuleWidget($("#pmTasksTemplates-showModuleWidget"));
+      
     pmDashboard.model.historyChart = c3.generate({
         bindto: '#c3-history-chart',
         data: {

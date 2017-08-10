@@ -8,6 +8,31 @@ pmTasksTemplates.model.name = "templates"
 pmTasksTemplates.model.kind = "Task"
 pmTemplates.model.kindObjects[pmTasksTemplates.model.kind] = pmTasksTemplates
   
+  
+pmTasksTemplates.showWidget = function(holder, kind)
+{
+    var thisObj = this;
+    var offset = 0
+    var limit = this.pageSize; 
+    return $.when(this.sendSearchQuery({kind:kind}, limit, offset)).done(function()
+    {
+        $(holder).html(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind})) 
+    }).fail(function()
+    {
+        $.notify("", "error");
+    }).promise()
+}
+
+pmTasksTemplates.showTaskWidget = function(holder)
+{
+    return pmTasksTemplates.showWidget(holder, "Task")
+}
+
+pmTasksTemplates.showModuleWidget = function(holder)
+{
+    return pmTasksTemplates.showWidget(holder, "Module")
+}
+
 pmTasksTemplates.execute = function(item_id)
 {
     var thisObj = this;
