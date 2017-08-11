@@ -315,7 +315,7 @@ polemarch.start = function(options)
     // Tasks Templates
     spajs.addMenu({
         id:"tasks", 
-        urlregexp:[/^templates$/, /^tasks\/page\/([0-9]+)$/],
+        urlregexp:[/^templates$/, /^templates\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showList(holder, menuInfo, data);}
     })
     

@@ -57,6 +57,14 @@ pmTemplates.importFromFile = function(files_event)
                 console.log(e)
                 var bulkdata = []
                 var filedata = JSON.parse(e.target.result)
+                
+                if(filedata.version/1 > 1)
+                {
+                    polemarch.showErrors("Error file version is "+filedata.version)
+                    def.reject();
+                    return;
+                }
+                
                 for(var i in filedata.data)
                 {
                     var val = filedata.data[i]
@@ -64,6 +72,8 @@ pmTemplates.importFromFile = function(files_event)
                     bulkdata.push(val)
                 }
                 console.log(bulkdata)
+                 
+                
                  
                 $.ajax({
                     url: "/api/v1/_bulk/",
@@ -144,7 +154,7 @@ pmTemplates.exportToFile = function(item_ids)
             var fileInfo = {
                 data:filedata,
                 count:filedata.length,
-                version:"0.1"
+                version:"1"
             }
             
             var textFileAsBlob = new Blob([JSON.stringify(fileInfo)], {
