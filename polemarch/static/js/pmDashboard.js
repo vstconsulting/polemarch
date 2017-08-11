@@ -114,7 +114,8 @@ pmDashboard.open  = function(holder, menuInfo, data)
     
     pmTasksTemplates.showTaskWidget($("#pmTasksTemplates-showTaskWidget"));
     pmTasksTemplates.showModuleWidget($("#pmTasksTemplates-showModuleWidget"));
-      
+    pmAnsibleModule.fastCommandWidget($("#pmAnsibleModule-fastCommandWidget"))
+    
     pmDashboard.model.historyChart = c3.generate({
         bindto: '#c3-history-chart',
         data: {

@@ -1,4 +1,9 @@
 
+/**
+ * Список playbook из всех проектов. 
+ * Сейчас используется для автокомплитов при выборе playbook.
+ * И для запуска конкретного playbook
+ */
 var pmTasks = new pmItems()
 
 pmTasks.model.name = "tasks"
@@ -70,9 +75,7 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
 
     return def.promise();
 }
-
-
-
+ 
 /**
  * Обновляет поле модел this.model.itemslist и ложит туда список пользователей
  * Обновляет поле модел this.model.items и ложит туда список инфу о пользователях по их id
