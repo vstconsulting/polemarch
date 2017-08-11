@@ -35,10 +35,7 @@ pmTemplates.showList = function(holder, menuInfo, data)
 
     return $.when(this.sendSearchQuery({kind:thisObj.model.kind}, limit, offset)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:""}))
-
-        thisObj.model.selectedCount = $('.multiple-select .selected').length;
-
+        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:""})) 
     }).fail(function()
     {
         $.notify("", "error");
@@ -46,3 +43,7 @@ pmTemplates.showList = function(holder, menuInfo, data)
 }
 
    
+pmTemplates.exportToFile = function()
+{
+   // $.when()
+}

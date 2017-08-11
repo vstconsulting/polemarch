@@ -8,22 +8,74 @@ function pmItems()
     this.model.itemslist = []
     this.model.items = {}
     this.model.name = "based"
-
+    this.model.selectedCount = 0;
+    
     this.toggleSelect = function(item_id, mode)
     {
+        if(!item_id)
+        {
+            return;
+        }
+        
+        console.log(item_id, mode)
         if(mode === undefined)
         {
             this.model.selectedItems[item_id] = !this.model.selectedItems[item_id]
+            if(this.model.selectedItems[item_id])
+            {
+                this.model.selectedCount++
+            }
+            else
+            {
+                this.model.selectedCount--
+            }
         }
         else
         {
+            if(this.model.selectedItems[item_id] != mode)
+            {
+                if(mode)
+                {
+                    this.model.selectedCount++
+                }
+                else
+                {
+                    this.model.selectedCount--
+                }
+            }
             this.model.selectedItems[item_id] = mode
         }
-
-        this.model.selectedCount = $('.multiple-select .item-row.selected').length;
+  
         return this.model.selectedItems[item_id];
     }
 
+    this.toggleSelectEachItem = function(mode)
+    {
+        var thisObj = this;
+        return $.when(this.loadAllItems()).done(function()
+        {
+            var delta = 0;
+            for(var i in thisObj.model.itemslist.results)
+            {  
+                var item_id = thisObj.model.itemslist.results[i].id
+                
+                if(thisObj.model.selectedItems[item_id] != mode)
+                {
+                    if(mode)
+                    {
+                        delta++
+                    }
+                    else
+                    {
+                        delta--
+                    }
+                }
+                thisObj.model.selectedItems[item_id] = mode 
+            }
+            thisObj.model.selectedCount += delta
+        }).promise()
+    }
+    
     this.toggleSelectAll = function(elements, mode)
     {
         for(var i=0; i< elements.length; i++)
@@ -86,10 +138,7 @@ function pmItems()
 
         return $.when(this.loadItems(limit, offset)).done(function()
         {
-            $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:""}))
-
-            thisObj.model.selectedCount = $('.multiple-select .selected').length;
-
+            $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:""})) 
         }).fail(function()
         {
             $.notify("", "error");
@@ -329,6 +378,22 @@ function pmItems()
         $.when(this.multiOperationsOnEachRow(elements, 'deleteItemQuery')).always(function(){
             spajs.openURL(window.location.href);
         })
+    }
+
+    this.deleteSelected = function()
+    {
+        var item_ids = []
+        for(var i in this.model.selectedItems)
+        {
+            if(this.model.selectedItems[i])
+            {
+                item_ids.push(i)
+            }
+        }
+        
+        return $.when(this.multiOperationsOnItems('deleteItemQuery', item_ids)).always(function(){
+            spajs.openURL(window.location.href);
+        }).promise(); 
     }
 
     this.multiOperationsOnItems = function(operation, item_ids, force, def)

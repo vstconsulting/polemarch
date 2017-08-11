@@ -111,10 +111,7 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
 
     return $.when(this.searchItems(project_id, 'project'), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:"", project_id:project_id}))
-
-        thisObj.model.selectedCount = $('.multiple-select .selected').length;
-
+        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:"", project_id:project_id}))  
     }).fail(function()
     {
         $.notify("", "error");

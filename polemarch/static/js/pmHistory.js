@@ -95,8 +95,7 @@ pmHistory.showListInInventory = function(holder, menuInfo, data)
 
     return $.when(this.sendSearchQuery({inventory:inventory_id}, limit, offset), pmInventories.loadItem(inventory_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id}))
-        thisObj.model.selectedCount = $('.multiple-select .selected').length;
+        $(holder).html(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id})) 
     }).fail(function()
     {
         $.notify("", "error");
@@ -150,7 +149,7 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
 }
 
 pmHistory.bindStdoutUpdates = function(item_id)
-{ 
+{
     var thisObj = this;
     $.when(this.loadNewLines(item_id, 0)).always(function()
     {
@@ -186,7 +185,7 @@ pmHistory.bindStdoutUpdates = function(item_id)
                     {
                         return;
                     }
-                    
+
                     for(var i = stdout_minline-1; i > stdout_minline - thisObj.model.linePerPage; i = i -1)
                     {
                         if(thisObj.model.items[item_id].stdout[i] != undefined)
@@ -229,18 +228,18 @@ pmHistory.loadItem = function(item_id)
         {
             data.test = Math.random();
 
-            
+
             if(!thisObj.model.items[item_id])
             {
                 thisObj.model.items[item_id] = {}
             }
-            
+
             for(var i in data)
             {
                 thisObj.model.items[item_id][i] = data[i]
             }
-            
-            pmHistory.model.items.justWatch(item_id); 
+
+            pmHistory.model.items.justWatch(item_id);
 
             if(data.project && !pmProjects.model.items[data.project])
             {
@@ -390,7 +389,7 @@ pmHistory.loadItems = function(limit, offset)
                     projects.push(val.project)
                 }
             }
-            
+
             if(projects.length)
             {
                 $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
@@ -484,13 +483,13 @@ pmHistory.getLine = function(item_id, line_id)
 
 pmHistory.loadNewLines = function(item_id, last_stdout_maxline)
 {
-    var thisObj = this; 
-    
+    var thisObj = this;
+
     if(last_stdout_maxline === undefined)
     {
         last_stdout_maxline = this.model.items[item_id].stdout_maxline;
     }
-    
+
     if(!last_stdout_maxline)
     {
         last_stdout_maxline = 0;
@@ -504,7 +503,7 @@ pmHistory.loadNewLines = function(item_id, last_stdout_maxline)
         {
             return;
         }
-        
+
         var needScrollDowun = $('#history-stdout').prop('scrollHeight') - $('#history-stdout').scrollTop() -  history_stdout.css('height').replace("px", "")/1 < 100
 
         if(last_stdout_maxline == 0)
@@ -555,7 +554,7 @@ pmHistory.scrollBottom = function()
  * Обновляет поле модел this.model.items и ложит туда список инфу о пользователях по их id
  */
 pmHistory.loadLines = function(item_id, opt)
-{ 
+{
     if(!opt.limit)
     {
         opt.limit = 30;

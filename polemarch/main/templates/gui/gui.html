@@ -213,10 +213,30 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="#" onclick="pmTasksTemplates.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                    <a href="#" onclick="pmTasksTemplates.deleteRows($('.multiple-select .item-row.selected')); return false;" >DeleteDelete from this page</a>
+                                </li> 
+                                <li>
+                                    <a href="#" onclick="pmTasksTemplates.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
                             </ul>
                         </div>
+                        
+                        <% if(!query){ %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">  
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(pmTasksTemplates.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                    </li>
+                                    <li class=" <%- pmTasksTemplates.model.justNotClass('selectedCount', 'hide') %>" >
+                                        <a href="#" onclick="spajs.showLoader(pmTasksTemplates.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } %>
                         <% if(pmTasksTemplates.getTotalPages(pmTasksTemplates.model.itemslist)){ %>
                                 <%= pmTasksTemplates.paginationHtml(pmTasksTemplates.model.itemslist) %>
                         <% } %>
@@ -774,12 +794,31 @@
                                 Actions on <%= pmHistory.model.justText('selectedCount') %> items
                                 <span class="caret"></span>
                             </button>
-                            <ul class="dropdown-menu">
+                            <ul class="dropdown-menu">  
                                 <li>
-                                    <a href="#" onclick="pmHistory.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                    <a href="#" onclick="pmHistory.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
+                                </li> 
+                                <li>
+                                    <a href="#" onclick="pmHistory.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
                             </ul>
                         </div>
+                        <% if(!query){ %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">  
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(pmHistory.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                    </li>
+                                    <li class=" <%- pmHistory.model.justNotClass('selectedCount', 'hide') %>" >
+                                        <a href="#" onclick="spajs.showLoader(pmHistory.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } %>
                         <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
                                 <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
                         <% } %>
@@ -885,6 +924,21 @@
                                 </li>
                             </ul>
                         </div>
+                        
+                        <!--<div class="btn-group" role="group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Select
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">  
+                                <li>
+                                    <a href="#" onclick="spajs.showLoader(pmHistory.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                </li>
+                                <li class=" <%- pmHistory.model.justNotClass('selectedCount', 'hide') %>" >
+                                    <a href="#" onclick="spajs.showLoader(pmHistory.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                </li>
+                            </ul>
+                        </div>-->
                         <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
                                 <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
                         <% } %>
@@ -1001,6 +1055,21 @@
                                 </li>
                             </ul>
                         </div>
+                        
+                        <!--<div class="btn-group" role="group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Select
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">  
+                                <li>
+                                    <a href="#" onclick="spajs.showLoader(pmHistory.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                </li>
+                                <li class=" <%- pmHistory.model.justNotClass('selectedCount', 'hide') %>" >
+                                    <a href="#" onclick="spajs.showLoader(pmHistory.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                </li>
+                            </ul>
+                        </div>-->
                         <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
                                 <%= pmHistory.paginationHtml(pmHistory.model.itemslist) %>
                         <% } %>
@@ -1392,10 +1461,30 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="#" onclick="pmPeriodicTasks.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                    <a href="#" onclick="pmPeriodicTasks.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
+                                </li> 
+                                <li>
+                                    <a href="#" onclick="pmPeriodicTasks.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
                             </ul>
                         </div>
+                        
+                        <% if(!query){ %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">  
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(pmPeriodicTasks.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                    </li>
+                                    <li class=" <%- pmPeriodicTasks.model.justNotClass('selectedCount', 'hide') %>" >
+                                        <a href="#" onclick="spajs.showLoader(pmPeriodicTasks.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } %>
                         <% if(pmPeriodicTasks.getTotalPages(pmPeriodicTasks.model.itemslist)){ %>
                                 <%= pmPeriodicTasks.paginationHtml(pmPeriodicTasks.model.itemslist) %>
                         <% } %>
@@ -1970,11 +2059,33 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="#" onclick="pmProjects.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                    <a href="#" onclick="pmProjects.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
+                                </li> 
+                                <li>
+                                    <a href="#" onclick="pmProjects.deleteSelected(); return false;" >Delete all selected elements</a>
+                                </li>
+                                <li>
                                     <a href="#" onclick="pmProjects.multiOperationsOnEachRow($('.multiple-select .item-row.selected'), 'syncRepo'); return false;" >Sync</a>
                                 </li>
                             </ul>
                         </div>
+                        
+                        <% if(!query){ %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">  
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(pmProjects.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                    </li>
+                                    <li class=" <%- pmProjects.model.justNotClass('selectedCount', 'hide') %>" >
+                                        <a href="#" onclick="spajs.showLoader(pmProjects.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } %>
                         <% if(pmProjects.getTotalPages(pmProjects.model.itemslist)){ %>
                                 <%= pmProjects.paginationHtml(pmProjects.model.itemslist) %>
                         <% } %>
@@ -2527,10 +2638,30 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a href="#"
-                                        onclick="pmInventories.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                        onclick="pmInventories.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
+                                </li> 
+                                <li>
+                                    <a href="#" onclick="pmInventories.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
                             </ul>
                         </div>
+                        
+                        <% if(!query){ %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">  
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(pmInventories.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                    </li>
+                                    <li class=" <%- pmInventories.model.justNotClass('selectedCount', 'hide') %>" >
+                                        <a href="#" onclick="spajs.showLoader(pmInventories.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } %>
                         <% if(pmInventories.getTotalPages(pmInventories.model.itemslist)){ %>
                                 <%= pmInventories.paginationHtml(pmInventories.model.itemslist) %>
                         <% } %>
@@ -3001,10 +3132,30 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a href="#"
-                                        onclick="pmUsers.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                        onclick="pmUsers.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
+                                </li> 
+                                <li>
+                                    <a href="#" onclick="pmUsers.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
                             </ul>
                         </div>
+                        
+                        <% if(!query){ %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">  
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(pmUsers.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                    </li>
+                                    <li class=" <%- pmUsers.model.justNotClass('selectedCount', 'hide') %>" >
+                                        <a href="#" onclick="spajs.showLoader(pmUsers.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } %>
                         <% if(pmUsers.getTotalPages(pmUsers.model.itemslist)){ %>
                                 <%= pmUsers.paginationHtml(pmUsers.model.itemslist) %>
                         <% } %>
@@ -3321,10 +3472,30 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a href="#"
-                                        onclick="pmHosts.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                        onclick="pmHosts.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
+                                </li> 
+                                <li>
+                                    <a href="#" onclick="pmHosts.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
                             </ul>
                         </div>
+                        
+                        <% if(!query){ %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">  
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(pmHosts.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                    </li>
+                                    <li class=" <%- pmHosts.model.justNotClass('selectedCount', 'hide') %>" >
+                                        <a href="#" onclick="spajs.showLoader(pmHosts.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } %>
                         <% if(pmHosts.getTotalPages(pmHosts.model.itemslist)){ %>
                                 <%= pmHosts.paginationHtml(pmHosts.model.itemslist) %>
                         <% } %>
@@ -4004,10 +4175,30 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a href="#"
-                                        onclick="pmGroups.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                        onclick="pmGroups.deleteRows($('.multiple-select .item-row.selected')); return false;" >DeleteDelete from this page</a>
+                                </li> 
+                                <li>
+                                    <a href="#" onclick="pmGroups.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
                             </ul>
                         </div>
+                        
+                        <% if(!query){ %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">  
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(pmGroups.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                    </li>
+                                    <li class=" <%- pmGroups.model.justNotClass('selectedCount', 'hide') %>" >
+                                        <a href="#" onclick="spajs.showLoader(pmGroups.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } %>
                         <% if(pmGroups.getTotalPages(pmGroups.model.itemslist)){ %>
                                 <%= pmGroups.paginationHtml(pmGroups.model.itemslist) %>
                         <% } %>
