@@ -143,7 +143,8 @@ pmTemplates.exportToFile = function(item_ids)
             
             var fileInfo = {
                 data:filedata,
-                count:filedata.length
+                count:filedata.length,
+                version:"0.1"
             }
             
             var textFileAsBlob = new Blob([JSON.stringify(fileInfo)], {
