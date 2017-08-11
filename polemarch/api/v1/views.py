@@ -182,7 +182,7 @@ class BulkViewSet(rest_views.APIView):
         "del": "perform_delete"
     }
     _allowed_types = [
-        'host', 'group', 'inventory', 'project', 'periodictask'
+        'host', 'group', 'inventory', 'project', 'periodictask', 'template'
     ]
 
     def get_serializer_class(self, item):
