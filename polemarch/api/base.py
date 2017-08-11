@@ -74,7 +74,8 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
     model = None
 
     def get_serializer_class(self):
-        if self.kwargs.get("pk", False) or self.action == "create":
+        if self.kwargs.get("pk", False) or self.action in ["create"] or \
+                int(self.request.query_params.get("detail", u"0")):
             if self.serializer_class_one is not None:
                 return self.serializer_class_one
         return super(GenericViewSet, self).get_serializer_class()
