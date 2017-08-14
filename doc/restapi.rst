@@ -1683,7 +1683,9 @@ History records
            "stop_time":"2017-07-02T13:48:11.922777Z",
            "raw_inventory":"inventory",
            "raw_args": "ansible-playbook main.yml -i /tmp/tmpvMIwMg -v",
-           "raw_stdout":"text"
+           "raw_stdout":"text",
+           "initiator": 1,
+           "initiator_type": "users"
         }
 
    :>json number id: id of history record.
@@ -1704,6 +1706,8 @@ History records
    :>json string raw_stdout: what Ansible wrote to stdout and stderr during
      execution. The size is limited to 10M characters. Full output
      in :http:get:`/api/v1/history/{id}/raw/`.
+   :>json number initiator: initiator id.
+   :>json string initiator_type: initiator type like in api url.
    :>json string url: url to this specific history record.
 
 .. |history_details_ref| replace:: **Response JSON Object:** response json fields
