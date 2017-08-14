@@ -262,7 +262,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                         history.start_time <= history.stop_time)
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
-        self.assertEqual(history.initiator, self.user)
+        self.assertEqual(history.initiator_object, self.user)
         History.objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, None), "OFFLINE")
@@ -509,7 +509,7 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                                    raw_inventory="inventory",
                                    raw_stdout="text",
                                    inventory=self.history_inventory,
-                                   initiator=self.user)
+                                   initiator=self.user.id)
         self.histories = [
             History.objects.create(status="OK",
                                    start_time=now() - timedelta(hours=15),
@@ -541,7 +541,8 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                           start_time=self.histories[0].start_time.strftime(df),
                           stop_time=self.histories[0].stop_time.strftime(df),
                           raw_inventory="inventory", raw_stdout="text",
-                          inventory=self.history_inventory.id)
+                          inventory=self.history_inventory.id,
+                          initiator=self.user.id, initiator_type="users")
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)

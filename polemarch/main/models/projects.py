@@ -68,7 +68,7 @@ class Project(AbstractModel):
                               project=self,
                               kind=kind,
                               raw_stdout="",
-                              initiator=extra.pop("initiator", None))
+                              initiator=extra.pop("initiator", 0))
         history = History.objects.create(status="DELAY", **history_kwargs)
         kwargs = dict(target=mod_name, inventory=inventory, history=history)
         kwargs.update(extra)

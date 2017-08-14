@@ -151,25 +151,25 @@ class HistoryQuerySet(BQuerySet):
 
 
 class History(BModel):
-    objects       = HistoryQuerySet.as_manager()
-    project       = models.ForeignKey(Project,
-                                      on_delete=models.CASCADE,
-                                      related_query_name="history",
-                                      null=True)
-    inventory     = models.ForeignKey(Inventory,
-                                      on_delete=models.CASCADE,
-                                      related_query_name="history",
-                                      blank=True, null=True, default=None)
-    mode          = models.CharField(max_length=256)
-    kind          = models.CharField(max_length=50, default="PLAYBOOK")
-    start_time    = models.DateTimeField(default=timezone.now)
-    stop_time     = models.DateTimeField(blank=True, null=True)
-    raw_args      = models.TextField(default="")
-    raw_inventory = models.TextField(default="")
-    status        = models.CharField(max_length=50)
-    initiator     = models.ForeignKey(User,
-                                      on_delete=models.SET_NULL,
-                                      blank=True, null=True, default=None)
+    objects        = HistoryQuerySet.as_manager()
+    project        = models.ForeignKey(Project,
+                                       on_delete=models.CASCADE,
+                                       related_query_name="history",
+                                       null=True)
+    inventory      = models.ForeignKey(Inventory,
+                                       on_delete=models.CASCADE,
+                                       related_query_name="history",
+                                       blank=True, null=True, default=None)
+    mode           = models.CharField(max_length=256)
+    kind           = models.CharField(max_length=50, default="PLAYBOOK")
+    start_time     = models.DateTimeField(default=timezone.now)
+    stop_time      = models.DateTimeField(blank=True, null=True)
+    raw_args       = models.TextField(default="")
+    raw_inventory  = models.TextField(default="")
+    status         = models.CharField(max_length=50)
+    initiator      = models.IntegerField(default=0)
+    # Initiator type should be always as in urls for api
+    initiator_type = models.CharField(max_length=50, default="users")
 
     class NoFactsAvailableException(NotApplicable):
         def __init__(self):
@@ -181,8 +181,12 @@ class History(BModel):
         ordering = ["-id"]
         index_together = [
             ["id", "project", "mode", "status", "inventory",
-             "start_time", "stop_time"]
+             "start_time", "stop_time", "initiator", "initiator_type"]
         ]
+
+    @property
+    def initiator_object(self):
+        return User.objects.get(id=self.initiator)
 
     @property
     def facts(self):
