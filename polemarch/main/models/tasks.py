@@ -13,6 +13,7 @@ from celery.schedules import crontab
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
@@ -166,6 +167,9 @@ class History(BModel):
     raw_args      = models.TextField(default="")
     raw_inventory = models.TextField(default="")
     status        = models.CharField(max_length=50)
+    initiator     = models.ForeignKey(User,
+                                      on_delete=models.SET_NULL,
+                                      blank=True, null=True, default=None)
 
     class NoFactsAvailableException(NotApplicable):
         def __init__(self):

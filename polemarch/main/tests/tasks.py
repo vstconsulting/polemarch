@@ -262,6 +262,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                         history.start_time <= history.stop_time)
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
+        self.assertEqual(history.initiator, self.user)
         History.objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, None), "OFFLINE")
@@ -507,7 +508,8 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         self.default_kwargs = dict(project=self.ph, mode="task.yml",
                                    raw_inventory="inventory",
                                    raw_stdout="text",
-                                   inventory=self.history_inventory)
+                                   inventory=self.history_inventory,
+                                   initiator=self.user)
         self.histories = [
             History.objects.create(status="OK",
                                    start_time=now() - timedelta(hours=15),

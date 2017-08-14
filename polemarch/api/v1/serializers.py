@@ -155,6 +155,7 @@ class HistorySerializer(serializers.ModelSerializer):
                   "inventory",
                   "start_time",
                   "stop_time",
+                  "initiator",
                   "url")
 
 
@@ -172,6 +173,7 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "raw_inventory",
                   "raw_args",
                   "raw_stdout",
+                  "initiator",
                   "url")
 
     def get_facts(self, request):
@@ -481,7 +483,9 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         inventory_id = int(data.pop("inventory"))
         target = str(data.pop(kind))
         action = getattr(self.instance, "execute_ansible_{}".format(kind))
-        history_id = action(target, inventory_id, **data)
+        history_id = action(
+            target, inventory_id, initiator=request.user, **data
+        )
         rdata = dict(detail="Started at inventory {}.".format(inventory_id),
                      history_id=history_id)
         return Response(rdata, 201)
