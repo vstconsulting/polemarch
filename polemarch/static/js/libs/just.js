@@ -362,7 +362,7 @@
 
 			Template.prototype.renderSync = function () {
 				var that = this;
-
+ 
 				var blank = loadSync(this.file)
                                 try {
                                         var buffer = blank.call(that);
@@ -378,7 +378,8 @@
                                             }
                                             return html;
                                 } catch (e) {
-                                        console.warn(e.message + ' in ' + that.file + ' on line ' + that.line);
+                                        console.error(e.message + ' in ' + that.file + ' on line ' + that.line);
+                                        throw e.message + ' in ' + that.file + ' on line ' + that.line 
                                         return;
                                 }
 			};
@@ -409,7 +410,7 @@
                             var html = tpl.renderSync();
                             if(html == undefined)
                             {
-                                console.warn("renderSync error", template, data)
+                                console.error("renderSync error", template, data)
                             }
                             return html;
 			};

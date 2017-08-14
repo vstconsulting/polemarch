@@ -149,7 +149,7 @@ pmModuleTemplates.execute = function(item_id)
 
 
 pmModuleTemplates.showItem = function(holder, menuInfo, data)
-{
+{ 
     var item_id = data.reg[1]
 
     var def = new $.Deferred();
@@ -366,8 +366,7 @@ pmModuleTemplates.updateItem = function(item_id)
         $.notify("Invalid value in filed name", "error");
         return;
     }
-    
-    debugger;
+     
     return $.ajax({
         url: "/api/v1/templates/"+item_id+"/",
         type: "PATCH",

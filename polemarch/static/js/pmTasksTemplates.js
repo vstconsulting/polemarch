@@ -1,5 +1,4 @@
 
-var pmModuleTemplates = Object.create(pmTemplates);
 
 var pmTasksTemplates = new pmItems()
 pmTasksTemplates.model.name = "templates"  

@@ -27,7 +27,34 @@ pmPeriodicTasks.selectInventory = function(inventory_id)
     return def.promise()
 }
 
+pmPeriodicTasks.deleteItem = function(item_id, force)
+{
+    if(!force && !confirm("Are you sure?"))
+    {
+        return;
+    }
+    
+    var def = new $.Deferred();
+    var thisObj = this;
+    $.when(this.loadItem(item_id)).done(function()
+    {
+        var project_id = pmPeriodicTasks.model.items[item_id].project;
+        $.when(thisObj.deleteItemQuery(item_id)).done(function(data)
+        {
+            def.resolve()
+            spajs.open({ menuId: "project/"+project_id+"/periodic-tasks"})
+        }).fail(function(e){
+            def.reject();
+            polemarch.showErrors(e.responseJSON)
+        })
+    }).fail(function(e){
+        def.reject();
+        polemarch.showErrors(e.responseJSON)
+    })
 
+    return def.promise();
+}
+    
 pmPeriodicTasks.execute = function(project_id, item_id)
 {
     var def = new $.Deferred();

@@ -1310,7 +1310,7 @@ function qunitAddTests_templates_modules(){
         var done = assert.async();
 
         // Открытие пункта меню new-project
-        $.when(spajs.open({ menuId:"template/new-task"})).done(function()
+        $.when(spajs.open({ menuId:"template/new-module"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню new-project');
             render(done)
@@ -1333,7 +1333,7 @@ function qunitAddTests_templates_modules(){
         $("#Templates-name").val("test-template-"+t); 
         
         // Отправка формы с данными project
-        $.when(pmTasksTemplates.addItem()).done(function()
+        $.when(pmModuleTemplates.addItem()).done(function()
         {
             assert.ok(true, 'Успешно template add Item');
             render(done)
@@ -1344,13 +1344,13 @@ function qunitAddTests_templates_modules(){
         })
     });
 
-    syncQUnit.addTest('Изменение шаблона', function ( assert )
+    syncQUnit.addTest('Изменение шаблона модуля', function ( assert )
     {
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования project
         // с адресом http://192.168.0.12:8080/?group-5
-        var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
+        var itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
 
         $("#module-autocomplete").val("test2-playbook-"+t);
 
@@ -1359,7 +1359,7 @@ function qunitAddTests_templates_modules(){
         jsonEditor.jsonEditorAddVar();
 
 
-        $.when(pmTasksTemplates.updateItem(itemId)).done(function()
+        $.when(pmModuleTemplates.updateItem(itemId)).done(function()
         {
             assert.ok(true, 'Успешно update add Item');
             render(done)
@@ -1375,10 +1375,10 @@ function qunitAddTests_templates_modules(){
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования project
         // с адресом http://192.168.0.12:8080/?project-5
-        var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
+        var itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
 
         // Удаление project.
-        $.when(pmTasksTemplates.deleteItem(itemId, true)).done(function()
+        $.when(pmModuleTemplates.deleteItem(itemId, true)).done(function()
         {
             assert.ok(true, 'Успешно delete Item');
             render(done)
