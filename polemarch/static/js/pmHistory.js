@@ -423,6 +423,13 @@ pmHistory.stopUpdates = function()
     this.model.loadNewLines_timeoutId = undefined;
 }
 
+/**
+ * Подсветка синтаксиса
+ * @link https://habrahabr.ru/post/43030/
+ * 
+ * @param {String} code
+ * @returns {String}
+ */
 pmHistory.Syntax = function(code)
 {
 	var comments	= [];	// Тут собираем все каменты

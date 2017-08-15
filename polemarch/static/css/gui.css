@@ -512,7 +512,7 @@ table{
 @media (min-width: 992px) {
     .h1-header{
         display: inline-table;
-        max-width: calc(100% - 360px);
+        max-width: calc(100% - 440px);
     }
 }
  

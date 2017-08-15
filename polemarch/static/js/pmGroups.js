@@ -1,9 +1,69 @@
 
 var pmGroups = new pmItems()
 pmGroups.model.name = "groups"
+pmGroups.model.page_name = "group"
 jsonEditor.options[pmGroups.model.name] = jsonEditor.options['item'];
  
+pmGroups.copyItem = function(item_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
 
+    $.when(this.loadItem(item_id)).done(function()
+    {
+        var data = thisObj.model.items[item_id];
+        delete data.id;
+        data.name = "copy from " + data.name
+        $.ajax({
+            url: "/api/v1/"+thisObj.model.name+"/",
+            type: "POST",
+            contentType:'application/json',
+            data: JSON.stringify(data),
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            },
+            success: function(newItem)
+            {
+                thisObj.model.items[newItem.id] = newItem
+                
+                if(data.children)
+                {
+                    var groups = []
+                    for(var i in data.groups)
+                    {
+                        groups.push(data.groups[i].id)
+                    } 
+                    $.when(thisObj.setSubGroups(newItem.id, groups)).always(function(){
+                        def.resolve(newItem.id)
+                    })
+                }
+                else
+                {
+                    var hosts = []
+                    for(var i in data.hosts)
+                    {
+                        hosts.push(data.hosts[i].id)
+                    } 
+
+                    $.when(thisObj.setSubHosts(newItem.id, hosts)).always(function(){
+                        def.resolve(newItem.id)
+                    }) 
+                }
+            },
+            error:function(e)
+            {
+                def.reject(e)
+            }
+        });
+    })
+
+    return def.promise();
+} 
+
+  
 /**
  * @param {string} parent_type 
  * @param {integer} parent_item 
@@ -165,8 +225,7 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
                     pmGroups.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
                 }
             }
-            //console.log("group update", data);
-            $.notify("Save", "success");
+            //console.log("group update", data); 
         },
         error:function(e)
         {
@@ -207,8 +266,7 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
                     pmGroups.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
                 }
             }
-            //console.log("group update", data);
-            $.notify("Save", "success");
+            //console.log("group update", data); 
         },
         error:function(e)
         {

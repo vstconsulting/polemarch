@@ -2,7 +2,44 @@
 var pmUsers = new pmItems()  
  
 pmUsers.model.name = "users"
+pmUsers.model.page_name = "user"
   
+pmUsers.copyItem = function(item_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+
+    $.when(this.loadItem(item_id)).done(function()
+    {
+        var data = thisObj.model.items[item_id];
+        delete data.id;
+        data.username = "copy-from-" + data.username
+        $.ajax({
+            url: "/api/v1/"+thisObj.model.name+"/",
+            type: "POST",
+            contentType:'application/json',
+            data: JSON.stringify(data),
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            },
+            success: function(data)
+            {
+                thisObj.model.items[data.id] = data
+                def.resolve(data.id)
+            },
+            error:function(e)
+            {
+                def.reject(e)
+            }
+        });
+    })
+
+    return def.promise();
+} 
+
 /** 
  * @return $.Deferred
  */

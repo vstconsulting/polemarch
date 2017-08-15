@@ -1,13 +1,13 @@
 
 
-var pmTasksTemplates = new pmItems()
+var pmTasksTemplates =  Object.create(pmTemplates);
 pmTasksTemplates.model.name = "templates"  
+pmTasksTemplates.model.page_name = "template"
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmTasksTemplates.model.kind = "Task"
 pmTemplates.model.kindObjects[pmTasksTemplates.model.kind] = pmTasksTemplates
-  
-  
+   
 pmTasksTemplates.showWidget = function(holder, kind)
 {
     var thisObj = this;

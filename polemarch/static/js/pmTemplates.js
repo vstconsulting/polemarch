@@ -6,6 +6,28 @@ pmTemplates.model.name = "templates"
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmTemplates.model.kind = "Task,Module"
 
+pmTemplates.copyAndEdit = function(item_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    return $.when(this.copyItem(item_id)).done(function(newItemId)
+    {
+        $.when(spajs.open({ menuId:thisObj.model.page_name + "/"+thisObj.model.items[item_id].kind+"/"+newItemId})).done(function(){
+            $.notify("Item was duplicate", "success");
+            def.resolve()
+        }).fail(function(e){
+            $.notify("Error in duplicate item", "error");
+            polemarch.showErrors(e)
+            def.reject()
+        })
+    }).fail(function(){
+        def.reject()
+    })
+
+    return def.promise();
+}
+    
+    
 // Содержит соответсвия разных kind к объектами с ними работающими.
 pmTemplates.model.kindObjects = {}
 

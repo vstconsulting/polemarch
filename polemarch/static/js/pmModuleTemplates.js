@@ -2,6 +2,7 @@
 var pmModuleTemplates = Object.create(pmTemplates);
 
 pmModuleTemplates.model.name = "templates"
+pmModuleTemplates.model.page_name = "template"
 pmModuleTemplates.model.selectedInventory = 0
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
