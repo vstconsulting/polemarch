@@ -17,6 +17,8 @@ from configparser import ConfigParser, NoSectionError
 
 from . import __file__ as file
 
+APACHE = False if ("webserver" in sys.argv) or ("runserver" in sys.argv) else True
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(file)))
 PY_VER = sys.version_info[0]
@@ -207,7 +209,8 @@ STATICFILES_FINDERS = (
   'django.contrib.staticfiles.finders.FileSystemFinder',
   'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+if APACHE:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Documentation files
 # http://django-docs.readthedocs.io/en/latest/#docs-access-optional
@@ -328,7 +331,6 @@ REPO_BACKENDS = {
     }
 }
 
-APACHE = False if ("webserver" in sys.argv) or ("runserver" in sys.argv) else True
 
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
