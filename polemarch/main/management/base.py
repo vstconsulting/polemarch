@@ -7,6 +7,7 @@ from django.core.management.base import (BaseCommand,
                                          CommandError as CommandErrorBase)
 from django.conf import settings
 import django
+import celery
 
 from ... import __version__
 from ..utils import exception_with_traceback
@@ -42,9 +43,8 @@ class ServiceCommand(BaseCommand):
         self.LOG_LEVEL = LOG_LEVEL.upper()
 
     def get_version(self):
-        return u'IHService {c}, Django {d.__version__}'.format(
-            c=__version__, d=django,
-        )
+        vstr = u'Polemarch {c}, Django {d.__version__}, Celery {r.__version__}'
+        return vstr.format(c=__version__, d=django, r=celery)
 
     def _print(self, info=""):
         self.stdout.write(str(info))  # pragma: no cover
