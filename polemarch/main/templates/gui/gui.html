@@ -144,7 +144,7 @@
         <button type="button" onclick="spajs.open({ menuId:'template/new-module'});  return false;" class="btn btn-primary" >Create module template</button>
           
         <span class="btn btn-default textfile"style="margin-left: 10px;" >
-            <input type="file" class="input-file"  onchange="spajs.showLoader(pmTemplates.importFromFile(event));"  >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmItems.importFromFile(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import template
         </span>
                         
@@ -226,7 +226,7 @@
                                 </li>
                                 <li role="separator" class="divider"></li>
                                 <li>
-                                    <a href="#" onclick="pmTasksTemplates.exportToFile(); return false;" >Export all selected templates</a>
+                                    <a href="#" onclick="pmTasksTemplates.exportSelecedToFile(); return false;" >Export all selected templates</a>
                                 </li>
                             </ul>
                         </div>
@@ -2581,8 +2581,13 @@
 
     <section class="content">
         <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Create inventory</a>
+        <span class="btn btn-default textfile"style="margin-left: 10px;" >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmItems.importFromFile(event));"  >
+            <span class="glyphicon glyphicon-file"></span> Import from file
+        </span>
         <br>
         <br>
+              
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -2673,6 +2678,10 @@
                                 </li> 
                                 <li>
                                     <a href="#" onclick="pmInventories.deleteSelected(); return false;" >Delete all selected elements</a>
+                                </li>
+                                <li role="separator" class="divider"></li>
+                                <li>
+                                    <a href="#" onclick="pmInventories.exportSelecedToFile(); return false;" >Export all selected inventories</a>
                                 </li>
                             </ul>
                         </div>

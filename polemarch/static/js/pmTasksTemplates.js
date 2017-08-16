@@ -283,17 +283,3 @@ pmTasksTemplates.updateItem = function(item_id)
         }
     });
 }
-
-pmTasksTemplates.exportToFile = function(){
-    
-    var item_ids = []
-    for(var i in this.model.selectedItems)
-    {
-        if(this.model.selectedItems[i])
-        {
-            item_ids.push(i)
-        }
-    }
-    
-    return pmTemplates.exportToFile(item_ids)
-}
