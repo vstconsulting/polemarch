@@ -1,5 +1,5 @@
 
-var pmProjects = new pmItems()
+var pmProjects = inheritance(pmItems)
 pmProjects.model.name = "projects"
 jsonEditor.options[pmProjects.model.name] = jsonEditor.options['item'];
 

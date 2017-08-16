@@ -1,5 +1,5 @@
  
-var pmInventories = new pmItems()  
+var pmInventories = inheritance(pmItems)
 pmInventories.model.name = "inventories"
 pmInventories.model.page_name = "inventory"
 jsonEditor.options[pmInventories.model.name] = jsonEditor.options['item'];

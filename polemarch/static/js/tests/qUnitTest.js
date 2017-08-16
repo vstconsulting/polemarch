@@ -218,13 +218,14 @@ function qunitAddTests_users()
         })
     });
 
+    var userId = undefined
     syncQUnit.addTest('Изменение пользователя', function ( assert )
     {
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
         // с адресом http://192.168.0.12:8080/?user-5
-        var userId = /user\/([0-9]+)/.exec(window.location.href)[1]
+        userId = /user\/([0-9]+)/.exec(window.location.href)[1]
 
         $("#user_"+userId+"_username").val("test2-user-"+t);
         $("#user_"+userId+"_password").val("test2-user-"+t);
@@ -242,7 +243,21 @@ function qunitAddTests_users()
         })
     });
 
-    syncQUnit.addTest('Удаление пользователя', function ( assert )
+    syncQUnit.addTest('Копирование пользователя', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(pmUsers.copyAndEdit(userId)).done(function()
+        {
+            assert.ok(true, 'Успешно copyAndEdit add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при copyAndEdit add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление копии пользователя', function ( assert )
     {
         var done = assert.async();
 
@@ -250,6 +265,21 @@ function qunitAddTests_users()
         // с адресом http://192.168.0.12:8080/?user-5
         var userId = /user\/([0-9]+)/.exec(window.location.href)[1]
 
+        // Удаление пользователя.
+        $.when(pmUsers.deleteItem(userId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete add Item');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Удаление пользователя', function ( assert )
+    {
+        var done = assert.async();
+ 
         // Удаление пользователя.
         $.when(pmUsers.deleteItem(userId, true)).done(function()
         {
@@ -347,13 +377,14 @@ function qunitAddTests_hosts()
         })
     });
 
+    var itemId = undefined    
     syncQUnit.addTest('Изменение хоста', function ( assert )
     {
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования хоста
         // с адресом http://192.168.0.12:8080/?host-5
-        var itemId = /host\/([0-9]+)/.exec(window.location.href)[1]
+        itemId = /host\/([0-9]+)/.exec(window.location.href)[1]
 
         $("#host_"+itemId+"_name").val("test2-hosts-"+t);
 
@@ -372,14 +403,43 @@ function qunitAddTests_hosts()
         })
     });
 
-    syncQUnit.addTest('Удаление хоста', function ( assert )
+    syncQUnit.addTest('Копирование хоста', function ( assert )
     {
         var done = assert.async();
 
-        // Предполагается что мы от прошлого теста попали на страницу редактирования хоста
-        // с адресом http://192.168.0.12:8080/?host-5
+        $.when(pmHosts.copyAndEdit(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно copyAndEdit add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при copyAndEdit add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление копии хоста', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?user-5
         var itemId = /host\/([0-9]+)/.exec(window.location.href)[1]
 
+        // Удаление пользователя.
+        $.when(pmHosts.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete add Item');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Удаление хоста', function ( assert )
+    {
+        var done = assert.async();
+ 
         // Удаление хоста.
         $.when(pmHosts.deleteItem(itemId, true)).done(function()
         {
@@ -598,14 +658,47 @@ function qunitAddTests_groups()
         })
     })
 
-    syncQUnit.addTest('Удаление группы', function ( assert )
+    var itemId = undefined
+    syncQUnit.addTest('Копирование группы', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+
+        var done = assert.async(); 
+        $.when(pmGroups.copyAndEdit(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно copyAndEdit add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при copyAndEdit add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление копии группы', function ( assert )
     {
         var done = assert.async();
 
-        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
-        // с адресом http://192.168.0.12:8080/?group-5
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?user-5
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
 
+        // Удаление пользователя.
+        $.when(pmGroups.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete add Item');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Удаление группы', function ( assert )
+    {
+        var done = assert.async();
+ 
         // Удаление группы.
         $.when(pmGroups.deleteItem(itemId, true)).done(function()
         {
@@ -741,14 +834,47 @@ function qunitAddTests_inventories()
         })
     })
 
-    syncQUnit.addTest('Удаление inventory', function ( assert )
+    var itemId = undefined
+    syncQUnit.addTest('Копирование группы', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+
+        var done = assert.async(); 
+        $.when(pmInventories.copyAndEdit(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно copyAndEdit add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при copyAndEdit add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление копии группы', function ( assert )
     {
         var done = assert.async();
 
-        // Предполагается что мы от прошлого теста попали на страницу редактирования inventory
-        // с адресом http://192.168.0.12:8080/?inventory-5
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?user-5
         var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
 
+        // Удаление пользователя.
+        $.when(pmInventories.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete add Item');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Удаление inventory', function ( assert )
+    {
+        var done = assert.async();
+ 
         // Удаление inventory.
         $.when(pmInventories.deleteItem(itemId, true)).done(function()
         {
@@ -1134,13 +1260,47 @@ function qunitAddTests_projects()
         })
     });
 
+    var taskId = undefined
+    syncQUnit.addTest('Копирование Periodic Task', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
+
+        var done = assert.async(); 
+        $.when(pmPeriodicTasks.copyAndEdit(taskId)).done(function()
+        {
+            assert.ok(true, 'Успешно copyAndEdit add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при copyAndEdit add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление копии Periodic Task', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?user-5
+        var taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
+
+        // Удаление пользователя.
+        $.when(pmPeriodicTasks.deleteItem(taskId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete add Item');
+            render(done)
+        })
+    });
+    
     syncQUnit.addTest('Удаление periodic task', function ( assert )
     { 
         var done = assert.async();
- 
-        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        var taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
-
+  
         // Удаление project.
         $.when(pmPeriodicTasks.deleteItem(taskId, true)).done(function()
         {
@@ -1268,14 +1428,47 @@ function qunitAddTests_templates_task(){
         })
     });
 
-    syncQUnit.addTest('Удаление шаблона', function ( assert )
+    var itemId = undefined
+    syncQUnit.addTest('Копирование template Task', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
+
+        var done = assert.async(); 
+        $.when(pmTasksTemplates.copyAndEdit(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно copyAndEdit add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при copyAndEdit add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление копии template Task', function ( assert )
     {
         var done = assert.async();
 
-        // Предполагается что мы от прошлого теста попали на страницу редактирования project
-        // с адресом http://192.168.0.12:8080/?project-5
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?user-5
         var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
 
+        // Удаление пользователя.
+        $.when(pmTasksTemplates.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete add Item');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Удаление шаблона', function ( assert )
+    {
+        var done = assert.async();
+ 
         // Удаление project.
         $.when(pmTasksTemplates.deleteItem(itemId, true)).done(function()
         {
@@ -1369,14 +1562,47 @@ function qunitAddTests_templates_modules(){
         })
     });
 
-    syncQUnit.addTest('Удаление шаблона', function ( assert )
+    var itemId = undefined
+    syncQUnit.addTest('Копирование template Module', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
+
+        var done = assert.async(); 
+        $.when(pmModuleTemplates.copyAndEdit(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно copyAndEdit add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при copyAndEdit add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление копии template Module', function ( assert )
     {
         var done = assert.async();
 
-        // Предполагается что мы от прошлого теста попали на страницу редактирования project
-        // с адресом http://192.168.0.12:8080/?project-5
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?user-5
         var itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
 
+        // Удаление пользователя.
+        $.when(pmModuleTemplates.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete add Item');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при delete add Item');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Удаление шаблона', function ( assert )
+    {
+        var done = assert.async();
+ 
         // Удаление project.
         $.when(pmModuleTemplates.deleteItem(itemId, true)).done(function()
         {

@@ -1,17 +1,25 @@
 
+function inheritance(obj)
+{
+    var item = jQuery.extend(true, {}, obj)
+    return item
+}
+
 function pmItems()
 {
-    this.pageSize = 20;
-    this.model = {};
-    this.model.selectedItems = {};
+    
+}
+    pmItems.pageSize = 20;
+    pmItems.model = {};
+    pmItems.model.selectedItems = {};
 
-    this.model.itemslist = []
-    this.model.items = {}
-    this.model.name = "based"
-    this.model.page_name = "based"
-    this.model.selectedCount = 0;
+    pmItems.model.itemslist = []
+    pmItems.model.items = {}
+    pmItems.model.name = "based"
+    pmItems.model.page_name = "based"
+    pmItems.model.selectedCount = 0;
 
-    this.toggleSelect = function(item_id, mode)
+    pmItems.toggleSelect = function(item_id, mode)
     {
         if(!item_id)
         {
@@ -50,7 +58,7 @@ function pmItems()
         return this.model.selectedItems[item_id];
     }
 
-    this.toggleSelectEachItem = function(mode)
+    pmItems.toggleSelectEachItem = function(mode)
     {
         var thisObj = this;
         return $.when(this.loadAllItems()).done(function()
@@ -77,7 +85,7 @@ function pmItems()
         }).promise()
     }
 
-    this.toggleSelectAll = function(elements, mode)
+    pmItems.toggleSelectAll = function(elements, mode)
     {
         for(var i=0; i< elements.length; i++)
         {
@@ -85,7 +93,7 @@ function pmItems()
         }
     }
 
-    this.validateHostName = function(name)
+    pmItems.validateHostName = function(name)
     {
         if(!name)
         {
@@ -116,7 +124,7 @@ function pmItems()
         return false;
     }
 
-    this.validateRangeName = function(name)
+    pmItems.validateRangeName = function(name)
     {
         if(!name)
         {
@@ -127,7 +135,7 @@ function pmItems()
     }
 
 
-    this.showList = function(holder, menuInfo, data)
+    pmItems.showList = function(holder, menuInfo, data)
     {
         var thisObj = this;
         var offset = 0
@@ -146,7 +154,7 @@ function pmItems()
         })
     }
 
-    this.search = function(query)
+    pmItems.search = function(query)
     {
         if(!query || !trim(query))
         {
@@ -156,7 +164,7 @@ function pmItems()
         return spajs.open({ menuId:this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
     }
 
-    this.showSearchResults = function(holder, menuInfo, data)
+    pmItems.showSearchResults = function(holder, menuInfo, data)
     {
         var thisObj = this;
         return $.when(this.searchItems(decodeURIComponent(data.reg[1]))).done(function()
@@ -168,7 +176,7 @@ function pmItems()
         })
     }
 
-    this.copyItem = function(item_id)
+    pmItems.copyItem = function(item_id)
     {
         var def = new $.Deferred();
         var thisObj = this;
@@ -199,12 +207,14 @@ function pmItems()
                     def.reject(e)
                 }
             });
+        }).fail(function(){ 
+            def.reject(e)
         })
 
         return def.promise();
     } 
     
-    this.copyAndEdit = function(item_id)
+    pmItems.copyAndEdit = function(item_id)
     {
         var def = new $.Deferred();
         var thisObj = this;
@@ -225,7 +235,7 @@ function pmItems()
         return def.promise();
     }
 
-    this.showItem = function(holder, menuInfo, data)
+    pmItems.showItem = function(holder, menuInfo, data)
     {
         var thisObj = this;
         //console.log(menuInfo, data)
@@ -239,7 +249,7 @@ function pmItems()
         })
     }
 
-    this.showNewItemPage = function(holder, menuInfo, data)
+    pmItems.showNewItemPage = function(holder, menuInfo, data)
     {
         var def = new $.Deferred();
         $(holder).html(spajs.just.render(this.model.name+'_new_page', {parent_item:data.reg[2], parent_type:data.reg[1]}))
@@ -248,7 +258,7 @@ function pmItems()
         return def.promise();
     }
 
-    this.loadAllItems = function()
+    pmItems.loadAllItems = function()
     {
         return this.loadItems(999999);
     }
@@ -256,7 +266,7 @@ function pmItems()
      * Обновляет поле модел this.model.itemslist и ложит туда список пользователей
      * Обновляет поле модел this.model.items и ложит туда список инфу о пользователях по их id
      */
-    this.loadItems = function(limit, offset)
+    pmItems.loadItems = function(limit, offset)
     {
         if(!limit)
         {
@@ -303,7 +313,7 @@ function pmItems()
         });
     }
 
-    this.sendSearchQuery = function(query, limit, offset)
+    pmItems.sendSearchQuery = function(query, limit, offset)
     {
         if(!limit)
         {
@@ -355,7 +365,7 @@ function pmItems()
         });
     }
 
-    this.searchItems = function(query, attrName, limit, offset)
+    pmItems.searchItems = function(query, attrName, limit, offset)
     {
         if(!attrName)
         {
@@ -370,7 +380,7 @@ function pmItems()
     /**
      * Обновляет поле модел this.model.items[item_id] и ложит туда пользователя
      */
-    this.loadItem = function(item_id)
+    pmItems.loadItem = function(item_id)
     {
         var thisObj = this;
         return jQuery.ajax({
@@ -400,7 +410,7 @@ function pmItems()
     /**
      * @return $.Deferred
      */
-    this.deleteItem = function(item_id, force)
+    pmItems.deleteItem = function(item_id, force)
     {
         if(!force && !confirm("Are you sure?"))
         {
@@ -415,7 +425,7 @@ function pmItems()
         }).promise()
     }
 
-    this.multiOperationsOnEachRow = function(elements, operation)
+    pmItems.multiOperationsOnEachRow = function(elements, operation)
     {
         var def = new $.Deferred();
         var item_ids = []
@@ -431,14 +441,14 @@ function pmItems()
         return def.promise();
     }
 
-    this.deleteRows = function(elements)
+    pmItems.deleteRows = function(elements)
     {
         $.when(this.multiOperationsOnEachRow(elements, 'deleteItemQuery')).always(function(){
             spajs.openURL(window.location.href);
         })
     }
 
-    this.deleteSelected = function()
+    pmItems.deleteSelected = function()
     {
         var item_ids = []
         for(var i in this.model.selectedItems)
@@ -454,7 +464,7 @@ function pmItems()
         }).promise();
     }
 
-    this.multiOperationsOnItems = function(operation, item_ids, force, def)
+    pmItems.multiOperationsOnItems = function(operation, item_ids, force, def)
     {
         if(!force && !confirm("Are you sure?"))
         {
@@ -484,7 +494,7 @@ function pmItems()
     /**
      * @return $.Deferred
      */
-    this.deleteItemQuery = function(item_id)
+    pmItems.deleteItemQuery = function(item_id)
     {
         $(".item-"+item_id).hide();
         this.toggleSelect(item_id, false);
@@ -510,7 +520,7 @@ function pmItems()
         });
     }
 
-    this.updateList = function(menuInfo, data, searchFunction)
+    pmItems.updateList = function(menuInfo, data, searchFunction)
     {
         var thisObj = this;
         $.when(searchFunction(menuInfo, data)).always(function()
@@ -525,7 +535,7 @@ function pmItems()
         })
     }
 
-    this.stopUpdates = function()
+    pmItems.stopUpdates = function()
     {
         clearTimeout(this.model.updateTimeoutId)
         this.model.updateTimeoutId = undefined;
@@ -540,7 +550,7 @@ function pmItems()
      * @param {function} searchFunction функция поиска новых данных
      * @returns {$.Deferred}
      */
-    this.showUpdatedList = function(holder, menuInfo, data, functionName, searchFunction)
+    pmItems.showUpdatedList = function(holder, menuInfo, data, functionName, searchFunction)
     {
         var thisObj = this;
         if(functionName == undefined)
@@ -575,7 +585,7 @@ function pmItems()
     // pagination
     ////////////////////////////////////////////////
 
-    this.paginationHtml = function(list)
+    pmItems.paginationHtml = function(list)
     {
         var totalPage = list.count / list.limit
         if(totalPage > Math.floor(totalPage))
@@ -595,12 +605,12 @@ function pmItems()
             url:url})
     }
 
-    this.getTotalPages = function(list)
+    pmItems.getTotalPages = function(list)
     {
         var totalPage = list.count / list.limit
         return  totalPage
     }
-}
+
 
 
 /**

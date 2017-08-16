@@ -1,5 +1,5 @@
 
-var pmHosts = new pmItems()
+var pmHosts = inheritance(pmItems)
 
 pmHosts.model.name = "hosts"
 pmHosts.model.page_name = "host"

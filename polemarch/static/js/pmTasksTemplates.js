@@ -1,6 +1,8 @@
 
 
-var pmTasksTemplates =  Object.create(pmTemplates);
+var pmTasksTemplates = inheritance(pmTemplates) 
+
+
 pmTasksTemplates.model.name = "templates"  
 pmTasksTemplates.model.page_name = "template"
 

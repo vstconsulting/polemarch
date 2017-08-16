@@ -1,5 +1,5 @@
 
-var pmPeriodicTasks = new pmItems()
+var pmPeriodicTasks = inheritance(pmItems)
 
 pmPeriodicTasks.model.page_name = "periodic-task"
 pmPeriodicTasks.model.name = "periodic-tasks"  

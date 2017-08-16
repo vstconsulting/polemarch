@@ -1,5 +1,5 @@
  
-var pmUsers = new pmItems()  
+var pmUsers = inheritance(pmItems)  
  
 pmUsers.model.name = "users"
 pmUsers.model.page_name = "user"

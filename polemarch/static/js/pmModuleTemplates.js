@@ -1,5 +1,5 @@
 
-var pmModuleTemplates = Object.create(pmTemplates);
+var pmModuleTemplates =  inheritance(pmTemplates)  
 
 pmModuleTemplates.model.name = "templates"
 pmModuleTemplates.model.page_name = "template"

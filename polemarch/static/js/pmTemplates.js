@@ -1,5 +1,6 @@
 
-var pmTemplates = new pmItems()
+var pmTemplates = inheritance(pmItems)
+ 
 pmTemplates.model.name = "templates"
 
 

@@ -1,5 +1,5 @@
 
-var pmHistory = new pmItems()
+var pmHistory = inheritance(pmItems)
 
 pmHistory.model.name = "history"
 pmHistory.model.linePerPage = 130;
