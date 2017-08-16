@@ -7,7 +7,7 @@ Before adding a new issue check the tracker for similar issues.
 Description of features.
 
 #### How do you imagine it?
-Describe how should change the application functionality after the introduction of this feature.
+Describe the changes in functionality after adding this feature
 
 #### Why do you think that this feature should be implemented in the application?
-Describe briefly what this feature can help users?
+Describe shortly how this feature will be useful for users
