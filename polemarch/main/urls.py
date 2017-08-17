@@ -25,5 +25,7 @@ urlpatterns = [
 ]
 
 urlpatterns += api_urls
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+if getattr(settings, "APACHE", False):
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)
 urlpatterns += [url(r'^{}'.format(doc_url), include('docs.urls'))]
