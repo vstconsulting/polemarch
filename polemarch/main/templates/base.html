@@ -103,7 +103,8 @@
         <script src="{% static 'js/pmPeriodicTasks.js' %}"></script>
         <script src="{% static 'js/pmHistory.js' %}"></script>
         <script src="{% static 'js/pmTemplates.js' %}"></script>
-        <script src="{% static 'js/pmTasksTemplates.js' %}"></script> 
+        <script src="{% static 'js/pmTasksTemplates.js' %}"></script>
+        <script src="{% static 'js/pmModuleTemplates.js' %}"></script> 
         <script src="{% static 'js/pmAnsibleModule.js' %}"></script>
         <script src="{% static 'js/pmDashboard.js' %}"></script> 
   
@@ -188,7 +189,7 @@
                     <div class="pull-right hidden-xs">
                         <b><a href="#" 
                               style="color:#ccc;" 
-                              onclick="$('body').append('<script src=\'' + window.pmStaticPath + 'js/tests/qUnitTest.js\'></script>')" >Test qUnit</a></b>
+                              onclick="$('body').append('<script src=\'' + window.pmStaticPath + 'js/tests/qUnitTest.js\'></script>'); return false;" >Test qUnit</a></b>
                         &nbsp;&nbsp;&nbsp;
                     </div>
                 {% endif %}

@@ -13,7 +13,7 @@ var pmAnsibleModule = {
  
 jsonEditor.options[pmAnsibleModule.model.name] = jsonEditor.options['item'];
   
-pmModuleTemplates.selectInventory = function(inventory_id)
+pmAnsibleModule.selectInventory = function(inventory_id)
 {
     var def = new $.Deferred();
     var thisObj = this;

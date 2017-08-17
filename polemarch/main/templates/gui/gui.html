@@ -144,7 +144,7 @@
         <button type="button" onclick="spajs.open({ menuId:'template/new-module'});  return false;" class="btn btn-primary" >Create module template</button>
           
         <span class="btn btn-default textfile"style="margin-left: 10px;" >
-            <input type="file" class="input-file"  onchange="spajs.showLoader(pmTemplates.importFromFile(event));"  >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmItems.importFromFile(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import template
         </span>
                         
@@ -226,7 +226,7 @@
                                 </li>
                                 <li role="separator" class="divider"></li>
                                 <li>
-                                    <a href="#" onclick="pmTasksTemplates.exportToFile(); return false;" >Export all selected templates</a>
+                                    <a href="#" onclick="pmTasksTemplates.exportSelecedToFile(); return false;" >Export all selected templates</a>
                                 </li>
                             </ul>
                         </div>
@@ -277,6 +277,7 @@
         <button type="button" onclick="spajs.showLoader(pmModuleTemplates.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save</button>
         <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), $('#group-autocomplete').val(), $('#module-autocomplete').val(), $('#module-args-string').val(), jsonEditor.jsonEditorGetValues())); return false;"
                class="btn btn-warning" >Execute</button>
+        <button type="button" onclick="spajs.showLoader(pmModuleTemplates.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy template" ><span class="glyphicon glyphicon-duplicate" ></span></button>
 
         <button type="button" onclick="spajs.showLoader(pmModuleTemplates.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove</button>
         <br>
@@ -549,7 +550,9 @@
         <button type="button" onclick="spajs.showLoader(pmTasksTemplates.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save</button>
         <button type="button" onclick="spajs.showLoader(pmTasks.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), $('#playbook-autocomplete').val(), jsonEditor.jsonEditorGetValues())); return false;"
                class="btn btn-warning" >Execute</button>
-
+        
+        <button type="button" onclick="spajs.showLoader(pmTasksTemplates.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy template" ><span class="glyphicon glyphicon-duplicate" ></span></button>
+        
         <button type="button" onclick="spajs.showLoader(pmTasksTemplates.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove</button>
         <br>
         <br>
@@ -1513,7 +1516,7 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <span class="h1-header" ><%- pmPeriodicTasks.model.items[item_id].mode %></span>
+            <span class="h1-header" ><%- pmPeriodicTasks.model.items[item_id].name %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -1528,6 +1531,7 @@
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save task</button>
         <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.execute(<%- project_id %>, <%- item_id %>)); return false;" class="btn btn-warning" >Execute now</button>
+        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy template" ><span class="glyphicon glyphicon-duplicate" ></span></button>
 
         <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove task</button>
         <br>
@@ -2201,16 +2205,25 @@
                                 <div class="form-group col-lg-2">
                                     <label class="control-label" >Repository URL</label>
                                     <input type="text"  placeholder="Enter project repository"  id="project_<%- pmProjects.model.items[item_id].id %>_repository" value="<%- pmProjects.model.items[item_id].repository %>"  class="form-control" maxlength="255">
-                                    <div class="help-block" onmouseenter="$(this).children().popover();">
-                                        Enter project repository url
-                                        <span class="glyphicon glyphicon-question-sign"
+                                    <div class="help-block" onmouseenter="$(this).children().popover();"> 
+                                        Enter <%= pmProjects.model.justText('repository_type') %> project repository url
+                                        <span class="glyphicon glyphicon-question-sign  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v != 'GIT' }) %>"
+                                            role="button"
+                                            data-trigger="hover"
+                                            title=""
+                                            data-placement="top"
+                                            data-html="true"
+                                            data-content="For example repository URL make be like this: `http://UserName@gitlab.com/UserName/ProjectRepository.git`"
+                                            data-original-title="GIT project repository URL"></span>
+
+                                        <span class="glyphicon glyphicon-question-sign  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v != 'TAR' }) %>"
                                                 role="button"
                                                 data-trigger="hover"
                                                 title=""
                                                 data-placement="top"
                                                 data-html="true"
-                                                data-content="For example repository URL make be like this: `http://UserName@gitlab.com/UserName/ProjectRepository.git`"
-                                                data-original-title="Project repository URL"></span>
+                                                data-content="For example repository URL make be like this: `http://example.com/ProjectRepository.tar`"
+                                                data-original-title="TAR project repository URL"></span>
 
                                     </div>
                                 </div>
@@ -2358,16 +2371,24 @@
                                 <input type="text"  placeholder="Enter project repository"  id="new_project_repository" value=""  class="form-control" maxlength="255">
                                 
                                 <div class="help-block" onmouseenter="$(this).children().popover();">
-                                    Enter project repository url
-                                    <span class="glyphicon glyphicon-question-sign"
+                                    Enter <%= pmProjects.model.justText('repository_type') %> project repository url
+                                    <span class="glyphicon glyphicon-question-sign  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v != 'GIT' }) %>"
                                             role="button"
                                             data-trigger="hover"
                                             title=""
                                             data-placement="top"
                                             data-html="true"
                                             data-content="For example repository URL make be like this: `http://UserName@gitlab.com/UserName/ProjectRepository.git`"
-                                            data-original-title="Project repository URL"></span>
+                                            data-original-title="GIT project repository URL"></span>
 
+                                    <span class="glyphicon glyphicon-question-sign  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v != 'TAR' }) %>"
+                                            role="button"
+                                            data-trigger="hover"
+                                            title=""
+                                            data-placement="top"
+                                            data-html="true"
+                                            data-content="For example repository URL make be like this: `http://example.com/ProjectRepository.tar`"
+                                            data-original-title="TAR project repository URL"></span>
                                 </div>
                             </div>
                             
@@ -2560,8 +2581,13 @@
 
     <section class="content">
         <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Create inventory</a>
+        <span class="btn btn-default textfile"style="margin-left: 10px;" >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmItems.importFromFile(event));"  >
+            <span class="glyphicon glyphicon-file"></span> Import from file
+        </span>
         <br>
         <br>
+              
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -2652,6 +2678,10 @@
                                 </li> 
                                 <li>
                                     <a href="#" onclick="pmInventories.deleteSelected(); return false;" >Delete all selected elements</a>
+                                </li>
+                                <li role="separator" class="divider"></li>
+                                <li>
+                                    <a href="#" onclick="pmInventories.exportSelecedToFile(); return false;" >Export all selected inventories</a>
                                 </li>
                             </ul>
                         </div>
@@ -2814,6 +2844,7 @@
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmInventories.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save inventory</button>
         <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/history'}); return false; return false;" class="btn btn-primary" >History</button>
+        <button type="button" onclick="spajs.showLoader(pmInventories.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy inventory" ><span class="glyphicon glyphicon-duplicate" ></span></button>
         <button type="button" onclick="spajs.showLoader(pmInventories.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove inventory</button>
         <br>
         <br>
@@ -3196,6 +3227,7 @@
 
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmUsers.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save user</button>
+        <button type="button" onclick="spajs.showLoader(pmUsers.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy user" ><span class="glyphicon glyphicon-duplicate" ></span></button>
         <button type="button" onclick="spajs.showLoader(pmUsers.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove user</button>
         <br>
         <br>
@@ -3536,6 +3568,7 @@
 
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmHosts.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save host</button>
+        <button type="button" onclick="spajs.showLoader(pmHosts.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy host" ><span class="glyphicon glyphicon-duplicate" ></span></button>
         <button type="button" onclick="spajs.showLoader(pmHosts.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove host</button>
         <br>
         <br>
@@ -4239,6 +4272,7 @@
 
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmGroups.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save group</button>
+        <button type="button" onclick="spajs.showLoader(pmGroups.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy group" ><span class="glyphicon glyphicon-duplicate" ></span></button>
         <button type="button" onclick="spajs.showLoader(pmGroups.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove group</button>
         <br>
         <br>

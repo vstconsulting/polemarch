@@ -1,8 +1,61 @@
  
-var pmInventories = new pmItems()  
+var pmInventories = inheritance(pmItems)
 pmInventories.model.name = "inventories"
+pmInventories.model.page_name = "inventory"
 jsonEditor.options[pmInventories.model.name] = jsonEditor.options['item'];
  
+pmInventories.copyItem = function(item_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+
+    $.when(this.loadItem(item_id)).done(function()
+    {
+        var data = thisObj.model.items[item_id];
+        delete data.id;
+        data.name = "copy from " + data.name
+        $.ajax({
+            url: "/api/v1/"+thisObj.model.name+"/",
+            type: "POST",
+            contentType:'application/json',
+            data: JSON.stringify(data),
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            },
+            success: function(newItem)
+            {
+                thisObj.model.items[newItem.id] = newItem
+                 
+                    var groups = []
+                    for(var i in data.groups)
+                    {
+                        groups.push(data.groups[i].id)
+                    }
+                    
+                    var hosts = []
+                    for(var i in data.hosts)
+                    {
+                        hosts.push(data.hosts[i].id)
+                    } 
+
+                    $.when(thisObj.setSubGroups(newItem.id, groups), thisObj.setSubHosts(newItem.id, hosts)).always(function(){
+                        def.resolve(newItem.id)
+                    })
+            },
+            error:function(e)
+            {
+                def.reject(e)
+            }
+        });
+    })
+
+    return def.promise();
+} 
+
+  
 /** 
  * @return $.Deferred
  */
@@ -21,6 +74,7 @@ pmInventories.addItem = function(parent_type, parent_item)
         return def.promise();
     }
  
+    var thisObj = this;
     $.ajax({
         url: "/api/v1/inventories/",
         type: "POST",
@@ -49,7 +103,7 @@ pmInventories.addItem = function(parent_type, parent_item)
             }
             else
             { 
-                $.when(spajs.open({ menuId:"inventory/"+data.id})).always(function(){
+                $.when(spajs.open({ menuId: thisObj.model.page_name + "/"+data.id})).always(function(){
                     def.resolve()
                 })
             }
@@ -208,8 +262,7 @@ pmInventories.setSubGroups = function(item_id, groups_ids)
                 {
                     pmInventories.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
                 }
-            } 
-            $.notify("Save", "success");
+            }  
         },
         error:function(e)
         {
@@ -249,8 +302,7 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
                 {
                     pmInventories.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
                 }
-            } 
-            $.notify("Save", "success");
+            }  
         },
         error:function(e)
         {

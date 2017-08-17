@@ -689,14 +689,15 @@ if(!window.spajs)
         //console.log("openMenu", menuId, menuInfo)
         if(!menuInfo || !menuInfo.onOpen)
         {
-            console.error("URL не зарегистрирован", opt.menuId, opt)
+            console.error("URL not registered", opt.menuId, opt)
             def.reject()
+            throw "URL not registered " + opt.menuId;
             return def.promise();
         }
 
         if(spajs.currentOpenMenu && menuInfo.id == spajs.currentOpenMenu.id && !opt.reopen)
         {
-            console.warn("Повторное открытие меню", menuInfo)
+            console.warn("Re-opening the menu", menuInfo)
             def.reject()
             return def.promise();
         }

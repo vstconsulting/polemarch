@@ -1,14 +1,15 @@
 
-var pmModuleTemplates = Object.create(pmTemplates);
 
-var pmTasksTemplates = new pmItems()
+var pmTasksTemplates = inheritance(pmTemplates) 
+
+
 pmTasksTemplates.model.name = "templates"  
+pmTasksTemplates.model.page_name = "template"
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmTasksTemplates.model.kind = "Task"
 pmTemplates.model.kindObjects[pmTasksTemplates.model.kind] = pmTasksTemplates
-  
-  
+   
 pmTasksTemplates.showWidget = function(holder, kind)
 {
     var thisObj = this;
@@ -281,18 +282,4 @@ pmTasksTemplates.updateItem = function(item_id)
             polemarch.showErrors(e.responseJSON)
         }
     });
-}
-
-pmTasksTemplates.exportToFile = function(){
-    
-    var item_ids = []
-    for(var i in this.model.selectedItems)
-    {
-        if(this.model.selectedItems[i])
-        {
-            item_ids.push(i)
-        }
-    }
-    
-    return pmTemplates.exportToFile(item_ids)
 }

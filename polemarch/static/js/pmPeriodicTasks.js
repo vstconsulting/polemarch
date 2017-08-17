@@ -1,8 +1,72 @@
 
-var pmPeriodicTasks = new pmItems()
+var pmPeriodicTasks = inheritance(pmItems)
 
+pmPeriodicTasks.model.page_name = "periodic-task"
 pmPeriodicTasks.model.name = "periodic-tasks"  
 pmPeriodicTasks.model.selectedInventory = 0;
+
+pmPeriodicTasks.copyAndEdit = function(item_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    return $.when(this.copyItem(item_id)).done(function(newItemId)
+    {
+        $.when(spajs.open({ menuId:"project/"+thisObj.model.items[item_id].project+"/"+thisObj.model.page_name + "/"+newItemId})).done(function(){
+            $.notify("Item was duplicate", "success");
+            def.resolve()
+        }).fail(function(e){
+            $.notify("Error in duplicate item", "error");
+            polemarch.showErrors(e)
+            def.reject()
+        })
+    }).fail(function(){
+        def.reject()
+    })
+
+    return def.promise();
+}
+   
+pmPeriodicTasks.copyItem = function(item_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+
+    $.when(this.loadItem(item_id)).done(function()
+    {
+        var data = thisObj.model.items[item_id];
+        delete data.id;
+        data.name = "copy from " + data.name
+        data.vars.group = data.group
+        data.vars.args = data.args
+        
+        delete data.group;
+        delete data.args;
+        
+        $.ajax({
+            url: "/api/v1/"+thisObj.model.name+"/",
+            type: "POST",
+            contentType:'application/json',
+            data: JSON.stringify(data),
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            },
+            success: function(data)
+            {
+                thisObj.model.items[data.id] = data
+                def.resolve(data.id)
+            },
+            error:function(e)
+            {
+                def.reject(e)
+            }
+        });
+    })
+
+    return def.promise();
+} 
 
 
 pmPeriodicTasks.selectInventory = function(inventory_id)
@@ -27,7 +91,34 @@ pmPeriodicTasks.selectInventory = function(inventory_id)
     return def.promise()
 }
 
+pmPeriodicTasks.deleteItem = function(item_id, force)
+{
+    if(!force && !confirm("Are you sure?"))
+    {
+        return;
+    }
+    
+    var def = new $.Deferred();
+    var thisObj = this;
+    $.when(this.loadItem(item_id)).done(function()
+    {
+        var project_id = pmPeriodicTasks.model.items[item_id].project;
+        $.when(thisObj.deleteItemQuery(item_id)).done(function(data)
+        {
+            def.resolve()
+            spajs.open({ menuId: "project/"+project_id+"/periodic-tasks"})
+        }).fail(function(e){
+            def.reject();
+            polemarch.showErrors(e.responseJSON)
+        })
+    }).fail(function(e){
+        def.reject();
+        polemarch.showErrors(e.responseJSON)
+    })
 
+    return def.promise();
+}
+    
 pmPeriodicTasks.execute = function(project_id, item_id)
 {
     var def = new $.Deferred();
