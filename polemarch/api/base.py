@@ -109,7 +109,7 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
     def permissions(self, request, pk=None):
         # pylint: disable=unused-argument
         serializer = self.get_serializer(self.get_object())
-        return serializer.permissions(request)
+        return serializer.permissions(request).resp
 
     @list_route(methods=["post"])
     def filter(self, request):

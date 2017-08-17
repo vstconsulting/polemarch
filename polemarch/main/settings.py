@@ -17,6 +17,8 @@ from configparser import ConfigParser, NoSectionError
 
 from . import __file__ as file
 
+APACHE = False if ("runserver" in sys.argv) else True
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(file)))
 PY_VER = sys.version_info[0]
@@ -33,7 +35,15 @@ config.read([CONFIG_FILE, os.path.join(BASE_DIR, 'main/settings.ini')])
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# To set key create file named `secret` near setting.ini file
+# or set in POLEMARCH_SECRET_FILE env.
+SECRET_FILE = os.getenv("POLEMARCH_SETTINGS_FILE", "/etc/polemarch/secret")
 SECRET_KEY = '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
+try:
+    with open(SECRET_FILE, "r") as secret_file:
+        SECRET_KEY = secret_file.read()
+except IOError:
+    pass
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config.getboolean("main", "debug", fallback=False)
@@ -207,7 +217,8 @@ STATICFILES_FINDERS = (
   'django.contrib.staticfiles.finders.FileSystemFinder',
   'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+if APACHE:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Documentation files
 # http://django-docs.readthedocs.io/en/latest/#docs-access-optional
@@ -328,7 +339,6 @@ REPO_BACKENDS = {
     }
 }
 
-APACHE = False if ("webserver" in sys.argv) or ("runserver" in sys.argv) else True
 
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True

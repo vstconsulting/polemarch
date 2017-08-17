@@ -64,15 +64,18 @@ class HostViewSet(base.ModelViewSetSet):
 class _GroupedViewSet(object):
     # pylint: disable=no-member
 
+    def _get_result(self, request, operation):
+        return operation(request.method, request.data).resp
+
     @detail_route(methods=["post", "put", "delete", "get"])
     def hosts(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
-        return serializer.hosts_operations(request)
+        return self._get_result(request, serializer.hosts_operations)
 
     @detail_route(methods=["post", "put", "delete", "get"])
     def groups(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
-        return serializer.groups_operations(request)
+        return self._get_result(request, serializer.groups_operations)
 
 
 class GroupViewSet(base.ModelViewSetSet, _GroupedViewSet):
@@ -102,19 +105,21 @@ class ProjectViewSet(base.ModelViewSetSet, _GroupedViewSet):
     @detail_route(methods=["post", "put", "delete", "get"])
     def inventories(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
-        return serializer.inventories_operations(request)
+        return self._get_result(request, serializer.inventories_operations)
 
     @detail_route(methods=["post"])
     def sync(self, request, *args, **kwargs):
-        return self.get_serializer(self.get_object()).sync()
+        return self.get_serializer(self.get_object()).sync().resp
 
     @detail_route(methods=["post"], url_path="execute-playbook")
     def execute_playbook(self, request, *args, **kwargs):
-        return self.get_serializer(self.get_object()).execute_playbook(request)
+        serializer = self.get_serializer(self.get_object())
+        return serializer.execute_playbook(request).resp
 
     @detail_route(methods=["post"], url_path="execute-module")
     def execute_module(self, request, *args, **kwargs):
-        return self.get_serializer(self.get_object()).execute_module(request)
+        serializer = self.get_serializer(self.get_object())
+        return serializer.execute_module(request).resp
 
 
 class TaskViewSet(base.ReadOnlyModelViewSet):
@@ -179,7 +184,8 @@ class BulkViewSet(rest_views.APIView):
     _op_types = {
         "add": "perform_create",
         "set": "perform_update",
-        "del": "perform_delete"
+        "del": "perform_delete",
+        "mod": "perform_modify"
     }
     _allowed_types = [
         'host', 'group', 'inventory', 'project', 'periodictask', 'template'
@@ -218,6 +224,11 @@ class BulkViewSet(rest_views.APIView):
         instance = self.get_object(item, pk)
         instance.delete()
         return base.Response("Ok", 200).resp_dict
+
+    def perform_modify(self, item, pk, data, method, data_type):
+        serializer = self.get_serializer(self.get_object(item, pk), item=item)
+        operation = getattr(serializer, "{}_operations".format(data_type))
+        return operation(method, data).resp_dict
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
