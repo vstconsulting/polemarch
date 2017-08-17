@@ -39,8 +39,11 @@ config.read([CONFIG_FILE, os.path.join(BASE_DIR, 'main/settings.ini')])
 # or set in POLEMARCH_SECRET_FILE env.
 SECRET_FILE = os.getenv("POLEMARCH_SETTINGS_FILE", "/etc/polemarch/secret")
 SECRET_KEY = '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
-with open(SECRET_FILE, "r") as secret_file:
-    SECRET_KEY = secret_file.read()
+try:
+    with open(SECRET_FILE, "r") as secret_file:
+        SECRET_KEY = secret_file.read()
+except IOError:
+    pass
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config.getboolean("main", "debug", fallback=False)
