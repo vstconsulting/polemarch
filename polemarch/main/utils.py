@@ -150,10 +150,12 @@ class tmp_file(object):
     Temporary file with name
     generated and auto removed on close.
     '''
-    def __init__(self, mode="w", bufsize=0, **kwargs):
+    def __init__(self, data="", mode="w", bufsize=0, **kwargs):
         '''
         tmp_file constructor
 
+        :param data: -- string to write in tmp file.
+        :type data: str
         :param mode: -- file open mode. Default 'w'.
         :type mode: str
         :param bufsize: -- bufer size for tempfile.NamedTemporaryFile
@@ -164,6 +166,8 @@ class tmp_file(object):
         kwargs.update(kw)
         fd = tempfile.NamedTemporaryFile(mode, **kwargs)
         self.fd = fd
+        if data:
+            self.write(data)
 
     def write(self, wr_string):
         '''

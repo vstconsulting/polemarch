@@ -211,15 +211,3 @@ Section ``[web]``.
 
 Here placed settings related to web-server. It is settings like: allowed hosts,
 static files directory or pagination limit.
-
-.. _worker:
-
-Worker settings
----------------
-
-Section ``[worker]``.
-
-Section for worker-related settings. Now here just one - directory to store
-files, which must be accessible by all workers. It have meaning only if you
-have cluster - more than one workers. In such case you must use some kind of
-network filesystem to share data between workers. Like NFS, Samba or something.
