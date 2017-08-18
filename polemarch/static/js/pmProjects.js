@@ -45,7 +45,7 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
     var project_id = data.reg[1]
     $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:project_id, query:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:project_id, query:project_id}))
 
         $("#inventories-autocomplete").select2();
 
@@ -224,7 +224,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
     return $.when(pmInventories.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
-        $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
+        $(".content").appendTpl(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
     }).fail(function(){
 
@@ -239,7 +239,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
     return $.when(pmInventories.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
-        $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
+        $(".content").appendTpl(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
     }).fail(function(){
 
@@ -254,7 +254,7 @@ pmProjects.showAddSubGroupsForm = function(item_id, holder)
 {
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
-        $(".content").append(spajs.just.render('add_existing_groups_to_project', {item_id:item_id}))
+        $(".content").appendTpl(spajs.just.render('add_existing_groups_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
     }).fail(function(){
 
@@ -269,7 +269,7 @@ pmProjects.showAddSubHostsForm = function(item_id, holder)
 {
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
-        $(".content").append(spajs.just.render('add_existing_hosts_to_project', {item_id:item_id}))
+        $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
     }).fail(function(){
 

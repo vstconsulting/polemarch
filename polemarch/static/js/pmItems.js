@@ -148,7 +148,7 @@ pmItems.showList = function(holder, menuInfo, data)
 
     return $.when(this.loadItems(limit, offset)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:""}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:""}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -170,7 +170,7 @@ pmItems.showSearchResults = function(holder, menuInfo, data)
     var thisObj = this;
     return $.when(this.searchItems(decodeURIComponent(data.reg[1]))).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -243,7 +243,7 @@ pmItems.showItem = function(holder, menuInfo, data)
 
     return $.when(this.loadItem(data.reg[1])).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:data.reg[1], project_id:0}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:data.reg[1], project_id:0}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -253,7 +253,10 @@ pmItems.showItem = function(holder, menuInfo, data)
 pmItems.showNewItemPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
-    $(holder).html(spajs.just.render(this.model.name+'_new_page', {parent_item:data.reg[2], parent_type:data.reg[1]}))
+    
+    var text = spajs.just.render(this.model.name+'_new_page', {parent_item:data.reg[2], parent_type:data.reg[1]})
+    console.log(text)
+    $(holder).insertTpl(text)
 
     def.resolve()
     return def.promise();

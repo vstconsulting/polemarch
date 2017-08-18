@@ -34,7 +34,7 @@ pmHistory.showSearchResults = function(holder, menuInfo, data)
     var thisObj = this;
     return $.when(this.sendSearchQuery({mode:decodeURIComponent(data.reg[1])})).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -74,7 +74,7 @@ pmHistory.showListInProjects = function(holder, menuInfo, data)
 
     return $.when(this.sendSearchQuery({project:project_id}, limit, offset), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_listInProjects', {query:"", project_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:"", project_id:project_id}))
         thisObj.model.selectedCount = $('.multiple-select .selected').length;
     }).fail(function()
     {
@@ -95,7 +95,7 @@ pmHistory.showListInInventory = function(holder, menuInfo, data)
 
     return $.when(this.sendSearchQuery({inventory:inventory_id}, limit, offset), pmInventories.loadItem(inventory_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id})) 
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id})) 
     }).fail(function()
     {
         $.notify("", "error");
@@ -108,7 +108,7 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
     var project_id = data.reg[1];
     return $.when(this.sendSearchQuery({mode: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -124,7 +124,7 @@ pmHistory.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[1];
     return $.when(this.loadItem(item_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
     {
@@ -140,7 +140,7 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
     var item_id = data.reg[2];
     return $.when(this.loadItem(item_id), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
     {

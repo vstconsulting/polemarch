@@ -159,7 +159,7 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
     {
         $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).done(function()
         {
-            $(holder).html(spajs.just.render(thisObj.model.name+'_module_page', {item_id:item_id}))
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_module_page', {item_id:item_id}))
 
             $("#inventories-autocomplete").select2();
             $("#projects-autocomplete").select2();
@@ -216,7 +216,7 @@ pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
     var thisObj = this;
     $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_new_module_page', {}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_module_page', {}))
 
         $("#inventories-autocomplete").select2();
         $("#projects-autocomplete").select2();

@@ -39,7 +39,7 @@ pmTemplates.showSearchResults = function(holder, menuInfo, data)
 
     return $.when(this.sendSearchQuery({kind:thisObj.model.kind, name:query})).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:query}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:query}))
     }).fail(function()
     {
         $.notify("", "error");
