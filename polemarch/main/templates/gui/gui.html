@@ -144,7 +144,7 @@
         <button type="button" onclick="spajs.open({ menuId:'template/new-module'});  return false;" class="btn btn-primary" >Create module template</button>
           
         <span class="btn btn-default textfile"style="margin-left: 10px;" >
-            <input type="file" class="input-file"  onchange="spajs.showLoader(pmItems.importFromFile(event));"  >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmTasksTemplates.importFromFile(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import template
         </span>
                         
@@ -2582,7 +2582,7 @@
     <section class="content">
         <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Create inventory</a>
         <span class="btn btn-default textfile"style="margin-left: 10px;" >
-            <input type="file" class="input-file"  onchange="spajs.showLoader(pmItems.importFromFile(event));"  >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.importFromFile(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import from file
         </span>
         <br>
@@ -2679,10 +2679,10 @@
                                 <li>
                                     <a href="#" onclick="pmInventories.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
-                                <li role="separator" class="divider"></li>
+                                <!--<li role="separator" class="divider"></li>
                                 <li>
                                     <a href="#" onclick="pmInventories.exportSelecedToFile(); return false;" >Export all selected inventories</a>
-                                </li>
+                                </li>-->
                             </ul>
                         </div>
                         

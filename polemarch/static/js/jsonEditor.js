@@ -192,7 +192,7 @@ jsonEditor.options['tasks']['force-handlers'] = {
 }
 
 jsonEditor.options['tasks']['forks'] = {
-    type:'textarea',
+    type:'text',
     help:'-f FORKS, --forks=FORKS',
     helpcontent:"specify number of parallel processes to use (default=5)",
     alias:'f'

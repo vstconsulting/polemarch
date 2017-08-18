@@ -45,22 +45,142 @@ pmTemplates.showSearchResults = function(holder, menuInfo, data)
         $.notify("", "error");
     })
 }
-
-pmTemplates.showList = function(holder, menuInfo, data)
+ 
+pmTemplates.exportToFile = function(item_ids)
 {
-    var thisObj = this;
-    var offset = 0
-    var limit = this.pageSize;
-    if(data.reg && data.reg[1] > 0)
+    var def = new $.Deferred();
+    if(!item_ids)
     {
-        offset = this.pageSize*(data.reg[1] - 1);
+        $.notify("No data for export", "error");
+        def.reject();
+        return def.promise();
     }
 
-    return $.when(this.sendSearchQuery({kind:thisObj.model.kind}, limit, offset)).done(function()
+    var data = {
+        "filter": {
+            "id__in": item_ids,
+        },
+    }
+
+    var thisObj = this;
+    $.ajax({
+        url: "/api/v1/"+this.model.name+"/filter/?detail=1",
+        type: "POST",
+        contentType:'application/json',
+        data:JSON.stringify(data),
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            var filedata = []
+            for(var i in data.results)
+            {
+                var val = data.results[i]
+                delete val['id'];
+                delete val['url'];
+
+                filedata.push({ 
+                    item: thisObj.model.page_name,
+                    data: val
+                })
+            }
+            
+            var fileInfo = {
+                data:filedata,
+                count:filedata.length,
+                version:"1"
+            }
+            
+            var textFileAsBlob = new Blob([JSON.stringify(fileInfo)], {
+              type: 'text/plain'
+            });
+
+            var newLink = document.createElement('a')
+            newLink.href = window.URL.createObjectURL(textFileAsBlob)
+            newLink.download = thisObj.model.name+"-"+Date()+".json"
+            newLink.target = "_blanl"
+            var event = new MouseEvent("click");
+            newLink.dispatchEvent(event);
+
+
+            def.resolve();
+        },
+        error:function(e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+            def.reject();
+        }
+    });
+
+    return def.promise();
+}
+
+pmTemplates.importFromFile = function(files_event)
+{  
+    var def = new $.Deferred(); 
+    this.model.files = files_event
+    
+    for(var i=0; i<files_event.target.files.length; i++)
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:""}))
-    }).fail(function()
-    {
-        $.notify("", "error");
-    }).promise()
+        var reader = new FileReader();
+        reader.onload = (function(index_in_files_array)
+        {
+            return function(e)
+            {
+                console.log(e)
+                var bulkdata = []
+                var filedata = JSON.parse(e.target.result)
+                
+                if(filedata.version/1 > 1)
+                {
+                    polemarch.showErrors("Error file version is "+filedata.version)
+                    def.reject();
+                    return;
+                }
+                
+                for(var i in filedata.data)
+                {
+                    var val = filedata.data[i]
+                    val.type = "add"
+                    bulkdata.push(val)
+                }
+                console.log(bulkdata)
+                 
+                $.ajax({
+                    url: "/api/v1/_bulk/",
+                    type: "POST",
+                    contentType:'application/json',
+                    data:JSON.stringify(bulkdata),
+                    beforeSend: function(xhr, settings) {
+                        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                            // Only send the token to relative URLs i.e. locally.
+                            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                        }
+                    },
+                    success: function(data)
+                    { 
+                        def.resolve();
+                        spajs.openURL(window.location.href);
+                    },
+                    error:function(e)
+                    {
+                        console.warn(e)
+                        polemarch.showErrors(e)
+                        def.reject();
+                    }
+                });
+            };
+        })(i);
+        reader.readAsText(files_event.target.files[i]); 
+        
+        // Нет поддержки загрузки более одного файла за раз.
+        break;
+    }
+    
+    return def.promise();
 }

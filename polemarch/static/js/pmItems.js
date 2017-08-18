@@ -325,10 +325,19 @@ pmItems.sendSearchQuery = function(query, limit, offset)
     {
         offset = 0;
     }
-
+ 
     var q = [];
     for(var i in query)
     {
+        if(Array.isArray(query[i]))
+        {
+            for(var j in query[i])
+            {
+                query[i][j] = encodeURIComponent(query[i][j])
+            } 
+            q.push(encodeURIComponent(i)+"="+query[i].join(","))
+            continue;
+        } 
         q.push(encodeURIComponent(i)+"="+encodeURIComponent(query[i]))
     }
 
@@ -627,144 +636,6 @@ pmItems.exportSelecedToFile = function(){
     return this.exportToFile(item_ids)
 }
 
-pmItems.exportToFile = function(item_ids)
-{
-    var def = new $.Deferred();
-    if(!item_ids)
-    {
-        $.notify("No data for export", "error");
-        def.reject();
-        return def.promise();
-    }
-
-    var data = {
-        "filter": {
-            "id__in": item_ids,
-        },
-    }
-
-    var thisObj = this;
-    $.ajax({
-        url: "/api/v1/"+this.model.name+"/filter/?detail=1",
-        type: "POST",
-        contentType:'application/json',
-        data:JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
-        {
-            var filedata = []
-            for(var i in data.results)
-            {
-                var val = data.results[i]
-                delete val['id'];
-                delete val['url'];
-
-                filedata.push({ 
-                    item: thisObj.model.page_name,
-                    data: val
-                })
-            }
-            
-            var fileInfo = {
-                data:filedata,
-                count:filedata.length,
-                version:"1"
-            }
-            
-            var textFileAsBlob = new Blob([JSON.stringify(fileInfo)], {
-              type: 'text/plain'
-            });
-
-            var newLink = document.createElement('a')
-            newLink.href = window.URL.createObjectURL(textFileAsBlob)
-            newLink.download = thisObj.model.name+"-"+Date()+".json"
-            newLink.target = "_blanl"
-            var event = new MouseEvent("click");
-            newLink.dispatchEvent(event);
-
-
-            def.resolve();
-        },
-        error:function(e)
-        {
-            console.warn(e)
-            polemarch.showErrors(e)
-            def.reject();
-        }
-    });
-
-    return def.promise();
-}
-
-pmItems.importFromFile = function(files_event)
-{  
-    var def = new $.Deferred(); 
-    this.model.files = files_event
-    
-    for(var i=0; i<files_event.target.files.length; i++)
-    {
-        var reader = new FileReader();
-        reader.onload = (function(index_in_files_array)
-        {
-            return function(e)
-            {
-                console.log(e)
-                var bulkdata = []
-                var filedata = JSON.parse(e.target.result)
-                
-                if(filedata.version/1 > 1)
-                {
-                    polemarch.showErrors("Error file version is "+filedata.version)
-                    def.reject();
-                    return;
-                }
-                
-                for(var i in filedata.data)
-                {
-                    var val = filedata.data[i]
-                    val.type = "add"
-                    bulkdata.push(val)
-                }
-                console.log(bulkdata)
-                 
-                $.ajax({
-                    url: "/api/v1/_bulk/",
-                    type: "POST",
-                    contentType:'application/json',
-                    data:JSON.stringify(bulkdata),
-                    beforeSend: function(xhr, settings) {
-                        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                            // Only send the token to relative URLs i.e. locally.
-                            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                        }
-                    },
-                    success: function(data)
-                    { 
-                        def.resolve();
-                        spajs.openURL(window.location.href);
-                    },
-                    error:function(e)
-                    {
-                        console.warn(e)
-                        polemarch.showErrors(e)
-                        def.reject();
-                    }
-                });
-            };
-        })(i);
-        reader.readAsText(files_event.target.files[i]); 
-        
-        // Нет поддержки загрузки более одного файла за раз.
-        break;
-    }
-    
-    return def.promise();
-}
 
 /**
  * Тестовый тест, чтоб было видно что тесты вообще хоть как то работают.
