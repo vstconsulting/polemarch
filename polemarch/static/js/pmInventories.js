@@ -512,7 +512,7 @@ pmInventories.showAddSubGroupsForm = function(item_id, holder)
 {
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
-        $(".content").append(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
+        $(".content").appendTpl(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
     }).fail(function(){
 
@@ -527,7 +527,7 @@ pmInventories.showAddSubHostsForm = function(item_id, holder)
 {
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
-        $(".content").append(spajs.just.render('add_existing_hosts_to_inventory', {item_id:item_id}))
+        $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_inventory', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
     }).fail(function(){
 

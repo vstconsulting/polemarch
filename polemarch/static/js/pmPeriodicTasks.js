@@ -202,7 +202,7 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
 
     return $.when(this.searchItems(project_id, 'project'), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:"", project_id:project_id}))  
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:"", project_id:project_id}))  
     }).fail(function()
     {
         $.notify("", "error");
@@ -225,7 +225,7 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
     var project_id = data.reg[1];
     return $.when(this.sendSearchQuery({playbook: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -239,7 +239,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
     return $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
         thisObj.model.newitem = {type:'INTERVAL', kind:'PLAYBOOK'}
-        $(holder).html(spajs.just.render(thisObj.model.name+'_new_page', {project_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {project_id:project_id}))
 
         $('#new_periodic-tasks_inventory').select2();
 
@@ -289,7 +289,7 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
 
     return $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
         pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory)
         
         $('#periodic-tasks_'+item_id+'_inventory').select2();

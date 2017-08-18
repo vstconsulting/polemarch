@@ -20,7 +20,8 @@
 (function () {
 	'use strict';
 	var
-		JUST = function (newOptions) {
+		JUST = function (newOptions) 
+                {
 			var
 				options = {
 					open : '<%',
@@ -41,9 +42,10 @@
 				STATE_LOOP = 8,
 				STATE_SUBBLOK = 9,
 				STATE_TEXT = 10,
+				STATE_JS = 11,
 				cache = {},
                                 countUid = 0,
-
+                                
 				regExpEscape = function (str) {
 					return String(str).replace(escapeExp, '\\$1');
 				},
@@ -155,8 +157,9 @@
                                     return html
                                 },
 				parseToCode = function (html) {
-
+ 
                                     html = reactiveReplace(html)
+                                    html = html.replace(/<=js(.*?)js=>/g, JustEvalJsPattern)
                                     // console.log("restpl", html)
 
                                     // <%= Вывод html
@@ -213,7 +216,7 @@
 								prefix = '\',(' + line + ', ';
 								postfix = '),\'';
 								state = STATE_TEXT;
-								break;
+								break; 
 							case '?':
 								prefix = '\');' + line + ';';
 								postfix = 'this.buffer.push(\'';
@@ -245,7 +248,7 @@
 								break;
 							case STATE_TEXT:
 								buffer.push(prefix, 'JustEscapeHtml('+text.substr(jsFromPos).replace(trimExp, '')+')', postfix);
-								break;
+								break; 
 							case STATE_CONDITION:
 								tmp = text.substr(jsFromPos).replace(trimExp, '');
 								if (!tmp.length) {
@@ -358,8 +361,7 @@
 				var  page = new Template(template, customData, undefined);
 				return page.renderSync();
 			};
-
-
+                        
 			Template.prototype.renderSync = function () {
 				var that = this;
  
@@ -580,6 +582,31 @@
 
 		window.JUST = JUST;
 }());
+
+
+function getUUID(s)
+{
+    if(!s)
+    {
+        s = ""
+    }
+    
+    var str = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890";
+    for(var i = 0; i< 24; i++)
+    {
+        s += str[Math.floor(Math.random()*(str.length-1))]
+    }
+    return s
+}
+
+window.JustEvalJsPattern_pageUUID = getUUID("pageUUID");
+
+
+function JustEvalJsPattern(text) 
+{
+    //console.log(text.replace(/^<=|=>$/g, ""))
+    return "<="+window.JustEvalJsPattern_pageUUID+text.replace(/^<=js|js=>$/g, "")+window.JustEvalJsPattern_pageUUID+"=>"
+}
 
 
 function JustEscapeHtml(text) {

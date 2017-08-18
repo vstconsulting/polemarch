@@ -45,7 +45,7 @@ pmAnsibleModule.showInProject = function(holder, menuInfo, data)
     
     return $.when(pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_run_page', {item_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_run_page', {item_id:project_id}))
         
         $("#inventories-autocomplete").select2(); 
 
@@ -62,7 +62,7 @@ pmAnsibleModule.fastCommandWidget = function(holder)
 { 
     return $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render('fastcommand_widget', {}))
+        $(holder).insertTpl(spajs.just.render('fastcommand_widget', {}))
         $("#projects-autocomplete").select2(); 
         $("#inventories-autocomplete").select2(); 
         

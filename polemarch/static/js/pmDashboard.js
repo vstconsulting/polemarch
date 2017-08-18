@@ -110,7 +110,7 @@ pmDashboard.open  = function(holder, menuInfo, data)
 {
     var thisObj = this 
     this.updateData()
-    $(holder).html(spajs.just.render('dashboard_page', {})) 
+    $(holder).insertTpl(spajs.just.render('dashboard_page', {})) 
     
     pmTasksTemplates.showTaskWidget($("#pmTasksTemplates-showTaskWidget"));
     pmTasksTemplates.showModuleWidget($("#pmTasksTemplates-showModuleWidget"));
