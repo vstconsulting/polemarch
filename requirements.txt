@@ -12,11 +12,11 @@ djangorestframework>=3.4, <4.0
 django-filter
 django-crispy-forms
 django-celery-beat==1.0.1
-jsonfield==2.0.1
-mod-wsgi==4.5.14
+jsonfield==2.0.2
+mod-wsgi==4.5.17
 
 # Repo types
-gitpython==2.1.3
+gitpython==2.1.5
 
 # additional DB and cache connectors
 PyMySQL
