@@ -1,10 +1,124 @@
 
-var pmPeriodicTasks = new pmItems()
+var pmPeriodicTasks = inheritance(pmItems)
 
-pmPeriodicTasks.model.name = "periodic-tasks"
+pmPeriodicTasks.model.page_name = "periodic-task"
+pmPeriodicTasks.model.name = "periodic-tasks"  
+pmPeriodicTasks.model.selectedInventory = 0;
+
+pmPeriodicTasks.copyAndEdit = function(item_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    return $.when(this.copyItem(item_id)).done(function(newItemId)
+    {
+        $.when(spajs.open({ menuId:"project/"+thisObj.model.items[item_id].project+"/"+thisObj.model.page_name + "/"+newItemId})).done(function(){
+            $.notify("Item was duplicate", "success");
+            def.resolve()
+        }).fail(function(e){
+            $.notify("Error in duplicate item", "error");
+            polemarch.showErrors(e)
+            def.reject()
+        })
+    }).fail(function(){
+        def.reject()
+    })
+
+    return def.promise();
+}
+   
+pmPeriodicTasks.copyItem = function(item_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+
+    $.when(this.loadItem(item_id)).done(function()
+    {
+        var data = thisObj.model.items[item_id];
+        delete data.id;
+        data.name = "copy from " + data.name
+        data.vars.group = data.group
+        data.vars.args = data.args
+        
+        delete data.group;
+        delete data.args;
+        
+        $.ajax({
+            url: "/api/v1/"+thisObj.model.name+"/",
+            type: "POST",
+            contentType:'application/json',
+            data: JSON.stringify(data),
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            },
+            success: function(data)
+            {
+                thisObj.model.items[data.id] = data
+                def.resolve(data.id)
+            },
+            error:function(e)
+            {
+                def.reject(e)
+            }
+        });
+    })
+
+    return def.promise();
+} 
 
 
+pmPeriodicTasks.selectInventory = function(inventory_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    inventory_id = inventory_id/1
+    if(inventory_id)
+    {
+        $.when(pmInventories.loadItem(inventory_id)).done(function(){
+            thisObj.model.selectedInventory = inventory_id;
+            def.resolve();
+        }).fail(function(){
+            def.reject();
+        });
+    }
+    else
+    {
+        thisObj.model.selectedInventory = 0;
+        def.resolve();
+    }
+    return def.promise()
+}
 
+pmPeriodicTasks.deleteItem = function(item_id, force)
+{
+    if(!force && !confirm("Are you sure?"))
+    {
+        return;
+    }
+    
+    var def = new $.Deferred();
+    var thisObj = this;
+    $.when(this.loadItem(item_id)).done(function()
+    {
+        var project_id = pmPeriodicTasks.model.items[item_id].project;
+        $.when(thisObj.deleteItemQuery(item_id)).done(function(data)
+        {
+            def.resolve()
+            spajs.open({ menuId: "project/"+project_id+"/periodic-tasks"})
+        }).fail(function(e){
+            def.reject();
+            polemarch.showErrors(e.responseJSON)
+        })
+    }).fail(function(e){
+        def.reject();
+        polemarch.showErrors(e.responseJSON)
+    })
+
+    return def.promise();
+}
+    
 pmPeriodicTasks.execute = function(project_id, item_id)
 {
     var def = new $.Deferred();
@@ -23,6 +137,8 @@ pmPeriodicTasks.execute = function(project_id, item_id)
             def.reject();
             return def.promise();
         }
+        data.group = $("#group-autocomplete").val()
+        data.args = $("#module-args-string").val()
     }
     else
     {
@@ -35,7 +151,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
         }
     }
 
-
+    debugger;
     $.ajax({
         url: "/api/v1/projects/"+project_id+"/"+kind+"/",
         type: "POST",
@@ -86,10 +202,7 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
 
     return $.when(this.searchItems(project_id, 'project'), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:"", project_id:project_id}))
-
-        thisObj.model.selectedCount = $('.multiple-select .selected').length;
-
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:"", project_id:project_id}))  
     }).fail(function()
     {
         $.notify("", "error");
@@ -112,7 +225,7 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
     var project_id = data.reg[1];
     return $.when(this.sendSearchQuery({playbook: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -126,7 +239,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
     return $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
         thisObj.model.newitem = {type:'INTERVAL', kind:'PLAYBOOK'}
-        $(holder).html(spajs.just.render(thisObj.model.name+'_new_page', {project_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {project_id:project_id}))
 
         $('#new_periodic-tasks_inventory').select2();
 
@@ -169,14 +282,16 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
 
 pmPeriodicTasks.showItem = function(holder, menuInfo, data)
 {
+    var def = new $.Deferred();
     var thisObj = this;
     var item_id = data.reg[2];
     var project_id = data.reg[1];
 
     return $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
-
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
+        pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory)
+        
         $('#periodic-tasks_'+item_id+'_inventory').select2();
 
         new autoComplete({
@@ -210,10 +325,16 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
                 response(matches);
             }
         });
+        
+        def.resolve();
+        
     }).fail(function()
     {
         $.notify("", "error");
+        def.reject();
     })
+            
+    return def.promise()
 }
 
 
@@ -230,8 +351,23 @@ pmPeriodicTasks.addItem = function(project_id)
 
     data.name = $("#new_periodic-tasks_name").val()
     data.type = $("#new_periodic-tasks_type").val()
-    data.inventory = $("#new_periodic-tasks_inventory").val()
+    data.inventory = $("#new_periodic-tasks_inventory").val() 
 
+    if(!data.name)
+    {
+        $.notify("Invalid filed `name` ", "error");
+        def.reject();
+        return def.promise();
+    }
+    
+    if(!data.inventory)
+    {
+        $.notify("Invalid filed `inventory` ", "error");
+        def.reject();
+        return def.promise();
+    }
+    
+    
     data.kind = $("#new_periodic-tasks_kind").val()
 
     if(data.kind == "MODULE")
@@ -262,11 +398,21 @@ pmPeriodicTasks.addItem = function(project_id)
     else
     {
         data.schedule = $("#new_periodic-tasks_schedule_INTERVAL").val()
+        if(!data.schedule)
+        {
+            $.notify("Invalid filed `Interval schedule` ", "error");
+            def.reject();
+            return def.promise();
+        }
     }
 
     data.vars = jsonEditor.jsonEditorGetValues()
 
-
+    if(data.kind == "MODULE")
+    {
+        data.vars.group = $("#group-autocomplete").val()
+        data.vars.args =  $("#module-args-string").val();
+    }
     $.ajax({
         url: "/api/v1/"+this.model.name+"/",
         type: "POST",
@@ -295,7 +441,48 @@ pmPeriodicTasks.addItem = function(project_id)
     return def.promise();
 }
 
+pmPeriodicTasks.loadItem = function(item_id)
+{
+    var thisObj = this;
+    return jQuery.ajax({
+        url: "/api/v1/"+this.model.name+"/"+item_id+"/",
+        type: "GET",
+        contentType:'application/json',
+        data: "",
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        { 
+            if(data.kind == "MODULE")
+            {
+                if(data && data.vars && data.vars.group !== undefined)
+                {
+                    data.group = data.vars.group
+                    delete data.vars.group
+                }
+
+                if(data && data.vars && data.vars.args !== undefined)
+                {
+                    data.args = data.vars.args
+                    delete data.vars.args
+                }
+            }
+            thisObj.model.items[item_id] = data
+        },
+        error:function(e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+        }
+    });
+}
+
 /**
+ * @param {integer} item_id идентификатор PeriodicTask
  * @return $.Deferred
  */
 pmPeriodicTasks.updateItem = function(item_id)
@@ -308,6 +495,21 @@ pmPeriodicTasks.updateItem = function(item_id)
 
     data.kind = $("#periodic-tasks_"+item_id+"_kind").val()
 
+    if(!data.name)
+    {
+        $.notify("Invalid filed `name` ", "error");
+        def.reject();
+        return;
+    }
+    
+    if(!data.inventory)
+    {
+        $.notify("Invalid filed `inventory` ", "error");
+        def.reject();
+        return;
+    }
+    
+    
     if(data.kind == "MODULE")
     {
         data.mode = $("#periodic-tasks_"+item_id+"_module").val()
@@ -336,10 +538,21 @@ pmPeriodicTasks.updateItem = function(item_id)
     else
     {
         data.schedule = $("#periodic-tasks_"+item_id+"_schedule_INTERVAL").val()
+        if(!data.schedule)
+        {
+            $.notify("Invalid filed `Interval schedule` ", "error");
+            def.reject();
+            return;
+        }
     }
 
     data.vars = jsonEditor.jsonEditorGetValues()
-
+    
+    if(data.kind == "MODULE")
+    {
+        data.vars.group = $("#group-autocomplete").val()
+        data.vars.args =  $("#module-args-string").val();
+    }
     return $.ajax({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "PATCH",

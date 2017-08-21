@@ -689,14 +689,15 @@ if(!window.spajs)
         //console.log("openMenu", menuId, menuInfo)
         if(!menuInfo || !menuInfo.onOpen)
         {
-            console.error("URL не зарегистрирован", opt.menuId, opt)
+            console.error("URL not registered", opt.menuId, opt)
             def.reject()
+            throw "URL not registered " + opt.menuId;
             return def.promise();
         }
 
         if(spajs.currentOpenMenu && menuInfo.id == spajs.currentOpenMenu.id && !opt.reopen)
         {
-            console.warn("Повторное открытие меню", menuInfo)
+            console.warn("Re-opening the menu", menuInfo)
             def.reject()
             return def.promise();
         }
@@ -855,6 +856,7 @@ if(!window.spajs)
         })
     }
 
+    var JustEvalJsPattern_reg_pageUUID = new RegExp("<="+window.JustEvalJsPattern_pageUUID+"(.*?)"+window.JustEvalJsPattern_pageUUID+"=>", "g")
     /**
      * Плагин для вставки шаблона в тело элемента
      * @param {string} tplText
@@ -873,8 +875,7 @@ if(!window.spajs)
         {
             tplText = ""+tplText
         }
-
-        var html = tplText.replace(/<js=(.*?)=js>/g, "")
+        var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
 
         if(window.cordova && 0)
         {
@@ -886,18 +887,17 @@ if(!window.spajs)
             $(this).html(html)
         });
 
-        /*
-        var js = tplText.match(/<js=(.*?)=js>/g)
+        var js = tplText.match(JustEvalJsPattern_reg_pageUUID)
         for(var i in js)
         {
             if(js[i] && js[i].length > 8);
             {
-                var code = js[i].substr(4, js[i].length - 8)
+                var code = js[i].substr(2 +window.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JustEvalJsPattern_pageUUID.length*2))
                 console.log(i, code)
                 eval(code);
             }
         }
-        */
+         
         return this;
     };
 
@@ -913,7 +913,7 @@ if(!window.spajs)
             tplText = ""+tplText
         }
 
-        var html = tplText.replace(/<js=(.*?)=js>/g, "")
+        var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
 
         if(window.cordova && 0)
         {
@@ -952,7 +952,7 @@ if(!window.spajs)
             tplText = ""+tplText
         }
 
-        var html = tplText.replace(/<js=(.*?)=js>/g, "")
+        var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
 
         if(window.cordova && 0)
         {

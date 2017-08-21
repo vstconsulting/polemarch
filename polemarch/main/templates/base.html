@@ -80,8 +80,7 @@
          
         <script src="{% static 'js/libs/autocomplete.js' %}"></script> 
         <script src="{% static 'plugins/select2/select2.min.js' %}"></script> 
-        <script src="{% static 'js/libs/touchwipe.js' %}"></script> 
-        <script src="{% static 'js/libs/shuffle.min.js' %}"></script> 
+        <script src="{% static 'js/libs/touchwipe.js' %}"></script>  
 
         <script src="{% static 'js/libs/tabSignal.js' %}"></script> 
         <script src="{% static 'js/libs/just.js' %}"></script> 
@@ -105,9 +104,9 @@
         <script src="{% static 'js/pmHistory.js' %}"></script>
         <script src="{% static 'js/pmTemplates.js' %}"></script>
         <script src="{% static 'js/pmTasksTemplates.js' %}"></script>
-        <script src="{% static 'js/pmModuleTemplates.js' %}"></script>
+        <script src="{% static 'js/pmModuleTemplates.js' %}"></script> 
         <script src="{% static 'js/pmAnsibleModule.js' %}"></script>
-        <script src="{% static 'js/pmDashboard.js' %}"></script>
+        <script src="{% static 'js/pmDashboard.js' %}"></script> 
   
         {% block custom_style %}
         {% endblock %}
@@ -190,7 +189,7 @@
                     <div class="pull-right hidden-xs">
                         <b><a href="#" 
                               style="color:#ccc;" 
-                              onclick="$('body').append('<script src=\'' + window.pmStaticPath + 'js/tests/qUnitTest.js\'></script>')" >Test qUnit</a></b>
+                              onclick="$('body').append('<script src=\'' + window.pmStaticPath + 'js/tests/qUnitTest.js\'></script>'); return false;" >Test qUnit</a></b>
                         &nbsp;&nbsp;&nbsp;
                     </div>
                 {% endif %}

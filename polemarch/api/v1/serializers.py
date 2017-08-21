@@ -9,9 +9,10 @@ from django.db.models import Q
 
 from rest_framework import serializers
 from rest_framework import exceptions
-from rest_framework.response import Response
+# from rest_framework.response import Response
 
 from ...main import models
+from ..base import Response
 
 
 # NOTE: we can freely remove that because according to real behaviour all our
@@ -161,6 +162,8 @@ class HistorySerializer(serializers.ModelSerializer):
                   "inventory",
                   "start_time",
                   "stop_time",
+                  "initiator",
+                  "initiator_type",
                   "url")
 
 
@@ -178,6 +181,8 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "raw_inventory",
                   "raw_args",
                   "raw_stdout",
+                  "initiator",
+                  "initiator_type",
                   "url")
 
     def get_facts(self, request):
@@ -219,10 +224,10 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
             )
         return list(qs.filter(id__in=objs_id))
 
-    def get_operation(self, request, attr):
+    def get_operation(self, method, data, attr):
         tp = getattr(self.instance, attr)
-        obj_list = self._get_objects(tp.model, request.data)
-        return self._operate(request, attr, obj_list)
+        obj_list = self._get_objects(tp.model, data)
+        return self._operate(method, data, attr, obj_list)
 
     def _response(self, total, found, code=200):
         data = dict(total=len(total))
@@ -241,8 +246,8 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         return instance
 
     @transaction.atomic()
-    def _operate(self, request, attr, obj_list):
-        action = self.operations[request.method]
+    def _operate(self, method, data, attr, obj_list):
+        action = self.operations[method]
         tp = getattr(self.instance, attr)
         if action == "all":
             if attr == "related_objects":
@@ -255,7 +260,7 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
             getattr(tp, "clear")()
             action = "add"
         getattr(tp, action)(*obj_list)
-        return self._response(request.data, obj_list)
+        return self._response(data, obj_list)
 
     def create(self, validated_data):
         return self._do_with_vars("create", validated_data=validated_data)
@@ -268,7 +273,8 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
 
     def permissions(self, request):
         pms = models.TypesPermissions.objects.filter(user__id__in=request.data)
-        return self._operate(request, "related_objects", pms)
+        return self._operate(request.method, request.data,
+                             "related_objects", pms)
 
 
 class HostSerializer(_WithVariablesSerializer):
@@ -360,11 +366,11 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
 
 class _InventoryOperations(_WithVariablesSerializer):
 
-    def hosts_operations(self, request):
-        return self.get_operation(request, attr="hosts")
+    def hosts_operations(self, method, data):
+        return self.get_operation(method, data, attr="hosts")
 
-    def groups_operations(self, request):
-        return self.get_operation(request, attr="groups")
+    def groups_operations(self, method, data):
+        return self.get_operation(method, data, attr="groups")
 
 
 ###################################
@@ -399,15 +405,15 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
     class ValidationException(exceptions.ValidationError):
         status_code = 409
 
-    def hosts_operations(self, request):
+    def hosts_operations(self, method, data):
         if self.instance.children:
             raise self.ValidationException("Group is children.")
-        return super(OneGroupSerializer, self).hosts_operations(request)
+        return super(OneGroupSerializer, self).hosts_operations(method, data)
 
-    def groups_operations(self, request):
+    def groups_operations(self, method, data):
         if not self.instance.children:
             raise self.ValidationException("Group is not children.")
-        return super(OneGroupSerializer, self).groups_operations(request)
+        return super(OneGroupSerializer, self).groups_operations(method, data)
 
 
 class InventorySerializer(_WithVariablesSerializer):
@@ -474,8 +480,8 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'vars',
                   'url',)
 
-    def inventories_operations(self, request):
-        return self.get_operation(request, attr="inventories")
+    def inventories_operations(self, method, data):
+        return self.get_operation(method, data, attr="inventories")
 
     @transaction.atomic()
     def sync(self):
@@ -488,7 +494,9 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         inventory_id = int(data.pop("inventory"))
         target = str(data.pop(kind))
         action = getattr(self.instance, "execute_ansible_{}".format(kind))
-        history_id = action(target, inventory_id, **data)
+        history_id = action(
+            target, inventory_id, initiator=request.user.id, **data
+        )
         rdata = dict(detail="Started at inventory {}.".format(inventory_id),
                      history_id=history_id)
         return Response(rdata, 201)

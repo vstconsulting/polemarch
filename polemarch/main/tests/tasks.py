@@ -264,6 +264,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                         history.start_time <= history.stop_time)
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
+        self.assertEqual(history.initiator_object, self.user)
         History.objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, None), "OFFLINE")
@@ -509,7 +510,8 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         self.default_kwargs = dict(project=self.ph, mode="task.yml",
                                    raw_inventory="inventory",
                                    raw_stdout="text",
-                                   inventory=self.history_inventory)
+                                   inventory=self.history_inventory,
+                                   initiator=self.user.id)
         self.histories = [
             History.objects.create(status="OK",
                                    start_time=now() - timedelta(hours=15),
@@ -541,7 +543,8 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                           start_time=self.histories[0].start_time.strftime(df),
                           stop_time=self.histories[0].stop_time.strftime(df),
                           raw_inventory="inventory", raw_stdout="text",
-                          inventory=self.history_inventory.id)
+                          inventory=self.history_inventory.id,
+                          initiator=self.user.id, initiator_type="users")
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)
@@ -612,13 +615,17 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         history.save()
         url = "/api/v1/history/{}/facts/".format(history.id)
         parsed = self.get_result("get", url)
-        self.assertCount(parsed, 4)
+        self.assertCount(parsed, 6)
         self.assertEquals(parsed['172.16.1.31']['status'], 'SUCCESS')
+        self.assertEquals(parsed['test.vst.lan']['status'], 'SUCCESS')
         self.assertEquals(parsed['172.16.1.29']['status'], 'SUCCESS')
         self.assertEquals(parsed['172.16.1.32']['status'], 'FAILED!')
         self.assertEquals(parsed['172.16.1.30']['status'], 'UNREACHABLE!')
         self.assertEquals(parsed['172.16.1.31']['ansible_facts']
                           ['ansible_memfree_mb'], 736)
+        self.assertCount(
+            parsed['test.vst.lan']['ansible_facts']["ansible_devices"], 2
+        )
         self.assertIn('No route to host',
                       parsed['172.16.1.30']['msg'])
         for status in ['RUN', 'DELAY']:

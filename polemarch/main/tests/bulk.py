@@ -5,6 +5,19 @@ from .. import models
 
 
 class ApiBulkTestCase(_ApiGHBaseTestCase):
+    def abstract_test_bulk_mod(self, objs, types, item):
+        for tp, data in types.items():
+            bulk_data = []
+            for obj in objs:
+                bulk_data += [
+                    {
+                        "type": "mod", "item": item,
+                        'pk': obj.id, "data": data,
+                        "method": "PUT", "data_type": tp
+                    }
+                ]
+            self.get_result("post", "/api/v1/_bulk/", 200,
+                            data=json.dumps(bulk_data))
 
     def abstract_test_bulk(self, single_data, new_single_data, url,
                            item):
@@ -53,6 +66,7 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
 
     def test_bulk_groups(self):
         models.Group.objects.all().delete()
+        models.Host.objects.all().delete()
         data = dict(name="group", children=True)
         new = dict(name="new_group", children=False)
         raised = False
@@ -64,6 +78,15 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
         new.pop("children")
         models.Group.objects.all().delete()
         self.abstract_test_bulk(data, new, "/api/v1/groups/", "group")
+
+        # Bulk add hosts
+        group1 = models.Group.objects.create(name="test1")
+        group2 = models.Group.objects.create(name="test2")
+        hdata = dict(name="host", type="HOST")
+        types = dict(hosts=self.mass_create("/api/v1/hosts/", data=[hdata]))
+        self.abstract_test_bulk_mod([group1, group2], types, "group")
+        self.assertCount(group1.hosts.all(), 1)
+        self.assertCount(group2.hosts.all(), 1)
 
     def test_bulk_inventories(self):
         models.Inventory.objects.all().delete()
@@ -87,6 +110,25 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
             data, new, "/api/v1/periodic-tasks/", "periodictask"
         )
 
+    def test_bulk_templates(self):
+        models.Template.objects.all().delete()
+        data = dict(
+            name="test_tmplt",
+            kind="Task",
+            data=dict(
+                playbook="test.yml",
+                vars=dict(
+                    connection="paramiko",
+                    tags="update",
+                )
+            )
+        )
+        new = dict(**data)
+        new["name"] = "test2_tmplt"
+        self.abstract_test_bulk(
+            data, new, "/api/v1/templates/", "template"
+        )
+
     def test_bulk_unsupported(self):
         data = dict(username="some_user", password="some_password")
         bulk_data = [
@@ -101,6 +143,7 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
         self.assertIn("inventory", result["allowed_types"])
         self.assertIn("project", result["allowed_types"])
         self.assertIn("periodictask", result["allowed_types"])
+        self.assertIn("template", result["allowed_types"])
         self.assertIn("add", result["operations_types"])
         self.assertIn("set", result["operations_types"])
         self.assertIn("del", result["operations_types"])

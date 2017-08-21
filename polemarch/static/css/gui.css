@@ -512,7 +512,7 @@ table{
 @media (min-width: 992px) {
     .h1-header{
         display: inline-table;
-        max-width: calc(100% - 360px);
+        max-width: calc(100% - 440px);
     }
 }
  
@@ -522,4 +522,13 @@ table{
 
 .item-name{
     word-wrap: break-word;
+}
+
+.input-file-holder{
+    
+}
+
+.btn-right{ 
+    float: right;
+    margin-left: 5px;
 }

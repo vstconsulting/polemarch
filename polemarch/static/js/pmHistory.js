@@ -1,5 +1,5 @@
 
-var pmHistory = new pmItems()
+var pmHistory = inheritance(pmItems)
 
 pmHistory.model.name = "history"
 pmHistory.model.linePerPage = 130;
@@ -19,7 +19,7 @@ pmHistory.cancelTask = function(item_id)
         },
         success: function(data)
         {
-            $.notify("Task cenceled!", "warning");
+            $.notify("Task canceled!", "warning");
         },
         error:function(e)
         {
@@ -34,7 +34,7 @@ pmHistory.showSearchResults = function(holder, menuInfo, data)
     var thisObj = this;
     return $.when(this.sendSearchQuery({mode:decodeURIComponent(data.reg[1])})).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -74,7 +74,28 @@ pmHistory.showListInProjects = function(holder, menuInfo, data)
 
     return $.when(this.sendSearchQuery({project:project_id}, limit, offset), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_listInProjects', {query:"", project_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:"", project_id:project_id}))
+        thisObj.model.selectedCount = $('.multiple-select .selected').length;
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showListInInventory = function(holder, menuInfo, data)
+{
+    var thisObj = this;
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[2] > 0)
+    {
+        offset = this.pageSize*(data.reg[2] - 1);
+    }
+    var inventory_id = data.reg[1];
+
+    return $.when(this.sendSearchQuery({inventory:inventory_id}, limit, offset), pmInventories.loadItem(inventory_id)).done(function()
+    {
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id})) 
     }).fail(function()
     {
         $.notify("", "error");
@@ -87,7 +108,7 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
     var project_id = data.reg[1];
     return $.when(this.sendSearchQuery({mode: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -103,7 +124,7 @@ pmHistory.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[1];
     return $.when(this.loadItem(item_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
     {
@@ -119,7 +140,7 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
     var item_id = data.reg[2];
     return $.when(this.loadItem(item_id), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
     {
@@ -130,7 +151,7 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
 pmHistory.bindStdoutUpdates = function(item_id)
 {
     var thisObj = this;
-    $.when(this.loadNewLines(item_id)).always(function()
+    $.when(this.loadNewLines(item_id, 0)).always(function()
     {
         var content = $('#history-stdout')
         content.scroll(function()
@@ -164,7 +185,7 @@ pmHistory.bindStdoutUpdates = function(item_id)
                     {
                         return;
                     }
-                    
+
                     for(var i = stdout_minline-1; i > stdout_minline - thisObj.model.linePerPage; i = i -1)
                     {
                         if(thisObj.model.items[item_id].stdout[i] != undefined)
@@ -207,18 +228,18 @@ pmHistory.loadItem = function(item_id)
         {
             data.test = Math.random();
 
-            
+
             if(!thisObj.model.items[item_id])
             {
                 thisObj.model.items[item_id] = {}
             }
-            
+
             for(var i in data)
             {
                 thisObj.model.items[item_id][i] = data[i]
             }
-            
-            pmHistory.model.items.justWatch(item_id); 
+
+            pmHistory.model.items.justWatch(item_id);
 
             if(data.project && !pmProjects.model.items[data.project])
             {
@@ -295,11 +316,18 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
                 }
             }
 
-            $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
+            if(projects.length > 0)
+            {
+                $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
+                    def.resolve()
+                }).fail(function(){
+                    def.reject()
+                })
+            }
+            else
+            {
                 def.resolve()
-            }).fail(function(){
-                def.reject()
-            })
+            }
         },
         error:function(e)
         {
@@ -362,11 +390,18 @@ pmHistory.loadItems = function(limit, offset)
                 }
             }
 
-            $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
+            if(projects.length)
+            {
+                $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
+                    def.resolve()
+                }).fail(function(){
+                    def.reject()
+                })
+            }
+            else
+            {
                 def.resolve()
-            }).fail(function(){
-                def.reject()
-            })
+            }
         },
         error:function(e)
         {
@@ -388,6 +423,13 @@ pmHistory.stopUpdates = function()
     this.model.loadNewLines_timeoutId = undefined;
 }
 
+/**
+ * Подсветка синтаксиса
+ * @link https://habrahabr.ru/post/43030/
+ * 
+ * @param {String} code
+ * @returns {String}
+ */
 pmHistory.Syntax = function(code)
 {
 	var comments	= [];	// Тут собираем все каменты
@@ -446,10 +488,15 @@ pmHistory.getLine = function(item_id, line_id)
     return spajs.just.render(this.model.name+'_stdout_line', {line:line})
 }
 
-pmHistory.loadNewLines = function(item_id)
+pmHistory.loadNewLines = function(item_id, last_stdout_maxline)
 {
     var thisObj = this;
-    var last_stdout_maxline = this.model.items[item_id].stdout_maxline;
+
+    if(last_stdout_maxline === undefined)
+    {
+        last_stdout_maxline = this.model.items[item_id].stdout_maxline;
+    }
+
     if(!last_stdout_maxline)
     {
         last_stdout_maxline = 0;
@@ -463,7 +510,7 @@ pmHistory.loadNewLines = function(item_id)
         {
             return;
         }
-        
+
         var needScrollDowun = $('#history-stdout').prop('scrollHeight') - $('#history-stdout').scrollTop() -  history_stdout.css('height').replace("px", "")/1 < 100
 
         if(last_stdout_maxline == 0)
@@ -500,7 +547,7 @@ pmHistory.loadNewLines = function(item_id)
         {
             thisObj.loadNewLines_timeoutId = setTimeout(function(){
                 thisObj.loadNewLines(item_id)
-            }, 1000)
+            }, 5001)
         }
     }).promise()
 }

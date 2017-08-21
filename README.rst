@@ -4,7 +4,11 @@ Polemarch
 **Polemarch** is service for orchestration infrastructure by ansible.
 Simply WEB gui for orchestration infrastructure by ansible playbooks.
 
-Official site: https://gitlab.com/vstconsulting/polemarch
+Official site:
+https://gitlab.com/vstconsulting/polemarch
+
+For any questions you could use issues tracker:
+https://gitlab.com/vstconsulting/polemarch/issues
 
 .. image:: https://raw.githubusercontent.com/vstconsulting/polemarch/master/doc/screencast.gif
    :alt: interface of Polemarch

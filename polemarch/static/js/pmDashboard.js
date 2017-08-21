@@ -15,10 +15,15 @@ pmDashboard.model.count = {
     history:'-',
 }
 
-
-pmDashboard.open  = function(holder, menuInfo, data)
+pmDashboard.stopUpdates = function()
 {
-    var thisObj = this
+    clearTimeout(this.model.updateTimeoutId)
+    this.model.updateTimeoutId = undefined;
+}
+
+pmDashboard.updateData = function()
+{
+    var thisObj = this 
     $.when(pmProjects.loadItems(1)).done(function(){
         thisObj.model.count.projects = pmProjects.model.itemslist.count;
     })
@@ -39,66 +44,95 @@ pmDashboard.open  = function(holder, menuInfo, data)
         thisObj.model.count.users = pmUsers.model.itemslist.count;
     })
 
-    $.when(pmHistory.loadItems(1)).done(function(){
-        thisObj.model.count.history = pmHistory.model.itemslist.count;
-    })
-
-    $(holder).html(spajs.just.render('dashboard_page', {}))
-
-
-    $.when(pmHistory.loadItems(100)).done(function()
-    {
-        var history_chart = c3.generate({
-            bindto: '#c3-history-chart',
-            data: {
-                x: 'time',
-                columns: [
-                    ['time']
-                ],
-                //type: 'area-spline',
-                type: 'area',
-            },
-            axis: {
-                x: {
-                    type: 'timeseries',
-                    tick: {
-                        format: '%Y-%m-%d'
-                    }
-                }
-            }
-        });
- 
+    $.when(pmTemplates.loadItems(1)).done(function(){
+        thisObj.model.count.templates = pmTemplates.model.itemslist.count;
+    }) 
+    
+    var startTime = moment().subtract(14, 'days').format("YYYY-MM-DD")+"T00:00:00.000000Z"
+    $.when(pmHistory.sendSearchQuery({start_time__gt:startTime})).done(function()
+    { 
         tasks_data = {} 
-        for(var i in pmHistory.model.items)
+        tasks_data_t = []
+        
+        var time = new Date(startTime)
+        time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24; 
+        for(var i = 0; i< 14; i++)
+        {  
+            tasks_data[time] = 0;
+            tasks_data_t.push(time)
+            time+=(3600*24*1000) 
+        }
+        
+        for(var i = 0; i< pmHistory.model.itemslist.results.length; i++)
         {
-            var val = pmHistory.model.items[i]
+            var val = pmHistory.model.itemslist.results[i]
             var time = new Date(val.start_time)
             time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
             
             if(!tasks_data[time])
             {
                 tasks_data[time] = 1
+                tasks_data_t.push(time)
             }
             else
             {
                 tasks_data[time] += 1
             } 
-        }
+        } 
         
+        //tasks_data_t.sort(function(a, b) {
+        //    return a - b;
+        //});
+
         chart_tasks_start_x = ['time'];
         chart_tasks_data = ['tasks'];
 
-        for(var i in tasks_data)
+        for(var j in tasks_data_t)
         {
-            chart_tasks_start_x.push(i/1);
-            chart_tasks_data.push(tasks_data[i]/1);
+            var time = tasks_data_t[j] 
+            chart_tasks_start_x.push(time/1);
+            chart_tasks_data.push(tasks_data[time]/1); 
         }
         
-        history_chart.load({
+        pmDashboard.model.historyChart.load({
             columns: [
                 chart_tasks_start_x,chart_tasks_data
             ]
         });
     })
+    
+    this.model.updateTimeoutId = setTimeout(function(){
+        pmDashboard.updateData()
+    }, 5001*30)
+}
 
+pmDashboard.open  = function(holder, menuInfo, data)
+{
+    var thisObj = this 
+    this.updateData()
+    $(holder).insertTpl(spajs.just.render('dashboard_page', {})) 
+    
+    pmTasksTemplates.showTaskWidget($("#pmTasksTemplates-showTaskWidget"));
+    pmTasksTemplates.showModuleWidget($("#pmTasksTemplates-showModuleWidget"));
+    pmAnsibleModule.fastCommandWidget($("#pmAnsibleModule-fastCommandWidget"))
+    
+    pmDashboard.model.historyChart = c3.generate({
+        bindto: '#c3-history-chart',
+        data: {
+            x: 'time',
+            columns: [
+                ['time']
+            ],
+            //type: 'area-spline',
+            type: 'area',
+        },
+        axis: {
+            x: {
+                type: 'timeseries',
+                tick: {
+                    format: '%Y-%m-%d'
+                }
+            }
+        }
+    });
 }

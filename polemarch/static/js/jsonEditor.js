@@ -192,7 +192,7 @@ jsonEditor.options['tasks']['force-handlers'] = {
 }
 
 jsonEditor.options['tasks']['forks'] = {
-    type:'textarea',
+    type:'text',
     help:'-f FORKS, --forks=FORKS',
     helpcontent:"specify number of parallel processes to use (default=5)",
     alias:'f'
@@ -206,7 +206,7 @@ jsonEditor.options['tasks']['help'] = {
 }
 
 jsonEditor.options['tasks']['inventory-file'] = {
-    type:'text',
+    type:'error',
     help:'-i INVENTORY, --inventory-file=INVENTORY',
     helpcontent:"specify inventory host path (default=/etc/ansible/hosts) or comma separated host list.",
     alias:'i'
@@ -303,34 +303,34 @@ jsonEditor.options['tasks']['vault-password-file'] = {
     alias:''
 }
 
-/*
 jsonEditor.options['tasks']['verbose'] = {
-    type:'boolean',
+    type:'error',
     help:'-v, --verbose',
     helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
     alias:'v'
 }
 
 jsonEditor.options['tasks']['vv'] = {
-    type:'boolean',
+    type:'error',
     help:'-v, --verbose',
     helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
     alias:'vv'
 }
 
 jsonEditor.options['tasks']['vvv'] = {
-    type:'boolean',
+    type:'error',
     help:'-v, --verbose',
     helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
     alias:'vvv'
 }
 
 jsonEditor.options['tasks']['vvvv'] = {
-    type:'boolean',
+    type:'error',
     help:'-v, --verbose',
     helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
     alias:'vvvv'
-}*/
+}
+/**/
 
 jsonEditor.options['tasks']['version'] = {
     type:'boolean',
@@ -512,7 +512,10 @@ jsonEditor.jsonEditorGetValues = function()
 
         if(type == "boolean")
         {
-            data[index] = $(arr[i]).hasClass('selected')
+            if($(arr[i]).hasClass('selected'))
+            {
+                data[index] = "";
+            }
         }
         else
         {
@@ -545,12 +548,12 @@ jsonEditor.jsonEditorAddVar = function(optionsblock)
         return;
     }
 
-    if(/^--/.test(name))
+    /*if(/^--/.test(name))
     {
         name = name.replace(/^--/, "ansible_")
-    }
+    }*/
 
-    if(/^-[A-z]$/.test(name))
+    if(/^-[A-z0-9]$/.test(name))
     {
         for(var i in jsonEditor.options[optionsblock])
         {
@@ -561,11 +564,62 @@ jsonEditor.jsonEditorAddVar = function(optionsblock)
             }
         }
     }
+    
+    if(jsonEditor.options[optionsblock][name])
+    {
+        var optInfo = jsonEditor.options[optionsblock][name]
+        if(optInfo.type == 'error')
+        {
+            $.notify("Adding this variable will be the mistake", "error");
+            return;
+        }
+    }
 
     $('#new_json_name').val('')
     $('#new_json_value').val('')
 
-    $("#jsonEditorVarList").append(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock}))
+    $("#jsonEditorVarList").appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock}))
+}
+
+jsonEditor.initForm = function(optionsblock)
+{ 
+    new autoComplete({
+        selector: '#new_json_name',
+        minChars: 0,
+        cache:false,
+        showByClick:true,
+        menuClass:'new_json_name',
+        renderItem: function(item, search)
+        {
+            return '<div class="autocomplete-suggestion" data-value="' + item.value + '" >' + item.value + ' - <i style="color:#777">' + item.help + '</i></div>';
+        },
+        onSelect: function(event, term, item)
+        {
+            //console.log('onSelect', term, item);
+            var value = $(item).attr('data-value'); 
+            $("#new_json_name").val(value);
+        },
+        source: function(term, response)
+        {
+            term = term.toLowerCase();
+
+            var matches = []
+            for(var i in jsonEditor.options[optionsblock])
+            {
+                var val = jsonEditor.options[optionsblock][i]
+                if(val.help.toLowerCase().indexOf(term) != -1)
+                {
+                    val.value = i
+                    matches.push(val)
+                }
+            }
+            if(matches.length)
+            {
+                response(matches);
+            }
+        }
+    });
+
 }
 
 jsonEditor.loadFile = function(event, element)

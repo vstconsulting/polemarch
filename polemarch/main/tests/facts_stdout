@@ -22,3 +22,99 @@
     "module_stdout": "/bin/sh: /usr/bin/python: No such file or directory\r\n",
     "msg": "MODULE FAILURE"
 }
+test2.vst.lan | SUCCESS => {
+    "ansible_facts": {
+        "ansible_devices": {
+            "vda": {
+                "holders": [],
+                "host": "SCSI storage controller: Red Hat, Inc Virtio block device",
+                "model": null,
+                "partitions": {
+                    "vda1": {
+                        "holders": [],
+                        "sectors": "20969439",
+                        "sectorsize": 512,
+                        "size": "10.00 GB",
+                        "start": "2048",
+                        "uuid": "66d6d7c7-ea86-4ae0-a1db-053c805a70cd"
+                    }
+                },
+                "removable": "0",
+                "rotational": "1",
+                "sas_address": null,
+                "sas_device_handle": null,
+                "scheduler_mode": "",
+                "sectors": "20971520",
+                "sectorsize": "512",
+                "size": "10.00 GB",
+                "support_discard": "0",
+                "vendor": "0x1af4"
+            },
+            "vdb": {
+                "holders": [],
+                "host": "SCSI storage controller: Red Hat, Inc Virtio block device",
+                "model": null,
+                "partitions": {},
+                "removable": "0",
+                "rotational": "1",
+                "sas_address": null,
+                "sas_device_handle": null,
+                "scheduler_mode": "",
+                "sectors": "131072",
+                "sectorsize": "512",
+                "size": "64.00 MB",
+                "support_discard": "0",
+                "vendor": "0x1af4"
+            }
+        }
+    },
+    "changed": false
+}
+test.vst.lan | SUCCESS => {
+    "ansible_facts": {
+        "ansible_devices": {
+            "vda": {
+                "holders": [],
+                "host": "SCSI storage controller: Red Hat, Inc Virtio block device",
+                "model": null,
+                "partitions": {
+                    "vda1": {
+                        "holders": [],
+                        "sectors": "20962777",
+                        "sectorsize": 512,
+                        "size": "10.00 GB",
+                        "start": "2048",
+                        "uuid": "29342a0b-e20f-4676-9ecf-dfdf02ef6683"
+                    }
+                },
+                "removable": "0",
+                "rotational": "1",
+                "sas_address": null,
+                "sas_device_handle": null,
+                "scheduler_mode": "",
+                "sectors": "20971520",
+                "sectorsize": "512",
+                "size": "10.00 GB",
+                "support_discard": "0",
+                "vendor": "0x1af4"
+            },
+            "vdb": {
+                "holders": [],
+                "host": "SCSI storage controller: Red Hat, Inc Virtio block device",
+                "model": null,
+                "partitions": {},
+                "removable": "0",
+                "rotational": "1",
+                "sas_address": null,
+                "sas_device_handle": null,
+                "scheduler_mode": "",
+                "sectors": "131072",
+                "sectorsize": "512",
+                "size": "64.00 MB",
+                "support_discard": "0",
+                "vendor": "0x1af4"
+            }
+        }
+    },
+    "changed": false
+}

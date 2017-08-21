@@ -11,7 +11,9 @@ import re
 import six
 from celery.schedules import crontab
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
@@ -92,8 +94,8 @@ class PeriodicTask(AbstractModel):
             self.run_ansible_module()
 
     def run_ansible_module(self):
-        self.project.execute_ansible_playbook(self.mode, self.inventory.id,
-                                              sync=True, **self.vars)
+        self.project.execute_ansible_module(self.mode, self.inventory.id,
+                                            sync=True, **self.vars)
 
     def run_ansible_playbook(self):
         self.project.execute_ansible_playbook(self.mode, self.inventory.id,
@@ -115,7 +117,7 @@ class Template(BModel):
     template_fields["PeriodicTask"] = ["type", "name", "schedule", "inventory",
                                        "kind", "mode", "project", "vars"]
     template_fields["Module"] = ["inventory", "module", "group", "args",
-                                 "vars"]
+                                 "vars", "project"]
     template_fields["Host"] = ["name", "vars"]
     template_fields["Group"] = template_fields["Host"] + ["children"]
 
@@ -149,22 +151,25 @@ class HistoryQuerySet(BQuerySet):
 
 
 class History(BModel):
-    objects       = HistoryQuerySet.as_manager()
-    project       = models.ForeignKey(Project,
-                                      on_delete=models.CASCADE,
-                                      related_query_name="history",
-                                      null=True)
-    inventory     = models.ForeignKey(Inventory,
-                                      on_delete=models.CASCADE,
-                                      related_query_name="history",
-                                      blank=True, null=True, default=None)
-    mode          = models.CharField(max_length=256)
-    kind          = models.CharField(max_length=50, default="PLAYBOOK")
-    start_time    = models.DateTimeField(default=timezone.now)
-    stop_time     = models.DateTimeField(blank=True, null=True)
-    raw_args      = models.TextField(default="")
-    raw_inventory = models.TextField(default="")
-    status        = models.CharField(max_length=50)
+    objects        = HistoryQuerySet.as_manager()
+    project        = models.ForeignKey(Project,
+                                       on_delete=models.CASCADE,
+                                       related_query_name="history",
+                                       null=True)
+    inventory      = models.ForeignKey(Inventory,
+                                       on_delete=models.CASCADE,
+                                       related_query_name="history",
+                                       blank=True, null=True, default=None)
+    mode           = models.CharField(max_length=256)
+    kind           = models.CharField(max_length=50, default="PLAYBOOK")
+    start_time     = models.DateTimeField(default=timezone.now)
+    stop_time      = models.DateTimeField(blank=True, null=True)
+    raw_args       = models.TextField(default="")
+    raw_inventory  = models.TextField(default="")
+    status         = models.CharField(max_length=50)
+    initiator      = models.IntegerField(default=0)
+    # Initiator type should be always as in urls for api
+    initiator_type = models.CharField(max_length=50, default="users")
 
     class NoFactsAvailableException(NotApplicable):
         def __init__(self):
@@ -176,27 +181,30 @@ class History(BModel):
         ordering = ["-id"]
         index_together = [
             ["id", "project", "mode", "status", "inventory",
-             "start_time", "stop_time"]
+             "start_time", "stop_time", "initiator", "initiator_type"]
         ]
 
     @property
-    def facts(self):
-        def jsonify(match):
-            source = str(match.group(0))
-            result = ', "' + source
-            result = re.sub(r" \| ", '":{ "status": "', result)
-            result = re.sub(r" => {", '",', result)
-            return result
+    def initiator_object(self):
+        return User.objects.get(id=self.initiator)
 
+    @property
+    def facts(self):
         if self.status not in ['OK', 'ERROR', 'OFFLINE']:
             raise DataNotReady("Execution still in process.")
-        if self.kind != 'MODULE':
+        if self.kind != 'MODULE' or self.mode != 'setup':
             raise self.NoFactsAvailableException()
-        if self.mode != 'setup':
-            raise self.NoFactsAvailableException()
-        data = self.raw_stdout
-        result = re.sub(r"[^|^\n]+\|[^{]+{\n", jsonify, data)
-        result = "{" + result[1:] + "}"
+        qs = self.raw_history_line.all()
+        qs = qs.exclude(Q(line__contains="No config file") |
+                        Q(line__contains="as config file"))
+        data = "\n".join(qs.values_list("line", flat=True)) + "\n"
+        regex = (
+            r"^([\S]{1,})\s\|\s([\S]{1,}) \=>"
+            r" \{\s([^\r]*?\"[\w]{1,}\"\: .*?\s)\}\s"
+        )
+        subst = '"\\1": {\n\t"status": "\\2", \n\\3},'
+        result = re.sub(regex, subst, data, 0, re.MULTILINE)
+        result = "{" + result[:-1] + "}"
         return json.loads(result)
 
     @property

@@ -129,7 +129,7 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
             filter=dict(variables__key="ansible_port", variables__value="222"),
             exclude=dict(variables__key="ansible_user", variables__value="rh")
         )
-        result = self.get_result("post", base_url+"filter/", code=200,
+        result = self.get_result("post", base_url+"filter/?detail=1", code=200,
                                  data=json.dumps(filter_data))
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], 2, result)

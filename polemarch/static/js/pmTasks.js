@@ -1,5 +1,10 @@
 
-var pmTasks = new pmItems()
+/**
+ * Список playbook из всех проектов. 
+ * Сейчас используется для автокомплитов при выборе playbook.
+ * И для запуска конкретного playbook
+ */
+var pmTasks = inheritance(pmItems)
 
 pmTasks.model.name = "tasks"
 
@@ -13,18 +18,18 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
         return def.promise();
     }
 
-    if(!project_id)
+    if(!(project_id/1))
     {
         $.notify("Invalid filed `project` ", "error");
         def.reject();
-        return;
+        return def.promise();
     }
 
-    if(!inventory)
+    if(!(inventory/1))
     {
         $.notify("Invalid filed `inventory` ", "error");
         def.reject();
-        return;
+        return def.promise();
     }
 
     if(data_vars == undefined)
@@ -34,7 +39,6 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
     
     data_vars.playbook = playbook
     data_vars.inventory = inventory
-
     $.ajax({
         url: "/api/v1/projects/"+project_id+"/execute-playbook/",
         type: "POST",
@@ -71,9 +75,7 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
 
     return def.promise();
 }
-
-
-
+ 
 /**
  * Обновляет поле модел this.model.itemslist и ложит туда список пользователей
  * Обновляет поле модел this.model.items и ложит туда список инфу о пользователях по их id

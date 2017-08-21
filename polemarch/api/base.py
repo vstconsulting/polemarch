@@ -74,7 +74,8 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
     model = None
 
     def get_serializer_class(self):
-        if self.kwargs.get("pk", False) or self.action == "create":
+        if self.kwargs.get("pk", False) or self.action in ["create"] or \
+                int(self.request.query_params.get("detail", u"0")):
             if self.serializer_class_one is not None:
                 return self.serializer_class_one
         return super(GenericViewSet, self).get_serializer_class()
@@ -113,7 +114,7 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
     def permissions(self, request, pk=None):
         # pylint: disable=unused-argument
         serializer = self.get_serializer(self.get_object())
-        return serializer.permissions(request)
+        return serializer.permissions(request).resp
 
     @list_route(methods=["post"])
     def filter(self, request):

@@ -1,5 +1,5 @@
 
-var pmProjects = new pmItems()
+var pmProjects = inheritance(pmItems)
 pmProjects.model.name = "projects"
 jsonEditor.options[pmProjects.model.name] = jsonEditor.options['item'];
 
@@ -45,7 +45,7 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
     var project_id = data.reg[1]
     $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:project_id, query:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:project_id, query:project_id}))
 
         $("#inventories-autocomplete").select2();
 
@@ -102,7 +102,24 @@ pmProjects.addItem = function()
 
     data.name = $("#new_project_name").val()
     data.repository = $("#new_project_repository").val()
-    data.vars = jsonEditor.jsonEditorGetValues()
+    data.vars = {
+        repo_type:$("#new_project_type").val(),
+        repo_password:$("#new_project_password").val(),
+    }
+    
+    if(!data.repository)
+    {
+        if(data.vars.repo_type == "MANUAL")
+        {
+            data.repository = "MANUAL"
+        }
+        else
+        {
+            $.notify("Invalid value in filed `Repository URL`", "error");
+            def.reject()
+            return def.promise();
+        }
+    }
 
     if(!data.name)
     {
@@ -147,7 +164,6 @@ pmProjects.updateItem = function(item_id)
     var data = {}
 
     data.name = $("#project_"+item_id+"_name").val()
-    data.vars = jsonEditor.jsonEditorGetValues()
     data.repository = $("#project_"+item_id+"_repository").val()
 
     if(!data.name)
@@ -156,6 +172,26 @@ pmProjects.updateItem = function(item_id)
         $.notify("Invalid value in filed name", "error");
         return;
     }
+    
+    data.vars = {
+        repo_type:$("#project_"+item_id+"_type").val(),
+        repo_password:$("#project_"+item_id+"_password").val(),
+    }
+    
+    if(!data.repository)
+    {
+        if(data.vars.repo_type == "MANUAL")
+        {
+            data.repository = "MANUAL"
+        }
+        else
+        {
+            $.notify("Invalid value in filed `Repository URL`", "error");
+            def.reject()
+            return def.promise();
+        }
+    }
+
 
     return $.ajax({
         url: "/api/v1/projects/"+item_id+"/",
@@ -188,7 +224,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
     return $.when(pmInventories.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
-        $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
+        $(".content").appendTpl(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
     }).fail(function(){
 
@@ -203,7 +239,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
     return $.when(pmInventories.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
-        $(".content").append(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
+        $(".content").appendTpl(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
     }).fail(function(){
 
@@ -218,7 +254,7 @@ pmProjects.showAddSubGroupsForm = function(item_id, holder)
 {
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
-        $(".content").append(spajs.just.render('add_existing_groups_to_project', {item_id:item_id}))
+        $(".content").appendTpl(spajs.just.render('add_existing_groups_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
     }).fail(function(){
 
@@ -233,7 +269,7 @@ pmProjects.showAddSubHostsForm = function(item_id, holder)
 {
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
-        $(".content").append(spajs.just.render('add_existing_hosts_to_project', {item_id:item_id}))
+        $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_project', {item_id:item_id}))
         $("#polemarch-model-items-select").select2();
     }).fail(function(){
 
@@ -623,6 +659,7 @@ pmProjects.supportedRepos = function()
         success: function(data)
         {
             pmProjects.model.supportedRepos = data;
+            pmProjects.model.repository_type = data[0]
             jsonEditor.options['projects'].repo_type = {
                 type:'select',
                 options:pmProjects.model.supportedRepos,

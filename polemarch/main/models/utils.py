@@ -9,6 +9,7 @@ from ...main.utils import (tmp_file, CmdExecutor,
                            KVExchanger, CalledProcessError)
 
 
+PolemarchInventory = namedtuple("PolemarchInventory", "raw keys")
 AnsibleExtra = namedtuple('AnsibleExtraArgs', [
     'args',
     'files',
@@ -45,9 +46,30 @@ class Executor(CmdExecutor):
                                              line_number=self.counter,
                                              line=line)
 
+    def execute(self, cmd, cwd):
+        self.history.raw_args = " ".join(cmd)
+        return super(Executor, self).execute(cmd, cwd)
+
 
 class AnsibleCommand(object):
     command_type = None
+
+    status_codes = {
+        4: "OFFLINE",
+        -9: "INTERRUPTED",
+        "other": "ERROR"
+    }
+
+    class Inventory(PolemarchInventory):
+        @property
+        def file(self):
+            self.__file = getattr(self, "__file", tmp_file(self.raw))
+            return self.__file
+
+        def close(self):
+            for key_file in self.keys:
+                key_file.close()
+            self.__file.close()
 
     def __init__(self, *args, **kwargs):
         self.args = args
@@ -55,64 +77,66 @@ class AnsibleCommand(object):
 
     def __parse_extra_args(self, **extra):
         extra_args, files = list(), list()
+        extra.pop("verbose", None)
         for key, value in extra.items():
-            if key in ["extra_vars", "extra-vars"]:
-                key = "extra-vars"
-            elif key == "verbose":
-                continue
-            elif key in ["key_file", "key-file"]:
+            key = key.replace("_", "-")
+            if key == "key-file":
                 if "BEGIN RSA PRIVATE KEY" in value:
-                    kfile = tmp_file()
-                    kfile.write(value)
+                    kfile = tmp_file(value)
                     files.append(kfile)
                     value = kfile.name
                 else:
                     value = "{}/{}".format(self.workdir, value)
-                key = "key-file"
             extra_args.append("--{}".format(key))
             extra_args += [str(value)] if value else []
         return AnsibleExtra(extra_args, files)
 
     def get_workdir(self):
-        return "/tmp"
+        return self.history.project.path
 
     @property
     def workdir(self):
         return self.get_workdir()
 
+    @property
+    def path_to_ansible(self):
+        return dirname(sys.executable) + "/" + self.command_type
+
+    def prepare(self, target, inventory, history):
+        self.target, self.history = target, history
+        self.inventory_object = self.Inventory(*inventory.get_inventory())
+        self.history.raw_inventory = self.inventory_object.raw
+        self.history.status = "RUN"
+        self.history.save()
+        self.executor = Executor(self.history)
+
+    def get_args(self, target, extra_args):
+        return [self.path_to_ansible, target,
+                '-i', self.inventory_object.file.name, '-v'] + extra_args
+
+    def error_handler(self, exception):
+        default_code = self.status_codes["other"]
+        if isinstance(exception, CalledProcessError):
+            self.history.raw_stdout = str(exception.output)
+            self.history.status = self.status_codes.get(exception.returncode,
+                                                        default_code)
+        else:
+            self.history.raw_stdout = self.history.raw_stdout + str(exception)
+            self.history.status = default_code
+
     def execute(self, target, inventory, history, **extra_args):
-        self.project = history.project
-        history.raw_inventory, key_files = inventory.get_inventory()
-        history.status = "RUN"
-        history.save()
-        path_to_ansible = dirname(sys.executable) + "/" + self.command_type
-        inventory_file = tmp_file()
-        inventory_file.write(history.raw_inventory)
-        status = "OK"
+        self.prepare(target, inventory, history)
+        self.history.status = "OK"
         try:
             extra = self.__parse_extra_args(**extra_args)
-            args = [path_to_ansible, target, '-i',
-                    inventory_file.name, '-v'] + extra.args
-            history.raw_args = " ".join(args)
-            history.raw_stdout = Executor(history).execute(args, self.workdir)
-        except CalledProcessError as exception:
-            history.raw_stdout = str(exception.output)
-            if exception.returncode == 4:
-                status = "OFFLINE"
-            elif exception.returncode == -9:
-                status = "INTERRUPTED"
-            else:
-                status = "ERROR"
-        except Exception as exception:  # pragma: no cover
-            history.raw_stdout = history.raw_stdout + str(exception)
-            status = "ERROR"
+            args = self.get_args(self.target, extra.args)
+            self.history.raw_stdout = self.executor.execute(args, self.workdir)
+        except Exception as exception:
+            self.error_handler(exception)
         finally:
-            inventory_file.close()
-            for key_file in key_files:
-                key_file.close()
-            history.stop_time = timezone.now()
-            history.status = status
-            history.save()
+            self.inventory_object.close()
+            self.history.stop_time = timezone.now()
+            self.history.save()
 
     def run(self):
         return self.execute(*self.args, **self.kwargs)
@@ -120,9 +144,6 @@ class AnsibleCommand(object):
 
 class AnsiblePlaybook(AnsibleCommand):
     command_type = "ansible-playbook"
-
-    def get_workdir(self):
-        return self.project.path
 
 
 class AnsibleModule(AnsibleCommand):

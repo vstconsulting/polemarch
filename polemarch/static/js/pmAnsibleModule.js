@@ -1,4 +1,8 @@
- 
+
+/**
+ * Класс для запуска модулей Ansible.
+ * 
+ */
 var pmAnsibleModule = { 
     pageSize:20,
     model:{
@@ -9,7 +13,7 @@ var pmAnsibleModule = {
  
 jsonEditor.options[pmAnsibleModule.model.name] = jsonEditor.options['item'];
   
-pmModuleTemplates.selectInventory = function(inventory_id)
+pmAnsibleModule.selectInventory = function(inventory_id)
 {
     var def = new $.Deferred();
     var thisObj = this;
@@ -31,6 +35,9 @@ pmModuleTemplates.selectInventory = function(inventory_id)
     return def.promise()
 }
 
+/**
+ * Страница /?project/1/ansible-module/run (Execute ansible module) в проекте 
+ */
 pmAnsibleModule.showInProject = function(holder, menuInfo, data)
 {
     var thisObj = this;
@@ -38,7 +45,7 @@ pmAnsibleModule.showInProject = function(holder, menuInfo, data)
     
     return $.when(pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_run_page', {item_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_run_page', {item_id:project_id}))
         
         $("#inventories-autocomplete").select2(); 
 
@@ -47,7 +54,32 @@ pmAnsibleModule.showInProject = function(holder, menuInfo, data)
         $.notify("", "error");
     })
 }
- 
+
+/**
+ * Widget быстрого запуска для Dashboard
+ */
+pmAnsibleModule.fastCommandWidget = function(holder)
+{ 
+    return $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems()).done(function()
+    {
+        $(holder).insertTpl(spajs.just.render('fastcommand_widget', {}))
+        $("#projects-autocomplete").select2(); 
+        $("#inventories-autocomplete").select2(); 
+        
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+/**
+ * @param {Integer} project_id 
+ * @param {Integer} inventory_id 
+ * @param {String} group 
+ * @param {String} module 
+ * @param {Object} data_args 
+ * @param {Object} data_vars 
+ */
 pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data_args, data_vars)
 {
     var def = new $.Deferred();
@@ -58,19 +90,27 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
         return def.promise();
     }
 
-    if(!inventory_id)
+    if(!(inventory_id/1))
     {
         $.notify("Invalid filed `inventory` ", "error");
         def.reject();
-        return;
+        return def.promise();
+    }
+    
+    if(!(project_id/1))
+    {
+        $.notify("Invalid filed `project` ", "error");
+        def.reject();
+        return def.promise();
     }
 
     if(!module)
     {
         $.notify("Invalid filed `module` ", "error");
         def.reject();
-        return;
+        return def.promise();
     }
+    
     
     if(!data_args)
     {  
@@ -87,7 +127,15 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
     data.module = module
     data.group = group
     data.args = data_args
+    
+    if(module == 'shell' && !data_args)
+    {
+        $.notify("Invalid filed `Shell command` ", "error");
+        def.reject();
+        return def.promise();
+    }
 
+    debugger;
     $.ajax({
         url: "/api/v1/projects/"+project_id+"/execute-module/",
         type: "POST",

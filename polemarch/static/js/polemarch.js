@@ -55,7 +55,7 @@ polemarch.start = function(options)
     {
         var t = new Date();
         polemarch.model.nowTime = t.getTime();
-    }, 1000)
+    }, 5001)
 
 
     $("body").touchwipe({
@@ -82,7 +82,8 @@ polemarch.start = function(options)
     spajs.addMenu({
         id:"home", 
         urlregexp:[/^(home|)$/],
-        onOpen:function(holder, menuInfo, data){return pmDashboard.open(holder, menuInfo, data);}
+        onOpen:function(holder, menuInfo, data){return pmDashboard.open(holder, menuInfo, data);},
+        onClose:function(){return pmDashboard.stopUpdates();},
     })
     
     // users
@@ -181,6 +182,12 @@ polemarch.start = function(options)
         onOpen:function(holder, menuInfo, data){return pmInventories.showItem(holder, menuInfo, data);}
     })
 
+    spajs.addMenu({
+        id:"inventory-history", 
+        urlregexp:[/^inventory\/([0-9]+)\/history$/, /^inventory\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showListInInventory(holder, menuInfo, data);}
+    })
+    
     spajs.addMenu({
         id:"newInventory", 
         urlregexp:[/^new-inventory$/, /^([A-z0-9_]+)\/([0-9]+)\/new-inventory$/],
@@ -308,7 +315,7 @@ polemarch.start = function(options)
     // Tasks Templates
     spajs.addMenu({
         id:"tasks", 
-        urlregexp:[/^templates$/, /^tasks\/page\/([0-9]+)$/],
+        urlregexp:[/^templates$/, /^templates\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showList(holder, menuInfo, data);}
     })
     
