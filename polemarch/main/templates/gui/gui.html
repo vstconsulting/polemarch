@@ -2582,7 +2582,7 @@
     <section class="content">
         <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Create inventory</a>
         <span class="btn btn-default textfile"style="margin-left: 10px;" >
-            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.importFromFile(event));"  >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import from file
         </span>
         <br>
@@ -2712,6 +2712,95 @@
     </section>
 </script>
 
+<script type="text/x-just" data-just="inventories_import_page">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" >Import from file</span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" >Inventories</a></li>
+            <li class="active">Import from file</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(); return false;" class="btn btn-primary" >Save inventory</button>
+        <span class="btn btn-default textfile"style="margin-left: 10px;" >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
+            <span class="glyphicon glyphicon-file"></span> Import from file
+        </span>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Import from file<br>
+                        <div class="box-tools pull-right"> 
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <~ pmInventories.model.importedInventories>
+                            <% for(var i in pmInventories.model.importedInventories){ var val = pmInventories.model.importedInventories[i] %>
+                                <%= pmInventories.renderImportedInventory(val) %>
+                            <% } %>
+                        <~>
+                    </div>
+                </div>
+            </section> 
+        </div> 
+    </section>
+</script>
+    
+<script type="text/x-just" data-just="inventories_imported_inventory"> 
+    
+    <h1>Hosts</h1>
+    <% for(var i in inventory.hosts){ var val = inventory.hosts[i] %> 
+        <div class="row">
+            <div class="form-group col-lg-2">
+                <label class="control-label" >Name</label>
+                <input type="text" value="<%- val.name %>"  class="form-control" maxlength="255">
+                <div class="help-block"></div>
+            </div>
+            <div class="form-group col-lg-2">
+                <label class="control-label" >Type</label>
+                <input type="text" value="<%- val.type %>"  class="form-control" maxlength="255">
+                <div class="help-block"></div>
+            </div> 
+            <%= jsonEditor.editor(val.vars, {block:'hosts'}) %>
+        </div>
+    <% } %>
+    
+    <h1>Groups</h1>
+    <% for(var i in inventory.groups){ var valg = inventory.groups[i] %>  
+            
+        <h1>Groups <%- i %></h1>
+        <% for(var i in valg.hosts){ var val = valg.hosts[i] %> 
+            <div class="row">
+                <div class="form-group col-lg-2">
+                    <label class="control-label" >Name</label>
+                    <input type="text" value="<%- val.name %>"  class="form-control" maxlength="255">
+                    <div class="help-block"></div>
+                </div>
+                <div class="form-group col-lg-2">
+                    <label class="control-label" >Type</label>
+                    <input type="text" value="<%- val.type %>"  class="form-control" maxlength="255">
+                    <div class="help-block"></div>
+                </div> 
+                <%= jsonEditor.editor(val.vars, {block:'hosts'}) %>
+            </div>
+        <% } %>
+    <% } %>
+    
+    <%= jsonEditor.editor(inventory.vars, {block:'inventories'}) %>
+</script>
+    
 <!-- Страница module_run_page in projects -->
 <script type="text/x-just" data-just="module_run_page">
     <section class="content-header">

@@ -5,6 +5,149 @@
 ///////////////////////////////////////////////
 // Вспомагательные функции для тестирования
 ///////////////////////////////////////////////
+ 
+/**
+*
+*  Base64 encode / decode
+*  http://www.webtoolkit.info/
+*
+**/
+
+var Base64 = {
+
+	// private property
+	_keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+
+	// public method for encoding
+	encode : function (input) {
+		var output = "";
+		var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+		var i = 0;
+
+		input = Base64._utf8_encode(input);
+
+		while (i < input.length) {
+
+			chr1 = input.charCodeAt(i++);
+			chr2 = input.charCodeAt(i++);
+			chr3 = input.charCodeAt(i++);
+
+			enc1 = chr1 >> 2;
+			enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+			enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+			enc4 = chr3 & 63;
+
+			if (isNaN(chr2)) {
+				enc3 = enc4 = 64;
+			} else if (isNaN(chr3)) {
+				enc4 = 64;
+			}
+
+			output = output +
+			this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) +
+			this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
+
+		}
+
+		return output;
+	},
+
+	// public method for decoding
+	decode : function (input) {
+		var output = "";
+		var chr1, chr2, chr3;
+		var enc1, enc2, enc3, enc4;
+		var i = 0;
+
+		input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+		while (i < input.length) {
+
+			enc1 = this._keyStr.indexOf(input.charAt(i++));
+			enc2 = this._keyStr.indexOf(input.charAt(i++));
+			enc3 = this._keyStr.indexOf(input.charAt(i++));
+			enc4 = this._keyStr.indexOf(input.charAt(i++));
+
+			chr1 = (enc1 << 2) | (enc2 >> 4);
+			chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+			chr3 = ((enc3 & 3) << 6) | enc4;
+
+			output = output + String.fromCharCode(chr1);
+
+			if (enc3 != 64) {
+				output = output + String.fromCharCode(chr2);
+			}
+			if (enc4 != 64) {
+				output = output + String.fromCharCode(chr3);
+			}
+
+		}
+
+		output = Base64._utf8_decode(output);
+
+		return output;
+
+	},
+
+	// private method for UTF-8 encoding
+	_utf8_encode : function (string) {
+		string = string.replace(/\r\n/g,"\n");
+		var utftext = "";
+
+		for (var n = 0; n < string.length; n++) {
+
+			var c = string.charCodeAt(n);
+
+			if (c < 128) {
+				utftext += String.fromCharCode(c);
+			}
+			else if((c > 127) && (c < 2048)) {
+				utftext += String.fromCharCode((c >> 6) | 192);
+				utftext += String.fromCharCode((c & 63) | 128);
+			}
+			else {
+				utftext += String.fromCharCode((c >> 12) | 224);
+				utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+				utftext += String.fromCharCode((c & 63) | 128);
+			}
+
+		}
+
+		return utftext;
+	},
+
+	// private method for UTF-8 decoding
+	_utf8_decode : function (utftext) {
+		var string = "";
+		var i = 0;
+		var c = c1 = c2 = 0;
+
+		while ( i < utftext.length ) {
+
+			c = utftext.charCodeAt(i);
+
+			if (c < 128) {
+				string += String.fromCharCode(c);
+				i++;
+			}
+			else if((c > 191) && (c < 224)) {
+				c2 = utftext.charCodeAt(i+1);
+				string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+				i += 2;
+			}
+			else {
+				c2 = utftext.charCodeAt(i+1);
+				c3 = utftext.charCodeAt(i+2);
+				string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+				i += 3;
+			}
+
+		}
+
+		return string;
+	}
+
+}
 
 function render(name, callback)
 {
@@ -885,6 +1028,80 @@ function qunitAddTests_inventories()
             render(done)
         })
     });
+    
+    // Инвенторий закодированный в Base64
+    var pmInventoriesText = "IyBIb3N0cyAKMS4yLjMuWzE6MjU1XSAKMTI0LjMuNC5bNDQ6NTVdIAoxMjQuMy41LlsxOjI1MF0gYW5zaWJsZV9ob3N0PTEwLjIwLjAuMiBhbnNpYmxlX3VzZXI9cm9vdCBhbnNpYmxlX3NzaF9wYXNzPWVhZGdiZQoxMjQuMy41LlsxOjI1MF0gYW5zaWJsZV9ob3N0PSIxMC4yMC4wLjIiIGFuc2libGVfdXNlcj0ncm9vdCcgYW5zaWJsZV9zc2hfcGFzcz1lYWRnYmUKMTI0LjMuNS5bMToyNTBdIGFuc2libGVfaG9zdD0iMTAuXCIyMFwnLjAuMiIgYW5zaWJsZV91c2VyPSdyIm9cJ290JyBhbnNpYmxlX3NzaF9wYXNzPWVhZGdiZQogIAojIEdsb2JhbCB2YXJzClthbGw6dmFyc10KYW5zaWJsZV91c2VyPWdyZXkKYW5zaWJsZV9zc2hfcHJpdmF0ZV9rZXlfZmlsZT0vdG1wL3RtcFJROGVUYwphbnNpYmxlX3NzaF9leHRyYV9hcmdzPS1vIFN0cmljdEhvc3RLZXlDaGVja2luZz1ubyAtbyBVc2VyS25vd25Ib3N0c0ZpbGU9L2Rldi9udWxsCgojIEdyb3VwcyAKW2dpdDpjaGlsZHJlbl0KY2kKZ2l0LXNlcnZlcnMKCgpbY2xvdWQ6Y2hpbGRyZW5dCmdpdApzZXJ2aWNlcwp0ZXN0CgoKW3Rlc3RdCnRlc3QudnN0LmxhbiBhbnNpYmxlX3VzZXI9Y2VudG9zCnRlc3QyLnZzdC5sYW4gYW5zaWJsZV9ob3N0PTE3Mi4xNi4xLjI2CgoKW2NpXQpnaXQtY2ktMSBhbnNpYmxlX2hvc3Q9MTcyLjE2LjEuMTMKZ2l0LWNpLTIgYW5zaWJsZV9ob3N0PTE3Mi4xNi4xLjE0CgoKW2dpdC1zZXJ2ZXJzXQpnaXQudnN0LmxhbiAKICAKCltzZXJ2aWNlc10KY2hhdC52c3Rjb25zdWx0aW5nLm5ldCBhbnNpYmxlX2hvc3Q9MTcyLjE2LjEuMTYKcGlwYy52c3QubGFuIApyZWRtaW5lLnZzdC5sYW4gCgoKW29wZW5zdGFja10KZnVlbC52c3QubGFuIGFuc2libGVfaG9zdD0xMC4yMC4wLjIgYW5zaWJsZV91c2VyPXJvb3QgYW5zaWJsZV9zc2hfcGFzcz1lYWRnYmUKb3MtY29tcHV0ZS0xLnZzdC5sYW4gYW5zaWJsZV9ob3N0PTEwLjIwLjAuOQpvcy1jb21wdXRlLTIudnN0LmxhbiBhbnNpYmxlX2hvc3Q9MTAuMjAuMC4xMwpvcy1jb250cm9sbGVyLTEudnN0LmxhbiBhbnNpYmxlX2hvc3Q9MTAuMjAuMC42Cm9zLWNvbnRyb2xsZXItMi52c3QubGFuIGFuc2libGVfaG9zdD0xMC4yMC4wLjgK"
+    pmInventoriesText = Base64.decode(pmInventoriesText)
+    
+    /**
+     * # Hosts 
+1.2.3.[1:255] 
+124.3.4.[44:55] 
+124.3.5.[1:250] ansible_host=10.20.0.2 ansible_user=root ansible_ssh_pass=eadgbe
+124.3.5.[1:250] ansible_host="10.20.0.2" ansible_user='root' ansible_ssh_pass=eadgbe
+124.3.5.[1:250] ansible_host="10.\"20\'.0.2" ansible_user='r"o\'ot' ansible_ssh_pass=eadgbe
+  
+# Global vars
+[all:vars]
+ansible_user=grey
+ansible_ssh_private_key_file=/tmp/tmpRQ8eTc
+ansible_ssh_extra_args=-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+
+# Groups 
+[git:children]
+ci
+git-servers
+
+
+[cloud:children]
+git
+services
+test
+
+
+[test]
+test.vst.lan ansible_user=centos
+test2.vst.lan ansible_host=172.16.1.26
+
+
+[ci]
+git-ci-1 ansible_host=172.16.1.13
+git-ci-2 ansible_host=172.16.1.14
+
+
+[git-servers]
+git.vst.lan 
+  
+
+[services]
+chat.vstconsulting.net ansible_host=172.16.1.16
+pipc.vst.lan 
+redmine.vst.lan 
+
+
+[openstack]
+fuel.vst.lan ansible_host=10.20.0.2 ansible_user=root ansible_ssh_pass=eadgbe
+os-compute-1.vst.lan ansible_host=10.20.0.9
+os-compute-2.vst.lan ansible_host=10.20.0.13
+os-controller-1.vst.lan ansible_host=10.20.0.6
+os-controller-2.vst.lan ansible_host=10.20.0.8
+
+     */
+
+    syncQUnit.addTest('Парсинг inventory', function ( assert )
+    {
+        var done = assert.async();
+        var inventory = pmInventories.parseFromText(pmInventoriesText)
+        
+        // @todo добавить сюда проверку данных про интвенторий 
+        assert.ok(inventory.hosts.length == 5, 'inventory.hosts.length == 5');
+        assert.ok(inventory.groups['ci'].hosts.length == 2, "inventory.groups['ci'].hosts.length == 2");
+        assert.ok(inventory.groups['cloud'].hosts.length == 0, "inventory.groups['cloud'].hosts.length == 0");
+        assert.ok(inventory.groups['cloud'].hosts.groups == 3, "inventory.groups['cloud'].hosts.groups == 3");
+         
+        render(done) 
+    });
+    
 }
 
 /**
