@@ -139,3 +139,16 @@ class HistoryModelViewSet(GenericViewSet,
 
 class ModelViewSetSet(GenericViewSet, viewsets.ModelViewSet):
     pass
+
+
+class NonModelsViewSet(GenericViewSet):
+    base_name = None
+
+    def get_queryset(self):
+        return QuerySet()
+
+
+class ListNonModelViewSet(NonModelsViewSet,
+                          viewsets.mixins.ListModelMixin):
+    def list(self, request, *args, **kwargs):
+        return Response({}, 200).resp
