@@ -21,6 +21,7 @@ from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation
+from ansible.cli.adhoc import AdHocCLI
 
 from . import exceptions as ex
 from . import __file__ as file
@@ -597,3 +598,53 @@ class BaseTask(object):
         ''' Method with task logic. '''
         # pylint: disable=notimplemented-raised,
         raise NotImplemented
+
+
+class AnsibleArgumentsReferenceBase(object):
+    _TYPES_COMPLIANCE = {
+        "string": "text",
+        "int": "integer",
+        None: "boolean",
+        "choice": "text",
+    }
+    _EXCLUSIONS = {
+        "private-key": "keyfile",
+        "key-file": "keyfile",
+    }
+
+    def __init__(self):
+        self.raw_dict = self._extract_from_cli()
+
+    def _extract_from_cli(self):
+        raise NotImplementedError()
+
+    def _cli_to_gui_type(self, name):
+        if name in self._EXCLUSIONS:
+            return self._EXCLUSIONS[name]
+        if name is not None and name.endswith("-file"):
+            return "textfile"
+        return self._TYPES_COMPLIANCE[name]
+
+    def is_exists(self, key):
+        return key in self.raw_dict
+
+    def as_gui_dict(self):
+        result = {}
+        for argument, info in self.raw_dict.items():
+            result[argument] = {}
+            result[argument]['help'] = info['help']
+            result[argument]['type'] = self._cli_to_gui_type(info['type'])
+        return result
+
+
+class AnsibleArgumentsReference(AnsibleArgumentsReferenceBase):
+    def _extract_from_cli(self):
+        # pylint: disable=protected-access,
+        cli = AdHocCLI(args=["", "all"])
+        cli.parse()
+        result = {}
+        for option in cli.parser._get_all_options():
+            for name in option._long_opts:
+                name = name[2:]
+                result[name] = {"type": option.type, "help": option.help}
+        return result

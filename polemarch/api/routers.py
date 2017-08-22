@@ -16,6 +16,9 @@ class _AbstractRouter(routers.DefaultRouter):
         super(_AbstractRouter, self).__init__(*args, **kwargs)
 
     def get_default_base_name(self, viewset):
+        base_name = getattr(viewset, 'base_name', None)
+        if base_name is not None:
+            return base_name
         queryset = getattr(viewset, 'queryset', None)
         model = getattr(viewset, 'model', None)
         if queryset is None:

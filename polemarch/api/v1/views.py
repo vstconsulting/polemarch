@@ -5,7 +5,7 @@ from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 
-from ...main.utils import CmdExecutor, KVExchanger
+from ...main.utils import CmdExecutor, KVExchanger, AnsibleArgumentsReference
 from .. import base
 from ..permissions import SuperUserPermission, StaffPermission
 from . import filters
@@ -245,3 +245,12 @@ class BulkViewSet(rest_views.APIView):
             "operations_types": self._op_types.keys(),
         }
         return base.Response(response, 200).resp
+
+
+class AnsibleViewSet(base.GenericViewSet):
+    base_name = "ansible"
+
+    @list_route()
+    def ansible_cli_reference(self, request):
+        reference = AnsibleArgumentsReference()
+        return base.Response(reference.as_gui_dict(), 200).resp
