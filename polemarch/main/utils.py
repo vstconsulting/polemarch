@@ -24,6 +24,7 @@ from django.template import loader
 from django.utils import translation
 from ansible import modules as ansible_modules
 from ansible.cli.adhoc import AdHocCLI
+from ansible.cli.playbook import PlaybookCLI
 
 from . import exceptions as ex
 from . import __file__ as file
@@ -602,7 +603,7 @@ class BaseTask(object):
         raise NotImplemented
 
 
-class AnsibleArgumentsReferenceBase(object):
+class AnsibleArgumentsReference(object):
     _TYPES_COMPLIANCE = {
         "string": "text",
         "int": "integer",
@@ -617,9 +618,6 @@ class AnsibleArgumentsReferenceBase(object):
     def __init__(self):
         self.raw_dict = self._extract_from_cli()
 
-    def _extract_from_cli(self):
-        raise NotImplementedError()
-
     def _cli_to_gui_type(self, name):
         if name in self._EXCLUSIONS:
             return self._EXCLUSIONS[name]
@@ -630,25 +628,32 @@ class AnsibleArgumentsReferenceBase(object):
     def is_exists(self, key):
         return key in self.raw_dict
 
-    def as_gui_dict(self):
+    def as_gui_dict(self, requisite=""):
         result = {}
-        for argument, info in self.raw_dict.items():
+        if requisite == "":
+            items = self.raw_dict.items()
+        else:
+            items = {requisite: self.raw_dict[requisite]}.items()
+        for argument, info in items:
             result[argument] = {}
             result[argument]['help'] = info['help']
             result[argument]['type'] = self._cli_to_gui_type(info['type'])
         return result
 
-
-class AnsibleArgumentsReference(AnsibleArgumentsReferenceBase):
     def _extract_from_cli(self):
         # pylint: disable=protected-access,
-        cli = AdHocCLI(args=["", "all"])
-        cli.parse()
         result = {}
-        for option in cli.parser._get_all_options():
-            for name in option._long_opts:
-                name = name[2:]
-                result[name] = {"type": option.type, "help": option.help}
+        clis = [AdHocCLI(args=["", "all"]), PlaybookCLI(args=[])]
+        for cli in clis:
+            cli = AdHocCLI(args=["", "all"])
+            cli.parse()
+            cli_result = {}
+            for option in cli.parser._get_all_options():
+                for name in option._long_opts:
+                    name = name[2:]
+                    cli_result[name] = {"type": option.type,
+                                        "help": option.help}
+            result.update(cli_result)
         return result
 
 

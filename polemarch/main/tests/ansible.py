@@ -4,9 +4,17 @@ from ..utils import AnsibleModules
 
 class ApiAnsibleTestCase(_ApiGHBaseTestCase):
     def test_ansible_cli_reference(self):
-        result = self.get_result("get", "/api/v1/ansible/cli_reference/")
+        url = "/api/v1/ansible/cli_reference/"
+        result = self.get_result("get", url)
         self.assertIn("args", result)
         self.assertIn("module-name", result)
+        self.assertIn("syntax-check", result)
+        # test filter
+        result = self.get_result("get", url + "?filter=args")
+        self.assertIn("args", result)
+        self.assertNotIn("module-name", result)
+        # test 400 if not exist filter
+        result = self.get_result("get", url + "?filter=byaka", 400)
 
     def test_ansible_modules(self):
         url = "/api/v1/ansible/modules/"

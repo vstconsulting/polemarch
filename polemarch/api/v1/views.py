@@ -253,8 +253,9 @@ class AnsibleViewSet(base.ListNonModelViewSet):
 
     @list_route(methods=["get"])
     def cli_reference(self, request):
+        requisite = request.query_params.get("filter", "")
         reference = utils.AnsibleArgumentsReference()
-        return base.Response(reference.as_gui_dict(), 200).resp
+        return base.Response(reference.as_gui_dict(requisite), 200).resp
 
     @list_route(methods=["get"])
     def modules(self, request):
