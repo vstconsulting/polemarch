@@ -265,7 +265,10 @@ pmInventories.importFromFile = function(files_event)
             return function(e)
             {
                 console.log(e)
-                thisObj.model.importedInventories.push(pmInventories.parseFromText(e.target.result))
+                thisObj.model.importedInventories.push({
+                    inventory:pmInventories.parseFromText(e.target.result),
+                    text:e.target.result
+                })
             };
         })(i);
         reader.readAsText(files_event.target.files[i]);
@@ -296,10 +299,9 @@ pmInventories.showImportPage = function(holder, menuInfo, data)
     return def.promise();
 }
 
-pmInventories.renderImportedInventory = function(inventory)
+pmInventories.renderImportedInventory = function(imported)
 {
-    var text = spajs.just.render(this.model.name+'_imported_inventory', {inventory:inventory}) 
-    console.log(text)
+    var text = spajs.just.render(this.model.name+'_imported_inventory', {inventory:imported.inventory, text:imported.text})  
     return text;
 }
 
