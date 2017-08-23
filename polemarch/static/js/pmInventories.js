@@ -136,6 +136,14 @@ pmInventories.parseHostLine = function(index, line, section, inventory)
     }
 }
 
+/**
+ * Парсит строку файла инвентория
+ * @param {integer} index
+ * @param {string} line
+ * @param {string} section
+ * @param {Object} inventory
+ * @returns {Boolean}
+ */
 pmInventories.parseLine = function(index, line, section, inventory)
 {
     line = trim(line);
@@ -183,10 +191,11 @@ pmInventories.parseLine = function(index, line, section, inventory)
             inventory.groups[section] = {
                 vars:{},
                 groups:[],
-                hosts:[]
+                hosts:[],
             }
         }
 
+        inventory.groups[section].children = true
         inventory.groups[section].groups.push(line)
         return true;
     }
@@ -195,8 +204,13 @@ pmInventories.parseLine = function(index, line, section, inventory)
     return false;
 }
 
+/**
+ * Парсит файла инвентория
+ * @param {string} text текст файла инвентория
+ * @returns {Object}
+ */
 pmInventories.parseFromText = function(text)
-{ 
+{
     var lines = text.split(/\n/g)
 
     var cSection = "_hosts";
@@ -275,23 +289,284 @@ pmInventories.importFromFile = function(files_event)
 
         // Нет поддержки загрузки более одного файла за раз.
         // break;
-    } 
+    }
     return def.promise();
 }
 
 pmInventories.openImportPageAndImportFiles = function(files_event)
 {
     $.when(spajs.open({ menuId:"inventories/import"})).done(function()
-    { 
+    {
        pmInventories.importFromFile(files_event)
     })
 }
 
+pmInventories.importInventories = function()
+{
+    for(var i in pmInventories.model.importedInventories)
+    {
+        return pmInventories.importInventory(pmInventories.model.importedInventories[i].inventory)
+    }
+}
+
+pmInventories.importInventory = function(inventory)
+{
+    var vars = jsonEditor.jsonEditorGetValues('inventory')
+    if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+    {
+        // <!--Вставка файла -->
+        $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error");
+        jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "inventory")
+        return;
+    }
+
+    for(var i in inventory.hosts)
+    {
+        var val = inventory.hosts[i]
+        var vars = jsonEditor.jsonEditorGetValues('host'+val.name)
+        if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+        {
+            // <!--Вставка файла -->
+            $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error"); 
+            jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+val.name)
+            return;
+        }
+    }
+
+    for(var i in inventory.groups)
+    {
+        var val = inventory.groups[i]
+
+        var vars = jsonEditor.jsonEditorGetValues('group'+i)
+        if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+        {
+            // <!--Вставка файла -->
+            $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error"); 
+            jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "group"+i)
+            return;
+        }
+
+        for(var j in val.hosts)
+        {
+            var hval = val.hosts[j]
+            var vars = jsonEditor.jsonEditorGetValues('host'+hval.name)
+            if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+            {
+                // <!--Вставка файла -->
+                $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error");
+                jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+hval.name)
+                return;
+            }
+        }
+    }
+ 
+    var def = new $.Deferred();
+    inventory.name = new Date().toString();
+
+    var inventoryObject = {
+        name:inventory.name,
+        vars:jsonEditor.jsonEditorGetValues('inventory')
+    }
+
+    $.when(pmInventories.importItem(inventoryObject)).done(function(inventory_id)
+    {
+        var bulkdata = []
+        // Сбор групп и вложенных в них хостов
+        for(var i in inventory.groups)
+        {
+            var val = inventory.groups[i]
+
+            bulkdata.push({
+                type:"add",
+                item:'group',
+                data:{
+                    name:i,
+                    children:val.children,
+                    vars:jsonEditor.jsonEditorGetValues('group'+i)
+                }
+            })
+
+            for(var j in val.hosts)
+            {
+                var hval = val.hosts[j]
+                bulkdata.push({
+                    type:"add",
+                    item:'host',
+                    data:{
+                        name:hval.name,
+                        type:hval.type,
+                        vars:jsonEditor.jsonEditorGetValues('host'+hval.name)
+                    }
+                })
+            }
+        }
+
+        // Сбор хостов вложенных к инвенторию
+        var bulkHosts = []
+        for(var i in inventory.hosts)
+        {
+            var val = inventory.hosts[i]
+            bulkHosts.push({
+                type:"add",
+                item:'host',
+                data:{
+                    name:val.name,
+                    type:val.type,
+                    vars:jsonEditor.jsonEditorGetValues('host'+val.name)
+                }
+            })
+        }
+
+        // Добавление хостов вложенных к инвенторию
+        $.ajax({
+            url: "/api/v1/_bulk/",
+            type: "POST",
+            contentType:'application/json',
+            data:JSON.stringify(bulkHosts),
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            },
+            success: function(data)
+            {
+                var hosts_ids = []
+                for(var i in data)
+                {
+                    var val = data[i]
+                    if(val.status != 201)
+                    {
+                        $.notify("Error "+val.status, "error");
+                    }
+                    hosts_ids.push(val.data.id)
+                }
+
+                $.when(pmInventories.addSubHosts(inventory_id, hosts_ids)).done(function()
+                {
+                    // Добавление групп и вложенных в них хостов
+                    $.ajax({
+                        url: "/api/v1/_bulk/",
+                        type: "POST",
+                        contentType:'application/json',
+                        data:JSON.stringify(bulkdata),
+                        beforeSend: function(xhr, settings) {
+                            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                                // Only send the token to relative URLs i.e. locally.
+                                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                            }
+                        },
+                        success: function(data)
+                        {
+                            var promise = []
+                            var igroups_ids = []
+                            for(var i in data)
+                            {
+                                var val = data[i]
+                                if(val.status != 201)
+                                {
+                                    $.notify("Error "+val.status, "error");
+                                }
+
+                                if(val.data.children !== undefined )
+                                {
+                                    igroups_ids.push(val.data.id)
+
+                                    debugger;
+                                    // Это группа
+                                    if(val.data.children)
+                                    {
+                                        if(inventory.groups[val.data.name].groups.length)
+                                        {
+                                            // Добавление подгрупп
+                                            var groups_ids = []
+                                            for(var j in inventory.groups[val.data.name].groups)
+                                            {
+                                                // найти id группы и прекрепить.
+                                                for(var k in data)
+                                                {
+                                                    if(data[k].data.children !== undefined && data[k].data.name == inventory.groups[val.data.name].groups[j])
+                                                    {
+                                                        groups_ids.push(data[k].data.id)
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            promise.push(pmGroups.addSubGroups(val.data.id, groups_ids));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if(inventory.groups[val.data.name].groups.length)
+                                        {
+                                            // Добавление хостов
+                                            var hosts_ids = []
+                                            for(var j in inventory.groups[val.data.name].hosts)
+                                            {
+                                                // найти id группы и прекрепить.
+                                                for(var k in data)
+                                                {
+                                                    if(data[k].data.children === undefined && data[k].data.name == inventory.groups[val.data.name].hosts[j])
+                                                    {
+                                                        hosts_ids.push(data[k].data.id)
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            promise.push(pmGroups.addSubHosts(val.data.id, hosts_ids));
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // Это хост
+                                }
+                            }
+
+                            promise.push(pmInventories.addSubGroups(inventory_id, igroups_ids))
+                            $.when.apply(this, promise).done(function(){
+                                def.resolve();
+                            }).fail(function(e){
+                                console.warn(e)
+                                polemarch.showErrors(e)
+                                def.reject();
+                            })
+                        },
+                        error:function(e)
+                        {
+                            console.warn(e)
+                            polemarch.showErrors(e)
+                            def.reject();
+                        }
+                    });
+                }).fail(function(e){
+                    console.warn(e)
+                    polemarch.showErrors(e)
+                    def.reject();
+                })
+            },
+            error:function(e)
+            {
+                console.warn(e)
+                polemarch.showErrors(e)
+                def.reject();
+            }
+        })
+    }).fail(function(e)
+    {
+        console.warn(e)
+        polemarch.showErrors(e)
+        def.reject();
+    })
+    return def.promise();
+}
+
+
 pmInventories.showImportPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
-    
-    var text = spajs.just.render(this.model.name+'_import_page', {}) 
+
+    var text = spajs.just.render(this.model.name+'_import_page', {})
     console.log(text)
     $(holder).insertTpl(text)
 
@@ -301,7 +576,7 @@ pmInventories.showImportPage = function(holder, menuInfo, data)
 
 pmInventories.renderImportedInventory = function(imported)
 {
-    var text = spajs.just.render(this.model.name+'_imported_inventory', {inventory:imported.inventory, text:imported.text})  
+    var text = spajs.just.render(this.model.name+'_imported_inventory', {inventory:imported.inventory, text:imported.text})
     return text;
 }
 

@@ -215,6 +215,37 @@ pmItems.copyItem = function(item_id)
     return def.promise();
 } 
 
+pmItems.importItem = function(data)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+ 
+    $.ajax({
+        url: "/api/v1/"+thisObj.model.name+"/",
+        type: "POST",
+        contentType:'application/json',
+        data: JSON.stringify(data),
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            thisObj.model.items[data.id] = data
+            def.resolve(data.id)
+        },
+        error:function(e)
+        {
+            $.notify("Error in import item", "error");
+            polemarch.showErrors(e)
+            def.reject(e)
+        }
+    }); 
+    return def.promise();
+}
+
 pmItems.copyAndEdit = function(item_id)
 {
     var def = new $.Deferred();

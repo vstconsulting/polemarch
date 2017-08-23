@@ -1099,6 +1099,8 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
         assert.ok(inventory.groups['cloud'].hosts.length == 0, "inventory.groups['cloud'].hosts.length == 0");
         assert.ok(inventory.groups['cloud'].hosts.groups == 3, "inventory.groups['cloud'].hosts.groups == 3");
          
+        // Проверять поле children для групп 
+         
         render(done) 
     });
     

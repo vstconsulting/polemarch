@@ -219,7 +219,7 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="#" onclick="pmTasksTemplates.deleteRows($('.multiple-select .item-row.selected')); return false;" >DeleteDelete from this page</a>
+                                    <a href="#" onclick="pmTasksTemplates.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
                                 </li> 
                                 <li>
                                     <a href="#" onclick="pmTasksTemplates.deleteSelected(); return false;" >Delete all selected elements</a>
@@ -2131,7 +2131,7 @@
 
     <section class="content"> 
         <button type="button" onclick="spajs.showLoader(pmProjects.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save project</button>
-        <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="btn-right hidden-sm hidden-xs btn btn-warning" ><i class="fa fa-refresh" aria-hidden="true"></i> Sync</button>
+        <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-warning" ><i class="fa fa-refresh" aria-hidden="true"></i> Sync</button>
         <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-play" aria-hidden="true"></i> Run playbook</button>
         <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/ansible-module/run'});  return false;" class="btn btn-info" ><i class="fa fa-terminal" aria-hidden="true"></i> Run module</button>
         <!--<button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-periodic-tasks'});  return false;" class="btn btn-info" >Create periodic tasks</button>-->
@@ -2730,7 +2730,7 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="spajs.showLoader(); return false;" class="btn btn-primary" >Save inventory</button>
+        <button type="button" onclick="spajs.showLoader(pmInventories.importInventories()); return false;" class="btn btn-primary" >Import inventory</button>
         <span class="btn btn-default textfile" style="margin-left: 10px;" >
             <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import from file
@@ -2775,7 +2775,7 @@
     <div class="col-lg-12">
         <h1>Group: <%- i %></h1> 
     </div> 
-    <%= jsonEditor.editor(valg.vars, {block:'groups', prefix:i}) %> 
+    <%= jsonEditor.editor(valg.vars, {block:'groups', prefix: 'group'+i}) %> 
 <% } %>
     
 <% for(var i in inventory.hosts){ var val = inventory.hosts[i] %>  
@@ -2800,14 +2800,11 @@
                     <label class="control-label" >Type</label>
                     <input type="text" value="<%- val.type %>"  class="form-control" maxlength="255">
                     <div class="help-block"></div>
-                </div>   
-                <% if(val.vars.ansible_ssh_private_key_file){ %>
-                        <!--Вставка файла -->
-                <% } %>
+                </div>  
             </div>
         </div>
     </section> 
-    <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:val.name}) %> 
+    <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:'host'+val.name}) %> 
 <% } %>
 
 <% for(var i in inventory.groups){ var valg = inventory.groups[i] %>  
@@ -2833,14 +2830,11 @@
                         <label class="control-label" >Type</label>
                         <input type="text" value="<%- val.type %>"  class="form-control" maxlength="255">
                         <div class="help-block"></div>
-                    </div> 
-                    <% if(val.vars.ansible_ssh_private_key_file){ %>
-                            <!--Вставка файла -->
-                    <% } %>
+                    </div>  
                 </div>
             </div>
         </section> 
-        <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:val.name}) %> 
+        <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:'host'+val.name}) %> 
     <% } %>
 <% } %>  
 </script>
@@ -4349,7 +4343,7 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a href="#"
-                                        onclick="pmGroups.deleteRows($('.multiple-select .item-row.selected')); return false;" >DeleteDelete from this page</a>
+                                        onclick="pmGroups.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
                                 </li> 
                                 <li>
                                     <a href="#" onclick="pmGroups.deleteSelected(); return false;" >Delete all selected elements</a>

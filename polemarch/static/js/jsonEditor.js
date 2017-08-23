@@ -507,6 +507,11 @@ jsonEditor.editor = function(json, opt)
     return spajs.just.render('jsonEditor', {data:json, optionsblock:opt.block, opt:opt})
 }
 
+jsonEditor.jsonEditorScrollTo = function(param_name, prefix)
+{ 
+    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    $("body").scrollTo("#json_"+param_name+"_line"+prefix) 
+}
 jsonEditor.jsonEditorGetValues = function(prefix)
 {
     if(!prefix)
