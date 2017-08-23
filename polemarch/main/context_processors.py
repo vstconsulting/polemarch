@@ -3,6 +3,7 @@ from .. import __version__ as polemarch_version
 
 
 def settings_constants(request):
+    # pylint: disable=unused-argument
     data = {"login_url": getattr(settings, 'LOGIN_URL', '/login/'),
             "logout_url": getattr(settings, 'LOGOUT_URL', '/logout/'),
             "docs_url": getattr(settings, 'DOC_URL', '/docs/'),
