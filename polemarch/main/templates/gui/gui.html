@@ -143,7 +143,7 @@
         <button type="button" onclick="spajs.open({ menuId:'template/new-task'});  return false;" class="btn btn-primary" >Create task template</button>
         <button type="button" onclick="spajs.open({ menuId:'template/new-module'});  return false;" class="btn btn-primary" >Create module template</button>
           
-        <span class="btn btn-default textfile"style="margin-left: 10px;" >
+        <span class="btn btn-default textfile" style="margin-left: 10px;" >
             <input type="file" class="input-file"  onchange="spajs.showLoader(pmTasksTemplates.importFromFile(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import template
         </span>
@@ -2581,8 +2581,8 @@
 
     <section class="content">
         <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Create inventory</a>
-        <span class="btn btn-default textfile"style="margin-left: 10px;" >
-            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.importFromFile(event));"  >
+        <span class="btn btn-default textfile" style="margin-left: 10px;" >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import from file
         </span>
         <br>
@@ -2712,6 +2712,139 @@
     </section>
 </script>
 
+<script type="text/x-just" data-just="inventories_import_page">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" >Import from file</span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" >Inventories</a></li>
+            <li class="active">Import from file</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(); return false;" class="btn btn-primary" >Save inventory</button>
+        <span class="btn btn-default textfile" style="margin-left: 10px;" >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
+            <span class="glyphicon glyphicon-file"></span> Import from file
+        </span>
+        <br>
+        <br>
+        <div class="row">
+            <~ pmInventories.model.importedInventories>
+                <% for(var i in pmInventories.model.importedInventories){ var val = pmInventories.model.importedInventories[i] %>
+                    <%= pmInventories.renderImportedInventory(val) %>
+                <% } %>
+            <~>
+        </div> 
+    </section>
+</script>
+    
+<script type="text/x-just" data-just="inventories_imported_inventory"> 
+    
+<section class="col-lg-12">
+    <div class="box box-info collapsed-box">
+        <div class="box-header with-border collapsed-box">
+            Imported file<br>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="form-group col-lg-12 col-ml-12 col-sm-12">
+                <pre><%- text %></pre>
+            </div>  
+        </div>
+    </div>
+</section> 
+        
+<div class="col-lg-12">
+    <h1>Inventory</h1> 
+</div> 
+<%= jsonEditor.editor(inventory.vars, {block:'inventories', prefix:"inventory"}) %>
+
+
+<% for(var i in inventory.groups){ var valg = inventory.groups[i] %>   
+    <div class="col-lg-12">
+        <h1>Group: <%- i %></h1> 
+    </div> 
+    <%= jsonEditor.editor(valg.vars, {block:'groups', prefix:i}) %> 
+<% } %>
+    
+<% for(var i in inventory.hosts){ var val = inventory.hosts[i] %>  
+    <div class="col-lg-12">
+        <h1>Host: <%- val.name %></h1> 
+    </div> 
+    <section class="col-lg-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                Host: <%- val.name %><br>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                </div>
+            </div>
+            <div class="box-body">   
+                <div class="form-group col-lg-2">
+                    <label class="control-label" >Name</label>
+                    <input type="text" value="<%- val.name %>"  class="form-control" maxlength="255">
+                    <div class="help-block"></div>
+                </div>
+                <div class="form-group col-lg-2">
+                    <label class="control-label" >Type</label>
+                    <input type="text" value="<%- val.type %>"  class="form-control" maxlength="255">
+                    <div class="help-block"></div>
+                </div>   
+                <% if(val.vars.ansible_ssh_private_key_file){ %>
+                        <!--Вставка файла -->
+                <% } %>
+            </div>
+        </div>
+    </section> 
+    <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:val.name}) %> 
+<% } %>
+
+<% for(var i in inventory.groups){ var valg = inventory.groups[i] %>  
+    <% for(var j in valg.hosts){ var val = valg.hosts[j] %> 
+        <div class="col-lg-12">
+            <h1>Group: <%- i %>, Host: <%- val.name %></h1>  
+        </div> 
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Group: <%- i %>, Host: <%- val.name %><br>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                    </div>
+                </div>
+                <div class="box-body">   
+                    <div class="form-group col-lg-2">
+                        <label class="control-label" >Name</label>
+                        <input type="text" value="<%- val.name %>"  class="form-control" maxlength="255">
+                        <div class="help-block"></div>
+                    </div>
+                    <div class="form-group col-lg-2">
+                        <label class="control-label" >Type</label>
+                        <input type="text" value="<%- val.type %>"  class="form-control" maxlength="255">
+                        <div class="help-block"></div>
+                    </div> 
+                    <% if(val.vars.ansible_ssh_private_key_file){ %>
+                            <!--Вставка файла -->
+                    <% } %>
+                </div>
+            </div>
+        </section> 
+        <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:val.name}) %> 
+    <% } %>
+<% } %>  
+</script>
+    
 <!-- Страница module_run_page in projects -->
 <script type="text/x-just" data-just="module_run_page">
     <section class="content-header">
@@ -3896,9 +4029,9 @@
 
     <% if(jsonEditor.options[optionsblock] && jsonEditor.options[optionsblock][name]){ thisOpt = jsonEditor.options[optionsblock][name]; %>
         <div class="form-group
-                    <% if(thisOpt.type == 'textarea' || thisOpt.type == 'textfile' ){ %> col-lg-12 <% }else{ %> col-lg-12 <% } %>
+                    <% if(thisOpt.type == 'textarea' || thisOpt.type == 'textfile' || thisOpt.type == 'keyfile' ){ %> col-lg-12 <% }else{ %> col-lg-12 <% } %>
                     <% if(thisOpt.type == 'boolean' ){ %> boolean-select <% } %>"
-                id="json_<%- name %>_line">
+                id="json_<%- name %>_line<%- opt.prefix%>">
             <label
                     class=" col-sm-4 col-lg-3 control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
                     for="#json_<%- name %>"
@@ -3906,35 +4039,32 @@
                 >
                 <%- name %>
             </label>
-            <div class="input-group col-xs-12 col-sm-8 col-lg-9 "  >
-
-                    <% if(thisOpt.type == 'textfile' ){ %>
-
-
+            <div class="input-group col-xs-12 col-sm-8 col-lg-9">
+                    <% if(thisOpt.type == 'textfile' || thisOpt.type == 'keyfile' ){ %>
                         <% if(!thisOpt.required){ %>
-                            <span class="btn btn-default btn-right" onclick="$('#json_<%- name %>_line').remove()" style="float: right; margin-left: 10px;" >
+                            <span class="btn btn-default btn-right"  onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix%>');" style="float: right; margin-left: 10px;" >
                                 <span class="glyphicon glyphicon-remove"></span>
                             </span>
                         <% } %>
 
-                        <span class="btn btn-default btn-right textfile"style="float: right; margin-left: 10px;" >
-                            <input type="file" class="input-file"  onchange="jsonEditor.loadFile(event, '#json_<%- name %>_value');"  >
+                        <span class="btn btn-default btn-right textfile" style="float: right; margin-left: 10px;" >
+                            <input type="file" class="input-file"  onchange="jsonEditor.loadFile(event, '#json_<%- name %>_value<%- opt.prefix%>');"  >
                             <span class="glyphicon glyphicon-file"></span>
                         </span>
                         <div style="clear: both; padding-top: 10px;" ></div>
                         <textarea
                                data-type="<%- thisOpt.type %>"
                                placeholder="Enter value"
-                               id="json_<%- name %>_value"
-                               class="form-control jsonEditor-data"
+                               id="json_<%- name %>_value<%- opt.prefix%>"
+                               class="form-control jsonEditor-data<%- opt.prefix%>"
                                data-json-name="<%- name %>"
                                rows="4"
                                style="resize:vertical;"
                                ><%- value %></textarea>
                     <% } else { %>
                             <% if(thisOpt.type == 'select' ){ %>
-                                <select class="form-control jsonEditor-data"
-                                        id="json_<%- name %>_value"
+                                <select class="form-control jsonEditor-data<%- opt.prefix%>"
+                                        id="json_<%- name %>_value<%- opt.prefix%>"
                                         data-json-name="<%- name %>"
                                         data-type="<%- thisOpt.type %>" >
                                     <% for(var i in thisOpt.options){ %>
@@ -3945,17 +4075,17 @@
                                 <input type="password"
                                        placeholder="Enter value"
                                        data-type="<%- thisOpt.type %>"
-                                       id="json_<%- name %>_value"
+                                       id="json_<%- name %>_value<%- opt.prefix%>"
                                        value="<%- value %>"
-                                       class="form-control jsonEditor-data"
+                                       class="form-control jsonEditor-data<%- opt.prefix%>"
                                        data-json-name="<%- name %>"
                                        >
                             <% } else if(thisOpt.type == 'boolean' ){ %>
-                                <div class="form-control jsonEditor-data selected"
+                                <div class="form-control jsonEditor-data<%- opt.prefix%> selected"
                                         onselectstart="return false"
                                         onmousedown="return false"
                                         style="cursor: pointer;"
-                                        id="json_<%- name %>_value"
+                                        id="json_<%- name %>_value<%- opt.prefix%>"
                                         data-json-name="<%- name %>"
                                         data-type="<%- thisOpt.type %>" >
                                     <div class="ico-on fa fa-toggle-on"></div>
@@ -3966,8 +4096,8 @@
                                 <textarea
                                        data-type="<%- thisOpt.type %>"
                                        placeholder="Enter value"
-                                       id="json_<%- name %>_value"
-                                       class="form-control jsonEditor-data"
+                                       id="json_<%- name %>_value<%- opt.prefix%>"
+                                       class="form-control jsonEditor-data<%- opt.prefix%>"
                                        data-json-name="<%- name %>"
                                        rows="4"
                                        style="resize:vertical;"
@@ -3976,15 +4106,15 @@
                                 <input type="text"
                                        data-type="text"
                                        placeholder="Enter value"
-                                       id="json_<%- name %>_value"
+                                       id="json_<%- name %>_value<%- opt.prefix%>"
                                        value="<%- value %>"
-                                       class="form-control jsonEditor-data"
+                                       class="form-control jsonEditor-data<%- opt.prefix%>"
                                        data-json-name="<%- name %>"
                                        >
                             <% } %>
 
                             <% if(!thisOpt.required){ %>
-                                <span class="input-group-addon  btn btn-danger" onclick="$('#json_<%- name %>_line').remove()">
+                                <span class="input-group-addon  btn btn-danger" onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix%>');">
                                     <span class="glyphicon glyphicon-remove"></span>
                                 </span>
                             <% } %>
@@ -4007,7 +4137,7 @@
             <% } %>
         </div>
     <% }else{ %>
-        <div class="form-group col-lg-12" id="json_<%- name %>_line">
+        <div class="form-group col-lg-12" id="json_<%- name %>_line<%- opt.prefix%>">
             <label class="control-label  col-sm-4 col-lg-3 <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
                     for="#json_<%- name %>"
                     style="word-wrap: break-word;">
@@ -4016,13 +4146,13 @@
             <div class="input-group  col-sm-8 col-lg-9">
                 <input type="text"
                        placeholder="Enter value"
-                       id="json_<%- name %>_value"
+                       id="json_<%- name %>_value<%- opt.prefix%>"
                        value="<%- value %>"
-                       class="form-control jsonEditor-data"
+                       class="form-control jsonEditor-data<%- opt.prefix%>"
                        data-json-name="<%- name %>"
                        data-type="text"
                        >
-                <span class="input-group-addon  btn btn-danger" onclick="$('#json_<%- name %>_line').remove()">
+                <span class="input-group-addon  btn btn-danger" onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix%>');">
                     <span class="glyphicon glyphicon-remove"></span>
                 </span>
             </div>
@@ -4033,7 +4163,7 @@
 <!-- jsonEditor -->
 <script type="text/x-just" data-just="jsonEditor">
 
-<section class="col-lg-12">
+<section class="col-lg-12"  id="jsonEditorVarListHolder<%- opt.prefix%>" style=" <% if(Object.keys(data).length == 0){ %>display:none<% } %>">
     <div class="box box-info">
         <div class="box-header with-border">
             <%- opt.title1 %><br>
@@ -4041,9 +4171,9 @@
         <div class="box-body">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="row" id="jsonEditorVarList">
+                    <div class="row" id="jsonEditorVarList<%- opt.prefix%>">
                         <% for(var i in data){ %>
-                            <%= this.partial('jsonEditorLine', { name:i, value:data[i], optionsblock:optionsblock }) %>
+                            <%= this.partial('jsonEditorLine', { name:i, value:data[i], optionsblock:optionsblock, opt:opt }) %>
                         <% } %>
                     </div>
                 </div>
@@ -4065,7 +4195,7 @@
                             Name
                         </label>
                         <div class="input-group  col-sm-10 col-lg-10 col-xs-12"  >
-                            <input type="text" placeholder="Enter name" id="new_json_name" value=""  class="form-control" >
+                            <input type="text" placeholder="Enter name" id="new_json_name<%- opt.prefix%>" value=""  class="form-control" >
                             <div class="help-block"></div>
                         </div>
                     </div>
@@ -4078,7 +4208,7 @@
                             Value
                         </label>
                         <div class="input-group col-sm-10 col-lg-10 col-xs-12"  >
-                            <textarea placeholder="Enter value" id="new_json_value" class="form-control"  style="resize:vertical;"></textarea>
+                            <textarea placeholder="Enter value" id="new_json_value<%- opt.prefix%>" class="form-control"  style="resize:vertical;"></textarea>
                             <div class="help-block"></div>
                         </div>
                     </div>
@@ -4086,13 +4216,13 @@
 
                 <div class="row">
                     <div class="form-group col-lg-1">
-                        <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>');" >Add varible</span>
+                        <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>', '<%- opt.prefix%>');" >Add varible</span>
                     </div>
                 </div>
             </div>
         </div>
     </section> 
-    <=js jsonEditor.initForm('<%- optionsblock %>') js=> 
+    <=js jsonEditor.initForm('<%- optionsblock %>', '<%- opt.prefix%>') js=> 
 <% } %>
 </script>
 
