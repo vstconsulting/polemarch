@@ -631,16 +631,9 @@ class AnsibleArgumentsReference(object):
                 return True
         return False
 
-    def _as_gui_dict_command(self, wanted, arguments):
+    def _as_gui_dict_command(self, arguments):
         command_result = {}
-        if wanted == "":
-            items = arguments.items()
-        else:
-            if wanted in arguments:
-                items = {wanted: arguments[wanted]}.items()
-            else:
-                items = {}
-        for argument, info in items:
+        for argument, info in arguments.items():
             command_result[argument] = {}
             command_result[argument]['help'] = info['help']
             command_result[argument]['type'] = self._cli_to_gui_type(
@@ -650,7 +643,8 @@ class AnsibleArgumentsReference(object):
     def as_gui_dict(self, wanted=""):
         result = {}
         for command, arguments in self.raw_dict.items():
-            result[command] = self._as_gui_dict_command(wanted, arguments)
+            if wanted == "" or command == wanted:
+                result[command] = self._as_gui_dict_command(arguments)
         return result
 
     def _extract_from_cli(self):

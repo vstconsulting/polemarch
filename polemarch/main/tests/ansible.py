@@ -16,13 +16,12 @@ class ApiAnsibleTestCase(_ApiGHBaseTestCase):
         self.assertIn("module-name", result['ansible'])
         self.assertIn("list-tasks", result['ansible-playbook'])
         # test filter
-        result = self.get_result("get", url + "?filter=args")
-        self.assertIn("args", result['ansible'])
-        self.assertNotIn("module-name", result['ansible'])
-        # test 400 if not exist filter
+        result = self.get_result("get", url + "?filter=ansible")
+        result.pop('ansible')
+        self.assertEquals(result, {})
+        # test empty if filter by non-exist
         result = self.get_result("get", url + "?filter=byaka", 200)
-        self.assertEquals(result['ansible'], {})
-        self.assertEquals(result['ansible-playbook'], {})
+        self.assertEquals(result, {})
 
     def test_ansible_modules(self):
         url = "/api/v1/ansible/modules/"
