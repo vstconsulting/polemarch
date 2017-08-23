@@ -115,6 +115,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'polemarch.main.context_processors.settings_constants',
+                'polemarch.main.context_processors.project_args',
             ],
         },
     },

@@ -49,29 +49,32 @@ else:
     use_cython = False
     ext = '.c'
 
+ext_list = [
+    "polemarch.api.v1.filters",
+    "polemarch.api.v1.serializers",
+    "polemarch.api.v1.views",
+    "polemarch.api.base",
+    "polemarch.api.handlers",
+    "polemarch.api.permissions",
+    "polemarch.api.routers",
+    "polemarch.api.urls",
+    "polemarch.main.models.base",
+    "polemarch.main.models.hosts",
+    "polemarch.main.models.projects",
+    "polemarch.main.models.tasks",
+    "polemarch.main.models.utils",
+    "polemarch.main.models.users",
+    "polemarch.main.models.vars",
+    "polemarch.main.tasks.tasks",
+    'polemarch.main.settings',
+    'polemarch.main.repo_backends',
+    'polemarch.main.validators',
+    'polemarch.main.views',
+    'polemarch.main.context_processors',
+
+]
 extensions_dict = dict((
-    ("polemarch.api.v1.filters", ["polemarch/api/v1/filters"+ext]),
-    ("polemarch.api.v1.serializers", ["polemarch/api/v1/serializers"+ext]),
-    ("polemarch.api.v1.views", ["polemarch/api/v1/views"+ext]),
-    ("polemarch.api.base", ["polemarch/api/base"+ext]),
-    ("polemarch.api.handlers", ["polemarch/api/handlers"+ext]),
-    ("polemarch.api.permissions", ["polemarch/api/permissions"+ext]),
-    ("polemarch.api.routers", ["polemarch/api/routers"+ext]),
-    ("polemarch.api.urls", ["polemarch/api/urls"+ext]),
-    ("polemarch.main.models.base", ["polemarch/main/models/base"+ext]),
-    ("polemarch.main.models.hosts", ["polemarch/main/models/hosts"+ext]),
-    ("polemarch.main.models.projects", ["polemarch/main/models/projects"+ext]),
-    ("polemarch.main.models.tasks", ["polemarch/main/models/tasks"+ext]),
-    ("polemarch.main.models.utils", ["polemarch/main/models/utils"+ext]),
-    ("polemarch.main.models.users", ["polemarch/main/models/users"+ext]),
-    ("polemarch.main.models.vars", ["polemarch/main/models/vars"+ext]),
-    ("polemarch.main.tasks.tasks", ["polemarch/main/tasks/tasks"+ext]),
-    ('polemarch.main.settings', ["polemarch/main/settings"+ext]),
-    ('polemarch.main.repo_backends', ["polemarch/main/repo_backends"+ext]),
-    ('polemarch.main.validators', ["polemarch/main/validators"+ext]),
-    ('polemarch.main.views', ["polemarch/main/views"+ext]),
-    ('polemarch.main.context_processors',
-     ["polemarch/main/context_processors"+ext]),
+    (exten, [exten.replace(".", "/")+ext]) for exten in ext_list
 ))
 
 ext_modules = list(Extension(m, f) for m, f in extensions_dict.items())
