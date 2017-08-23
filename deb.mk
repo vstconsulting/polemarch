@@ -91,7 +91,7 @@ export DEBIAN_RULES
 define DEBIAN_PREINST
 #!/bin/bash
 # making sure user created
-id -u $(USER) &>/dev/null || useradd -M $(USER)
+id -u $(USER) &>/dev/null || useradd -m $(USER)
 id -g $(USER) &>/dev/null || groupadd $(USER)
 endef
 export DEBIAN_PREINST

@@ -27,7 +27,7 @@ all: compile
 docs:
 	-rm -rf doc/_build
 	mkdir -p doc/_static
-	$(PY) setup.py build_sphinx --build-dir doc/_build
+	$(PY) setup.py build_sphinx --build-dir doc/_build -W
 
 test:
 	tox -e $(ENVS) $(TESTS)

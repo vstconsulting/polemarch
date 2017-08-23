@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.db.models.query import QuerySet
 from rest_framework import viewsets, views as rest_views
+from rest_framework.reverse import reverse
 from rest_framework.response import Response as RestResponse
 from rest_framework.decorators import detail_route, list_route
 
@@ -139,3 +140,33 @@ class HistoryModelViewSet(GenericViewSet,
 
 class ModelViewSetSet(GenericViewSet, viewsets.ModelViewSet):
     pass
+
+
+class NonModelsViewSet(GenericViewSet):
+    base_name = None
+
+    def get_queryset(self):
+        return QuerySet()
+
+
+class ListNonModelViewSet(NonModelsViewSet,
+                          viewsets.mixins.ListModelMixin):
+
+    @property
+    def methods(self):
+        this_class_dict = ListNonModelViewSet.__dict__
+        obj_class_dict = self.__class__.__dict__
+        new_methods = list()
+        for name, attr in obj_class_dict.items():
+            detail = getattr(attr, 'detail', True)
+            if name not in this_class_dict and not detail:
+                new_methods.append(name.replace('_', "-"))
+        return new_methods
+
+    def list(self, request, *args, **kwargs):
+        routes = {
+            method: reverse("{}-{}".format(self.base_name, method),
+                            request=request)
+            for method in self.methods
+        }
+        return Response(routes, 200).resp

@@ -5,7 +5,7 @@ from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 
-from ...main.utils import CmdExecutor, KVExchanger
+from ...main import utils
 from .. import base
 from ..permissions import SuperUserPermission, StaffPermission
 from . import filters
@@ -158,7 +158,8 @@ class HistoryViewSet(base.HistoryModelViewSet):
     @detail_route(methods=["post"])
     def cancel(self, request, *args, **kwargs):
         obj = self.get_object()
-        KVExchanger(CmdExecutor.CANCEL_PREFIX + str(obj.id)).send(True, 10)
+        exch = utils.KVExchanger(utils.CmdExecutor.CANCEL_PREFIX + str(obj.id))
+        exch.send(True, 10)
         return base.Response("Task canceled: {}".format(obj.id), 200).resp
 
     @detail_route(methods=["get"])
@@ -245,3 +246,21 @@ class BulkViewSet(rest_views.APIView):
             "operations_types": self._op_types.keys(),
         }
         return base.Response(response, 200).resp
+
+
+class AnsibleViewSet(base.ListNonModelViewSet):
+    base_name = "ansible"
+
+    @list_route(methods=["get"])
+    def cli_reference(self, request):
+        reference = utils.AnsibleArgumentsReference()
+        return base.Response(reference.as_gui_dict(
+            request.query_params.get("filter", "")
+        ), 200).resp
+
+    @list_route(methods=["get"])
+    def modules(self, request):
+        _mods = utils.AnsibleModules().get(
+            request.query_params.get("filter", "")
+        )
+        return base.Response(_mods, 200).resp
