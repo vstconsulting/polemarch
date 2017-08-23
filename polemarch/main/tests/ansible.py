@@ -12,15 +12,17 @@ class ApiAnsibleTestCase(_ApiGHBaseTestCase):
     def test_ansible_cli_reference(self):
         url = "/api/v1/ansible/cli_reference/"
         result = self.get_result("get", url)
-        self.assertIn("args", result)
-        self.assertIn("module-name", result)
-        self.assertIn("syntax-check", result)
+        self.assertIn("args", result['ansible'])
+        self.assertIn("module-name", result['ansible'])
+        self.assertIn("list-tasks", result['ansible-playbook'])
         # test filter
         result = self.get_result("get", url + "?filter=args")
-        self.assertIn("args", result)
-        self.assertNotIn("module-name", result)
+        self.assertIn("args", result['ansible'])
+        self.assertNotIn("module-name", result['ansible'])
         # test 400 if not exist filter
-        self.get_result("get", url + "?filter=byaka", 400)
+        result = self.get_result("get", url + "?filter=byaka", 200)
+        self.assertEquals(result['ansible'], {})
+        self.assertEquals(result['ansible-playbook'], {})
 
     def test_ansible_modules(self):
         url = "/api/v1/ansible/modules/"

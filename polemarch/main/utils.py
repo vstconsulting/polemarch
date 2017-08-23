@@ -604,13 +604,13 @@ class BaseTask(object):
 
 
 class AnsibleArgumentsReference(object):
-    _TYPES_COMPLIANCE = {
+    _GUI_TYPES_CONVERSION = {
         "string": "text",
         "int": "integer",
         None: "boolean",
         "choice": "text",
     }
-    _EXCLUSIONS = {
+    _GUI_TYPES_EXCEPTIONS = {
         "private-key": "keyfile",
         "key-file": "keyfile",
     }
@@ -619,33 +619,49 @@ class AnsibleArgumentsReference(object):
         self.raw_dict = self._extract_from_cli()
 
     def _cli_to_gui_type(self, name):
-        if name in self._EXCLUSIONS:
-            return self._EXCLUSIONS[name]
+        if name in self._GUI_TYPES_EXCEPTIONS:
+            return self._GUI_TYPES_EXCEPTIONS[name]
         if name is not None and name.endswith("-file"):
             return "textfile"
-        return self._TYPES_COMPLIANCE[name]
+        return self._GUI_TYPES_CONVERSION[name]
 
     def is_exists(self, key):
-        return key in self.raw_dict
+        for _, arguments in self.raw_dict.items():
+            if key in arguments:
+                return True
+        return False
 
-    def as_gui_dict(self, requisite=""):
-        result = {}
-        if requisite == "":
-            items = self.raw_dict.items()
+    def _as_gui_dict_command(self, wanted, arguments):
+        command_result = {}
+        if wanted == "":
+            items = arguments.items()
         else:
-            items = {requisite: self.raw_dict[requisite]}.items()
+            if wanted in arguments:
+                items = {wanted: arguments[wanted]}.items()
+            else:
+                items = {}
         for argument, info in items:
-            result[argument] = {}
-            result[argument]['help'] = info['help']
-            result[argument]['type'] = self._cli_to_gui_type(info['type'])
+            command_result[argument] = {}
+            command_result[argument]['help'] = info['help']
+            command_result[argument]['type'] = self._cli_to_gui_type(
+                info['type'])
+        return command_result
+
+    def as_gui_dict(self, wanted=""):
+        result = {}
+        for command, arguments in self.raw_dict.items():
+            result[command] = self._as_gui_dict_command(wanted, arguments)
         return result
 
     def _extract_from_cli(self):
         # pylint: disable=protected-access,
         result = {}
-        clis = [AdHocCLI(args=["", "all"]), PlaybookCLI(args=[])]
-        for cli in clis:
-            cli = AdHocCLI(args=["", "all"])
+        clis = {
+            "ansible": AdHocCLI(args=["", "all"]),
+            "ansible-playbook": PlaybookCLI(args=["", "none.yml"])
+        }
+        for cli_name in clis:
+            cli = clis[cli_name]
             cli.parse()
             cli_result = {}
             for option in cli.parser._get_all_options():
@@ -653,7 +669,7 @@ class AnsibleArgumentsReference(object):
                     name = name[2:]
                     cli_result[name] = {"type": option.type,
                                         "help": option.help}
-            result.update(cli_result)
+            result[cli_name] = cli_result
         return result
 
 
