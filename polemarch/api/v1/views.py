@@ -236,8 +236,11 @@ class BulkViewSet(rest_views.APIView):
         operations = request.data
         results = []
         for operation in operations:
-            perf_method = getattr(self, self._op_types[operation.pop("type")])
-            results.append(perf_method(**operation))
+            op_type = operation.pop("type")
+            perf_method = getattr(self, self._op_types[op_type])
+            result = perf_method(**operation)
+            result['type'] = op_type
+            results.append(result)
         return base.Response(results, 200).resp
 
     def get(self, request):
