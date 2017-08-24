@@ -216,7 +216,7 @@ pmInventories.parseFromText = function(text)
     var cSection = "_hosts";
     var  inventory = {
         hosts:[],
-        groups:[],
+        groups:{},
         vars:{}
     }
 
@@ -279,6 +279,7 @@ pmInventories.importFromFile = function(files_event)
             return function(e)
             {
                 console.log(e)
+                thisObj.model.importedInventories = []
                 thisObj.model.importedInventories.push({
                     inventory:pmInventories.parseFromText(e.target.result),
                     text:e.target.result
@@ -626,7 +627,11 @@ pmInventories.copyItem = function(item_id)
                 def.reject(e)
             }
         });
+    }).fail(function(e)
+    {
+        def.reject(e)
     })
+
 
     return def.promise();
 }

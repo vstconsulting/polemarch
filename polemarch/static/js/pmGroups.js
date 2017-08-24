@@ -13,7 +13,7 @@ pmGroups.copyItem = function(item_id)
     {
         var data = thisObj.model.items[item_id];
         delete data.id;
-        data.name = "copy from " + data.name
+        data.name = "copy-from-" + data.name
         $.ajax({
             url: "/api/v1/"+thisObj.model.name+"/",
             type: "POST",
@@ -58,6 +58,9 @@ pmGroups.copyItem = function(item_id)
                 def.reject(e)
             }
         });
+    }).fail(function(e)
+    {
+        def.reject(e)
     })
 
     return def.promise();

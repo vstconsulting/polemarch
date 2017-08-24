@@ -36,7 +36,11 @@ pmHosts.copyItem = function(item_id)
                 def.reject(e)
             }
         });
+    }).fail(function(e)
+    {
+        def.reject(e)
     })
+
 
     return def.promise();
 } 
