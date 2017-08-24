@@ -859,7 +859,7 @@ function qunitAddTests_groups()
         // Предполагается что мы от прошлого теста попали на страницу редактирования группы
         // с адресом http://192.168.0.12:8080/?group-5
         itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
-        debugger;
+      
         var done = assert.async(); 
         $.when(pmGroups.copyAndEdit(itemId)).done(function()
         {
@@ -1419,7 +1419,16 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
          
         var res = deepEqual(etalon, inventory)
         assert.ok(res, 'Сравнение инвентория распарсенного и оригинального');  
-        render(done) 
+        
+        $.when(pmInventories.importInventory(inventory)).done(function()
+        {
+            assert.ok(true, 'Успешно импортирован инвенторий');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка импорте инвентория');
+            render(done)
+        }) 
     });
     
 }
