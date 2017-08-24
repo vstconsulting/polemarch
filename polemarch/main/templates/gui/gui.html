@@ -2730,7 +2730,7 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="spajs.showLoader(pmInventories.importInventories()); return false;" class="btn btn-primary" >Import inventory</button>
+        <button type="button" onclick="spajs.showLoader(pmInventories.importInventoriesAndOpen()); return false;" class="btn btn-primary" >Import inventory</button>
         <span class="btn btn-default textfile" style="margin-left: 10px;" >
             <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import from file
@@ -3589,7 +3589,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 60px" class="hidden-xs">Type</th>
+                                    <th style="width: 70px;" class="hidden-xs">Type</th>
                                     <th style="width: 80px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>

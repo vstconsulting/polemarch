@@ -310,6 +310,16 @@ pmInventories.importInventories = function()
     }
 }
 
+pmInventories.importInventoriesAndOpen = function(inventory)
+{
+    return $.when(pmInventories.importInventories()).done(function(inventory_id){
+        spajs.open({ menuId:"inventory/"+inventory_id})
+    }).fail(function(e){
+        console.warn(e)
+        polemarch.showErrors(e) 
+    }).promise()
+}
+
 pmInventories.importInventory = function(inventory)
 {
     var vars = jsonEditor.jsonEditorGetValues('inventory')
@@ -439,6 +449,7 @@ pmInventories.importInventory = function(inventory)
                     if(val.status != 201)
                     {
                         $.notify("Error "+val.status, "error");
+                        continue;
                     }
                     hosts_ids.push(val.data.id)
                 }
@@ -459,8 +470,8 @@ pmInventories.importInventory = function(inventory)
                         },
                         success: function(data)
                         {
-                            var promise = []
                             var igroups_ids = []
+                            var bulk_update = []
                             for(var i in data)
                             {
                                 var val = data[i]
@@ -472,14 +483,13 @@ pmInventories.importInventory = function(inventory)
                                 if(val.data.children !== undefined )
                                 {
                                     igroups_ids.push(val.data.id)
-
-                                    debugger;
+ 
                                     // Это группа
                                     if(val.data.children)
                                     {
                                         if(inventory.groups[val.data.name].groups.length)
                                         {
-                                            // Добавление подгрупп
+                                            // Добавление подгрупп 
                                             var groups_ids = []
                                             for(var j in inventory.groups[val.data.name].groups)
                                             {
@@ -493,7 +503,15 @@ pmInventories.importInventory = function(inventory)
                                                     }
                                                 }
                                             }
-                                            promise.push(pmGroups.addSubGroups(val.data.id, groups_ids));
+                                            bulk_update.push({
+                                                type: "mod", 
+                                                item:'group',
+                                                method: "PUT",
+                                                data_type: 'groups',
+                                                pk:val.data.id,
+                                                data:groups_ids
+                                            })
+                                            // promise.push(pmGroups.addSubGroups(val.data.id, groups_ids));
                                         }
                                     }
                                     else
@@ -514,7 +532,15 @@ pmInventories.importInventory = function(inventory)
                                                     }
                                                 }
                                             }
-                                            promise.push(pmGroups.addSubHosts(val.data.id, hosts_ids));
+                                            bulk_update.push({
+                                                type: "mod", 
+                                                item:'group',
+                                                method: "PUT",
+                                                data_type: 'hosts',
+                                                pk:val.data.id,
+                                                data:hosts_ids
+                                            })
+                                            //promise.push(pmGroups.addSubHosts(val.data.id, hosts_ids));
                                         }
                                     }
                                 }
@@ -523,15 +549,53 @@ pmInventories.importInventory = function(inventory)
                                     // Это хост
                                 }
                             }
+                            
+                            $.when(pmInventories.addSubGroups(inventory_id, igroups_ids)).done(function()
+                            {
+                                if(bulk_update.length)
+                                {
+                                    $.ajax({
+                                        url: "/api/v1/_bulk/",
+                                        type: "POST",
+                                        contentType:'application/json',
+                                        data:JSON.stringify(bulk_update),
+                                        beforeSend: function(xhr, settings) {
+                                            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                                                // Only send the token to relative URLs i.e. locally.
+                                                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                                            }
+                                        },
+                                        success: function(data)
+                                        {
+                                            for(var i in data)
+                                            {
+                                                var val = data[i]
+                                                if(val.status != 200)
+                                                {
+                                                    $.notify("Error "+val.status, "error");
+                                                    continue;
+                                                } 
+                                            }
 
-                            promise.push(pmInventories.addSubGroups(inventory_id, igroups_ids))
-                            $.when.apply(this, promise).done(function(){
-                                def.resolve();
+                                            def.resolve(inventory_id);
+                                        },
+                                        error:function(e)
+                                        {
+                                            console.warn(e)
+                                            polemarch.showErrors(e)
+                                            def.reject();
+                                        }
+                                    }) 
+                                }
+                                else
+                                {
+                                    def.resolve(inventory_id);
+                                }
                             }).fail(function(e){
                                 console.warn(e)
                                 polemarch.showErrors(e)
                                 def.reject();
-                            })
+                            }) 
                         },
                         error:function(e)
                         {
