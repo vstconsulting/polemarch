@@ -16,7 +16,7 @@ from .users import TypesPermissions
 from .tasks import Task, PeriodicTask, History, HistoryLines, Template
 from ..validators import validate_hostname, RegexValidator
 from ..exceptions import UnknownTypeException
-from ..utils import raise_context
+from ..utils import raise_context, AnsibleArgumentsReference
 
 
 #####################################
@@ -93,6 +93,14 @@ def validate_template(instance, **kwargs):
             )
     if errors:
         raise ValidationError(errors)
+    command = "ansible-playbook"
+    ansible_args = dict(instance.data['vars'])
+    if instance.kind == "Module":
+        command = "ansible"
+    if instance.kind == "PeriodicTask" and instance.data["kind"] == "MODULE":
+        command = "ansible"
+        ansible_args.pop("group")
+    AnsibleArgumentsReference().validate_args(command, ansible_args)
 
 
 @receiver(signals.pre_delete, sender=Project)
