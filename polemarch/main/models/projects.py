@@ -70,10 +70,8 @@ class Project(AbstractModel):
                               kind=kind,
                               raw_stdout="",
                               initiator=extra.pop("initiator", 0))
-        command = "ansible" + ("-playbook" if kind == "PLAYBOOK" else "")
+        command = kind.lower()
         ansible_args = dict(extra)
-        if kind == "MODULE":
-            ansible_args.pop("group")
         utils.AnsibleArgumentsReference().validate_args(command, ansible_args)
         history = History.objects.create(status="DELAY", **history_kwargs)
         kwargs = dict(target=mod_name, inventory=inventory, history=history)

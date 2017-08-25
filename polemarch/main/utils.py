@@ -615,6 +615,7 @@ class AnsibleArgumentsReference(object):
         "key-file": "keyfile",
     }
     _EXCLUDE_ARGS = ['verbose', 'inventory-file', 'module-name']
+    _HIDDEN_ARGS = ['group']
 
     def __init__(self):
         self.raw_dict = self._extract_from_cli()
@@ -635,6 +636,8 @@ class AnsibleArgumentsReference(object):
     def _as_gui_dict_command(self, args):
         cmd_result = {}
         for arg, info in args.items():
+            if arg in self._HIDDEN_ARGS:
+                continue
             cmd_result[arg] = {}
             cmd_result[arg]['help'] = info['help']
             cmd_result[arg]['type'] = self._cli_to_gui_type(info['type'])
@@ -663,8 +666,8 @@ class AnsibleArgumentsReference(object):
         # pylint: disable=protected-access,
         result = {}
         clis = {
-            "ansible": AdHocCLI(args=["", "all"]),
-            "ansible-playbook": PlaybookCLI(args=["", "none.yml"])
+            "module": AdHocCLI(args=["", "all"]),
+            "playbook": PlaybookCLI(args=["", "none.yml"])
         }
         for cli_name in clis:
             cli = clis[cli_name]
@@ -678,6 +681,9 @@ class AnsibleArgumentsReference(object):
                     cli_result[name] = {"type": option.type,
                                         "help": option.help}
             result[cli_name] = cli_result
+        result['module']['group'] = {"type": "string", "help": ""}
+        result['periodic_playbook'] = result['playbook']
+        result['periodic_module'] = result['module']
         return result
 
 

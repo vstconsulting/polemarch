@@ -228,6 +228,7 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         data["not_found"] = data["total"] - data["operated"]
         return Response(data, status=code)
 
+    @transaction.atomic
     def _do_with_vars(self, method_name, *args, **kwargs):
         method = getattr(super(_WithVariablesSerializer, self), method_name)
         instance = method(*args, **kwargs)

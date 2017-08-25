@@ -331,7 +331,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                         200)
 
 
-class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
+class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
         super(ApiPeriodicTasksTestCase, self).setUp()
 
@@ -437,6 +437,24 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         count = PeriodicTask.objects.filter(id__in=results_id).count()
         self.assertEqual(count, 0)
 
+    def test_periodic_task_ansible_args_validation(self):
+        def update_func(args, mistake):
+            args['vars'].update(mistake)
+
+        url = "/api/v1/periodic-tasks/"
+        old_count = PeriodicTask.objects.count()
+        variables = {"limit": "host-1"}
+        # playbook
+        data = dict(mode="p1.yml", schedule="10", type="INTERVAL",
+                    project=self.periodic_project_id,
+                    inventory=self.inventory.id, name="one", vars=variables)
+        self.make_test(url, data, update_func)
+        # module
+        data['kind'] = "MODULE"
+        self.make_test(url, data, update_func, "group")
+        # none of PeriodicTasks created in DB
+        self.assertEquals(old_count, PeriodicTask.objects.count())
+
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
@@ -535,7 +553,7 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             args['data']['vars'].update(mistake)
 
         self.make_test(url, self.tmplt_data, update_func)
-        self.make_test(url, module_template_data, update_func)
+        self.make_test(url, module_template_data, update_func, "group")
         self.make_test(url, ptask_template_data, update_func, "group")
 
 
