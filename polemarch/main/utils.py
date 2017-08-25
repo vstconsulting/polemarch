@@ -620,12 +620,12 @@ class AnsibleArgumentsReference(object):
     def __init__(self):
         self.raw_dict = self._extract_from_cli()
 
-    def _cli_to_gui_type(self, name):
-        if name in self._GUI_TYPES_EXCEPTIONS:
-            return self._GUI_TYPES_EXCEPTIONS[name]
-        if name is not None and name.endswith("-file"):
+    def _cli_to_gui_type(self, argument, type_name):
+        if argument in self._GUI_TYPES_EXCEPTIONS:
+            return self._GUI_TYPES_EXCEPTIONS[argument]
+        if argument is not None and argument.endswith("-file"):
             return "textfile"
-        return self._GUI_TYPES_CONVERSION[name]
+        return self._GUI_TYPES_CONVERSION[type_name]
 
     def is_exists(self, key):
         for _, args in self.raw_dict.items():
@@ -640,7 +640,7 @@ class AnsibleArgumentsReference(object):
                 continue
             cmd_result[arg] = {}
             cmd_result[arg]['help'] = info['help']
-            cmd_result[arg]['type'] = self._cli_to_gui_type(info['type'])
+            cmd_result[arg]['type'] = self._cli_to_gui_type(arg, info['type'])
         return cmd_result
 
     def validate_args(self, command, args):
