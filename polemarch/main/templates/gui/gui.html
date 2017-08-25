@@ -2031,14 +2031,10 @@
                                                     <span class="caret"></span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-right">
-
+ 
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/periodic-tasks'}); return false;" >Periodic tasks</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/history'}); return false;" >History</a>
+                                                            onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
                                                     </li>
                                                     <li role="separator" class="divider"></li>
                                                     <li>
@@ -2051,8 +2047,13 @@
                                                     <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/periodic-tasks'}); return false;" >Periodic tasks</a>
                                                     </li>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/history'}); return false;" >History</a>
+                                                    </li>
+                                                    <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.showLoader(pmProjects.deleteItem(<%- valid %>)); return false;" >Delete</a>
