@@ -13,8 +13,10 @@ class ApiAnsibleTestCase(_ApiGHBaseTestCase):
         url = "/api/v1/ansible/cli_reference/"
         result = self.get_result("get", url)
         self.assertIn("args", result['ansible'])
-        self.assertIn("module-name", result['ansible'])
+        self.assertIn("forks", result['ansible'])
         self.assertIn("list-tasks", result['ansible-playbook'])
+        self.assertNotIn("verbose", result['ansible'])
+        self.assertNotIn("verbose", result['ansible-playbook'])
         # test filter
         result = self.get_result("get", url + "?filter=ansible")
         result.pop('ansible')

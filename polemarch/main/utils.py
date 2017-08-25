@@ -614,6 +614,7 @@ class AnsibleArgumentsReference(object):
         "private-key": "keyfile",
         "key-file": "keyfile",
     }
+    _EXCLUDE_ARGS = ['verbose', 'inventory-file', 'module-name']
 
     def __init__(self):
         self.raw_dict = self._extract_from_cli()
@@ -626,25 +627,36 @@ class AnsibleArgumentsReference(object):
         return self._GUI_TYPES_CONVERSION[name]
 
     def is_exists(self, key):
-        for _, arguments in self.raw_dict.items():
-            if key in arguments:
+        for _, args in self.raw_dict.items():
+            if key in args:
                 return True
         return False
 
-    def _as_gui_dict_command(self, arguments):
-        command_result = {}
-        for argument, info in arguments.items():
-            command_result[argument] = {}
-            command_result[argument]['help'] = info['help']
-            command_result[argument]['type'] = self._cli_to_gui_type(
-                info['type'])
-        return command_result
+    def _as_gui_dict_command(self, args):
+        cmd_result = {}
+        for arg, info in args.items():
+            cmd_result[arg] = {}
+            cmd_result[arg]['help'] = info['help']
+            cmd_result[arg]['type'] = self._cli_to_gui_type(info['type'])
+        return cmd_result
+
+    def validate_args(self, command, args):
+        try:
+            for argument, value in args.items():
+                mtype = self.raw_dict[command][argument]["type"]
+                if mtype == 'int':
+                    int(value)
+                elif mtype is None and value is not None:
+                    raise AssertionError("This argument shouldn't have value")
+        except (KeyError, ValueError, AssertionError) as e:
+            raise ValueError("Incorrect argument: {}. "
+                             "Problem: {}".format(argument, str(e)))
 
     def as_gui_dict(self, wanted=""):
         result = {}
-        for command, arguments in self.raw_dict.items():
-            if wanted == "" or command == wanted:
-                result[command] = self._as_gui_dict_command(arguments)
+        for cmd, args in self.raw_dict.items():
+            if wanted == "" or cmd == wanted:
+                result[cmd] = self._as_gui_dict_command(args)
         return result
 
     def _extract_from_cli(self):
@@ -661,6 +673,8 @@ class AnsibleArgumentsReference(object):
             for option in cli.parser._get_all_options():
                 for name in option._long_opts:
                     name = name[2:]
+                    if name in self._EXCLUDE_ARGS:
+                        continue
                     cli_result[name] = {"type": option.type,
                                         "help": option.help}
             result[cli_name] = cli_result
