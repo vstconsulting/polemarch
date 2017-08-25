@@ -1,5 +1,6 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponse
 from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
@@ -141,6 +142,12 @@ class HistoryViewSet(base.HistoryModelViewSet):
     serializer_class = serializers.HistorySerializer
     serializer_class_one = serializers.OneHistorySerializer
     filter_class = filters.HistoryFilter
+
+    def _get_extra_queryset(self):
+        return self.queryset.filter(
+            Q(initiator=self.request.user.id, initiator_type="users") |
+            Q(project__in=self.get_user_aval_projects())
+        ).distinct()
 
     @detail_route(methods=["get"])
     def raw(self, request, *args, **kwargs):
