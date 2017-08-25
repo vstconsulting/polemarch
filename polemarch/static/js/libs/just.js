@@ -20,7 +20,8 @@
 (function () {
 	'use strict';
 	var
-		JUST = function (newOptions) {
+		JUST = function (newOptions) 
+                {
 			var
 				options = {
 					open : '<%',
@@ -41,9 +42,10 @@
 				STATE_LOOP = 8,
 				STATE_SUBBLOK = 9,
 				STATE_TEXT = 10,
+				STATE_JS = 11,
 				cache = {},
                                 countUid = 0,
-
+                                
 				regExpEscape = function (str) {
 					return String(str).replace(escapeExp, '\\$1');
 				},
@@ -126,10 +128,10 @@
 
                                                 // Для отслеживания элемента массива по индексу  <~ polemarch.model.groups[item_id] > надо писать без одинарных кавычек forObject[2]
                                                 //var res = html.replace("<"+startPart[lastStatus]+"<~>",
-                                                //                "<%= "+forObject[1]+".justHtml("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
+                                                //                "<%= "+forObject[1]+".justTpl("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
                                                                 
                                                 var res = html.replace("<"+startPart[lastStatus]+"<~>",
-                                                                "<%= "+forObject[1]+".justHtml("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
+                                                                "<%= "+forObject[1]+".justTpl("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
                                                                 )
                                                 // console.info("html:", html)
                                                 // console.error("res:", res)
@@ -155,8 +157,9 @@
                                     return html
                                 },
 				parseToCode = function (html) {
-
+ 
                                     html = reactiveReplace(html)
+                                    html = html.replace(/<=js(.*?)js=>/g, JustEvalJsPattern)
                                     // console.log("restpl", html)
 
                                     // <%= Вывод html
@@ -172,7 +175,7 @@
     AAA
         <~var j in line>
             <div>
-                <%= j %> - <%= line.justHtml(j) %>
+                <%= j %> - <%= line.justTpl(j) %>
             </div>
         <~>
     BBB
@@ -213,7 +216,7 @@
 								prefix = '\',(' + line + ', ';
 								postfix = '),\'';
 								state = STATE_TEXT;
-								break;
+								break; 
 							case '?':
 								prefix = '\');' + line + ';';
 								postfix = 'this.buffer.push(\'';
@@ -245,7 +248,7 @@
 								break;
 							case STATE_TEXT:
 								buffer.push(prefix, 'JustEscapeHtml('+text.substr(jsFromPos).replace(trimExp, '')+')', postfix);
-								break;
+								break; 
 							case STATE_CONDITION:
 								tmp = text.substr(jsFromPos).replace(trimExp, '');
 								if (!tmp.length) {
@@ -358,11 +361,10 @@
 				var  page = new Template(template, customData, undefined);
 				return page.renderSync();
 			};
-
-
+                        
 			Template.prototype.renderSync = function () {
 				var that = this;
-
+ 
 				var blank = loadSync(this.file)
                                 try {
                                         var buffer = blank.call(that);
@@ -378,7 +380,8 @@
                                             }
                                             return html;
                                 } catch (e) {
-                                        console.warn(e.message + ' in ' + that.file + ' on line ' + that.line);
+                                        console.error(e.message + ' in ' + that.file + ' on line ' + that.line);
+                                        throw e.message + ' in ' + that.file + ' on line ' + that.line 
                                         return;
                                 }
 			};
@@ -409,7 +412,7 @@
                             var html = tpl.renderSync();
                             if(html == undefined)
                             {
-                                console.warn("renderSync error", template, data)
+                                console.error("renderSync error", template, data)
                             }
                             return html;
 			};
@@ -579,6 +582,31 @@
 
 		window.JUST = JUST;
 }());
+
+
+function getUUID(s)
+{
+    if(!s)
+    {
+        s = ""
+    }
+    
+    var str = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890";
+    for(var i = 0; i< 24; i++)
+    {
+        s += str[Math.floor(Math.random()*(str.length-1))]
+    }
+    return s
+}
+
+window.JustEvalJsPattern_pageUUID = getUUID("pageUUID");
+
+
+function JustEvalJsPattern(text) 
+{
+    //console.log(text.replace(/^<=|=>$/g, ""))
+    return "<="+window.JustEvalJsPattern_pageUUID+text.replace(/^<=js|js=>$/g, "")+window.JustEvalJsPattern_pageUUID+"=>"
+}
 
 
 function JustEscapeHtml(text) {

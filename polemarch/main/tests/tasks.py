@@ -15,9 +15,10 @@ from ..models import Project
 from ..models import Task, PeriodicTask, History, Inventory, Template
 
 from .inventory import _ApiGHBaseTestCase
+from ._base import AnsibleArgsValidationTest
 
 
-class ApiTasksTestCase(_ApiGHBaseTestCase):
+class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
         super(ApiTasksTestCase, self).setUp()
         data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git",
@@ -241,13 +242,19 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
             return "test_output"
         subprocess_function.side_effect = side_effect
         inv1, h1 = self.create_inventory()
+        url = "/api/v1/projects/{}/execute-playbook/"
         # check good run (without any problems)
         start_time = now()
         self.post_result(
-            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
-            data=json.dumps(dict(inventory=inv1, playbook="other/playbook.yml",
-                                 limit="limited-hosts", user="some-def-user",
-                                 extra_vars=extra_vars, key_file=key_file))
+            url.format(self.task_proj.id),
+            data=json.dumps({
+                "inventory": inv1,
+                "playbook": "other/playbook.yml",
+                "limit": "limited-hosts",
+                "user": "some-def-user",
+                "extra-vars": extra_vars,
+                "key-file": key_file
+            })
         )
         end_time = now()
         history = get_history_item()
@@ -262,6 +269,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                         history.start_time <= history.stop_time)
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
+        self.assertEqual(history.initiator_object, self.user)
         History.objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, None), "OFFLINE")
@@ -269,16 +277,43 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
         # error at node
         check_status(subprocess.CalledProcessError(None, None, None), "ERROR")
         History.objects.all().delete()
-
         result = self.get_result(
             "post",
-            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            url.format(self.task_proj.id),
             400,
             data=json.dumps(dict(inventory=inv1, playbook="",
                                  limit="limited-hosts", user="some-def-user",
                                  extra_vars=extra_vars, key_file=key_file))
         )
         self.assertEqual(result["detail"], "Empty playbook/module name.")
+
+    def test_ansible_args_validate_at_execution(self):
+        def update_func(args, mistake):
+            args.update(mistake)
+
+        inv1, h1 = self.create_inventory()
+        # you can't destroy world if you even does not know ansible arguments )
+        # test playbook execution errors with incorrect arguments:
+        playbook_url = "/api/v1/projects/" \
+                       "{}/execute-playbook/".format(self.task_proj.id)
+        required_args_playbook = {
+            "inventory": inv1,
+            "playbook": "destroy_world.yml",
+            "user": "evil_genius",
+            "key-file": "key_to_absolute_weapon"
+        }
+        self.make_test(playbook_url, required_args_playbook, update_func)
+        # argument not exists error during module execution
+        module_url = "/api/v1/projects/" \
+                     "{}/execute-module/".format(self.task_proj.id)
+        required_args_module = {
+            "inventory": inv1,
+            "module": "ping",
+            "group": "penguin",
+            "user": "evil_genius",
+            "key-file": "key_to_absolute_weapon"
+        }
+        self.make_test(module_url, required_args_module, update_func, "group")
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_cancel_task(self, subprocess_function):
@@ -296,7 +331,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase):
                         200)
 
 
-class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
+class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
         super(ApiPeriodicTasksTestCase, self).setUp()
 
@@ -402,8 +437,26 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase):
         count = PeriodicTask.objects.filter(id__in=results_id).count()
         self.assertEqual(count, 0)
 
+    def test_periodic_task_ansible_args_validation(self):
+        def update_func(args, mistake):
+            args['vars'].update(mistake)
 
-class ApiTemplateTestCase(_ApiGHBaseTestCase):
+        url = "/api/v1/periodic-tasks/"
+        old_count = PeriodicTask.objects.count()
+        variables = {"limit": "host-1"}
+        # playbook
+        data = dict(mode="p1.yml", schedule="10", type="INTERVAL",
+                    project=self.periodic_project_id,
+                    inventory=self.inventory.id, name="one", vars=variables)
+        self.make_test(url, data, update_func)
+        # module
+        data['kind'] = "MODULE"
+        self.make_test(url, data, update_func, "group")
+        # none of PeriodicTasks created in DB
+        self.assertEquals(old_count, PeriodicTask.objects.count())
+
+
+class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
         super(ApiTemplateTestCase, self).setUp()
 
@@ -486,13 +539,22 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase):
                 inventory=222233222,
                 args="ls -la",
                 vars=dict(
-                    user="centos"
+                    user="centos",
+                    group="asddf"
                 )
             )
         )
         module_template = Template.objects.create(**module_template_data)
         self.details_test(url + "{}/".format(module_template.id),
                           **module_template_data)
+        # test validation
+
+        def update_func(args, mistake):
+            args['data']['vars'].update(mistake)
+
+        self.make_test(url, self.tmplt_data, update_func)
+        self.make_test(url, module_template_data, update_func, "group")
+        self.make_test(url, ptask_template_data, update_func, "group")
 
 
 class ApiHistoryTestCase(_ApiGHBaseTestCase):
@@ -507,7 +569,8 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         self.default_kwargs = dict(project=self.ph, mode="task.yml",
                                    raw_inventory="inventory",
                                    raw_stdout="text",
-                                   inventory=self.history_inventory)
+                                   inventory=self.history_inventory,
+                                   initiator=self.user.id)
         self.histories = [
             History.objects.create(status="OK",
                                    start_time=now() - timedelta(hours=15),
@@ -539,7 +602,8 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                           start_time=self.histories[0].start_time.strftime(df),
                           stop_time=self.histories[0].stop_time.strftime(df),
                           raw_inventory="inventory", raw_stdout="text",
-                          inventory=self.history_inventory.id)
+                          inventory=self.history_inventory.id,
+                          initiator=self.user.id, initiator_type="users")
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)

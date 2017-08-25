@@ -46,7 +46,7 @@ jsonEditor.options['item']['ansible_ssh_pass'] = {
 }
 
 jsonEditor.options['item']['ansible_ssh_private_key_file'] = {
-    type:'textfile',
+    type:'keyfile',
     help:'Inventory Parameter - ansible_ssh_private_key_file',
     helpcontent:'Private key file used by ssh. Useful if using multiple keys and you don’t want to use SSH agent.'
 }
@@ -192,7 +192,7 @@ jsonEditor.options['tasks']['force-handlers'] = {
 }
 
 jsonEditor.options['tasks']['forks'] = {
-    type:'textarea',
+    type:'text',
     help:'-f FORKS, --forks=FORKS',
     helpcontent:"specify number of parallel processes to use (default=5)",
     alias:'f'
@@ -206,7 +206,7 @@ jsonEditor.options['tasks']['help'] = {
 }
 
 jsonEditor.options['tasks']['inventory-file'] = {
-    type:'text',
+    type:'error',
     help:'-i INVENTORY, --inventory-file=INVENTORY',
     helpcontent:"specify inventory host path (default=/etc/ansible/hosts) or comma separated host list.",
     alias:'i'
@@ -248,7 +248,7 @@ jsonEditor.options['tasks']['module-path'] = {
 }
 
 jsonEditor.options['tasks']['new-vault-password-file'] = {
-    type:'textfile',
+    type:'keyfile',
     help:'--new-vault-password-file=NEW_VAULT_PASSWORD_FILE',
     helpcontent:"new vault password file for rekey",
     alias:''
@@ -297,40 +297,40 @@ jsonEditor.options['tasks']['tags'] = {
 }
 
 jsonEditor.options['tasks']['vault-password-file'] = {
-    type:'textfile',
+    type:'keyfile',
     help:'--vault-password-file=VAULT_PASSWORD_FILE',
     helpcontent:"vault password file",
     alias:''
 }
 
-/*
 jsonEditor.options['tasks']['verbose'] = {
-    type:'boolean',
+    type:'error',
     help:'-v, --verbose',
     helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
     alias:'v'
 }
 
 jsonEditor.options['tasks']['vv'] = {
-    type:'boolean',
+    type:'error',
     help:'-v, --verbose',
     helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
     alias:'vv'
 }
 
 jsonEditor.options['tasks']['vvv'] = {
-    type:'boolean',
+    type:'error',
     help:'-v, --verbose',
     helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
     alias:'vvv'
 }
 
 jsonEditor.options['tasks']['vvvv'] = {
-    type:'boolean',
+    type:'error',
     help:'-v, --verbose',
     helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
     alias:'vvvv'
-}*/
+}
+/**/
 
 jsonEditor.options['tasks']['version'] = {
     type:'boolean',
@@ -347,7 +347,7 @@ jsonEditor.options['tasks']['ask-pass'] = {
 }
 
 jsonEditor.options['tasks']['private-key'] = {
-    type:'textfile',
+    type:'keyfile',
     help:'--private-key=PRIVATE_KEY_FILE, --key-file=PRIVATE_KEY_FILE',
     helpcontent:"use this file to authenticate the connection\n<br><i>Connection options group: control as whom and how to connect to hosts</i>",
     alias:''
@@ -493,18 +493,41 @@ jsonEditor.editor = function(json, opt)
         opt.title1 = 'Variables'
     }
     
+    if(!opt.prefix)
+    {
+        opt.prefix = 'prefix'
+    }
+    opt.prefix = opt.prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    
     if(!opt.title2)
     {
         opt.title2 = 'Adding new variable'
     }
     
-    return spajs.just.render('jsonEditor', {data:json, optionsblock:opt.block, opt})
+    return spajs.just.render('jsonEditor', {data:json, optionsblock:opt.block, opt:opt})
 }
 
-jsonEditor.jsonEditorGetValues = function()
+jsonEditor.jsonEditorScrollTo = function(param_name, prefix)
+{ 
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+    
+    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    $("body").scrollTo("#json_"+param_name+"_line"+prefix) 
+}
+
+jsonEditor.jsonEditorGetValues = function(prefix)
 {
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    
     var data = {}
-    var arr = $(".jsonEditor-data")
+    var arr = $(".jsonEditor-data"+prefix)
     for(var i = 0; i< arr.length; i++)
     {
         var type = $(arr[i]).attr('data-type');
@@ -512,7 +535,10 @@ jsonEditor.jsonEditorGetValues = function()
 
         if(type == "boolean")
         {
-            data[index] = $(arr[i]).hasClass('selected')
+            if($(arr[i]).hasClass('selected'))
+            {
+                data[index] = "";
+            }
         }
         else
         {
@@ -523,15 +549,36 @@ jsonEditor.jsonEditorGetValues = function()
     return data
 }
 
-jsonEditor.jsonEditorAddVar = function(optionsblock)
+jsonEditor.jsonEditorRmVar = function(name, prefix)
 {
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+    
+    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    $('#json_'+name+'_line'+prefix+'').remove()
+    if(!$(".jsonEditor-data"+prefix).length)
+    {
+        $("#jsonEditorVarListHolder"+prefix).hide()
+    }
+}
+
+jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
+{
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    
     if(!optionsblock)
     {
         optionsblock = 'base'
     }
 
-    var name = $('#new_json_name').val()
-    var value = $('#new_json_value').val()
+    var name = $('#new_json_name'+prefix).val()
+    var value = $('#new_json_value'+prefix).val()
 
     if(!name)
     {
@@ -539,18 +586,18 @@ jsonEditor.jsonEditorAddVar = function(optionsblock)
         return;
     }
 
-    if($("#json_"+name+"_value").length)
+    if($("#json_"+name+"_value"+prefix).length)
     {
         $.notify("This var already exists", "error");
         return;
     }
 
-    if(/^--/.test(name))
+    /*if(/^--/.test(name))
     {
         name = name.replace(/^--/, "ansible_")
-    }
+    }*/
 
-    if(/^-[A-z]$/.test(name))
+    if(/^-[A-z0-9]$/.test(name))
     {
         for(var i in jsonEditor.options[optionsblock])
         {
@@ -561,11 +608,73 @@ jsonEditor.jsonEditorAddVar = function(optionsblock)
             }
         }
     }
+    
+    if(jsonEditor.options[optionsblock][name])
+    {
+        var optInfo = jsonEditor.options[optionsblock][name]
+        if(optInfo.type == 'error')
+        {
+            $.notify("Adding this variable will be the mistake", "error");
+            return;
+        }
+    }
 
-    $('#new_json_name').val('')
-    $('#new_json_value').val('')
+    $('#new_json_name'+prefix).val('')
+    $('#new_json_value'+prefix).val('')
+    
+    var opt = {
+        prefix:prefix
+    }
 
-    $("#jsonEditorVarList").append(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock}))
+    $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt})) 
+    $("#jsonEditorVarListHolder"+prefix).show()
+}
+
+jsonEditor.initForm = function(optionsblock, prefix)
+{ 
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    
+    new autoComplete({
+        selector: '#new_json_name'+prefix,
+        minChars: 0,
+        cache:false,
+        showByClick:true,
+        menuClass:'new_json_name'+prefix,
+        renderItem: function(item, search)
+        {
+            return '<div class="autocomplete-suggestion" data-value="' + item.value + '" >' + item.value + ' - <i style="color:#777">' + item.help + '</i></div>';
+        },
+        onSelect: function(event, term, item)
+        {
+            //console.log('onSelect', term, item);
+            var value = $(item).attr('data-value'); 
+            $("#new_json_name"+prefix).val(value);
+        },
+        source: function(term, response)
+        {
+            term = term.toLowerCase();
+
+            var matches = []
+            for(var i in jsonEditor.options[optionsblock])
+            {
+                var val = jsonEditor.options[optionsblock][i]
+                if(val.help.toLowerCase().indexOf(term) != -1)
+                {
+                    val.value = i
+                    matches.push(val)
+                }
+            }
+            if(matches.length)
+            {
+                response(matches);
+            }
+        }
+    });
+
 }
 
 jsonEditor.loadFile = function(event, element)

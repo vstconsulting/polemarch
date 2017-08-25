@@ -1,11 +1,34 @@
 
-var pmTemplates = new pmItems()
+var pmTemplates = inheritance(pmItems)
+ 
 pmTemplates.model.name = "templates"
 
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmTemplates.model.kind = "Task,Module"
 
+pmTemplates.copyAndEdit = function(item_id)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    return $.when(this.copyItem(item_id)).done(function(newItemId)
+    {
+        $.when(spajs.open({ menuId:thisObj.model.page_name + "/"+thisObj.model.items[item_id].kind+"/"+newItemId})).done(function(){
+            $.notify("Item was duplicate", "success");
+            def.resolve()
+        }).fail(function(e){
+            $.notify("Error in duplicate item", "error");
+            polemarch.showErrors(e)
+            def.reject()
+        })
+    }).fail(function(){
+        def.reject()
+    })
+
+    return def.promise();
+}
+    
+    
 // Содержит соответсвия разных kind к объектами с ними работающими.
 pmTemplates.model.kindObjects = {}
 
@@ -16,30 +39,85 @@ pmTemplates.showSearchResults = function(holder, menuInfo, data)
 
     return $.when(this.sendSearchQuery({kind:thisObj.model.kind, name:query})).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:query}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:query}))
     }).fail(function()
     {
         $.notify("", "error");
     })
 }
-
-pmTemplates.showList = function(holder, menuInfo, data)
+ 
+pmTemplates.exportToFile = function(item_ids)
 {
-    var thisObj = this;
-    var offset = 0
-    var limit = this.pageSize;
-    if(data.reg && data.reg[1] > 0)
+    var def = new $.Deferred();
+    if(!item_ids)
     {
-        offset = this.pageSize*(data.reg[1] - 1);
+        $.notify("No data for export", "error");
+        def.reject();
+        return def.promise();
     }
 
-    return $.when(this.sendSearchQuery({kind:thisObj.model.kind}, limit, offset)).done(function()
-    {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_list', {query:""}))
-    }).fail(function()
-    {
-        $.notify("", "error");
-    }).promise()
+    var data = {
+        "filter": {
+            "id__in": item_ids,
+        },
+    }
+
+    var thisObj = this;
+    $.ajax({
+        url: "/api/v1/"+this.model.name+"/filter/?detail=1",
+        type: "POST",
+        contentType:'application/json',
+        data:JSON.stringify(data),
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            var filedata = []
+            for(var i in data.results)
+            {
+                var val = data.results[i]
+                delete val['id'];
+                delete val['url'];
+
+                filedata.push({ 
+                    item: thisObj.model.page_name,
+                    data: val
+                })
+            }
+            
+            var fileInfo = {
+                data:filedata,
+                count:filedata.length,
+                version:"1"
+            }
+            
+            var textFileAsBlob = new Blob([JSON.stringify(fileInfo)], {
+              type: 'text/plain'
+            });
+
+            var newLink = document.createElement('a')
+            newLink.href = window.URL.createObjectURL(textFileAsBlob)
+            newLink.download = thisObj.model.name+"-"+Date()+".json"
+            newLink.target = "_blanl"
+            var event = new MouseEvent("click");
+            newLink.dispatchEvent(event);
+
+
+            def.resolve();
+        },
+        error:function(e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+            def.reject();
+        }
+    });
+
+    return def.promise();
 }
 
 pmTemplates.importFromFile = function(files_event)
@@ -73,8 +151,6 @@ pmTemplates.importFromFile = function(files_event)
                 }
                 console.log(bulkdata)
                  
-                
-                 
                 $.ajax({
                     url: "/api/v1/_bulk/",
                     type: "POST",
@@ -106,78 +182,5 @@ pmTemplates.importFromFile = function(files_event)
         break;
     }
     
-    return def.promise();
-}
-
-pmTemplates.exportToFile = function(item_ids)
-{
-    var def = new $.Deferred();
-    if(!item_ids)
-    {
-        $.notify("No data for export", "error");
-        def.reject();
-        return def.promise();
-    }
-
-    var data = {
-        "filter": {
-            "id__in": item_ids,
-        },
-    }
-
-    $.ajax({
-        url: "/api/v1/templates/filter/?detail=1",
-        type: "POST",
-        contentType:'application/json',
-        data:JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
-        {
-            var filedata = []
-            for(var i in data.results)
-            {
-                var val = data.results[i]
-                delete val['id'];
-                delete val['url'];
-
-                filedata.push({ 
-                    item: "template",
-                    data: val
-                })
-            }
-            
-            var fileInfo = {
-                data:filedata,
-                count:filedata.length,
-                version:"1"
-            }
-            
-            var textFileAsBlob = new Blob([JSON.stringify(fileInfo)], {
-              type: 'text/plain'
-            });
-
-            var newLink = document.createElement('a')
-            newLink.href = window.URL.createObjectURL(textFileAsBlob)
-            newLink.download = "pmTemplates-"+Date()+".json"
-            newLink.target = "_blanl"
-            var event = new MouseEvent("click");
-            newLink.dispatchEvent(event);
-
-
-            def.resolve();
-        },
-        error:function(e)
-        {
-            console.warn(e)
-            polemarch.showErrors(e)
-            def.reject();
-        }
-    });
-
     return def.promise();
 }

@@ -13,7 +13,9 @@ from celery.schedules import crontab
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+from django.contrib.auth.models import User
 
+from ..utils import AnsibleArgumentsReference
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
 from .base import BModel, BManager, BQuerySet, models
@@ -80,6 +82,17 @@ class PeriodicTask(AbstractModel):
     def get_vars(self):
         qs = self.variables.order_by("key")
         return OrderedDict(qs.values_list('key', 'value'))
+
+    @transaction.atomic()
+    def set_vars(self, variables):
+        command = "playbook"
+        ansible_args = {}
+        for key, value in variables.items():
+            ansible_args[key] = value
+        if self.kind == "MODULE":
+            command = "module"
+        AnsibleArgumentsReference().validate_args(command, ansible_args)
+        return super(PeriodicTask, self).set_vars(variables)
 
     def get_schedule(self):
         if self.type == "CRONTAB":
@@ -150,22 +163,25 @@ class HistoryQuerySet(BQuerySet):
 
 
 class History(BModel):
-    objects       = HistoryQuerySet.as_manager()
-    project       = models.ForeignKey(Project,
-                                      on_delete=models.CASCADE,
-                                      related_query_name="history",
-                                      null=True)
-    inventory     = models.ForeignKey(Inventory,
-                                      on_delete=models.CASCADE,
-                                      related_query_name="history",
-                                      blank=True, null=True, default=None)
-    mode          = models.CharField(max_length=256)
-    kind          = models.CharField(max_length=50, default="PLAYBOOK")
-    start_time    = models.DateTimeField(default=timezone.now)
-    stop_time     = models.DateTimeField(blank=True, null=True)
-    raw_args      = models.TextField(default="")
-    raw_inventory = models.TextField(default="")
-    status        = models.CharField(max_length=50)
+    objects        = HistoryQuerySet.as_manager()
+    project        = models.ForeignKey(Project,
+                                       on_delete=models.CASCADE,
+                                       related_query_name="history",
+                                       null=True)
+    inventory      = models.ForeignKey(Inventory,
+                                       on_delete=models.CASCADE,
+                                       related_query_name="history",
+                                       blank=True, null=True, default=None)
+    mode           = models.CharField(max_length=256)
+    kind           = models.CharField(max_length=50, default="PLAYBOOK")
+    start_time     = models.DateTimeField(default=timezone.now)
+    stop_time      = models.DateTimeField(blank=True, null=True)
+    raw_args       = models.TextField(default="")
+    raw_inventory  = models.TextField(default="")
+    status         = models.CharField(max_length=50)
+    initiator      = models.IntegerField(default=0)
+    # Initiator type should be always as in urls for api
+    initiator_type = models.CharField(max_length=50, default="users")
 
     class NoFactsAvailableException(NotApplicable):
         def __init__(self):
@@ -177,8 +193,12 @@ class History(BModel):
         ordering = ["-id"]
         index_together = [
             ["id", "project", "mode", "status", "inventory",
-             "start_time", "stop_time"]
+             "start_time", "stop_time", "initiator", "initiator_type"]
         ]
+
+    @property
+    def initiator_object(self):
+        return User.objects.get(id=self.initiator)
 
     @property
     def facts(self):

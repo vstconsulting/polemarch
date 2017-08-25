@@ -689,14 +689,15 @@ if(!window.spajs)
         //console.log("openMenu", menuId, menuInfo)
         if(!menuInfo || !menuInfo.onOpen)
         {
-            console.error("URL не зарегистрирован", opt.menuId, opt)
+            console.error("URL not registered", opt.menuId, opt)
             def.reject()
+            throw "URL not registered " + opt.menuId;
             return def.promise();
         }
 
         if(spajs.currentOpenMenu && menuInfo.id == spajs.currentOpenMenu.id && !opt.reopen)
         {
-            console.warn("Повторное открытие меню", menuInfo)
+            console.warn("Re-opening the menu", menuInfo)
             def.reject()
             return def.promise();
         }
@@ -855,130 +856,6 @@ if(!window.spajs)
         })
     }
 
-    /**
-     * Плагин для вставки шаблона в тело элемента
-     * @param {string} tplText
-     *
-     * После вставки переданого хтимл кода выполняет js код который был в блоках <js=   =js>
-     * Например  строка "html  <js= console.log("test"); =js> html" будет вставлено "html html" и потом выполнено console.log("test");
-     */
-    $.fn.insertTpl = function(tplText)
-    {
-        if(!tplText)
-        {
-            return this;
-        }
-
-        if(typeof tplText !== "string")
-        {
-            tplText = ""+tplText
-        }
-
-        var html = tplText.replace(/<js=(.*?)=js>/g, "")
-
-        if(window.cordova && 0)
-        {
-            html = html.replace(/ onclick=/gmi, "ontouchstart=")
-        }
-
-        this.each(function()
-        {
-            $(this).html(html)
-        });
-
-        /*
-        var js = tplText.match(/<js=(.*?)=js>/g)
-        for(var i in js)
-        {
-            if(js[i] && js[i].length > 8);
-            {
-                var code = js[i].substr(4, js[i].length - 8)
-                console.log(i, code)
-                eval(code);
-            }
-        }
-        */
-        return this;
-    };
-
-    $.fn.appendTpl = function(tplText)
-    {
-        if(!tplText)
-        {
-            return this;
-        }
-
-        if(typeof tplText !== "string")
-        {
-            tplText = ""+tplText
-        }
-
-        var html = tplText.replace(/<js=(.*?)=js>/g, "")
-
-        if(window.cordova && 0)
-        {
-            html = html.replace(/ onclick=/gmi, "ontouchstart=")
-        }
-
-        this.each(function()
-        {
-            $(this).append(html)
-        });
-
-        /*
-        var js = tplText.match(/<js=(.*?)=js>/g)
-        for(var i in js)
-        {
-            if(js[i] && js[i].length > 8);
-            {
-                var code = js[i].substr(4, js[i].length - 8)
-                console.log(i, code)
-                eval(code);
-            }
-        }
-        */
-        return this;
-    };
-
-    $.fn.prependTpl = function(tplText)
-    {
-        if(!tplText)
-        {
-            return this;
-        }
-
-        if(typeof tplText !== "string")
-        {
-            tplText = ""+tplText
-        }
-
-        var html = tplText.replace(/<js=(.*?)=js>/g, "")
-
-        if(window.cordova && 0)
-        {
-            html = html.replace(/ onclick=/gmi, "ontouchstart=")
-        }
-
-        this.each(function()
-        {
-            $(this).prepend(html)
-        });
-
-        /*
-        var js = tplText.match(/<js=(.*?)=js>/g)
-        for(var i in js)
-        {
-            if(js[i] && js[i].length > 8);
-            {
-                var code = js[i].substr(4, js[i].length - 8)
-                console.log(i, code)
-                eval(code);
-            }
-        }
-        */
-        return this;
-    };
- 
     //******************************************************************************
     //* Функции для работы с ajax запросами
     //******************************************************************************

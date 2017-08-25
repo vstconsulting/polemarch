@@ -137,7 +137,9 @@ class HistoryFilter(_BaseFilter):
                   'status',
                   'inventory',
                   'start_time',
-                  'stop_time')
+                  'stop_time',
+                  'initiator',
+                  'initiator_type')
 
 
 class PeriodicTaskFilter(_BaseFilter):

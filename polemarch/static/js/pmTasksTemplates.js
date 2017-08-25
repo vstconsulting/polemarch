@@ -1,14 +1,15 @@
 
-var pmModuleTemplates = Object.create(pmTemplates);
 
-var pmTasksTemplates = new pmItems()
+var pmTasksTemplates = inheritance(pmTemplates) 
+
+
 pmTasksTemplates.model.name = "templates"  
+pmTasksTemplates.model.page_name = "template"
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmTasksTemplates.model.kind = "Task"
 pmTemplates.model.kindObjects[pmTasksTemplates.model.kind] = pmTasksTemplates
-  
-  
+   
 pmTasksTemplates.showWidget = function(holder, kind)
 {
     var thisObj = this;
@@ -16,7 +17,7 @@ pmTasksTemplates.showWidget = function(holder, kind)
     var limit = this.pageSize; 
     return $.when(this.sendSearchQuery({kind:kind}, limit, offset)).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind})) 
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind})) 
     }).fail(function()
     {
         $.notify("", "error");
@@ -65,7 +66,7 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
     {
         thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
         
-        $(holder).html(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id})) 
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id})) 
         $("#inventories-autocomplete").select2();
         //$("#projects-autocomplete").select2();
 
@@ -127,7 +128,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
     var thisObj = this; 
     $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_new_page', {}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {}))
         
         $("#inventories-autocomplete").select2();
         //$("#projects-autocomplete").select2();
@@ -281,18 +282,4 @@ pmTasksTemplates.updateItem = function(item_id)
             polemarch.showErrors(e.responseJSON)
         }
     });
-}
-
-pmTasksTemplates.exportToFile = function(){
-    
-    var item_ids = []
-    for(var i in this.model.selectedItems)
-    {
-        if(this.model.selectedItems[i])
-        {
-            item_ids.push(i)
-        }
-    }
-    
-    return pmTemplates.exportToFile(item_ids)
 }

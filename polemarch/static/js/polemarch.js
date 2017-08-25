@@ -171,6 +171,13 @@ polemarch.start = function(options)
     })
     
     spajs.addMenu({
+        id:"inventories-import", 
+        urlregexp:[/^inventories\/import$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showImportPage(holder, menuInfo, data);}
+    })
+
+    
+    spajs.addMenu({
         id:"inventories-search", 
         urlregexp:[/^inventories\/search\/([A-z0-9 %\-.]+)$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showSearchResults(holder, menuInfo, data);}

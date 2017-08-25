@@ -13,7 +13,7 @@ var pmAnsibleModule = {
  
 jsonEditor.options[pmAnsibleModule.model.name] = jsonEditor.options['item'];
   
-pmModuleTemplates.selectInventory = function(inventory_id)
+pmAnsibleModule.selectInventory = function(inventory_id)
 {
     var def = new $.Deferred();
     var thisObj = this;
@@ -45,10 +45,50 @@ pmAnsibleModule.showInProject = function(holder, menuInfo, data)
     
     return $.when(pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_run_page', {item_id:project_id}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_run_page', {item_id:project_id}))
         
         $("#inventories-autocomplete").select2(); 
+        
+        $.when(pmAnsibleModule.loadAllModule()).done(function()
+        { 
+            new autoComplete({
+                selector: '#module-autocomplete',
+                minChars: 0,
+                cache:false,
+                showByClick:true,
+                menuClass:'module-autocomplete',
+                renderItem: function(item, search)
+                {
+                    var name = item.replace(/^.*\.(.*?)$/, "$1")
+                    return '<div class="autocomplete-suggestion" data-value="' + name + '" >' + name + " <i style='color:#777'>" + item + '</i></div>';
+                },
+                onSelect: function(event, term, item)
+                {
+                    $("#module-autocomplete").val($(item).attr('data-value'));
+                    //console.log('onSelect', term, item);
+                    //var value = $(item).attr('data-value'); 
+                },
+                source: function(term, response)
+                {
+                    term = term.toLowerCase();
 
+                    var matches = []
+                    for(var i in pmAnsibleModule.model.ansible_modules)
+                    {
+                        var val = pmAnsibleModule.model.ansible_modules[i]
+                        if(val.toLowerCase().indexOf(term) != -1)
+                        {
+                            matches.push(val)
+                        }
+                    }
+                    if(matches.length)
+                    {
+                        response(matches);
+                    }
+                }
+            });
+
+        }) 
     }).fail(function()
     {
         $.notify("", "error");
@@ -62,7 +102,7 @@ pmAnsibleModule.fastCommandWidget = function(holder)
 { 
     return $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render('fastcommand_widget', {}))
+        $(holder).insertTpl(spajs.just.render('fastcommand_widget', {}))
         $("#projects-autocomplete").select2(); 
         $("#inventories-autocomplete").select2(); 
         
@@ -70,6 +110,35 @@ pmAnsibleModule.fastCommandWidget = function(holder)
     {
         $.notify("", "error");
     })
+}
+
+pmAnsibleModule.loadAllModule = function()
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    jQuery.ajax({
+        url: "/api/v1/ansible/modules/",
+        type: "GET",
+        contentType:'application/json', 
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        { 
+            thisObj.model.ansible_modules = data 
+            def.resolve();
+        },
+        error:function(e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+            def.reject();
+        }
+    });
+    return def.promise();
 }
 
 /**

@@ -12,6 +12,132 @@
  * Skype:Levhav
  * 89244269357
  */
+
+
+var JustEvalJsPattern_reg_pageUUID = new RegExp("<="+window.JustEvalJsPattern_pageUUID+"(.*?)"+window.JustEvalJsPattern_pageUUID+"=>", "g")
+/**
+ * Плагин для вставки шаблона в тело элемента
+ * @param {string} tplText
+ *
+ * После вставки переданого хтимл кода выполняет js код который был в блоках <js=   =js>
+ * Например  строка "html  <js= console.log("test"); =js> html" будет вставлено "html html" и потом выполнено console.log("test");
+ */
+$.fn.insertTpl = function(tplText)
+{
+    if(!tplText)
+    {
+        return this;
+    }
+
+    if(typeof tplText !== "string")
+    {
+        tplText = ""+tplText
+    }
+    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
+
+    if(window.cordova && 0)
+    {
+        html = html.replace(/ onclick=/gmi, "ontouchstart=")
+    }
+
+    this.each(function()
+    {
+        $(this).html(html)
+    });
+
+    var js = tplText.match(JustEvalJsPattern_reg_pageUUID)
+    for(var i in js)
+    {
+        if(js[i] && js[i].length > 8);
+        {
+            var code = js[i].substr(2 +window.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JustEvalJsPattern_pageUUID.length*2))
+            //console.log(i, code)
+            eval(code);
+        }
+    }
+
+    return this;
+};
+
+$.fn.appendTpl = function(tplText)
+{
+    if(!tplText)
+    {
+        return this;
+    }
+
+    if(typeof tplText !== "string")
+    {
+        tplText = ""+tplText
+    }
+
+    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
+
+    if(window.cordova && 0)
+    {
+        html = html.replace(/ onclick=/gmi, "ontouchstart=")
+    }
+
+    this.each(function()
+    {
+        $(this).append(html)
+    });
+
+    /*
+    var js = tplText.match(/<js=(.*?)=js>/g)
+    for(var i in js)
+    {
+        if(js[i] && js[i].length > 8);
+        {
+            var code = js[i].substr(4, js[i].length - 8)
+            console.log(i, code)
+            eval(code);
+        }
+    }
+    */
+    return this;
+};
+
+$.fn.prependTpl = function(tplText)
+{
+    if(!tplText)
+    {
+        return this;
+    }
+
+    if(typeof tplText !== "string")
+    {
+        tplText = ""+tplText
+    }
+
+    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
+
+    if(window.cordova && 0)
+    {
+        html = html.replace(/ onclick=/gmi, "ontouchstart=")
+    }
+
+    this.each(function()
+    {
+        $(this).prepend(html)
+    });
+
+    /*
+    var js = tplText.match(/<js=(.*?)=js>/g)
+    for(var i in js)
+    {
+        if(js[i] && js[i].length > 8);
+        {
+            var code = js[i].substr(4, js[i].length - 8)
+            console.log(i, code)
+            eval(code);
+        }
+    }
+    */
+    return this;
+};
+
+
 var justReactive = {
 
     /**
@@ -126,11 +252,17 @@ var justReactive = {
         //console.log("setter", newval);
         for(var i in newval.just_ids)
         {
-            if(newval.just_ids[i].type == 'innerHTML')
+            if(newval.just_ids[i].type == 'innerTPL')
+            {
+                // innerTPL - вставить на страницу обработав как шаблон.
+                var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
+                if(el) $(el).insertTpl(newval.just_ids[i].callBack(val, newval.just_ids[i].customData))
+            }
+            else if(newval.just_ids[i].type == 'innerHTML')
             {
                 // innerHTML - вставить без обработки на страницу.
                 var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
-                if(el) el.innerHTML = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+                if(el) el.innerHTML = newval.just_ids[i].callBack(val, newval.just_ids[i].customData) 
             }
             else if(newval.just_ids[i].type == 'textContent')
             {
@@ -402,11 +534,15 @@ var justReactive = {
         }
 
         // Вернём в ответ код который надо вставить в шаблон
-        if(opt.type == 'innerHTML')
+        if(opt.type == 'innerTPL')
+        {
+            return "<div id='_justReactive"+id+"' class='just-watch just-watch-tpl' style='display: inline;' >"+opt.callBack(this[opt.prop], opt.customData)+"</div>";
+        }
+        else if(opt.type == 'innerHTML')
         {
             return "<div id='_justReactive"+id+"' class='just-watch just-watch-html' style='display: inline;' >"+opt.callBack(this[opt.prop], opt.customData)+"</div>";
         }
-        else if(opt.type == 'textContent')
+        else  if(opt.type == 'textContent')
         {
             return "<div id='_justReactive"+id+"' style='display: inline;' class='just-watch just-watch-text' >"+justReactive.justStrip(opt.callBack(this[opt.prop], opt.customData))+"</div>";
         }
@@ -463,6 +599,15 @@ Object.defineProperty(Object.prototype, "justHtml", {
   , configurable: true
   , writable: false
   , value: function(prop, callBack, customData){ return justReactive.setValue.apply(this, [{type:'innerHTML', prop:prop, callBack:callBack, customData:customData}])
+  }
+});
+
+// Проставляет tpl код значения
+Object.defineProperty(Object.prototype, "justTpl", {
+    enumerable: false
+  , configurable: true
+  , writable: false
+  , value: function(prop, callBack, customData){ return justReactive.setValue.apply(this, [{type:'innerTPL', prop:prop, callBack:callBack, customData:customData}])
   }
 });
 

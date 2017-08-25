@@ -1,6 +1,7 @@
 import json
-
-from ..models import Inventory
+from datetime import timedelta
+from django.utils.timezone import now
+from ..models import Inventory, History, Project
 from .inventory import _ApiGHBaseTestCase
 
 
@@ -143,3 +144,35 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         self.get_result("delete", single_url)
         self.get_result("delete", "/api/v1/projects/{}/".format(project_id))
         inventory.delete()
+
+    def test_history_access_rights(self):
+        history_url = "/api/v1/history/"
+        self.change_identity()
+        nonprivileged_user1 = self.user
+        data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git",
+                     vars=dict(repo_type="TEST"))]
+        project_id = self.mass_create("/api/v1/projects/", data,
+                                      "name", "repository")[0]
+        inventory = Inventory.objects.create()
+        history_kwargs = dict(project=Project.objects.get(pk=project_id),
+                              mode="setup", kind="MODULE",
+                              raw_inventory="inventory", raw_stdout="text",
+                              inventory=inventory, status="OK",
+                              start_time=now() - timedelta(hours=15),
+                              stop_time=now() - timedelta(hours=14))
+        history = History.objects.create(**history_kwargs)
+        result = self.get_result("get", history_url+"{}/".format(history.id))
+        self.assertEqual(result['id'], history.pk)
+        self.change_identity()
+        nonprivileged_user2 = self.user
+        self.get_result("get", history_url+"{}/".format(history.id), 404)
+        self.user = nonprivileged_user1
+        perm_url = "/api/v1/projects/" + str(project_id) + "/permissions/"
+        self.get_result("post", perm_url, 200,
+                        data=json.dumps([nonprivileged_user2.id]))
+        self.user = nonprivileged_user2
+        result = self.get_result("get", history_url+"{}/".format(history.id))
+        self.assertEqual(result['id'], history.pk)
+        self.user = nonprivileged_user1
+        result = self.get_result("get", history_url+"{}/".format(history.id))
+        self.assertEqual(result['id'], history.pk)

@@ -85,13 +85,13 @@ example than general howto) you must do such steps:
       location = 127.0.0.1:11211
 
 4. Setup some network filesystem. NFS for example. Mount it in same directory
-   to all worker-intended nodes. Write that directory in :ref:`worker`.
+   to all worker-intended nodes. Write that directory in :ref:`main`.
    Example:
 
    .. sourcecode:: ini
 
-      [worker]
-      exchange_dir = /mnt/mynfs
+      [main]
+      projects_dir = /mnt/mynfs
 
 5. Setup some http-balancer. HAProxy for example. Point it to web-intended
    nodes.
@@ -128,6 +128,8 @@ example than general howto) you must do such steps:
       sudo service polemarchweb stop
 
 That's it.
+
+.. _main:
 
 Main settings
 -------------
@@ -211,15 +213,3 @@ Section ``[web]``.
 
 Here placed settings related to web-server. It is settings like: allowed hosts,
 static files directory or pagination limit.
-
-.. _worker:
-
-Worker settings
----------------
-
-Section ``[worker]``.
-
-Section for worker-related settings. Now here just one - directory to store
-files, which must be accessible by all workers. It have meaning only if you
-have cluster - more than one workers. In such case you must use some kind of
-network filesystem to share data between workers. Like NFS, Samba or something.

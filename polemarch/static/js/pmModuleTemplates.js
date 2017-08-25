@@ -1,7 +1,8 @@
 
-var pmModuleTemplates = Object.create(pmTemplates);
+var pmModuleTemplates =  inheritance(pmTemplates)  
 
 pmModuleTemplates.model.name = "templates"
+pmModuleTemplates.model.page_name = "template"
 pmModuleTemplates.model.selectedInventory = 0
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
@@ -149,7 +150,7 @@ pmModuleTemplates.execute = function(item_id)
 
 
 pmModuleTemplates.showItem = function(holder, menuInfo, data)
-{
+{ 
     var item_id = data.reg[1]
 
     var def = new $.Deferred();
@@ -158,7 +159,7 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
     {
         $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).done(function()
         {
-            $(holder).html(spajs.just.render(thisObj.model.name+'_module_page', {item_id:item_id}))
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_module_page', {item_id:item_id}))
 
             $("#inventories-autocomplete").select2();
             $("#projects-autocomplete").select2();
@@ -215,7 +216,7 @@ pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
     var thisObj = this;
     $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems()).done(function()
     {
-        $(holder).html(spajs.just.render(thisObj.model.name+'_new_module_page', {}))
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_module_page', {}))
 
         $("#inventories-autocomplete").select2();
         $("#projects-autocomplete").select2();
@@ -366,8 +367,7 @@ pmModuleTemplates.updateItem = function(item_id)
         $.notify("Invalid value in filed name", "error");
         return;
     }
-    
-    debugger;
+     
     return $.ajax({
         url: "/api/v1/templates/"+item_id+"/",
         type: "PATCH",

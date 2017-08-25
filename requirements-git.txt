@@ -1,2 +1,2 @@
-# git+http://git.vst.lan/vst/celery.git#egg=celery-4.0.3
-# http://gitlab.com/vstconsulting/celery/repository/archive.zip?ref=master#egg=celery-4.0.3
+# If you need to install package from git-repo,
+# you should think about many times.

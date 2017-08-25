@@ -6,6 +6,7 @@ import logging
 from django.conf import settings
 from django.utils import timezone
 
+from .. import utils
 from . import hosts as hosts_models
 from .vars import AbstractModel, AbstractVarsQuerySet, BManager, models
 from ..exceptions import PMException
@@ -67,7 +68,11 @@ class Project(AbstractModel):
                               inventory=inventory,
                               project=self,
                               kind=kind,
-                              raw_stdout="")
+                              raw_stdout="",
+                              initiator=extra.pop("initiator", 0))
+        command = kind.lower()
+        ansible_args = dict(extra)
+        utils.AnsibleArgumentsReference().validate_args(command, ansible_args)
         history = History.objects.create(status="DELAY", **history_kwargs)
         kwargs = dict(target=mod_name, inventory=inventory, history=history)
         kwargs.update(extra)
@@ -75,6 +80,7 @@ class Project(AbstractModel):
 
     def _execute(self, kind, task_class, *args, **extra):
         sync = extra.pop("sync", False)
+
         kwargs = self._prepare_kw(kind, *args, **extra)
         history = kwargs['history']
         if sync:

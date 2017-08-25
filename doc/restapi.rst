@@ -1683,7 +1683,9 @@ History records
            "stop_time":"2017-07-02T13:48:11.922777Z",
            "raw_inventory":"inventory",
            "raw_args": "ansible-playbook main.yml -i /tmp/tmpvMIwMg -v",
-           "raw_stdout":"text"
+           "raw_stdout":"text",
+           "initiator": 1,
+           "initiator_type": "users"
         }
 
    :>json number id: id of history record.
@@ -1704,6 +1706,8 @@ History records
    :>json string raw_stdout: what Ansible wrote to stdout and stderr during
      execution. The size is limited to 10M characters. Full output
      in :http:get:`/api/v1/history/{id}/raw/`.
+   :>json number initiator: initiator id.
+   :>json string initiator_type: initiator type like in api url.
    :>json string url: url to this specific history record.
 
 .. |history_details_ref| replace:: **Response JSON Object:** response json fields
@@ -1939,6 +1943,97 @@ History records
     modules run.
    :statuscode 424: facts still not ready because module is currently running
     or only scheduled for run.
+
+Ansible
+-------
+
+.. http:get:: /api/v1/ansible/
+
+   Get list of available methods in that category. All methods under
+   `/ansible/` designed to provide information about ansible installation which
+   Polemarch is currently using.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/ansible/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+            "cli-reference": "http://localhost:8000/api/v1/ansible/cli_reference/",
+            "modules": "http://localhost:8000/api/v1/ansible/modules/"
+        }
+
+.. http:get:: /api/v1/ansible/cli_reference/
+
+   Get list of available ansible command line tools arguments with their type
+   and hint.
+
+   :query filter: filter by tool, for which you want get help (either `ansible`
+    or `ansible-playbook`).
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/ansible/cli_reference/?filter=ansible HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+            "ansible": {
+                "extra-vars": {
+                    "type": "text",
+                    "help": "set additional variables as key=value or YAML/JSON"
+                },
+                "help": {
+                    "type": "boolean",
+                    "help": "show this help message and exit"
+                },
+                // there is much more arguments to type it here
+                // ...
+            }
+        }
+
+.. http:get:: /api/v1/ansible/modules/
+
+   Get list of installed ansible modules.
+
+   :query filter: filter to search by module name. It is Python regular
+    expression.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/ansible/modules/?filter=\.git HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        [
+            "extras.source_control.git_config",
+            "extras.source_control.github_release",
+            "extras.source_control.github_hooks",
+            "extras.source_control.gitlab_user",
+            "extras.source_control.github_key",
+            "extras.source_control.gitlab_group",
+            "extras.source_control.gitlab_project",
+            "core.source_control.git"
+        ]
 
 .. _variables:
 

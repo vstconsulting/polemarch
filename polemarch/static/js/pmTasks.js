@@ -4,7 +4,7 @@
  * Сейчас используется для автокомплитов при выборе playbook.
  * И для запуска конкретного playbook
  */
-var pmTasks = new pmItems()
+var pmTasks = inheritance(pmItems)
 
 pmTasks.model.name = "tasks"
 

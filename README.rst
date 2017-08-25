@@ -4,7 +4,11 @@ Polemarch
 **Polemarch** is service for orchestration infrastructure by ansible.
 Simply WEB gui for orchestration infrastructure by ansible playbooks.
 
-Official site: https://gitlab.com/vstconsulting/polemarch
+Official site:
+https://gitlab.com/vstconsulting/polemarch
+
+For any questions you could use issues tracker:
+https://gitlab.com/vstconsulting/polemarch/issues
 
 .. image:: https://raw.githubusercontent.com/vstconsulting/polemarch/master/doc/screencast.gif
    :alt: interface of Polemarch
@@ -33,7 +37,7 @@ Red Hat/CentOS installation
 
    .. sourcecode:: bash
 
-      sudo yum localinstall polemarch-0.0.2-0.x86_64.rpm.
+      sudo yum localinstall polemarch-0.0.X-0.x86_64.rpm.
 
 3. Run services with commands
 
@@ -62,7 +66,7 @@ Ubuntu/Debian installation
 
    .. sourcecode:: bash
 
-      sudo dpkg -i polemarch_0.0.2-1_amd64.deb || sudo apt-get install -f
+      sudo dpkg -i polemarch_0.0.X-1_amd64.deb || sudo apt-get install -f
 
 3. Run services with commands
 

@@ -8,6 +8,7 @@ from subprocess import CalledProcessError, Popen, PIPE, STDOUT
 from threading import Thread
 
 import os
+import re
 import tempfile
 from os.path import dirname
 try:
@@ -21,6 +22,9 @@ from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation
+from ansible import modules as ansible_modules
+from ansible.cli.adhoc import AdHocCLI
+from ansible.cli.playbook import PlaybookCLI
 
 from . import exceptions as ex
 from . import __file__ as file
@@ -150,10 +154,12 @@ class tmp_file(object):
     Temporary file with name
     generated and auto removed on close.
     '''
-    def __init__(self, mode="w", bufsize=0, **kwargs):
+    def __init__(self, data="", mode="w", bufsize=0, **kwargs):
         '''
         tmp_file constructor
 
+        :param data: -- string to write in tmp file.
+        :type data: str
         :param mode: -- file open mode. Default 'w'.
         :type mode: str
         :param bufsize: -- bufer size for tempfile.NamedTemporaryFile
@@ -164,6 +170,8 @@ class tmp_file(object):
         kwargs.update(kw)
         fd = tempfile.NamedTemporaryFile(mode, **kwargs)
         self.fd = fd
+        if data:
+            self.write(data)
 
     def write(self, wr_string):
         '''
@@ -593,3 +601,141 @@ class BaseTask(object):
         ''' Method with task logic. '''
         # pylint: disable=notimplemented-raised,
         raise NotImplemented
+
+
+class AnsibleArgumentsReference(object):
+    _GUI_TYPES_CONVERSION = {
+        "string": "text",
+        "int": "integer",
+        None: "boolean",
+        "choice": "text",
+    }
+    _GUI_TYPES_EXCEPTIONS = {
+        "private-key": "keyfile",
+        "key-file": "keyfile",
+    }
+    _EXCLUDE_ARGS = ['verbose', 'inventory-file', 'module-name']
+    _HIDDEN_ARGS = ['group']
+
+    def __init__(self):
+        self.raw_dict = self._extract_from_cli()
+
+    def _cli_to_gui_type(self, argument, type_name):
+        if argument in self._GUI_TYPES_EXCEPTIONS:
+            return self._GUI_TYPES_EXCEPTIONS[argument]
+        if argument is not None and argument.endswith("-file"):
+            return "textfile"
+        return self._GUI_TYPES_CONVERSION[type_name]
+
+    def is_exists(self, key):
+        for _, args in self.raw_dict.items():
+            if key in args:
+                return True
+        return False
+
+    def _as_gui_dict_command(self, args):
+        cmd_result = {}
+        for arg, info in args.items():
+            if arg in self._HIDDEN_ARGS:
+                continue
+            cmd_result[arg] = {}
+            cmd_result[arg]['help'] = info['help']
+            cmd_result[arg]['type'] = self._cli_to_gui_type(arg, info['type'])
+        return cmd_result
+
+    def validate_args(self, command, args):
+        try:
+            for argument, value in args.items():
+                mtype = self.raw_dict[command][argument]["type"]
+                if mtype == 'int':
+                    int(value)
+                elif mtype is None and value is not None:
+                    raise AssertionError("This argument shouldn't have value")
+        except (KeyError, ValueError, AssertionError) as e:
+            raise ValueError("Incorrect argument: {}. "
+                             "Problem: {}".format(argument, str(e)))
+
+    def as_gui_dict(self, wanted=""):
+        result = {}
+        for cmd, args in self.raw_dict.items():
+            if wanted == "" or cmd == wanted:
+                result[cmd] = self._as_gui_dict_command(args)
+        return result
+
+    def _extract_from_cli(self):
+        # pylint: disable=protected-access,
+        result = {}
+        clis = {
+            "module": AdHocCLI(args=["", "all"]),
+            "playbook": PlaybookCLI(args=["", "none.yml"])
+        }
+        for cli_name in clis:
+            cli = clis[cli_name]
+            cli.parse()
+            cli_result = {}
+            for option in cli.parser._get_all_options():
+                for name in option._long_opts:
+                    name = name[2:]
+                    if name in self._EXCLUDE_ARGS:
+                        continue
+                    cli_result[name] = {"type": option.type,
+                                        "help": option.help}
+            result[cli_name] = cli_result
+        result['module']['group'] = {"type": "string", "help": ""}
+        result['periodic_playbook'] = result['playbook']
+        result['periodic_module'] = result['module']
+        return result
+
+
+class Modules(object):
+    mod_path = ansible_modules.__path__[0]
+
+    def __init__(self):
+        self.clean()
+
+    def _get_mod_list(self):
+        # TODO: add cache between queries
+        return self._modules_list
+
+    def clean(self):
+        self._modules_list = list()
+        self._key_filter = None
+
+    def _get_mods(self, files):
+        return [
+            f[:-3] for f in files
+            if f[-3:] == ".py" and f[:-3] != "__init__" and "_" not in f[:2]
+        ]
+
+    def _setup_key(self, key, files, search=None):
+        _modules_list = list()
+        _mods = self._get_mods(files)
+        if _mods:
+            for _mod in _mods:
+                _mod_key = "{}.{}".format(key, _mod)
+                if search is None or search.search(_mod_key):
+                    _modules_list.append(_mod_key)
+        return _modules_list
+
+    def _filter(self, query):
+        if self._key_filter == query:
+            return self._get_mod_list()
+        self.clean()
+        self._key_filter = query
+        search = re.compile(query, re.IGNORECASE) if query else None
+        for path, sub_dirs, files in os.walk(self.mod_path):
+            if "__pycache__" in sub_dirs:
+                sub_dirs.remove("__pycache__")
+            key = path.replace(self.mod_path, "").replace("/", ".")
+            self._modules_list += self._setup_key(key, files, search)
+        return self._get_mod_list()
+
+    def all(self):
+        return self.get()
+
+    def get(self, key=""):
+        return self._filter(key)
+
+
+class AnsibleModules(Modules):
+    mod_path = ansible_modules.__path__[0] + "/"
