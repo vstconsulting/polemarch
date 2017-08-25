@@ -649,7 +649,7 @@ class AnsibleArgumentsReference(object):
                 mtype = self.raw_dict[command][argument]["type"]
                 if mtype == 'int':
                     int(value)
-                elif mtype is None and value is not None:
+                elif mtype is None and value not in [None, ""]:
                     raise AssertionError("This argument shouldn't have value")
         except (KeyError, ValueError, AssertionError) as e:
             raise ValueError("Incorrect argument: {}. "
