@@ -217,8 +217,9 @@ pmInventories.parseFromText = function(text)
     var  inventory = {
         hosts:[],
         groups:{},
-        vars:{}
-    }
+        vars:{},
+        name:new Date().toString()
+    } 
 
     for(var i in lines)
     {
@@ -378,7 +379,13 @@ pmInventories.importInventory = function(inventory)
     }
  
     var def = new $.Deferred();
-    inventory.name = new Date().toString();
+    inventory.name = $("#inventory_name").val();
+    if(!inventory.name)
+    {
+        $.notify("Error in filed inventory name", "error");
+        def2.reject()
+        return def2.promise(); 
+    }
 
     var inventoryObject = {
         name:inventory.name,
