@@ -131,22 +131,24 @@ except NoSectionError:
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.polemarch.sqlite3'),
     }
-if __DB_SETTINGS['ENGINE'] == 'django.db.backends.mysql':
-    import pymysql
-    pymysql.install_as_MySQLdb()
 
 try:
     __DB_OPTIONS = { }
     for k, v in config.items('database.options'):
-        if k in ["CONN_MAX_AGE", "timeout"]:
+        if k in ["CONN_MAX_AGE", "timeout", "connect_timeout"]:
             __DB_OPTIONS[k] = float(v)
             continue
         __DB_OPTIONS[k] = v.format(**__kwargs)
     if not __DB_OPTIONS: raise NoSectionError('database.options')
 except NoSectionError:
-    __DB_OPTIONS = {
-        "timeout": 10
-    }
+    __DB_OPTIONS = {}
+
+if __DB_SETTINGS['ENGINE'] == 'django.db.backends.mysql':
+    import pymysql
+    pymysql.install_as_MySQLdb()
+
+if __DB_SETTINGS['ENGINE'] == 'db.polemarch.sqlite3':
+    __DB_OPTIONS["timeout"] = __DB_OPTIONS.get("timeout", 10)
 
 __DB_SETTINGS["OPTIONS"] = __DB_OPTIONS
 
