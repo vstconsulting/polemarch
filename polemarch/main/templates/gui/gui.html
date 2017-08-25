@@ -2031,14 +2031,10 @@
                                                     <span class="caret"></span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-right">
-
+ 
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/periodic-tasks'}); return false;" >Periodic tasks</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/history'}); return false;" >History</a>
+                                                            onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
                                                     </li>
                                                     <li role="separator" class="divider"></li>
                                                     <li>
@@ -2051,8 +2047,13 @@
                                                     <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/periodic-tasks'}); return false;" >Periodic tasks</a>
                                                     </li>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/history'}); return false;" >History</a>
+                                                    </li>
+                                                    <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.showLoader(pmProjects.deleteItem(<%- valid %>)); return false;" >Delete</a>
@@ -2768,6 +2769,23 @@
 <div class="col-lg-12">
     <h1>Inventory</h1> 
 </div> 
+<section class="col-lg-12">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            Inventory<br>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+            </div>
+        </div>
+        <div class="box-body">   
+            <div class="form-group col-lg-2">
+                <label class="control-label" >Name</label>
+                <input type="text" id="inventory_name" value="<%- inventory.name %>"  class="form-control" maxlength="255">
+                <div class="help-block"></div>
+            </div>
+        </div>
+    </div>
+</section> 
 <%= jsonEditor.editor(inventory.vars, {block:'inventories', prefix:"inventory"}) %>
 
 
@@ -2793,12 +2811,12 @@
             <div class="box-body">   
                 <div class="form-group col-lg-2">
                     <label class="control-label" >Name</label>
-                    <input type="text" value="<%- val.name %>"  class="form-control" maxlength="255">
+                    <input type="text" disabled value="<%- val.name %>"  class="form-control" maxlength="255">
                     <div class="help-block"></div>
                 </div>
                 <div class="form-group col-lg-2">
                     <label class="control-label" >Type</label>
-                    <input type="text" value="<%- val.type %>"  class="form-control" maxlength="255">
+                    <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
                     <div class="help-block"></div>
                 </div>  
             </div>
@@ -2823,12 +2841,12 @@
                 <div class="box-body">   
                     <div class="form-group col-lg-2">
                         <label class="control-label" >Name</label>
-                        <input type="text" value="<%- val.name %>"  class="form-control" maxlength="255">
+                        <input type="text" disabled value="<%- val.name %>"  class="form-control" maxlength="255">
                         <div class="help-block"></div>
                     </div>
                     <div class="form-group col-lg-2">
                         <label class="control-label" >Type</label>
-                        <input type="text" value="<%- val.type %>"  class="form-control" maxlength="255">
+                        <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
                         <div class="help-block"></div>
                     </div>  
                 </div>
@@ -2871,7 +2889,7 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4">
                                 <label class="control-label" >Inventory</label>
                                 <select
                                     class="form-control select2"
@@ -2893,7 +2911,7 @@
                                 <% if(!pmModuleTemplates.model.selectedInventory){ %>
 
                                 <% }else{ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4">
                                         <label class="control-label" >Group</label>
                                         <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
                                             <option value="all" selected>All</option>
@@ -2912,7 +2930,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4">
                                 <label class="control-label" >Module</label>
                                 <input type="text"
                                         class="module-autocomplete form-control"
