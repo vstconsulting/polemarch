@@ -12,14 +12,19 @@ class ApiAnsibleTestCase(_ApiGHBaseTestCase):
     def test_ansible_cli_reference(self):
         url = "/api/v1/ansible/cli_reference/"
         result = self.get_result("get", url)
-        self.assertIn("args", result['ansible'])
-        self.assertIn("forks", result['ansible'])
-        self.assertIn("list-tasks", result['ansible-playbook'])
-        self.assertNotIn("verbose", result['ansible'])
-        self.assertNotIn("verbose", result['ansible-playbook'])
+        self.assertIn("args", result['module'])
+        self.assertIn("forks", result['module'])
+        self.assertIn("list-tasks", result['playbook'])
+        self.assertNotIn("verbose", result['module'])
+        self.assertNotIn("verbose", result['playbook'])
+        self.assertIn("args", result['periodic_module'])
+        self.assertIn("forks", result['periodic_module'])
+        self.assertIn("list-tasks", result['periodic_playbook'])
+        self.assertNotIn("verbose", result['periodic_module'])
+        self.assertNotIn("verbose", result['periodic_playbook'])
         # test filter
-        result = self.get_result("get", url + "?filter=ansible")
-        result.pop('ansible')
+        result = self.get_result("get", url + "?filter=module")
+        result.pop('module')
         self.assertEquals(result, {})
         # test empty if filter by non-exist
         result = self.get_result("get", url + "?filter=byaka", 200)

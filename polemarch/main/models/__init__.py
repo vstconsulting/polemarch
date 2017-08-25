@@ -93,13 +93,12 @@ def validate_template(instance, **kwargs):
             )
     if errors:
         raise ValidationError(errors)
-    command = "ansible-playbook"
+    command = "playbook"
     ansible_args = dict(instance.data['vars'])
     if instance.kind == "Module":
-        command = "ansible"
+        command = "module"
     if instance.kind == "PeriodicTask" and instance.data["kind"] == "MODULE":
-        command = "ansible"
-        ansible_args.pop("group")
+        command = "module"
     AnsibleArgumentsReference().validate_args(command, ansible_args)
 
 
