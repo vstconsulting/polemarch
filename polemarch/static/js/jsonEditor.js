@@ -509,9 +509,15 @@ jsonEditor.editor = function(json, opt)
 
 jsonEditor.jsonEditorScrollTo = function(param_name, prefix)
 { 
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+    
     prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
     $("body").scrollTo("#json_"+param_name+"_line"+prefix) 
 }
+
 jsonEditor.jsonEditorGetValues = function(prefix)
 {
     if(!prefix)
@@ -545,6 +551,12 @@ jsonEditor.jsonEditorGetValues = function(prefix)
 
 jsonEditor.jsonEditorRmVar = function(name, prefix)
 {
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+    
+    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
     $('#json_'+name+'_line'+prefix+'').remove()
     if(!$(".jsonEditor-data"+prefix).length)
     {

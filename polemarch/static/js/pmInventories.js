@@ -322,13 +322,16 @@ pmInventories.importInventoriesAndOpen = function(inventory)
 
 pmInventories.importInventory = function(inventory)
 {
+    var def2 = new $.Deferred();
+    
     var vars = jsonEditor.jsonEditorGetValues('inventory')
     if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
     {
         // <!--Вставка файла -->
         $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error");
         jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "inventory")
-        return;
+        def2.reject()
+        return def2.promise();
     }
 
     for(var i in inventory.hosts)
@@ -340,7 +343,8 @@ pmInventories.importInventory = function(inventory)
             // <!--Вставка файла -->
             $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error"); 
             jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+val.name)
-            return;
+            def2.reject()
+            return def2.promise();
         }
     }
 
@@ -354,7 +358,8 @@ pmInventories.importInventory = function(inventory)
             // <!--Вставка файла -->
             $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error"); 
             jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "group"+i)
-            return;
+            def2.reject()
+            return def2.promise();
         }
 
         for(var j in val.hosts)
@@ -366,7 +371,8 @@ pmInventories.importInventory = function(inventory)
                 // <!--Вставка файла -->
                 $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error");
                 jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+hval.name)
-                return;
+                def2.reject()
+                return def2.promise();
             }
         }
     }
@@ -379,8 +385,15 @@ pmInventories.importInventory = function(inventory)
         vars:jsonEditor.jsonEditorGetValues('inventory')
     }
 
+    var deleteBulk = []
     $.when(pmInventories.importItem(inventoryObject)).done(function(inventory_id)
     {
+        deleteBulk.push({ 
+            type:"del",
+            item:'inventory',
+            pk:inventory_id
+        })
+        
         var bulkdata = []
         // Сбор групп и вложенных в них хостов
         for(var i in inventory.groups)
@@ -442,6 +455,7 @@ pmInventories.importInventory = function(inventory)
             },
             success: function(data)
             {
+                var hasError = false;
                 var hosts_ids = []
                 for(var i in data)
                 {
@@ -449,9 +463,23 @@ pmInventories.importInventory = function(inventory)
                     if(val.status != 201)
                     {
                         $.notify("Error "+val.status, "error");
+                        hasError = true;
                         continue;
                     }
                     hosts_ids.push(val.data.id)
+                    deleteBulk.push({ 
+                        type:"del",
+                        item:'host',
+                        pk:val.data.id
+                    })
+                }
+
+                if(hasError)
+                {
+                    // По меньшей мере в одной операции была ошибка вставки.
+                    // Инвенторий импортирован не полностью
+                    def.reject(deleteBulk);
+                    return;
                 }
 
                 $.when(pmInventories.addSubHosts(inventory_id, hosts_ids)).done(function()
@@ -472,12 +500,20 @@ pmInventories.importInventory = function(inventory)
                         {
                             var igroups_ids = []
                             var bulk_update = []
+                            var hasError = false;
                             for(var i in data)
-                            {
+                            { 
+                                deleteBulk.push({ 
+                                    type:"del",
+                                    item:data.item,
+                                    pk:data[i].data.id
+                                })
+
                                 var val = data[i]
                                 if(val.status != 201)
                                 {
                                     $.notify("Error "+val.status, "error");
+                                    hasError = true;
                                 }
 
                                 if(val.data.children !== undefined )
@@ -510,8 +546,7 @@ pmInventories.importInventory = function(inventory)
                                                 data_type: 'groups',
                                                 pk:val.data.id,
                                                 data:groups_ids
-                                            })
-                                            // promise.push(pmGroups.addSubGroups(val.data.id, groups_ids));
+                                            }) 
                                         }
                                     }
                                     else
@@ -539,8 +574,7 @@ pmInventories.importInventory = function(inventory)
                                                 data_type: 'hosts',
                                                 pk:val.data.id,
                                                 data:hosts_ids
-                                            })
-                                            //promise.push(pmGroups.addSubHosts(val.data.id, hosts_ids));
+                                            }) 
                                         }
                                     }
                                 }
@@ -548,6 +582,14 @@ pmInventories.importInventory = function(inventory)
                                 {
                                     // Это хост
                                 }
+                            }
+                            
+                            if(hasError)
+                            {
+                                // По меньшей мере в одной операции была ошибка вставки.
+                                // Инвенторий импортирован не полностью
+                                def.reject(deleteBulk);
+                                return;
                             }
                             
                             $.when(pmInventories.addSubGroups(inventory_id, igroups_ids)).done(function()
@@ -567,14 +609,24 @@ pmInventories.importInventory = function(inventory)
                                         },
                                         success: function(data)
                                         {
+                                            var hasError = false;
                                             for(var i in data)
                                             {
                                                 var val = data[i]
                                                 if(val.status != 200)
                                                 {
                                                     $.notify("Error "+val.status, "error");
+                                                    hasError = true;
                                                     continue;
-                                                } 
+                                                }
+                                            }
+
+                                            if(hasError)
+                                            {
+                                                // По меньшей мере в одной операции была ошибка обновления.
+                                                // Инвенторий импортирован не полностью
+                                                def.reject(deleteBulk);
+                                                return;
                                             }
 
                                             def.resolve(inventory_id);
@@ -583,7 +635,7 @@ pmInventories.importInventory = function(inventory)
                                         {
                                             console.warn(e)
                                             polemarch.showErrors(e)
-                                            def.reject();
+                                            def.reject(deleteBulk);
                                         }
                                     }) 
                                 }
@@ -594,36 +646,61 @@ pmInventories.importInventory = function(inventory)
                             }).fail(function(e){
                                 console.warn(e)
                                 polemarch.showErrors(e)
-                                def.reject();
+                                def.reject(deleteBulk);
                             }) 
                         },
                         error:function(e)
                         {
                             console.warn(e)
                             polemarch.showErrors(e)
-                            def.reject();
+                            def.reject(deleteBulk);
                         }
                     });
                 }).fail(function(e){
                     console.warn(e)
                     polemarch.showErrors(e)
-                    def.reject();
+                    def.reject(deleteBulk);
                 })
             },
             error:function(e)
             {
                 console.warn(e)
                 polemarch.showErrors(e)
-                def.reject();
+                def.reject(deleteBulk);
             }
         })
     }).fail(function(e)
     {
         console.warn(e)
         polemarch.showErrors(e)
-        def.reject();
+        def.reject(deleteBulk);
     })
-    return def.promise();
+    
+    
+    var def2 = new $.Deferred();
+    
+    $.when(def).done(function(inventory_id)
+    {
+        def2.resolve(inventory_id)
+    }).fail(function(delete_bulk)
+    {
+        $.when($.ajax({
+            url: "/api/v1/_bulk/",
+            type: "POST",
+            contentType:'application/json',
+            data:JSON.stringify(delete_bulk),
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            }
+        })).always(function(){
+            def2.reject()
+        })
+    })
+    
+    return def2.promise();
 }
 
 

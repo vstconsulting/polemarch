@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////
 // Вспомагательные функции для тестирования
 ///////////////////////////////////////////////
- 
+
 /**
 *
 *  Base64 encode / decode
@@ -155,30 +155,30 @@ var Base64 = {
  * @param {type} y
  * @returns {Boolean}
  */
-var deepEqual = function (x, y) 
-{ 
-    if ((typeof x == "object" && x != null) && (typeof y == "object" && y != null)) 
+var deepEqual = function (x, y)
+{
+    if ((typeof x == "object" && x != null) && (typeof y == "object" && y != null))
     {
         if (Object.keys(x).length != Object.keys(y).length)
-        { 
+        {
             console.error("x.keys.length != y.keys.length")
             throw("x.keys.length != y.keys.length")
             return false;
         }
 
-        for (var prop in x) 
+        for (var prop in x)
         {
             if (y.hasOwnProperty(prop))
             {
                 if (! deepEqual(x[prop], y[prop]))
-                { 
+                {
                     console.error("x["+prop + "] != y["+prop+"]")
                     throw("x["+prop + "] != y["+prop+"]")
                     return false;
                 }
             }
             else
-            { 
+            {
                 console.error("x["+prop + "] != undefined")
                 throw("x["+prop + "] != undefined")
                 return false;
@@ -188,7 +188,7 @@ var deepEqual = function (x, y)
         return true;
     }
     else if (x !== y)
-    { 
+    {
         console.error("x("+x + ") != y("+ y + ")")
         throw("x("+x + ") != y("+ y + ")")
         return false;
@@ -196,7 +196,7 @@ var deepEqual = function (x, y)
     else
     {
         return true;
-    }  
+    }
 }
 
 
@@ -207,10 +207,10 @@ function render(name, callback)
        callback =  name
        name = "render"
     }
-    
+
     var def = new $.Deferred();
     var time = 10
-    
+
     setTimeout(function(name){
         console.log("render " + name)
         setTimeout(function(){
@@ -469,11 +469,11 @@ function qunitAddTests_users()
             render(done)
         })
     });
-    
+
     syncQUnit.addTest('Удаление пользователя', function ( assert )
     {
         var done = assert.async();
- 
+
         // Удаление пользователя.
         $.when(pmUsers.deleteItem(userId, true)).done(function()
         {
@@ -571,7 +571,7 @@ function qunitAddTests_hosts()
         })
     });
 
-    var itemId = undefined    
+    var itemId = undefined
     syncQUnit.addTest('Изменение хоста', function ( assert )
     {
         var done = assert.async();
@@ -629,11 +629,11 @@ function qunitAddTests_hosts()
             render(done)
         })
     });
-    
+
     syncQUnit.addTest('Удаление хоста', function ( assert )
     {
         var done = assert.async();
- 
+
         // Удаление хоста.
         $.when(pmHosts.deleteItem(itemId, true)).done(function()
         {
@@ -801,7 +801,7 @@ function qunitAddTests_groups()
 
         var master_group_itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
         itemId = master_group_itemId
-        
+
         // Отправка формы с данными группы
         $.when(pmGroups.addItem('group', master_group_itemId)).done(function()
         {
@@ -859,8 +859,8 @@ function qunitAddTests_groups()
         // Предполагается что мы от прошлого теста попали на страницу редактирования группы
         // с адресом http://192.168.0.12:8080/?group-5
         itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
-      
-        var done = assert.async(); 
+
+        var done = assert.async();
         $.when(pmGroups.copyAndEdit(itemId)).done(function()
         {
             assert.ok(true, 'Успешно copyAndEdit Item '+itemId);
@@ -889,11 +889,11 @@ function qunitAddTests_groups()
             render(done)
         })
     });
-    
+
     syncQUnit.addTest('Удаление группы', function ( assert )
     {
         var done = assert.async();
- 
+
         // Удаление группы.
         $.when(pmGroups.deleteItem(itemId, true)).done(function()
         {
@@ -1036,7 +1036,7 @@ function qunitAddTests_inventories()
         // с адресом http://192.168.0.12:8080/?group-5
         itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
 
-        var done = assert.async(); 
+        var done = assert.async();
         $.when(pmInventories.copyAndEdit(itemId)).done(function()
         {
             assert.ok(true, 'Успешно copyAndEdit add Item');
@@ -1065,11 +1065,11 @@ function qunitAddTests_inventories()
             render(done)
         })
     });
-    
+
     syncQUnit.addTest('Удаление inventory', function ( assert )
     {
         var done = assert.async();
- 
+
         // Удаление inventory.
         $.when(pmInventories.deleteItem(itemId, true)).done(function()
         {
@@ -1080,7 +1080,7 @@ function qunitAddTests_inventories()
             render(done)
         })
     });
-    
+
     // Инвенторий закодированный в Base64
     var pmInventoriesText = "IyBIb3N0cyAKMS4yLjMuWzE6MjU1XSAKMTI0LjMuNC5bN\
 DQ6NTVdIAoxMjQuMy41LlsxOjI1MF0gYW5zaWJsZV9ob3N0PTEwLjIwLjAuMiBhbnNpYmxlX3V\
@@ -1108,15 +1108,15 @@ wcml2YXRlX2tleV9maWxlPS9yb290L2YudHh0Cm9zLWNvbnRyb2xsZXItMS52c3QubGFuIGFuc\
 2libGVfaG9zdD0xMC4yMC4wLjYKb3MtY29udHJvbGxlci0yLnZzdC5sYW4gYW5zaWJsZV9ob3N\
 0PTEwLjIwLjAuOAo="
     pmInventoriesText = Base64.decode(pmInventoriesText)
-    
+
     /** Оригинал инвентория
-     * # Hosts 
-1.2.3.[1:255] 
-124.3.4.[44:55] 
+     * # Hosts
+1.2.3.[1:255]
+124.3.4.[44:55]
 124.3.5.[1:250] ansible_host=10.20.0.2 ansible_user=root ansible_ssh_pass=eadgbe ansible_ssh_private_key_file=/root/f.txt
 124.3.5.[1:251] ansible_host="10.20.0.2" ansible_user='root' ansible_ssh_pass=eadgbe
 124.3.5.[1:252] ansible_host="10.\"20\'.0.2" ansible_user='r"o\'ot' ansible_ssh_pass=eadgbe
-  
+
 # Global vars
 [all:vars]
 ansible_user=grey
@@ -1124,7 +1124,7 @@ ansible_ssh_private_key_file=/tmp/tmpRQ8eTc
 ansible_ssh_extra_args=-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
 ansible_ssh_private_key_file=/root/f.txt
 
-# Groups 
+# Groups
 [git:children]
 ci
 git-servers
@@ -1142,20 +1142,20 @@ test2.vst.lan ansible_host=172.16.1.26
 
 [test:vars]
 ansible_ssh_private_key_file=/root/f.txt
- 
+
 [ci]
 git-ci-1 ansible_host=172.16.1.13 ansible_ssh_private_key_file=/root/f.txt
 git-ci-2 ansible_host=172.16.1.14
 
 
 [git-servers]
-git.vst.lan 
-  
+git.vst.lan
+
 
 [services]
 chat.vstconsulting.net ansible_host=172.16.1.16
-pipc.vst.lan 
-redmine.vst.lan 
+pipc.vst.lan
+redmine.vst.lan
 
 
 [openstack]
@@ -1180,257 +1180,317 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             render(done)
         })
     });
-    
+
+    var etalon = {
+        "hosts": [
+          {
+            "name": "1.2.3.[1:255]",
+            "type": "RANGE",
+            "vars": {
+
+            }
+          },
+          {
+            "name": "124.3.4.[44:55]",
+            "type": "RANGE",
+            "vars": {
+
+            }
+          },
+          {
+            "name": "124.3.5.[1:250]",
+            "type": "RANGE",
+            "vars": {
+              "ansible_host": "10.20.0.2",
+              "ansible_user": "root",
+              "ansible_ssh_pass": "eadgbe",
+              "ansible_ssh_private_key_file": "/root/f.txt"
+            }
+          },
+          {
+            "name": "124.3.5.[1:251]",
+            "type": "RANGE",
+            "vars": {
+              "ansible_host": "10.20.0.2",
+              "ansible_user": "root",
+              "ansible_ssh_pass": "eadgbe"
+            }
+          },
+          {
+            "name": "124.3.5.[1:252]",
+            "type": "RANGE",
+            "vars": {
+              "ansible_host": "10.\\\"20\\'.0.2",
+              "ansible_user": "r\"o\\'ot",
+              "ansible_ssh_pass": "eadgbe"
+            }
+          }
+        ],
+        "groups": {
+          "git": {
+            "vars": {
+
+            },
+            "groups": [
+              "ci",
+              "git-servers"
+            ],
+            "hosts": [
+
+            ],
+            "children": true
+          },
+          "cloud": {
+            "vars": {
+
+            },
+            "groups": [
+              "git",
+              "services",
+              "test"
+            ],
+            "hosts": [
+
+            ],
+            "children": true
+          },
+          "test": {
+            "vars": {
+              "ansible_ssh_private_key_file": "/root/f.txt"
+            },
+            "groups": [
+
+            ],
+            "hosts": [
+              {
+                "name": "test.vst.lan",
+                "type": "HOST",
+                "vars": {
+                  "ansible_user": "centos"
+                }
+              },
+              {
+                "name": "test2.vst.lan",
+                "type": "HOST",
+                "vars": {
+                  "ansible_host": "172.16.1.26"
+                }
+              }
+            ]
+          },
+          "ci": {
+            "vars": {
+
+            },
+            "groups": [
+
+            ],
+            "hosts": [
+              {
+                "name": "git-ci-1",
+                "type": "HOST",
+                "vars": {
+                  "ansible_host": "172.16.1.13",
+                  "ansible_ssh_private_key_file": "/root/f.txt"
+                }
+              },
+              {
+                "name": "git-ci-2",
+                "type": "HOST",
+                "vars": {
+                  "ansible_host": "172.16.1.14"
+                }
+              }
+            ]
+          },
+          "git-servers": {
+            "vars": {
+
+            },
+            "groups": [
+
+            ],
+            "hosts": [
+              {
+                "name": "git.vst.lan",
+                "type": "HOST",
+                "vars": {
+
+                }
+              }
+            ]
+          },
+          "services": {
+            "vars": {
+
+            },
+            "groups": [
+
+            ],
+            "hosts": [
+              {
+                "name": "chat.vstconsulting.net",
+                "type": "HOST",
+                "vars": {
+                  "ansible_host": "172.16.1.16"
+                }
+              },
+              {
+                "name": "pipc.vst.lan",
+                "type": "HOST",
+                "vars": {
+
+                }
+              },
+              {
+                "name": "redmine.vst.lan",
+                "type": "HOST",
+                "vars": {
+
+                }
+              }
+            ]
+          },
+          "openstack": {
+            "vars": {
+
+            },
+            "groups": [
+
+            ],
+            "hosts": [
+              {
+                "name": "fuel.vst.lan",
+                "type": "HOST",
+                "vars": {
+                  "ansible_host": "10.20.0.2",
+                  "ansible_user": "root",
+                  "ansible_ssh_pass": "eadgbe"
+                }
+              },
+              {
+                "name": "os-compute-1.vst.lan",
+                "type": "HOST",
+                "vars": {
+                  "ansible_host": "10.20.0.9"
+                }
+              },
+              {
+                "name": "os-compute-2.vst.lan",
+                "type": "HOST",
+                "vars": {
+                  "ansible_host": "10.20.0.13",
+                  "ansible_ssh_private_key_file": "/root/f.txt"
+                }
+              },
+              {
+                "name": "os-controller-1.vst.lan",
+                "type": "HOST",
+                "vars": {
+                  "ansible_host": "10.20.0.6"
+                }
+              },
+              {
+                "name": "os-controller-2.vst.lan",
+                "type": "HOST",
+                "vars": {
+                  "ansible_host": "10.20.0.8"
+                }
+              }
+            ]
+          }
+        },
+        "vars": {
+          "ansible_user": "grey",
+          "ansible_ssh_private_key_file": "/root/f.txt",
+          "ansible_ssh_extra_args": "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        }
+    }
+    var inventory = undefined;
+
     syncQUnit.addTest('Парсинг inventory', function ( assert )
     {
         var done = assert.async();
-        var inventory = pmInventories.parseFromText(pmInventoriesText) 
+        inventory = pmInventories.parseFromText(pmInventoriesText)
         pmInventories.model.importedInventories = []
         pmInventories.model.importedInventories.push({
             inventory:inventory,
             text:pmInventoriesText
         })
-        
-        var etalon = {
-            "hosts": [
-              {
-                "name": "1.2.3.[1:255]",
-                "type": "RANGE",
-                "vars": {
 
-                }
-              },
-              {
-                "name": "124.3.4.[44:55]",
-                "type": "RANGE",
-                "vars": {
+        var res = deepEqual(etalon, inventory)
+        assert.ok(res, 'Сравнение инвентория распарсенного и оригинального');
+        render(done)
+    });
 
-                }
-              },
-              {
-                "name": "124.3.5.[1:250]",
-                "type": "RANGE",
-                "vars": {
-                  "ansible_host": "10.20.0.2",
-                  "ansible_user": "root",
-                  "ansible_ssh_pass": "eadgbe",
-                  "ansible_ssh_private_key_file": "/root/f.txt"
-                }
-              },
-              {
-                "name": "124.3.5.[1:251]",
-                "type": "RANGE",
-                "vars": {
-                  "ansible_host": "10.20.0.2",
-                  "ansible_user": "root",
-                  "ansible_ssh_pass": "eadgbe"
-                }
-              },
-              {
-                "name": "124.3.5.[1:252]",
-                "type": "RANGE",
-                "vars": {
-                  "ansible_host": "10.\\\"20\\'.0.2",
-                  "ansible_user": "r\"o\\'ot",
-                  "ansible_ssh_pass": "eadgbe"
-                }
-              }
-            ],
-            "groups": {
-              "git": {
-                "vars": {
+    syncQUnit.addTest('Импорт не валидного inventory 1', function ( assert )
+    { 
+        var done = assert.async();
+        $.when(pmInventories.importInventory(inventory)).done(function()
+        {
+            assert.ok(false, 'Успешно импортирован не валидный инвенторий (а это не правильно)');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка в импорте не валидного инвентория (как и задумано)');
+            render(done)
+        })
+    });
 
-                },
-                "groups": [
-                  "ci",
-                  "git-servers"
-                ],
-                "hosts": [
-
-                ],
-                "children": true
-              },
-              "cloud": {
-                "vars": {
-
-                },
-                "groups": [
-                  "git",
-                  "services",
-                  "test"
-                ],
-                "hosts": [
-
-                ],
-                "children": true
-              },
-              "test": {
-                "vars": {
-                  "ansible_ssh_private_key_file": "/root/f.txt"
-                },
-                "groups": [
-
-                ],
-                "hosts": [
-                  {
-                    "name": "test.vst.lan",
-                    "type": "HOST",
-                    "vars": {
-                      "ansible_user": "centos"
-                    }
-                  },
-                  {
-                    "name": "test2.vst.lan",
-                    "type": "HOST",
-                    "vars": {
-                      "ansible_host": "172.16.1.26"
-                    }
-                  }
-                ]
-              },
-              "ci": {
-                "vars": {
-
-                },
-                "groups": [
-
-                ],
-                "hosts": [
-                  {
-                    "name": "git-ci-1",
-                    "type": "HOST",
-                    "vars": {
-                      "ansible_host": "172.16.1.13",
-                      "ansible_ssh_private_key_file": "/root/f.txt"
-                    }
-                  },
-                  {
-                    "name": "git-ci-2",
-                    "type": "HOST",
-                    "vars": {
-                      "ansible_host": "172.16.1.14"
-                    }
-                  }
-                ]
-              },
-              "git-servers": {
-                "vars": {
-
-                },
-                "groups": [
-
-                ],
-                "hosts": [
-                  {
-                    "name": "git.vst.lan",
-                    "type": "HOST",
-                    "vars": {
-
-                    }
-                  }
-                ]
-              },
-              "services": {
-                "vars": {
-
-                },
-                "groups": [
-
-                ],
-                "hosts": [
-                  {
-                    "name": "chat.vstconsulting.net",
-                    "type": "HOST",
-                    "vars": {
-                      "ansible_host": "172.16.1.16"
-                    }
-                  },
-                  {
-                    "name": "pipc.vst.lan",
-                    "type": "HOST",
-                    "vars": {
-
-                    }
-                  },
-                  {
-                    "name": "redmine.vst.lan",
-                    "type": "HOST",
-                    "vars": {
-
-                    }
-                  }
-                ]
-              },
-              "openstack": {
-                "vars": {
-
-                },
-                "groups": [
-
-                ],
-                "hosts": [
-                  {
-                    "name": "fuel.vst.lan",
-                    "type": "HOST",
-                    "vars": {
-                      "ansible_host": "10.20.0.2",
-                      "ansible_user": "root",
-                      "ansible_ssh_pass": "eadgbe"
-                    }
-                  },
-                  {
-                    "name": "os-compute-1.vst.lan",
-                    "type": "HOST",
-                    "vars": {
-                      "ansible_host": "10.20.0.9"
-                    }
-                  },
-                  {
-                    "name": "os-compute-2.vst.lan",
-                    "type": "HOST",
-                    "vars": {
-                      "ansible_host": "10.20.0.13",
-                      "ansible_ssh_private_key_file": "/root/f.txt"
-                    }
-                  },
-                  {
-                    "name": "os-controller-1.vst.lan",
-                    "type": "HOST",
-                    "vars": {
-                      "ansible_host": "10.20.0.6"
-                    }
-                  },
-                  {
-                    "name": "os-controller-2.vst.lan",
-                    "type": "HOST",
-                    "vars": {
-                      "ansible_host": "10.20.0.8"
-                    }
-                  }
-                ]
-              }
-            },
-            "vars": {
-              "ansible_user": "grey",
-              "ansible_ssh_private_key_file": "/root/f.txt",
-              "ansible_ssh_extra_args": "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+    syncQUnit.addTest('Импорт валидного inventory', function ( assert )
+    {
+        jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', 'inventory') 
+        for(var i in inventory.hosts)
+        {
+            var val = inventory.hosts[i]
+            jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', 'host'+val.name) 
+        }
+        for(var i in inventory.groups)
+        {
+            var val = inventory.groups[i]
+            jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', "group"+i) 
+            
+            for(var j in val.hosts)
+            {
+                var hval = val.hosts[j]
+                jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', "host"+hval.name) 
             }
         }
          
-        var res = deepEqual(etalon, inventory)
-        assert.ok(res, 'Сравнение инвентория распарсенного и оригинального');  
-        
+        var done = assert.async();
         $.when(pmInventories.importInventory(inventory)).done(function()
         {
             assert.ok(true, 'Успешно импортирован инвенторий');
             render(done)
         }).fail(function()
         {
-            assert.ok(false, 'Ошибка импорте инвентория');
+            assert.ok(false, 'Ошибка в импорте инвентория');
             render(done)
-        }) 
+        })
     });
-    
+
+    syncQUnit.addTest('Импорт не валидного inventory', function ( assert )
+    {
+        var done = assert.async();
+        inventory.groups["error group"] = {
+            "vars": {},
+            "groups": [],
+            "hosts": [],
+            "children": true
+        }
+ 
+        $.when(pmInventories.importInventory(inventory)).done(function()
+        {
+            assert.ok(false, 'Успешно импортирован инвенторий а должна быть ошибка');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка в импорте инвентория как и задумано');
+            render(done)
+        })
+
+    });
+
 }
 
 /**
@@ -1511,7 +1571,7 @@ function qunitAddTests_projects()
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
         project_id = itemId;
-        
+
         $("#project_"+itemId+"_name").val("test2-project-"+t);
 
         $("#new_json_name").val("test3");
@@ -1685,7 +1745,7 @@ function qunitAddTests_projects()
             render(done)
         })
     });
- 
+
     var inventory_id = undefined;
     syncQUnit.addTest('Сохранение нового inventory', function ( assert )
     {
@@ -1706,7 +1766,7 @@ function qunitAddTests_projects()
 
         // Отправка формы с данными inventory
         $.when(pmInventories.addItem()).done(function()
-        { 
+        {
             inventory_id = /inventory\/([0-9]+)/.exec(window.location.href)[1]
             assert.ok(true, 'Успешно inventory add Item');
             render(done)
@@ -1720,7 +1780,7 @@ function qunitAddTests_projects()
 
     syncQUnit.addTest('Страница Create new periodic task', function ( assert )
     {
-        var done = assert.async(); 
+        var done = assert.async();
         $.when(spajs.open({ menuId:'project/'+project_id+'/new-periodic-tasks'})).done(function()
         {
             assert.ok(true, 'Страница открылась');
@@ -1757,15 +1817,15 @@ function qunitAddTests_projects()
 
         $.when(pmPeriodicTasks.selectInventory(inventoryId)).done(function()
         {
-            $("#new_periodic-tasks_inventory").val(inventoryId) 
-            
+            $("#new_periodic-tasks_inventory").val(inventoryId)
+
             // Отправка формы с данными project
             $.when(pmPeriodicTasks.addItem(itemId)).done(function()
-            { 
+            {
                 assert.ok(true, 'Успешно project add pmPeriodicTasks');
                 render(done)
             }).fail(function()
-            { 
+            {
                 assert.ok(false, 'Ошибка при project add pmPeriodicTasks');
                 render(done)
             })
@@ -1776,7 +1836,7 @@ function qunitAddTests_projects()
     });
 
     syncQUnit.addTest('Изменение periodic task', function ( assert )
-    { 
+    {
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
         var taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
         // Предполагается что мы от прошлого теста попали на страницу создания inventory
@@ -1813,7 +1873,7 @@ function qunitAddTests_projects()
         // с адресом http://192.168.0.12:8080/?group-5
         taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
 
-        var done = assert.async(); 
+        var done = assert.async();
         $.when(pmPeriodicTasks.copyAndEdit(taskId)).done(function()
         {
             assert.ok(true, 'Успешно copyAndEdit add Item');
@@ -1842,11 +1902,11 @@ function qunitAddTests_projects()
             render(done)
         })
     });
-    
+
     syncQUnit.addTest('Удаление periodic task', function ( assert )
-    { 
+    {
         var done = assert.async();
-  
+
         // Удаление project.
         $.when(pmPeriodicTasks.deleteItem(taskId, true)).done(function()
         {
@@ -1857,7 +1917,7 @@ function qunitAddTests_projects()
             render(done)
         })
     });
-    
+
     syncQUnit.addTest('Страница списка periodic task', function ( assert )
     {
         var done = assert.async();
@@ -1894,7 +1954,7 @@ function qunitAddTests_projects()
 }
 
 function qunitAddTests_templates_task(){
-    
+
     syncQUnit.addTest('Список шаблонов', function ( assert )
     {
         var done = assert.async();
@@ -1935,8 +1995,8 @@ function qunitAddTests_templates_task(){
         var done = assert.async();
 
         // Заполнение формы с данными project
-        $("#Templates-name").val("test-template-"+t); 
-        
+        $("#Templates-name").val("test-template-"+t);
+
         // Отправка формы с данными project
         $.when(pmTasksTemplates.addItem()).done(function()
         {
@@ -1981,7 +2041,7 @@ function qunitAddTests_templates_task(){
         // с адресом http://192.168.0.12:8080/?group-5
         itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
 
-        var done = assert.async(); 
+        var done = assert.async();
         $.when(pmTasksTemplates.copyAndEdit(itemId)).done(function()
         {
             assert.ok(true, 'Успешно copyAndEdit add Item');
@@ -2010,11 +2070,11 @@ function qunitAddTests_templates_task(){
             render(done)
         })
     });
-    
+
     syncQUnit.addTest('Удаление шаблона', function ( assert )
     {
         var done = assert.async();
- 
+
         // Удаление project.
         $.when(pmTasksTemplates.deleteItem(itemId, true)).done(function()
         {
@@ -2028,7 +2088,7 @@ function qunitAddTests_templates_task(){
 }
 
 function qunitAddTests_templates_modules(){
-    
+
     syncQUnit.addTest('Список шаблонов', function ( assert )
     {
         var done = assert.async();
@@ -2069,8 +2129,8 @@ function qunitAddTests_templates_modules(){
         var done = assert.async();
 
         // Заполнение формы с данными project
-        $("#Templates-name").val("test-template-"+t); 
-        
+        $("#Templates-name").val("test-template-"+t);
+
         // Отправка формы с данными project
         $.when(pmModuleTemplates.addItem()).done(function()
         {
@@ -2115,7 +2175,7 @@ function qunitAddTests_templates_modules(){
         // с адресом http://192.168.0.12:8080/?group-5
         itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
 
-        var done = assert.async(); 
+        var done = assert.async();
         $.when(pmModuleTemplates.copyAndEdit(itemId)).done(function()
         {
             assert.ok(true, 'Успешно copyAndEdit add Item');
@@ -2144,11 +2204,11 @@ function qunitAddTests_templates_modules(){
             render(done)
         })
     });
-    
+
     syncQUnit.addTest('Удаление шаблона', function ( assert )
     {
         var done = assert.async();
- 
+
         // Удаление project.
         $.when(pmModuleTemplates.deleteItem(itemId, true)).done(function()
         {
@@ -2182,7 +2242,7 @@ function qunitAddTests_history()
     syncQUnit.addTest('Страница history', function ( assert )
     {
         var done = assert.async();
-        
+
         if(!pmHistory.model.itemslist.results.length)
         {
             assert.ok(true, 'Нет истории.');
@@ -2199,7 +2259,7 @@ function qunitAddTests_history()
             render(done)
         })
     });
-    
+
 }
 
     injectQunit()
