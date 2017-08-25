@@ -15,6 +15,7 @@ class ApiAnsibleTestCase(_ApiGHBaseTestCase):
         self.assertIn("args", result['module'])
         self.assertIn("forks", result['module'])
         self.assertIn("list-tasks", result['playbook'])
+        self.assertEquals("keyfile", result['module']['private-key']['type'])
         self.assertNotIn("verbose", result['module'])
         self.assertNotIn("verbose", result['playbook'])
         self.assertIn("args", result['periodic_module'])
