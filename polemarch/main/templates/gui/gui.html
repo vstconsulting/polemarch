@@ -1169,6 +1169,18 @@
                                 </div>
                                 <div class="help-block"></div>
                             </div>
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Initiator</label>
+                                <div
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255"> 
+                                        <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmHistory.model.items[item_id].initiator_type %>
+                                        </a>
+                                </div>
+                                <div class="help-block"></div>
+                            </div>
                         </div>
 
                     </div>
@@ -1297,6 +1309,18 @@
                                         disabled=""
                                         maxlength="255">
                                         <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return  v ? moment(v).format('MM/DD/YYYY HH:mm:ss') : '' }) %>
+                                </div>
+                                <div class="help-block"></div>
+                            </div>
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Initiator</label>
+                                <div
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255"> 
+                                        <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmHistory.model.items[item_id].initiator_type %>
+                                        </a>
                                 </div>
                                 <div class="help-block"></div>
                             </div>
