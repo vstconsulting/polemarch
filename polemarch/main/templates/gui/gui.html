@@ -3034,7 +3034,9 @@
                                     <% console.log("inventory", pmInventories.model.items[item_id].groups[i]) %>
                                     <div class="form-group col-lg-2">
                                         <label class="control-label" >Group</label>
-                                        <%- pmInventories.model.items[item_id].groups[i].name %>
+                                        <a href="<%- polemarch.opt.host %>/?group/<%- pmInventories.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmInventories.model.items[item_id].groups[i].name %>
+                                        </a>
                                     </div>
                                 <% } %>
                             <~>
@@ -3042,8 +3044,10 @@
                             <~ pmInventories.model.items[item_id].hosts >
                                 <% for(var i in pmInventories.model.items[item_id].hosts){ %>
                                     <div class="form-group col-lg-2">
-                                        <label class="control-label" >Host</label>
-                                        <%- pmInventories.model.items[item_id].hosts[i].name %>
+                                        <label class="control-label" >Host</label> 
+                                        <a href="<%- polemarch.opt.host %>/?host/<%- pmInventories.model.items[item_id].hosts[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmInventories.model.items[item_id].hosts[i].name %>
+                                        </a>
                                     </div>
                                 <% } %>
                             <~>
