@@ -1169,6 +1169,18 @@
                                 </div>
                                 <div class="help-block"></div>
                             </div>
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Initiator</label>
+                                <div
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255"> 
+                                        <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmHistory.model.items[item_id].initiator_type %>
+                                        </a>
+                                </div>
+                                <div class="help-block"></div>
+                            </div>
                         </div>
 
                     </div>
@@ -1297,6 +1309,18 @@
                                         disabled=""
                                         maxlength="255">
                                         <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return  v ? moment(v).format('MM/DD/YYYY HH:mm:ss') : '' }) %>
+                                </div>
+                                <div class="help-block"></div>
+                            </div>
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Initiator</label>
+                                <div
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255"> 
+                                        <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmHistory.model.items[item_id].initiator_type %>
+                                        </a>
                                 </div>
                                 <div class="help-block"></div>
                             </div>
@@ -3034,7 +3058,9 @@
                                     <% console.log("inventory", pmInventories.model.items[item_id].groups[i]) %>
                                     <div class="form-group col-lg-2">
                                         <label class="control-label" >Group</label>
-                                        <%- pmInventories.model.items[item_id].groups[i].name %>
+                                        <a href="<%- polemarch.opt.host %>/?group/<%- pmInventories.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmInventories.model.items[item_id].groups[i].name %>
+                                        </a>
                                     </div>
                                 <% } %>
                             <~>
@@ -3042,8 +3068,10 @@
                             <~ pmInventories.model.items[item_id].hosts >
                                 <% for(var i in pmInventories.model.items[item_id].hosts){ %>
                                     <div class="form-group col-lg-2">
-                                        <label class="control-label" >Host</label>
-                                        <%- pmInventories.model.items[item_id].hosts[i].name %>
+                                        <label class="control-label" >Host</label> 
+                                        <a href="<%- polemarch.opt.host %>/?host/<%- pmInventories.model.items[item_id].hosts[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmInventories.model.items[item_id].hosts[i].name %>
+                                        </a>
                                     </div>
                                 <% } %>
                             <~>
@@ -4470,8 +4498,10 @@
                             <~ pmGroups.model.items[item_id].groups >
                                 <% for(var i in pmGroups.model.items[item_id].groups){ %>
                                     <div class="form-group col-lg-2">
-                                        <label class="control-label" >Group</label>
-                                        <%- pmGroups.model.items[item_id].groups[i].name %>
+                                        <label class="control-label" >Group</label> 
+                                        <a href="<%- polemarch.opt.host %>/?group/<%- pmGroups.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmGroups.model.items[item_id].groups[i].name %>
+                                        </a>
                                     </div>
                                 <% } %>
                             <~>
@@ -4479,8 +4509,10 @@
                             <~ pmGroups.model.items[item_id].hosts >
                                 <% for(var i in pmGroups.model.items[item_id].hosts){ %>
                                     <div class="form-group col-lg-2">
-                                        <label class="control-label" >Host</label>
-                                        <%- pmGroups.model.items[item_id].hosts[i].name %>
+                                        <label class="control-label" >Host</label> 
+                                        <a href="<%- polemarch.opt.host %>/?host/<%- pmGroups.model.items[item_id].hosts[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmGroups.model.items[item_id].hosts[i].name %>
+                                        </a>
                                     </div>
                                 <% } %>
                             <~>
@@ -4626,6 +4658,7 @@
                                     <div class="ico-off fa  fa-toggle-off"></div>
                                     <div class="boolean-title" >Boolean value</div>
                                 </div>
+                                <div class="help-block">If turn, then allow adding sub groups to group</div>
                             </div>
                         </div>
                     </div>

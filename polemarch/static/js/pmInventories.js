@@ -118,16 +118,8 @@ pmInventories.parseHostLine = function(index, line, section, inventory)
     }
 
     if(section !== "_hosts")
-    {
-        if(!inventory.groups[section])
-        {
-            inventory.groups[section] = {
-                vars:{},
-                groups:[],
-                hosts:[]
-            }
-        }
-
+    { 
+        pmInventories.addGroupIfNotExists(inventory, section)
         inventory.groups[section].hosts.push(host)
     }
     else
@@ -165,15 +157,7 @@ pmInventories.parseLine = function(index, line, section, inventory)
     {
         section = section.substring(0, section.length - ":vars".length)
 
-        if(!inventory.groups[section])
-        {
-            inventory.groups[section] = {
-                vars:{},
-                groups:[],
-                hosts:[]
-            }
-        }
-
+        pmInventories.addGroupIfNotExists(inventory, section)
         inventory.groups[section].vars = Object.assign(inventory.groups[section].vars, pmInventories.parseMonoVarsLine(index, line))
         return true;
     }
@@ -186,15 +170,7 @@ pmInventories.parseLine = function(index, line, section, inventory)
          */
         section = section.substring(0, section.length - ":children".length)
 
-        if(!inventory.groups[section])
-        {
-            inventory.groups[section] = {
-                vars:{},
-                groups:[],
-                hosts:[],
-            }
-        }
-
+        pmInventories.addGroupIfNotExists(inventory, section)
         inventory.groups[section].children = true
         inventory.groups[section].groups.push(line)
         return true;
@@ -202,6 +178,18 @@ pmInventories.parseLine = function(index, line, section, inventory)
 
     pmInventories.parseHostLine(index, line, section, inventory)
     return false;
+}
+
+pmInventories.addGroupIfNotExists = function(inventory, group_name)
+{ 
+    if(!inventory.groups[group_name])
+    {
+        inventory.groups[group_name] = {
+            vars:{},
+            groups:[],
+            hosts:[],
+        }
+    }
 }
 
 /**
@@ -239,6 +227,9 @@ pmInventories.parseFromText = function(text)
         {
             var res = /^\[([A-z0-9\.:\-]+)\]/ig.exec(line)
             cSection = res[1]
+             
+            pmInventories.addGroupIfNotExists(inventory, cSection.substring(0, cSection.length - ":vars".length))
+            
             console.info("setSection:vars ", cSection)
             continue;
         }
@@ -246,6 +237,7 @@ pmInventories.parseFromText = function(text)
         {
             var res = /^\[([A-z0-9\.:\-]+)\]/ig.exec(line)
             cSection = res[1]
+            pmInventories.addGroupIfNotExists(inventory, cSection.substring(0, cSection.length - ":children".length))
             console.info("setSection:children ", cSection)
             continue;
         }
@@ -253,6 +245,7 @@ pmInventories.parseFromText = function(text)
         {
             var res = /^\[([A-z0-9\.:\-]+)\]/ig.exec(line)
             cSection = res[1]
+            pmInventories.addGroupIfNotExists(inventory, cSection)
             console.info("setSection ", cSection)
             continue;
         }
@@ -323,6 +316,7 @@ pmInventories.importInventoriesAndOpen = function(inventory)
 
 pmInventories.importInventory = function(inventory)
 {
+        debugger; 
     var def2 = new $.Deferred();
     
     var vars = jsonEditor.jsonEditorGetValues('inventory')
@@ -400,7 +394,6 @@ pmInventories.importInventory = function(inventory)
             item:'inventory',
             pk:inventory_id
         })
-        
         var bulkdata = []
         // Сбор групп и вложенных в них хостов
         for(var i in inventory.groups)
@@ -558,7 +551,7 @@ pmInventories.importInventory = function(inventory)
                                     }
                                     else
                                     {
-                                        if(inventory.groups[val.data.name].groups.length)
+                                        if(inventory.groups[val.data.name].hosts.length)
                                         {
                                             // Добавление хостов
                                             var hosts_ids = []
@@ -567,7 +560,7 @@ pmInventories.importInventory = function(inventory)
                                                 // найти id группы и прекрепить.
                                                 for(var k in data)
                                                 {
-                                                    if(data[k].data.children === undefined && data[k].data.name == inventory.groups[val.data.name].hosts[j])
+                                                    if(data[k].data.children === undefined && data[k].data.name == inventory.groups[val.data.name].hosts[j].name)
                                                     {
                                                         hosts_ids.push(data[k].data.id)
                                                         break;
@@ -1102,12 +1095,13 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
  */
 pmInventories.addSubHosts = function(item_id, hosts_ids)
 {
-    if(!hosts_ids)
-    {
-        hosts_ids = []
+    var def = new $.Deferred();
+    if(!hosts_ids || hosts_ids.length == 0)
+    {  
+        def.resolve()
+        return def.promise();
     }
 
-    var def = new $.Deferred();
     $.ajax({
         url: "/api/v1/inventories/"+item_id+"/hosts/",
         type: "POST",

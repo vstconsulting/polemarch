@@ -101,7 +101,7 @@ polemarch.start = function(options)
 
     spajs.addMenu({
         id:"user", 
-        urlregexp:[/^user\/([0-9]+)$/],
+        urlregexp:[/^user\/([0-9]+)$/, /^users\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmUsers.showItem(holder, menuInfo, data);}
     })
 
@@ -127,7 +127,7 @@ polemarch.start = function(options)
 
     spajs.addMenu({
         id:"host", 
-        urlregexp:[/^host\/([0-9]+)$/],
+        urlregexp:[/^host\/([0-9]+)$/, /^hosts\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showItem(holder, menuInfo, data);}
     })
 
@@ -153,7 +153,7 @@ polemarch.start = function(options)
 
     spajs.addMenu({
         id:"group", 
-        urlregexp:[/^group\/([0-9]+)$/],
+        urlregexp:[/^group\/([0-9]+)$/, /^groups\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showItem(holder, menuInfo, data);}
     })
 
@@ -185,7 +185,7 @@ polemarch.start = function(options)
 
     spajs.addMenu({
         id:"inventory", 
-        urlregexp:[/^inventory\/([0-9]+)$/],
+        urlregexp:[/^inventory\/([0-9]+)$/, /^inventories\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showItem(holder, menuInfo, data);}
     })
 
@@ -217,7 +217,7 @@ polemarch.start = function(options)
     
     spajs.addMenu({
         id:"project", 
-        urlregexp:[/^project\/([0-9]+)$/], 
+        urlregexp:[/^project\/([0-9]+)$/, /^projects\/([0-9]+)$/], 
         onOpen:function(holder, menuInfo, data){return pmProjects.openItem(holder, menuInfo, data);}
     })
 
@@ -334,7 +334,7 @@ polemarch.start = function(options)
     
     spajs.addMenu({
         id:"Task-item", 
-        urlregexp:[/^template\/Task\/([0-9]+)$/], 
+        urlregexp:[/^template\/Task\/([0-9]+)$/, /^templates\/Task\/([0-9]+)$/], 
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showItem(holder, menuInfo, data);}, 
     })
     
@@ -346,7 +346,7 @@ polemarch.start = function(options)
      
     spajs.addMenu({
         id:"Module-item", 
-        urlregexp:[/^template\/Module\/([0-9]+)$/], 
+        urlregexp:[/^template\/Module\/([0-9]+)$/, /^templates\/Module\/([0-9]+)$/], 
         onOpen:function(holder, menuInfo, data){return pmModuleTemplates.showItem(holder, menuInfo, data);}, 
     })
     
