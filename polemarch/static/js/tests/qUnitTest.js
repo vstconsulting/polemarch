@@ -1404,7 +1404,8 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
           "ansible_user": "grey",
           "ansible_ssh_private_key_file": "/root/f.txt",
           "ansible_ssh_extra_args": "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-        }
+        },
+        name : "inventory",
     }
     var inventory = undefined;
 
@@ -1412,29 +1413,41 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
     {
         var done = assert.async();
         inventory = pmInventories.parseFromText(pmInventoriesText)
+        inventory.name = "inventory"
         pmInventories.model.importedInventories = []
         pmInventories.model.importedInventories.push({
             inventory:inventory,
             text:pmInventoriesText
         })
 
-        var res = deepEqual(etalon, inventory)
+        var res = deepEqual(etalon, inventory)   
         assert.ok(res, 'Сравнение инвентория распарсенного и оригинального');
         render(done)
     });
-
+ 
     syncQUnit.addTest('Импорт не валидного inventory 1', function ( assert )
     { 
         var done = assert.async();
-        $.when(pmInventories.importInventory(inventory)).done(function()
+        
+        $.when(spajs.open({ menuId:"inventories/import"})).done(function()
         {
-            assert.ok(false, 'Успешно импортирован не валидный инвенторий (а это не правильно)');
-            render(done)
+            assert.ok(true, 'Успешно открыто меню inventories/import'); 
+            $("#inventory_name").val("inventory")
+
+            $.when(pmInventories.importInventory(inventory)).done(function()
+            {
+                assert.ok(false, 'Успешно импортирован не валидный инвенторий (а это не правильно)');
+                render(done)
+            }).fail(function()
+            { 
+                assert.ok(true, 'Ошибка в импорте не валидного инвентория (как и задумано)');
+                render(done)
+            })
         }).fail(function()
         {
-            assert.ok(true, 'Ошибка в импорте не валидного инвентория (как и задумано)');
+            assert.ok(false, 'Ошибка при открытиии меню inventories/import');
             render(done)
-        })
+        }) 
     });
 
     syncQUnit.addTest('Импорт валидного inventory', function ( assert )
@@ -1456,14 +1469,15 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
                 jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', "host"+hval.name) 
             }
         }
-         
+          
         var done = assert.async();
+        $("#inventory_name").val("inventory")
         $.when(pmInventories.importInventory(inventory)).done(function()
         {
-            assert.ok(true, 'Успешно импортирован инвенторий');
+            assert.ok(true, 'Успешно импортирован инвенторий'); 
             render(done)
         }).fail(function()
-        {
+        { 
             assert.ok(false, 'Ошибка в импорте инвентория');
             render(done)
         })
@@ -1479,18 +1493,73 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             "children": true
         }
  
+        $("#inventory_name").val("inventory") 
         $.when(pmInventories.importInventory(inventory)).done(function()
-        {
+        { 
             assert.ok(false, 'Успешно импортирован инвенторий а должна быть ошибка');
             render(done)
         }).fail(function()
-        {
+        { 
             assert.ok(true, 'Ошибка в импорте инвентория как и задумано');
             render(done)
         })
 
     });
 
+    syncQUnit.addTest('Парсинг inventory 2', function ( assert )
+    {
+        var done = assert.async();
+        var inventoryText = "W3NlcnZlcnM6Y2hpbGRyZW5dCnVzdWFsCnVudXN1YWwKW3VzdWFsXQ\
+oxNzIuMTYuMS5bMzA6MzFdClt1bnVzdWFsXQpbc2VydmVyczp2YXJzXQphbnNpYmxlX3VzZXI9Y2Vud\
+G9zCmFuc2libGVfc3NoX3ByaXZhdGVfa2V5X2ZpbGU9L2hvbWUvY2VwcmV1L2RlZmF1bHQucGVtCmFu\
+c2libGVfYmVjb21lPXRydWU="
+        inventoryText = Base64.decode(inventoryText)
+        
+        var inventory = pmInventories.parseFromText(inventoryText)
+        var etalon = {
+            "hosts": [],
+            "groups": {
+              "servers": {
+                "vars": {
+                  "ansible_user": "centos",
+                  "ansible_ssh_private_key_file": "/home/cepreu/default.pem",
+                  "ansible_become": "true"
+                },
+                "groups": [
+                  "usual",
+                  "unusual"
+                ],
+                "hosts": [],
+                "children": true
+              },
+              "usual": {
+                "vars": {},
+                "groups": [],
+                "hosts": [
+                  {
+                    "name": "172.16.1.[30:31]",
+                    "type": "RANGE",
+                    "vars": {
+
+                    }
+                  }
+                ]
+              },
+              "unusual": {
+                "vars": {},
+                "groups": [],
+                "hosts": []
+              }
+            },
+            "vars": {},
+            name:"inventory"
+          }
+        inventory.name = "inventory"
+      
+        var res = deepEqual(etalon, inventory)
+        assert.ok(res, 'Сравнение инвентория 2 распарсенного и оригинального');
+        render(done)
+    }); 
 }
 
 /**
