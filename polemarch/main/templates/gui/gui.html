@@ -1741,8 +1741,8 @@
                             часы	0-23
                             день месяца	1-31
                             месяц	1-12
-                            день недели	0-7 (0-Вс,1-Пн,2-Вт,3-Ср,4-Чт,5-Пт,6-Сб,7-Вс)
-
+                            день недели	0-7 (0-Вс,1-Пн,2-Вт,3-Ср,4-Чт,5-Пт,6-Сб,7-Вс) (sun mon tue wed thu fri sat)
+                            
                             * — любая цифра;
                             целое число;
                             целые числа через запятую — задание дискретного множества значений, например 1,2,5;
@@ -4059,10 +4059,10 @@
                 </div>
 
                 <div class="control-label " style="margin-top:15px;">
-                    <% for(var i = 1; i<= 7; i++){ %>
+                    <% for(var i = 0; i<= 6; i++){ %>
                         <button class="btn btn-default col-xs-6 col-lg-6 <%- crontabEditor.model.DaysOfWeek.justClass(i, 'selected') %>"
                                 onclick="crontabEditor.model.DaysOfWeek[<%- i %>] = !crontabEditor.model.DaysOfWeek[<%- i %>]; crontabEditor.updateCronString(); "
-                                ><%- crontabEditor.model.DaysOfWeekNames[i-1] %></button>
+                                ><%- crontabEditor.model.DaysOfWeekNames[i] %></button>
                     <% } %>
                 </div>
             </div>

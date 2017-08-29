@@ -7,7 +7,7 @@ function crontabEditor(){
 crontabEditor.model = {}
 
 crontabEditor.model.MonthsNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-crontabEditor.model.DaysOfWeekNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+crontabEditor.model.DaysOfWeekNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 crontabEditor.model.Months = {}
 crontabEditor.model.DayOfMonth = {}
@@ -63,7 +63,7 @@ crontabEditor.parseCronString = function(string)
     crontabEditor.parseItem(crontabEditor.model.Hours, crontabEditor.model.HoursStr, 0, 23)
     crontabEditor.parseItem(crontabEditor.model.DayOfMonth, crontabEditor.model.DayOfMonthStr, 1, 31)
     crontabEditor.parseItem(crontabEditor.model.Months, crontabEditor.model.MonthsStr, 1, 12)
-    crontabEditor.parseItem(crontabEditor.model.DaysOfWeek, crontabEditor.model.DaysOfWeekStr, 1, 7)
+    crontabEditor.parseItem(crontabEditor.model.DaysOfWeek, crontabEditor.model.DaysOfWeekStr, 0, 6)
 
 }
 
@@ -393,7 +393,7 @@ crontabEditor.updateCronString = function()
             DaysOfWeek.push(i/1);
         }
     }
-    crontabEditor.model.DaysOfWeekStr = this.compileItem(DaysOfWeek, 1, 7);
+    crontabEditor.model.DaysOfWeekStr = this.compileItem(DaysOfWeek, 0, 6);
 
     //
     // Months
