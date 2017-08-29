@@ -452,6 +452,7 @@ pmItems.loadItem = function(item_id)
         success: function(data)
         {
             //console.log("loadUser", data)
+            thisObj.model.items.justWatch(item_id)
             thisObj.model.items[item_id] = data
         },
         error:function(e)

@@ -187,6 +187,7 @@ pmGroups.updateItem = function(item_id)
         return def.promise();
     }
   
+    var thisObj = this;
     return $.ajax({
         url: "/api/v1/groups/"+item_id+"/",
         type: "PATCH",
@@ -200,6 +201,7 @@ pmGroups.updateItem = function(item_id)
         },
         success: function(data)
         {
+            thisObj.model.items[item_id] = data
             //console.log("group update", data);
             $.notify("Save", "success");
         },

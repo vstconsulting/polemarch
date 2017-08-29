@@ -263,7 +263,7 @@
             <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <span class="h1-header" >Module template `<%- pmModuleTemplates.model.items[item_id].name %>`</span>
+            <span class="h1-header" >Module template `<%= pmModuleTemplates.model.items[item_id].justText('name') %>`</span>
 
         </h1>
         <ol class="breadcrumb">
@@ -536,7 +536,7 @@
             <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <span class="h1-header" >Template `<%- pmTasksTemplates.model.items[item_id].name %>` run playbook options</span>
+            <span class="h1-header" >Template `<%= pmTasksTemplates.model.items[item_id].justText('name') %>` run playbook options</span>
 
         </h1>
         <ol class="breadcrumb">
@@ -1175,9 +1175,13 @@
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255"> 
-                                        <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
-                                            <%- pmHistory.model.items[item_id].initiator_type %>
-                                        </a>
+                                        <% if(pmHistory.model.items[item_id].initiator > 0 ){ %>
+                                            <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
+                                                <%- pmHistory.model.items[item_id].initiator_type %>
+                                            </a>
+                                        <% }else{ %>
+                                            From scheduler
+                                        <% } %>
                                 </div>
                                 <div class="help-block"></div>
                             </div>
@@ -1311,16 +1315,20 @@
                                         <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return  v ? moment(v).format('MM/DD/YYYY HH:mm:ss') : '' }) %>
                                 </div>
                                 <div class="help-block"></div>
-                            </div>
+                            </div> 
                             <div class="form-group col-lg-2">
                                 <label class="control-label" >Initiator</label>
                                 <div
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255"> 
-                                        <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
-                                            <%- pmHistory.model.items[item_id].initiator_type %>
-                                        </a>
+                                        <% if(pmHistory.model.items[item_id].initiator > 0 ){ %>
+                                            <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
+                                                <%- pmHistory.model.items[item_id].initiator_type %>
+                                            </a>
+                                        <% }else{ %>
+                                            From scheduler
+                                        <% } %>
                                 </div>
                                 <div class="help-block"></div>
                             </div>
@@ -1540,7 +1548,7 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <span class="h1-header" ><%- pmPeriodicTasks.model.items[item_id].name %></span>
+            <span class="h1-header" ><%= pmPeriodicTasks.model.items[item_id].justText('name') %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -2144,7 +2152,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" ><%- pmProjects.model.items[item_id].name %></span>
+            <span class="h1-header" ><%= pmProjects.model.items[item_id].justText('name') %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -2535,7 +2543,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" >Project `<%- pmProjects.model.items[item_id].name %>` run playbook options</span>
+            <span class="h1-header" >Project `<%= pmProjects.model.items[item_id].justText('name') %>` run playbook options</span>
 
         </h1>
         <ol class="breadcrumb">
@@ -2998,7 +3006,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" ><%- pmInventories.model.items[item_id].name %></span>
+            <span class="h1-header" ><%= pmInventories.model.items[item_id].justText('name') %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -3386,7 +3394,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" ><%- pmUsers.model.items[item_id].username %></span>
+            <span class="h1-header" ><%= pmUsers.model.items[item_id].justText('username') %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -3727,7 +3735,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" ><%- pmHosts.model.items[item_id].name %></span>
+            <span class="h1-header" ><%= pmHosts.model.items[item_id].justText('name') %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -4429,7 +4437,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" ><%- pmGroups.model.items[item_id].name %></span>
+            <span class="h1-header" ><%= pmGroups.model.items[item_id].justText('name') %></span>
 
         </h1>
         <ol class="breadcrumb">
