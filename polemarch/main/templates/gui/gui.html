@@ -2377,19 +2377,17 @@
                                 <input type="text"  placeholder="Enter project name"  id="new_project_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-
-                            <div class="row">
-                                <div class="form-group col-lg-2">
-                                    <label class="control-label" >Repository type</label>
-                                    <select class="form-control select2" id="new_project_type" onchange="pmProjects.model.repository_type = this.value;" data-placeholder="Select a type" >
-                                        <% for(var i in pmProjects.model.supportedRepos){ %>
-                                            <option
-                                                <% if(pmProjects.model.repository_type = pmProjects.model.supportedRepos[i]){ %>selected<% } %> 
-                                                value="<%- pmProjects.model.supportedRepos[i] %>" ><%- pmProjects.model.supportedRepos[i] %></option>
-                                        <% } %>
-                                    </select>
-                                </div>
-                            </div>
+ 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Repository type</label>
+                                <select class="form-control select2" id="new_project_type" onchange="pmProjects.model.repository_type = this.value;" data-placeholder="Select a type" >
+                                    <% for(var i in pmProjects.model.supportedRepos){ %>
+                                        <option
+                                            <% if(pmProjects.model.repository_type = pmProjects.model.supportedRepos[i]){ %>selected<% } %> 
+                                            value="<%- pmProjects.model.supportedRepos[i] %>" ><%- pmProjects.model.supportedRepos[i] %></option>
+                                    <% } %>
+                                </select>
+                            </div> 
                             
                             <div class="form-group col-lg-2  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v == 'MANUAL' }) %>">
                                 <label class="control-label" >Repository URL</label>
