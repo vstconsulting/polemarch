@@ -228,8 +228,11 @@ pmInventories.parseFromText = function(text)
             var res = /^\[([A-z0-9\.:\-]+)\]/ig.exec(line)
             cSection = res[1]
              
-            pmInventories.addGroupIfNotExists(inventory, cSection.substring(0, cSection.length - ":vars".length))
-            
+            var group_name = cSection.substring(0, cSection.length - ":vars".length)
+            if(group_name != "all")
+            {
+                pmInventories.addGroupIfNotExists(inventory, group_name)
+            }
             console.info("setSection:vars ", cSection)
             continue;
         }
@@ -315,10 +318,8 @@ pmInventories.importInventoriesAndOpen = function(inventory)
 }
 
 pmInventories.importInventory = function(inventory)
-{
-        debugger; 
-    var def2 = new $.Deferred();
-    
+{ 
+    var def2 = new $.Deferred(); 
     var vars = jsonEditor.jsonEditorGetValues('inventory')
     if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
     {
@@ -373,7 +374,12 @@ pmInventories.importInventory = function(inventory)
     }
  
     var def = new $.Deferred();
-    inventory.name = $("#inventory_name").val();
+    
+    if(!inventory.name && $("#inventory_name").length != 0)
+    {
+        inventory.name = $("#inventory_name").val();
+    }
+    
     if(!inventory.name)
     {
         $.notify("Error in filed inventory name", "error");
@@ -385,7 +391,7 @@ pmInventories.importInventory = function(inventory)
         name:inventory.name,
         vars:jsonEditor.jsonEditorGetValues('inventory')
     }
-
+    
     var deleteBulk = []
     $.when(pmInventories.importItem(inventoryObject)).done(function(inventory_id)
     {
@@ -478,6 +484,7 @@ pmInventories.importInventory = function(inventory)
                 {
                     // По меньшей мере в одной операции была ошибка вставки.
                     // Инвенторий импортирован не полностью
+                    debugger;
                     def.reject(deleteBulk);
                     return;
                 }
@@ -588,6 +595,7 @@ pmInventories.importInventory = function(inventory)
                             {
                                 // По меньшей мере в одной операции была ошибка вставки.
                                 // Инвенторий импортирован не полностью
+                                debugger;
                                 def.reject(deleteBulk);
                                 return;
                             }
@@ -625,6 +633,7 @@ pmInventories.importInventory = function(inventory)
                                             {
                                                 // По меньшей мере в одной операции была ошибка обновления.
                                                 // Инвенторий импортирован не полностью
+                                                debugger;
                                                 def.reject(deleteBulk);
                                                 return;
                                             }
@@ -635,6 +644,7 @@ pmInventories.importInventory = function(inventory)
                                         {
                                             console.warn(e)
                                             polemarch.showErrors(e)
+                                            debugger;
                                             def.reject(deleteBulk);
                                         }
                                     }) 
@@ -646,6 +656,7 @@ pmInventories.importInventory = function(inventory)
                             }).fail(function(e){
                                 console.warn(e)
                                 polemarch.showErrors(e)
+                                debugger;
                                 def.reject(deleteBulk);
                             }) 
                         },
@@ -653,12 +664,14 @@ pmInventories.importInventory = function(inventory)
                         {
                             console.warn(e)
                             polemarch.showErrors(e)
+                            debugger;
                             def.reject(deleteBulk);
                         }
                     });
                 }).fail(function(e){
                     console.warn(e)
                     polemarch.showErrors(e)
+                    debugger;
                     def.reject(deleteBulk);
                 })
             },
@@ -666,6 +679,7 @@ pmInventories.importInventory = function(inventory)
             {
                 console.warn(e)
                 polemarch.showErrors(e)
+                debugger;
                 def.reject(deleteBulk);
             }
         })
@@ -673,17 +687,15 @@ pmInventories.importInventory = function(inventory)
     {
         console.warn(e)
         polemarch.showErrors(e)
+        debugger;
         def.reject(deleteBulk);
     })
-    
-    
-    var def2 = new $.Deferred();
-    
+     
     $.when(def).done(function(inventory_id)
     {
         def2.resolve(inventory_id)
     }).fail(function(delete_bulk)
-    {
+    { 
         $.when($.ajax({
             url: "/api/v1/_bulk/",
             type: "POST",
