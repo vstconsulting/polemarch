@@ -261,6 +261,7 @@ pmTasksTemplates.updateItem = function(item_id)
         return;
     }
  
+    var thisObj = this;
     return $.ajax({
         url: "/api/v1/templates/"+item_id+"/",
         type: "PATCH",
@@ -274,6 +275,7 @@ pmTasksTemplates.updateItem = function(item_id)
         },
         success: function(data)
         {
+            thisObj.model.items[item_id] = data
             $.notify("Save", "success");
         },
         error:function(e)

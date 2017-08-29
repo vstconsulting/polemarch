@@ -128,6 +128,7 @@ pmUsers.updateItem = function(item_id)
         data.password = $("#user_"+item_id+"_password").val()
     }
 
+    var thisObj = this;
     return $.ajax({
         url: "/api/v1/users/"+item_id+"/",
         type: "PATCH",
@@ -141,6 +142,7 @@ pmUsers.updateItem = function(item_id)
         },
         success: function(data)
         { 
+            thisObj.model.items[item_id] = data
             $.notify("Save", "success");
         },
         error:function(e)

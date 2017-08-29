@@ -869,6 +869,7 @@ pmInventories.updateItem = function(item_id)
         return;
     }
 
+    var thisObj = this;
     return $.ajax({
         url: "/api/v1/inventories/"+item_id+"/",
         type: "PATCH",
@@ -882,6 +883,7 @@ pmInventories.updateItem = function(item_id)
         },
         success: function(data)
         {
+            thisObj.model.items[item_id] = data
             $.notify("Save", "success");
         },
         error:function(e)
