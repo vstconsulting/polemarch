@@ -10,8 +10,6 @@ var pmAnsibleModule = {
         selectedInventory:0
     }
 }
- 
-jsonEditor.options[pmAnsibleModule.model.name] = jsonEditor.options['item'];
   
 pmAnsibleModule.selectInventory = function(inventory_id)
 {

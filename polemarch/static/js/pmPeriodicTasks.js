@@ -409,7 +409,7 @@ pmPeriodicTasks.addItem = function(project_id)
         }
     }
 
-    data.vars = jsonEditor.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues(data.kind)
 
     if(data.kind == "MODULE")
     {
@@ -550,7 +550,7 @@ pmPeriodicTasks.updateItem = function(item_id)
         }
     }
 
-    data.vars = jsonEditor.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues(data.kind)
     
     if(data.kind == "MODULE")
     {
