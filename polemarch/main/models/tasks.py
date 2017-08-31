@@ -15,6 +15,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.contrib.auth.models import User
 
+from ..utils import AnsibleArgumentsReference
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
 from .base import BModel, BManager, BQuerySet, models
@@ -81,6 +82,17 @@ class PeriodicTask(AbstractModel):
     def get_vars(self):
         qs = self.variables.order_by("key")
         return OrderedDict(qs.values_list('key', 'value'))
+
+    @transaction.atomic()
+    def set_vars(self, variables):
+        command = "playbook"
+        ansible_args = {}
+        for key, value in variables.items():
+            ansible_args[key] = value
+        if self.kind == "MODULE":
+            command = "module"
+        AnsibleArgumentsReference().validate_args(command, ansible_args)
+        return super(PeriodicTask, self).set_vars(variables)
 
     def get_schedule(self):
         if self.type == "CRONTAB":

@@ -12,6 +12,7 @@ from .tasks import (ApiTasksTestCase,
                     ApiPeriodicTasksTestCase,
                     ApiTemplateTestCase,
                     ApiHistoryTestCase)
+from .ansible import ApiAnsibleTestCase
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -211,7 +212,8 @@ class APITestCase(ApiUsersTestCase,
                   ApiHostsTestCase, ApiGroupsTestCase,
                   ApiInventoriesTestCase, ApiProjectsTestCase,
                   ApiTasksTestCase, ApiPeriodicTasksTestCase,
-                  ApiBulkTestCase, ApiTemplateTestCase, ApiHistoryTestCase):
+                  ApiBulkTestCase, ApiTemplateTestCase, ApiHistoryTestCase,
+                  ApiAnsibleTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 

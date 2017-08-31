@@ -161,6 +161,7 @@ pmProjects.addItem = function()
  */
 pmProjects.updateItem = function(item_id)
 {
+    var def = new $.Deferred();
     var data = {}
 
     data.name = $("#project_"+item_id+"_name").val()
@@ -170,7 +171,8 @@ pmProjects.updateItem = function(item_id)
     {
         console.warn("Invalid value in filed name")
         $.notify("Invalid value in filed name", "error");
-        return;
+        def.reject("Invalid value in filed name")
+        return def.promise();
     }
     
     data.vars = {
@@ -187,13 +189,14 @@ pmProjects.updateItem = function(item_id)
         else
         {
             $.notify("Invalid value in filed `Repository URL`", "error");
-            def.reject()
+            def.reject("Invalid value in filed `Repository URL`")
             return def.promise();
         }
     }
 
 
-    return $.ajax({
+    var thisObj = this;
+    $.ajax({
         url: "/api/v1/projects/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
@@ -207,13 +210,17 @@ pmProjects.updateItem = function(item_id)
         success: function(data)
         {
             $.notify("Save", "success");
+            thisObj.model.items[item_id] = data
+            def.resolve(item_id)
         },
         error:function(e)
         {
             console.warn("project "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
+            def.reject(e)
         }
     });
+    return def.promise();
 }
 
 /**

@@ -1,6 +1,8 @@
 import json  # noqa: F401
 import random
 import string
+
+import copy
 import os
 
 import six
@@ -166,3 +168,22 @@ class BaseTestCase(TestCase):
         self.assertTrue(isinstance(result, dict))
         for field, value in fields.items():
             self.assertEqual(result[field], value)
+
+
+class AnsibleArgsValidationTest(BaseTestCase):
+    _MISTAKES = [
+        ("non-existent-ansible-arg", "blablabla"),
+        ("forks", "234bnl"),
+        ("sudo", "makaka"),
+        ("group", "bugaga"),
+    ]
+
+    def make_test(self, url, required_args, update_func, exception=None):
+        for arg, val in self._MISTAKES:
+            if exception == arg:
+                continue
+            args = copy.deepcopy(required_args)
+            update_func(args, {arg: val})
+            result = self.get_result("post", url, 400, data=json.dumps(args))
+            self.assertIn("Incorrect argument", result["detail"])
+            self.assertIn(arg, result["detail"])

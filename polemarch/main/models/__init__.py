@@ -16,7 +16,7 @@ from .users import TypesPermissions
 from .tasks import Task, PeriodicTask, History, HistoryLines, Template
 from ..validators import validate_hostname, RegexValidator
 from ..exceptions import UnknownTypeException
-from ..utils import raise_context
+from ..utils import raise_context, AnsibleArgumentsReference
 
 
 #####################################
@@ -93,6 +93,13 @@ def validate_template(instance, **kwargs):
             )
     if errors:
         raise ValidationError(errors)
+    command = "playbook"
+    ansible_args = dict(instance.data['vars'])
+    if instance.kind == "Module":
+        command = "module"
+    if instance.kind == "PeriodicTask" and instance.data["kind"] == "MODULE":
+        command = "module"
+    AnsibleArgumentsReference().validate_args(command, ansible_args)
 
 
 @receiver(signals.pre_delete, sender=Project)
@@ -125,5 +132,11 @@ def save_to_beat(instance, **kwargs):
 
 @receiver(signals.post_delete, sender=PeriodicTask)
 def delete_from_beat(instance, **kwargs):
-    django_celery_beat.models.PeriodicTask.objects.\
-        filter(name=str(instance.id)).delete()
+    manager = django_celery_beat.models.PeriodicTask.objects
+    celery_tasks = manager.filter(name=str(instance.id))
+    if instance.type == "CRONTAB" and celery_tasks.count() > 0:
+        crontab_id = celery_tasks[0].crontab_id
+        others = manager.filter(crontab_id=crontab_id)
+        if others.count() == 1:
+            CrontabSchedule.objects.get(id=crontab_id).delete()
+    celery_tasks.delete()

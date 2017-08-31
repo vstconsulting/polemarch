@@ -122,6 +122,10 @@ py34-django110:
   <<: *tests_template
 py34-django111:
   <<: *tests_template
+py35-django111:
+  <<: *tests_template
+  image: onegreyonewhite/tox:ubuntu
+
 
 pep8_checks:
   stage: code_standarts

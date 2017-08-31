@@ -143,7 +143,7 @@
         <button type="button" onclick="spajs.open({ menuId:'template/new-task'});  return false;" class="btn btn-primary" >Create task template</button>
         <button type="button" onclick="spajs.open({ menuId:'template/new-module'});  return false;" class="btn btn-primary" >Create module template</button>
           
-        <span class="btn btn-default textfile"style="margin-left: 10px;" >
+        <span class="btn btn-default textfile" style="margin-left: 10px;" >
             <input type="file" class="input-file"  onchange="spajs.showLoader(pmTasksTemplates.importFromFile(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import template
         </span>
@@ -219,7 +219,7 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="#" onclick="pmTasksTemplates.deleteRows($('.multiple-select .item-row.selected')); return false;" >DeleteDelete from this page</a>
+                                    <a href="#" onclick="pmTasksTemplates.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
                                 </li> 
                                 <li>
                                     <a href="#" onclick="pmTasksTemplates.deleteSelected(); return false;" >Delete all selected elements</a>
@@ -263,7 +263,7 @@
             <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <span class="h1-header" >Module template `<%- pmModuleTemplates.model.items[item_id].name %>`</span>
+            <span class="h1-header" >Module template `<%= pmModuleTemplates.model.items[item_id].justText('name') %>`</span>
 
         </h1>
         <ol class="breadcrumb">
@@ -536,7 +536,7 @@
             <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <span class="h1-header" >Template `<%- pmTasksTemplates.model.items[item_id].name %>` run playbook options</span>
+            <span class="h1-header" >Template `<%= pmTasksTemplates.model.items[item_id].justText('name') %>` run playbook options</span>
 
         </h1>
         <ol class="breadcrumb">
@@ -1169,6 +1169,22 @@
                                 </div>
                                 <div class="help-block"></div>
                             </div>
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Initiator</label>
+                                <div
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255"> 
+                                        <% if(pmHistory.model.items[item_id].initiator > 0 ){ %>
+                                            <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
+                                                <%- pmHistory.model.items[item_id].initiator_type %>
+                                            </a>
+                                        <% }else{ %>
+                                            From scheduler
+                                        <% } %>
+                                </div>
+                                <div class="help-block"></div>
+                            </div>
                         </div>
 
                     </div>
@@ -1297,6 +1313,22 @@
                                         disabled=""
                                         maxlength="255">
                                         <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return  v ? moment(v).format('MM/DD/YYYY HH:mm:ss') : '' }) %>
+                                </div>
+                                <div class="help-block"></div>
+                            </div> 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Initiator</label>
+                                <div
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255"> 
+                                        <% if(pmHistory.model.items[item_id].initiator > 0 ){ %>
+                                            <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
+                                                <%- pmHistory.model.items[item_id].initiator_type %>
+                                            </a>
+                                        <% }else{ %>
+                                            From scheduler
+                                        <% } %>
                                 </div>
                                 <div class="help-block"></div>
                             </div>
@@ -1516,7 +1548,7 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-            <span class="h1-header" ><%- pmPeriodicTasks.model.items[item_id].name %></span>
+            <span class="h1-header" ><%= pmPeriodicTasks.model.items[item_id].justText('name') %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -1709,8 +1741,8 @@
                             часы	0-23
                             день месяца	1-31
                             месяц	1-12
-                            день недели	0-7 (0-Вс,1-Пн,2-Вт,3-Ср,4-Чт,5-Пт,6-Сб,7-Вс)
-
+                            день недели	0-7 (0-Вс,1-Пн,2-Вт,3-Ср,4-Чт,5-Пт,6-Сб,7-Вс) (sun mon tue wed thu fri sat)
+                            
                             * — любая цифра;
                             целое число;
                             целые числа через запятую — задание дискретного множества значений, например 1,2,5;
@@ -2031,14 +2063,10 @@
                                                     <span class="caret"></span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-right">
-
+ 
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/periodic-tasks'}); return false;" >Periodic tasks</a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="#"
-                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/history'}); return false;" >History</a>
+                                                            onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
                                                     </li>
                                                     <li role="separator" class="divider"></li>
                                                     <li>
@@ -2051,8 +2079,13 @@
                                                     <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="#"
-                                                            onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/periodic-tasks'}); return false;" >Periodic tasks</a>
                                                     </li>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/history'}); return false;" >History</a>
+                                                    </li>
+                                                    <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.showLoader(pmProjects.deleteItem(<%- valid %>)); return false;" >Delete</a>
@@ -2119,7 +2152,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" ><%- pmProjects.model.items[item_id].name %></span>
+            <span class="h1-header" ><%= pmProjects.model.items[item_id].justText('name') %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -2131,7 +2164,7 @@
 
     <section class="content"> 
         <button type="button" onclick="spajs.showLoader(pmProjects.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save project</button>
-        <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="btn-right hidden-sm hidden-xs btn btn-warning" ><i class="fa fa-refresh" aria-hidden="true"></i> Sync</button>
+        <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-warning" ><i class="fa fa-refresh" aria-hidden="true"></i> Sync</button>
         <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-play" aria-hidden="true"></i> Run playbook</button>
         <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/ansible-module/run'});  return false;" class="btn btn-info" ><i class="fa fa-terminal" aria-hidden="true"></i> Run module</button>
         <!--<button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-periodic-tasks'});  return false;" class="btn btn-info" >Create periodic tasks</button>-->
@@ -2352,19 +2385,17 @@
                                 <input type="text"  placeholder="Enter project name"  id="new_project_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-
-                            <div class="row">
-                                <div class="form-group col-lg-2">
-                                    <label class="control-label" >Repository type</label>
-                                    <select class="form-control select2" id="new_project_type" onchange="pmProjects.model.repository_type = this.value;" data-placeholder="Select a type" >
-                                        <% for(var i in pmProjects.model.supportedRepos){ %>
-                                            <option
-                                                <% if(pmProjects.model.repository_type = pmProjects.model.supportedRepos[i]){ %>selected<% } %> 
-                                                value="<%- pmProjects.model.supportedRepos[i] %>" ><%- pmProjects.model.supportedRepos[i] %></option>
-                                        <% } %>
-                                    </select>
-                                </div>
-                            </div>
+ 
+                            <div class="form-group col-lg-2">
+                                <label class="control-label" >Repository type</label>
+                                <select class="form-control select2" id="new_project_type" onchange="pmProjects.model.repository_type = this.value;" data-placeholder="Select a type" >
+                                    <% for(var i in pmProjects.model.supportedRepos){ %>
+                                        <option
+                                            <% if(pmProjects.model.repository_type = pmProjects.model.supportedRepos[i]){ %>selected<% } %> 
+                                            value="<%- pmProjects.model.supportedRepos[i] %>" ><%- pmProjects.model.supportedRepos[i] %></option>
+                                    <% } %>
+                                </select>
+                            </div> 
                             
                             <div class="form-group col-lg-2  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v == 'MANUAL' }) %>">
                                 <label class="control-label" >Repository URL</label>
@@ -2512,7 +2543,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" >Project `<%- pmProjects.model.items[item_id].name %>` run playbook options</span>
+            <span class="h1-header" >Project `<%= pmProjects.model.items[item_id].justText('name') %>` run playbook options</span>
 
         </h1>
         <ol class="breadcrumb">
@@ -2581,8 +2612,8 @@
 
     <section class="content">
         <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Create inventory</a>
-        <span class="btn btn-default textfile"style="margin-left: 10px;" >
-            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.importFromFile(event));"  >
+        <span class="btn btn-default textfile" style="margin-left: 10px;" >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import from file
         </span>
         <br>
@@ -2712,6 +2743,150 @@
     </section>
 </script>
 
+<script type="text/x-just" data-just="inventories_import_page">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" >Import from file</span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" >Inventories</a></li>
+            <li class="active">Import from file</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmInventories.importInventoriesAndOpen()); return false;" class="btn btn-primary" >Import inventory</button>
+        <span class="btn btn-default textfile" style="margin-left: 10px;" >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
+            <span class="glyphicon glyphicon-file"></span> Import from file
+        </span>
+        <br>
+        <br>
+        <div class="row">
+            <~ pmInventories.model.importedInventories>
+                <% for(var i in pmInventories.model.importedInventories){ var val = pmInventories.model.importedInventories[i] %>
+                    <%= pmInventories.renderImportedInventory(val) %>
+                <% } %>
+            <~>
+        </div> 
+    </section>
+</script>
+    
+<script type="text/x-just" data-just="inventories_imported_inventory"> 
+    
+<section class="col-lg-12">
+    <div class="box box-info collapsed-box">
+        <div class="box-header with-border collapsed-box">
+            Imported file<br>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="form-group col-lg-12 col-ml-12 col-sm-12">
+                <pre><%- text %></pre>
+            </div>  
+        </div>
+    </div>
+</section> 
+        
+<div class="col-lg-12">
+    <h1>Inventory</h1> 
+</div> 
+<section class="col-lg-12">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            Inventory<br>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+            </div>
+        </div>
+        <div class="box-body">   
+            <div class="form-group col-lg-2">
+                <label class="control-label" >Name</label>
+                <input type="text" id="inventory_name" value="<%- inventory.name %>"  class="form-control" maxlength="255">
+                <div class="help-block"></div>
+            </div>
+        </div>
+    </div>
+</section> 
+<%= jsonEditor.editor(inventory.vars, {block:'inventories', prefix:"inventory"}) %>
+
+
+<% for(var i in inventory.groups){ var valg = inventory.groups[i] %>   
+    <div class="col-lg-12">
+        <h1>Group: <%- i %></h1> 
+    </div> 
+    <%= jsonEditor.editor(valg.vars, {block:'groups', prefix: 'group'+i}) %> 
+<% } %>
+    
+<% for(var i in inventory.hosts){ var val = inventory.hosts[i] %>  
+    <div class="col-lg-12">
+        <h1>Host: <%- val.name %></h1> 
+    </div> 
+    <section class="col-lg-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                Host: <%- val.name %><br>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                </div>
+            </div>
+            <div class="box-body">   
+                <div class="form-group col-lg-2">
+                    <label class="control-label" >Name</label>
+                    <input type="text" disabled value="<%- val.name %>"  class="form-control" maxlength="255">
+                    <div class="help-block"></div>
+                </div>
+                <div class="form-group col-lg-2">
+                    <label class="control-label" >Type</label>
+                    <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
+                    <div class="help-block"></div>
+                </div>  
+            </div>
+        </div>
+    </section> 
+    <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:'host'+val.name}) %> 
+<% } %>
+
+<% for(var i in inventory.groups){ var valg = inventory.groups[i] %>  
+    <% for(var j in valg.hosts){ var val = valg.hosts[j] %> 
+        <div class="col-lg-12">
+            <h1>Group: <%- i %>, Host: <%- val.name %></h1>  
+        </div> 
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Group: <%- i %>, Host: <%- val.name %><br>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                    </div>
+                </div>
+                <div class="box-body">   
+                    <div class="form-group col-lg-2">
+                        <label class="control-label" >Name</label>
+                        <input type="text" disabled value="<%- val.name %>"  class="form-control" maxlength="255">
+                        <div class="help-block"></div>
+                    </div>
+                    <div class="form-group col-lg-2">
+                        <label class="control-label" >Type</label>
+                        <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
+                        <div class="help-block"></div>
+                    </div>  
+                </div>
+            </div>
+        </section> 
+        <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:'host'+val.name}) %> 
+    <% } %>
+<% } %>  
+</script>
+    
 <!-- Страница module_run_page in projects -->
 <script type="text/x-just" data-just="module_run_page">
     <section class="content-header">
@@ -2744,7 +2919,7 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4">
                                 <label class="control-label" >Inventory</label>
                                 <select
                                     class="form-control select2"
@@ -2766,7 +2941,7 @@
                                 <% if(!pmModuleTemplates.model.selectedInventory){ %>
 
                                 <% }else{ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4">
                                         <label class="control-label" >Group</label>
                                         <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
                                             <option value="all" selected>All</option>
@@ -2785,7 +2960,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4">
                                 <label class="control-label" >Module</label>
                                 <input type="text"
                                         class="module-autocomplete form-control"
@@ -2831,7 +3006,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" ><%- pmInventories.model.items[item_id].name %></span>
+            <span class="h1-header" ><%= pmInventories.model.items[item_id].justText('name') %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -2889,7 +3064,9 @@
                                     <% console.log("inventory", pmInventories.model.items[item_id].groups[i]) %>
                                     <div class="form-group col-lg-2">
                                         <label class="control-label" >Group</label>
-                                        <%- pmInventories.model.items[item_id].groups[i].name %>
+                                        <a href="<%- polemarch.opt.host %>/?group/<%- pmInventories.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmInventories.model.items[item_id].groups[i].name %>
+                                        </a>
                                     </div>
                                 <% } %>
                             <~>
@@ -2897,8 +3074,10 @@
                             <~ pmInventories.model.items[item_id].hosts >
                                 <% for(var i in pmInventories.model.items[item_id].hosts){ %>
                                     <div class="form-group col-lg-2">
-                                        <label class="control-label" >Host</label>
-                                        <%- pmInventories.model.items[item_id].hosts[i].name %>
+                                        <label class="control-label" >Host</label> 
+                                        <a href="<%- polemarch.opt.host %>/?host/<%- pmInventories.model.items[item_id].hosts[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmInventories.model.items[item_id].hosts[i].name %>
+                                        </a>
                                     </div>
                                 <% } %>
                             <~>
@@ -3215,7 +3394,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" ><%- pmUsers.model.items[item_id].username %></span>
+            <span class="h1-header" ><%= pmUsers.model.items[item_id].justText('username') %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -3462,7 +3641,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 60px" class="hidden-xs">Type</th>
+                                    <th style="width: 70px;" class="hidden-xs">Type</th>
                                     <th style="width: 80px;" class="hidden-xs">Actions</th>
                                     <th style="width: 95px;" class="visible-xs">Actions</th>
                                 </tr>
@@ -3556,7 +3735,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" ><%- pmHosts.model.items[item_id].name %></span>
+            <span class="h1-header" ><%= pmHosts.model.items[item_id].justText('name') %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -3880,10 +4059,10 @@
                 </div>
 
                 <div class="control-label " style="margin-top:15px;">
-                    <% for(var i = 1; i<= 7; i++){ %>
+                    <% for(var i = 0; i<= 6; i++){ %>
                         <button class="btn btn-default col-xs-6 col-lg-6 <%- crontabEditor.model.DaysOfWeek.justClass(i, 'selected') %>"
                                 onclick="crontabEditor.model.DaysOfWeek[<%- i %>] = !crontabEditor.model.DaysOfWeek[<%- i %>]; crontabEditor.updateCronString(); "
-                                ><%- crontabEditor.model.DaysOfWeekNames[i-1] %></button>
+                                ><%- crontabEditor.model.DaysOfWeekNames[i] %></button>
                     <% } %>
                 </div>
             </div>
@@ -3896,9 +4075,9 @@
 
     <% if(jsonEditor.options[optionsblock] && jsonEditor.options[optionsblock][name]){ thisOpt = jsonEditor.options[optionsblock][name]; %>
         <div class="form-group
-                    <% if(thisOpt.type == 'textarea' || thisOpt.type == 'textfile' ){ %> col-lg-12 <% }else{ %> col-lg-12 <% } %>
+                    <% if(thisOpt.type == 'textarea' || thisOpt.type == 'textfile' || thisOpt.type == 'keyfile' ){ %> col-lg-12 <% }else{ %> col-lg-12 <% } %>
                     <% if(thisOpt.type == 'boolean' ){ %> boolean-select <% } %>"
-                id="json_<%- name %>_line">
+                id="json_<%- name %>_line<%- opt.prefix%>">
             <label
                     class=" col-sm-4 col-lg-3 control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
                     for="#json_<%- name %>"
@@ -3906,35 +4085,32 @@
                 >
                 <%- name %>
             </label>
-            <div class="input-group col-xs-12 col-sm-8 col-lg-9 "  >
-
-                    <% if(thisOpt.type == 'textfile' ){ %>
-
-
+            <div class="input-group col-xs-12 col-sm-8 col-lg-9">
+                    <% if(thisOpt.type == 'textfile' || thisOpt.type == 'keyfile' ){ %>
                         <% if(!thisOpt.required){ %>
-                            <span class="btn btn-default btn-right" onclick="$('#json_<%- name %>_line').remove()" style="float: right; margin-left: 10px;" >
+                            <span class="btn btn-default btn-right"  onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix%>');" style="float: right; margin-left: 10px;" >
                                 <span class="glyphicon glyphicon-remove"></span>
                             </span>
                         <% } %>
 
-                        <span class="btn btn-default btn-right textfile"style="float: right; margin-left: 10px;" >
-                            <input type="file" class="input-file"  onchange="jsonEditor.loadFile(event, '#json_<%- name %>_value');"  >
+                        <span class="btn btn-default btn-right textfile" style="float: right; margin-left: 10px;" >
+                            <input type="file" class="input-file"  onchange="jsonEditor.loadFile(event, '#json_<%- name %>_value<%- opt.prefix%>');"  >
                             <span class="glyphicon glyphicon-file"></span>
                         </span>
                         <div style="clear: both; padding-top: 10px;" ></div>
                         <textarea
                                data-type="<%- thisOpt.type %>"
                                placeholder="Enter value"
-                               id="json_<%- name %>_value"
-                               class="form-control jsonEditor-data"
+                               id="json_<%- name %>_value<%- opt.prefix%>"
+                               class="form-control jsonEditor-data<%- opt.prefix%>"
                                data-json-name="<%- name %>"
                                rows="4"
                                style="resize:vertical;"
                                ><%- value %></textarea>
                     <% } else { %>
                             <% if(thisOpt.type == 'select' ){ %>
-                                <select class="form-control jsonEditor-data"
-                                        id="json_<%- name %>_value"
+                                <select class="form-control jsonEditor-data<%- opt.prefix%>"
+                                        id="json_<%- name %>_value<%- opt.prefix%>"
                                         data-json-name="<%- name %>"
                                         data-type="<%- thisOpt.type %>" >
                                     <% for(var i in thisOpt.options){ %>
@@ -3945,17 +4121,17 @@
                                 <input type="password"
                                        placeholder="Enter value"
                                        data-type="<%- thisOpt.type %>"
-                                       id="json_<%- name %>_value"
+                                       id="json_<%- name %>_value<%- opt.prefix%>"
                                        value="<%- value %>"
-                                       class="form-control jsonEditor-data"
+                                       class="form-control jsonEditor-data<%- opt.prefix%>"
                                        data-json-name="<%- name %>"
                                        >
                             <% } else if(thisOpt.type == 'boolean' ){ %>
-                                <div class="form-control jsonEditor-data selected"
+                                <div class="form-control jsonEditor-data<%- opt.prefix%> selected"
                                         onselectstart="return false"
                                         onmousedown="return false"
                                         style="cursor: pointer;"
-                                        id="json_<%- name %>_value"
+                                        id="json_<%- name %>_value<%- opt.prefix%>"
                                         data-json-name="<%- name %>"
                                         data-type="<%- thisOpt.type %>" >
                                     <div class="ico-on fa fa-toggle-on"></div>
@@ -3966,8 +4142,8 @@
                                 <textarea
                                        data-type="<%- thisOpt.type %>"
                                        placeholder="Enter value"
-                                       id="json_<%- name %>_value"
-                                       class="form-control jsonEditor-data"
+                                       id="json_<%- name %>_value<%- opt.prefix%>"
+                                       class="form-control jsonEditor-data<%- opt.prefix%>"
                                        data-json-name="<%- name %>"
                                        rows="4"
                                        style="resize:vertical;"
@@ -3976,15 +4152,15 @@
                                 <input type="text"
                                        data-type="text"
                                        placeholder="Enter value"
-                                       id="json_<%- name %>_value"
+                                       id="json_<%- name %>_value<%- opt.prefix%>"
                                        value="<%- value %>"
-                                       class="form-control jsonEditor-data"
+                                       class="form-control jsonEditor-data<%- opt.prefix%>"
                                        data-json-name="<%- name %>"
                                        >
                             <% } %>
 
                             <% if(!thisOpt.required){ %>
-                                <span class="input-group-addon  btn btn-danger" onclick="$('#json_<%- name %>_line').remove()">
+                                <span class="input-group-addon  btn btn-danger" onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix%>');">
                                     <span class="glyphicon glyphicon-remove"></span>
                                 </span>
                             <% } %>
@@ -4007,7 +4183,7 @@
             <% } %>
         </div>
     <% }else{ %>
-        <div class="form-group col-lg-12" id="json_<%- name %>_line">
+        <div class="form-group col-lg-12" id="json_<%- name %>_line<%- opt.prefix%>">
             <label class="control-label  col-sm-4 col-lg-3 <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
                     for="#json_<%- name %>"
                     style="word-wrap: break-word;">
@@ -4016,13 +4192,13 @@
             <div class="input-group  col-sm-8 col-lg-9">
                 <input type="text"
                        placeholder="Enter value"
-                       id="json_<%- name %>_value"
+                       id="json_<%- name %>_value<%- opt.prefix%>"
                        value="<%- value %>"
-                       class="form-control jsonEditor-data"
+                       class="form-control jsonEditor-data<%- opt.prefix%>"
                        data-json-name="<%- name %>"
                        data-type="text"
                        >
-                <span class="input-group-addon  btn btn-danger" onclick="$('#json_<%- name %>_line').remove()">
+                <span class="input-group-addon  btn btn-danger" onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix%>');">
                     <span class="glyphicon glyphicon-remove"></span>
                 </span>
             </div>
@@ -4033,7 +4209,7 @@
 <!-- jsonEditor -->
 <script type="text/x-just" data-just="jsonEditor">
 
-<section class="col-lg-12">
+<section class="col-lg-12"  id="jsonEditorVarListHolder<%- opt.prefix%>" style=" <% if(Object.keys(data).length == 0){ %>display:none<% } %>">
     <div class="box box-info">
         <div class="box-header with-border">
             <%- opt.title1 %><br>
@@ -4041,9 +4217,9 @@
         <div class="box-body">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="row" id="jsonEditorVarList">
+                    <div class="row" id="jsonEditorVarList<%- opt.prefix%>">
                         <% for(var i in data){ %>
-                            <%= this.partial('jsonEditorLine', { name:i, value:data[i], optionsblock:optionsblock }) %>
+                            <%= this.partial('jsonEditorLine', { name:i, value:data[i], optionsblock:optionsblock, opt:opt }) %>
                         <% } %>
                     </div>
                 </div>
@@ -4065,7 +4241,7 @@
                             Name
                         </label>
                         <div class="input-group  col-sm-10 col-lg-10 col-xs-12"  >
-                            <input type="text" placeholder="Enter name" id="new_json_name" value=""  class="form-control" >
+                            <input type="text" placeholder="Enter name" id="new_json_name<%- opt.prefix%>" value=""  class="form-control" >
                             <div class="help-block"></div>
                         </div>
                     </div>
@@ -4078,7 +4254,7 @@
                             Value
                         </label>
                         <div class="input-group col-sm-10 col-lg-10 col-xs-12"  >
-                            <textarea placeholder="Enter value" id="new_json_value" class="form-control"  style="resize:vertical;"></textarea>
+                            <textarea placeholder="Enter value" id="new_json_value<%- opt.prefix%>" class="form-control"  style="resize:vertical;"></textarea>
                             <div class="help-block"></div>
                         </div>
                     </div>
@@ -4086,13 +4262,13 @@
 
                 <div class="row">
                     <div class="form-group col-lg-1">
-                        <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>');" >Add varible</span>
+                        <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>', '<%- opt.prefix%>');" >Add varible</span>
                     </div>
                 </div>
             </div>
         </div>
     </section> 
-    <=js jsonEditor.initForm('<%- optionsblock %>') js=> 
+    <=js jsonEditor.initForm('<%- optionsblock %>', '<%- opt.prefix%>') js=> 
 <% } %>
 </script>
 
@@ -4219,7 +4395,7 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a href="#"
-                                        onclick="pmGroups.deleteRows($('.multiple-select .item-row.selected')); return false;" >DeleteDelete from this page</a>
+                                        onclick="pmGroups.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
                                 </li> 
                                 <li>
                                     <a href="#" onclick="pmGroups.deleteSelected(); return false;" >Delete all selected elements</a>
@@ -4261,7 +4437,7 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" ><%- pmGroups.model.items[item_id].name %></span>
+            <span class="h1-header" ><%= pmGroups.model.items[item_id].justText('name') %></span>
 
         </h1>
         <ol class="breadcrumb">
@@ -4328,8 +4504,10 @@
                             <~ pmGroups.model.items[item_id].groups >
                                 <% for(var i in pmGroups.model.items[item_id].groups){ %>
                                     <div class="form-group col-lg-2">
-                                        <label class="control-label" >Group</label>
-                                        <%- pmGroups.model.items[item_id].groups[i].name %>
+                                        <label class="control-label" >Group</label> 
+                                        <a href="<%- polemarch.opt.host %>/?group/<%- pmGroups.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmGroups.model.items[item_id].groups[i].name %>
+                                        </a>
                                     </div>
                                 <% } %>
                             <~>
@@ -4337,8 +4515,10 @@
                             <~ pmGroups.model.items[item_id].hosts >
                                 <% for(var i in pmGroups.model.items[item_id].hosts){ %>
                                     <div class="form-group col-lg-2">
-                                        <label class="control-label" >Host</label>
-                                        <%- pmGroups.model.items[item_id].hosts[i].name %>
+                                        <label class="control-label" >Host</label> 
+                                        <a href="<%- polemarch.opt.host %>/?host/<%- pmGroups.model.items[item_id].hosts[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmGroups.model.items[item_id].hosts[i].name %>
+                                        </a>
                                     </div>
                                 <% } %>
                             <~>
@@ -4484,6 +4664,7 @@
                                     <div class="ico-off fa  fa-toggle-off"></div>
                                     <div class="boolean-title" >Boolean value</div>
                                 </div>
+                                <div class="help-block">If turn, then allow adding sub groups to group</div>
                             </div>
                         </div>
                     </div>

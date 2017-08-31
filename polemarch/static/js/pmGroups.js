@@ -13,7 +13,7 @@ pmGroups.copyItem = function(item_id)
     {
         var data = thisObj.model.items[item_id];
         delete data.id;
-        data.name = "copy from " + data.name
+        data.name = "copy-from-" + data.name
         $.ajax({
             url: "/api/v1/"+thisObj.model.name+"/",
             type: "POST",
@@ -58,6 +58,9 @@ pmGroups.copyItem = function(item_id)
                 def.reject(e)
             }
         });
+    }).fail(function(e)
+    {
+        def.reject(e)
     })
 
     return def.promise();
@@ -80,7 +83,14 @@ pmGroups.addItem = function(parent_type, parent_item)
 
     if(!data.name)
     {
-        $.notify("Invalid value in filed name", "error");
+        $.notify("Empty value in filed name", "error");
+        def.reject()
+        return def.promise();
+    }
+    
+    if(/[^A-z0-9_.\-]/.test(data.name))
+    {
+        $.notify("Invalid value in filed name it mast be as [^A-z0-9_.\-]", "error");
         def.reject()
         return def.promise();
     }
@@ -169,7 +179,15 @@ pmGroups.updateItem = function(item_id)
         $.notify("Invalid value in filed name", "error");
         return;
     }
-
+    
+    if(/[^A-z0-9_.\-]/.test(data.name))
+    {
+        $.notify("Invalid value in filed name it mast be as [^A-z0-9_.\-]", "error");
+        def.reject()
+        return def.promise();
+    }
+  
+    var thisObj = this;
     return $.ajax({
         url: "/api/v1/groups/"+item_id+"/",
         type: "PATCH",
@@ -183,6 +201,7 @@ pmGroups.updateItem = function(item_id)
         },
         success: function(data)
         {
+            thisObj.model.items[item_id] = data
             //console.log("group update", data);
             $.notify("Save", "success");
         },

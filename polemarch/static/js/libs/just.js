@@ -128,10 +128,10 @@
 
                                                 // Для отслеживания элемента массива по индексу  <~ polemarch.model.groups[item_id] > надо писать без одинарных кавычек forObject[2]
                                                 //var res = html.replace("<"+startPart[lastStatus]+"<~>",
-                                                //                "<%= "+forObject[1]+".justHtml("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
+                                                //                "<%= "+forObject[1]+".justTpl("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
                                                                 
                                                 var res = html.replace("<"+startPart[lastStatus]+"<~>",
-                                                                "<%= "+forObject[1]+".justHtml("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
+                                                                "<%= "+forObject[1]+".justTpl("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
                                                                 )
                                                 // console.info("html:", html)
                                                 // console.error("res:", res)
@@ -175,7 +175,7 @@
     AAA
         <~var j in line>
             <div>
-                <%= j %> - <%= line.justHtml(j) %>
+                <%= j %> - <%= line.justTpl(j) %>
             </div>
         <~>
     BBB

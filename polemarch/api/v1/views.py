@@ -1,11 +1,12 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponse
 from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 
-from ...main.utils import CmdExecutor, KVExchanger
+from ...main import utils
 from .. import base
 from ..permissions import SuperUserPermission, StaffPermission
 from . import filters
@@ -142,6 +143,12 @@ class HistoryViewSet(base.HistoryModelViewSet):
     serializer_class_one = serializers.OneHistorySerializer
     filter_class = filters.HistoryFilter
 
+    def _get_extra_queryset(self):
+        return self.queryset.filter(
+            Q(initiator=self.request.user.id, initiator_type="users") |
+            Q(project__in=self.get_user_aval_projects())
+        ).distinct()
+
     @detail_route(methods=["get"])
     def raw(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -158,7 +165,8 @@ class HistoryViewSet(base.HistoryModelViewSet):
     @detail_route(methods=["post"])
     def cancel(self, request, *args, **kwargs):
         obj = self.get_object()
-        KVExchanger(CmdExecutor.CANCEL_PREFIX + str(obj.id)).send(True, 10)
+        exch = utils.KVExchanger(utils.CmdExecutor.CANCEL_PREFIX + str(obj.id))
+        exch.send(True, 10)
         return base.Response("Task canceled: {}".format(obj.id), 200).resp
 
     @detail_route(methods=["get"])
@@ -235,8 +243,11 @@ class BulkViewSet(rest_views.APIView):
         operations = request.data
         results = []
         for operation in operations:
-            perf_method = getattr(self, self._op_types[operation.pop("type")])
-            results.append(perf_method(**operation))
+            op_type = operation.pop("type")
+            perf_method = getattr(self, self._op_types[op_type])
+            result = perf_method(**operation)
+            result['type'] = op_type
+            results.append(result)
         return base.Response(results, 200).resp
 
     def get(self, request):
@@ -245,3 +256,21 @@ class BulkViewSet(rest_views.APIView):
             "operations_types": self._op_types.keys(),
         }
         return base.Response(response, 200).resp
+
+
+class AnsibleViewSet(base.ListNonModelViewSet):
+    base_name = "ansible"
+
+    @list_route(methods=["get"])
+    def cli_reference(self, request):
+        reference = utils.AnsibleArgumentsReference()
+        return base.Response(reference.as_gui_dict(
+            request.query_params.get("filter", "")
+        ), 200).resp
+
+    @list_route(methods=["get"])
+    def modules(self, request):
+        _mods = utils.AnsibleModules().get(
+            request.query_params.get("filter", "")
+        )
+        return base.Response(_mods, 200).resp

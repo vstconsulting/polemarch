@@ -63,7 +63,11 @@ pmPeriodicTasks.copyItem = function(item_id)
                 def.reject(e)
             }
         });
+    }).fail(function(e)
+    {
+        def.reject(e)
     })
+
 
     return def.promise();
 } 
@@ -150,8 +154,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
             return def.promise();
         }
     }
-
-    debugger;
+ 
     $.ajax({
         url: "/api/v1/projects/"+project_id+"/"+kind+"/",
         type: "POST",
@@ -471,6 +474,7 @@ pmPeriodicTasks.loadItem = function(item_id)
                     delete data.vars.args
                 }
             }
+            thisObj.model.items.justWatch(item_id)
             thisObj.model.items[item_id] = data
         },
         error:function(e)
@@ -553,6 +557,7 @@ pmPeriodicTasks.updateItem = function(item_id)
         data.vars.group = $("#group-autocomplete").val()
         data.vars.args =  $("#module-args-string").val();
     }
+    var thisObj = this;
     return $.ajax({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "PATCH",
@@ -566,6 +571,7 @@ pmPeriodicTasks.updateItem = function(item_id)
         },
         success: function(data)
         {
+            thisObj.model.items[item_id] = data
             $.notify("Save", "success");
         },
         error:function(e)

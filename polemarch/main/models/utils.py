@@ -79,7 +79,6 @@ class AnsibleCommand(object):
         extra_args, files = list(), list()
         extra.pop("verbose", None)
         for key, value in extra.items():
-            key = key.replace("_", "-")
             if key == "key-file":
                 if "BEGIN RSA PRIVATE KEY" in value:
                     kfile = tmp_file(value)

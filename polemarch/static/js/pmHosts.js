@@ -36,7 +36,11 @@ pmHosts.copyItem = function(item_id)
                 def.reject(e)
             }
         });
+    }).fail(function(e)
+    {
+        def.reject(e)
     })
+
 
     return def.promise();
 } 
@@ -160,6 +164,7 @@ pmHosts.updateItem = function(item_id)
         }
     }
 
+    var thisObj = this;
     return $.ajax({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "PATCH",
@@ -173,6 +178,7 @@ pmHosts.updateItem = function(item_id)
         },
         success: function(data)
         { 
+            thisObj.model.items[item_id] = data
             $.notify("Save", "success");
         },
         error:function(e)

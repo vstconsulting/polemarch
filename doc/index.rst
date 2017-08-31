@@ -15,6 +15,7 @@ Official site: https://gitlab.com/vstconsulting/polemarch
    pipinstall
    restapi
    config
+   gui
 
 
 
