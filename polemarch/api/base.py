@@ -153,11 +153,13 @@ class NonModelsViewSet(GenericViewSet):
     base_name = None
 
     def get_queryset(self):
-        return QuerySet()
+        raise NotImplementedError("Can't get QuerySet"
+                                  " for NonModelsViewSet")  # nocv
 
 
 class ListNonModelViewSet(NonModelsViewSet,
                           viewsets.mixins.ListModelMixin):
+    # pylint: disable=abstract-method
 
     @property
     def methods(self):

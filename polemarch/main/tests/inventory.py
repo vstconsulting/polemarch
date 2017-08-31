@@ -190,6 +190,12 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         groups[3].groups.add(groups[5])
         groups[4].groups.add(groups[5])
         groups[5].groups.add(groups[6])
+
+        # test get subgroups
+        test_url = "{}{}/groups/".format(url, groups[1].id)
+        result = self.get_result("get", test_url, 200)
+        self.assertIn(groups[2].id, result)
+        # test cyclic dependency
         test_url = "{}{}/groups/".format(url, groups[6].id)
         result = self.get_result("post", test_url, 400,
                                  data=json.dumps([groups[1].id]))
