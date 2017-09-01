@@ -14,7 +14,7 @@ from .hosts import Host, Group, Inventory
 from .projects import Project
 from .users import TypesPermissions
 from .tasks import Task, PeriodicTask, History, HistoryLines, Template
-from ..validators import validate_hostname, RegexValidator
+from ..validators import RegexValidator
 from ..exceptions import UnknownTypeException
 from ..utils import raise_context, AnsibleArgumentsReference
 
@@ -59,20 +59,6 @@ def validate_crontab(instance, **kwargs):
     except ValueError as ex:
         msg = dict(schedule=["{}".format(ex)])
         raise ValidationError(msg)
-
-
-@receiver(signals.pre_save, sender=Host)
-def validate_hosts(instance, **kwargs):
-    if instance.variables.filter(key="ansible_host").count():
-        validate_hostname(instance.variables.get("ansible_host"))
-    elif instance.type == "HOST":
-        validate_hostname(instance.name)
-    elif instance.type == "RANGE":
-        validate_name = RegexValidator(
-            regex=r'^[a-zA-Z0-9\-\._\[\]\:]*$',
-            message='Name must be Alphanumeric'
-        )
-        validate_name(instance.name)
 
 
 @receiver(signals.pre_save, sender=Host)

@@ -99,6 +99,18 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         data = dict(name="127.0.1.1", type="host", vars=self.vars)
         self.get_result("post", url, 415, data=json.dumps(data))
 
+    def hosts_validation(self):
+        url = "/api/v1/hosts/"
+        data = [dict(name="???", type="HOST", vars={}),
+                dict(name="hostlocl", type="HOST",
+                     vars={"ansible_host": "???"})]
+        for h in data:
+            result = self.get_result("post", url, 400, data=json.dumps(h))
+            self.assertIn("Invalid hostname or IP", str(result))
+        data = dict(name="???", type="RANGE", vars={})
+        result = self.get_result("post", url, 400, data=json.dumps(data))
+        self.assertIn("Name must be Alphanumeric", str(result))
+
     def test_filter_host(self):
         base_url = "/api/v1/hosts/"
         filter_url = "{}?name=hostonlocal".format(base_url)
@@ -200,7 +212,9 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         result = self.get_result("post", test_url, 400,
                                  data=json.dumps([groups[1].id]))
         self.assertEqual(result["error_type"], "CiclicDependencyError")
-
+        result = self.get_result("post", test_url, 400,
+                                 data=json.dumps([groups[6].id]))
+        self.assertEqual(result["error_type"], "CiclicDependencyError")
         # Fix for clear group if CiclicDependencyError
         g1 = Group.objects.create(name="base_01")
         g2 = Group.objects.create(name="base_02", children=True)

@@ -8,7 +8,6 @@ from collections import OrderedDict
 import json
 
 import re
-import six
 from celery.schedules import crontab
 from django.db import transaction
 from django.db.models import Q
@@ -36,7 +35,7 @@ class Task(BModel):
         default_related_name = "tasks"
 
     def __unicode__(self):
-        return str(self.name)
+        return str(self.name)  # nocv
 
 
 # noinspection PyTypeChecker
@@ -139,16 +138,14 @@ class Template(BModel):
 
     @data.setter
     def data(self, value):
-        if isinstance(value, (six.string_types, six.text_type)):
-            self.template_data = json.dumps(json.loads(json.dumps(value)))
-        elif isinstance(value, (dict, OrderedDict, list)):
-            self.template_data = json.dumps(value)
-        else:
-            raise ValueError("Unknown data type set.")
+        # there is no way, how data could be non-dict and trigger
+        # validate_template does not fails during saving. And this method
+        # not using during loading.
+        self.template_data = json.dumps(value)
 
     @data.deleter
     def data(self):
-        self.template_data = ""
+        self.template_data = ""  # nocv
 
 
 class HistoryQuerySet(BQuerySet):
