@@ -148,7 +148,7 @@ pmAnsibleModule.loadAllModule = function()
  * @param {Object} data_vars 
  */
 pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data_args, data_vars)
-{
+{ 
     var def = new $.Deferred();
     if(!group)
     {
@@ -201,8 +201,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
         def.reject();
         return def.promise();
     }
-
-    debugger;
+ 
     $.ajax({
         url: "/api/v1/projects/"+project_id+"/execute-module/",
         type: "POST",

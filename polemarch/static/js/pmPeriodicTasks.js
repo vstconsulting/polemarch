@@ -209,7 +209,7 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
     }).fail(function()
     {
         $.notify("", "error");
-    })
+    }).promise();
 }
 
 pmPeriodicTasks.search = function(project_id, query)
@@ -232,7 +232,7 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
     }).fail(function()
     {
         $.notify("", "error");
-    })
+    }).promise();
 }
 
 pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
@@ -280,7 +280,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
     }).fail(function()
     {
         $.notify("", "error");
-    })
+    }).promise();
 }
 
 pmPeriodicTasks.showItem = function(holder, menuInfo, data)
@@ -290,7 +290,7 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[2];
     var project_id = data.reg[1];
 
-    return $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
+    $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
         pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory)
@@ -416,6 +416,7 @@ pmPeriodicTasks.addItem = function(project_id)
         data.vars.group = $("#group-autocomplete").val()
         data.vars.args =  $("#module-args-string").val();
     }
+    
     $.ajax({
         url: "/api/v1/"+this.model.name+"/",
         type: "POST",
@@ -492,7 +493,7 @@ pmPeriodicTasks.loadItem = function(item_id)
 pmPeriodicTasks.updateItem = function(item_id)
 {
     var data = {}
-
+    
     data.type = $("#periodic-tasks_"+item_id+"_type").val()
     data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
     data.name = $("#periodic-tasks_"+item_id+"_name").val()

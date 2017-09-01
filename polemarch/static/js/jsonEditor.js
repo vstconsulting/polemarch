@@ -2,9 +2,147 @@
 function jsonEditor(){
 
 }
- 
+
+
 jsonEditor.options = {};
- 
+
+jsonEditor.options['item'] = {}
+
+////////////////////////////////////////////////
+// item
+////////////////////////////////////////////////
+
+jsonEditor.options['item']['ansible_connection'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_host',
+    helpcontent:'Connection type to the host. This can be the name of any of\
+            ansible’s connection plugins. SSH protocol types are smart, ssh or\
+            paramiko. The default is smart. Non-SSH based types are described\
+            in the next section.'
+}
+
+jsonEditor.options['item']['ansible_host'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_host',
+    helpcontent:'The name of the host to connect to, if different from the alias you wish to give to it.'
+}
+
+jsonEditor.options['item']['ansible_port'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_port',
+    helpcontent:'The ssh port number, if not 22'
+}
+
+jsonEditor.options['item']['ansible_user'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_user',
+    helpcontent:'The default ssh user name to use.'
+}
+
+jsonEditor.options['item']['ansible_ssh_pass'] = {
+    type:'password',
+    help:'Inventory Parameter - ansible_ssh_pass',
+    helpcontent:'The ssh password to use (never store this variable in plain text; always use a vault.)'
+}
+
+jsonEditor.options['item']['ansible_ssh_private_key_file'] = {
+    type:'keyfile',
+    help:'Inventory Parameter - ansible_ssh_private_key_file',
+    helpcontent:'Private key file used by ssh. Useful if using multiple keys and you don’t want to use SSH agent.'
+}
+
+jsonEditor.options['item']['ansible_ssh_common_args'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_ssh_common_args',
+    helpcontent:'This setting is always appended to the default command line for sftp, scp, and ssh. Useful to configure a ProxyCommand for a certain host (or group).'
+}
+
+jsonEditor.options['item']['ansible_sftp_extra_args'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_sftp_extra_args',
+    helpcontent:'This setting is always appended to the default sftp command line.'
+}
+
+jsonEditor.options['item']['ansible_scp_extra_args'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_scp_extra_args',
+    helpcontent:'This setting is always appended to the default scp command line.'
+}
+
+jsonEditor.options['item']['ansible_ssh_extra_args'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_ssh_extra_args',
+    helpcontent:'This setting is always appended to the default ssh command line.'
+}
+
+jsonEditor.options['item']['ansible_ssh_pipelining'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_ssh_pipelining',
+    helpcontent:'Determines whether or not to use SSH pipelining. This can override the pipelining setting in ansible.cfg.'
+}
+
+jsonEditor.options['item']['ansible_ssh_executable'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_ssh_executable',
+    helpcontent:'This setting overrides the default behavior to use the system ssh. This can override the ssh_executable setting in ansible.cfg.'
+}
+
+jsonEditor.options['item']['ansible_become'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_become',
+    helpcontent:'Equivalent to ansible_sudo or ansible_su, allows to force privilege escalation'
+}
+
+jsonEditor.options['item']['ansible_become_method'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_become_method',
+    helpcontent:'Allows to set privilege escalation method'
+}
+
+jsonEditor.options['item']['ansible_become_user'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_become_user',
+    helpcontent:'Equivalent to ansible_sudo_user or ansible_su_user, allows to set the user you become through privilege escalation'
+}
+
+jsonEditor.options['item']['ansible_become_pass'] = {
+    type:'password',
+    help:'Inventory Parameter - ansible_become_pass',
+    helpcontent:'Equivalent to ansible_sudo_pass or ansible_su_pass, allows you to set the privilege escalation password (never store this variable in plain text; always use a vault.)'
+}
+
+jsonEditor.options['item']['ansible_shell_type'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_shell_type',
+    helpcontent:'The shell type of the target system. You should not use this \n\
+                setting unless you have set the ansible_shell_executable to a \n\
+                non-Bourne (sh) compatible shell. By default commands are \n\
+                formatted using sh-style syntax. Setting this to csh or fish \n\
+                will cause commands executed on target systems to follow those\n\
+                shell’s syntax instead.'
+}
+
+jsonEditor.options['item']['ansible_python_interpreter'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_python_interpreter',
+    helpcontent:'The target host python path. This is useful for systems with \n\
+               more than one Python or not located at /usr/bin/python such as\n\
+               *BSD, or where /usr/bin/python is not a 2.X series Python.\n\
+               We do not use the /usr/bin/env mechanism as that requires the\n\
+               remote user’s path to be set right and also assumes the python\n\
+               executable is named python, where the executable might be named\n\
+               something like python2.6.'
+}
+
+jsonEditor.options['item']['ansible_shell_executable'] = {
+    type:'text',
+    help:'Inventory Parameter - ansible_shell_executable',
+    helpcontent:'This sets the shell the ansible controller will use on the \n\
+                target machine, overrides executable in ansible.cfg which \n\
+                defaults to /bin/sh. You should really only change it if is not\n\
+                possible to use /bin/sh (i.e. /bin/sh is not installed on the\n\
+                target machine or cannot be run from sudo.).'
+}
   
 ////////////////////////////////////////////////
 // jsonEditor
@@ -138,7 +276,7 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
         }
     }
     
-    if(jsonEditor.options[optionsblock][name])
+    if(optionsblock && jsonEditor.options[optionsblock] && jsonEditor.options[optionsblock][name])
     {
         var optInfo = jsonEditor.options[optionsblock][name]
         if(optInfo.type == 'error')
@@ -166,8 +304,6 @@ jsonEditor.initAutoComplete = function(optionsblock, prefix)
         prefix = "prefix"
     }
     prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
-    
-    console.log("initAutoComplete", optionsblock, prefix)
     
     new autoComplete({
         selector: '#new_json_name'+prefix,
@@ -215,7 +351,7 @@ jsonEditor.initForm = function(optionsblock, prefix)
         prefix = "prefix"
     }
     prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
-    
+
     if(jsonEditor.options[optionsblock])
     {
         jsonEditor.initAutoComplete(optionsblock, prefix)
@@ -236,6 +372,15 @@ jsonEditor.initForm = function(optionsblock, prefix)
         success: function(data)
         {
             Object.assign(jsonEditor.options, data)
+            
+            jsonEditor.options['hosts'] = {};
+            mergeDeep(jsonEditor.options['hosts'], jsonEditor.options['item'])
+            
+            jsonEditor.options['groups'] = {};
+            mergeDeep(jsonEditor.options['groups'], jsonEditor.options['item'])
+            
+            jsonEditor.options['inventories'] = {};
+            mergeDeep(jsonEditor.options['inventories'], jsonEditor.options['item'])
             jsonEditor.initAutoComplete(optionsblock, prefix)
         }
     }); 

@@ -482,8 +482,7 @@ pmInventories.importInventory = function(inventory)
                 if(hasError)
                 {
                     // По меньшей мере в одной операции была ошибка вставки.
-                    // Инвенторий импортирован не полностью
-                    debugger;
+                    // Инвенторий импортирован не полностью 
                     def.reject(deleteBulk);
                     return;
                 }
@@ -593,8 +592,7 @@ pmInventories.importInventory = function(inventory)
                             if(hasError)
                             {
                                 // По меньшей мере в одной операции была ошибка вставки.
-                                // Инвенторий импортирован не полностью
-                                debugger;
+                                // Инвенторий импортирован не полностью 
                                 def.reject(deleteBulk);
                                 return;
                             }
@@ -631,8 +629,7 @@ pmInventories.importInventory = function(inventory)
                                             if(hasError)
                                             {
                                                 // По меньшей мере в одной операции была ошибка обновления.
-                                                // Инвенторий импортирован не полностью
-                                                debugger;
+                                                // Инвенторий импортирован не полностью 
                                                 def.reject(deleteBulk);
                                                 return;
                                             }
@@ -642,8 +639,7 @@ pmInventories.importInventory = function(inventory)
                                         error:function(e)
                                         {
                                             console.warn(e)
-                                            polemarch.showErrors(e)
-                                            debugger;
+                                            polemarch.showErrors(e) 
                                             def.reject(deleteBulk);
                                         }
                                     }) 
@@ -654,39 +650,34 @@ pmInventories.importInventory = function(inventory)
                                 }
                             }).fail(function(e){
                                 console.warn(e)
-                                polemarch.showErrors(e)
-                                debugger;
+                                polemarch.showErrors(e) 
                                 def.reject(deleteBulk);
                             }) 
                         },
                         error:function(e)
                         {
                             console.warn(e)
-                            polemarch.showErrors(e)
-                            debugger;
+                            polemarch.showErrors(e) 
                             def.reject(deleteBulk);
                         }
                     });
                 }).fail(function(e){
                     console.warn(e)
-                    polemarch.showErrors(e)
-                    debugger;
+                    polemarch.showErrors(e) 
                     def.reject(deleteBulk);
                 })
             },
             error:function(e)
             {
                 console.warn(e)
-                polemarch.showErrors(e)
-                debugger;
+                polemarch.showErrors(e) 
                 def.reject(deleteBulk);
             }
         })
     }).fail(function(e)
     {
         console.warn(e)
-        polemarch.showErrors(e)
-        debugger;
+        polemarch.showErrors(e) 
         def.reject(deleteBulk);
     })
      
@@ -719,8 +710,7 @@ pmInventories.showImportPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
 
-    var text = spajs.just.render(this.model.name+'_import_page', {})
-    console.log(text)
+    var text = spajs.just.render(this.model.name+'_import_page', {}) 
     $(holder).insertTpl(text)
 
     def.resolve()

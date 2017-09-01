@@ -1766,11 +1766,11 @@
                 </div>
                 
                 <div class="row <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
-                    <%= jsonEditor.editor(pmPeriodicTasks.model.items[item_id].vars, {prefix: "MODULE", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'}) %>
+                    <%= jsonEditor.editor(pmPeriodicTasks.model.items[item_id].vars, {prefix: "PLAYBOOK", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'}) %>
                 </div>
                 
                 <div class="row <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
-                    <%= jsonEditor.editor(pmPeriodicTasks.model.items[item_id].vars, {prefix: "PLAYBOOK", block:'periodic_module', title1:'Arguments', title2:'Adding new argument'}) %>
+                    <%= jsonEditor.editor(pmPeriodicTasks.model.items[item_id].vars, {prefix: "MODULE", block:'periodic_module', title1:'Arguments', title2:'Adding new argument'}) %>
                 </div>
                 
             </section>
@@ -1983,11 +1983,11 @@
                     </div>
                 </div> 
                 <div class="row <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
-                    <%= jsonEditor.editor({}, {prefix: "MODULE", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'}) %>
+                    <%= jsonEditor.editor({}, {prefix: "PLAYBOOK", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'}) %>
                 </div>
                 
                 <div class="row <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
-                    <%= jsonEditor.editor({}, {prefix: "PLAYBOOK", block:'periodic_module', title1:'Arguments', title2:'Adding new argument'}) %>
+                    <%= jsonEditor.editor({}, {prefix: "MODULE", block:'periodic_module', title1:'Arguments', title2:'Adding new argument'}) %>
                 </div>
                 
             </section>
@@ -4251,7 +4251,20 @@
                             Name
                         </label>
                         <div class="input-group  col-sm-10 col-lg-10 col-xs-12"  >
-                            <input type="text" placeholder="Enter name" id="new_json_name<%- opt.prefix%>" value=""  class="form-control" >
+                        
+                            <% if(opt.select2){ %>
+                                <select class="form-control select2" id="new_json_name<%- opt.prefix%>" data-placeholder="Select param" >
+                                    <% for(var i in jsonEditor.options[optionsblock]){ %> 
+                                        <option value="<%- i %>" >
+                                            <%- i %> (<%- jsonEditor.options[optionsblock][i].help %>)
+                                        </option> 
+                                    <% } %>
+                                </select>
+                            <% }else{ %>
+                                <input type="text" placeholder="Enter name" id="new_json_name<%- opt.prefix%>" value=""  class="form-control" >
+                                <=js jsonEditor.initForm('<%- optionsblock %>', '<%- opt.prefix%>') js=> 
+                            <% } %>
+                            
                             <div class="help-block"></div>
                         </div>
                     </div>
@@ -4278,7 +4291,7 @@
             </div>
         </div>
     </section> 
-    <=js jsonEditor.initForm('<%- optionsblock %>', '<%- opt.prefix%>') js=> 
+    
 <% } %>
 </script>
 

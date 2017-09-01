@@ -90,6 +90,8 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
     {
         def.reject();
     })
+    
+    return def.promise();
 }
 
 /**
