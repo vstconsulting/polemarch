@@ -3,6 +3,8 @@ function jsonEditor(){
 
 }
 
+jsonEditor.model = {}
+jsonEditor.model.isLoaded_cli_reference = false;
 
 jsonEditor.options = {};
 
@@ -382,6 +384,8 @@ jsonEditor.initForm = function(optionsblock, prefix)
             jsonEditor.options['inventories'] = {};
             mergeDeep(jsonEditor.options['inventories'], jsonEditor.options['item'])
             jsonEditor.initAutoComplete(optionsblock, prefix)
+            
+            jsonEditor.model.isLoaded_cli_reference = true;
         }
     }); 
 }

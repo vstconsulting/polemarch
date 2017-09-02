@@ -394,7 +394,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor(pmModuleTemplates.model.items[item_id].data.vars, {block:'module', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor(pmModuleTemplates.model.items[item_id].data.vars, {block:'module', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -525,7 +525,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor({}, {block:'module', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor({}, {block:'module', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -620,7 +620,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor(pmTasksTemplates.model.items[item_id].data.vars, {block:'playbook', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor(pmTasksTemplates.model.items[item_id].data.vars, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -707,7 +707,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor({}, {block:'playbook', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor({}, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -2602,7 +2602,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor({}, {block:'playbook', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor({}, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -3003,7 +3003,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor({}, {block:'module', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor({}, {block:'module', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -4253,17 +4253,21 @@
                         <div class="input-group  col-sm-10 col-lg-10 col-xs-12"  >
                         
                             <% if(opt.select2){ %>
-                                <select class="form-control select2" id="new_json_name<%- opt.prefix%>" data-placeholder="Select param" >
-                                    <% for(var i in jsonEditor.options[optionsblock]){ %> 
-                                        <option value="<%- i %>" >
-                                            <%- i %> (<%- jsonEditor.options[optionsblock][i].help %>)
-                                        </option> 
-                                    <% } %>
-                                </select>
+                                <~ jsonEditor.model.isLoaded_cli_reference>
+                                    <select class="form-control select2" id="new_json_name<%- opt.prefix%>" data-placeholder="Select param" >
+                                        <option selected="" disabled="" value="" >Not set</option>
+                                        <% for(var i in jsonEditor.options[optionsblock]){ %> 
+                                            <option value="<%- i %>" >
+                                                <%- i %> (<%- jsonEditor.options[optionsblock][i].help %>)
+                                            </option> 
+                                        <% } %>
+                                    </select>
+                                    <=js $("#new_json_name<%- opt.prefix%>").select2() js=> 
+                                <~>
                             <% }else{ %>
                                 <input type="text" placeholder="Enter name" id="new_json_name<%- opt.prefix%>" value=""  class="form-control" >
-                                <=js jsonEditor.initForm('<%- optionsblock %>', '<%- opt.prefix%>') js=> 
                             <% } %>
+                            <=js jsonEditor.initForm('<%- optionsblock %>', '<%- opt.prefix%>') js=> 
                             
                             <div class="help-block"></div>
                         </div>

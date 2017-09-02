@@ -2766,4 +2766,4 @@ function qunitAddTests_history()
 
 }
 
-    injectQunit()
+injectQunit()
