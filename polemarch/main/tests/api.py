@@ -86,12 +86,10 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertEqual(result['count'], 2, result)
         self._logout(client)
 
-    def test_nonadmin_user_access_to_himself(self):
+    def test_nonoprivileged_userwork_restriction(self):
         self.change_identity()
         selfurl = "/api/v1/users/{}/".format(self.user.id)
         self.get_result("patch", selfurl, 200)
-
-    def test_nonoprivileged_userwork_restriction(self):
         url = "/api/v1/users/"
         self.change_identity(is_super_user=True)
         olduser = self.user

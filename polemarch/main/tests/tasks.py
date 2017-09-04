@@ -712,15 +712,6 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         self.change_identity()
         self.list_test(url, 0)
 
-    def test_pagination_off_histories(self):
-        url = "/api/v1/history/"
-        lines_url = url + "{}/lines/?limit=2".format(self.histories[3].id)
-        clazz = HistoryViewSet.pagination_class
-        HistoryViewSet.pagination_class = None
-        result = self.get_result("get", lines_url)
-        self.assertCount(result, 4)
-        HistoryViewSet.pagination_class = clazz
-
     def test_history_facts(self):
         history_kwargs = dict(project=self.ph, mode="setup",
                               kind="MODULE",

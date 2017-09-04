@@ -94,15 +94,15 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
         return queryset
 
     def get_paginated_route_response(self, queryset, serializer_class,
-                                     filter_classes=None):
+                                     filter_classes=None, **kwargs):
         queryset = self.filter_route_queryset(queryset, filter_classes)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = serializer_class(page, many=True)
+            serializer = serializer_class(page, many=True, **kwargs)
             return self.get_paginated_response(serializer.data)
 
-        serializer = serializer_class(queryset, many=True)
+        serializer = serializer_class(queryset, many=True, **kwargs)
         return RestResponse(serializer.data)
 
     @detail_route(methods=["post", "put", "delete", "get"])
@@ -117,13 +117,11 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
         queryset = queryset.filter(**request.data.get("filter", {}))
         queryset = queryset.exclude(**request.data.get("exclude", {}))
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return RestResponse(serializer.data)
+        return self.get_paginated_route_response(
+            queryset=queryset,
+            serializer_class=self.get_serializer_class(),
+            context=self.get_serializer_context()
+        )
 
 
 class ReadOnlyModelViewSet(GenericViewSet,

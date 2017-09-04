@@ -49,11 +49,11 @@ class ServiceCommand(BaseCommand):
     def _print(self, info=""):
         self.stdout.write(str(info))  # nocv
 
-    def _success(self, info=""):
-        try:  # nocv
-            self._print(self.style.SUCCESS(info))  # nocv
-        except:  # nocv
-            self._print(self.style.MIGRATE_SUCCESS(info))  # nocv
+    def _success(self, info=""):  # nocv
+        try:
+            self._print(self.style.SUCCESS(info))
+        except:
+            self._print(self.style.MIGRATE_SUCCESS(info))
 
     def _info(self, info=""):
         self._print(self.style.HTTP_INFO(info))  # nocv
