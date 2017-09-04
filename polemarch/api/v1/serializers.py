@@ -15,6 +15,10 @@ from ...main import models
 from ..base import Response
 
 
+# NOTE: we can freely remove that because according to real behaviour all our
+#  models always have queryset at this stage, so this code actually doing
+# nothing
+#
 # Serializers field for usability
 class ModelRelatedField(serializers.PrimaryKeyRelatedField):
     def __init__(self, **kwargs):
@@ -107,7 +111,9 @@ class UserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if not self.context['request'].user.is_staff and \
                         instance.id != self.context['request'].user.id:
-            raise exceptions.PermissionDenied
+            # can't be tested because PATCH from non privileged user to other
+            # user fails at self.get_object() in View
+            raise exceptions.PermissionDenied  # nocv
         instance.username = validated_data.get('username',
                                                instance.username)
         instance.is_active = validated_data.get('is_active',
@@ -197,7 +203,8 @@ class VariableSerializer(serializers.ModelSerializer):
                   'value',)
 
     def to_representation(self, instance):
-        return {instance.key: instance.value}
+        # we are not using that. This function here just in case.
+        return {instance.key: instance.value}  # nocv
 
 
 class _WithVariablesSerializer(serializers.ModelSerializer):

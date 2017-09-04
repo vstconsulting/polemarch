@@ -9,7 +9,7 @@ class ModelPermission(permissions.IsAuthenticated):
         if request.user.is_staff:
             return True
         elif request.user == obj:
-            return True
+            return True  # nocv
         return bool(view.get_queryset().filter(id=obj.id).count())
 
 

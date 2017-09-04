@@ -36,7 +36,7 @@ class Task(BModel):
         default_related_name = "tasks"
 
     def __unicode__(self):
-        return str(self.name)
+        return str(self.name)  # nocv
 
 
 # noinspection PyTypeChecker
@@ -140,7 +140,7 @@ class Template(BModel):
     @data.setter
     def data(self, value):
         if isinstance(value, (six.string_types, six.text_type)):
-            self.template_data = json.dumps(json.loads(json.dumps(value)))
+            self.template_data = json.dumps(json.loads(value))
         elif isinstance(value, (dict, OrderedDict, list)):
             self.template_data = json.dumps(value)
         else:
@@ -148,7 +148,7 @@ class Template(BModel):
 
     @data.deleter
     def data(self):
-        self.template_data = ""
+        self.template_data = ""  # nocv
 
 
 class HistoryQuerySet(BQuerySet):

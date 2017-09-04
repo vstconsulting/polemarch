@@ -3,10 +3,13 @@ from __future__ import unicode_literals
 
 import logging
 
+from django.db import transaction
+
 from .base import BManager, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex
 from ..utils import get_render
+from ..validators import validate_hostname, RegexValidator
 
 logger = logging.getLogger("polemarch")
 
@@ -49,7 +52,23 @@ class Host(AbstractModel):
         default_related_name = "hosts"
 
     def __unicode__(self):
-        return "{}".format(self.name)
+        return "{}".format(self.name)  # nocv
+
+    @transaction.atomic()
+    def set_vars(self, variables):
+        # Moved it from triggers because in trigger variables are always empty.
+        # They saved later of trigger execution.
+        if variables.get("ansible_host", False):
+            validate_hostname(variables.get("ansible_host"))
+        elif self.type == "HOST":
+            validate_hostname(self.name)
+        elif self.type == "RANGE":
+            validate_name = RegexValidator(
+                regex=r'^[a-zA-Z0-9\-\._\[\]\:]*$',
+                message='Name must be Alphanumeric'
+            )
+            validate_name(self.name)
+        return super(Host, self).set_vars(variables)
 
     def toString(self, var_sep=" "):
         hvars, key = self.get_generated_vars()
