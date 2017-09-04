@@ -127,10 +127,13 @@ pmPeriodicTasks.execute = function(project_id, item_id)
 {
     var def = new $.Deferred();
 
-    var data = jsonEditor.jsonEditorGetValues();
+    var kind = $("#periodic-tasks_"+item_id+"_kind").val();
+
+    var data = jsonEditor.jsonEditorGetValues(kind);
     data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
 
-    var kind = 'execute-playbook'
+    /* Because execute does not send arguments */
+    /* var kind = 'execute-playbook' */
     if($("#periodic-tasks_"+item_id+"_kind").val() == 'MODULE')
     {
         kind = 'execute-module'
