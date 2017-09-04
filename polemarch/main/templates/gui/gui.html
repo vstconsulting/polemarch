@@ -140,8 +140,8 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="spajs.open({ menuId:'template/new-task'});  return false;" class="btn btn-primary" >Create task template</button>
-        <button type="button" onclick="spajs.open({ menuId:'template/new-module'});  return false;" class="btn btn-primary" >Create module template</button>
+        <a href="<%- polemarch.opt.host %>/?template/new-task" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >Create task template</a>
+        <a href="<%- polemarch.opt.host %>/?template/new-module" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >Create module template</a>
           
         <span class="btn btn-default textfile" style="margin-left: 10px;" >
             <input type="file" class="input-file"  onchange="spajs.showLoader(pmTasksTemplates.importFromFile(event));"  >
@@ -394,7 +394,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor(pmModuleTemplates.model.items[item_id].data.vars, {block:'module', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor(pmModuleTemplates.model.items[item_id].data.vars, {block:'module', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -525,7 +525,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor({}, {block:'tasks', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor({}, {block:'module', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -620,7 +620,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor(pmTasksTemplates.model.items[item_id].data.vars, {block:'tasks', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor(pmTasksTemplates.model.items[item_id].data.vars, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -707,7 +707,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor({}, {block:'tasks', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor({}, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -1764,9 +1764,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <%= jsonEditor.editor(pmPeriodicTasks.model.items[item_id].vars, {block:'tasks', title1:'Arguments', title2:'Adding new argument'}) %>
+                
+                <div class="row <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
+                    <%= jsonEditor.editor(pmPeriodicTasks.model.items[item_id].vars, {prefix: "PLAYBOOK", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'}) %>
                 </div>
+                
+                <div class="row <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
+                    <%= jsonEditor.editor(pmPeriodicTasks.model.items[item_id].vars, {prefix: "MODULE", block:'periodic_module', title1:'Arguments', title2:'Adding new argument'}) %>
+                </div>
+                
             </section>
         </div>
     </section>
@@ -1975,10 +1981,15 @@
                             -->
                         </div>
                     </div>
+                </div> 
+                <div class="row <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
+                    <%= jsonEditor.editor({}, {prefix: "PLAYBOOK", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'}) %>
                 </div>
-                <div class="row">
-                    <%= jsonEditor.editor({}, {block:'tasks', title1:'Arguments', title2:'Adding new argument'}) %>
+                
+                <div class="row <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
+                    <%= jsonEditor.editor({}, {prefix: "MODULE", block:'periodic_module', title1:'Arguments', title2:'Adding new argument'}) %>
                 </div>
+                
             </section>
         </div>
     </section>
@@ -2165,11 +2176,10 @@
     <section class="content"> 
         <button type="button" onclick="spajs.showLoader(pmProjects.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save project</button>
         <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-warning" ><i class="fa fa-refresh" aria-hidden="true"></i> Sync</button>
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'});  return false;" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-play" aria-hidden="true"></i> Run playbook</button>
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/ansible-module/run'});  return false;" class="btn btn-info" ><i class="fa fa-terminal" aria-hidden="true"></i> Run module</button>
-        <!--<button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-periodic-tasks'});  return false;" class="btn btn-info" >Create periodic tasks</button>-->
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/periodic-tasks'});  return false;" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-clock-o" aria-hidden="true"></i> Periodic tasks</button>
-        <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/history'});  return false;" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-history" aria-hidden="true"></i> History</button>
+        <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>/playbook/run" onclick="return spajs.openURL(this.href);" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-play" aria-hidden="true"></i> Run playbook</a>
+        <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>/ansible-module/run" onclick="return spajs.openURL(this.href);" class="btn btn-info" ><i class="fa fa-terminal" aria-hidden="true"></i> Run module</a>
+        <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-clock-o" aria-hidden="true"></i> Periodic tasks</a>
+        <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>/history" onclick="return spajs.openURL(this.href);" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-history" aria-hidden="true"></i> History</a>
 
 
         <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-danger danger-right" >Remove project</button>
@@ -2568,7 +2578,7 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4">
                                 <label class="control-label" >Inventory</label>
                                 <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
                                     <% for(var i in pmInventories.model.itemslist.results){ %>
@@ -2579,7 +2589,7 @@
                                 </select>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4">
                                 <label class="control-label" >Playbook</label>
                                 <input type="text"
                                         class="playbook-autocomplete form-control"
@@ -2592,7 +2602,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor({}, {block:'tasks', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor({}, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -2993,7 +3003,7 @@
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor({}, {block:'module', title1:'Arguments', title2:'Adding new argument'}) %>
+            <%= jsonEditor.editor({}, {block:'module', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -3018,7 +3028,7 @@
 
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmInventories.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save inventory</button>
-        <button type="button" onclick="spajs.open({ menuId:'inventory/<%- item_id %>/history'}); return false; return false;" class="btn btn-primary" >History</button>
+        <a href="<%- polemarch.opt.host %>/?inventory/<%- item_id %>/history" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >History</a>
         <button type="button" onclick="spajs.showLoader(pmInventories.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy inventory" ><span class="glyphicon glyphicon-duplicate" ></span></button>
         <button type="button" onclick="spajs.showLoader(pmInventories.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove inventory</button>
         <br>
@@ -4241,7 +4251,24 @@
                             Name
                         </label>
                         <div class="input-group  col-sm-10 col-lg-10 col-xs-12"  >
-                            <input type="text" placeholder="Enter name" id="new_json_name<%- opt.prefix%>" value=""  class="form-control" >
+                        
+                            <% if(opt.select2){ %>
+                                <~ jsonEditor.model.isLoaded_cli_reference>
+                                    <select class="form-control select2" id="new_json_name<%- opt.prefix%>" data-placeholder="Select param" >
+                                        <option selected="" disabled="" value="" >Not set</option>
+                                        <% for(var i in jsonEditor.options[optionsblock]){ %> 
+                                            <option value="<%- i %>" >
+                                                <%- i %> (<%- jsonEditor.options[optionsblock][i].help %>)
+                                            </option> 
+                                        <% } %>
+                                    </select>
+                                    <=js $("#new_json_name<%- opt.prefix%>").select2() js=> 
+                                <~>
+                            <% }else{ %>
+                                <input type="text" placeholder="Enter name" id="new_json_name<%- opt.prefix%>" value=""  class="form-control" >
+                            <% } %>
+                            <=js jsonEditor.initForm('<%- optionsblock %>', '<%- opt.prefix%>') js=> 
+                            
                             <div class="help-block"></div>
                         </div>
                     </div>
@@ -4268,7 +4295,7 @@
             </div>
         </div>
     </section> 
-    <=js jsonEditor.initForm('<%- optionsblock %>', '<%- opt.prefix%>') js=> 
+    
 <% } %>
 </script>
 

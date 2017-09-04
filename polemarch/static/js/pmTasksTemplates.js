@@ -205,7 +205,7 @@ pmTasksTemplates.addItem = function()
         console.warn("Invalid value in filed name")
         $.notify("Invalid value in filed name", "error");
         def.reject()
-        return;
+        return def.promise();
     }
 
     var thisObj = this;
