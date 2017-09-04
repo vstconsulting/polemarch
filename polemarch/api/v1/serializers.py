@@ -20,17 +20,17 @@ from ..base import Response
 # nothing
 #
 # Serializers field for usability
-# class ModelRelatedField(serializers.PrimaryKeyRelatedField):
-#     def __init__(self, **kwargs):
-#         model = kwargs.pop("model", None)
-#         assert not ((model is not None or self.queryset is not None) and
-#                     kwargs.get('read_only', None)), (
-#             'Relational fields should not provide a `queryset` or `model`'
-#             ' argument, when setting read_only=`True`.'
-#         )
-#         if model is not None:
-#             kwargs["queryset"] = model.objects.all()
-#         super(ModelRelatedField, self).__init__(**kwargs)
+class ModelRelatedField(serializers.PrimaryKeyRelatedField):
+    def __init__(self, **kwargs):
+        model = kwargs.pop("model", None)
+        assert not ((model is not None or self.queryset is not None) and
+                    kwargs.get('read_only', None)), (
+            'Relational fields should not provide a `queryset` or `model`'
+            ' argument, when setting read_only=`True`.'
+        )
+        if model is not None:
+            kwargs["queryset"] = model.objects.all()
+        super(ModelRelatedField, self).__init__(**kwargs)
 
 
 class DictField(serializers.CharField):
@@ -313,7 +313,7 @@ class TaskSerializer(_WithVariablesSerializer):
 
 
 class OneTaskSerializer(TaskSerializer):
-    # project = ModelRelatedField(read_only=True) see note to ModelRelatedField
+    project = ModelRelatedField(read_only=True)
     playbook = serializers.CharField(read_only=True)
 
     class Meta:

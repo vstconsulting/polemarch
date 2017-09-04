@@ -45,3 +45,21 @@ class ServiceCommand(BaseCommand):
     def get_version(self):
         vstr = u'Polemarch {c}, Django {d.__version__}, Celery {r.__version__}'
         return vstr.format(c=__version__, d=django, r=celery)
+
+    def _print(self, info=""):
+        self.stdout.write(str(info))  # nocv
+
+    def _success(self, info=""):
+        try:  # nocv
+            self._print(self.style.SUCCESS(info))  # nocv
+        except:  # nocv
+            self._print(self.style.MIGRATE_SUCCESS(info))  # nocv
+
+    def _info(self, info=""):
+        self._print(self.style.HTTP_INFO(info))  # nocv
+
+    def _error(self, info=""):
+        self._print(self.style.ERROR(info))  # nocv
+
+    def _warning(self, info=""):
+        self._print(self.style.WARNING(info))  # nocv

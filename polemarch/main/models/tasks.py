@@ -8,6 +8,7 @@ from collections import OrderedDict
 import json
 
 import re
+import six
 from celery.schedules import crontab
 from django.db import transaction
 from django.db.models import Q
@@ -138,10 +139,12 @@ class Template(BModel):
 
     @data.setter
     def data(self, value):
-        # there is no way, how data could be non-dict and trigger
-        # validate_template does not fails during saving. And this method
-        # not using during loading.
-        self.template_data = json.dumps(value)
+        if isinstance(value, (six.string_types, six.text_type)):
+            self.template_data = json.dumps(json.loads(value))
+        elif isinstance(value, (dict, OrderedDict, list)):
+            self.template_data = json.dumps(value)
+        else:
+            raise ValueError("Unknown data type set.")
 
     @data.deleter
     def data(self):

@@ -523,6 +523,24 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         )
         self.job_template = Template.objects.create(**self.tmplt_data)
 
+    def test_string_template_data(self):
+        tmplt_data = dict(
+            name="test_tmplt",
+            kind="Task",
+            data=dict(vars={})
+        )
+        job_template = Template.objects.create(**tmplt_data)
+        job_template.data = json.dumps(dict(
+                playbook="test.yml",
+                vars=dict(
+                    connection="paramiko",
+                    tags="update",
+                )
+            ))
+        self.assertTrue(isinstance(job_template.data, dict))
+        with self.assertRaises(ValueError):
+            job_template.data = object()
+
     def test_templates(self):
         url = "/api/v1/templates/"
         self.list_test(url, Template.objects.all().count())

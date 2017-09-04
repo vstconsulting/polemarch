@@ -2,10 +2,24 @@ from __future__ import unicode_literals
 
 from django.db import models
 
+from ...main.utils import Paginator
+
 
 class BQuerySet(models.QuerySet):
-    # all methods in this class was before not using by anything in Polemarch
-    pass
+
+    def paged(self, *args, **kwargs):  # nocv
+        return self.get_paginator(*args, **kwargs).items()
+
+    def get_paginator(self, *args, **kwargs):  # nocv
+        return Paginator(self, *args, **kwargs)
+
+    def _find(self, field_name, tp_name, *args, **kwargs):  # nocv
+        field = kwargs.get(field_name, None) or (list(args)[0:1]+[None])[0]
+        if field is None:
+            return self
+        if isinstance(field, list):
+            return getattr(self, tp_name)(**{field_name+"__in": field})
+        return getattr(self, tp_name)(**{field_name: field})
 
 
 class BManager(models.Manager.from_queryset(BQuerySet)):

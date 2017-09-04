@@ -93,17 +93,9 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
                                         request=self.request).qs
         return queryset
 
-    def get_paginated_route_response(self, queryset, serializer_class=None,
+    def get_paginated_route_response(self, queryset, serializer_class,
                                      filter_classes=None):
         queryset = self.filter_route_queryset(queryset, filter_classes)
-
-        # TODO: discuss this removal with onegrey:
-        # argument: even when you have this and call
-        # get_paginated_route_response(..., None, ...) in
-        # HistoryViewSet.lines() it is still not working (incorrect serializer
-        # assumed and method fails further)
-        # if serializer_class is None:
-        #    serializer_class = self.get_serializer_class()
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -153,8 +145,7 @@ class NonModelsViewSet(GenericViewSet):
     base_name = None
 
     def get_queryset(self):
-        raise NotImplementedError("Can't get QuerySet"
-                                  " for NonModelsViewSet")  # nocv
+        return QuerySet()  # nocv
 
 
 class ListNonModelViewSet(NonModelsViewSet,
