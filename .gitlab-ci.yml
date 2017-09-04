@@ -42,6 +42,7 @@ stages:
   only:
     - /^issue_.*$/
     - developer
+    - master
     - make_bin_packages
 
 
@@ -182,11 +183,11 @@ release_deb:
     paths:
     - dist/
 
-#release_pypi:
-#  stage: release
-#  only:
-#   - tags
-#  script:
-#   - python2 setup.py compile
-#   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
-#  allow_failure: false
+release_pypi:
+  stage: release
+  only:
+   - manual
+  script:
+   - python2 setup.py compile
+   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
+  allow_failure: true
