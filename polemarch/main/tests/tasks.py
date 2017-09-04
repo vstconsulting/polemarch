@@ -6,8 +6,6 @@ from datetime import timedelta
 import subprocess
 from django.utils.timezone import now
 
-from ...api.v1.views import HistoryViewSet
-
 try:
     from mock import patch
 except ImportError:
