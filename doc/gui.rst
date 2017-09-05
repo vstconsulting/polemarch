@@ -24,8 +24,11 @@ in playbook execution page.
 If you don't have git repository, you can upload tar archive with project files
 from any http url.
 
-Also there is special type of project - empty project. In case you want run
-only modules without any playbooks or something.
+Also there is special type of project - empty project (MANUAL). In case you
+want run only modules without any playbooks or something. Polemarch will
+create folder for your project files in `projects_dir` (you can specify
+in settings), where you manually place your project files (like playbooks or
+something).
 
 .. image:: gui_gif/create_projects.gif
 
