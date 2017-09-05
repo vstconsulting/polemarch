@@ -13,6 +13,7 @@ except ImportError:
 
 from ..models import Project
 from ..models import Task, PeriodicTask, History, Inventory, Template
+from ..tasks.tasks import ScheduledTask
 
 from .inventory import _ApiGHBaseTestCase
 from ._base import AnsibleArgsValidationTest
@@ -81,6 +82,18 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.post_result(
             "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
             data=json.dumps(dict(inventory=inv1, playbook="first.yml")))
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertTrue(call_args[0].endswith("ansible-playbook"))
+        self.assertTrue(call_args[1].endswith("first.yml"))
+        self.assertTrue(result[0].startswith(self.correct_simple_inventory))
+        self.assertEquals(result[1], "somekey")
+        # test simple execution sync
+        subprocess_function.reset_mock()
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory=inv1, playbook="first.yml",
+                                 sync=True)))
         self.assertEquals(subprocess_function.call_count, 1)
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible-playbook"))
@@ -389,8 +402,10 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
         # test with bad value
         data = dict(mode="p1.yml", schedule="30 */4 foo", type="CRONTAB",
-                    project=self.periodic_project_id)
-        self.get_result("post", url, 400, data=json.dumps(data))
+                    project=self.periodic_project_id,
+                    inventory=self.inventory.id)
+        result = self.get_result("post", url, 400, data=json.dumps(data))
+        self.assertIn("Invalid weekday", str(result))
 
         # test with with no project
         data = dict(mode="p1.yml", schedule="30 */4", type="CRONTAB")
@@ -455,6 +470,33 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         # none of PeriodicTasks created in DB
         self.assertEquals(old_count, PeriodicTask.objects.count())
 
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_periodic_task_execution(self, subprocess_function):
+        url = "/api/v1/periodic-tasks/"
+        # module
+        data = dict(mode="shell", schedule="10", type="INTERVAL",
+                    project=self.periodic_project_id,
+                    kind="MODULE",
+                    inventory=self.inventory.id, name="one",
+                    vars={"args": "ls -la", "group": "all"})
+        id = self.get_result("post", url, 201, data=json.dumps(data))['id']
+        ScheduledTask.delay(id)
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertTrue(call_args[0].endswith("ansible"))
+        self.assertIn("shell", call_args)
+        subprocess_function.reset_mock()
+        # playbook
+        data = dict(mode="p1.yml", schedule="10", type="INTERVAL",
+                    project=self.periodic_project_id,
+                    inventory=self.inventory.id, name="one", vars={})
+        id = self.get_result("post", url, 201, data=json.dumps(data))['id']
+        ScheduledTask.delay(id)
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertTrue(call_args[0].endswith("ansible-playbook"))
+        self.assertTrue(call_args[1].endswith("p1.yml"))
+
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
@@ -478,6 +520,24 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             )
         )
         self.job_template = Template.objects.create(**self.tmplt_data)
+
+    def test_string_template_data(self):
+        tmplt_data = dict(
+            name="test_tmplt",
+            kind="Task",
+            data=dict(vars={})
+        )
+        job_template = Template.objects.create(**tmplt_data)
+        job_template.data = json.dumps(dict(
+                playbook="test.yml",
+                vars=dict(
+                    connection="paramiko",
+                    tags="update",
+                )
+            ))
+        self.assertTrue(isinstance(job_template.data, dict))
+        with self.assertRaises(ValueError):
+            job_template.data = object()
 
     def test_templates(self):
         url = "/api/v1/templates/"

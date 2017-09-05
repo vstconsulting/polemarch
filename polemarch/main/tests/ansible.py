@@ -23,6 +23,7 @@ class ApiAnsibleTestCase(_ApiGHBaseTestCase):
         self.assertIn("list-tasks", result['periodic_playbook'])
         self.assertNotIn("verbose", result['periodic_module'])
         self.assertNotIn("verbose", result['periodic_playbook'])
+        self.assertIn("f", result['module']['forks']['shortopts'])
         # test filter
         result = self.get_result("get", url + "?filter=module")
         result.pop('module')

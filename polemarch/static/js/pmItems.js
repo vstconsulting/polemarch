@@ -56,6 +56,11 @@ pmItems.toggleSelect = function(item_id, mode)
         this.model.selectedItems[item_id] = mode
     }
 
+    if(this.model.selectedCount < 0)
+    {
+        this.model.selectedCount = 0;
+    }
+
     return this.model.selectedItems[item_id];
 }
 
@@ -83,6 +88,12 @@ pmItems.toggleSelectEachItem = function(mode)
             thisObj.model.selectedItems[item_id] = mode
         }
         thisObj.model.selectedCount += delta
+        
+        if(thisObj.model.selectedCount < 0)
+        {
+            thisObj.model.selectedCount = 0;
+        }
+
     }).promise()
 }
 
@@ -441,6 +452,7 @@ pmItems.loadItem = function(item_id)
         success: function(data)
         {
             //console.log("loadUser", data)
+            thisObj.model.items.justWatch(item_id)
             thisObj.model.items[item_id] = data
         },
         error:function(e)

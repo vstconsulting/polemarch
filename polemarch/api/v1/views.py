@@ -259,6 +259,7 @@ class BulkViewSet(rest_views.APIView):
 
 
 class AnsibleViewSet(base.ListNonModelViewSet):
+    # pylint: disable=abstract-method
     base_name = "ansible"
 
     @list_route(methods=["get"])

@@ -3,8 +3,6 @@ var pmHosts = inheritance(pmItems)
 
 pmHosts.model.name = "hosts"
 pmHosts.model.page_name = "host"
-jsonEditor.options[pmHosts.model.name] = jsonEditor.options['item'];
-  
 
 pmHosts.copyItem = function(item_id)
 {
@@ -164,6 +162,7 @@ pmHosts.updateItem = function(item_id)
         }
     }
 
+    var thisObj = this;
     return $.ajax({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "PATCH",
@@ -177,6 +176,7 @@ pmHosts.updateItem = function(item_id)
         },
         success: function(data)
         { 
+            thisObj.model.items[item_id] = data
             $.notify("Save", "success");
         },
         error:function(e)

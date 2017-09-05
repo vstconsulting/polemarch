@@ -127,10 +127,13 @@ pmPeriodicTasks.execute = function(project_id, item_id)
 {
     var def = new $.Deferred();
 
-    var data = jsonEditor.jsonEditorGetValues();
+    var kind = $("#periodic-tasks_"+item_id+"_kind").val();
+
+    var data = jsonEditor.jsonEditorGetValues(kind);
     data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
 
-    var kind = 'execute-playbook'
+    /* Because execute does not send arguments */
+    /* var kind = 'execute-playbook' */
     if($("#periodic-tasks_"+item_id+"_kind").val() == 'MODULE')
     {
         kind = 'execute-module'
@@ -154,8 +157,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
             return def.promise();
         }
     }
-
-    debugger;
+ 
     $.ajax({
         url: "/api/v1/projects/"+project_id+"/"+kind+"/",
         type: "POST",
@@ -210,7 +212,7 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
     }).fail(function()
     {
         $.notify("", "error");
-    })
+    }).promise();
 }
 
 pmPeriodicTasks.search = function(project_id, query)
@@ -233,7 +235,7 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
     }).fail(function()
     {
         $.notify("", "error");
-    })
+    }).promise();
 }
 
 pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
@@ -281,7 +283,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
     }).fail(function()
     {
         $.notify("", "error");
-    })
+    }).promise();
 }
 
 pmPeriodicTasks.showItem = function(holder, menuInfo, data)
@@ -291,7 +293,7 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[2];
     var project_id = data.reg[1];
 
-    return $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
+    $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
         pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory)
@@ -410,13 +412,14 @@ pmPeriodicTasks.addItem = function(project_id)
         }
     }
 
-    data.vars = jsonEditor.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues(data.kind)
 
     if(data.kind == "MODULE")
     {
         data.vars.group = $("#group-autocomplete").val()
         data.vars.args =  $("#module-args-string").val();
     }
+    
     $.ajax({
         url: "/api/v1/"+this.model.name+"/",
         type: "POST",
@@ -475,6 +478,7 @@ pmPeriodicTasks.loadItem = function(item_id)
                     delete data.vars.args
                 }
             }
+            thisObj.model.items.justWatch(item_id)
             thisObj.model.items[item_id] = data
         },
         error:function(e)
@@ -492,7 +496,7 @@ pmPeriodicTasks.loadItem = function(item_id)
 pmPeriodicTasks.updateItem = function(item_id)
 {
     var data = {}
-
+    
     data.type = $("#periodic-tasks_"+item_id+"_type").val()
     data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
     data.name = $("#periodic-tasks_"+item_id+"_name").val()
@@ -550,13 +554,14 @@ pmPeriodicTasks.updateItem = function(item_id)
         }
     }
 
-    data.vars = jsonEditor.jsonEditorGetValues()
+    data.vars = jsonEditor.jsonEditorGetValues(data.kind)
     
     if(data.kind == "MODULE")
     {
         data.vars.group = $("#group-autocomplete").val()
         data.vars.args =  $("#module-args-string").val();
     }
+    var thisObj = this;
     return $.ajax({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "PATCH",
@@ -570,6 +575,7 @@ pmPeriodicTasks.updateItem = function(item_id)
         },
         success: function(data)
         {
+            thisObj.model.items[item_id] = data
             $.notify("Save", "success");
         },
         error:function(e)

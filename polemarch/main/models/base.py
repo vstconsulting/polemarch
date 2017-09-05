@@ -7,16 +7,16 @@ from ...main.utils import Paginator
 
 class BQuerySet(models.QuerySet):
 
-    def paged(self, *args, **kwargs):
+    def paged(self, *args, **kwargs):  # nocv
         return self.get_paginator(*args, **kwargs).items()
 
-    def get_paginator(self, *args, **kwargs):
+    def get_paginator(self, *args, **kwargs):  # nocv
         return Paginator(self, *args, **kwargs)
 
-    def _find(self, field_name, tp_name, *args, **kwargs):
+    def _find(self, field_name, tp_name, *args, **kwargs):  # nocv
         field = kwargs.get(field_name, None) or (list(args)[0:1]+[None])[0]
         if field is None:
-            return self  # pragma: no cover
+            return self
         if isinstance(field, list):
             return getattr(self, tp_name)(**{field_name+"__in": field})
         return getattr(self, tp_name)(**{field_name: field})
@@ -40,7 +40,7 @@ class BModel(models.Model):
         abstract = True
 
     def __unicode__(self):
-        return "<{}>".format(self.id)
+        return "<{}>".format(self.id)  # nocv
 
     def __str__(self):
         return self.__unicode__()

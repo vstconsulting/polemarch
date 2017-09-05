@@ -388,6 +388,54 @@ function qunitAddTests_users()
     var t = new Date();
     t = t.getTime()
 
+    syncQUnit.addTest('Создание пользователя с ошибкой 1', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания пользователя
+        var done = assert.async();
+
+        // Заполнение формы с данными пользователя
+        $("#new_user_username").val("admin");
+        $("#new_user_password").val("admin");
+        $("#new_user_email").val("admin");
+        $("#new_user_first_name").val("admin");
+        $("#new_user_last_name").val("admin");
+
+        // Отправка формы с данными пользователя
+        $.when(pmUsers.addItem()).done(function()
+        {
+            assert.ok(false, 'Успешно user add Item, а не должно было');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при user add Item, как и задумано');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Создание пользователя с ошибкой 2', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания пользователя
+        var done = assert.async();
+
+        // Заполнение формы с данными пользователя
+        $("#new_user_username").val("admin"+t);
+        $("#new_user_password").val("admin");
+        $("#new_user_email").val("admin");
+        $("#new_user_first_name").val("admin");
+        $("#new_user_last_name").val("admin");
+
+        // Отправка формы с данными пользователя
+        $.when(pmUsers.addItem()).done(function()
+        {
+            assert.ok(false, 'Успешно user add Item, а не должно было');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при user add Item, как и задумано');
+            render(done)
+        })
+    });
+    
     syncQUnit.addTest('Создание пользователя', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания пользователя
@@ -396,7 +444,7 @@ function qunitAddTests_users()
         // Заполнение формы с данными пользователя
         $("#new_user_username").val("test-user-"+t);
         $("#new_user_password").val("test-user-"+t);
-        $("#new_user_email").val("test@user.ru");
+        $("#new_user_email").val("test2@user.ru");
         $("#new_user_first_name").val("test");
         $("#new_user_last_name").val("user");
 
@@ -413,6 +461,30 @@ function qunitAddTests_users()
     });
 
     var userId = undefined
+    syncQUnit.addTest('Изменение пользователя с ошибкой', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
+        // с адресом http://192.168.0.12:8080/?user-5
+        userId = /user\/([0-9]+)/.exec(window.location.href)[1]
+
+        $("#user_"+userId+"_username").val("admin");
+        $("#user_"+userId+"_password").val("test2-user-"+t);
+        $("#user_"+userId+"_email").val("test2@user.ru");
+        $("#user_"+userId+"_first_name").val("test2-"+t);
+        $("#user_"+userId+"_last_name").val("user2-"+t);
+
+        $.when(pmUsers.updateItem(userId)).done(function()
+        {
+            assert.ok(false, 'Успешно update add Item, а не должно было');
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Ошибка при update add Item, как и задумано');
+            render(done)
+        })
+    });
+
     syncQUnit.addTest('Изменение пользователя', function ( assert )
     {
         var done = assert.async();
@@ -437,6 +509,19 @@ function qunitAddTests_users()
         })
     });
 
+    syncQUnit.addTest('Копирование пользователя с ошибкой', function ( assert )
+    {
+        var done = assert.async(); 
+        $.when(pmUsers.copyAndEdit(999999)).done(function()
+        {
+            assert.ok(false, 'Успешно copyAndEdit add Item, а не должно было');
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Ошибка при copyAndEdit add Item, как и задумано');
+            render(done)
+        })
+    }); 
+    
     syncQUnit.addTest('Копирование пользователя', function ( assert )
     {
         var done = assert.async();
@@ -447,6 +532,21 @@ function qunitAddTests_users()
             render(done)
         }).fail(function(){
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление копии пользователя с ошибкой', function ( assert )
+    {
+        var done = assert.async();
+ 
+        // Удаление пользователя.
+        $.when(pmUsers.deleteItem(999999, true)).done(function()
+        {
+            assert.ok(false, 'Успешно copyAndEdit add Item, а не должно было');
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Ошибка при copyAndEdit add Item, как и задумано');
             render(done)
         })
     });
@@ -540,7 +640,7 @@ function qunitAddTests_hosts()
 
     var t = new Date();
     t = t.getTime()
-
+ 
     syncQUnit.addTest('Создание хоста', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания хоста
@@ -550,12 +650,12 @@ function qunitAddTests_hosts()
         $("#new_host_name").val("test-host-"+t);
         $("#new_host_type").val("HOST");
 
-        $("#new_json_name").val("test1");
-        $("#new_json_value").val("val1");
+        $("#new_json_nameprefix").val("test1");
+        $("#new_json_valueprefix").val("val1");
         jsonEditor.jsonEditorAddVar();
 
-        $("#new_json_name").val("test2");
-        $("#new_json_value").val("val2");
+        $("#new_json_nameprefix").val("test2");
+        $("#new_json_valueprefix").val("val2");
         jsonEditor.jsonEditorAddVar();
 
 
@@ -582,8 +682,8 @@ function qunitAddTests_hosts()
 
         $("#host_"+itemId+"_name").val("test2-hosts-"+t);
 
-        $("#new_json_name").val("test3");
-        $("#new_json_value").val("val3");
+        $("#new_json_nameprefix").val("test3");
+        $("#new_json_valueprefix").val("val3");
         jsonEditor.jsonEditorAddVar();
 
 
@@ -715,12 +815,12 @@ function qunitAddTests_groups()
         // Заполнение формы с данными группы
         $("#new_group_name").val("test-group-"+t);
 
-        $("#new_json_name").val("test1");
-        $("#new_json_value").val("val1");
+        $("#new_json_nameprefix").val("test1");
+        $("#new_json_valueprefix").val("val1");
         jsonEditor.jsonEditorAddVar();
 
-        $("#new_json_name").val("test2");
-        $("#new_json_value").val("val2");
+        $("#new_json_nameprefix").val("test2");
+        $("#new_json_valueprefix").val("val2");
         jsonEditor.jsonEditorAddVar();
 
         $("#new_group_children").addClass('selected');
@@ -747,8 +847,8 @@ function qunitAddTests_groups()
 
         $("#group_"+itemId+"_name").val("test2-group-"+t);
 
-        $("#new_json_name").val("test3");
-        $("#new_json_value").val("val3");
+        $("#new_json_nameprefix").val("test3");
+        $("#new_json_valueprefix").val("val3");
         jsonEditor.jsonEditorAddVar();
 
 
@@ -791,12 +891,12 @@ function qunitAddTests_groups()
         // Заполнение формы с данными группы
         $("#new_group_name").val("test-sub-group-"+t);
 
-        $("#new_json_name").val("test1");
-        $("#new_json_value").val("val1");
+        $("#new_json_nameprefix").val("test1");
+        $("#new_json_valueprefix").val("val1");
         jsonEditor.jsonEditorAddVar();
 
-        $("#new_json_name").val("test2");
-        $("#new_json_value").val("val2");
+        $("#new_json_nameprefix").val("test2");
+        $("#new_json_valueprefix").val("val2");
         jsonEditor.jsonEditorAddVar();
 
         var master_group_itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
@@ -954,12 +1054,12 @@ function qunitAddTests_inventories()
         // Заполнение формы с данными inventory
         $("#new_inventory_name").val("test-inventory-"+t);
 
-        $("#new_json_name").val("test1");
-        $("#new_json_value").val("val1");
+        $("#new_json_nameprefix").val("test1");
+        $("#new_json_valueprefix").val("val1");
         jsonEditor.jsonEditorAddVar();
 
-        $("#new_json_name").val("test2");
-        $("#new_json_value").val("val2");
+        $("#new_json_nameprefix").val("test2");
+        $("#new_json_valueprefix").val("val2");
         jsonEditor.jsonEditorAddVar();
 
 
@@ -985,8 +1085,8 @@ function qunitAddTests_inventories()
 
         $("#inventory_"+itemId+"_name").val("test2-inventory-"+t);
 
-        $("#new_json_name").val("test3");
-        $("#new_json_value").val("val3");
+        $("#new_json_nameprefix").val("test3");
+        $("#new_json_valueprefix").val("val3");
         jsonEditor.jsonEditorAddVar();
 
         $.when(pmInventories.updateItem(itemId)).done(function()
@@ -1404,7 +1504,8 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
           "ansible_user": "grey",
           "ansible_ssh_private_key_file": "/root/f.txt",
           "ansible_ssh_extra_args": "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-        }
+        },
+        name : "inventory",
     }
     var inventory = undefined;
 
@@ -1412,29 +1513,41 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
     {
         var done = assert.async();
         inventory = pmInventories.parseFromText(pmInventoriesText)
+        inventory.name = "inventory"
         pmInventories.model.importedInventories = []
         pmInventories.model.importedInventories.push({
             inventory:inventory,
             text:pmInventoriesText
         })
 
-        var res = deepEqual(etalon, inventory)
+        var res = deepEqual(etalon, inventory)   
         assert.ok(res, 'Сравнение инвентория распарсенного и оригинального');
         render(done)
     });
-
+ 
     syncQUnit.addTest('Импорт не валидного inventory 1', function ( assert )
     { 
         var done = assert.async();
-        $.when(pmInventories.importInventory(inventory)).done(function()
+        
+        $.when(spajs.open({ menuId:"inventories/import"})).done(function()
         {
-            assert.ok(false, 'Успешно импортирован не валидный инвенторий (а это не правильно)');
-            render(done)
+            assert.ok(true, 'Успешно открыто меню inventories/import'); 
+            $("#inventory_name").val("inventory")
+
+            $.when(pmInventories.importInventory(inventory)).done(function()
+            {
+                assert.ok(false, 'Успешно импортирован не валидный инвенторий (а это не правильно)');
+                render(done)
+            }).fail(function()
+            { 
+                assert.ok(true, 'Ошибка в импорте не валидного инвентория (как и задумано)');
+                render(done)
+            })
         }).fail(function()
         {
-            assert.ok(true, 'Ошибка в импорте не валидного инвентория (как и задумано)');
+            assert.ok(false, 'Ошибка при открытиии меню inventories/import');
             render(done)
-        })
+        }) 
     });
 
     syncQUnit.addTest('Импорт валидного inventory', function ( assert )
@@ -1456,14 +1569,15 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
                 jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', "host"+hval.name) 
             }
         }
-         
+          
         var done = assert.async();
+        $("#inventory_name").val("inventory")
         $.when(pmInventories.importInventory(inventory)).done(function()
         {
-            assert.ok(true, 'Успешно импортирован инвенторий');
+            assert.ok(true, 'Успешно импортирован инвенторий'); 
             render(done)
         }).fail(function()
-        {
+        { 
             assert.ok(false, 'Ошибка в импорте инвентория');
             render(done)
         })
@@ -1479,18 +1593,73 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             "children": true
         }
  
+        $("#inventory_name").val("inventory") 
         $.when(pmInventories.importInventory(inventory)).done(function()
-        {
+        { 
             assert.ok(false, 'Успешно импортирован инвенторий а должна быть ошибка');
             render(done)
         }).fail(function()
-        {
+        { 
             assert.ok(true, 'Ошибка в импорте инвентория как и задумано');
             render(done)
         })
 
     });
 
+    syncQUnit.addTest('Парсинг inventory 2', function ( assert )
+    {
+        var done = assert.async();
+        var inventoryText = "W3NlcnZlcnM6Y2hpbGRyZW5dCnVzdWFsCnVudXN1YWwKW3VzdWFsXQ\
+oxNzIuMTYuMS5bMzA6MzFdClt1bnVzdWFsXQpbc2VydmVyczp2YXJzXQphbnNpYmxlX3VzZXI9Y2Vud\
+G9zCmFuc2libGVfc3NoX3ByaXZhdGVfa2V5X2ZpbGU9L2hvbWUvY2VwcmV1L2RlZmF1bHQucGVtCmFu\
+c2libGVfYmVjb21lPXRydWU="
+        inventoryText = Base64.decode(inventoryText)
+        
+        var inventory = pmInventories.parseFromText(inventoryText)
+        var etalon = {
+            "hosts": [],
+            "groups": {
+              "servers": {
+                "vars": {
+                  "ansible_user": "centos",
+                  "ansible_ssh_private_key_file": "/home/cepreu/default.pem",
+                  "ansible_become": "true"
+                },
+                "groups": [
+                  "usual",
+                  "unusual"
+                ],
+                "hosts": [],
+                "children": true
+              },
+              "usual": {
+                "vars": {},
+                "groups": [],
+                "hosts": [
+                  {
+                    "name": "172.16.1.[30:31]",
+                    "type": "RANGE",
+                    "vars": {
+
+                    }
+                  }
+                ]
+              },
+              "unusual": {
+                "vars": {},
+                "groups": [],
+                "hosts": []
+              }
+            },
+            "vars": {},
+            name:"inventory"
+          }
+        inventory.name = "inventory"
+      
+        var res = deepEqual(etalon, inventory)
+        assert.ok(res, 'Сравнение инвентория 2 распарсенного и оригинального');
+        render(done)
+    }); 
 }
 
 /**
@@ -1541,12 +1710,12 @@ function qunitAddTests_projects()
         $("#new_project_name").val("test-project-"+t);
         $("#new_project_repository").val("git://test-project-"+t);
 
-        $("#new_json_name").val("test1");
-        $("#new_json_value").val("val1");
+        $("#new_json_nameprefix").val("test1");
+        $("#new_json_valueprefix").val("val1");
         jsonEditor.jsonEditorAddVar();
 
-        $("#new_json_name").val("test2");
-        $("#new_json_value").val("val2");
+        $("#new_json_nameprefix").val("test2");
+        $("#new_json_valueprefix").val("val2");
         jsonEditor.jsonEditorAddVar();
 
 
@@ -1574,8 +1743,8 @@ function qunitAddTests_projects()
 
         $("#project_"+itemId+"_name").val("test2-project-"+t);
 
-        $("#new_json_name").val("test3");
-        $("#new_json_value").val("val3");
+        $("#new_json_nameprefix").val("test3");
+        $("#new_json_valuprefixe").val("val3");
         jsonEditor.jsonEditorAddVar();
 
 
@@ -1650,11 +1819,80 @@ function qunitAddTests_projects()
         })
     })
 
+    syncQUnit.addTest('run playbooke с ошибкой 1', function ( assert )
+    { 
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+ 
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1] 
+         
+        // Отправка формы с данными project
+        $.when(pmTasks.execute(itemId, 99999, "main.yml")).done(function()
+        {
+            assert.ok(false, 'Успешно Execute ansible module, а не должно было');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка Execute ansible module, как и задумано');
+            render(done)
+        }) 
+    });
+
+    syncQUnit.addTest('run playbook с ошибкой 2', function ( assert )
+    { 
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+ 
+        $("#new_json_nameprefix").val("test1");
+        $("#new_json_valueprefix").val("val1");
+        jsonEditor.jsonEditorAddVar();
+  
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1] 
+        var inventoryId = $("#inventories-autocomplete option")[1].value // Надеемся что там есть хоть один инвенторий 
+        $('#inventories-autocomplete').val(inventoryId)
+        
+        // Отправка формы с данными project
+        $.when(pmTasks.execute(itemId, $('#inventories-autocomplete').val(), "main.yml")).done(function()
+        {
+            assert.ok(false, 'Успешно Execute ansible module, а не должно было');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка Execute ansible module, как и задумано');
+            render(done)
+        })
+
+    });
+
+    syncQUnit.addTest('run playbook', function ( assert )
+    { 
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+ 
+        jsonEditor.jsonEditorRmVar("test1")
+        
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1] 
+        var inventoryId = $("#inventories-autocomplete option")[1].value // Надеемся что там есть хоть один инвенторий
+ 
+        $('#inventories-autocomplete').val(inventoryId)
+        // Отправка формы с данными project
+        $.when(pmTasks.execute(itemId, $('#inventories-autocomplete').val(), "main.yml")).done(function()
+        {
+            assert.ok(true, 'Успешно Execute ansible module, как и задумано');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка Execute ansible module, а не должно было');
+            render(done)
+        }) 
+    });
+    
+    var projectId = undefined
     syncQUnit.addTest('Страница Execute ansible module', function ( assert )
     {
         var done = assert.async();
-        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(spajs.open({ menuId:'project/'+itemId+'/ansible-module/run'})).done(function()
+        projectId = /project\/([0-9]+)/.exec(window.location.href)[1]
+        $.when(spajs.open({ menuId:'project/'+projectId+'/ansible-module/run'})).done(function()
         {
             assert.ok(true, 'Страница открылась');
             render(done)
@@ -1665,11 +1903,110 @@ function qunitAddTests_projects()
         })
     })
 
-    syncQUnit.addTest('Страница periodic-tasks', function ( assert )
+    syncQUnit.addTest('Execute ansible module с ошибкой 1', function ( assert )
     {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
         var done = assert.async();
+
+        // Заполнение формы с данными project
+        $("#module-autocomplete").val("test");
+        jsonEditor.jsonEditorRmVar("test1")
+        
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(spajs.open({ menuId:'project/'+itemId+'/periodic-tasks'})).done(function()
+        
+        var inventoryId = $("#inventories-autocomplete option")[1].value // Надеемся что там есть хоть один инвенторий
+
+        $.when(pmModuleTemplates.selectInventory(inventoryId)).done(function()
+        { 
+            $('#inventories-autocomplete').val(inventoryId)
+            // Отправка формы с данными project
+            $.when(pmAnsibleModule.execute(itemId, 99999, "All", $('#module-autocomplete').val())).done(function()
+            {
+                assert.ok(false, 'Успешно Execute ansible module, а не должно было');
+                render(done)
+            }).fail(function()
+            {
+                assert.ok(true, 'Ошибка Execute ansible module, как и задумано');
+                render(done)
+            })
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при selectInventory');
+        })
+    });
+
+    syncQUnit.addTest('Execute ansible module с ошибкой 2', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        // Заполнение формы с данными project
+        $("#module-autocomplete").val("test");
+        
+        $("#new_json_nameprefix").val("test1");
+        $("#new_json_valueprefix").val("val1");
+        jsonEditor.jsonEditorAddVar();
+ 
+
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+        
+        var inventoryId = $("#inventories-autocomplete option")[1].value // Надеемся что там есть хоть один инвенторий
+
+        $.when(pmModuleTemplates.selectInventory(inventoryId)).done(function()
+        { 
+            $('#inventories-autocomplete').val(inventoryId)
+            // Отправка формы с данными project
+            $.when(pmAnsibleModule.execute(itemId, $('#inventories-autocomplete').val(), "All", $('#module-autocomplete').val())).done(function()
+            {
+                assert.ok(false, 'Успешно Execute ansible module, а не должно было');
+                render(done)
+            }).fail(function()
+            {
+                assert.ok(true, 'Ошибка Execute ansible module, как и задумано');
+                render(done)
+            })
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при selectInventory');
+        })
+    });
+
+    syncQUnit.addTest('Execute ansible module', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        // Заполнение формы с данными project
+        $("#module-autocomplete").val("test");
+        jsonEditor.jsonEditorRmVar("test1")
+        
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+        
+        var inventoryId = $("#inventories-autocomplete option")[1].value // Надеемся что там есть хоть один инвенторий
+
+        $.when(pmModuleTemplates.selectInventory(inventoryId)).done(function()
+        { 
+            $('#inventories-autocomplete').val(inventoryId)
+            // Отправка формы с данными project
+            $.when(pmAnsibleModule.execute(itemId, $('#inventories-autocomplete').val(), "All", $('#module-autocomplete').val())).done(function()
+            {
+                assert.ok(true, 'Успешно Execute ansible module, как и задумано');
+                render(done)
+            }).fail(function()
+            {
+                assert.ok(false, 'Ошибка Execute ansible module, а не должно было');
+                render(done)
+            })
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при selectInventory');
+        })
+    });
+    
+    syncQUnit.addTest('Страница periodic-tasks', function ( assert )
+    { 
+        var done = assert.async(); 
+        $.when(spajs.open({ menuId:'project/'+projectId+'/periodic-tasks'})).done(function()
         {
             assert.ok(true, 'Страница открылась');
             render(done)
@@ -1755,12 +2092,12 @@ function qunitAddTests_projects()
         // Заполнение формы с данными inventory
         $("#new_inventory_name").val("test-inventory-"+t);
 
-        $("#new_json_name").val("test1");
-        $("#new_json_value").val("val1");
+        $("#new_json_nameprefix").val("test1");
+        $("#new_json_valueprefix").val("val1");
         jsonEditor.jsonEditorAddVar();
 
-        $("#new_json_name").val("test2");
-        $("#new_json_value").val("val2");
+        $("#new_json_nameprefix").val("test2");
+        $("#new_json_valueprefix").val("val2");
         jsonEditor.jsonEditorAddVar();
 
 
@@ -1793,7 +2130,7 @@ function qunitAddTests_projects()
     })
 
 
-    syncQUnit.addTest('Создание periodic task', function ( assert )
+    syncQUnit.addTest('Создание не валидного periodic task', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания project
         var done = assert.async();
@@ -1804,13 +2141,51 @@ function qunitAddTests_projects()
 
         $("#new_periodic-tasks_schedule_INTERVAL").val(t);
 
-        $("#new_json_name").val("test1");
-        $("#new_json_value").val("val1");
-        jsonEditor.jsonEditorAddVar();
+        $("#new_json_namePLAYBOOK").val("test1");
+        $("#new_json_valuePLAYBOOK").val("val1");
+        jsonEditor.jsonEditorAddVar('periodic_playbook', "PLAYBOOK");
+ 
 
-        $("#new_json_name").val("test2");
-        $("#new_json_value").val("val2");
-        jsonEditor.jsonEditorAddVar();
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+        var inventoryId = $("#new_periodic-tasks_inventory option")[2].value
+
+        $.when(pmPeriodicTasks.selectInventory(inventoryId)).done(function()
+        {
+            $("#new_periodic-tasks_inventory").val(inventoryId)
+
+            // Отправка формы с данными project
+            $.when(pmPeriodicTasks.addItem(itemId)).done(function()
+            {
+                assert.ok(false, 'Успешно project add pmPeriodicTasks, а не должно было');
+                render(done)
+            }).fail(function()
+            {
+                assert.ok(true, 'Ошибка при project add pmPeriodicTasks, как и задумано');
+                render(done)
+            })
+        }).fail(function()
+        {
+            assert.ok(false, 'Ошибка при selectInventory');
+        })
+    });
+
+    syncQUnit.addTest('Создание periodic task', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        jsonEditor.jsonEditorRmVar('test1', 'PLAYBOOK')
+        
+        // Заполнение формы с данными project
+        $("#new_periodic-tasks_name").val("test-project-"+t);
+        $("#new_periodic-tasks_playbook").val("test-project-"+t);
+
+        $("#new_periodic-tasks_schedule_INTERVAL").val(t);
+
+        $("#new_json_namePLAYBOOK").val("become-method");
+        $("#new_json_valuePLAYBOOK").val("val1");
+        jsonEditor.jsonEditorAddVar('periodic_playbook', "PLAYBOOK");
+ 
 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
         var inventoryId = $("#new_periodic-tasks_inventory option")[2].value
@@ -1834,6 +2209,32 @@ function qunitAddTests_projects()
             assert.ok(false, 'Ошибка при selectInventory');
         })
     });
+    
+    syncQUnit.addTest('Изменение не валидного periodic task', function ( assert )
+    {
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+        var taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
+        // Предполагается что мы от прошлого теста попали на страницу создания inventory
+        var done = assert.async();
+
+        // Заполнение формы с данными inventory
+        $("#periodic-tasks_"+taskId+"_name").val("test-task2-"+t);
+
+        $("#new_json_namePLAYBOOK").val("test1");
+        $("#new_json_valuePLAYBOOK").val("val1");
+        jsonEditor.jsonEditorAddVar('periodic_playbook', "PLAYBOOK");
+  
+        // Отправка формы с данными inventory
+        $.when(pmPeriodicTasks.updateItem(taskId)).done(function()
+        {
+            assert.ok(false, 'Успешно update Periodic Task, а не должно было');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при update Periodic Task, как и задуманно');
+            render(done)
+        })
+    });
 
     syncQUnit.addTest('Изменение periodic task', function ( assert )
     {
@@ -1844,16 +2245,13 @@ function qunitAddTests_projects()
 
         // Заполнение формы с данными inventory
         $("#periodic-tasks_"+taskId+"_name").val("test-task2-"+t);
-
-        $("#new_json_name").val("test1");
-        $("#new_json_value").val("val1");
-        jsonEditor.jsonEditorAddVar();
-
-        $("#new_json_name").val("test2");
-        $("#new_json_value").val("val2");
-        jsonEditor.jsonEditorAddVar();
-
-
+        
+        jsonEditor.jsonEditorRmVar('test1', 'PLAYBOOK')
+        
+        $("#new_json_namePLAYBOOK").val("private-key");
+        $("#new_json_valuePLAYBOOK").val("PLAYBOOK");
+        jsonEditor.jsonEditorAddVar('periodic_playbook', 'PLAYBOOK');
+ 
         // Отправка формы с данными inventory
         $.when(pmPeriodicTasks.updateItem(taskId)).done(function()
         {
@@ -1989,6 +2387,30 @@ function qunitAddTests_templates_task(){
     var t = new Date();
     t = t.getTime()
 
+    syncQUnit.addTest('Сохранение не валидного шаблона задачи', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        // Заполнение формы с данными project
+        $("#Templates-name").val("!2 d#");
+        
+        $("#new_json_nameprefix").val("syntax-check32");
+        $("#new_json_valueprefix").val("syntax-check32");
+        jsonEditor.jsonEditorAddVar(); 
+       
+        // Отправка формы с данными project
+        $.when(pmTasksTemplates.addItem()).done(function()
+        {
+            assert.ok(false, 'Успешно template add Item, а не должно было');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при template add Item, как и задумано');
+            render(done)
+        })
+    });
+
     syncQUnit.addTest('Сохранение шаблона задачи', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания project
@@ -1996,6 +2418,7 @@ function qunitAddTests_templates_task(){
 
         // Заполнение формы с данными project
         $("#Templates-name").val("test-template-"+t);
+        jsonEditor.jsonEditorRmVar("syntax-check32");
 
         // Отправка формы с данными project
         $.when(pmTasksTemplates.addItem()).done(function()
@@ -2005,6 +2428,31 @@ function qunitAddTests_templates_task(){
         }).fail(function()
         {
             assert.ok(false, 'Ошибка при template add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Изменение не валидного шаблона', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
+
+        $("#playbook-autocomplete").val("test2-playbook-"+t);
+
+        $("#new_json_nameprefix").val("syntax-check22");
+        $("#new_json_valueprefix").val("syntax-check22");
+        jsonEditor.jsonEditorAddVar(); 
+            
+        $.when(pmTasksTemplates.updateItem(itemId)).done(function()
+        {
+            assert.ok(false, 'Успешно template update Item, а не должно было');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при template update Item, как и задумано');
             render(done)
         })
     });
@@ -2019,8 +2467,9 @@ function qunitAddTests_templates_task(){
 
         $("#playbook-autocomplete").val("test2-playbook-"+t);
 
-        $("#new_json_name").val("test3");
-        $("#new_json_value").val("val3");
+        jsonEditor.jsonEditorRmVar("syntax-check22");
+        $("#new_json_nameprefix").val("new-vault-password-file");
+        $("#new_json_valueprefix").val("syntax-check");
         jsonEditor.jsonEditorAddVar();
 
 
@@ -2033,7 +2482,7 @@ function qunitAddTests_templates_task(){
             render(done)
         })
     });
-
+    
     var itemId = undefined
     syncQUnit.addTest('Копирование template Task', function ( assert )
     {
@@ -2123,11 +2572,40 @@ function qunitAddTests_templates_modules(){
     var t = new Date();
     t = t.getTime()
 
+    syncQUnit.addTest('Сохранение не валидного шаблона модуля', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        // Заполнение формы с данными project
+        $("#Templates-name").val("test-template-"+t);
+
+        $("#new_json_nameprefix").val("new-vault-password-file2");
+        $("#new_json_valueprefix").val("syntax-check");
+        jsonEditor.jsonEditorAddVar();
+        
+        // Отправка формы с данными project
+        $.when(pmModuleTemplates.addItem()).done(function()
+        {
+            assert.ok(false, 'Успешно template add Item, а не должно было');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при template add Item, как и задумано');
+            render(done)
+        })
+    });
+    
     syncQUnit.addTest('Сохранение шаблона модуля', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания project
         var done = assert.async();
 
+        jsonEditor.jsonEditorRmVar("new-vault-password-file2")
+        $("#new_json_nameprefix").val("new-vault-password-file");
+        $("#new_json_valueprefix").val("syntax-check");
+        jsonEditor.jsonEditorAddVar();
+        
         // Заполнение формы с данными project
         $("#Templates-name").val("test-template-"+t);
 
@@ -2143,7 +2621,7 @@ function qunitAddTests_templates_modules(){
         })
     });
 
-    syncQUnit.addTest('Изменение шаблона модуля', function ( assert )
+    syncQUnit.addTest('Изменение не валидного шаблона модуля', function ( assert )
     {
         var done = assert.async();
 
@@ -2153,8 +2631,34 @@ function qunitAddTests_templates_modules(){
 
         $("#module-autocomplete").val("test2-playbook-"+t);
 
-        $("#new_json_name").val("test3");
-        $("#new_json_value").val("val3");
+        $("#new_json_nameprefix").val("new-vault-password-file2");
+        $("#new_json_valueprefix").val("syntax-check");
+        jsonEditor.jsonEditorAddVar();
+
+
+        $.when(pmModuleTemplates.updateItem(itemId)).done(function()
+        {
+            assert.ok(false, 'Успешно update add Item, а не должно было');
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Ошибка при update add Item, как и задумано');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Изменение шаблона модуля', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
+        
+        jsonEditor.jsonEditorRmVar("new-vault-password-file2")
+        $("#module-autocomplete").val("test2-playbook-"+t);
+
+        $("#new_json_nameprefix").val("new-vault-password-file");
+        $("#new_json_valueprefix").val("syntax-check");
         jsonEditor.jsonEditorAddVar();
 
 
@@ -2262,4 +2766,4 @@ function qunitAddTests_history()
 
 }
 
-    injectQunit()
+injectQunit()

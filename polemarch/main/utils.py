@@ -641,6 +641,7 @@ class AnsibleArgumentsReference(object):
             cmd_result[arg] = {}
             cmd_result[arg]['help'] = info['help']
             cmd_result[arg]['type'] = self._cli_to_gui_type(arg, info['type'])
+            cmd_result[arg]['shortopts'] = info['shortopts']
         return cmd_result
 
     def validate_args(self, command, args):
@@ -649,7 +650,7 @@ class AnsibleArgumentsReference(object):
                 mtype = self.raw_dict[command][argument]["type"]
                 if mtype == 'int':
                     int(value)
-                elif mtype is None and value is not None:
+                elif mtype is None and value not in [None, ""]:
                     raise AssertionError("This argument shouldn't have value")
         except (KeyError, ValueError, AssertionError) as e:
             raise ValueError("Incorrect argument: {}. "
@@ -678,8 +679,12 @@ class AnsibleArgumentsReference(object):
                     name = name[2:]
                     if name in self._EXCLUDE_ARGS:
                         continue
+                    shortopts = []
+                    for opt in option._short_opts:
+                        shortopts.append(opt[1:])
                     cli_result[name] = {"type": option.type,
-                                        "help": option.help}
+                                        "help": option.help,
+                                        "shortopts": shortopts}
             result[cli_name] = cli_result
         result['module']['group'] = {"type": "string", "help": ""}
         result['periodic_playbook'] = result['playbook']

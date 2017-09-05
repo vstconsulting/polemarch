@@ -3,7 +3,6 @@
 var pmInventories = inheritance(pmItems)
 pmInventories.model.name = "inventories"
 pmInventories.model.page_name = "inventory"
-jsonEditor.options[pmInventories.model.name] = jsonEditor.options['item'];
 
 /**
  * Параметры из секции *:vars
@@ -118,16 +117,8 @@ pmInventories.parseHostLine = function(index, line, section, inventory)
     }
 
     if(section !== "_hosts")
-    {
-        if(!inventory.groups[section])
-        {
-            inventory.groups[section] = {
-                vars:{},
-                groups:[],
-                hosts:[]
-            }
-        }
-
+    { 
+        pmInventories.addGroupIfNotExists(inventory, section)
         inventory.groups[section].hosts.push(host)
     }
     else
@@ -165,15 +156,7 @@ pmInventories.parseLine = function(index, line, section, inventory)
     {
         section = section.substring(0, section.length - ":vars".length)
 
-        if(!inventory.groups[section])
-        {
-            inventory.groups[section] = {
-                vars:{},
-                groups:[],
-                hosts:[]
-            }
-        }
-
+        pmInventories.addGroupIfNotExists(inventory, section)
         inventory.groups[section].vars = Object.assign(inventory.groups[section].vars, pmInventories.parseMonoVarsLine(index, line))
         return true;
     }
@@ -186,15 +169,7 @@ pmInventories.parseLine = function(index, line, section, inventory)
          */
         section = section.substring(0, section.length - ":children".length)
 
-        if(!inventory.groups[section])
-        {
-            inventory.groups[section] = {
-                vars:{},
-                groups:[],
-                hosts:[],
-            }
-        }
-
+        pmInventories.addGroupIfNotExists(inventory, section)
         inventory.groups[section].children = true
         inventory.groups[section].groups.push(line)
         return true;
@@ -202,6 +177,18 @@ pmInventories.parseLine = function(index, line, section, inventory)
 
     pmInventories.parseHostLine(index, line, section, inventory)
     return false;
+}
+
+pmInventories.addGroupIfNotExists = function(inventory, group_name)
+{ 
+    if(!inventory.groups[group_name])
+    {
+        inventory.groups[group_name] = {
+            vars:{},
+            groups:[],
+            hosts:[],
+        }
+    }
 }
 
 /**
@@ -239,6 +226,12 @@ pmInventories.parseFromText = function(text)
         {
             var res = /^\[([A-z0-9\.:\-]+)\]/ig.exec(line)
             cSection = res[1]
+             
+            var group_name = cSection.substring(0, cSection.length - ":vars".length)
+            if(group_name != "all")
+            {
+                pmInventories.addGroupIfNotExists(inventory, group_name)
+            }
             console.info("setSection:vars ", cSection)
             continue;
         }
@@ -246,6 +239,7 @@ pmInventories.parseFromText = function(text)
         {
             var res = /^\[([A-z0-9\.:\-]+)\]/ig.exec(line)
             cSection = res[1]
+            pmInventories.addGroupIfNotExists(inventory, cSection.substring(0, cSection.length - ":children".length))
             console.info("setSection:children ", cSection)
             continue;
         }
@@ -253,6 +247,7 @@ pmInventories.parseFromText = function(text)
         {
             var res = /^\[([A-z0-9\.:\-]+)\]/ig.exec(line)
             cSection = res[1]
+            pmInventories.addGroupIfNotExists(inventory, cSection)
             console.info("setSection ", cSection)
             continue;
         }
@@ -322,9 +317,8 @@ pmInventories.importInventoriesAndOpen = function(inventory)
 }
 
 pmInventories.importInventory = function(inventory)
-{
-    var def2 = new $.Deferred();
-    
+{ 
+    var def2 = new $.Deferred(); 
     var vars = jsonEditor.jsonEditorGetValues('inventory')
     if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
     {
@@ -379,7 +373,12 @@ pmInventories.importInventory = function(inventory)
     }
  
     var def = new $.Deferred();
-    inventory.name = $("#inventory_name").val();
+    
+    if(!inventory.name && $("#inventory_name").length != 0)
+    {
+        inventory.name = $("#inventory_name").val();
+    }
+    
     if(!inventory.name)
     {
         $.notify("Error in filed inventory name", "error");
@@ -391,7 +390,7 @@ pmInventories.importInventory = function(inventory)
         name:inventory.name,
         vars:jsonEditor.jsonEditorGetValues('inventory')
     }
-
+    
     var deleteBulk = []
     $.when(pmInventories.importItem(inventoryObject)).done(function(inventory_id)
     {
@@ -400,7 +399,6 @@ pmInventories.importInventory = function(inventory)
             item:'inventory',
             pk:inventory_id
         })
-        
         var bulkdata = []
         // Сбор групп и вложенных в них хостов
         for(var i in inventory.groups)
@@ -484,7 +482,7 @@ pmInventories.importInventory = function(inventory)
                 if(hasError)
                 {
                     // По меньшей мере в одной операции была ошибка вставки.
-                    // Инвенторий импортирован не полностью
+                    // Инвенторий импортирован не полностью 
                     def.reject(deleteBulk);
                     return;
                 }
@@ -558,7 +556,7 @@ pmInventories.importInventory = function(inventory)
                                     }
                                     else
                                     {
-                                        if(inventory.groups[val.data.name].groups.length)
+                                        if(inventory.groups[val.data.name].hosts.length)
                                         {
                                             // Добавление хостов
                                             var hosts_ids = []
@@ -567,7 +565,7 @@ pmInventories.importInventory = function(inventory)
                                                 // найти id группы и прекрепить.
                                                 for(var k in data)
                                                 {
-                                                    if(data[k].data.children === undefined && data[k].data.name == inventory.groups[val.data.name].hosts[j])
+                                                    if(data[k].data.children === undefined && data[k].data.name == inventory.groups[val.data.name].hosts[j].name)
                                                     {
                                                         hosts_ids.push(data[k].data.id)
                                                         break;
@@ -594,7 +592,7 @@ pmInventories.importInventory = function(inventory)
                             if(hasError)
                             {
                                 // По меньшей мере в одной операции была ошибка вставки.
-                                // Инвенторий импортирован не полностью
+                                // Инвенторий импортирован не полностью 
                                 def.reject(deleteBulk);
                                 return;
                             }
@@ -631,7 +629,7 @@ pmInventories.importInventory = function(inventory)
                                             if(hasError)
                                             {
                                                 // По меньшей мере в одной операции была ошибка обновления.
-                                                // Инвенторий импортирован не полностью
+                                                // Инвенторий импортирован не полностью 
                                                 def.reject(deleteBulk);
                                                 return;
                                             }
@@ -641,7 +639,7 @@ pmInventories.importInventory = function(inventory)
                                         error:function(e)
                                         {
                                             console.warn(e)
-                                            polemarch.showErrors(e)
+                                            polemarch.showErrors(e) 
                                             def.reject(deleteBulk);
                                         }
                                     }) 
@@ -652,45 +650,42 @@ pmInventories.importInventory = function(inventory)
                                 }
                             }).fail(function(e){
                                 console.warn(e)
-                                polemarch.showErrors(e)
+                                polemarch.showErrors(e) 
                                 def.reject(deleteBulk);
                             }) 
                         },
                         error:function(e)
                         {
                             console.warn(e)
-                            polemarch.showErrors(e)
+                            polemarch.showErrors(e) 
                             def.reject(deleteBulk);
                         }
                     });
                 }).fail(function(e){
                     console.warn(e)
-                    polemarch.showErrors(e)
+                    polemarch.showErrors(e) 
                     def.reject(deleteBulk);
                 })
             },
             error:function(e)
             {
                 console.warn(e)
-                polemarch.showErrors(e)
+                polemarch.showErrors(e) 
                 def.reject(deleteBulk);
             }
         })
     }).fail(function(e)
     {
         console.warn(e)
-        polemarch.showErrors(e)
+        polemarch.showErrors(e) 
         def.reject(deleteBulk);
     })
-    
-    
-    var def2 = new $.Deferred();
-    
+     
     $.when(def).done(function(inventory_id)
     {
         def2.resolve(inventory_id)
     }).fail(function(delete_bulk)
-    {
+    { 
         $.when($.ajax({
             url: "/api/v1/_bulk/",
             type: "POST",
@@ -715,8 +710,7 @@ pmInventories.showImportPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
 
-    var text = spajs.just.render(this.model.name+'_import_page', {})
-    console.log(text)
+    var text = spajs.just.render(this.model.name+'_import_page', {}) 
     $(holder).insertTpl(text)
 
     def.resolve()
@@ -864,6 +858,7 @@ pmInventories.updateItem = function(item_id)
         return;
     }
 
+    var thisObj = this;
     return $.ajax({
         url: "/api/v1/inventories/"+item_id+"/",
         type: "PATCH",
@@ -877,6 +872,7 @@ pmInventories.updateItem = function(item_id)
         },
         success: function(data)
         {
+            thisObj.model.items[item_id] = data
             $.notify("Save", "success");
         },
         error:function(e)
@@ -1102,12 +1098,13 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
  */
 pmInventories.addSubHosts = function(item_id, hosts_ids)
 {
-    if(!hosts_ids)
-    {
-        hosts_ids = []
+    var def = new $.Deferred();
+    if(!hosts_ids || hosts_ids.length == 0)
+    {  
+        def.resolve()
+        return def.promise();
     }
 
-    var def = new $.Deferred();
     $.ajax({
         url: "/api/v1/inventories/"+item_id+"/hosts/",
         type: "POST",
