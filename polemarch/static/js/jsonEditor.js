@@ -3,6 +3,8 @@ function jsonEditor(){
 
 }
 
+jsonEditor.model = {}
+jsonEditor.model.isLoaded_cli_reference = false;
 
 jsonEditor.options = {};
 
@@ -143,340 +145,7 @@ jsonEditor.options['item']['ansible_shell_executable'] = {
                 possible to use /bin/sh (i.e. /bin/sh is not installed on the\n\
                 target machine or cannot be run from sudo.).'
 }
-
-////////////////////////////////////////////////
-// tasks
-////////////////////////////////////////////////
-
-jsonEditor.options['tasks'] = {}
-jsonEditor.options['tasks']['ask-vault-pass'] = {
-    type:'password',
-    help:'--ask-vault-pass',
-    helpcontent:'ask for vault password',
-    alias:''
-}
-
-jsonEditor.options['tasks']['check'] = {
-    type:'boolean',
-    help:'--check',
-    helpcontent:"don't make any changes; instead, try to predict some of the changes that may occur",
-    alias:'C'
-}
-
-jsonEditor.options['tasks']['diff'] = {
-    type:'boolean',
-    help:'--diff',
-    helpcontent:"when changing (small) files and templates, show the differences in those files; works great with --check",
-    alias:'D'
-}
-
-jsonEditor.options['tasks']['extra-vars'] = {
-    type:'textarea',
-    help:'-e EXTRA_VARS, --extra-vars=EXTRA_VARS',
-    helpcontent:"set additional variables as key=value or YAML/JSON",
-    alias:'e'
-}
-
-jsonEditor.options['tasks']['flush-cache'] = {
-    type:'boolean',
-    help:'--flush-cache',
-    helpcontent:"clear the fact cache",
-    alias:''
-}
-
-jsonEditor.options['tasks']['force-handlers'] = {
-    type:'boolean',
-    help:'--force-handlers',
-    helpcontent:"run handlers even if a task fails",
-    alias:''
-}
-
-jsonEditor.options['tasks']['forks'] = {
-    type:'text',
-    help:'-f FORKS, --forks=FORKS',
-    helpcontent:"specify number of parallel processes to use (default=5)",
-    alias:'f'
-}
-
-jsonEditor.options['tasks']['help'] = {
-    type:'boolean',
-    help:'--help',
-    helpcontent:"show ansible help message and exit",
-    alias:'h'
-}
-
-jsonEditor.options['tasks']['inventory-file'] = {
-    type:'error',
-    help:'-i INVENTORY, --inventory-file=INVENTORY',
-    helpcontent:"specify inventory host path (default=/etc/ansible/hosts) or comma separated host list.",
-    alias:'i'
-}
-
-jsonEditor.options['tasks']['limit'] = {
-    type:'text',
-    help:'-l SUBSET, --limit=SUBSET',
-    helpcontent:"further limit selected hosts to an additional pattern",
-    alias:'l'
-}
-
-jsonEditor.options['tasks']['list-hosts'] = {
-    type:'boolean',
-    help:'--list-hosts',
-    helpcontent:"outputs a list of matching hosts; does not execute anything else",
-    alias:''
-}
-
-jsonEditor.options['tasks']['list-tags'] = {
-    type:'boolean',
-    help:'--list-tags',
-    helpcontent:"list all available tags",
-    alias:''
-}
-
-jsonEditor.options['tasks']['list-tasks'] = {
-    type:'boolean',
-    help:'--list-tasks',
-    helpcontent:"list all tasks that would be executed",
-    alias:''
-}
-
-jsonEditor.options['tasks']['module-path'] = {
-    type:'text',
-    help:'-M MODULE_PATH, --module-path=MODULE_PATH',
-    helpcontent:"specify path(s) to module library (default=None)",
-    alias:''
-}
-
-jsonEditor.options['tasks']['new-vault-password-file'] = {
-    type:'keyfile',
-    help:'--new-vault-password-file=NEW_VAULT_PASSWORD_FILE',
-    helpcontent:"new vault password file for rekey",
-    alias:''
-}
-
-jsonEditor.options['tasks']['output'] = {
-    type:'textarea',
-    help:'--output=OUTPUT_FILE',
-    helpcontent:"output file name for encrypt or decrypt; use - for stdout",
-    alias:''
-}
-
-jsonEditor.options['tasks']['skip-tags'] = {
-    type:'textarea',
-    help:'--skip-tags=SKIP_TAGS',
-    helpcontent:"only run plays and tasks whose tags do not match these values",
-    alias:''
-}
-
-jsonEditor.options['tasks']['start-at-task'] = {
-    type:'textarea',
-    help:'--start-at-task=START_AT_TASK',
-    helpcontent:"start the playbook at the task matching this name",
-    alias:''
-}
-
-jsonEditor.options['tasks']['step'] = {
-    type:'boolean',
-    help:'--step',
-    helpcontent:"one-step-at-a-time: confirm each task before running",
-    alias:''
-}
-
-jsonEditor.options['tasks']['syntax-check'] = {
-    type:'boolean',
-    help:'--syntax-check',
-    helpcontent:"perform a syntax check on the playbook, but do not execute it",
-    alias:''
-}
-
-jsonEditor.options['tasks']['tags'] = {
-    type:'text',
-    help:'-t TAGS, --tags=TAGS',
-    helpcontent:"only run plays and tasks tagged with these values",
-    alias:'t'
-}
-
-jsonEditor.options['tasks']['vault-password-file'] = {
-    type:'keyfile',
-    help:'--vault-password-file=VAULT_PASSWORD_FILE',
-    helpcontent:"vault password file",
-    alias:''
-}
-
-jsonEditor.options['tasks']['verbose'] = {
-    type:'error',
-    help:'-v, --verbose',
-    helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
-    alias:'v'
-}
-
-jsonEditor.options['tasks']['vv'] = {
-    type:'error',
-    help:'-v, --verbose',
-    helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
-    alias:'vv'
-}
-
-jsonEditor.options['tasks']['vvv'] = {
-    type:'error',
-    help:'-v, --verbose',
-    helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
-    alias:'vvv'
-}
-
-jsonEditor.options['tasks']['vvvv'] = {
-    type:'error',
-    help:'-v, --verbose',
-    helpcontent:"verbose mode (-vvv for more, -vvvv to enable connection debugging)",
-    alias:'vvvv'
-}
-/**/
-
-jsonEditor.options['tasks']['version'] = {
-    type:'boolean',
-    help:'--version',
-    helpcontent:"show program's version number and exit",
-    alias:''
-}
-
-jsonEditor.options['tasks']['ask-pass'] = {
-    type:'boolean',
-    help:'-k, --ask-pass',
-    helpcontent:"ask for connection password\n<br><i>Connection options group: control as whom and how to connect to hosts</i>",
-    alias:'k'
-}
-
-jsonEditor.options['tasks']['private-key'] = {
-    type:'keyfile',
-    help:'--private-key=PRIVATE_KEY_FILE, --key-file=PRIVATE_KEY_FILE',
-    helpcontent:"use this file to authenticate the connection\n<br><i>Connection options group: control as whom and how to connect to hosts</i>",
-    alias:''
-}
-
-jsonEditor.options['tasks']['user'] = {
-    type:'text',
-    help:'-u REMOTE_USER, --user=REMOTE_USER',
-    helpcontent:"connect as this user (default=None)\n<br><i>Connection options group: control as whom and how to connect to hosts</i>",
-    alias:'u'
-}
-
-jsonEditor.options['tasks']['connection'] = {
-    type:'text',
-    help:'-c CONNECTION, --connection=CONNECTION',
-    helpcontent:"connection type to use (default=smart)\n<br><i>Connection options group: control as whom and how to connect to hosts</i>",
-    alias:'c'
-}
-
-jsonEditor.options['tasks']['timeout'] = {
-    type:'text',
-    help:'-T TIMEOUT, --timeout=TIMEOUT',
-    helpcontent:"override the connection timeout in seconds (default=10)\n<br><i>Connection options group: control as whom and how to connect to hosts</i>",
-    alias:'T'
-}
-
-jsonEditor.options['tasks']['ssh-common-args'] = {
-    type:'textarea',
-    help:'--ssh-common-args=SSH_COMMON_ARGS',
-    helpcontent:"specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)\n<br><i>Connection options group: control as whom and how to connect to hosts</i>",
-    alias:''
-}
-
-jsonEditor.options['tasks']['sftp-extra-args'] = {
-    type:'textarea',
-    help:'--sftp-extra-args=SFTP_EXTRA_ARGS',
-    helpcontent:"specify extra arguments to pass to sftp only (e.g. -f, -l)\n<br><i>Connection options group: control as whom and how to connect to hosts</i>",
-    alias:''
-}
-
-jsonEditor.options['tasks']['scp-extra-args'] = {
-    type:'textarea',
-    help:'--scp-extra-args=SCP_EXTRA_ARGS',
-    helpcontent:"specify extra arguments to pass to scp only (e.g. -l)\n<br><i>Connection options group: control as whom and how to connect to hosts</i>",
-    alias:''
-}
-
-jsonEditor.options['tasks']['ssh-extra-args'] = {
-    type:'textarea',
-    help:'--ssh-extra-args=SSH_EXTRA_ARGS',
-    helpcontent:"specify extra arguments to pass to ssh only (e.g. -R)\n<br><i>Connection options group: control as whom and how to connect to hosts</i>",
-    alias:''
-}
-
-jsonEditor.options['tasks']['sudo'] = {
-    type:'boolean',
-    help:'-s, --sudo',
-    helpcontent:"run operations with sudo (nopasswd) (deprecated, use become)\n<br><i>Privilege escalation options group: control how and which user you become as on target hosts</i>",
-    alias:'s'
-}
-
-jsonEditor.options['tasks']['sudo'] = {
-    type:'text',
-    help:'-U SUDO_USER, --sudo-user=SUDO_USER',
-    helpcontent:"desired sudo user (default=root) (deprecated, use become)\n<br><i>Privilege escalation options group: control how and which user you become as on target hosts</i>",
-    alias:'U'
-}
-
-jsonEditor.options['tasks']['su'] = {
-    type:'text',
-    help:'-S, --su',
-    helpcontent:"run operations with su (deprecated, use become)\n<br><i>Privilege escalation options group: control how and which user you become as on target hosts</i>",
-    alias:'S'
-}
-
-jsonEditor.options['tasks']['su-user'] = {
-    type:'text',
-    help:'-R SU_USER, --su-user=SU_USER',
-    helpcontent:"run operations with su as this user (default=root) (deprecated, use become)\n<br><i>Privilege escalation options group: control how and which user you become as on target hosts</i>",
-    alias:'R'
-}
-
-jsonEditor.options['tasks']['become'] = {
-    type:'boolean',
-    help:'-b, --become',
-    helpcontent:"run operations with become (does not imply password prompting)\n<br><i>Privilege escalation options group: control how and which user you become as on target hosts</i>",
-    alias:'b'
-}
-
-jsonEditor.options['tasks']['become-method'] = {
-    type:'text',
-    help:'--become-method=BECOME_METHOD',
-    helpcontent:"privilege escalation method to use (default=sudo), valid choices: [ sudo | su | pbrun | pfexec | doas | dzdo | ksu ]\
-                    \n<br><i>Privilege escalation options group: control how and which user you become as on target hosts</i>",
-    alias:''
-}
-
-jsonEditor.options['tasks']['become-user'] = {
-    type:'text',
-    help:'--become-user=BECOME_USER',
-    helpcontent:"run operations as this user (default=root)\
-                    \n<br><i>Privilege escalation options group: control how and which user you become as on target hosts</i>",
-    alias:''
-}
-
-jsonEditor.options['tasks']['ask-sudo-pass'] = {
-    type:'boolean',
-    help:'--ask-sudo-pass',
-    helpcontent:"ask for sudo password (deprecated, use become)\
-                    \n<br><i>Privilege escalation options group: control how and which user you become as on target hosts</i>",
-    alias:''
-}
-
-jsonEditor.options['tasks']['ask-su-pass'] = {
-    type:'boolean',
-    help:'--ask-su-pass',
-    helpcontent:"ask for su password (deprecated, use become)\
-                    \n<br><i>Privilege escalation options group: control how and which user you become as on target hosts</i>",
-    alias:''
-}
-
-jsonEditor.options['tasks']['ask-become-pass'] = {
-    type:'boolean',
-    help:'-K, --ask-become-pass',
-    helpcontent:"ask for privilege escalation password\
-                    \n<br><i>Privilege escalation options group: control how and which user you become as on target hosts</i>",
-    alias:'K'
-}
-
+  
 ////////////////////////////////////////////////
 // jsonEditor
 ////////////////////////////////////////////////
@@ -609,7 +278,7 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
         }
     }
     
-    if(jsonEditor.options[optionsblock][name])
+    if(optionsblock && jsonEditor.options[optionsblock] && jsonEditor.options[optionsblock][name])
     {
         var optInfo = jsonEditor.options[optionsblock][name]
         if(optInfo.type == 'error')
@@ -630,7 +299,7 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
     $("#jsonEditorVarListHolder"+prefix).show()
 }
 
-jsonEditor.initForm = function(optionsblock, prefix)
+jsonEditor.initAutoComplete = function(optionsblock, prefix)
 { 
     if(!prefix)
     {
@@ -662,7 +331,8 @@ jsonEditor.initForm = function(optionsblock, prefix)
             for(var i in jsonEditor.options[optionsblock])
             {
                 var val = jsonEditor.options[optionsblock][i]
-                if(val.help.toLowerCase().indexOf(term) != -1)
+                if(i.toLowerCase().indexOf(term) != -1 
+                        || (val['shortopts'] && val['shortopts'][0] && val['shortopts'][0].toLowerCase().indexOf(term) != -1) )
                 {
                     val.value = i
                     matches.push(val)
@@ -674,7 +344,50 @@ jsonEditor.initForm = function(optionsblock, prefix)
             }
         }
     });
+}
 
+jsonEditor.initForm = function(optionsblock, prefix)
+{ 
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+
+    if(jsonEditor.options[optionsblock])
+    {
+        jsonEditor.initAutoComplete(optionsblock, prefix)
+        return;
+    }
+     
+    return jQuery.ajax({
+        url: "/api/v1/ansible/cli_reference/",
+        type: "GET",
+        contentType:'application/json',
+        data: "",
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        },
+        success: function(data)
+        {
+            Object.assign(jsonEditor.options, data)
+            
+            jsonEditor.options['hosts'] = {};
+            mergeDeep(jsonEditor.options['hosts'], jsonEditor.options['item'])
+            
+            jsonEditor.options['groups'] = {};
+            mergeDeep(jsonEditor.options['groups'], jsonEditor.options['item'])
+            
+            jsonEditor.options['inventories'] = {};
+            mergeDeep(jsonEditor.options['inventories'], jsonEditor.options['item'])
+            jsonEditor.initAutoComplete(optionsblock, prefix)
+            
+            jsonEditor.model.isLoaded_cli_reference = true;
+        }
+    }); 
 }
 
 jsonEditor.loadFile = function(event, element)

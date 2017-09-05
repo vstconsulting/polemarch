@@ -1,4 +1,4 @@
-__version__ = "0.0.6"
+__version__ = "0.0.7"
 
 def _main(settings="polemarch.main.settings"):
     # pylint: disable=unused-variable

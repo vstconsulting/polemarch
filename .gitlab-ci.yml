@@ -42,6 +42,7 @@ stages:
   only:
     - /^issue_.*$/
     - developer
+    - master
     - make_bin_packages
 
 
@@ -76,6 +77,15 @@ py34-django111-coverage:
 
 default_rpm_tests:
   <<: *packing-test
+  script:
+   - make rpm RELEASE=${CI_BUILD_ID}
+   - sudo yum install dist/*.rpm -y -q
+   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
+   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
+
+default_oracle_tests:
+  <<: *packing-test
+  image: onegreyonewhite/tox:oracle
   script:
    - make rpm RELEASE=${CI_BUILD_ID}
    - sudo yum install dist/*.rpm -y -q
@@ -173,11 +183,11 @@ release_deb:
     paths:
     - dist/
 
-#release_pypi:
-#  stage: release
-#  only:
-#   - tags
-#  script:
-#   - python2 setup.py compile
-#   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
-#  allow_failure: false
+release_pypi:
+  stage: release
+  only:
+   - manual
+  script:
+   - python2 setup.py compile
+   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
+  allow_failure: true

@@ -3,8 +3,6 @@ var pmHosts = inheritance(pmItems)
 
 pmHosts.model.name = "hosts"
 pmHosts.model.page_name = "host"
-jsonEditor.options[pmHosts.model.name] = jsonEditor.options['item'];
-  
 
 pmHosts.copyItem = function(item_id)
 {

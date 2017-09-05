@@ -2,8 +2,7 @@
 var pmGroups = inheritance(pmItems)
 pmGroups.model.name = "groups"
 pmGroups.model.page_name = "group"
-jsonEditor.options[pmGroups.model.name] = jsonEditor.options['item'];
- 
+
 pmGroups.copyItem = function(item_id)
 {
     var def = new $.Deferred();

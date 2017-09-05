@@ -37,18 +37,16 @@ config.read([CONFIG_FILE, os.path.join(BASE_DIR, 'main/settings.ini')])
 # SECURITY WARNING: keep the secret key used in production secret!
 # To set key create file named `secret` near setting.ini file
 # or set in POLEMARCH_SECRET_FILE env.
-SECRET_FILE = os.getenv("POLEMARCH_SETTINGS_FILE", "/etc/polemarch/secret")
+SECRET_FILE = os.getenv("POLEMARCH_SECRET_FILE", "/etc/polemarch/secret")
 SECRET_KEY = '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
 try:
     with open(SECRET_FILE, "r") as secret_file:
-        SECRET_KEY = secret_file.read()
+        SECRET_KEY = secret_file.read()  # nocv
 except IOError:
     pass
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config.getboolean("main", "debug", fallback=False)
-
-EXCHANGE_DIR = config.get("main", "exchange_dir", fallback="/tmp")
 
 # Directory for git projects
 PROJECTS_DIR = config.get("main", "projects_dir", fallback="{HOME}/projects").format(**__kwargs)
@@ -126,29 +124,30 @@ WSGI_APPLICATION = 'polemarch.main.wsgi.application'
 try:
     __DB_SETTINGS = {k.upper():v.format(**__kwargs) for k,v in config.items('database')}
     if not __DB_SETTINGS: raise NoSectionError('database')
-except NoSectionError:
+except NoSectionError:  # nocv
     __DB_SETTINGS = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.polemarch.sqlite3'),
     }
 
+__DB_OPTIONS = { }
 try:
-    __DB_OPTIONS = { }
+    int_values_types = ["timeout", "connect_timeout", "read_timeout", "write_timeout"]
     for k, v in config.items('database.options'):
-        if k in ["CONN_MAX_AGE", "timeout", "connect_timeout"]:
-            __DB_OPTIONS[k] = float(v)
+        if k in int_values_types:
+            __DB_OPTIONS[k] = int(float(v))
             continue
-        __DB_OPTIONS[k] = v.format(**__kwargs)
+        __DB_OPTIONS[k] = v.format(**__kwargs)  # nocv
     if not __DB_OPTIONS: raise NoSectionError('database.options')
-except NoSectionError:
+except NoSectionError:  # nocv
     __DB_OPTIONS = {}
 
-if __DB_SETTINGS['ENGINE'] == 'django.db.backends.mysql':
+if __DB_SETTINGS['ENGINE'] == 'django.db.backends.mysql':  # nocv
     import pymysql
     pymysql.install_as_MySQLdb()
 
-if __DB_SETTINGS['ENGINE'] == 'db.polemarch.sqlite3':
-    __DB_OPTIONS["timeout"] = __DB_OPTIONS.get("timeout", 10)
+if __DB_SETTINGS['ENGINE'] == 'django.db.polemarch.sqlite3':
+    __DB_OPTIONS["timeout"] = __DB_OPTIONS.get("timeout", 10)  # nocv
 
 __DB_SETTINGS["OPTIONS"] = __DB_OPTIONS
 
@@ -244,7 +243,6 @@ DOCS_ACCESS = 'public'
 DOC_URL = "/docs/"
 
 # Celery settings
-
 __broker_url = config.get("rpc", "connection", fallback="filesystem:///var/tmp").format(**__kwargs)
 if __broker_url.startswith("filesystem://"):
     __broker_folder = __broker_url.split("://", 1)[1]
@@ -255,7 +253,7 @@ if __broker_url.startswith("filesystem://"):
         "data_folder_processed": __broker_folder,
     }
 else:
-    CELERY_BROKER_URL = __broker_url  # pragma: no cover
+    CELERY_BROKER_URL = __broker_url  # nocv
 
 CELERY_RESULT_BACKEND = config.get("rpc", "result_backend", fallback="file:///tmp").format(**__kwargs)
 CELERY_WORKER_CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)

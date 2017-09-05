@@ -55,6 +55,9 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         self.user = nonprivileged_user1
         self.get_result("post", single_url + "permissions/", 200,
                         data=json.dumps([nonprivileged_user2.id]))
+        perms = self.get_result("get", single_url + "permissions/", 200)
+        self.assertIn(nonprivileged_user2.id, perms)
+
         self.user = nonprivileged_user2
         id, single_url = self._ensure_have_rights(url, data, list_urls,
                                                   single_url)

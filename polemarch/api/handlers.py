@@ -30,7 +30,7 @@ def polemarch_exception_handler(exc, context):
                         status=status.HTTP_404_NOT_FOUND)
     elif isinstance(exc, djexcs.ValidationError):
         errors = dict(exc).get('__all__', dict(exc)) if isinstance(exc, dict)\
-                                                     else exc
+                                                     else str(exc)
         if isinstance(errors, list):
             errors = {'other_errors': errors}  # pragma: no cover
         return Response({"detail": errors},
