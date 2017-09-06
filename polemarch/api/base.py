@@ -49,9 +49,12 @@ class QuerySetMixin(rest_views.APIView):
             queryset = queryset.all()
         return queryset
 
-    def get_user_aval_projects(self):
-        return self.request.user.related_objects.values_list('projects',
+    def get_user_aval_related(self, related):
+        return self.request.user.related_objects.values_list(related,
                                                              flat=True)
+
+    def get_user_aval_projects(self):
+        return self.get_user_aval_related("projects")
 
     def _get_extra_queryset(self):
         return self.queryset.filter(

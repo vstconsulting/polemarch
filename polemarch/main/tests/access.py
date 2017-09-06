@@ -149,7 +149,7 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
         inventory.delete()
 
     def test_history_access_rights(self):
-        history_url = "/api/v1/history/"
+        def_url = "/api/v1/history/"
         self.change_identity()
         nonprivileged_user1 = self.user
         data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git",
@@ -164,18 +164,61 @@ class ApiAccessTestCase(_ApiGHBaseTestCase):
                               start_time=now() - timedelta(hours=15),
                               stop_time=now() - timedelta(hours=14))
         history = History.objects.create(**history_kwargs)
-        result = self.get_result("get", history_url+"{}/".format(history.id))
+        result = self.get_result("get", def_url+"{}/".format(history.id))
         self.assertEqual(result['id'], history.pk)
         self.change_identity()
         nonprivileged_user2 = self.user
-        self.get_result("get", history_url+"{}/".format(history.id), 404)
+        self.get_result("get", def_url+"{}/".format(history.id), 404)
         self.user = nonprivileged_user1
         perm_url = "/api/v1/projects/" + str(project_id) + "/permissions/"
         self.get_result("post", perm_url, 200,
                         data=json.dumps([nonprivileged_user2.id]))
         self.user = nonprivileged_user2
-        result = self.get_result("get", history_url+"{}/".format(history.id))
+        result = self.get_result("get", def_url+"{}/".format(history.id))
         self.assertEqual(result['id'], history.pk)
         self.user = nonprivileged_user1
-        result = self.get_result("get", history_url+"{}/".format(history.id))
+        result = self.get_result("get", def_url+"{}/".format(history.id))
         self.assertEqual(result['id'], history.pk)
+
+    def test_template_access_rights(self):
+        def_url = "/api/v1/templates/"
+        self.change_identity()
+        nonprivileged_user1 = self.user
+        data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git",
+                     vars=dict(repo_type="TEST"))]
+        project_id = self.mass_create("/api/v1/projects/", data,
+                                      "name", "repository")[0]
+        inv = self.get_result("post", "/api/v1/inventories/", 201,
+                              data=dict(name="test_inv_tmplt_access"))
+        def_kwargs = json.dumps(dict(
+            name="test_tmplt",
+            kind="Task",
+            data=dict(
+                playbook="test.yml",
+                project=project_id,
+                inventory=inv['id'],
+                vars=dict(
+                    connection="paramiko",
+                    tags="update",
+                )
+            )
+        ))
+        result = self.get_result("post", def_url, 201, data=def_kwargs)
+        tmplt_id = result['id']
+        result = self.get_result("get", def_url + "{}/".format(tmplt_id))
+        self.assertEqual(result['id'], tmplt_id)
+        self.change_identity()
+        nonprivileged_user2 = self.user
+        self.get_result("get", def_url + "{}/".format(tmplt_id), 404)
+        self.user = nonprivileged_user1
+        perm_data = json.dumps([nonprivileged_user2.id])
+        perm_url = "/api/v1/projects/" + str(project_id) + "/permissions/"
+        self.get_result("post", perm_url, 200, data=perm_data)
+        perm_url = "/api/v1/inventories/" + str(inv['id']) + "/permissions/"
+        self.get_result("post", perm_url, 200, data=perm_data)
+        self.user = nonprivileged_user2
+        result = self.get_result("get", def_url + "{}/".format(tmplt_id))
+        self.assertEqual(result['id'], tmplt_id)
+        self.user = nonprivileged_user1
+        result = self.get_result("get", def_url + "{}/".format(tmplt_id))
+        self.assertEqual(result['id'], tmplt_id)

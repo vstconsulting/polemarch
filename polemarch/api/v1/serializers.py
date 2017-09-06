@@ -44,32 +44,6 @@ class DictField(serializers.CharField):
 
 
 # Serializers
-class TemplateSerializer(serializers.ModelSerializer):
-    data = DictField(required=True, write_only=True)
-
-    class Meta:
-        model = models.Template
-        fields = (
-            'id',
-            'name',
-            'kind',
-            'data',
-        )
-
-
-class OneTemplateSerializer(TemplateSerializer):
-    data = DictField(required=True)
-
-    class Meta:
-        model = models.Template
-        fields = (
-            'id',
-            'name',
-            'kind',
-            'data',
-        )
-
-
 class UserSerializer(serializers.ModelSerializer):
 
     class UserExist(exceptions.ValidationError):
@@ -360,6 +334,30 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'url',)
 
 
+class TemplateSerializer(_WithVariablesSerializer):
+    data = DictField(required=True, write_only=True)
+
+    class Meta:
+        model = models.Template
+        fields = (
+            'id',
+            'name',
+            'kind',
+            'data',
+        )
+
+
+class OneTemplateSerializer(TemplateSerializer):
+    data = DictField(required=True)
+
+    class Meta:
+        model = models.Template
+        fields = (
+            'id',
+            'name',
+            'kind',
+            'data',
+        )
 ###################################
 # Subclasses for operations
 # with hosts and groups
