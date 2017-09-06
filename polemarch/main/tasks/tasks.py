@@ -1,8 +1,6 @@
 # pylint: disable=broad-except,no-member,redefined-outer-name
 import logging
 
-from django.core.exceptions import ObjectDoesNotExist
-
 from ...celery_app import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
@@ -46,7 +44,7 @@ class ScheduledTask(BaseTask):
         from ..models import PeriodicTask
         try:
             task = PeriodicTask.objects.get(id=self.job_id)
-        except ObjectDoesNotExist:
+        except PeriodicTask.DoesNotExist:
             return
         task.execute()
 
