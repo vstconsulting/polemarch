@@ -34,10 +34,13 @@ Vendor: $(VENDOR)
 License: ${LICENSE}
 AutoReq: No
 AutoProv: No
+BuildRequires: python, openssl-devel, python-virtualenv, libyaml-devel
+BuildRequires: httpd, httpd-devel
 Requires: python, openssl-devel
 Requires: httpd, httpd-devel, logrotate
 Requires: python-virtualenv
 Requires: git
+Requires: libyaml-devel
 
 
 %description

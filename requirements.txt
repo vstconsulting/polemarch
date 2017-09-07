@@ -2,6 +2,7 @@
 configparser==3.5.0b2
 celery>4.0.3,<=4.1.0
 six
+pyyaml
 sqlalchemy
 ansible>=2.1, <=2.3.2
 paramiko<=2.2.1

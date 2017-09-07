@@ -22,3 +22,9 @@ class AnsibleTestCase(TestCase):
         self.assertEqual(s1, s3)
         self.assertNotEqual(s2, s1)
         self.assertEqual(len(s7), 0, s7)
+
+        mods = AnsibleModules(detailed=True, fields="module,short_description")
+        shell_module = mods.get("commands.shell")[0]
+        self.assertEqual(shell_module['data']['module'], "shell", shell_module)
+        self.assertEqual(shell_module['data']['short_description'],
+                         "Execute commands in nodes.", shell_module)

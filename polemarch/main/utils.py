@@ -11,12 +11,17 @@ import os
 import re
 import tempfile
 from os.path import dirname
+from collections import OrderedDict
 try:
     from Queue import Queue, Empty
 except ImportError:
     from queue import Queue, Empty
 
 import six
+try:
+    from yaml import CLoader as Loader, load
+except ImportError:
+    from yaml import Loader, load
 from django.conf import settings
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
@@ -41,8 +46,11 @@ def import_class(path):
     '''
     m_len = path.rfind(".")
     class_name = path[m_len + 1:len(path)]
-    module = __import__(path[0:m_len], globals(), locals(), [class_name])
-    return getattr(module, class_name)
+    try:
+        module = __import__(path[0:m_len], globals(), locals(), [class_name])
+        return getattr(module, class_name)
+    except SystemExit:
+        return None
 
 
 def project_path():
@@ -693,10 +701,14 @@ class AnsibleArgumentsReference(object):
 
 
 class Modules(object):
-    mod_path = ansible_modules.__path__[0]
+    mod = ansible_modules
 
     def __init__(self):
         self.clean()
+
+    @property
+    def mod_path(self):
+        return self.mod.__path__[0] + "/"
 
     def _get_mod_list(self):
         # TODO: add cache between queries
@@ -712,6 +724,9 @@ class Modules(object):
             if f[-3:] == ".py" and f[:-3] != "__init__" and "_" not in f[:2]
         ]
 
+    def _get_info(self, key):  # nocv
+        return key
+
     def _setup_key(self, key, files, search=None):
         _modules_list = list()
         _mods = self._get_mods(files)
@@ -719,7 +734,9 @@ class Modules(object):
             for _mod in _mods:
                 _mod_key = "{}.{}".format(key, _mod)
                 if search is None or search.search(_mod_key):
-                    _modules_list.append(_mod_key)
+                    info = self._get_info(_mod_key)
+                    if info is not None:
+                        _modules_list.append(info)
         return _modules_list
 
     def _filter(self, query):
@@ -730,7 +747,7 @@ class Modules(object):
         search = re.compile(query, re.IGNORECASE) if query else None
         for path, sub_dirs, files in os.walk(self.mod_path):
             if "__pycache__" in sub_dirs:
-                sub_dirs.remove("__pycache__")
+                sub_dirs.remove("__pycache__")  # nocv
             key = path.replace(self.mod_path, "").replace("/", ".")
             self._modules_list += self._setup_key(key, files, search)
         return self._get_mod_list()
@@ -743,4 +760,35 @@ class Modules(object):
 
 
 class AnsibleModules(Modules):
-    mod_path = ansible_modules.__path__[0] + "/"
+    mod = ansible_modules
+
+    default_fields = [
+        'module',
+        'short_description',
+    ]
+
+    def __init__(self, detailed=False, fields=None):
+        super(AnsibleModules, self).__init__()
+        self.detailed = detailed
+        fields = fields.split(',') if fields else self.default_fields
+        self.fields = [field.strip() for field in fields if field.strip()]
+
+    def _get_mod_info(self, key, sub):
+        try:
+            path = "{}.{}.{}".format(self.mod.__name__, key, sub)
+            return import_class(path)
+        except BaseException as exception_object:
+            return exception_object
+
+    def _get_info(self, key):
+        data = self._get_mod_info(key, "DOCUMENTATION")
+        if isinstance(data, BaseException) or data is None:
+            return None
+        if not self.detailed:
+            return key
+        result = OrderedDict(path=key)
+        doc_data = load(data, Loader=Loader)
+        result["data"] = OrderedDict()
+        for field in self.fields:
+            result["data"][field] = doc_data[field]
+        return result

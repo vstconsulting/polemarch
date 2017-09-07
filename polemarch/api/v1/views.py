@@ -300,7 +300,9 @@ class AnsibleViewSet(base.ListNonModelViewSet):
 
     @list_route(methods=["get"])
     def modules(self, request):
-        _mods = utils.AnsibleModules().get(
+        detailed = int(request.query_params.get("detailed", "0"))
+        fields = request.query_params.get("fields", "")
+        _mods = utils.AnsibleModules(detailed, fields).get(
             request.query_params.get("filter", "")
         )
         return base.Response(_mods, 200).resp
