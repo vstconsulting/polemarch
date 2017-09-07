@@ -29,7 +29,7 @@ stages:
     - master
     - GUI
     - tags
-  retry: 3
+  retry: 2
 
 
 .pack_tamplate: &packing-test
@@ -45,7 +45,7 @@ stages:
     - developer
     - master
     - make_bin_packages
-  retry: 3
+  retry: 2
 
 
 .tests_template: &tests_template
@@ -56,7 +56,7 @@ stages:
    - make test ENVS=$CI_BUILD_NAME-install
   dependencies:
   - build_zip
-  retry: 3
+  retry: 2
 
 
 # Branch tests
@@ -67,7 +67,7 @@ code_style:
    - make test ENVS=pep,flake,pylint
   only:
     - /^issue_.*$/
-  retry: 3
+  retry: 2
 
 py27-django18-coverage:
   <<: *branch_tests
@@ -119,7 +119,7 @@ build_zip:
     expire_in: 20 minutes
     paths:
     - dist/
-  retry: 3
+  retry: 2
 
 py27-django18:
   <<: *tests_template
@@ -150,7 +150,7 @@ pep8_checks:
   script:
    - make test ENVS=pep,flake
   allow_failure: false
-  retry: 3
+  retry: 2
 
 pylint_checks:
   stage: code_standarts
@@ -160,7 +160,7 @@ pylint_checks:
   script:
    - make test ENVS=pylint
   allow_failure: false
-  retry: 3
+  retry: 2
 
 
 # Realese
