@@ -3,7 +3,7 @@ Source: $(NAME)
 Section: unknown
 Priority: optional
 Maintainer: $(VENDOR)
-Build-Depends: debhelper (>= 9), python-virtualenv, python-pip, apache2, apache2-dev, python-dev, gcc, libffi-dev, libssl-dev libyaml-dev
+Build-Depends: debhelper (>= 9), python-virtualenv, python-pip, apache2, apache2-dev, python-dev, gcc, libffi-dev, libssl-dev, libyaml-dev
 Standards-Version: 3.9.5
 Homepage: https://gitlab.com/vstconsulting/polemarch
 Vcs-Git: git@gitlab.com:vstconsulting/polemarch.git
@@ -11,7 +11,7 @@ Vcs-Browser: https://gitlab.com/vstconsulting/polemarch.git
 
 Package: $(NAME)
 Architecture: amd64
-Depends: $${shlibs:Depends}, $${misc:Depends}, apache2, python-virtualenv, libffi6, libssl-dev, sshpass, libpython2.7, git libyaml-dev
+Depends: $${shlibs:Depends}, $${misc:Depends}, apache2, python-virtualenv, libffi6, libssl-dev, sshpass, libpython2.7, git, libyaml-dev
 Description: $(SUMMARY)
 $(DESCRIPTION)
 endef
