@@ -94,7 +94,7 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
 
         self.get_result("post", single_url + "sync/", 200)
 
-    def test_todo(self):
-        pass
+        # TODO:
         # pull not cloned repo
         # ssh repository with key access
+        # broken tar
