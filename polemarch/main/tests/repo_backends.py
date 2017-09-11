@@ -1,6 +1,10 @@
+import shutil
 import sys
 
 import json
+import tempfile
+
+import git
 
 try:
     from mock import patch
@@ -46,9 +50,15 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
             self.get_result("delete", self.url + "{}/".format(pr))
 
     def test_git_import(self):
-        repo_url = self.tests_path + "/test_repo"
+        # create test repository
+        repo_dir = tempfile.mkdtemp()
+        open(repo_dir + "/main.yml", 'a').close()
+        repo = git.Repo.init(repo_dir)
+        repo.index.add(["main.yml"])
+        repo.index.commit("no message")
+        # actual test
         data = dict(name="GitProject{}".format(sys.version_info[0]),
-                    repository=repo_url,
+                    repository=repo_dir,
                     vars=dict(repo_type="GIT",
                               repo_password="pN6BQnjCdVybFaaA"))
         prj_id = self.get_result("post", self.url, data=json.dumps(data))['id']
@@ -61,6 +71,8 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         self.assertEquals(tasks["results"][0]["name"], "main")
 
         self.get_result("post", single_url+"sync/", 200)
+        # delete test repository
+        shutil.rmtree(repo_dir)
 
     @patch('polemarch.main.repo_backends._ArchiveRepo._download')
     def test_tar_import(self, download):
@@ -81,3 +93,8 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         self.assertEquals(tasks["results"][0]["name"], "main")
 
         self.get_result("post", single_url + "sync/", 200)
+
+    def test_todo(self):
+        pass
+        # pull not cloned repo
+        # ssh repository with key access

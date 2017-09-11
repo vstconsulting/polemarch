@@ -77,7 +77,7 @@ class _Base(object):
     def delete(self):
         if os.path.exists(self.path):
             if os.path.isfile(self.path):
-                os.remove(self.path)  # pragma: no cover
+                os.remove(self.path)  # nocv
             else:
                 shutil.rmtree(self.path)
             return "Repository removed!"
@@ -179,10 +179,10 @@ class _ArchiveRepo(_Base):
 
     def _download(self, url, options):
         # pylint: disable=unused-argument
-        return urlretrieve(url)[0]
+        return urlretrieve(url)[0]  # nocv
 
     def _extract(self, archive, path, options):
-        raise NotImplementedError
+        raise NotImplementedError  # nocv
 
 
 class Tar(_ArchiveRepo):
@@ -207,7 +207,7 @@ class Manual(_Base):
             if oserror.errno == os.errno.EEXIST:
                 self.delete()
                 return self.make_clone(options)
-            raise
+            raise  # nocv
         return None, None
 
     def make_update(self, options):
