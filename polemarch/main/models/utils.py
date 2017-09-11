@@ -23,14 +23,6 @@ class Executor(CmdExecutor):
         self.history = history
         self.counter = 0
 
-    @property
-    def output(self):
-        return self.history.raw_stdout
-
-    @output.setter
-    def output(self, value):
-        pass
-
     def line_handler(self, proc, line):
         cancel = KVExchanger(self.CANCEL_PREFIX + str(self.history.id)).get()
         if cancel is not None:

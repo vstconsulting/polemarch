@@ -81,20 +81,20 @@ class _Base(object):
             else:
                 shutil.rmtree(self.path)
             return "Repository removed!"
-        return "Repository does not exists."
+        return "Repository does not exists."  # nocv
 
     def clone(self):
         repo = self._make_operations(self.make_clone)[0]
-        return "Recived {} files.".format(len(self._get_files(repo)))
+        return "Received {} files.".format(len(self._get_files(repo)))
 
     def get(self):
         return self._make_operations(self.make_update)
 
     def check(self):
-        pass
+        pass  # nocv
 
 
-class Git(_Base):  # pragma: no cover
+class Git(_Base):
     _fetch_statuses = [
         "NEW_TAG", "NEW_HEAD", "HEAD_UPTODATE",
         "TAG_UPDATE", "REJECTED", "FORCED_UPDATE",
@@ -165,7 +165,7 @@ class Git(_Base):  # pragma: no cover
                 for res in super(Git, self).get()[1]}
 
 
-class _ArchiveRepo(_Base):  # pragma: no cover
+class _ArchiveRepo(_Base):
     def make_clone(self, options):
         os.mkdir(self.path)
         archive = self._download(self.proj.repository, options)
@@ -185,7 +185,7 @@ class _ArchiveRepo(_Base):  # pragma: no cover
         raise NotImplementedError
 
 
-class Tar(_ArchiveRepo):  # pragma: no cover
+class Tar(_ArchiveRepo):
     def _extract(self, archive, path, options):
         # pylint: disable=broad-except
         shutil.move(path, path + ".bak")
@@ -203,7 +203,7 @@ class Manual(_Base):
     def make_clone(self, options):
         try:
             os.mkdir(self.path)
-        except OSError as oserror:  # pragma: nocov
+        except OSError as oserror:
             if oserror.errno == os.errno.EEXIST:
                 self.delete()
                 return self.make_clone(options)

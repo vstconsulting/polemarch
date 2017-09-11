@@ -110,8 +110,8 @@ class AbstractModel(BModel):
 
     @vars.deleter
     def vars(self):
-        self.variables.all().delete()
+        self.variables.all().delete()  # nocv
 
     @property
     def have_vars(self):
-        return bool(len(self.vars))
+        return bool(len(self.vars))  # nocv
