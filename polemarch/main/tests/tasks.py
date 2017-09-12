@@ -111,6 +111,11 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             # check additional args
             self.assertIn("--user", call_args)
             self.assertIn("mysuperuser", call_args)
+            penguin_exists = False
+            for arg in call_args:
+                if "penguin" in arg:
+                    penguin_exists = True
+            self.assertTrue(penguin_exists)
             # check inventory
             inventory_path = call_args[3]
             with open(inventory_path, 'r') as inventory_file:
@@ -129,9 +134,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         # test simple execution
         answer = self.post_result(
             "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
-            data=json.dumps(dict(inventory=inv1, module="shell",
-                                 group="all", args="ls -la",
-                                 user="mysuperuser")))
+            data=json.dumps({"inventory": inv1, "module": "shell",
+                             "group": "all", "args": "ls -la",
+                             "user": "mysuperuser", "key-file": "penguin"}))
         self.assertEquals(subprocess_function.call_count, 1)
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible"))

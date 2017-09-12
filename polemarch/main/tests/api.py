@@ -13,6 +13,7 @@ from .tasks import (ApiTasksTestCase,
                     ApiTemplateTestCase,
                     ApiHistoryTestCase)
 from .ansible import ApiAnsibleTestCase
+from .repo_backends import RepoBackendsTestCase
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -211,7 +212,7 @@ class APITestCase(ApiUsersTestCase,
                   ApiInventoriesTestCase, ApiProjectsTestCase,
                   ApiTasksTestCase, ApiPeriodicTasksTestCase,
                   ApiBulkTestCase, ApiTemplateTestCase, ApiHistoryTestCase,
-                  ApiAnsibleTestCase):
+                  ApiAnsibleTestCase, RepoBackendsTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 

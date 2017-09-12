@@ -120,7 +120,8 @@ class CmdExecutor(object):
         t = Thread(target=self._enqueue_output, args=(stream, q))
         t.start()
         timeout = 0
-        while timeout == 0 or proc.poll() is None:
+        retry = {"r": True}  # one try after proc end to get rest of out
+        while timeout == 0 or proc.poll() is None or retry.pop("r", False):
             try:
                 line = q.get(timeout=timeout).rstrip()
                 timeout = 0
