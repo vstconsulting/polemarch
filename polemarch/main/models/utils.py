@@ -25,7 +25,7 @@ class DummyHistory(object):
         pass
 
     def __getattr__(self, item):
-        return None
+        return None  # nocv
 
     def save(self):
         pass
