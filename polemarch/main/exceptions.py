@@ -11,7 +11,7 @@ class UnknownTypeException(PMException):
     _def_message = "Unknown type {}."
 
     def __init__(self, tp, msg=None):
-        self._def_message = self._def_message if msg is None else msg
+        self._def_message = msg or self._def_message
         msg = self._def_message.format(tp)
         super(UnknownTypeException, self).__init__(msg)
 

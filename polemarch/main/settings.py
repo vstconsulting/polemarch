@@ -41,7 +41,7 @@ SECRET_FILE = os.getenv("POLEMARCH_SECRET_FILE", "/etc/polemarch/secret")
 SECRET_KEY = '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
 try:
     with open(SECRET_FILE, "r") as secret_file:
-        SECRET_KEY = secret_file.read()  # nocv
+        SECRET_KEY = secret_file.read().strip()  # nocv
 except IOError:
     pass
 

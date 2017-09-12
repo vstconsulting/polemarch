@@ -87,12 +87,9 @@ class PeriodicTask(AbstractModel):
     @transaction.atomic()
     def set_vars(self, variables):
         command = "playbook"
-        ansible_args = {}
-        for key, value in variables.items():
-            ansible_args[key] = value
         if self.kind == "MODULE":
             command = "module"
-        AnsibleArgumentsReference().validate_args(command, ansible_args)
+        AnsibleArgumentsReference().validate_args(command, variables)
         return super(PeriodicTask, self).set_vars(variables)
 
     def get_schedule(self):

@@ -247,11 +247,10 @@ class KVExchanger(object):
 
     def __init__(self, key, timeout=None):
         self.key = self.PREFIX + str(key)
-        self.timeout = timeout if timeout else self.TIMEOUT
+        self.timeout = timeout or self.TIMEOUT
 
     def send(self, value, ttl=None):
-        ttl = self.timeout if ttl is None else ttl
-        return self.cache.add(self.key, value, ttl)
+        return self.cache.add(self.key, value, ttl or self.timeout)
 
     def prolong(self):
         payload = self.cache.get(self.key)
