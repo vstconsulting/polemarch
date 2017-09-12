@@ -496,6 +496,16 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible-playbook"))
         self.assertTrue(call_args[1].endswith("p1.yml"))
+        subprocess_function.reset_mock()
+        data['save_result'] = False
+        id = self.get_result("post", url, 201, data=json.dumps(data))['id']
+        count = History.objects.all().count()
+        ScheduledTask.delay(id)
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertTrue(call_args[0].endswith("ansible-playbook"))
+        self.assertTrue(call_args[1].endswith("p1.yml"))
+        self.assertCount(History.objects.all(), count)
 
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):

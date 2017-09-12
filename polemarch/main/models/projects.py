@@ -58,24 +58,32 @@ class Project(AbstractModel):
     def type(self):
         return self.variables.get(key="repo_type").value
 
-    def _prepare_kw(self, kind, mod_name, inventory_id, **extra):
-        if not mod_name:
-            raise PMException("Empty playbook/module name.")
+    def _get_history(self, kind, mod_name, inventory, **extra):
+        initiator = extra.pop("initiator", 0)
+        save_result = extra.pop("save_result", True)
+        command = kind.lower()
+        ansible_args = dict(extra)
+        utils.AnsibleArgumentsReference().validate_args(command, ansible_args)
+        if not save_result:
+            return None, extra
         from .tasks import History
-        inventory = hosts_models.Inventory.objects.get(id=inventory_id)
         history_kwargs = dict(mode=mod_name,
                               start_time=timezone.now(),
                               inventory=inventory,
                               project=self,
                               kind=kind,
                               raw_stdout="",
-                              initiator=extra.pop("initiator", 0))
-        command = kind.lower()
-        ansible_args = dict(extra)
-        utils.AnsibleArgumentsReference().validate_args(command, ansible_args)
-        history = History.objects.create(status="DELAY", **history_kwargs)
+                              initiator=initiator)
+        return History.objects.create(status="DELAY", **history_kwargs), extra
+
+    def _prepare_kw(self, kind, mod_name, inventory_id, **extra):
+        if not mod_name:
+            raise PMException("Empty playbook/module name.")
+        inventory = hosts_models.Inventory.objects.get(id=inventory_id)
+        history, extra = self._get_history(kind, mod_name, inventory, **extra)
         kwargs = dict(target=mod_name, inventory=inventory, history=history)
         kwargs.update(extra)
+        kwargs['project'] = self
         return kwargs
 
     def _execute(self, kind, task_class, *args, **extra):
@@ -87,7 +95,7 @@ class Project(AbstractModel):
             task_class(**kwargs)
         else:
             task_class.delay(**kwargs)
-        return history.id
+        return history.id if history is not None else history
 
     def execute_ansible_playbook(self, playbook, inventory_id, **extra):
         return self._execute("PLAYBOOK", ExecuteAnsiblePlaybook,

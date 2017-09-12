@@ -51,6 +51,7 @@ class PeriodicTask(AbstractModel):
                                     related_query_name="periodic_tasks")
     schedule    = models.CharField(max_length=4*1024)
     type        = models.CharField(max_length=10)
+    save_result = models.BooleanField(default=True)
 
     kinds = ["PLAYBOOK", "MODULE"]
     types = ["CRONTAB", "INTERVAL"]
@@ -106,12 +107,16 @@ class PeriodicTask(AbstractModel):
             self.run_ansible_module()
 
     def run_ansible_module(self):
-        self.project.execute_ansible_module(self.mode, self.inventory.id,
-                                            sync=True, **self.vars)
+        self.project.execute_ansible_module(
+            self.mode, self.inventory.id, sync=True,
+            save_result=self.save_result, **self.vars
+        )
 
     def run_ansible_playbook(self):
-        self.project.execute_ansible_playbook(self.mode, self.inventory.id,
-                                              sync=True, **self.vars)
+        self.project.execute_ansible_playbook(
+            self.mode, self.inventory.id, sync=True,
+            save_result=self.save_result, **self.vars
+        )
 
 
 class Template(BModel):

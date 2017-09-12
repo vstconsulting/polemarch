@@ -17,6 +17,20 @@ AnsibleExtra = namedtuple('AnsibleExtraArgs', [
 
 
 # Classes and methods for support
+class DummyHistory(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __setattr__(self, key, value):
+        pass
+
+    def __getattr__(self, item):
+        return None
+
+    def save(self):
+        pass
+
+
 class Executor(CmdExecutor):
     def __init__(self, history):
         super(Executor, self).__init__()
@@ -91,7 +105,7 @@ class AnsibleCommand(object):
         return AnsibleExtra(extra_args, files)
 
     def get_workdir(self):
-        return self.history.project.path
+        return self.project.path
 
     @property
     def workdir(self):
@@ -101,8 +115,9 @@ class AnsibleCommand(object):
     def path_to_ansible(self):
         return dirname(sys.executable) + "/" + self.command_type
 
-    def prepare(self, target, inventory, history):
-        self.target, self.history = target, history
+    def prepare(self, target, inventory, history, project):
+        self.target, self.project = target, project
+        self.history = history if history else DummyHistory()
         self.inventory_object = self.Inventory(*inventory.get_inventory())
         self.history.raw_inventory = self.inventory_object.raw
         self.history.status = "RUN"
@@ -123,8 +138,8 @@ class AnsibleCommand(object):
             self.history.raw_stdout = self.history.raw_stdout + str(exception)
             self.history.status = default_code
 
-    def execute(self, target, inventory, history, **extra_args):
-        self.prepare(target, inventory, history)
+    def execute(self, target, inventory, history, project, **extra_args):
+        self.prepare(target, inventory, history, project)
         self.history.status = "OK"
         try:
             extra = self.__parse_extra_args(**extra_args)

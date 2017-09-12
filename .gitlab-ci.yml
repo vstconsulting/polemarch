@@ -2,6 +2,9 @@ image: onegreyonewhite/tox:tox
 
 variables:
   TESTS: "polemarch.main.tests"
+  GET_SOURCES_ATTEMPTS: 3
+  ARTIFACT_DOWNLOAD_ATTEMPTS: 3
+  RESTORE_CACHE_ATTEMPTS: 3
 
 stages:
   - code_standarts
