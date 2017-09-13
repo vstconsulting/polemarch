@@ -290,7 +290,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEqual(history.initiator_object, self.user)
         History.objects.all().delete()
         # node are offline
-        check_status(subprocess.CalledProcessError(4, None, None), "OFFLINE")
+        check_status(subprocess.CalledProcessError(4, None, ""), "OFFLINE")
         History.objects.all().delete()
         # error at node
         check_status(subprocess.CalledProcessError(None, None, None), "ERROR")
