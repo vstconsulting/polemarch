@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 import sys
@@ -36,6 +37,14 @@ class Executor(CmdExecutor):
         super(Executor, self).__init__()
         self.history = history
         self.counter = 0
+
+    @property
+    def output(self):
+        return self.history.raw_stdout  # nocv
+
+    @output.setter
+    def output(self, value):
+        pass  # nocv
 
     def line_handler(self, proc, line):
         cancel = KVExchanger(self.CANCEL_PREFIX + str(self.history.id)).get()
@@ -123,7 +132,7 @@ class AnsibleCommand(object):
     def error_handler(self, exception):
         default_code = self.status_codes["other"]
         if isinstance(exception, CalledProcessError):
-            self.history.raw_stdout = str(exception.output)
+            self.history.raw_stdout = "{}".format(exception.output)
             self.history.status = self.status_codes.get(exception.returncode,
                                                         default_code)
         else:
