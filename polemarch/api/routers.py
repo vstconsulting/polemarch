@@ -36,6 +36,14 @@ class _AbstractRouter(routers.DefaultRouter):
         name = name or view().get_view_name().lower()
         self.custom_urls.append((prefix, view, name))
 
+    def unregister(self, prefix):
+        index = 0
+        for reg_prefix, _, _ in self.registry:
+            if reg_prefix == prefix:
+                del self.registry[index]
+                break
+            index += 1
+
 
 class APIRouter(_AbstractRouter):
     root_view_name = 'api-v1'

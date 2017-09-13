@@ -67,13 +67,11 @@ class Project(AbstractModel):
         if not save_result:
             return None, extra
         from .tasks import History
-        history_kwargs = dict(mode=mod_name,
-                              start_time=timezone.now(),
-                              inventory=inventory,
-                              project=self,
-                              kind=kind,
-                              raw_stdout="",
-                              initiator=initiator)
+        history_kwargs = dict(
+            mode=mod_name, start_time=timezone.now(),
+            inventory=inventory, project=self,
+            kind=kind, raw_stdout="", initiator=initiator
+        )
         return History.objects.create(status="DELAY", **history_kwargs), extra
 
     def _prepare_kw(self, kind, mod_name, inventory_id, **extra):
@@ -81,9 +79,10 @@ class Project(AbstractModel):
             raise PMException("Empty playbook/module name.")
         inventory = hosts_models.Inventory.objects.get(id=inventory_id)
         history, extra = self._get_history(kind, mod_name, inventory, **extra)
-        kwargs = dict(target=mod_name, inventory=inventory, history=history)
+        kwargs = dict(
+            target=mod_name, inventory=inventory, history=history, project=self
+        )
         kwargs.update(extra)
-        kwargs['project'] = self
         return kwargs
 
     def _execute(self, kind, task_class, *args, **extra):
