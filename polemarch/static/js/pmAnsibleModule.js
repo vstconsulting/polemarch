@@ -159,21 +159,21 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
 
     if(!(inventory_id/1))
     {
-        $.notify("Invalid filed `inventory` ", "error");
+        $.notify("Invalid field `inventory` ", "error");
         def.reject();
         return def.promise();
     }
     
     if(!(project_id/1))
     {
-        $.notify("Invalid filed `project` ", "error");
+        $.notify("Invalid field `project` ", "error");
         def.reject();
         return def.promise();
     }
 
     if(!module)
     {
-        $.notify("Invalid filed `module` ", "error");
+        $.notify("Invalid field `module` ", "error");
         def.reject();
         return def.promise();
     }
@@ -197,7 +197,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
     
     if(module == 'shell' && !data_args)
     {
-        $.notify("Invalid filed `Shell command` ", "error");
+        $.notify("Invalid field `Shell command` ", "error");
         def.reject();
         return def.promise();
     }

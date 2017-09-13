@@ -117,7 +117,7 @@ pmProjects.addItem = function()
         }
         else
         {
-            $.notify("Invalid value in filed `Repository URL`", "error");
+            $.notify("Invalid value in field `Repository URL`", "error");
             def.reject()
             return def.promise();
         }
@@ -125,7 +125,7 @@ pmProjects.addItem = function()
 
     if(!data.name)
     {
-        $.notify("Invalid value in filed name", "error");
+        $.notify("Invalid value in field name", "error");
         def.reject()
         return def.promise();
     }
@@ -171,9 +171,9 @@ pmProjects.updateItem = function(item_id)
 
     if(!data.name)
     {
-        console.warn("Invalid value in filed name")
-        $.notify("Invalid value in filed name", "error");
-        def.reject("Invalid value in filed name")
+        console.warn("Invalid value in field name")
+        $.notify("Invalid value in field name", "error");
+        def.reject("Invalid value in field name")
         return def.promise();
     }
     
@@ -190,8 +190,8 @@ pmProjects.updateItem = function(item_id)
         }
         else
         {
-            $.notify("Invalid value in filed `Repository URL`", "error");
-            def.reject("Invalid value in filed `Repository URL`")
+            $.notify("Invalid value in field `Repository URL`", "error");
+            def.reject("Invalid value in field `Repository URL`")
             return def.promise();
         }
     }

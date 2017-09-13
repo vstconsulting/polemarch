@@ -360,14 +360,14 @@ pmPeriodicTasks.addItem = function(project_id)
 
     if(!data.name)
     {
-        $.notify("Invalid filed `name` ", "error");
+        $.notify("Invalid field `name` ", "error");
         def.reject();
         return def.promise();
     }
     
     if(!data.inventory)
     {
-        $.notify("Invalid filed `inventory` ", "error");
+        $.notify("Invalid field `inventory` ", "error");
         def.reject();
         return def.promise();
     }
@@ -405,7 +405,7 @@ pmPeriodicTasks.addItem = function(project_id)
         data.schedule = $("#new_periodic-tasks_schedule_INTERVAL").val()
         if(!data.schedule)
         {
-            $.notify("Invalid filed `Interval schedule` ", "error");
+            $.notify("Invalid field `Interval schedule` ", "error");
             def.reject();
             return def.promise();
         }
@@ -504,14 +504,14 @@ pmPeriodicTasks.updateItem = function(item_id)
 
     if(!data.name)
     {
-        $.notify("Invalid filed `name` ", "error");
+        $.notify("Invalid field `name` ", "error");
         def.reject();
         return;
     }
     
     if(!data.inventory)
     {
-        $.notify("Invalid filed `inventory` ", "error");
+        $.notify("Invalid field `inventory` ", "error");
         def.reject();
         return;
     }
@@ -547,7 +547,7 @@ pmPeriodicTasks.updateItem = function(item_id)
         data.schedule = $("#periodic-tasks_"+item_id+"_schedule_INTERVAL").val()
         if(!data.schedule)
         {
-            $.notify("Invalid filed `Interval schedule` ", "error");
+            $.notify("Invalid field `Interval schedule` ", "error");
             def.reject();
             return;
         }

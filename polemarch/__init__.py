@@ -6,6 +6,8 @@ def _main(settings="polemarch.main.settings"):
     import sys
     os.environ.setdefault('C_FORCE_ROOT', 'true')
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
+    #os.environ.setdefault("ANSIBLE_FORCE_COLOR", "true")
+
 
     try:
         from django.core.management import execute_from_command_line

@@ -202,8 +202,8 @@ pmTasksTemplates.addItem = function()
      
     if(!data.name)
     {
-        console.warn("Invalid value in filed name")
-        $.notify("Invalid value in filed name", "error");
+        console.warn("Invalid value in field name")
+        $.notify("Invalid value in field name", "error");
         def.reject()
         return def.promise();
     }
@@ -256,8 +256,8 @@ pmTasksTemplates.updateItem = function(item_id)
 
     if(!data.name)
     {
-        console.warn("Invalid value in filed name")
-        $.notify("Invalid value in filed name", "error");
+        console.warn("Invalid value in field name")
+        $.notify("Invalid value in field name", "error");
         return;
     }
  

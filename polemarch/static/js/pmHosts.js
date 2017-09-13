@@ -58,12 +58,12 @@ pmHosts.addItem = function(parent_type, parent_item)
 
     if(data.type == "HOST"  && (!data.name || !this.validateHostName(data.name)))
     {
-        $.notify("Invalid value in filed name", "error");
+        $.notify("Invalid value in field name", "error");
         return;
     }
     else if(data.type == "RANGE"  && (!data.name || !this.validateRangeName(data.name)))
     {
-        $.notify("Invalid value in filed name", "error");
+        $.notify("Invalid value in field name", "error");
         return;
     }
 
@@ -149,7 +149,7 @@ pmHosts.updateItem = function(item_id)
     {
         if(!data.name || !this.validateHostName(data.name) )
         {
-            $.notify("Invalid value in filed name", "error");
+            $.notify("Invalid value in field name", "error");
             return;
         }
     }
@@ -157,7 +157,7 @@ pmHosts.updateItem = function(item_id)
     {  
         if(!data.name || !this.validateRangeName(data.name) )
         {
-            $.notify("Invalid value in filed name", "error");
+            $.notify("Invalid value in field name", "error");
             return;
         }
     }

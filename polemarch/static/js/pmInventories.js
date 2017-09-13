@@ -323,7 +323,7 @@ pmInventories.importInventory = function(inventory)
     if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
     {
         // <!--Вставка файла -->
-        $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error");
+        $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
         jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "inventory")
         def2.reject()
         return def2.promise();
@@ -336,7 +336,7 @@ pmInventories.importInventory = function(inventory)
         if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
         {
             // <!--Вставка файла -->
-            $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error"); 
+            $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
             jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+val.name)
             def2.reject()
             return def2.promise();
@@ -351,7 +351,7 @@ pmInventories.importInventory = function(inventory)
         if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
         {
             // <!--Вставка файла -->
-            $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error"); 
+            $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
             jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "group"+i)
             def2.reject()
             return def2.promise();
@@ -364,7 +364,7 @@ pmInventories.importInventory = function(inventory)
             if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
             {
                 // <!--Вставка файла -->
-                $.notify("Error in filed ansible_ssh_private_key_file invalid value", "error");
+                $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
                 jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+hval.name)
                 def2.reject()
                 return def2.promise();
@@ -381,7 +381,7 @@ pmInventories.importInventory = function(inventory)
     
     if(!inventory.name)
     {
-        $.notify("Error in filed inventory name", "error");
+        $.notify("Error in field inventory name", "error");
         def2.reject()
         return def2.promise(); 
     }
@@ -791,7 +791,7 @@ pmInventories.addItem = function(parent_type, parent_item)
 
     if(!data.name)
     {
-        $.notify("Invalid value in filed name", "error");
+        $.notify("Invalid value in field name", "error");
         def.reject()
         return def.promise();
     }
@@ -853,8 +853,8 @@ pmInventories.updateItem = function(item_id)
 
     if(!data.name)
     {
-        console.warn("Invalid value in filed name")
-        $.notify("Invalid value in filed name", "error");
+        console.warn("Invalid value in field name")
+        $.notify("Invalid value in field name", "error");
         return;
     }
 
