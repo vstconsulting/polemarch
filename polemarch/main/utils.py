@@ -109,7 +109,7 @@ class CmdExecutor(object):
 
     def _enqueue_output(self, out, queue):
         line = out.readline()
-        while line != '':
+        while line.strip():
             queue.put(line)
             line = out.readline()
         out.close()
