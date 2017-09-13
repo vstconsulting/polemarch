@@ -119,7 +119,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'polemarch.main.wsgi.application'
+WSGI = 'polemarch.main.wsgi'
+WSGI_APPLICATION = "{}.application".format(WSGI)
 
 try:
     __DB_SETTINGS = {k.upper():v.format(**__kwargs) for k,v in config.items('database')}
