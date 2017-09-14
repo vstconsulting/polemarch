@@ -147,11 +147,8 @@ class CmdExecutor(object):
         :rtype: str
         '''
         self.output = ""
-        my_env = os.environ.copy()
-        my_env["ANSIBLE_FORCE_COLOR"] = "true"
         proc = Popen(cmd, stdout=PIPE, stderr=STDOUT,
-                     universal_newlines=True, cwd=cwd,
-                     env=my_env)
+                     universal_newlines=True, cwd=cwd)
         for line in self._unbuffered(proc):
             if self.line_handler(proc, line):
                 break
