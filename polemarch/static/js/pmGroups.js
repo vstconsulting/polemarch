@@ -82,14 +82,14 @@ pmGroups.addItem = function(parent_type, parent_item)
 
     if(!data.name)
     {
-        $.notify("Empty value in filed name", "error");
+        $.notify("Empty value in field name", "error");
         def.reject()
         return def.promise();
     }
     
     if(/[^A-z0-9_.\-]/.test(data.name))
     {
-        $.notify("Invalid value in filed name it mast be as [^A-z0-9_.\-]", "error");
+        $.notify("Invalid value in field name it mast be as [^A-z0-9_.\-]", "error");
         def.reject()
         return def.promise();
     }
@@ -174,14 +174,14 @@ pmGroups.updateItem = function(item_id)
 
     if(!data.name)
     {
-        console.warn("Invalid value in filed name")
-        $.notify("Invalid value in filed name", "error");
+        console.warn("Invalid value in field name")
+        $.notify("Invalid value in field name", "error");
         return;
     }
     
     if(/[^A-z0-9_.\-]/.test(data.name))
     {
-        $.notify("Invalid value in filed name it mast be as [^A-z0-9_.\-]", "error");
+        $.notify("Invalid value in field name it mast be as [^A-z0-9_.\-]", "error");
         def.reject()
         return def.promise();
     }

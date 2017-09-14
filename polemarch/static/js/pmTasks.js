@@ -20,14 +20,14 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
 
     if(!(project_id/1))
     {
-        $.notify("Invalid filed `project` ", "error");
+        $.notify("Invalid field `project` ", "error");
         def.reject();
         return def.promise();
     }
 
     if(!(inventory/1))
     {
-        $.notify("Invalid filed `inventory` ", "error");
+        $.notify("Invalid field `inventory` ", "error");
         def.reject();
         return def.promise();
     }

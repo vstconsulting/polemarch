@@ -1741,6 +1741,9 @@ History records
 
    :arg id: id of history record.
 
+   :query color: Default is ``no``. If ``yes`` you will get output with ANSI
+    Esc color codes printed by Ansible in addition to text itself.
+
    Example request:
 
    .. sourcecode:: http

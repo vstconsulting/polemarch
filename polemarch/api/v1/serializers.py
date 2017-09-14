@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import json
 
+import re
 import six
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -158,6 +159,15 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "initiator",
                   "initiator_type",
                   "url")
+
+    def get_raw(self, request):
+        params = request.query_params
+        color = params.get("color", "no")
+        if color == "yes":
+            return self.instance.raw_stdout
+        else:
+            ansi_escape = re.compile(r'\x1b[^m]*m')
+            return ansi_escape.sub('', self.instance.raw_stdout)
 
     def get_facts(self, request):
         return self.instance.facts

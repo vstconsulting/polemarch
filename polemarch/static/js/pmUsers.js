@@ -62,14 +62,14 @@ pmUsers.addItem = function()
 
     if(!data.username)
     {
-        $.notify("Invalid value in filed name", "error");
+        $.notify("Invalid value in field name", "error");
         def.reject()
         return def.promise();
     }
 
     if(!data.password)
     {
-        $.notify("Invalid value in filed password", "error");
+        $.notify("Invalid value in field password", "error");
         def.reject()
         return def.promise();
     }
@@ -118,8 +118,8 @@ pmUsers.updateItem = function(item_id)
 
     if(!data.username)
     {
-        console.warn("Invalid value in filed name")
-        $.notify("Invalid value in filed name", "error");
+        console.warn("Invalid value in field name")
+        $.notify("Invalid value in field name", "error");
         return;
     }
 

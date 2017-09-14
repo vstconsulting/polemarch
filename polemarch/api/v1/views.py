@@ -154,8 +154,8 @@ class HistoryViewSet(base.HistoryModelViewSet):
 
     @detail_route(methods=["get"])
     def raw(self, request, *args, **kwargs):
-        obj = self.get_object()
-        return HttpResponse(obj.raw_stdout, content_type="text/plain")
+        result = self.get_serializer(self.get_object()).get_raw(request)
+        return HttpResponse(result, content_type="text/plain")
 
     @detail_route(methods=["get"])
     def lines(self, request, *args, **kwargs):

@@ -1,11 +1,8 @@
-import os
-
 from celery import Celery
 
+from .environment import prepare_environment
 
-os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE',
-                      'polemarch.main.settings')
+prepare_environment()
 app = Celery('polemarch')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()

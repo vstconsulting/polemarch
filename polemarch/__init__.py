@@ -1,11 +1,12 @@
+from .environment import prepare_environment
+
 __version__ = "0.0.7"
 
 def _main(settings="polemarch.main.settings"):
     # pylint: disable=unused-variable
-    import os
     import sys
-    os.environ.setdefault('C_FORCE_ROOT', 'true')
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
+    prepare_environment(DJANGO_SETTINGS_MODULE=settings)
+
 
     try:
         from django.core.management import execute_from_command_line
