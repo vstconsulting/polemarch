@@ -10,7 +10,7 @@ try:
     from mock import patch
 except ImportError:
     from unittest.mock import patch
-
+from django.test import override_settings
 from .inventory import _ApiGHBaseTestCase
 from ..repo_backends import _Base, logger, os
 
@@ -75,6 +75,7 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         shutil.rmtree(repo_dir)
 
     @patch('polemarch.main.repo_backends._ArchiveRepo._download')
+    @override_settings(PROJECTS_DIR="/tmp/test_projs{}".format(sys.hexversion))
     def test_tar_import(self, download):
         download.side_effect = [self.tests_path + '/test_repo.tar'] * 10
         url = "/api/v1/projects/"

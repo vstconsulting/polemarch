@@ -14,7 +14,7 @@ from os.path import dirname
 from collections import OrderedDict
 try:
     from Queue import Queue, Empty
-except ImportError:
+except ImportError:  # nocv
     from queue import Queue, Empty
 
 import six
@@ -50,7 +50,7 @@ def import_class(path):
         module = __import__(path[0:m_len], globals(), locals(), [class_name])
         return getattr(module, class_name)
     except SystemExit:
-        return None
+        return None  # nocv
 
 
 def project_path():
@@ -60,11 +60,7 @@ def project_path():
     :return: -- string with full system path
     :rtype: str
     '''
-    # if hasattr(sys, "frozen"):
-    #     return dirname(dirname(sys.executable))
-    # return dirname(dirname(__file__))
-
-    return dirname(dirname(file))
+    return dirname(dirname(file))  # nocv
 
 
 def get_render(name, data, trans='en'):
@@ -504,8 +500,7 @@ class redirect_stdany(object):
         :param streams: -- names of streams like ``['stdout', 'stderr']``
         :type streams: list
         '''
-        if streams:
-            self._streams = streams
+        self._streams = streams or self._streams
         self.stream = new_stream
         self._old_streams = {}
 

@@ -9,6 +9,7 @@ class AnsibleTestCase(TestCase):
         reference = AnsibleArgumentsReference()
         for rule in AnsibleArgumentsReference._GUI_TYPES_EXCEPTIONS:
             self.assertTrue(reference.is_exists(rule))
+        self.assertTrue(not reference.is_exists("error_case"))
 
     def test_ansible_modules(self):
         mods = AnsibleModules()
