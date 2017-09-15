@@ -16,7 +16,3 @@ def get_app(**kwargs):
     celery_app.config_from_object('django.conf:settings', namespace='CELERY')
     celery_app.autodiscover_tasks()
     return celery_app
-
-
-if __name__ != "__main__":
-    app = get_app()
