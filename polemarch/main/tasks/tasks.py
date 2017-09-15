@@ -1,7 +1,7 @@
 # pylint: disable=broad-except,no-member,redefined-outer-name
 import logging
 
-from ...celery_app import app
+from ... import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
 from ..models.utils import AnsibleModule, AnsiblePlaybook

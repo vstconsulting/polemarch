@@ -1,15 +1,20 @@
 import os
 
 
-def prepare_environment(*args, **kwargs):
-    # pylint: disable=unused-argument
+default_settings = {
     # ansible specific environment variables
-    os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
-    os.environ.setdefault("ANSIBLE_FORCE_COLOR", "true")
+    "ANSIBLE_HOST_KEY_CHECKING": 'False',
+    "ANSIBLE_FORCE_COLOR": "true",
     # django settings module
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE',
-                          'polemarch.main.settings')
+    "DJANGO_SETTINGS_MODULE": 'polemarch.main.settings',
     # celery specific
-    os.environ.setdefault('C_FORCE_ROOT', 'true')
+    "C_FORCE_ROOT": "true",
+}
+
+
+def prepare_environment(**kwargs):
+    # pylint: disable=unused-argument
+    for key, value in default_settings.items():
+        os.environ.setdefault(key, value)
 
     os.environ.update(kwargs)

@@ -4,15 +4,15 @@ After=network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=forking
-ExecStart=/opt/polemarch/bin/celery multi start worker -A polemarch.celery_app:app \
+ExecStart=/opt/polemarch/bin/celery multi start worker -A polemarch:app \
                                   -B -f /var/log/polemarch/worker.log -l WARNING \
                                   --pidfile=/var/run/polemarch/worker.pid \
                                   --schedule=/var/run/polemarch/beat-schedule
-ExecReload=/opt/polemarch/bin/celery multi restart worker -A polemarch.celery_app:app \
+ExecReload=/opt/polemarch/bin/celery multi restart worker -A polemarch:app \
                                    -B -f /var/log/polemarch/worker.log -l WARNING \
                                    --pidfile=/var/run/polemarch/worker.pid \
                                    --schedule=/var/run/polemarch/beat-schedule
-ExecStop=/opt/polemarch/bin/celery multi stopwait worker -A polemarch.celery_app:app \
+ExecStop=/opt/polemarch/bin/celery multi stopwait worker -A polemarch:app \
                                  -B -f /var/log/polemarch/worker.log -l WARNING \
                                  --pidfile=/var/run/polemarch/worker.pid \
                                  --schedule=/var/run/polemarch/beat-schedule

@@ -8,6 +8,7 @@ from django.core.management.base import (BaseCommand,
 from django.conf import settings
 import django
 import celery
+import ansible
 
 from ... import __version__
 from ..utils import exception_with_traceback
@@ -43,8 +44,11 @@ class ServiceCommand(BaseCommand):
         self.LOG_LEVEL = LOG_LEVEL.upper()
 
     def get_version(self):
-        vstr = u'Polemarch {c}, Django {d.__version__}, Celery {r.__version__}'
-        return vstr.format(c=__version__, d=django, r=celery)
+        vstr = (
+            u'Polemarch {c}, Django {d.__version__}, '
+            u'Celery {r.__version__}, Ansible {a.__version__}'
+        )
+        return vstr.format(c=__version__, d=django, r=celery, a=ansible)
 
     def _print(self, info=""):
         self.stdout.write(str(info))  # nocv

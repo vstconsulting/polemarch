@@ -79,7 +79,7 @@ to do:
 
    .. sourcecode:: bash
 
-      celery -A polemarch.celery_app:app worker -B -S django
+      celery -A polemarch:app worker -B -S django
 
    Celery is distributed task queue included in Polemarch installation. All
    options above is required to for worker to run properly. But there is many
