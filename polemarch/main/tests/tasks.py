@@ -676,7 +676,7 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                           status="OK", project=self.ph.id,
                           start_time=self.histories[0].start_time.strftime(df),
                           stop_time=self.histories[0].stop_time.strftime(df),
-                          raw_inventory="inventory", raw_stdout="text",
+                          raw_inventory="inventory",
                           inventory=self.history_inventory.id,
                           initiator=self.user.id, initiator_type="users")
 
