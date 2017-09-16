@@ -512,6 +512,15 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertTrue(call_args[1].endswith("p1.yml"))
         self.assertCount(History.objects.all(), count)
 
+        def side_effect(*args, **kwargs):
+            raise Exception("Test text")
+
+        subprocess_function.reset_mock()
+        subprocess_function.side_effect = side_effect
+        ScheduledTask(id)
+        self.assertEquals(subprocess_function.call_count, 1)
+        self.assertCount(History.objects.all(), count)
+
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):

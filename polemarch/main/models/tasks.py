@@ -224,7 +224,7 @@ class History(BModel):
     @property
     def raw_stdout(self):
         return "\n".join(self.raw_history_line
-                         .values_list("line", flat=True)[:10000000])
+                         .values_list("line", flat=True))
 
     @raw_stdout.setter
     @transaction.atomic

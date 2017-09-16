@@ -28,6 +28,14 @@ class DummyHistory(object):
     def __getattr__(self, item):
         return None  # nocv
 
+    @property
+    def raw_stdout(self):
+        return ""
+
+    @raw_stdout.setter
+    def raw_stdout(self, value):
+        pass  # nocv
+
     def save(self):
         pass
 
