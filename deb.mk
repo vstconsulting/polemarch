@@ -81,6 +81,7 @@ override_dh_auto_install:
 	# systemd services
 	mkdir -p $(BUILDROOT)/etc/systemd/system/
 	cp initbin/*.service $(BUILDROOT)/etc/systemd/system/
+	cp initbin/*.conf $(BUILDROOT)/etc/tmpfiles.d
 	# settings
 	cp $(NAME)/main/settings.ini $(BUILDROOT)/etc/$(NAME)/
 %:

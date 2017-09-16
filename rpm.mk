@@ -58,6 +58,7 @@ $(DESCRIPTION)
 /var/lock/%{name}
 %attr(755,root,root) /etc/systemd/system/%{shortname}web.service
 %attr(755,root,root) /etc/systemd/system/%{shortname}worker.service
+%attr(755,root,root) /etc/tmpfiles.d/%{shortname}.conf
 
 %pre
 id -u %{file_permissions_user} &>/dev/null || useradd %{file_permissions_user}
@@ -88,6 +89,7 @@ mkdir -p $$RPM_BUILD_ROOT/usr/bin
 install -m 755 %{name}/main/settings.ini $$RPM_BUILD_ROOT/etc/%{name}/settings.ini.template
 install -m 755 initbin/%{shortname}web.service $$RPM_BUILD_ROOT/etc/systemd/system/%{shortname}web.service
 install -m 755 initbin/%{shortname}worker.service $$RPM_BUILD_ROOT/etc/systemd/system/%{shortname}worker.service
+install -m 755 initbin/%{shortname}conf $$RPM_BUILD_ROOT/etc/tmpfiles.d/%{shortname}.conf
 
 %post
 sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl migrate > /dev/null 2>&1
