@@ -35,9 +35,7 @@ License: ${LICENSE}
 AutoReq: No
 AutoProv: No
 BuildRequires: python, openssl-devel, libyaml-devel
-BuildRequires: httpd, httpd-devel
-Requires: python, openssl-devel
-Requires: httpd, httpd-devel, logrotate
+Requires: python, openssl-devel, logrotate
 Requires: python-virtualenv
 Requires: git
 Requires: libyaml-devel
@@ -91,14 +89,6 @@ install -m 755 initbin/%{shortname}worker.service $$RPM_BUILD_ROOT/etc/systemd/s
 
 %post
 sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl migrate > /dev/null 2>&1
-sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl webserver \
-                                          --setup-only --port=8080 \
-                                          --user %{shortname} --group %{shortname} \
-                                          --server-root=/opt/%{name}/httpd \
-                                          --log-directory=/var/log/%{name} \
-                                          --access-log \
-                                          --pid-file=/var/run/%{name}/web.pid \
-                                          >/dev/null 2>&1
 /usr/bin/systemctl enable %{shortname}web.service > /dev/null 2>&1
 /usr/bin/systemctl enable %{shortname}worker.service > /dev/null 2>&1
 /usr/bin/systemctl daemon-reload > /dev/null 2>&1

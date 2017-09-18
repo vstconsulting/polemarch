@@ -14,7 +14,7 @@ django-filter
 django-crispy-forms
 django-celery-beat==1.0.1
 jsonfield==2.0.2
-mod-wsgi==4.5.17
+uWSGI==2.0.15
 
 # Repo types
 gitpython==2.1.5

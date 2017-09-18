@@ -17,3 +17,4 @@ recursive-include initbin *
 include Makefile
 include deb.mk
 include rpm.mk
+include web.ini
