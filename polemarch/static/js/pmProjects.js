@@ -130,18 +130,12 @@ pmProjects.addItem = function()
         return def.promise();
     }
 
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/projects/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             $.notify("project created", "success");
             $.when(spajs.open({ menuId:"project/"+data.id})).always(function(){
@@ -198,18 +192,12 @@ pmProjects.updateItem = function(item_id)
 
 
     var thisObj = this;
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/projects/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data:JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             $.notify("Save", "success");
             thisObj.model.items[item_id] = data
@@ -359,18 +347,12 @@ pmProjects.setSubInventories = function(item_id, inventories_ids)
         inventories_ids = []
     }
 
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/projects/"+item_id+"/inventories/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(inventories_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(pmProjects.model.items[item_id])
             {
@@ -400,18 +382,12 @@ pmProjects.setSubGroups = function(item_id, groups_ids)
         groups_ids = []
     }
 
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/projects/"+item_id+"/groups/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(pmProjects.model.items[item_id])
             {
@@ -440,18 +416,12 @@ pmProjects.setSubHosts = function(item_id, hosts_ids)
     {
         hosts_ids = []
     }
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/projects/"+item_id+"/hosts/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(pmProjects.model.items[item_id])
             {
@@ -482,18 +452,12 @@ pmProjects.addSubInventories = function(item_id, inventories_ids)
     }
 
     var def = new $.Deferred();
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/projects/"+item_id+"/inventories/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(inventories_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(data.not_found > 0)
             {
@@ -533,18 +497,12 @@ pmProjects.addSubGroups = function(item_id, groups_ids)
     }
 
     var def = new $.Deferred();
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/projects/"+item_id+"/groups/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(data.not_found > 0)
             {
@@ -583,18 +541,12 @@ pmProjects.addSubHosts = function(item_id, hosts_ids)
         hosts_ids = []
     }
     var def = new $.Deferred();
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/projects/"+item_id+"/hosts/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(data.not_found > 0)
             {
@@ -628,17 +580,11 @@ pmProjects.addSubHosts = function(item_id, hosts_ids)
  */
 pmProjects.syncRepo = function(item_id)
 {
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/projects/"+item_id+"/sync/",
         type: "POST",
         contentType:'application/json',
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             $.notify("Send sync query", "success");
         },
@@ -655,17 +601,11 @@ pmProjects.syncRepo = function(item_id)
  */
 pmProjects.supportedRepos = function()
 {
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/projects/supported-repos/",
         type: "GET",
         contentType:'application/json',
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             pmProjects.model.supportedRepos = data;
             pmProjects.model.repository_type = data[0]

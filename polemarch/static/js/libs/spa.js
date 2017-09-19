@@ -881,7 +881,12 @@ if(!window.spajs)
             return;
         }
 
-        if(data.message)
+        if(data && data.responseJSON)
+        {
+            return spajs.ajax.showErrors(data.responseJSON)
+        }
+        
+        if(data && data.message)
         {
             return spajs.ajax.showErrors(data.message)
         }
@@ -912,20 +917,9 @@ if(!window.spajs)
      */
     spajs.ajax.ErrorTest = function(data)
     {
-        if(data && (data.status === 401 || data.status === 403))
+        if(data && (data.status === 401 /*|| data.status === 403*/ ))
         {
-            if(window.auth && auth.getAuthorizationData)
-            {
-                $.when(auth.updateKey({
-                    email:auth.getAuthorizationData().email,
-                    password:auth.getAuthorizationData().password
-                })).done(function(){
-
-                }).fail(function(){
-                    spajs.open({ menuId:"auth", notAddToHistory:true})
-                })
-            }
-
+            window.location.reload()
             return true;
         }
 
@@ -1029,14 +1023,24 @@ if(!window.spajs)
      */
     spajs.ajax.Call = function(opt)
     {
+         /*
+          * @note
+          * Во первых кеш должен протухать с какой то переодичностью
+          * Во вторых он должен учитывать данные авторизации
+          */
+       
         if(opt.key === undefined)
         {
             opt.key = opt.type+"_"+opt.url+"_"+spajs.ajax.gethashCode(JSON.stringify(opt.data))
         }
         if(!spajs.isOnline() && spajs.ajax.ajaxCache[opt.key])
         {
-            opt.success(spajs.ajax.ajaxCache[opt.key])
-            return {useCache:true, addToQueue:false, ignor:false, abort:function(){}};
+            if(opt.error) // Отключил кеширование
+            {
+                opt.error();
+            }
+            //opt.success(spajs.ajax.ajaxCache[opt.key])
+            return {useCache:false, addToQueue:false, ignor:false, abort:function(){}};
         }
 
         if(!spajs.isOnline() && opt.reTryInOnline)
@@ -1070,55 +1074,23 @@ if(!window.spajs)
         {
             if(opt.useCache)
             {
-                spajs.ajax.ajaxCache[opt.key] = data
+                //spajs.ajax.ajaxCache[opt.key] = data  // Отключил кеширование
             } 
-            def.resolve(data, status, xhr)
             if(successCallBack) successCallBack(data, status, xhr)
+            def.resolve(data, status, xhr)
         }
 
         opt.error = function(data, status, xhr)
         {
-            if( (data.status == 401) && window.auth && auth.getAuthorizationData)
+            var headers = data.getAllResponseHeaders()
+            if( data.status == 401 || ( data.status == 403 && headers.indexOf("x-anonymous:") != -1 ) )
             {
-               /**
-                * 401 Unauthorized («не авторизован»)
-                * 403 Forbidden («запрещено»)
-                */
-                $.when(auth.updateKey({
-                    email:auth.getAuthorizationData().email,
-                    password:auth.getAuthorizationData().password
-                })).done(function()
-                {
-                    opt.error = function(data, status, xhr)
-                    {
-                        def.reject(data, status, xhr)
-                        if(errorCallBack)
-                        {
-                            errorCallBack(data, status, xhr)
-                        }
-                    }
-                    var res = jQuery.ajax(opt);
-                    res.useCache = false;
-                    res.addToQueue = false;
-                    res.ignor = false;
-                    defpromise.abort = function()
-                    {
-                        res.abort()
-                    }
-                    
-                }).fail(function()
-                {
-                    def.reject(data, status, xhr)
-                    if(errorCallBack)
-                    {
-                        errorCallBack(data, status, xhr)
-                    }
-                })
+                window.location.reload() 
             }
             else if(errorCallBack)
             {
+                errorCallBack(data, status, xhr) 
                 def.reject(data, status, xhr)
-                errorCallBack(data, status, xhr)
             }
             else
             { 
@@ -1157,5 +1129,5 @@ if(!window.spajs)
             jQuery.ajax(spajs.ajax.ajaxQueue[i]);
         }
         spajs.ajax.ajaxQueue = []
-    }
+    } 
 }

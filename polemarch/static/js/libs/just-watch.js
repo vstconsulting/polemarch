@@ -214,6 +214,33 @@ var justReactive = {
             return;
         }
 
+        if(Array.isArray(obj[prop]) && Array.isArray(newval))
+        {
+            if(newval.length < obj[prop].length)
+            {
+                obj[prop].splice(newval.length, obj[prop].length - newval.length);
+            }
+            
+            for(var i in newval)
+            { 
+                if(typeof newval[i] == "object" && newval[i] != null)
+                {
+                    if(level < 100)
+                    {
+                        justReactive.megreFunc(obj[prop], i, newval[i], level+1);
+                    }
+                    obj[prop].justWatch(i);
+                }
+                else
+                {
+                    obj[prop][i] = newval[i];
+                    obj[prop].justWatch(i);
+                }
+            }
+            return;
+        }
+        
+        
         var v1arr = {}
         for(var i in obj[prop])
         {
@@ -478,8 +505,14 @@ var justReactive = {
                     }
                     else
                     {
-                        //newval.val = val;
-                        justReactive.megreFunc(newval, 'val', val);
+                        if(typeof val == "object" && val != null)
+                        {
+                            justReactive.megreFunc(newval, 'val', val);
+                        }
+                        else
+                        {
+                            newval.val = val;
+                        }
 
                         if(Array.isArray(val))
                         {

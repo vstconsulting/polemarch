@@ -7,17 +7,11 @@ pmHistory.justDeepWatch('model');
 
 pmHistory.cancelTask = function(item_id)
 {
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/history/"+item_id+"/cancel/",
         type: "POST",
         contentType:'application/json',
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             $.notify("Task canceled!", "warning");
         },
@@ -213,18 +207,12 @@ pmHistory.loadItem = function(item_id)
     var def = new $.Deferred();
     var thisObj = this;
 
-    jQuery.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "GET",
         contentType:'application/json',
         data: "",
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             data.test = Math.random();
 
@@ -285,18 +273,12 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
 
     var def = new $.Deferred();
     var thisObj = this;
-    jQuery.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/?"+q.join('&'),
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             //console.log("update Items", data)
             data.limit = limit
@@ -358,18 +340,12 @@ pmHistory.loadItems = function(limit, offset)
 
     var def = new $.Deferred();
     var thisObj = this;
-    jQuery.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/",
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             //console.log("update Items", data)
             data.limit = limit
@@ -549,18 +525,12 @@ pmHistory.loadLines = function(item_id, opt)
     opt.format = 'json';
 
     var def = new $.Deferred();
-    jQuery.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/history/"+item_id+"/lines/",
         type: "GET",
         contentType:'application/json',
         data: opt,
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(!pmHistory.model.items[item_id].stdout)
             {

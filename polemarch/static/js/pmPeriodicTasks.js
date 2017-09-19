@@ -42,18 +42,12 @@ pmPeriodicTasks.copyItem = function(item_id)
         delete data.group;
         delete data.args;
         
-        $.ajax({
+        spajs.ajax.Call({
             url: "/api/v1/"+thisObj.model.name+"/",
             type: "POST",
             contentType:'application/json',
             data: JSON.stringify(data),
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                }
-            },
-            success: function(data)
+                        success: function(data)
             {
                 thisObj.model.items[data.id] = data
                 def.resolve(data.id)
@@ -157,18 +151,12 @@ pmPeriodicTasks.execute = function(project_id, item_id)
         }
     }
  
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/projects/"+project_id+"/"+kind+"/",
         type: "POST",
         data:JSON.stringify(data),
         contentType:'application/json',
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             $.notify("Started", "success");
             if(data && data.history_id)
@@ -419,18 +407,12 @@ pmPeriodicTasks.addItem = function(project_id)
         data.vars.args =  $("#module-args-string").val();
     }
     
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             $.notify("periodic task created", "success");
 
@@ -450,18 +432,12 @@ pmPeriodicTasks.addItem = function(project_id)
 pmPeriodicTasks.loadItem = function(item_id)
 {
     var thisObj = this;
-    return jQuery.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "GET",
         contentType:'application/json',
         data: "",
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         { 
             if(data.kind == "MODULE")
             {
@@ -561,18 +537,12 @@ pmPeriodicTasks.updateItem = function(item_id)
         data.vars.args =  $("#module-args-string").val();
     }
     var thisObj = this;
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data:JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             thisObj.model.items[item_id] = data
             $.notify("Save", "success");

@@ -13,18 +13,12 @@ pmGroups.copyItem = function(item_id)
         var data = thisObj.model.items[item_id];
         delete data.id;
         data.name = "copy-from-" + data.name
-        $.ajax({
+        spajs.ajax.Call({
             url: "/api/v1/"+thisObj.model.name+"/",
             type: "POST",
             contentType:'application/json',
             data: JSON.stringify(data),
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                }
-            },
-            success: function(newItem)
+                        success: function(newItem)
             {
                 thisObj.model.items[newItem.id] = newItem
                 
@@ -94,18 +88,12 @@ pmGroups.addItem = function(parent_type, parent_item)
         return def.promise();
     }
  
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/groups/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             //console.log("group add", data);
             $.notify("Group created", "success");
@@ -187,18 +175,12 @@ pmGroups.updateItem = function(item_id)
     }
   
     var thisObj = this;
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/groups/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data:JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             thisObj.model.items[item_id] = data
             //console.log("group update", data);
@@ -222,18 +204,12 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
         groups_ids = []
     }
 
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/groups/"+item_id+"/groups/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(pmGroups.model.items[item_id])
             {
@@ -263,18 +239,12 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
         hosts_ids = []
     }
 
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/groups/"+item_id+"/hosts/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(pmGroups.model.items[item_id])
             {
@@ -305,18 +275,12 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
     }
 
     var def = new $.Deferred();
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/groups/"+item_id+"/groups/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(data.not_found > 0)
             {
@@ -362,18 +326,12 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
     }
 
     var def = new $.Deferred();
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/groups/"+item_id+"/hosts/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(data.not_found > 0)
             {

@@ -198,18 +198,12 @@ pmItems.copyItem = function(item_id)
         var data = thisObj.model.items[item_id];
         delete data.id;
         data.name = "copy from " + data.name
-        $.ajax({
+        spajs.ajax.Call({
             url: "/api/v1/"+thisObj.model.name+"/",
             type: "POST",
             contentType:'application/json',
             data: JSON.stringify(data),
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                }
-            },
-            success: function(data)
+                        success: function(data)
             {
                 thisObj.model.items[data.id] = data
                 def.resolve(data.id)
@@ -231,18 +225,12 @@ pmItems.importItem = function(data)
     var def = new $.Deferred();
     var thisObj = this;
  
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/"+thisObj.model.name+"/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             thisObj.model.items[data.id] = data
             def.resolve(data.id)
@@ -325,18 +313,12 @@ pmItems.loadItems = function(limit, offset)
     }
 
     var thisObj = this;
-    return jQuery.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/",
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             //console.log("update Items", data)
             data.limit = limit
@@ -387,18 +369,12 @@ pmItems.sendSearchQuery = function(query, limit, offset)
     }
 
     var thisObj = this;
-    return jQuery.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/?"+q.join('&'),
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             //console.log("update Items", data)
             data.limit = limit
@@ -437,30 +413,30 @@ pmItems.searchItems = function(query, attrName, limit, offset)
  */
 pmItems.loadItem = function(item_id)
 {
+    var def = new $.Deferred();
     var thisObj = this;
-    return jQuery.ajax({
+    
+    spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "GET",
         contentType:'application/json',
         data: "",
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             //console.log("loadUser", data)
             thisObj.model.items.justWatch(item_id)
             thisObj.model.items[item_id] = data
+            def.resolve(data)
         },
         error:function(e)
         {
             console.warn(e)
             polemarch.showErrors(e)
+            def.reject(e)
         }
     });
+    
+    return def.promise();
 }
 
 /**
@@ -555,16 +531,10 @@ pmItems.deleteItemQuery = function(item_id)
     $(".item-"+item_id).hide();
     this.toggleSelect(item_id, false);
 
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "DELETE",
         contentType:'application/json',
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
         success: function(data)
         {
             $(".item-"+item_id).remove();

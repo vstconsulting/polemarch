@@ -14,18 +14,12 @@ pmUsers.copyItem = function(item_id)
         var data = thisObj.model.items[item_id];
         delete data.id;
         data.username = "copy-from-" + data.username
-        $.ajax({
+        spajs.ajax.Call({
             url: "/api/v1/"+thisObj.model.name+"/",
             type: "POST",
             contentType:'application/json',
             data: JSON.stringify(data),
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                }
-            },
-            success: function(data)
+                        success: function(data)
             {
                 thisObj.model.items[data.id] = data
                 def.resolve(data.id)
@@ -74,18 +68,12 @@ pmUsers.addItem = function()
         return def.promise();
     }
  
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/users/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         { 
             $.notify("User created", "success");
             $.when(spajs.open({ menuId:"user/"+data.id})).always(function(){
@@ -129,18 +117,12 @@ pmUsers.updateItem = function(item_id)
     }
 
     var thisObj = this;
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/users/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data:JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         { 
             thisObj.model.items[item_id] = data
             $.notify("Save", "success");

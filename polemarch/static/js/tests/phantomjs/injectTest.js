@@ -155,18 +155,12 @@ function startTest()
                 console.log("Тест 2");
 
         console.log("Тест формы авторизации шаг 2");
-        jQuery.ajax({
+        spajs.ajax.Call({
             url: "/api/v1/users/",
             type: "GET",
             contentType:'application/json',
             data: "",
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                }
-            },
-            success: function(data)
+                        success: function(data)
             {
                 console.log("Тест формы авторизации пройден");
                 injectQunit();

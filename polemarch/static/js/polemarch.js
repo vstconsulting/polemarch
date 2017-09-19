@@ -51,6 +51,9 @@ polemarch.start = function(options)
         useHistoryApi:true
     })
 
+    //spajs.ajax.setHeader("Authorization", "");
+    spajs.ajax.setHeader("X-CSRFToken", getCookie('csrftoken'));
+
     setInterval(function()
     {
         var t = new Date();

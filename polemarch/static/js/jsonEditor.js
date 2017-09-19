@@ -16,7 +16,7 @@ jsonEditor.options['item'] = {}
 
 jsonEditor.options['item']['ansible_connection'] = {
     type:'text',
-    help:'Inventory Parameter - ansible_host',
+    help:'Inventory Parameter - ansible_connection',
     helpcontent:'Connection type to the host. This can be the name of any of\
             ansible’s connection plugins. SSH protocol types are smart, ssh or\
             paramiko. The default is smart. Non-SSH based types are described\
@@ -233,6 +233,30 @@ jsonEditor.jsonEditorRmVar = function(name, prefix)
     }
 }
 
+/**
+ * Тестовый метод как аналог jsonEditorAddVar только без проверок для тестирования заведомо ошибочных ситуаций
+ * @param {string} name
+ * @param {string} value
+ * @param {string} optionsblock
+ * @param {string} prefix 
+ */
+jsonEditor.__devAddVar = function(name, value, optionsblock, prefix)
+{ 
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+    
+    if(!optionsblock)
+    {
+        optionsblock = 'base'
+    }
+
+    
+    $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:{prefix:prefix}})) 
+    $("#jsonEditorVarListHolder"+prefix).show()
+}
+
 jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
 {
     if(!prefix)
@@ -295,7 +319,7 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
         prefix:prefix
     }
 
-    $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt})) 
+    $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:opt})) 
     $("#jsonEditorVarListHolder"+prefix).show()
 }
 
@@ -360,17 +384,11 @@ jsonEditor.initForm = function(optionsblock, prefix)
         return;
     }
      
-    return jQuery.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/ansible/cli_reference/",
         type: "GET",
         contentType:'application/json',
         data: "",
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
         success: function(data)
         {
             Object.assign(jsonEditor.options, data)
