@@ -17,13 +17,13 @@ class ExecutorTestCase(TestCase):
         # test output on `sleep --help`
         output = []
 
-        def add_line(history, line_number, line):
+        def add_line(line, line_number):
             # pylint: disable=unused-argument
             output.append(line)
 
         history = MagicMock()
         history.id = 999
-        history.raw_history_line.create = add_line
+        history.write_line = add_line
         executor = Executor(history)
         executor.execute(['sleep', '--version'], '/')
         result = "\n".join(output)

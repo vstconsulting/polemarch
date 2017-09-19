@@ -240,6 +240,11 @@ class History(BModel):
     def raw_stdout(self):
         self.raw_history_line.all().delete()
 
+    def write_line(self, value, number):
+        self.raw_history_line.create(
+            history=self, line_number=number, line=value
+        )
+
 
 class HistoryLines(BModel):
     line         = models.TextField(default="")

@@ -4,7 +4,7 @@ define RPM_SPEC
 %define shortname $(NAME)
 %define file_permissions_user $(USER)
 %define file_permissions_group $(USER)
-%define venv_cmd virtualenv --no-site-packages
+%define venv_cmd $(PY) -m virtualenv --no-site-packages
 %define venv_name %{name}
 %define venv_install_dir /opt/%{venv_name}
 %define venv_dir %{buildroot}/%{venv_install_dir}
