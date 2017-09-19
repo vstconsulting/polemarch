@@ -81,3 +81,9 @@ To load the saved data, use:
    .. sourcecode:: bash
 
       sudo -u polemarch /opt/polemarch/bin/polemarchctl loaddata /home/polemarch/backup.json
+
+
+Update
+------
+
+Before updating any type of package strongly recommended to stop all services and create backup for safe.

@@ -42,4 +42,8 @@ def polemarch_exception_handler(exc, context):
         return Response({'detail': str(sys.exc_info()[1]),
                          'error_type': sys.exc_info()[0].__name__},
                         status=status.HTTP_400_BAD_REQUEST)
-    return views.exception_handler(exc, context)
+    default_response = views.exception_handler(exc, context)
+
+    if isinstance(exc, exceptions.NotAuthenticated):
+        default_response["X-Anonymous"] = "true"
+    return default_response
