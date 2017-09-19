@@ -40,7 +40,7 @@ class DummyHistory(object):
 
     def write_line(self, value, number):
         # pylint: disable=unused-argument
-        logger.info(value)
+        logger.info(value)  # nocv
 
     def save(self):
         pass

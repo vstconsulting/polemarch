@@ -212,6 +212,7 @@ class History(BModel):
         qs = qs.exclude(Q(line__contains="No config file") |
                         Q(line__contains="as config file"))
         data = "\n".join(qs.values_list("line", flat=True)) + "\n"
+        data = re.sub(r'\x1b[^m]*m', '', data)
         regex = (
             r"^([\S]{1,})\s\|\s([\S]{1,}) \=>"
             r" \{\s([^\r]*?\"[\w]{1,}\"\: .*?\s)\}\s"
@@ -240,7 +241,7 @@ class History(BModel):
     def raw_stdout(self):
         self.raw_history_line.all().delete()
 
-    def write_line(self, value, number):
+    def write_line(self, value, number):  # nocv
         self.raw_history_line.create(
             history=self, line_number=number, line=value
         )
