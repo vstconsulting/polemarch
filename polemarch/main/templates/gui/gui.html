@@ -53,7 +53,7 @@
                             data-placeholder="Select project"
                             style="width:100%" 
                         >
-                            <option selected value="0" >Not set</option>
+                            <option selected value="0" disabled>Not set</option>
                             <% for(var i in pmProjects.model.itemslist.results){ %>
                                 <option
                                     value="<%- pmProjects.model.itemslist.results[i].id %>"
@@ -71,7 +71,7 @@
                             style="width:100%"
                             onchange="pmModuleTemplates.selectInventory(this.value);"
                         >
-                            <option selected value="0" >Not set</option>
+                            <option selected value="0" disabled>Not set</option>
                             <% for(var i in pmInventories.model.itemslist.results){ %>
                                 <option
                                     value="<%- pmInventories.model.itemslist.results[i].id %>"
@@ -2512,7 +2512,7 @@
             <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
-
+ 
             <span class="h1-header" >Project `<%= pmProjects.model.items[item_id].justText('name') %>` run playbook options</span>
 
         </h1>
@@ -2526,7 +2526,7 @@
 
     <section class="content">
         <button type="button"
-                onclick="spajs.showLoader(pmTasks.execute(<%- item_id %>, $('#inventories-autocomplete').val(), $('#playbook-autocomplete').val())); return false;"
+                onclick="spajs.showLoader(pmProjects.executePlaybook(<%- item_id %>)); return false;"
                 class="btn btn-warning" >Execute</button>
         <br>
         <br>
@@ -2540,7 +2540,13 @@
                         <div class="row">
                             <div class="form-group col-lg-4">
                                 <label class="control-label" >Inventory</label>
-                                <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
+                                <select class="form-control select2"
+                                        id="inventories-autocomplete" 
+                                        data-placeholder="Select inventory" 
+                                        style="width:100%"  
+                                        onchange="pmProjects.model.selectedInventory = this.value;"
+                                >
+                                    <option selected value="0" disabled>Not set</option>
                                     <% for(var i in pmInventories.model.itemslist.results){ %>
                                         <option
                                             value="<%- pmInventories.model.itemslist.results[i].id %>"
@@ -2556,13 +2562,17 @@
                                         id="playbook-autocomplete"
                                         value="">
                             </div>
+                             
+                            <~ pmProjects.model.selectedInventory>
+                                <%= pmGroups.groupsAutocompleteTemplate(pmProjects.model.selectedInventory) %>
+                            <~>
                         </div>
                     </div>
                 </div>
             </section>
         </div>
         <div class="row">
-            <%= jsonEditor.editor({}, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
+            <%= jsonEditor.editor({}, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true, excluded_options:['limit']}) %>
         </div>
     </section>
 </script>
@@ -4161,7 +4171,7 @@
                 <span class="col-sm-8 col-lg-9 col-lg-offset-3 col-sm-offset-4 help-block" style="padding-left: 0px;"
                                 onmouseenter="$(this).children().popover();">
                     <%- thisOpt.help %>
-                    <% if(thisOpt.help){ %>
+                    <% if(thisOpt.helpcontent){ %>
                         <span class="glyphicon glyphicon-question-sign"
                                 role="button"
                                 data-trigger="hover"
@@ -4236,11 +4246,13 @@
                             <% if(opt.select2){ %>
                                 <~ jsonEditor.model.isLoaded_cli_reference>
                                     <select class="form-control select2" id="new_json_name<%- opt.prefix%>" data-placeholder="Select param" >
-                                        <option selected="" disabled="" value="" >Not set</option>
+                                        <option selected="" disabled="" value="" disabled>Not set</option>
                                         <% for(var i in jsonEditor.options[optionsblock]){ %> 
-                                            <option value="<%- i %>" >
-                                                <%- i %> (<%- jsonEditor.options[optionsblock][i].help %>)
-                                            </option> 
+                                            <% if($.inArray(i, opt.excluded_options) == -1){ %>
+                                                <option value="<%- i %>" >
+                                                    <%- i %> (<%- jsonEditor.options[optionsblock][i].help %>)
+                                                </option> 
+                                            <% } %>
                                         <% } %>
                                     </select>
                                     <=js $("#new_json_name<%- opt.prefix%>").select2() js=> 

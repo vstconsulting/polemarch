@@ -467,7 +467,7 @@ pmGroups.groupsAutocompleteTemplate = function(inventory_id, value, prefix)
 {
     if(value === undefined)
     {
-        value = "All"
+        value = "all"
     }
 
     if(!prefix)
@@ -599,15 +599,15 @@ pmGroups.groupsAutocompleteTemplate = function(inventory_id, value, prefix)
                     if(!addTermToMatches && "All".toLowerCase().indexOf(term) != -1 )
                     {
                         matches.push({
-                            value:"All",
+                            value:"all",
                             isHost:false,
-                            name:"All",
+                            name:"all",
                         })
                         
                         matchesAll.push({
-                            value:"All",
+                            value:"all",
                             isHost:false,
-                            name:"All",
+                            name:"all",
                         })
                     }
 

@@ -2,6 +2,7 @@
 var pmProjects = inheritance(pmItems)
 pmProjects.model.name = "projects"
 jsonEditor.options[pmProjects.model.name] = {};
+pmProjects.model.selectedInventory = 0
 
 jsonEditor.options[pmProjects.model.name]['repo_password'] = {
     type:'password',
@@ -36,6 +37,13 @@ pmProjects.openNewItemPage = function(holder, menuInfo, data)
     })
 
     return def.promise();
+}
+
+pmProjects.executePlaybook = function(project_id)
+{ 
+    var data_vars = jsonEditor.jsonEditorGetValues();
+    data_vars.limit = pmGroups.getGroupsAutocompleteValue(); 
+    return pmTasks.execute(project_id, $('#inventories-autocomplete').val(), $('#playbook-autocomplete').val(), data_vars);
 }
 
 pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
