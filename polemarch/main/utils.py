@@ -577,6 +577,7 @@ class task(object):
         def wrapper(*args, **kwargs):
             return task_cls(*args, **kwargs).start()
 
+        wrapper.task_class = task_cls
         return wrapper
 
 
