@@ -279,7 +279,9 @@
                class="btn btn-warning" >Execute</button>
         <button type="button" onclick="spajs.showLoader(pmModuleTemplates.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy template" ><span class="glyphicon glyphicon-duplicate" ></span></button>
 
-        <button type="button" onclick="spajs.showLoader(pmModuleTemplates.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove</button>
+        <button type="button" onclick="spajs.showLoader(pmModuleTemplates.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
+            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove template</span>
+        </button>
         <br>
         <br>
         <div class="row">
@@ -553,7 +555,9 @@
         
         <button type="button" onclick="spajs.showLoader(pmTasksTemplates.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy template" ><span class="glyphicon glyphicon-duplicate" ></span></button>
         
-        <button type="button" onclick="spajs.showLoader(pmTasksTemplates.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove</button>
+        <button type="button" onclick="spajs.showLoader(pmTasksTemplates.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
+            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove template</span>
+        </button>
         <br>
         <br>
         <div class="row">
@@ -1116,7 +1120,9 @@
     <section class="content">
         <~ pmHistory.model.items[item_id].status>
             <% if(pmHistory.model.items[item_id].status != 'RUN' && pmHistory.model.items[item_id].status != 'DELAY'){ %>
-                <button type="button" onclick="spajs.showLoader(pmHistory.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove</button>
+                <button type="button" onclick="spajs.showLoader(pmHistory.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
+                    <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove history</span>
+                </button>
             <% }else{ %>
                 <button type="button" onclick="spajs.showLoader(pmHistory.cancelTask(<%- item_id %>)); return false;" class="btn btn-warning danger-right" >Cancel task</button>
             <% } %>
@@ -1262,7 +1268,9 @@
     <section class="content">
         <~ pmHistory.model.items[item_id].status>
             <% if(pmHistory.model.items[item_id].status != 'RUN' && pmHistory.model.items[item_id].status != 'DELAY'){ %>
-                <button type="button" onclick="spajs.showLoader(pmHistory.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove</button>
+                <button type="button" onclick="spajs.showLoader(pmHistory.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
+                    <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove history</span>
+                </button>
             <% }else{ %>
                 <button type="button" onclick="spajs.showLoader(pmHistory.cancelTask(<%- item_id %>)); return false;" class="btn btn-warning danger-right" >Cancel task</button>
             <% } %>
@@ -2223,7 +2231,9 @@
         <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>/history" onclick="return spajs.openURL(this.href);" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-history" aria-hidden="true"></i> History</a>
 
 
-        <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-danger danger-right" >Remove project</button>
+        <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-danger danger-right" > 
+            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove project</span>
+        </button>
 
 
         <div class="btn-group visible-sm visible-xs" role="group" style="float: right;" >
@@ -3071,7 +3081,9 @@
         <button type="button" onclick="spajs.showLoader(pmInventories.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save inventory</button>
         <a href="<%- polemarch.opt.host %>/?inventory/<%- item_id %>/history" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >History</a>
         <button type="button" onclick="spajs.showLoader(pmInventories.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy inventory" ><span class="glyphicon glyphicon-duplicate" ></span></button>
-        <button type="button" onclick="spajs.showLoader(pmInventories.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove inventory</button>
+        <button type="button" onclick="spajs.showLoader(pmInventories.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
+            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove inventory</span>
+        </button>
         <br>
         <br>
         <div class="row">
@@ -3458,7 +3470,9 @@
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmUsers.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save user</button>
         <button type="button" onclick="spajs.showLoader(pmUsers.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy user" ><span class="glyphicon glyphicon-duplicate" ></span></button>
-        <button type="button" onclick="spajs.showLoader(pmUsers.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove user</button>
+        <button type="button" onclick="spajs.showLoader(pmUsers.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" > 
+            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove user</span>
+        </button>
         <br>
         <br>
         <div class="row">
@@ -3799,7 +3813,9 @@
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmHosts.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save host</button>
         <button type="button" onclick="spajs.showLoader(pmHosts.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy host" ><span class="glyphicon glyphicon-duplicate" ></span></button>
-        <button type="button" onclick="spajs.showLoader(pmHosts.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove host</button>
+        <button type="button" onclick="spajs.showLoader(pmHosts.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
+            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove host</span> 
+        </button>
         <br>
         <br>
         <div class="row">
@@ -4518,7 +4534,9 @@
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmGroups.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save group</button>
         <button type="button" onclick="spajs.showLoader(pmGroups.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy group" ><span class="glyphicon glyphicon-duplicate" ></span></button>
-        <button type="button" onclick="spajs.showLoader(pmGroups.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove group</button>
+        <button type="button" onclick="spajs.showLoader(pmGroups.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
+            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove group</span>
+        </button>
         <br>
         <br>
         <div class="row">
