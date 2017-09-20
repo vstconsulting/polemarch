@@ -399,6 +399,8 @@ pmPeriodicTasks.addItem = function(project_id)
         }
     }
 
+    data.save_result = $("#new_periodic-tasks_save_result").hasClass('selected')
+    
     data.vars = jsonEditor.jsonEditorGetValues(data.kind)
 
     if(data.kind == "MODULE")
@@ -478,6 +480,8 @@ pmPeriodicTasks.updateItem = function(item_id)
 
     data.kind = $("#periodic-tasks_"+item_id+"_kind").val()
 
+    data.save_result = $("#periodic-tasks_"+item_id+"_save_result").hasClass('selected')
+    
     if(!data.name)
     {
         $.notify("Invalid field `name` ", "error");

@@ -45,8 +45,8 @@
                 Run shell command
             </div>
             <div class="box-body">
-                <div class="row">
-                    <div class="form-group col-lg-2 col-sm-4">
+                <div class="row">4
+                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-sm-4">
                         <label class="control-label" >Project</label>
                         <select
                             class="form-control select2"
@@ -63,7 +63,7 @@
                         </select>
                     </div>
                     
-                    <div class="form-group col-lg-2 col-sm-4">
+                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-sm-4">
                         <label class="control-label" >Inventory</label>
                         <select
                             class="form-control select2"
@@ -83,14 +83,14 @@
 
                     <~ pmModuleTemplates.model.selectedInventory>
                         <% if(!pmModuleTemplates.model.selectedInventory){ %>
-                            <div class="form-group col-lg-2 col-sm-4">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-sm-4">
                                 <label class="control-label" >Group</label>
                                 <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
                                     <option value="all" selected>All</option> 
                                 </select> 
                             </div>
                         <% }else{ %>
-                            <div class="form-group col-lg-2 col-sm-4">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-sm-4">
                                 <label class="control-label" >Group</label>
                                 <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
                                     <option value="all" selected>All</option>
@@ -291,7 +291,7 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Template name</label>
                                 <input type="text"
                                         placeholder="Enter name"
@@ -302,7 +302,7 @@
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Project</label>
                                 <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
                                     <option selected value="0" >Not set</option>
@@ -316,7 +316,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Inventory</label>
                                 <select
                                     class="form-control select2"
@@ -339,7 +339,7 @@
                                 <% if(!pmModuleTemplates.model.selectedInventory){ %>
 
                                 <% }else{ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Group</label>
                                         <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
                                             <option value="all">All</option>
@@ -362,7 +362,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Module</label>
                                 <input type="text"
                                         class="module-autocomplete form-control"
@@ -428,7 +428,7 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Template name</label>
                                 <input type="text"
                                         placeholder="Enter name"
@@ -439,7 +439,7 @@
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Project</label>
                                 <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
                                     <option selected value="0" >Not set</option>
@@ -452,7 +452,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Inventory</label>
                                 <select
                                     class="form-control select2"
@@ -474,7 +474,7 @@
                                 <% if(!pmModuleTemplates.model.selectedInventory){ %>
 
                                 <% }else{ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Group</label>
                                         <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
                                             <option value="all" selected>All</option>
@@ -493,7 +493,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Module</label>
                                 <input type="text"
                                         class="module-autocomplete form-control"
@@ -565,7 +565,7 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Template name</label>
                                 <input type="text"
                                         placeholder="Enter name"
@@ -575,7 +575,7 @@
                                         maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Project</label>
                                 <select
                                 onchange="pmTasksTemplates.selectProject(this.value);"
@@ -594,7 +594,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Inventory</label>
                                 <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
                                     <option <% if(!pmTasksTemplates.model.items[item_id].data.inventory){ %> selected <% } %> value="0" >Not set</option>
@@ -607,7 +607,7 @@
                                 </select>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Playbook</label>
                                 <input type="text"
                                         class="playbook-autocomplete form-control"
@@ -654,7 +654,7 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Template name</label>
                                 <input type="text"
                                         placeholder="Enter name"
@@ -664,7 +664,7 @@
                                         maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Project</label>
                                 <select
                                 onchange="pmTasksTemplates.selectProject(this.value);"
@@ -682,7 +682,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Inventory</label>
                                 <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
                                     <option selected value="0" >Not set</option>
@@ -694,7 +694,7 @@
                                 </select>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Playbook</label>
                                 <input type="text"
                                         class="playbook-autocomplete form-control"
@@ -1131,7 +1131,7 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Status</label>
                                 <div
                                         class="form-control disabled history-status <%- pmHistory.model.items[item_id].justClassName('status', function(v){ return "history-status-"+v}) %>"
@@ -1141,7 +1141,7 @@
                                 </div>
                                 <div class="help-block"></div>
                             </div>
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" ><% if( pmHistory.model.items[item_id].kind != "MODULE"){ %>Playbook<% }else{ %>Module<% } %></label>
                                 <input type="text"
                                         value="<%- pmHistory.model.items[item_id].mode %>"
@@ -1150,7 +1150,7 @@
                                         maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Start time</label>
                                 <input type="text"
                                         value="<%- moment(pmHistory.model.items[item_id].start_time).format('MM/DD/YYYY HH:mm:ss') %>"
@@ -1159,7 +1159,7 @@
                                         maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Stop time</label>
                                 <div
                                         class="form-control disabled"
@@ -1169,7 +1169,7 @@
                                 </div>
                                 <div class="help-block"></div>
                             </div>
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Initiator</label>
                                 <div
                                         class="form-control disabled"
@@ -1277,7 +1277,7 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Status</label>
                                 <div
                                         class="form-control disabled history-status <%- pmHistory.model.items[item_id].justClassName('status', function(v){ return "history-status-"+v}) %>"
@@ -1288,7 +1288,7 @@
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Playbook</label>
                                 <input type="text"
                                         value="<%- pmHistory.model.items[item_id].mode %>"
@@ -1297,7 +1297,7 @@
                                         maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Start time</label>
                                 <input type="text"
                                         value="<%- moment(pmHistory.model.items[item_id].start_time).format('MM/DD/YYYY HH:mm:ss') %>"
@@ -1306,7 +1306,7 @@
                                         maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Stop time</label>
                                 <div
                                         class="form-control disabled"
@@ -1316,7 +1316,7 @@
                                 </div>
                                 <div class="help-block"></div>
                             </div> 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Initiator</label>
                                 <div
                                         class="form-control disabled"
@@ -1551,7 +1551,7 @@
             <span class="h1-header" ><%= pmPeriodicTasks.model.items[item_id].justText('name') %></span>
 
         </h1>
-        <ol class="breadcrumb">
+        <ol class="breadcrumb"> 
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
             <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[project_id].name.slice(0, 20) %></a></li>
@@ -1565,9 +1565,11 @@
         <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.execute(<%- project_id %>, <%- item_id %>)); return false;" class="btn btn-warning" >Execute now</button>
         <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy template" ><span class="glyphicon glyphicon-duplicate" ></span></button>
 
-        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >Remove task</button>
+        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
+            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove task</span>
+        </button>  
         <br>
-        <br>
+        <br> 
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -1581,7 +1583,7 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Name</label>
                                 <input type="text"
                                         placeholder="Enter name"
@@ -1591,44 +1593,26 @@
                                         maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-                            <div class="form-group col-lg-2">
-                                <label class="control-label" >Kind</label>
-                                <select class="form-control"
-                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_kind"
-                                        data-placeholder="Select kind"
-                                        onchange="pmPeriodicTasks.model.items[<%- item_id %>].kind = this.value;"
-                                        style="width:100%" >
-                                    <option value="PLAYBOOK" <% if(pmPeriodicTasks.model.items[item_id].kind == 'PLAYBOOK'){ %>selected<% } %> >Playbook</option>
-                                    <option value="MODULE" <% if(pmPeriodicTasks.model.items[item_id].kind == 'MODULE'){ %>selected<% } %> >Module</option>
-                                </select>
-                                <div class="help-block"></div>
+                             
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
+                                <label class="control-label" >Save in history</label>
+                                <div class="form-control <% if(pmPeriodicTasks.model.items[item_id].save_result){ %>selected<% } %>"
+                                        onclick="$(this).toggleClass('selected');"
+                                        onselectstart="return false"
+                                        onmousedown="return false"
+                                        style="cursor: pointer;"
+                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_save_result"  >
+                                    <div class="ico-on fa fa-toggle-on"></div>
+                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                    <div class="boolean-title" >Boolean value</div>
+                                </div>
+                                <div class="help-block">Save result of task in history</div>
                             </div>
+                            
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
-                                <label class="control-label" >Playbook</label>
-                                <input type="text"
-                                        placeholder="Enter playbook name"
-                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_playbook"
-                                        value="<%- pmPeriodicTasks.model.items[item_id].mode %>"
-                                        class="form-control"
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-
-                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
-                                <label class="control-label" >Module</label>
-                                <input type="text"
-                                        placeholder="Enter module name"
-                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_module"
-                                        value="<%- pmPeriodicTasks.model.items[item_id].mode %>"
-                                        class="form-control"
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4">
                                 <label class="control-label" >Inventory</label>
 
                                 <select class="form-control select2"
@@ -1645,6 +1629,45 @@
                                 </select>
                                 <div class="help-block"></div>
                             </div>
+                            
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Kind</label>
+                                <select class="form-control"
+                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_kind"
+                                        data-placeholder="Select kind"
+                                        onchange="pmPeriodicTasks.model.items[<%- item_id %>].kind = this.value;"
+                                        style="width:100%" >
+                                    <option value="PLAYBOOK" <% if(pmPeriodicTasks.model.items[item_id].kind == 'PLAYBOOK'){ %>selected<% } %> >Playbook</option>
+                                    <option value="MODULE" <% if(pmPeriodicTasks.model.items[item_id].kind == 'MODULE'){ %>selected<% } %> >Module</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div>
+                            
+                        </div> 
+
+                        <div class="row">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
+                                <label class="control-label" >Playbook</label>
+                                <input type="text"
+                                        placeholder="Enter playbook name"
+                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_playbook"
+                                        value="<%- pmPeriodicTasks.model.items[item_id].mode %>"
+                                        class="form-control"
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
+                                <label class="control-label" >Module</label>
+                                <input type="text"
+                                        placeholder="Enter module name"
+                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_module"
+                                        value="<%- pmPeriodicTasks.model.items[item_id].mode %>"
+                                        class="form-control"
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+
                         </div>
 
                         <div class="row <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %> ">
@@ -1652,7 +1675,7 @@
                                 <% if(!pmPeriodicTasks.model.selectedInventory){ %>
 
                                 <% }else{ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Group</label>
                                         <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
                                             <option value="all" selected>All</option>
@@ -1691,7 +1714,7 @@
                         
                         <div class="row">
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Type</label>
                                 <select
                                         onchange="pmPeriodicTasks.model.items[<%- item_id %>].type = this.value;"
@@ -1704,7 +1727,7 @@
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'INTERVAL' }) %> ">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'INTERVAL' }) %> ">
                                 <label class="control-label" >Interval schedule</label>
                                 <div class="input-group">
                                     <input type="text"
@@ -1810,17 +1833,34 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Name</label>
                                 <input type="text"
                                         placeholder="Enter name"
                                         id="new_periodic-tasks_name"
                                         class="form-control"
                                         maxlength="255">
-                                <div class="help-block"></div>
+                                <div class="help-block"></div> 
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
+                                <label class="control-label" >Save in history</label>
+                                <div class="form-control selected"
+                                        onclick="$(this).toggleClass('selected');"
+                                        onselectstart="return false"
+                                        onmousedown="return false"
+                                        style="cursor: pointer;"
+                                        id="new_periodic-tasks_save_result"  >
+                                    <div class="ico-on fa fa-toggle-on"></div>
+                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                    <div class="boolean-title" >Boolean value</div>
+                                </div>
+                                <div class="help-block">Save result of task in history</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Kind</label>
                                 <select class="form-control"
                                         id="new_periodic-tasks_kind"
@@ -1832,32 +1872,8 @@
                                 </select>
                                 <div class="help-block"></div>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
-                                <label class="control-label" >Playbook</label>
-                                <input type="text"
-                                        placeholder="Enter playbook name"
-                                        id="new_periodic-tasks_playbook"
-                                        value=""
-                                        class="form-control"
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-
-                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
-                                <label class="control-label" >Module</label>
-                                <input type="text"
-                                        placeholder="Enter module name"
-                                        id="new_periodic-tasks_module"
-                                        value=""
-                                        class="form-control"
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-
-                            <div class="form-group col-lg-2">
+                            
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Inventory</label>
 
                                 <select class="form-control select2"
@@ -1874,6 +1890,31 @@
                                 </select>
                                 <div class="help-block"></div>
                             </div> 
+                            
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
+                                <label class="control-label" >Playbook</label>
+                                <input type="text"
+                                        placeholder="Enter playbook name"
+                                        id="new_periodic-tasks_playbook"
+                                        value=""
+                                        class="form-control"
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
+                                <label class="control-label" >Module</label>
+                                <input type="text"
+                                        placeholder="Enter module name"
+                                        id="new_periodic-tasks_module"
+                                        value=""
+                                        class="form-control"
+                                        maxlength="255">
+                                <div class="help-block"></div>
+                            </div> 
                         </div>
 
                         <div class="row <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
@@ -1881,7 +1922,7 @@
                                 <% if(!pmPeriodicTasks.model.selectedInventory){ %>
 
                                 <% }else{ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Group</label>
                                         <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
                                             <option value="all" selected>All</option>
@@ -1918,7 +1959,7 @@
                         
                         <div class="row">
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Type</label>
                                 <select
                                         onchange="pmPeriodicTasks.model.newitem.type = this.value;"
@@ -1931,7 +1972,7 @@
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'INTERVAL' }) %> ">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'INTERVAL' }) %> ">
                                 <label class="control-label" >Interval schedule</label>
                                 <div class="input-group">
                                     <input type="text"
@@ -2231,13 +2272,13 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter project name"  id="project_<%- pmProjects.model.items[item_id].id %>_name" value="<%- pmProjects.model.items[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div> 
                             
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Repository type</label>
                                 <input type="text" disabled  placeholder="Enter project name" id="project_<%- pmProjects.model.items[item_id].id %>_type" value="<%- pmProjects.model.items[item_id].vars.repo_type %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
@@ -2245,7 +2286,7 @@
                         </div>
                         <div class="row">
                             <% if(pmProjects.model.items[item_id].vars.repo_type != "MANUAL"){ %>
-                                <div class="form-group col-lg-2">
+                                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                     <label class="control-label" >Repository URL</label>
                                     <input type="text"  placeholder="Enter project repository"  id="project_<%- pmProjects.model.items[item_id].id %>_repository" value="<%- pmProjects.model.items[item_id].repository %>"  class="form-control" maxlength="255">
                                     <div class="help-block" onmouseenter="$(this).children().popover();"> 
@@ -2272,7 +2313,7 @@
                                 </div>
                             <% } %>
                             <% if(pmProjects.model.items[item_id].vars.repo_type != "TAR" || pmProjects.model.items[item_id].vars.repo_type != "MANUAL"){ %>
-                                <div class="form-group col-lg-2">
+                                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                     <label class="control-label" >Repository password</label>
                                     <input type="password" 
                                             placeholder="Enter repository password"
@@ -2304,7 +2345,7 @@
                             <~ pmProjects.model.items[item_id].groups >
                                 <% console.log("projects", item_id, pmProjects.model.items[item_id].groups) %>
                                 <% for(var i in pmProjects.model.items[item_id].groups){ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Group</label>
                                         <%- pmProjects.model.items[item_id].groups[i].name %>
                                     </div>
@@ -2313,7 +2354,7 @@
 
                             <~ pmProjects.model.items[item_id].hosts >
                                 <% for(var i in pmProjects.model.items[item_id].hosts){ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Host</label>
                                         <%- pmProjects.model.items[item_id].hosts[i].name %>
                                     </div>
@@ -2322,7 +2363,7 @@
 
                             <~ pmProjects.model.items[item_id].inventories >
                                 <% for(var i in pmProjects.model.items[item_id].inventories){ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Inventory</label>
                                         <%- pmProjects.model.items[item_id].inventories[i].name %>
                                     </div>
@@ -2390,13 +2431,13 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter project name"  id="new_project_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
  
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Repository type</label>
                                 <select class="form-control select2" id="new_project_type" onchange="pmProjects.model.repository_type = this.value;" data-placeholder="Select a type" >
                                     <% for(var i in pmProjects.model.supportedRepos){ %>
@@ -2407,7 +2448,7 @@
                                 </select>
                             </div> 
                             
-                            <div class="form-group col-lg-2  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v == 'MANUAL' }) %>">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v == 'MANUAL' }) %>">
                                 <label class="control-label" >Repository URL</label>
                                 <input type="text"  placeholder="Enter project repository"  id="new_project_repository" value=""  class="form-control" maxlength="255">
                                 
@@ -2433,7 +2474,7 @@
                                 </div>
                             </div>
                             
-                            <div class="form-group col-lg-2 <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v == 'TAR' || v == 'MANUAL' }) %>">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v == 'TAR' || v == 'MANUAL' }) %>">
                                 <label class="control-label" >Repository password</label>
                                 <input type="password"  placeholder="Enter repository password"  id="new_project_password" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
@@ -2818,7 +2859,7 @@
             </div>
         </div>
         <div class="box-body">   
-            <div class="form-group col-lg-2">
+            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                 <label class="control-label" >Name</label>
                 <input type="text" id="inventory_name" value="<%- inventory.name %>"  class="form-control" maxlength="255">
                 <div class="help-block"></div>
@@ -2849,12 +2890,12 @@
                 </div>
             </div>
             <div class="box-body">   
-                <div class="form-group col-lg-2">
+                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                     <label class="control-label" >Name</label>
                     <input type="text" disabled value="<%- val.name %>"  class="form-control" maxlength="255">
                     <div class="help-block"></div>
                 </div>
-                <div class="form-group col-lg-2">
+                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                     <label class="control-label" >Type</label>
                     <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
                     <div class="help-block"></div>
@@ -2879,12 +2920,12 @@
                     </div>
                 </div>
                 <div class="box-body">   
-                    <div class="form-group col-lg-2">
+                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                         <label class="control-label" >Name</label>
                         <input type="text" disabled value="<%- val.name %>"  class="form-control" maxlength="255">
                         <div class="help-block"></div>
                     </div>
-                    <div class="form-group col-lg-2">
+                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                         <label class="control-label" >Type</label>
                         <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
                         <div class="help-block"></div>
@@ -3045,7 +3086,7 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter inventory name"  id="inventory_<%- pmInventories.model.items[item_id].id %>_name" value="<%- pmInventories.model.items[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
@@ -3072,7 +3113,7 @@
                                 <% console.log("inventories", item_id, pmInventories.model.items[item_id].groups) %>
                                 <% for(var i in pmInventories.model.items[item_id].groups){ %>
                                     <% console.log("inventory", pmInventories.model.items[item_id].groups[i]) %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Group</label>
                                         <a href="<%- polemarch.opt.host %>/?group/<%- pmInventories.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
                                             <%- pmInventories.model.items[item_id].groups[i].name %>
@@ -3083,7 +3124,7 @@
 
                             <~ pmInventories.model.items[item_id].hosts >
                                 <% for(var i in pmInventories.model.items[item_id].hosts){ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Host</label> 
                                         <a href="<%- polemarch.opt.host %>/?host/<%- pmInventories.model.items[item_id].hosts[i].id %>" onclick="return spajs.openURL(this.href);" >
                                             <%- pmInventories.model.items[item_id].hosts[i].name %>
@@ -3178,7 +3219,7 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter inventory name"  id="new_inventory_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
@@ -3431,13 +3472,13 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Username</label>
                                 <input type="text"  placeholder="Enter username"  id="user_<%- pmUsers.model.items[item_id].id %>_username" value="<%- pmUsers.model.items[item_id].username %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Password</label>
                                 <input type="password" class="form-control" placeholder="Enter password" id="user_<%- pmUsers.model.items[item_id].id %>_password" >
                                 <div class="help-block"></div>
@@ -3446,13 +3487,13 @@
 
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Email</label>
                                 <input type="email" class="form-control" placeholder="Enter email" id="user_<%- pmUsers.model.items[item_id].id %>_email" value="<%- pmUsers.model.items[item_id].email %>" >
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >First name</label>
                                 <input type="text" class="form-control" placeholder="Enter first name" id="user_<%- pmUsers.model.items[item_id].id %>_first_name" value="<%- pmUsers.model.items[item_id].first_name %>" >
                                 <div class="help-block"></div>
@@ -3462,13 +3503,13 @@
 
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Last name</label>
                                 <input type="text" class="form-control" placeholder="Enter last name" id="user_<%- pmUsers.model.items[item_id].id %>_last_name" value="<%- pmUsers.model.items[item_id].last_name %>" >
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2 boolean-select">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
                                 <label class="control-label" >Active</label>
                                 <div class="form-control <% if(pmUsers.model.items[item_id].is_active){ %>selected<% } %>"
                                         onclick="$(this).toggleClass('selected');"
@@ -3482,7 +3523,7 @@
                                 </div>
                             </div>
                             <!--
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Staff</label>
                                 <select class="form-control" id="user_<%- pmUsers.model.items[item_id].id %>_is_staff">
                                     <option value="true" <%if(pmUsers.model.items[item_id].is_staff){ %> selected <% } %> >True</option>
@@ -3532,13 +3573,13 @@
 
                         <div class="row">
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Username</label>
                                 <input type="text" class="form-control" placeholder="Enter username" id="new_user_username" >
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Password</label>
                                 <input type="password" class="form-control" placeholder="Enter password" id="new_user_password" >
                                 <div class="help-block"></div>
@@ -3546,13 +3587,13 @@
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Email</label>
                                 <input type="email" class="form-control" placeholder="Enter email" id="new_user_email" >
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >First name</label>
                                 <input type="text" class="form-control" placeholder="Enter first name" id="new_user_first_name" >
                                 <div class="help-block"></div>
@@ -3560,13 +3601,13 @@
                         </div>
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Last name</label>
                                 <input type="text" class="form-control" placeholder="Enter last name" id="new_user_last_name" >
                                 <div class="help-block"></div>
                             </div>
                             <!--
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Staff</label>
                                 <select class="form-control" id="new_user_is_staff" >
                                     <option value="true" selected >True</option>
@@ -3574,7 +3615,7 @@
                                 </select>
                                 <div class="help-block"></div>
                             </div>-->
-                            <div class="form-group col-lg-2 boolean-select">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
                                 <label class="control-label" >Active</label>
                                 <div class="form-control selected"
                                         onclick="$(this).toggleClass('selected');"
@@ -3772,13 +3813,13 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter host name"  id="host_<%- pmHosts.model.items[item_id].id %>_name" value="<%- pmHosts.model.items[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Type</label>
                                 <select class="form-control" id="host_<%- pmHosts.model.items[item_id].id %>_type">
                                     <option value="HOST" <% if(pmHosts.model.items[item_id].type == 'HOST'){ %> selected <% } %> >HOST</option>
@@ -3827,13 +3868,13 @@
                     <div class="box-body">
 
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter host name"  id="new_host_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Type</label>
                                 <select class="form-control" id="new_host_type">
                                     <option value="HOST" selected >HOST</option>
@@ -3875,7 +3916,7 @@
 
         <div class="row crontabEditor" id="crontabEditor-gui" style="margin-top: 15px; display:none;" >
 
-            <div class="form-group col-lg-2 col-xs-12 col-md-6 col-sm-6">
+            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-xs-12 col-md-6 col-sm-6">
 
                 <div class="btn-group" role="group" style="width: 100%;">
                     <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -3920,7 +3961,7 @@
                 </div>
             </div>
 
-            <div class="form-group col-lg-2 col-xs-12 col-md-6 col-sm-6">
+            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-xs-12 col-md-6 col-sm-6">
 
                 <div class="btn-group" role="group" style="width: 100%;">
                     <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -3965,7 +4006,7 @@
                 </div>
             </div>
 
-            <div class="form-group col-lg-2 col-xs-12 col-md-6 col-sm-6">
+            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-xs-12 col-md-6 col-sm-6">
 
                 <div class="btn-group" role="group" style="width: 100%;">
                     <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -4490,13 +4531,13 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter group name"  id="group_<%- pmGroups.model.items[item_id].id %>_name" value="<%- pmGroups.model.items[item_id].name %>"  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
 
-                            <!--<div class="form-group col-lg-2 boolean-select">
+                            <!--<div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
                                 <label class="control-label" >Children</label>
                                 <div class="form-control <% if(pmGroups.model.items[item_id].children){ %>selected<% } %>"
                                         onclick="$(this).toggleClass('selected');"
@@ -4530,7 +4571,7 @@
                         <div class="row">
                             <~ pmGroups.model.items[item_id].groups >
                                 <% for(var i in pmGroups.model.items[item_id].groups){ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Group</label> 
                                         <a href="<%- polemarch.opt.host %>/?group/<%- pmGroups.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
                                             <%- pmGroups.model.items[item_id].groups[i].name %>
@@ -4541,7 +4582,7 @@
 
                             <~ pmGroups.model.items[item_id].hosts >
                                 <% for(var i in pmGroups.model.items[item_id].hosts){ %>
-                                    <div class="form-group col-lg-2">
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Host</label> 
                                         <a href="<%- polemarch.opt.host %>/?host/<%- pmGroups.model.items[item_id].hosts[i].id %>" onclick="return spajs.openURL(this.href);" >
                                             <%- pmGroups.model.items[item_id].hosts[i].name %>
@@ -4674,12 +4715,12 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <div class="form-group col-lg-2">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Name</label>
                                 <input type="text"  placeholder="Enter group name"  id="new_group_name" value=""  class="form-control" maxlength="255">
                                 <div class="help-block"></div>
                             </div>
-                            <div class="form-group col-lg-2 boolean-select">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
                                 <label class="control-label" >Children</label>
                                 <div class="form-control"
                                         onclick="$(this).toggleClass('selected');"
