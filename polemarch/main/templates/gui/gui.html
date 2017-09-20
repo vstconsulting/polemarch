@@ -791,7 +791,8 @@
                                                     Module
                                                 <% } %>
                                             </td>
-                                            <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> history-status-<%- pmHistory.model.itemslist.results[i].status %>" >
+                                            
+                                            <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> <%- pmHistory.model.items[val.id].justClassName('status', function(v){ return "history-status-"+v}) %>" >
                                                 <%= pmHistory.model.items[val.id].justText('status') %>
                                             </td>
                                             <td class="hidden-xs">
@@ -915,7 +916,7 @@
                                             <a href="/?project/<%- project_id %>/history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
                                                         onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].mode %></a>
                                             </td>
-                                            <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> history-status-<%- pmHistory.model.itemslist.results[i].status %>" >
+                                            <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %>  <%- pmHistory.model.items[val.id].justClassName('status', function(v){ return "history-status-"+v}) %>" >
                                                 <%= pmHistory.model.items[val.id].justText('status') %>
                                             </td>
                                             <td class="hidden-xs">
@@ -1046,7 +1047,7 @@
                                                 Module
                                             <% } %>
                                         </td>
-                                        <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> history-status-<%- pmHistory.model.itemslist.results[i].status %>" >
+                                        <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %>  <%- pmHistory.model.items[val.id].justClassName('status', function(v){ return "history-status-"+v}) %>" >
                                             <%= pmHistory.model.items[val.id].justText('status') %>
                                         </td>
                                         <td class="hidden-xs">

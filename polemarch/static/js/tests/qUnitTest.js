@@ -1550,8 +1550,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
     });
 
     syncQUnit.addTest('Импорт валидного inventory', function ( assert )
-    {
-        debugger;
+    { 
         jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', 'inventory') 
         for(var i in inventory.hosts)
         {
