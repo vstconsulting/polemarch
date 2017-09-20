@@ -35,7 +35,7 @@ License: ${LICENSE}
 AutoReq: No
 AutoProv: No
 BuildRequires: python, openssl-devel, libyaml-devel
-Requires: python, openssl-devel, logrotate
+Requires: python, openssl-devel
 Requires: python-virtualenv
 Requires: git
 Requires: libyaml-devel
