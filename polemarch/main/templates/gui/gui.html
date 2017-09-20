@@ -36,7 +36,6 @@
     </section> 
 </script>
 
-
 <!-- Список templates_list -->
 <script type="text/x-just" data-just="fastcommand_widget"> 
     <section class="col-lg-12 col-sm-12 col-xs-12">
@@ -45,7 +44,7 @@
                 Run shell command
             </div>
             <div class="box-body">
-                <div class="row">4
+                <div class="row">
                     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-sm-4">
                         <label class="control-label" >Project</label>
                         <select
@@ -82,27 +81,10 @@
                     </div>
 
                     <~ pmModuleTemplates.model.selectedInventory>
-                        <% if(!pmModuleTemplates.model.selectedInventory){ %>
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-sm-4">
-                                <label class="control-label" >Group</label>
-                                <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
-                                    <option value="all" selected>All</option> 
-                                </select> 
-                            </div>
-                        <% }else{ %>
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-sm-4">
-                                <label class="control-label" >Group</label>
-                                <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
-                                    <option value="all" selected>All</option>
-                                    <% for(var i in pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups){ %>
-                                        <option value="<%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %>" ><%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %></option>
-                                    <% } %>
-                                </select> 
-                            </div>
-                        <% } %>
+                        <%= pmGroups.groupsAutocompleteTemplate(pmModuleTemplates.model.selectedInventory) %>
                     <~>
                     
-                    <div class="col-lg-6 col-sm-12">
+                    <div class="col-lg-12 col-sm-12">
                         <label class="control-label" >Shell command</label>
                         <div class="input-group">
                             <input type="text"
@@ -115,7 +97,7 @@
                                 <button 
                                 class="btn btn-primary"
                                 type="button"
-                                onclick="spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), $('#group-autocomplete').val(), 'shell', $('#module-args-string').val(), {}))"
+                                onclick="spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), pmGroups.getGroupsAutocompleteValue(), 'shell', $('#module-args-string').val(), {}))"
                                 ><span class="glyphicon glyphicon-send"></span> Run command</button> 
                             </span>
                         </div> 
@@ -275,7 +257,7 @@
 
     <section class="content">
         <button type="button" onclick="spajs.showLoader(pmModuleTemplates.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save</button>
-        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), $('#group-autocomplete').val(), $('#module-autocomplete').val(), $('#module-args-string').val(), jsonEditor.jsonEditorGetValues())); return false;"
+        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), pmGroups.getGroupsAutocompleteValue(), $('#module-autocomplete').val(), $('#module-args-string').val(), jsonEditor.jsonEditorGetValues())); return false;"
                class="btn btn-warning" >Execute</button>
         <button type="button" onclick="spajs.showLoader(pmModuleTemplates.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy template" ><span class="glyphicon glyphicon-duplicate" ></span></button>
 
@@ -337,29 +319,8 @@
                                 </select>
                             </div>
 
-                            <~ pmModuleTemplates.model.selectedInventory>
-                                <% if(!pmModuleTemplates.model.selectedInventory){ %>
-
-                                <% }else{ %>
-                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                        <label class="control-label" >Group</label>
-                                        <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
-                                            <option value="all">All</option>
-                                            <% for(var i in pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups){ %>
-                                                <option
-                                                    <% if(pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name == pmModuleTemplates.model.items[item_id].data.group ){ %>selected<% } %>
-                                                    value="<%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %>" >
-                                                        <%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %>
-                                                    </option>
-                                            <% } %>
-                                        </select>
-                                        <div class="help-block">
-                                            <% if(!pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups.length){ %>
-                                                    <span class="error-note" >In inventory <%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].name %> has no any groups</span>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                <% } %>
+                            <~ pmModuleTemplates.model.selectedInventory> 
+                                <%= pmGroups.groupsAutocompleteTemplate(pmModuleTemplates.model.selectedInventory, pmModuleTemplates.model.items[item_id].data.group) %>
                             <~>
                         </div>
 
@@ -473,24 +434,7 @@
                             </div>
 
                             <~ pmModuleTemplates.model.selectedInventory>
-                                <% if(!pmModuleTemplates.model.selectedInventory){ %>
-
-                                <% }else{ %>
-                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                        <label class="control-label" >Group</label>
-                                        <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
-                                            <option value="all" selected>All</option>
-                                            <% for(var i in pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups){ %>
-                                                <option value="<%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %>" ><%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %></option>
-                                            <% } %>
-                                        </select>
-                                        <div class="help-block">
-                                            <% if(!pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups.length){ %>
-                                                    <span class="error-note" >In inventory <%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].name %> has no any groups</span>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                <% } %>
+                                <%= pmGroups.groupsAutocompleteTemplate(pmModuleTemplates.model.selectedInventory) %>
                             <~>
                         </div>
 
@@ -1681,26 +1625,7 @@
 
                         <div class="row <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %> ">
                             <~ pmPeriodicTasks.model.selectedInventory>
-                                <% if(!pmPeriodicTasks.model.selectedInventory){ %>
-
-                                <% }else{ %>
-                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                        <label class="control-label" >Group</label>
-                                        <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
-                                            <option value="all" selected>All</option>
-                                            <% for(var i in pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups){ %>
-                                                <option value="<%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups[i].name %>" 
-                                                        <% if(pmPeriodicTasks.model.items[item_id].group == pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups[i].name){ %>selected<% } %>
-                                                        ><%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups[i].name %></option>
-                                            <% } %>
-                                        </select>
-                                        <div class="help-block">
-                                            <% if(!pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups.length){ %>
-                                                    <span class="error-note" >In inventory <%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].name %> has no any groups</span>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                <% } %>
+                                <%= pmGroups.groupsAutocompleteTemplate(pmPeriodicTasks.model.selectedInventory, pmPeriodicTasks.model.items[item_id].group) %>
                             <~>
                         </div>
                         
@@ -1928,24 +1853,7 @@
 
                         <div class="row <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
                             <~ pmPeriodicTasks.model.selectedInventory>
-                                <% if(!pmPeriodicTasks.model.selectedInventory){ %>
-
-                                <% }else{ %>
-                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                        <label class="control-label" >Group</label>
-                                        <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
-                                            <option value="all" selected>All</option>
-                                            <% for(var i in pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups){ %>
-                                                <option value="<%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups[i].name %>" ><%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups[i].name %></option>
-                                            <% } %>
-                                        </select>
-                                        <div class="help-block">
-                                            <% if(!pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].groups.length){ %>
-                                                    <span class="error-note" >In inventory <%- pmInventories.model.items[pmPeriodicTasks.model.selectedInventory].name %> has no any groups</span>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                <% } %>
+                                <%= pmGroups.groupsAutocompleteTemplate(pmPeriodicTasks.model.selectedInventory) %>
                             <~>
                         </div>
 
@@ -2968,7 +2876,7 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute(<%- item_id %>, $('#inventories-autocomplete').val(), $('#group-autocomplete').val(), $('#module-autocomplete').val())); return false;" class="btn btn-warning" >Execute</button>
+        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute(<%- item_id %>, $('#inventories-autocomplete').val(), pmGroups.getGroupsAutocompleteValue(), $('#module-autocomplete').val())); return false;" class="btn btn-warning" >Execute</button>
 
         <br>
         <br>
@@ -2999,25 +2907,8 @@
                                 </select>
                             </div>
 
-                            <~ pmModuleTemplates.model.selectedInventory>
-                                <% if(!pmModuleTemplates.model.selectedInventory){ %>
-
-                                <% }else{ %>
-                                    <div class="form-group col-lg-4">
-                                        <label class="control-label" >Group</label>
-                                        <select class="form-control select2" id="group-autocomplete" data-placeholder="Select group" style="width:100%" >
-                                            <option value="all" selected>All</option>
-                                            <% for(var i in pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups){ %>
-                                                <option value="<%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %>" ><%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups[i].name %></option>
-                                            <% } %>
-                                        </select>
-                                        <div class="help-block">
-                                            <% if(!pmInventories.model.items[pmModuleTemplates.model.selectedInventory].groups.length){ %>
-                                                    <span class="error-note" >In inventory <%- pmInventories.model.items[pmModuleTemplates.model.selectedInventory].name %> has no any groups</span>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                <% } %>
+                            <~ pmModuleTemplates.model.selectedInventory> 
+                                <%= pmGroups.groupsAutocompleteTemplate(pmModuleTemplates.model.selectedInventory) %> 
                             <~>
                         </div>
 
@@ -4137,7 +4028,39 @@
         </div>
 </script>
 
-
+<!-- groupsAutocompleteTemplate -->
+<script type="text/x-just" data-just="groups_autocomplete_filed">
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-sm-4">
+        <label class="control-label" >Group</label>
+        
+        <% if(!selectedInventory){ %>  
+            <div class="input-group">
+                <input type="text"
+                        placeholder="Enter name" 
+                        id="groups_autocomplete_filed<%- prefix %>" 
+                        value="<%- value %>"
+                        class="form-control disabled"
+                        aria-describedby="input-addon<%- prefix %>" 
+                        disabled >  
+                <span class="input-group-addon" id="input-addon<%- prefix %>"  style="cursor: pointer;" >
+                    <span class='glyphicon glyphicon-remove' ></span>
+                </span> 
+            </div>
+        <% }else{ %> 
+            <div class="input-group">
+                <input type="text" placeholder="Enter name" id="groups_autocomplete_filed<%- prefix %>" value="<%- value %>"  class="form-control" aria-describedby="input-addon<%- prefix %>" >  
+                <span class="input-group-addon" id="input-addon<%- prefix %>" onclick="$('#groups_autocomplete_filed<%- prefix %>').val('');" style="cursor: pointer;" >
+                    <span class='glyphicon glyphicon-remove' ></span>
+                </span>
+            </div>
+        <% } %> 
+        <div class="help-block">
+            Limit to one or more hosts and groups
+            <a class="glyphicon glyphicon-question-sign" href="https://ansible-tips-and-tricks.readthedocs.io/en/latest/ansible/commands/#limit-to-one-or-more-hosts" target="_blank"></a>
+        </div>
+    </div>
+</script>
+ 
 <!-- jsonEditor - jsonEditorLine-->
 <script type="text/x-just" data-just="jsonEditorLine">
 

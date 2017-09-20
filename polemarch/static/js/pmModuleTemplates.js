@@ -42,16 +42,13 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
     var thisObj = this;
     $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems(), pmModuleTemplates.loadItem(item_id)).done(function()
     {
-        $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).done(function()
+        $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).always(function()
         {
-            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_module_page', {item_id:item_id}))
-
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_module_page', {item_id:item_id})) 
             $("#inventories-autocomplete").select2();
             $("#projects-autocomplete").select2();
  
             def.resolve();
-        }).fail(function(){
-            def.reject();
         });
     }).fail(function()
     {
@@ -118,7 +115,7 @@ pmModuleTemplates.addItem = function()
         module:$("#module-autocomplete").val(),
         inventory:$("#inventories-autocomplete").val(),
         project:$("#projects-autocomplete").val(),
-        group:$("#group-autocomplete").val(),
+        group:pmGroups.getGroupsAutocompleteValue(),
         args:$("#module-args-string").val(),
         vars:jsonEditor.jsonEditorGetValues(),
     }
@@ -167,7 +164,7 @@ pmModuleTemplates.updateItem = function(item_id)
         module:$("#module-autocomplete").val(),
         inventory:$("#inventories-autocomplete").val(),
         project:$("#projects-autocomplete").val(),
-        group:$("#group-autocomplete").val(),
+        group:pmGroups.getGroupsAutocompleteValue(),
         args:$("#module-args-string").val(),
         vars:jsonEditor.jsonEditorGetValues(),
     }

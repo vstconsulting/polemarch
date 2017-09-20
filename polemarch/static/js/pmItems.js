@@ -421,7 +421,7 @@ pmItems.loadItem = function(item_id)
         type: "GET",
         contentType:'application/json',
         data: "",
-                success: function(data)
+        success: function(data)
         {
             //console.log("loadUser", data)
             thisObj.model.items.justWatch(item_id)
@@ -431,7 +431,7 @@ pmItems.loadItem = function(item_id)
         error:function(e)
         {
             console.warn(e)
-            polemarch.showErrors(e)
+            //polemarch.showErrors(e)
             def.reject(e)
         }
     });

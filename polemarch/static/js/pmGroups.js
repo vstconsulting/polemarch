@@ -21,14 +21,14 @@ pmGroups.copyItem = function(item_id)
                         success: function(newItem)
             {
                 thisObj.model.items[newItem.id] = newItem
-                
+
                 if(data.children)
                 {
                     var groups = []
                     for(var i in data.groups)
                     {
                         groups.push(data.groups[i].id)
-                    } 
+                    }
                     $.when(thisObj.setSubGroups(newItem.id, groups)).always(function(){
                         def.resolve(newItem.id)
                     })
@@ -39,11 +39,11 @@ pmGroups.copyItem = function(item_id)
                     for(var i in data.hosts)
                     {
                         hosts.push(data.hosts[i].id)
-                    } 
+                    }
 
                     $.when(thisObj.setSubHosts(newItem.id, hosts)).always(function(){
                         def.resolve(newItem.id)
-                    }) 
+                    })
                 }
             },
             error:function(e)
@@ -57,13 +57,13 @@ pmGroups.copyItem = function(item_id)
     })
 
     return def.promise();
-} 
+}
 
-  
+
 /**
- * @param {string} parent_type 
- * @param {integer} parent_item 
- * @return $.Deferred 
+ * @param {string} parent_type
+ * @param {integer} parent_item
+ * @return $.Deferred
  */
 pmGroups.addItem = function(parent_type, parent_item)
 {
@@ -80,14 +80,14 @@ pmGroups.addItem = function(parent_type, parent_item)
         def.reject()
         return def.promise();
     }
-    
+
     if(/[^A-z0-9_.\-]/.test(data.name))
     {
         $.notify("Invalid value in field name it mast be as [^A-z0-9_.\-]", "error");
         def.reject()
         return def.promise();
     }
- 
+
     spajs.ajax.Call({
         url: "/api/v1/groups/",
         type: "POST",
@@ -166,14 +166,14 @@ pmGroups.updateItem = function(item_id)
         $.notify("Invalid value in field name", "error");
         return;
     }
-    
+
     if(/[^A-z0-9_.\-]/.test(data.name))
     {
         $.notify("Invalid value in field name it mast be as [^A-z0-9_.\-]", "error");
         def.reject()
         return def.promise();
     }
-  
+
     var thisObj = this;
     return spajs.ajax.Call({
         url: "/api/v1/groups/"+item_id+"/",
@@ -193,7 +193,7 @@ pmGroups.updateItem = function(item_id)
         }
     });
 }
- 
+
 /**
  * @return $.Deferred
  */
@@ -219,7 +219,7 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
                     pmGroups.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
                 }
             }
-            //console.log("group update", data); 
+            //console.log("group update", data);
         },
         error:function(e)
         {
@@ -228,7 +228,7 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
         }
     });
 }
- 
+
 /**
  * @return $.Deferred
  */
@@ -254,7 +254,7 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
                     pmGroups.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
                 }
             }
-            //console.log("group update", data); 
+            //console.log("group update", data);
         },
         error:function(e)
         {
@@ -288,14 +288,14 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
                 def.reject()
                 return;
             }
-            
+
             if(pmGroups.model.items[item_id])
-            { 
+            {
                 if(!pmGroups.model.items[item_id].groups)
                 {
                     pmGroups.model.items[item_id].groups = []
                 }
-                
+
                 for(var i in groups_ids)
                 {
                     pmGroups.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
@@ -314,7 +314,7 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
     });
     return def.promise();
 }
- 
+
 /**
  * @return $.Deferred
  */
@@ -339,14 +339,14 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
                 def.reject()
                 return;
             }
-            
+
             if(pmGroups.model.items[item_id])
-            { 
+            {
                 if(!pmGroups.model.items[item_id].hosts)
                 {
                     pmGroups.model.items[item_id].hosts = []
                 }
-                
+
                 for(var i in hosts_ids)
                 {
                     pmGroups.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
@@ -437,4 +437,192 @@ pmGroups.hasGroups = function(item_id, group_id)
     }
     return false;
 }
- 
+
+
+
+/**
+ * Значение поля автокоплита для строки групп
+ * @see https://ansible-tips-and-tricks.readthedocs.io/en/latest/ansible/commands/#limit-to-one-or-more-hosts 
+ * @param {string} prefix
+ * @returns {string} Значение поля автокоплита для строки групп
+ */
+pmGroups.getGroupsAutocompleteValue = function(prefix)
+{
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+    return $('#groups_autocomplete_filed'+prefix).val() 
+}
+
+/**
+ * Поле автокоплита для строки групп
+ * @see https://ansible-tips-and-tricks.readthedocs.io/en/latest/ansible/commands/#limit-to-one-or-more-hosts
+ * @param {integer} inventory_id
+ * @param {string} value
+ * @param {string} prefix
+ * @returns {string} HTML шаблон
+ */
+pmGroups.groupsAutocompleteTemplate = function(inventory_id, value, prefix)
+{
+    if(value === undefined)
+    {
+        value = "All"
+    }
+
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+
+    if(inventory_id)
+    {
+        $.when(pmInventories.loadItem(inventory_id)).done(function()
+        {
+            new autoComplete({
+                selector: '#groups_autocomplete_filed'+prefix,
+                minChars: 0,
+                cache:false,
+                showByClick:true,
+                menuClass:'groups_autocomplete_filed'+prefix,
+                renderItem: function(item, search)
+                {
+                    var text = item.name
+                    if(item.isHost)
+                    {
+                        text += ' <i style="color:#ccc;">(Host)</i>'
+                    }
+                    else
+                    {
+                        text += ' <i style="color:#ccc;">(Group)</i>'
+                    }
+                    
+                    return '<div class="autocomplete-suggestion" data-value="' + item.value + '" >' + text + '</div>';
+                },
+                onSelect: function(event, term, item)
+                {
+                    //console.log('onSelect', term, item);
+                    var value = $(item).attr('data-value');
+                    $("#groups_autocomplete_filed"+prefix).val(value);
+                },
+                source: function(original_term, response)
+                { 
+                    var addTermToMatches = false
+                    var term = original_term
+                    var baseTerm = ""
+                    if(original_term.indexOf(':') >= 0)
+                    {
+                        addTermToMatches = true
+                        term = original_term.replace(/^(.*):([^:]*)$/gim, "$2")
+                        baseTerm = original_term.replace(/^(.*):([^:]*)$/gim, "$1:")
+                    }
+                    
+                    if(term[0] == '!')
+                    {
+                        term = term.substring(1)
+                        baseTerm = baseTerm + "!"
+                    }
+                    
+                    var arrUsedItems = original_term.toLowerCase().replace(/!/gmi, "").split(/:/g)
+                    
+                    term = term.toLowerCase();
+
+                    var matches = []
+                    var matchesAll = []
+
+                    for(var i in pmInventories.model.items[inventory_id].groups)
+                    {
+                        var val = pmInventories.model.items[inventory_id].groups[i]
+                        
+                        if($.inArray(val.name.toLowerCase(), arrUsedItems) != -1)
+                        {
+                            continue;
+                        }
+                        
+                        var text = val.name
+                        if(addTermToMatches)
+                        {
+                            text = baseTerm+text
+                        }
+                        
+                        if(val.name.toLowerCase().indexOf(term) == 0 )
+                        {
+                            matches.push({
+                                value:text,
+                                isHost:false,
+                                name:val.name,
+                            })
+                        }
+                        
+                        matchesAll.push({
+                            value:text,
+                            isHost:false,
+                            name:val.name,
+                        })
+                    }
+
+                    for(var i in pmInventories.model.items[inventory_id].hosts)
+                    {
+                        var val = pmInventories.model.items[inventory_id].hosts[i]
+                        if($.inArray(val.name.toLowerCase(), arrUsedItems) != -1)
+                        {
+                            continue;
+                        }
+                        
+                        if(val.name.indexOf(":") != -1)
+                        {
+                            continue;
+                        }
+                        
+                        var text = val.name
+                        if(addTermToMatches)
+                        {
+                            text = baseTerm+text
+                        }
+                        
+                        if(val.name.toLowerCase().indexOf(term) == 0 )
+                        {
+                            matches.push({
+                                value:text,
+                                isHost:true,
+                                name:val.name,
+                            })
+                        }
+                        
+                        matchesAll.push({
+                            value:text,
+                            isHost:true,
+                            name:val.name,
+                        })
+                    }
+                    
+                    if(!addTermToMatches && "All".toLowerCase().indexOf(term) != -1 )
+                    {
+                        matches.push({
+                            value:"All",
+                            isHost:false,
+                            name:"All",
+                        })
+                        
+                        matchesAll.push({
+                            value:"All",
+                            isHost:false,
+                            name:"All",
+                        })
+                    }
+
+                    if(matches.length > 1 || addTermToMatches)
+                    {
+                        response(matches);
+                    }
+                    else
+                    {
+                        response(matchesAll)
+                    }
+                }
+            });
+        })
+    }
+     
+    return spajs.just.render('groups_autocomplete_filed', {selectedInventory:inventory_id, value:value, prefix:prefix})
+}

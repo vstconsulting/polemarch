@@ -137,7 +137,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
             def.reject();
             return def.promise();
         }
-        data.group = $("#group-autocomplete").val()
+        data.group = pmGroups.getGroupsAutocompleteValue()
         data.args = $("#module-args-string").val()
     }
     else
@@ -405,7 +405,7 @@ pmPeriodicTasks.addItem = function(project_id)
 
     if(data.kind == "MODULE")
     {
-        data.vars.group = $("#group-autocomplete").val()
+        data.vars.group = pmGroups.getGroupsAutocompleteValue()
         data.vars.args =  $("#module-args-string").val();
     }
     
@@ -537,7 +537,7 @@ pmPeriodicTasks.updateItem = function(item_id)
     
     if(data.kind == "MODULE")
     {
-        data.vars.group = $("#group-autocomplete").val()
+        data.vars.group = pmGroups.getGroupsAutocompleteValue()
         data.vars.args =  $("#module-args-string").val();
     }
     var thisObj = this;
