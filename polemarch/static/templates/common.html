@@ -1,0 +1,33 @@
+
+<script  type="text/x-just" style="display: none;" data-just="pagination">
+<% if(totalPage > 1){ %>
+        <ul class="pagination no-margin pull-right">
+            <% if(totalPage < 21){ %>
+                <% for(var i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" ><%- i+1 %></a></li>
+                    <% } %>
+                <% } %>
+            <% }else{ %>
+                <% for(var i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
+                            <% if( dotShow == false){ %>
+                                <% dotShow = true %>
+                                <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);">..</a></li>
+                            <% } %>
+                        <% }else{ %>
+                            <% dotShow = false %>
+                            <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" ><%- i+1 %></a></li>
+                        <% } %>
+                    <% } %>
+                <% } %>
+            <% } %>
+        </ul>
+<% } %>
+</script>
+

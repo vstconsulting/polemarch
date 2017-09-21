@@ -1,0 +1,118 @@
+
+<!-- Страница dashboard -->
+<script type="text/x-just" data-just="dashboard_page">
+    <section class="content-header">
+        <h1>
+            Dashboard
+        </h1>
+        <ol class="breadcrumb">
+            <li class="active">Dashboard</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-lg-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('templates') %></h3>
+                        <p>Templates</p>
+                    </div>
+                    <div class="icon hidden-xs" style="top: 0px;">
+                        <i class="glyphicon glyphicon-cog"></i>
+                    </div>
+                    <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('projects') %></h3>
+                        <p>Projects</p>
+                    </div>
+                    <div class="icon visible-lg" style="top: -5px;">
+                        <i class="glyphicon glyphicon-list"></i>
+                    </div>
+                    <a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('inventories') %></h3>
+                        <p>Inventories</p>
+                    </div>
+                    <div class="icon hidden-xs" style="top: -5px;">
+                        <i class="glyphicon glyphicon-th"></i>
+                    </div>
+                    <a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('hosts') %></h3>
+                        <p>Hosts</p>
+                    </div>
+                    <div class="icon hidden-xs" style="top: 0px;">
+                        <i class="glyphicon glyphicon-tasks"></i>
+                    </div>
+                    <a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('groups') %></h3>
+                        <p>Groups</p>
+                    </div>
+                    <div class="icon hidden-xs" style="top: -5px;">
+                        <i class="glyphicon glyphicon-th-large"></i>
+                    </div>
+                    <a href="<%- polemarch.opt.host %>/?groups" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><%= pmDashboard.model.count.justText('users') %></h3>
+                        <p>Users</p>
+                    </div>
+                    <div class="icon hidden-xs" style="top: -15px;">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <a href="<%- polemarch.opt.host %>/?users" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">  
+            <div id="pmAnsibleModule-fastCommandWidget"></div> 
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-12 col-xs-12">
+                <div class="box box-info">
+                    <div class="box-header ui-sortable-handle" style="cursor: move;">
+                        <i class="fa fa-th"></i>
+                        <h3 class="box-title">Tasks history</h3>
+                        <!-- 
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-sm" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                            <button type="button" class="btn btn-sm" data-widget="remove"><i class="fa fa-times"></i></button>
+                        </div>-->
+                    </div>
+                    <div class="box-body border-radius-none">
+                        <div id="c3-history-chart"></div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="row"> 
+            <div id="pmTasksTemplates-showTaskWidget"></div> 
+            <div id="pmTasksTemplates-showModuleWidget"></div> 
+        </div>
+    </section>
+</script>

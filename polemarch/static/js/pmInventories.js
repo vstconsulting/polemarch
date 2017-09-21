@@ -447,18 +447,12 @@ pmInventories.importInventory = function(inventory)
         }
 
         // Добавление хостов вложенных к инвенторию
-        $.ajax({
+        spajs.ajax.Call({
             url: "/api/v1/_bulk/",
             type: "POST",
             contentType:'application/json',
             data:JSON.stringify(bulkHosts),
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                }
-            },
-            success: function(data)
+                        success: function(data)
             {
                 var hasError = false;
                 var hosts_ids = []
@@ -490,18 +484,12 @@ pmInventories.importInventory = function(inventory)
                 $.when(pmInventories.addSubHosts(inventory_id, hosts_ids)).done(function()
                 {
                     // Добавление групп и вложенных в них хостов
-                    $.ajax({
+                    spajs.ajax.Call({
                         url: "/api/v1/_bulk/",
                         type: "POST",
                         contentType:'application/json',
                         data:JSON.stringify(bulkdata),
-                        beforeSend: function(xhr, settings) {
-                            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                                // Only send the token to relative URLs i.e. locally.
-                                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                            }
-                        },
-                        success: function(data)
+                                                success: function(data)
                         {
                             var igroups_ids = []
                             var bulk_update = []
@@ -601,18 +589,12 @@ pmInventories.importInventory = function(inventory)
                             {
                                 if(bulk_update.length)
                                 {
-                                    $.ajax({
+                                    spajs.ajax.Call({
                                         url: "/api/v1/_bulk/",
                                         type: "POST",
                                         contentType:'application/json',
                                         data:JSON.stringify(bulk_update),
-                                        beforeSend: function(xhr, settings) {
-                                            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                                                // Only send the token to relative URLs i.e. locally.
-                                                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                                            }
-                                        },
-                                        success: function(data)
+                                                                                success: function(data)
                                         {
                                             var hasError = false;
                                             for(var i in data)
@@ -686,18 +668,12 @@ pmInventories.importInventory = function(inventory)
         def2.resolve(inventory_id)
     }).fail(function(delete_bulk)
     { 
-        $.when($.ajax({
+        $.when(spajs.ajax.Call({
             url: "/api/v1/_bulk/",
             type: "POST",
             contentType:'application/json',
             data:JSON.stringify(delete_bulk),
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                }
-            }
-        })).always(function(){
+                    })).always(function(){
             def2.reject()
         })
     })
@@ -733,18 +709,12 @@ pmInventories.copyItem = function(item_id)
         var data = thisObj.model.items[item_id];
         delete data.id;
         data.name = "copy from " + data.name
-        $.ajax({
+        spajs.ajax.Call({
             url: "/api/v1/"+thisObj.model.name+"/",
             type: "POST",
             contentType:'application/json',
             data: JSON.stringify(data),
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                }
-            },
-            success: function(newItem)
+                        success: function(newItem)
             {
                 thisObj.model.items[newItem.id] = newItem
 
@@ -797,18 +767,12 @@ pmInventories.addItem = function(parent_type, parent_item)
     }
 
     var thisObj = this;
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/inventories/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             $.notify("inventory created", "success");
 
@@ -859,18 +823,12 @@ pmInventories.updateItem = function(item_id)
     }
 
     var thisObj = this;
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/inventories/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data:JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             thisObj.model.items[item_id] = data
             $.notify("Save", "success");
@@ -966,18 +924,12 @@ pmInventories.setSubGroups = function(item_id, groups_ids)
         groups_ids = []
     }
 
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/inventories/"+item_id+"/groups/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(pmInventories.model.items[item_id])
             {
@@ -1006,18 +958,12 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
         hosts_ids = []
     }
 
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/inventories/"+item_id+"/hosts/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(pmInventories.model.items[item_id])
             {
@@ -1047,18 +993,12 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
     }
 
     var def = new $.Deferred();
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/inventories/"+item_id+"/groups/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(data.not_found > 0)
             {
@@ -1105,18 +1045,12 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
         return def.promise();
     }
 
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/inventories/"+item_id+"/hosts/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             if(data.not_found > 0)
             {

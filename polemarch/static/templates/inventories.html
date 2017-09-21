@@ -1,0 +1,545 @@
+
+
+<!-- Список inventory -->
+<script type="text/x-just" data-just="inventories_list">
+    <section class="content-header">
+        <h1>
+            Inventories
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Inventories</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <a class="btn btn-primary"  href="/?new-inventory" onclick="spajs.open({ menuId:'new-inventory'}); return false;">Create inventory</a>
+        <span class="btn btn-default textfile" style="margin-left: 10px;" >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
+            <span class="glyphicon glyphicon-file"></span> Import from file
+        </span>
+        <br>
+        <br>
+              
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Inventories
+                        <div class="input-group col-lg-2" style="float: right;">
+                            <input
+                                type="text"
+                                id="search-query-input"
+                                placeholder="Search by name"
+                                class="form-control"
+                                maxlength="255"
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmInventories.search($('#search-query-input').val()));"
+                            >
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmInventories.search($('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
+                            </div>
+                        </div>
+                        <% if(pmInventories.getTotalPages(pmInventories.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmInventories.paginationHtml(pmInventories.model.itemslist) %>
+                            </div>
+                        <% } %>
+
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmInventories.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
+                                    <th>Name</th>
+                                    <th style="width: 105px;">Actions</th>
+                                </tr>
+                                <% for(var i in pmInventories.model.itemslist.results){ %>
+                                    <tr
+                                        class="item-row item-<%- pmInventories.model.itemslist.results[i].id %>  <%- pmInventories.model.selectedItems.justClass(pmInventories.model.itemslist.results[i].id, 'selected') %>"
+                                        data-id="<%- pmInventories.model.itemslist.results[i].id %>" >
+                                        <td class=""  onclick="pmInventories.toggleSelect(<%- pmInventories.model.itemslist.results[i].id %>); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td>
+                                            <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- pmInventories.model.itemslist.results[i].name %></a>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Actions
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-right">
+                                                    <li>
+                                                        <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-group'}); return false;" >Create sub group</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.open({ menuId:'inventory/<%- pmInventories.model.itemslist.results[i].id %>/new-host'}); return false;" >Create sub host</a>
+                                                    </li>
+                                                    <li role="separator" class="divider"></li>
+                                                    <li>
+                                                        <a href="/?inventory/<%- pmInventories.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.showLoader(pmInventories.deleteItem(<%- pmInventories.model.itemslist.results[i].id %>)); return false;" >Delete</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="btn-group <%- pmInventories.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= pmInventories.model.justText('selectedCount') %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#"
+                                        onclick="pmInventories.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
+                                </li> 
+                                <li>
+                                    <a href="#" onclick="pmInventories.deleteSelected(); return false;" >Delete all selected elements</a>
+                                </li>
+                                <!--<li role="separator" class="divider"></li>
+                                <li>
+                                    <a href="#" onclick="pmInventories.exportSelecedToFile(); return false;" >Export all selected inventories</a>
+                                </li>-->
+                            </ul>
+                        </div>
+                        
+                        <% if(!query){ %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">  
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(pmInventories.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                    </li>
+                                    <li class=" <%- pmInventories.model.justNotClass('selectedCount', 'hide') %>" >
+                                        <a href="#" onclick="spajs.showLoader(pmInventories.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } %>
+                        <% if(pmInventories.getTotalPages(pmInventories.model.itemslist)){ %>
+                                <%= pmInventories.paginationHtml(pmInventories.model.itemslist) %>
+                        <% } %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<script type="text/x-just" data-just="inventories_import_page">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" >Import from file</span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" >Inventories</a></li>
+            <li class="active">Import from file</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmInventories.importInventoriesAndOpen()); return false;" class="btn btn-primary" >Import inventory</button>
+        <span class="btn btn-default textfile" style="margin-left: 10px;" >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
+            <span class="glyphicon glyphicon-file"></span> Import from file
+        </span>
+        <br>
+        <br>
+        <div class="row">
+            <~ pmInventories.model.importedInventories>
+                <% for(var i in pmInventories.model.importedInventories){ var val = pmInventories.model.importedInventories[i] %>
+                    <%= pmInventories.renderImportedInventory(val) %>
+                <% } %>
+            <~>
+        </div> 
+    </section>
+</script>
+    
+<script type="text/x-just" data-just="inventories_imported_inventory"> 
+    
+<section class="col-lg-12">
+    <div class="box box-info collapsed-box">
+        <div class="box-header with-border collapsed-box">
+            Imported file<br>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="form-group col-lg-12 col-ml-12 col-sm-12">
+                <pre><%- text %></pre>
+            </div>  
+        </div>
+    </div>
+</section> 
+        
+<div class="col-lg-12">
+    <h1>Inventory</h1> 
+</div> 
+<section class="col-lg-12">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            Inventory<br>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+            </div>
+        </div>
+        <div class="box-body">   
+            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                <label class="control-label" >Name</label>
+                <input type="text" id="inventory_name" value="<%- inventory.name %>"  class="form-control" maxlength="255">
+                <div class="help-block"></div>
+            </div>
+        </div>
+    </div>
+</section> 
+<%= jsonEditor.editor(inventory.vars, {block:'inventories', prefix:"inventory"}) %>
+
+
+<% for(var i in inventory.groups){ var valg = inventory.groups[i] %>   
+    <div class="col-lg-12">
+        <h1>Group: <%- i %></h1> 
+    </div> 
+    <%= jsonEditor.editor(valg.vars, {block:'groups', prefix: 'group'+i}) %> 
+<% } %>
+    
+<% for(var i in inventory.hosts){ var val = inventory.hosts[i] %>  
+    <div class="col-lg-12">
+        <h1>Host: <%- val.name %></h1> 
+    </div> 
+    <section class="col-lg-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                Host: <%- val.name %><br>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                </div>
+            </div>
+            <div class="box-body">   
+                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                    <label class="control-label" >Name</label>
+                    <input type="text" disabled value="<%- val.name %>"  class="form-control" maxlength="255">
+                    <div class="help-block"></div>
+                </div>
+                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                    <label class="control-label" >Type</label>
+                    <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
+                    <div class="help-block"></div>
+                </div>  
+            </div>
+        </div>
+    </section> 
+    <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:'host'+val.name}) %> 
+<% } %>
+
+<% for(var i in inventory.groups){ var valg = inventory.groups[i] %>  
+    <% for(var j in valg.hosts){ var val = valg.hosts[j] %> 
+        <div class="col-lg-12">
+            <h1>Group: <%- i %>, Host: <%- val.name %></h1>  
+        </div> 
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Group: <%- i %>, Host: <%- val.name %><br>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                    </div>
+                </div>
+                <div class="box-body">   
+                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                        <label class="control-label" >Name</label>
+                        <input type="text" disabled value="<%- val.name %>"  class="form-control" maxlength="255">
+                        <div class="help-block"></div>
+                    </div>
+                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                        <label class="control-label" >Type</label>
+                        <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
+                        <div class="help-block"></div>
+                    </div>  
+                </div>
+            </div>
+        </section> 
+        <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:'host'+val.name}) %> 
+    <% } %>
+<% } %>  
+</script>
+
+<!-- Страница inventory -->
+<script type="text/x-just" data-just="inventories_page">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" ><%= pmInventories.model.items[item_id].justText('name') %></span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" >Inventories</a></li>
+            <li class="active"><%- pmInventories.model.items[item_id].name.slice(0, 20) %></li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmInventories.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save inventory</button>
+        <a href="<%- polemarch.opt.host %>/?inventory/<%- item_id %>/history" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >History</a>
+        <button type="button" onclick="spajs.showLoader(pmInventories.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy inventory" ><span class="glyphicon glyphicon-duplicate" ></span></button>
+        <button type="button" onclick="spajs.showLoader(pmInventories.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
+            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove inventory</span>
+        </button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Inventory<br>
+                        <div class="box-tools pull-right">
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Name</label>
+                                <input type="text"  placeholder="Enter inventory name"  id="inventory_<%- pmInventories.model.items[item_id].id %>_name" value="<%- pmInventories.model.items[item_id].name %>"  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <%= jsonEditor.editor(pmInventories.model.items[item_id].vars, {block:'inventories'}) %>
+        </div>
+
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Sub items<br>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <~ pmInventories.model.items[item_id].groups >
+                                <% console.log("inventories", item_id, pmInventories.model.items[item_id].groups) %>
+                                <% for(var i in pmInventories.model.items[item_id].groups){ %>
+                                    <% console.log("inventory", pmInventories.model.items[item_id].groups[i]) %>
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                        <label class="control-label" >Group</label>
+                                        <a href="<%- polemarch.opt.host %>/?group/<%- pmInventories.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmInventories.model.items[item_id].groups[i].name %>
+                                        </a>
+                                    </div>
+                                <% } %>
+                            <~>
+
+                            <~ pmInventories.model.items[item_id].hosts >
+                                <% for(var i in pmInventories.model.items[item_id].hosts){ %>
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                        <label class="control-label" >Host</label> 
+                                        <a href="<%- polemarch.opt.host %>/?host/<%- pmInventories.model.items[item_id].hosts[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                            <%- pmInventories.model.items[item_id].hosts[i].name %>
+                                        </a>
+                                    </div>
+                                <% } %>
+                            <~>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+
+                                    <button
+                                            type="button"
+                                            onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary hidden-xs"
+                                            >Edit existings groups</button>
+
+                                    <button type="button"
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;"
+                                            class="btn btn-primary hidden-xs"
+                                            >Create new group</button>
+
+                                    <div style="margin-top:10px;" class="hidden-xs hidden-md hidden-lg"></div>
+
+                                    <button type="button"
+                                            onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary hidden-xs"
+                                            >Edit existings hosts</button>
+
+                                    <button type="button"
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;"
+                                            class="btn btn-primary hidden-xs"
+                                            >Create new host</button>
+
+                                    <button
+                                            type="button"
+                                            onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary btn-block visible-xs"
+                                            >Edit existings groups</button>
+
+                                    <button type="button"
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;"
+                                            class="btn btn-primary btn-block visible-xs"
+                                            >Create new group</button>
+
+                                    <button type="button"
+                                            onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary btn-block visible-xs"
+                                            >Edit existings hosts</button>
+
+                                    <button type="button"
+                                            onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;"
+                                            class="btn btn-primary btn-block visible-xs"
+                                            >Create new host</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<!-- Страница создания inventory -->
+<script type="text/x-just" data-just="inventories_new_page">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" >Create new inventory</span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" >Inventories</a></li>
+            <li class="active">Create new inventory</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmInventories.addItem('<%- parent_type %>', <%- parent_item %>)); return false;" class="btn btn-primary" >Save inventory</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        New inventory<br>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Name</label>
+                                <input type="text"  placeholder="Enter inventory name"  id="new_inventory_name" value=""  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <%= jsonEditor.editor({}, {block:'inventories'}) %>
+        </div>
+    </section>
+</script>
+
+
+<!-- Добавление списка подгрупп к inventory -->
+<script type="text/x-just" data-just="add_existing_groups_to_inventory">
+    <div class="row" id="add_existing_item_to_inventory">
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Edit sub groups<br>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
+                                <% for(var i in pmGroups.model.itemslist.results){ %>
+                                    <option
+                                        value="<%- pmGroups.model.itemslist.results[i].id %>"
+                                        <% if(pmInventories.hasGroups(item_id, pmGroups.model.itemslist.results[i].id)){ %>selected<% } %> ><%- pmGroups.model.itemslist.results[i].name %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <button type="button" onclick="$('#add_existing_item_to_inventory').hide(); spajs.showLoader(pmInventories.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_inventory').remove(); return false;" class="btn btn-default" >Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</script>
+
+<!-- Добавление списка хостов к inventory -->
+<script type="text/x-just" data-just="add_existing_hosts_to_inventory">
+    <div class="row" id="add_existing_item_to_inventory">
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Edit sub hosts<br>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
+                                <% for(var i in pmHosts.model.itemslist.results){ %>
+                                    <option
+                                        value="<%- pmHosts.model.itemslist.results[i].id %>"
+                                        <% if(pmInventories.hasHosts(item_id, pmHosts.model.itemslist.results[i].id)){ %>selected<% } %> ><%- pmHosts.model.itemslist.results[i].name %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <button type="button" onclick="$('#add_existing_item_to_inventory').hide(); spajs.showLoader(pmInventories.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_inventory').remove(); return false;" class="btn btn-default" >Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</script>

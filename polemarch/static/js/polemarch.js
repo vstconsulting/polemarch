@@ -19,6 +19,41 @@ function getCookie(name)
     return cookieValue;
 }
 
+function loadTpl(name)
+{ 
+    return jQuery.ajax({
+       url: window.pmStaticPath+"/templates/"+name+".html",
+       type: "GET",
+       success: function(res)
+       {
+            $("body").append(res)  
+       },
+       error:function(res)
+       {
+            $.notify("Error in template loaging", "error");
+       }
+    })
+}
+
+function loadTplArray(templatesArray)
+{ 
+    var def = new $.Deferred();
+    var promiseArr = []
+    for(var i in templatesArray)
+    {
+        promiseArr.push(loadTpl(templatesArray[i]))
+    }
+
+    $.when.apply($, promiseArr).done(function()
+    {
+        def.resolve();
+    }).fail(function(){ 
+        def.reject();
+    }) 
+    
+    return def.promise()
+}
+
 var polemarch = {
 
 }
@@ -50,6 +85,9 @@ polemarch.start = function(options)
         menu_url: undefined,
         useHistoryApi:true
     })
+
+    //spajs.ajax.setHeader("Authorization", "");
+    spajs.ajax.setHeader("X-CSRFToken", getCookie('csrftoken'));
 
     setInterval(function()
     {

@@ -189,7 +189,7 @@ var autoComplete = (function(){
 
             that.focusHandler = function(e){
                 
-                if(that.value.length != 0 && o.showByClick)
+                if(that.value.length != 0 && !o.showByClick)
                 { 
                     return;
                 }
