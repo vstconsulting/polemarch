@@ -1,15 +1,4 @@
 /**
- * @author Trapenok Victor (Трапенок Виктор Викторович), Levhav@ya.ru, 89244269357
- * Буду рад новым заказам на разработку чего ни будь.
- *
- * Levhav@ya.ru
- * Skype:Levhav
- * 89244269357
- * @link http://comet-server.com
- *
- */
-
-/**
  * Модуль перевода
  * @param {String} text
  * @returns {window.gettext.data|Window.gettext.data}
