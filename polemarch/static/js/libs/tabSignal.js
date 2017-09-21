@@ -1,12 +1,5 @@
 /**
- * I will be glad to new orders for something a development. 
- * @author Trapenok Victor (Трапенок Виктор Викторович), Levhav@ya.ru, 89244269357  
  * @link https://github.com/Levhav/TabSignal.js
- *
- * (҂`_´)
- * <,︻╦╤─ ҉ - - - - - - --
- * _/﹋\_
- *
  */
 
 function tabSignal()

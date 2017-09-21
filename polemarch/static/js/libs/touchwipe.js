@@ -16,8 +16,6 @@
 });
     
  *
- * @author Trapenok Victor (https://github.com/Levhav)
- * 
  * Fork from: 
  * https://gist.github.com/bchumney/6874073
  * https://gist.github.com/willerce/40612b775ad6a4363131

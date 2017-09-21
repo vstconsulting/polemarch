@@ -1,16 +1,8 @@
-
 /*
  * https://github.com/Levhav/justReactive
  * Adding reactive to string templates engine.
  *
  * Apache License 2.0
- *
- * @author Trapenok Victor (Трапенок Виктор Викторович) Levhav@yandex.com
- * I will be glad to new orders for the development of something.
- *
- * Levhav@yandex.com
- * Skype:Levhav
- * 89244269357
  */
 
 
