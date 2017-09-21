@@ -1,23 +1,23 @@
 
 
-var pmTasksTemplates = inheritance(pmTemplates) 
+var pmTasksTemplates = inheritance(pmTemplates)
 
 
-pmTasksTemplates.model.name = "templates"  
+pmTasksTemplates.model.name = "templates"
 pmTasksTemplates.model.page_name = "template"
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmTasksTemplates.model.kind = "Task"
 pmTemplates.model.kindObjects[pmTasksTemplates.model.kind] = pmTasksTemplates
-   
+
 pmTasksTemplates.showWidget = function(holder, kind)
 {
     var thisObj = this;
     var offset = 0
-    var limit = this.pageSize; 
+    var limit = this.pageSize;
     return $.when(this.sendSearchQuery({kind:kind}, limit, offset)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind})) 
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -39,21 +39,21 @@ pmTasksTemplates.execute = function(item_id)
     var thisObj = this;
     var def = new $.Deferred();
     $.when(this.loadItem(item_id)).done(function()
-    { 
+    {
         var val = thisObj.model.items[item_id]
         $.when(pmTasks.execute(val.data.project, val.data.inventory/1, val.data.playbook, val.data.vars)).done(function()
-        {  
+        {
             def.resolve();
         }).fail(function()
         {
             def.reject();
         })
-         
+
     }).fail(function()
     {
         def.reject();
     })
-    
+
     return def.promise()
 }
 
@@ -65,8 +65,8 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
     $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
         thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
-        
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id})) 
+
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id}))
         $("#inventories-autocomplete").select2();
         //$("#projects-autocomplete").select2();
 
@@ -84,7 +84,7 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
             {
                 $("#playbook-autocomplete").val($(item).text());
                 //console.log('onSelect', term, item);
-                //var value = $(item).attr('data-value'); 
+                //var value = $(item).attr('data-value');
             },
             source: function(term, response)
             {
@@ -111,10 +111,10 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
     {
         def.reject();
     })
-    
+
     return def.promise()
 }
-    
+
 pmTasksTemplates.selectProject = function(project_id){
     console.log("select project", project_id)
     $(".autocomplete-suggestion").hide()
@@ -125,11 +125,11 @@ pmTasksTemplates.selectProject = function(project_id){
 pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
-    var thisObj = this; 
+    var thisObj = this;
     $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {}))
-        
+
         $("#inventories-autocomplete").select2();
         //$("#projects-autocomplete").select2();
 
@@ -152,7 +152,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
             {
                 $("#playbook-autocomplete").val($(item).text());
                 //console.log('onSelect', term, item);
-                //var value = $(item).attr('data-value'); 
+                //var value = $(item).attr('data-value');
             },
             source: function(term, response)
             {
@@ -179,10 +179,10 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
     {
         def.reject();
     })
-    
+
     return def.promise()
 }
- 
+
 /**
  * @return $.Deferred
  */
@@ -197,9 +197,9 @@ pmTasksTemplates.addItem = function()
         playbook:$("#playbook-autocomplete").val(),
         inventory:$("#inventories-autocomplete").val(),
         project:$("#projects-autocomplete").val(),
-        vars:jsonEditor.jsonEditorGetValues() 
-    } 
-     
+        vars:jsonEditor.jsonEditorGetValues()
+    }
+
     if(!data.name)
     {
         console.warn("Invalid value in field name")
@@ -222,12 +222,12 @@ pmTasksTemplates.addItem = function()
             })
         },
         error:function(e)
-        { 
+        {
             polemarch.showErrors(e.responseJSON)
             def.reject()
         }
     });
- 
+
     return def.promise();
 }
 
@@ -242,9 +242,9 @@ pmTasksTemplates.updateItem = function(item_id)
     data.kind = this.model.kind
     data.data = {
         inventory:$("#inventories-autocomplete").val()/1,
-        vars:jsonEditor.jsonEditorGetValues() 
-    } 
-     
+        vars:jsonEditor.jsonEditorGetValues()
+    }
+
     data.data.playbook = $("#playbook-autocomplete").val()
     data.data.project = $("#projects-autocomplete").val()/1
 
@@ -254,7 +254,7 @@ pmTasksTemplates.updateItem = function(item_id)
         $.notify("Invalid value in field name", "error");
         return;
     }
- 
+
     var thisObj = this;
     return spajs.ajax.Call({
         url: "/api/v1/templates/"+item_id+"/",
