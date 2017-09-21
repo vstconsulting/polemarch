@@ -19,10 +19,6 @@ class GUIView(BaseView):
     template_name = "gui/gui.html"
 
 
-class HelpView(BaseView):
-    template_name = "gui/help.html"
-
-
 class Login(BaseView):
     template_name = 'auth/login.html'
 
