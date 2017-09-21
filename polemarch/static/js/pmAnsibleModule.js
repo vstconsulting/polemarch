@@ -53,7 +53,7 @@ pmAnsibleModule.showInProject = function(holder, menuInfo, data)
                 selector: '#module-autocomplete',
                 minChars: 0,
                 cache:false,
-                showByClick:true,
+                showByClick:false,
                 menuClass:'module-autocomplete',
                 renderItem: function(item, search)
                 {

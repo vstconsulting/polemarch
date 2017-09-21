@@ -74,7 +74,7 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
             selector: '#playbook-autocomplete',
             minChars: 0,
             cache:false,
-            showByClick:true,
+            showByClick:false,
             menuClass:'playbook-autocomplete',
             renderItem: function(item, search)
             {
@@ -137,7 +137,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
             selector: '#playbook-autocomplete',
             minChars: 0,
             cache:false,
-            showByClick:true,
+            showByClick:false,
             menuClass:'playbook-autocomplete',
             renderItem: function(item, search)
             {

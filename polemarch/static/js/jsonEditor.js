@@ -335,7 +335,7 @@ jsonEditor.initAutoComplete = function(optionsblock, prefix)
         selector: '#new_json_name'+prefix,
         minChars: 0,
         cache:false,
-        showByClick:true,
+        showByClick:false,
         menuClass:'new_json_name'+prefix,
         renderItem: function(item, search)
         {

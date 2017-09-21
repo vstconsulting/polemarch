@@ -240,7 +240,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
             selector: '#new_periodic-tasks_playbook',
             minChars: 0,
             cache:false,
-            showByClick:true,
+            showByClick:false,
             renderItem: function(item, search)
             {
                 return '<div class="autocomplete-suggestion" data-value="' + item.playbook + '">' + item.playbook + '</div>';
@@ -291,7 +291,7 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
             selector: '#periodic-tasks_'+item_id+'_playbook',
             minChars: 0,
             cache:false,
-            showByClick:true,
+            showByClick:false,
             renderItem: function(item, search)
             {
                 return '<div class="autocomplete-suggestion" data-value="' + item.id + '.yaml">' + item.name + '.yaml</div>';
