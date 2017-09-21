@@ -445,6 +445,7 @@ class InventorySerializer(_WithVariablesSerializer):
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     vars   = DictField(required=False)
+    all_hosts  = HostSerializer(read_only=True, many=True)
     hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
     groups = GroupSerializer(read_only=True, many=True, source="groups_list")
 
@@ -453,6 +454,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
         fields = ('id',
                   'name',
                   'hosts',
+                  'all_hosts',
                   "groups",
                   'vars',
                   'url',)
