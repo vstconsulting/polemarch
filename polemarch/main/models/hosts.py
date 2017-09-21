@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 
 from django.db import transaction
+from django.db.models import Q
 
 from .base import BManager, models
 from .vars import AbstractModel, AbstractVarsQuerySet
@@ -107,7 +108,7 @@ class GroupQuerySet(AbstractVarsQuerySet):
 class Group(AbstractModel):
     CiclicDependencyError = CiclicDependencyError
     objects     = BManager.from_queryset(GroupQuerySet)()
-    hosts       = models.ManyToManyField(Host)
+    hosts       = models.ManyToManyField(Host, related_query_name="groups")
     parents     = models.ManyToManyField('Group', blank=True, null=True,
                                          related_query_name="childrens")
     children    = models.BooleanField(default=False)
@@ -167,3 +168,10 @@ class Inventory(AbstractModel):
                          dict(groups=groups_strings, hosts=hosts_strings,
                               vars=self.vars_string(hvars, "\n")))
         return inv, keys
+
+    @property
+    def all_hosts(self):
+        return Host.objects.filter(
+            Q(groups__in=self.groups_list) |
+            Q(pk__in=self.hosts_list)
+        )

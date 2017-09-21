@@ -1,5 +1,5 @@
 include polemarch/README.md
-include README.rst
+include README.rst LICENSE
 include polemarch/main/settings.ini
 include polemarch/main/tests/exemplary_complex_inventory
 include polemarch/main/tests/facts_stdout

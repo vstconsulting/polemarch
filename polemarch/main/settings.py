@@ -356,6 +356,22 @@ REPO_BACKENDS = {
 }
 
 
+TASKS_HANDLERS = {
+    "REPO": {
+        "BACKEND": "polemarch.main.tasks.RepoTask"
+    },
+    "SCHEDUER": {
+        "BACKEND": "polemarch.main.tasks.ScheduledTask"
+    },
+    "MODULE": {
+        "BACKEND": "polemarch.main.tasks.ExecuteAnsibleModule"
+    },
+    "PLAYBOOK": {
+        "BACKEND": "polemarch.main.tasks.ExecuteAnsiblePlaybook"
+    },
+}
+
+
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     REPO_BACKENDS["TEST"] = {
