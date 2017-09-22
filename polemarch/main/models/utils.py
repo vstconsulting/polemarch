@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import sys
 from os.path import dirname
+import logging
 from collections import namedtuple
 
 from django.utils import timezone
@@ -10,6 +11,7 @@ from ...main.utils import (tmp_file, CmdExecutor,
                            KVExchanger, CalledProcessError)
 
 
+logger = logging.getLogger("polemarch")
 PolemarchInventory = namedtuple("PolemarchInventory", "raw keys")
 AnsibleExtra = namedtuple('AnsibleExtraArgs', [
     'args',
@@ -27,6 +29,18 @@ class DummyHistory(object):
 
     def __getattr__(self, item):
         return None  # nocv
+
+    @property
+    def raw_stdout(self):
+        return ""
+
+    @raw_stdout.setter
+    def raw_stdout(self, value):
+        logger.info(value)  # nocv
+
+    def write_line(self, value, number):
+        # pylint: disable=unused-argument
+        logger.info(value)  # nocv
 
     def save(self):
         pass
@@ -57,9 +71,7 @@ class Executor(CmdExecutor):
 
     def write_output(self, line):
         self.counter += 1
-        self.history.raw_history_line.create(history=self.history,
-                                             line_number=self.counter,
-                                             line=line)
+        self.history.write_line(line, self.counter)
 
     def execute(self, cmd, cwd):
         self.history.raw_args = " ".join(cmd)

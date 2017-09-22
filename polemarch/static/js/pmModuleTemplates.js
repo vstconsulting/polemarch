@@ -42,16 +42,13 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
     var thisObj = this;
     $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems(), pmModuleTemplates.loadItem(item_id)).done(function()
     {
-        $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).done(function()
+        $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).always(function()
         {
-            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_module_page', {item_id:item_id}))
-
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_module_page', {item_id:item_id})) 
             $("#inventories-autocomplete").select2();
             $("#projects-autocomplete").select2();
  
             def.resolve();
-        }).fail(function(){
-            def.reject();
         });
     }).fail(function()
     {
@@ -118,7 +115,7 @@ pmModuleTemplates.addItem = function()
         module:$("#module-autocomplete").val(),
         inventory:$("#inventories-autocomplete").val(),
         project:$("#projects-autocomplete").val(),
-        group:$("#group-autocomplete").val(),
+        group:pmGroups.getGroupsAutocompleteValue(),
         args:$("#module-args-string").val(),
         vars:jsonEditor.jsonEditorGetValues(),
     }
@@ -132,18 +129,12 @@ pmModuleTemplates.addItem = function()
     }
 
     var thisObj = this;
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/templates/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             $.notify("template created", "success");
             $.when(spajs.open({ menuId:"template/"+thisObj.model.kind+"/"+data.id})).always(function(){
@@ -173,7 +164,7 @@ pmModuleTemplates.updateItem = function(item_id)
         module:$("#module-autocomplete").val(),
         inventory:$("#inventories-autocomplete").val(),
         project:$("#projects-autocomplete").val(),
-        group:$("#group-autocomplete").val(),
+        group:pmGroups.getGroupsAutocompleteValue(),
         args:$("#module-args-string").val(),
         vars:jsonEditor.jsonEditorGetValues(),
     }
@@ -186,18 +177,12 @@ pmModuleTemplates.updateItem = function(item_id)
     }
      
     var thisObj = this;
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/templates/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data:JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             thisObj.model.items[item_id] = data
             $.notify("Save", "success");

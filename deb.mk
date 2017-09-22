@@ -80,7 +80,9 @@ override_dh_auto_install:
 	mkdir -p $(BUILDROOT)/etc/$(NAME)
 	# systemd services
 	mkdir -p $(BUILDROOT)/etc/systemd/system/
+	mkdir -p $(BUILDROOT)/etc/tmpfiles.d/
 	cp initbin/*.service $(BUILDROOT)/etc/systemd/system/
+	cp initbin/*.conf $(BUILDROOT)/etc/tmpfiles.d/
 	# settings
 	cp $(NAME)/main/settings.ini $(BUILDROOT)/etc/$(NAME)/
 %:

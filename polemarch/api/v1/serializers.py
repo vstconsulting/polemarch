@@ -10,7 +10,6 @@ from django.db.models import Q
 
 from rest_framework import serializers
 from rest_framework import exceptions
-# from rest_framework.response import Response
 
 from ...main import models
 from ..base import Response
@@ -143,6 +142,8 @@ class HistorySerializer(serializers.ModelSerializer):
 
 
 class OneHistorySerializer(serializers.ModelSerializer):
+    raw_stdout = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = models.History
         fields = ("id",
@@ -168,6 +169,10 @@ class OneHistorySerializer(serializers.ModelSerializer):
         else:
             ansi_escape = re.compile(r'\x1b[^m]*m')
             return ansi_escape.sub('', self.instance.raw_stdout)
+
+    def get_raw_stdout(self, obj):
+        request = self.context.get('request')
+        return request.build_absolute_uri("raw/")
 
     def get_facts(self, request):
         return self.instance.facts
@@ -440,6 +445,7 @@ class InventorySerializer(_WithVariablesSerializer):
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     vars   = DictField(required=False)
+    all_hosts  = HostSerializer(read_only=True, many=True)
     hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
     groups = GroupSerializer(read_only=True, many=True, source="groups_list")
 
@@ -448,6 +454,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
         fields = ('id',
                   'name',
                   'hosts',
+                  'all_hosts',
                   "groups",
                   'vars',
                   'url',)

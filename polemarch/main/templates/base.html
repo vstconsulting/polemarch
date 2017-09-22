@@ -14,48 +14,8 @@
 
       <title>{% block title %}{% if name %}{{ name }} – {% endif %}Polemarch Dashboard{% endblock %}</title>
 
-      {% block style %}
-
-        {% block bootstrap_theme %} 
-        {% endblock %}  
-         
-        <!-- jQuery 2.2.3 -->
-        <script src="{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}"></script>
-        <!-- Bootstrap 3.3.6 -->
-        <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-        <!-- FastClick -->
-        <script src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
-        <!-- AdminLTE App -->
-        <script src="{% static 'js/app.js' %}"></script>
+      {% block pmInlineScripts %}
       
-        <link href="{% static 'plugins/select2/select2.min.css' %}" rel="stylesheet" />
-        
-        <!-- Bootstrap 3.3.6 -->
-        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
-        <!-- Font Awesome -->
-        <link rel="stylesheet" href="{% static 'lte/css/font-awesome.min.css' %}">
-        <!-- Ionicons -->
-        <link rel="stylesheet" href="{% static 'lte/css/ionicons.min.css' %}">
-        <!-- Theme style -->
-        <link rel="stylesheet" href="{% static 'lte/css/AdminLTE.min.css' %}">
-        <!-- AdminLTE Skins. Choose a skin from the css/skins
-             folder instead of downloading all of them to reduce the load. -->
-        <link rel="stylesheet" href="{% static 'lte/css/skins/_all-skins.min.css' %}">
-         
-        <link rel="stylesheet" href="{% static 'js/libs/c3/c3.min.css' %}">
-        
-        <link rel="stylesheet" href="{% static 'css/gui.css' %}">
-
-        <link rel="stylesheet" href="{% static 'css/ansi-colors.css' %}">
-        
-         
-        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-        <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-        <![endif]-->
- 
         <script type="text/javascript">
             var hostname = window.location.host;
             var server_status_types = '{{server_status_types|safe}}';
@@ -76,46 +36,53 @@
             window.isDebug = {% if debug %}true{% else %}false{% endif %}
             
         </script>
-           
-        <script src="{% static 'js/libs/c3/d3.min.js' %}"></script> 
-        <script src="{% static 'js/libs/c3/c3.min.js' %}"></script> 
          
-        <script src="{% static 'js/libs/autocomplete.js' %}"></script> 
-        <script src="{% static 'plugins/select2/select2.min.js' %}"></script> 
-        <script src="{% static 'js/libs/touchwipe.js' %}"></script>  
+      {% endblock %}
+      
+      {% block style %}
 
-        <script src="{% static 'js/libs/tabSignal.js' %}"></script> 
-        <script src="{% static 'js/libs/just.js' %}"></script> 
-        <script src="{% static 'js/libs/just-watch.js' %}"></script> 
-        <script src="{% static 'js/libs/notify.js' %}"></script>
-        <script src="{% static 'js/libs/moment.min.js' %}"></script>
-        <script src="{% static 'js/libs/markdown.js' %}"></script>
-        <script src="{% static 'js/libs/jquery.scrollTo.min.js' %}"></script> 
-        <script src="{% static 'js/libs/spa.js' %}"></script>
-        <script src="{% static 'js/libs/ansi_up.js' %}"></script>
+        {% block bootstrap_theme %} 
+        {% endblock %}  
+         
+        <link href="{% static 'plugins/select2/select2.min.css' %}" rel="stylesheet" />
+        
+        <!-- Bootstrap 3.3.6 -->
+        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="{% static 'lte/css/font-awesome.min.css' %}">
+        <!-- Ionicons -->
+        <link rel="stylesheet" href="{% static 'lte/css/ionicons.min.css' %}">
+        <!-- Theme style -->
+        <link rel="stylesheet" href="{% static 'lte/css/AdminLTE.min.css' %}">
+        <!-- AdminLTE Skins. Choose a skin from the css/skins
+             folder instead of downloading all of them to reduce the load. -->
+        <link rel="stylesheet" href="{% static 'lte/css/skins/_all-skins.min.css' %}">
+         
+        <link rel="stylesheet" href="{% static 'js/libs/c3/c3.min.css' %}">
+        
+        <link rel="stylesheet" href="{% static 'css/gui.css' %}">
 
-        <script src="{% static 'js/polemarch.js' %}"></script>
-        <script src="{% static 'js/jsonEditor.js' %}"></script> 
-        <script src="{% static 'js/crontabEditor.js' %}"></script>
-        <script src="{% static 'js/pmItems.js' %}"></script>
-        <script src="{% static 'js/pmUsers.js' %}"></script>
-        <script src="{% static 'js/pmHosts.js' %}"></script>
-        <script src="{% static 'js/pmGroups.js' %}"></script>
-        <script src="{% static 'js/pmInventories.js' %}"></script>
-        <script src="{% static 'js/pmProjects.js' %}"></script>
-        <script src="{% static 'js/pmTasks.js' %}"></script>
-        <script src="{% static 'js/pmPeriodicTasks.js' %}"></script>
-        <script src="{% static 'js/pmHistory.js' %}"></script>
-        <script src="{% static 'js/pmTemplates.js' %}"></script>
-        <script src="{% static 'js/pmTasksTemplates.js' %}"></script>
-        <script src="{% static 'js/pmModuleTemplates.js' %}"></script> 
-        <script src="{% static 'js/pmAnsibleModule.js' %}"></script>
-        <script src="{% static 'js/pmDashboard.js' %}"></script> 
-  
+        <link rel="stylesheet" href="{% static 'css/ansi-colors.css' %}">
+        
         {% block custom_style %}
         {% endblock %}
       {% endblock %}
 
+      {% block commonScripts %}
+      
+        <!-- jQuery 2.2.3 -->
+        <script src="{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}"></script>
+        <script src="{% static 'js/libs/notify.js' %}"></script>
+        <!-- Bootstrap 3.3.6 -->
+        <script defer src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+        <!-- FastClick -->
+        <script defer src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+        <!-- AdminLTE App -->
+        <script defer src="{% static 'js/app.js' %}"></script>
+        
+      {% endblock %}
+      
+      {% block pmScripts %}{% endblock %}
     {% endblock %}
   </head>
 
@@ -124,21 +91,6 @@
         
     <div id="loader-wrapper">
         <div id="loader"></div>
-
-        <!--<div class="spinner for-ios">
-            <div class="bar1"></div>
-            <div class="bar2"></div>
-            <div class="bar3"></div>
-            <div class="bar4"></div>
-            <div class="bar5"></div>
-            <div class="bar6"></div>
-            <div class="bar7"></div>
-            <div class="bar8"></div>
-            <div class="bar9"></div>
-            <div class="bar10"></div>
-            <div class="bar11"></div>
-            <div class="bar12"></div>
-        </div>-->
     </div>
     
     {% block navbar %}
@@ -185,49 +137,52 @@
                 {% block content %}{% endblock %}
             </div>
             
-            <footer class="main-footer">
-                <div class="pull-right" style="float: right;    padding-left: 15px;    display: inline-block;">
-                    <div class="btn-group" role="group">
-                        <a type="button" style="box-shadow:none;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" href="#" onclick="return false;">
-                            <span class="glyphicon glyphicon-question-sign"></span> Help 
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-right" style=" bottom:100% !important; top:auto !important; ">
-                            <li>
-                                <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%20{{polemarch_version}}" target="_blank">Ask question</a>
-                            </li>
-                            <li>
-                                <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20{{polemarch_version}}" target="_blank">Add bug</a>
-                            </li>
-                            <li>
-                                <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Feature%20request&issue%5Btitle%5D=" target="_blank">Add feature request</a>
-                            </li>
-                            <li role="separator" class="divider"></li>
-                            <li>
-                                <a href="https://gitlab.com/vstconsulting/polemarch" target="_blank">Official repository</a>
-                            </li>
-                            <li>
-                                <a href="http://polemarch.readthedocs.io" target="_blank">Official documentation</a>
-                            </li>
-                            <li>
-                                <a href="https://gitlab.com/vstconsulting/polemarch/issues" target="_blank">Issues</a>
-                            </li>
-                        </ul>
+            {% block footer %}
+                <footer class="main-footer">
+                    <div class="pull-right" style="float: right;    padding-left: 15px;    display: inline-block;">
+                        <div class="btn-group" role="group">
+                            <a type="button" style="box-shadow:none;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" href="#" onclick="return false;">
+                                <span class="glyphicon glyphicon-question-sign"></span> Help 
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-right" style=" bottom:100% !important; top:auto !important; ">
+                                <li>
+                                    <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%20{{polemarch_version}}" target="_blank">Ask question</a>
+                                </li>
+                                <li>
+                                    <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20{{polemarch_version}}" target="_blank">Add bug</a>
+                                </li>
+                                <li>
+                                    <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Feature%20request&issue%5Btitle%5D=" target="_blank">Add feature request</a>
+                                </li>
+                                <li role="separator" class="divider"></li>
+                                <li>
+                                    <a href="https://gitlab.com/vstconsulting/polemarch" target="_blank">Official repository</a>
+                                </li>
+                                <li>
+                                    <a href="http://polemarch.readthedocs.io" target="_blank">Official documentation</a>
+                                </li>
+                                <li>
+                                    <a href="https://gitlab.com/vstconsulting/polemarch/issues" target="_blank">Issues</a>
+                                </li>
+                            </ul>
+                        </div>
+
                     </div>
-                   
-                </div>
-                <div class="pull-right hidden-xs">
-                    <b>Version</b> {{polemarch_version}}
-                </div>
-                {% if debug %} 
                     <div class="pull-right hidden-xs">
-                        <b><a href="#" 
-                              style="color:#ccc;" 
-                              onclick="$('body').append('<script src=\'' + window.pmStaticPath + 'js/tests/qUnitTest.js\'></script>'); return false;" >Test qUnit</a></b>
-                        &nbsp;&nbsp;&nbsp;
+                        <b>Version</b> {{polemarch_version}}
                     </div>
-                {% endif %}
-                <br>
-            </footer>
+
+                    {% if debug %} 
+                        <div class="pull-right hidden-xs">
+                            <b><a href="#" 
+                                  style="color:#ccc;" 
+                                  onclick="$('body').append('<script src=\'' + window.pmStaticPath + 'js/tests/qUnitTest.js\'></script>'); return false;" >Test qUnit</a></b>
+                            &nbsp;&nbsp;&nbsp;
+                        </div>
+                    {% endif %}
+                    <br>
+                </footer>
+            {% endblock %}
         </div>
     {% endblock %} 
     {% block script %}{% endblock %}

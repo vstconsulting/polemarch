@@ -17,7 +17,6 @@ doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 
 urlpatterns = [
     url(r'^$', views.GUIView.as_view()),
-    url(r'^help/$', views.HelpView.as_view()),
     url(r'^{}'.format(login_url), views.Login.as_view(), name='login'),
     url(r'^{}'.format(logout_url), views.Logout.as_view(), {'next_page': '/'}),
     url(r'^admin/', admin.site.urls),

@@ -63,18 +63,12 @@ pmTemplates.exportToFile = function(item_ids)
     }
 
     var thisObj = this;
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/filter/?detail=1",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             var filedata = []
             for(var i in data.results)
@@ -151,18 +145,12 @@ pmTemplates.importFromFile = function(files_event)
                 }
                 console.log(bulkdata)
                  
-                $.ajax({
+                spajs.ajax.Call({
                     url: "/api/v1/_bulk/",
                     type: "POST",
                     contentType:'application/json',
                     data:JSON.stringify(bulkdata),
-                    beforeSend: function(xhr, settings) {
-                        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                            // Only send the token to relative URLs i.e. locally.
-                            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                        }
-                    },
-                    success: function(data)
+                                        success: function(data)
                     { 
                         def.resolve();
                         spajs.openURL(window.location.href);

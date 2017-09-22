@@ -186,8 +186,8 @@ PAGE_LIMIT = config.getint("web", "page_limit", fallback=1000)
 # Rest Api settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
@@ -353,6 +353,22 @@ REPO_BACKENDS = {
     "MANUAL": {
         "BACKEND": "polemarch.main.repo_backends.Manual",
     }
+}
+
+
+TASKS_HANDLERS = {
+    "REPO": {
+        "BACKEND": "polemarch.main.tasks.RepoTask"
+    },
+    "SCHEDUER": {
+        "BACKEND": "polemarch.main.tasks.ScheduledTask"
+    },
+    "MODULE": {
+        "BACKEND": "polemarch.main.tasks.ExecuteAnsibleModule"
+    },
+    "PLAYBOOK": {
+        "BACKEND": "polemarch.main.tasks.ExecuteAnsiblePlaybook"
+    },
 }
 
 

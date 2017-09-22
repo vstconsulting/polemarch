@@ -1182,31 +1182,30 @@ function qunitAddTests_inventories()
     });
 
     // Инвенторий закодированный в Base64
-    var pmInventoriesText = "IyBIb3N0cyAKMS4yLjMuWzE6MjU1XSAKMTI0LjMuNC5bN\
-DQ6NTVdIAoxMjQuMy41LlsxOjI1MF0gYW5zaWJsZV9ob3N0PTEwLjIwLjAuMiBhbnNpYmxlX3V\
-zZXI9cm9vdCBhbnNpYmxlX3NzaF9wYXNzPWVhZGdiZSBhbnNpYmxlX3NzaF9wcml2YXRlX2tle\
-V9maWxlPS9yb290L2YudHh0CjEyNC4zLjUuWzE6MjUxXSBhbnNpYmxlX2hvc3Q9IjEwLjIwLjA\
-uMiIgYW5zaWJsZV91c2VyPSdyb290JyBhbnNpYmxlX3NzaF9wYXNzPWVhZGdiZQoxMjQuMy41L\
-lsxOjI1Ml0gYW5zaWJsZV9ob3N0PSIxMC5cIjIwXCcuMC4yIiBhbnNpYmxlX3VzZXI9J3Iib1w\
-nb3QnIGFuc2libGVfc3NoX3Bhc3M9ZWFkZ2JlCiAgCiMgR2xvYmFsIHZhcnMKW2FsbDp2YXJzX\
-QphbnNpYmxlX3VzZXI9Z3JleQphbnNpYmxlX3NzaF9wcml2YXRlX2tleV9maWxlPS90bXAvdG1\
-wUlE4ZVRjCmFuc2libGVfc3NoX2V4dHJhX2FyZ3M9LW8gU3RyaWN0SG9zdEtleUNoZWNraW5nP\
-W5vIC1vIFVzZXJLbm93bkhvc3RzRmlsZT0vZGV2L251bGwKYW5zaWJsZV9zc2hfcHJpdmF0ZV9\
-rZXlfZmlsZT0vcm9vdC9mLnR4dAoKIyBHcm91cHMgCltnaXQ6Y2hpbGRyZW5dCmNpCmdpdC1zZ\
-XJ2ZXJzCgoKW2Nsb3VkOmNoaWxkcmVuXQpnaXQKc2VydmljZXMKdGVzdAoKClt0ZXN0XQp0ZXN\
-0LnZzdC5sYW4gYW5zaWJsZV91c2VyPWNlbnRvcwp0ZXN0Mi52c3QubGFuIGFuc2libGVfaG9zd\
-D0xNzIuMTYuMS4yNgoKW3Rlc3Q6dmFyc10KYW5zaWJsZV9zc2hfcHJpdmF0ZV9rZXlfZmlsZT0\
-vcm9vdC9mLnR4dAogCltjaV0KZ2l0LWNpLTEgYW5zaWJsZV9ob3N0PTE3Mi4xNi4xLjEzIGFuc\
-2libGVfc3NoX3ByaXZhdGVfa2V5X2ZpbGU9L3Jvb3QvZi50eHQKZ2l0LWNpLTIgYW5zaWJsZV9\
-ob3N0PTE3Mi4xNi4xLjE0CgoKW2dpdC1zZXJ2ZXJzXQpnaXQudnN0LmxhbiAKICAKCltzZXJ2a\
-WNlc10KY2hhdC52c3Rjb25zdWx0aW5nLm5ldCBhbnNpYmxlX2hvc3Q9MTcyLjE2LjEuMTYKcGl\
-wYy52c3QubGFuIApyZWRtaW5lLnZzdC5sYW4gCgoKW29wZW5zdGFja10KZnVlbC52c3QubGFuI\
-GFuc2libGVfaG9zdD0xMC4yMC4wLjIgYW5zaWJsZV91c2VyPXJvb3QgYW5zaWJsZV9zc2hfcGF\
-zcz1lYWRnYmUKb3MtY29tcHV0ZS0xLnZzdC5sYW4gYW5zaWJsZV9ob3N0PTEwLjIwLjAuOQpvc\
-y1jb21wdXRlLTIudnN0LmxhbiBhbnNpYmxlX2hvc3Q9MTAuMjAuMC4xMyBhbnNpYmxlX3NzaF9\
-wcml2YXRlX2tleV9maWxlPS9yb290L2YudHh0Cm9zLWNvbnRyb2xsZXItMS52c3QubGFuIGFuc\
-2libGVfaG9zdD0xMC4yMC4wLjYKb3MtY29udHJvbGxlci0yLnZzdC5sYW4gYW5zaWJsZV9ob3N\
-0PTEwLjIwLjAuOAo="
+    var pmInventoriesText = "IyBIb3N0cyAKMS4yLjMuWzE6MjU1XSAKMTI0LjMuNC5bNDQ6\n\
+NTVdIAoxMjQuMy41LlsxOjI1MF0gYW5zaWJsZV9ob3N0PTEwLjIwLjAuMiBhbnNpYmxlX3VzZXI9c\n\
+m9vdCBhbnNpYmxlX3NzaF9wYXNzPWVhZGdiZSBhbnNpYmxlX3NzaF9wcml2YXRlX2tleV9maWxlPS\n\
+9yb290L2YudHh0CjEyNC4zLjUuWzE6MjUxXSBhbnNpYmxlX2hvc3Q9IjEwLjIwLjAuMiIgYW5zaWJ\n\
+sZV91c2VyPSdyb290JyBhbnNpYmxlX3NzaF9wYXNzPWVhZGdiZQoxMjQuMy41LlsxOjI1Ml0gYW5z\n\
+aWJsZV9ob3N0PSIxMC4yMC4wLjEyIiBhbnNpYmxlX3VzZXI9J3Iib1wnb3QnIGFuc2libGVfc3NoX\n\
+3Bhc3M9ZWFkZ2JlCiAgCiMgR2xvYmFsIHZhcnMKW2FsbDp2YXJzXQphbnNpYmxlX3VzZXI9Z3JleQ\n\
+phbnNpYmxlX3NzaF9wcml2YXRlX2tleV9maWxlPS90bXAvdG1wUlE4ZVRjCmFuc2libGVfc3NoX2V\n\
+4dHJhX2FyZ3M9LW8gU3RyaWN0SG9zdEtleUNoZWNraW5nPW5vIC1vIFVzZXJLbm93bkhvc3RzRmls\n\
+ZT0vZGV2L251bGwKYW5zaWJsZV9zc2hfcHJpdmF0ZV9rZXlfZmlsZT0vcm9vdC9mLnR4dAoKIyBHc\n\
+m91cHMgCltnaXQ6Y2hpbGRyZW5dCmNpCmdpdC1zZXJ2ZXJzCgoKW2Nsb3VkOmNoaWxkcmVuXQpnaX\n\
+QKc2VydmljZXMKdGVzdAoKClt0ZXN0XQp0ZXN0LnZzdC5sYW4gYW5zaWJsZV91c2VyPWNlbnRvcwp\n\
+0ZXN0Mi52c3QubGFuIGFuc2libGVfaG9zdD0xNzIuMTYuMS4yNgoKW3Rlc3Q6dmFyc10KYW5zaWJs\n\
+ZV9zc2hfcHJpdmF0ZV9rZXlfZmlsZT0vcm9vdC9mLnR4dAogCltjaV0KZ2l0LWNpLTEgYW5zaWJsZ\n\
+V9ob3N0PTE3Mi4xNi4xLjEzIGFuc2libGVfc3NoX3ByaXZhdGVfa2V5X2ZpbGU9L3Jvb3QvZi50eH\n\
+QKZ2l0LWNpLTIgYW5zaWJsZV9ob3N0PTE3Mi4xNi4xLjE0CgoKW2dpdC1zZXJ2ZXJzXQpnaXQudnN\n\
+0LmxhbiAKICAKCltzZXJ2aWNlc10KY2hhdC52c3Rjb25zdWx0aW5nLm5ldCBhbnNpYmxlX2hvc3Q9\n\
+MTcyLjE2LjEuMTYKcGlwYy52c3QubGFuIApyZWRtaW5lLnZzdC5sYW4gCgoKW29wZW5zdGFja10KZ\n\
+nVlbC52c3QubGFuIGFuc2libGVfaG9zdD0xMC4yMC4wLjIgYW5zaWJsZV91c2VyPXJvb3QgYW5zaW\n\
+JsZV9zc2hfcGFzcz1lYWRnYmUKb3MtY29tcHV0ZS0xLnZzdC5sYW4gYW5zaWJsZV9ob3N0PTEwLjI\n\
+wLjAuOQpvcy1jb21wdXRlLTIudnN0LmxhbiBhbnNpYmxlX2hvc3Q9MTAuMjAuMC4xMyBhbnNpYmxl\n\
+X3NzaF9wcml2YXRlX2tleV9maWxlPS9yb290L2YudHh0Cm9zLWNvbnRyb2xsZXItMS52c3QubGFuI\n\
+GFuc2libGVfaG9zdD0xMC4yMC4wLjYKb3MtY29udHJvbGxlci0yLnZzdC5sYW4gYW5zaWJsZV9ob3\n\
+N0PTEwLjIwLjAuOAo="
     pmInventoriesText = Base64.decode(pmInventoriesText)
 
     /** Оригинал инвентория
@@ -1215,7 +1214,7 @@ wcml2YXRlX2tleV9maWxlPS9yb290L2YudHh0Cm9zLWNvbnRyb2xsZXItMS52c3QubGFuIGFuc\
 124.3.4.[44:55]
 124.3.5.[1:250] ansible_host=10.20.0.2 ansible_user=root ansible_ssh_pass=eadgbe ansible_ssh_private_key_file=/root/f.txt
 124.3.5.[1:251] ansible_host="10.20.0.2" ansible_user='root' ansible_ssh_pass=eadgbe
-124.3.5.[1:252] ansible_host="10.\"20\'.0.2" ansible_user='r"o\'ot' ansible_ssh_pass=eadgbe
+124.3.5.[1:252] ansible_host="10.20.0.12" ansible_user='r"o\'ot' ansible_ssh_pass=eadgbe
 
 # Global vars
 [all:vars]
@@ -1304,7 +1303,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
               "ansible_host": "10.20.0.2",
               "ansible_user": "root",
               "ansible_ssh_pass": "eadgbe",
-              "ansible_ssh_private_key_file": "/root/f.txt"
+              "ansible_ssh_private_key_file": "/root/f.txt" 
             }
           },
           {
@@ -1320,7 +1319,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             "name": "124.3.5.[1:252]",
             "type": "RANGE",
             "vars": {
-              "ansible_host": "10.\\\"20\\'.0.2",
+              "ansible_host": "10.20.0.12",
               "ansible_user": "r\"o\\'ot",
               "ansible_ssh_pass": "eadgbe"
             }
@@ -1551,7 +1550,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
     });
 
     syncQUnit.addTest('Импорт валидного inventory', function ( assert )
-    {
+    { 
         jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', 'inventory') 
         for(var i in inventory.hosts)
         {
@@ -1839,13 +1838,11 @@ function qunitAddTests_projects()
     });
 
     syncQUnit.addTest('run playbook с ошибкой 2', function ( assert )
-    { 
+    {  
         // Предполагается что мы от прошлого теста попали на страницу создания project
         var done = assert.async();
  
-        $("#new_json_nameprefix").val("test1");
-        $("#new_json_valueprefix").val("val1");
-        jsonEditor.jsonEditorAddVar();
+        jsonEditor.__devAddVar("test1", "test1", "playbook") 
   
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1] 
         var inventoryId = $("#inventories-autocomplete option")[1].value // Надеемся что там есть хоть один инвенторий 
@@ -1942,10 +1939,8 @@ function qunitAddTests_projects()
 
         // Заполнение формы с данными project
         $("#module-autocomplete").val("test");
-        
-        $("#new_json_nameprefix").val("test1");
-        $("#new_json_valueprefix").val("val1");
-        jsonEditor.jsonEditorAddVar();
+         
+        jsonEditor.__devAddVar("test1", "test1", "playbook") 
  
 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
@@ -2092,13 +2087,8 @@ function qunitAddTests_projects()
         // Заполнение формы с данными inventory
         $("#new_inventory_name").val("test-inventory-"+t);
 
-        $("#new_json_nameprefix").val("test1");
-        $("#new_json_valueprefix").val("val1");
-        jsonEditor.jsonEditorAddVar();
-
-        $("#new_json_nameprefix").val("test2");
-        $("#new_json_valueprefix").val("val2");
-        jsonEditor.jsonEditorAddVar();
+        jsonEditor.__devAddVar("test1", "test1", "inventory")  
+        jsonEditor.__devAddVar("test2", "test2", "inventory")  
 
 
         // Отправка формы с данными inventory
@@ -2140,10 +2130,8 @@ function qunitAddTests_projects()
         $("#new_periodic-tasks_playbook").val("test-project-"+t);
 
         $("#new_periodic-tasks_schedule_INTERVAL").val(t);
-
-        $("#new_json_namePLAYBOOK").val("test1");
-        $("#new_json_valuePLAYBOOK").val("val1");
-        jsonEditor.jsonEditorAddVar('periodic_playbook', "PLAYBOOK");
+ 
+        jsonEditor.__devAddVar("test1", "test1", "periodic_playbook", 'PLAYBOOK')  
  
 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
@@ -2170,7 +2158,7 @@ function qunitAddTests_projects()
     });
 
     syncQUnit.addTest('Создание periodic task', function ( assert )
-    {
+    { 
         // Предполагается что мы от прошлого теста попали на страницу создания project
         var done = assert.async();
 
@@ -2184,7 +2172,7 @@ function qunitAddTests_projects()
 
         $("#new_json_namePLAYBOOK").val("become-method");
         $("#new_json_valuePLAYBOOK").val("val1");
-        jsonEditor.jsonEditorAddVar('periodic_playbook', "PLAYBOOK");
+        jsonEditor.jsonEditorAddVar('periodic_playbook', "PLAYBOOK"); 
  
 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
@@ -2219,10 +2207,8 @@ function qunitAddTests_projects()
 
         // Заполнение формы с данными inventory
         $("#periodic-tasks_"+taskId+"_name").val("test-task2-"+t);
-
-        $("#new_json_namePLAYBOOK").val("test1");
-        $("#new_json_valuePLAYBOOK").val("val1");
-        jsonEditor.jsonEditorAddVar('periodic_playbook', "PLAYBOOK");
+ 
+        jsonEditor.__devAddVar("test1", "test1", "periodic_playbook", "PLAYBOOK") 
   
         // Отправка формы с данными inventory
         $.when(pmPeriodicTasks.updateItem(taskId)).done(function()
@@ -2394,10 +2380,8 @@ function qunitAddTests_templates_task(){
 
         // Заполнение формы с данными project
         $("#Templates-name").val("!2 d#");
-        
-        $("#new_json_nameprefix").val("syntax-check32");
-        $("#new_json_valueprefix").val("syntax-check32");
-        jsonEditor.jsonEditorAddVar(); 
+         
+        jsonEditor.__devAddVar("syntax-check32", "syntax-check32") 
        
         // Отправка формы с данными project
         $.when(pmTasksTemplates.addItem()).done(function()
@@ -2441,10 +2425,8 @@ function qunitAddTests_templates_task(){
         var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
 
         $("#playbook-autocomplete").val("test2-playbook-"+t);
-
-        $("#new_json_nameprefix").val("syntax-check22");
-        $("#new_json_valueprefix").val("syntax-check22");
-        jsonEditor.jsonEditorAddVar(); 
+ 
+        jsonEditor.__devAddVar("syntax-check22", "syntax-check22") 
             
         $.when(pmTasksTemplates.updateItem(itemId)).done(function()
         {
@@ -2579,10 +2561,8 @@ function qunitAddTests_templates_modules(){
 
         // Заполнение формы с данными project
         $("#Templates-name").val("test-template-"+t);
-
-        $("#new_json_nameprefix").val("new-vault-password-file2");
-        $("#new_json_valueprefix").val("syntax-check");
-        jsonEditor.jsonEditorAddVar();
+ 
+        jsonEditor.__devAddVar("new-vault-password-file2", "syntax-check") 
         
         // Отправка формы с данными project
         $.when(pmModuleTemplates.addItem()).done(function()
@@ -2597,7 +2577,7 @@ function qunitAddTests_templates_modules(){
     });
     
     syncQUnit.addTest('Сохранение шаблона модуля', function ( assert )
-    {
+    { 
         // Предполагается что мы от прошлого теста попали на страницу создания project
         var done = assert.async();
 
@@ -2622,18 +2602,15 @@ function qunitAddTests_templates_modules(){
     });
 
     syncQUnit.addTest('Изменение не валидного шаблона модуля', function ( assert )
-    {
+    { 
         var done = assert.async();
 
         // Предполагается что мы от прошлого теста попали на страницу редактирования project
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
 
-        $("#module-autocomplete").val("test2-playbook-"+t);
-
-        $("#new_json_nameprefix").val("new-vault-password-file2");
-        $("#new_json_valueprefix").val("syntax-check");
-        jsonEditor.jsonEditorAddVar();
+        $("#module-autocomplete").val("test2-playbook-"+t); 
+        jsonEditor.__devAddVar("new-vault-password-file2", "syntax-check") 
 
 
         $.when(pmModuleTemplates.updateItem(itemId)).done(function()
