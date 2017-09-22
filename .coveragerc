@@ -10,6 +10,8 @@ omit =
     test.py
     upload_big.py
     polemarch/__init__.py
+    polemarch/__main__.py
+    polemarch/wapp.py
     polemarch/main/management/commands/webserver.py
     polemarch/main/tests/repos.py
     *celery_beat_scheduler.py

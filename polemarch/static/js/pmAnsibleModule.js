@@ -53,7 +53,7 @@ pmAnsibleModule.showInProject = function(holder, menuInfo, data)
                 selector: '#module-autocomplete',
                 minChars: 0,
                 cache:false,
-                showByClick:true,
+                showByClick:false,
                 menuClass:'module-autocomplete',
                 renderItem: function(item, search)
                 {
@@ -114,16 +114,10 @@ pmAnsibleModule.loadAllModule = function()
 {
     var def = new $.Deferred();
     var thisObj = this;
-    jQuery.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/ansible/modules/",
         type: "GET",
         contentType:'application/json', 
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
         success: function(data)
         { 
             thisObj.model.ansible_modules = data 
@@ -159,21 +153,21 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
 
     if(!(inventory_id/1))
     {
-        $.notify("Invalid filed `inventory` ", "error");
+        $.notify("Invalid field `inventory` ", "error");
         def.reject();
         return def.promise();
     }
     
     if(!(project_id/1))
     {
-        $.notify("Invalid filed `project` ", "error");
+        $.notify("Invalid field `project` ", "error");
         def.reject();
         return def.promise();
     }
 
     if(!module)
     {
-        $.notify("Invalid filed `module` ", "error");
+        $.notify("Invalid field `module` ", "error");
         def.reject();
         return def.promise();
     }
@@ -197,23 +191,17 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
     
     if(module == 'shell' && !data_args)
     {
-        $.notify("Invalid filed `Shell command` ", "error");
+        $.notify("Invalid field `Shell command` ", "error");
         def.reject();
         return def.promise();
     }
  
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/projects/"+project_id+"/execute-module/",
         type: "POST",
         data:JSON.stringify(data),
         contentType:'application/json',
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data) 
+                success: function(data) 
         {
             if(data && data.history_id)
             { 

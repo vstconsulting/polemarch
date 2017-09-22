@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import json
 
+import re
 import six
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -9,7 +10,6 @@ from django.db.models import Q
 
 from rest_framework import serializers
 from rest_framework import exceptions
-# from rest_framework.response import Response
 
 from ...main import models
 from ..base import Response
@@ -44,32 +44,6 @@ class DictField(serializers.CharField):
 
 
 # Serializers
-class TemplateSerializer(serializers.ModelSerializer):
-    data = DictField(required=True, write_only=True)
-
-    class Meta:
-        model = models.Template
-        fields = (
-            'id',
-            'name',
-            'kind',
-            'data',
-        )
-
-
-class OneTemplateSerializer(TemplateSerializer):
-    data = DictField(required=True)
-
-    class Meta:
-        model = models.Template
-        fields = (
-            'id',
-            'name',
-            'kind',
-            'data',
-        )
-
-
 class UserSerializer(serializers.ModelSerializer):
 
     class UserExist(exceptions.ValidationError):
@@ -168,6 +142,8 @@ class HistorySerializer(serializers.ModelSerializer):
 
 
 class OneHistorySerializer(serializers.ModelSerializer):
+    raw_stdout = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = models.History
         fields = ("id",
@@ -184,6 +160,19 @@ class OneHistorySerializer(serializers.ModelSerializer):
                   "initiator",
                   "initiator_type",
                   "url")
+
+    def get_raw(self, request):
+        params = request.query_params
+        color = params.get("color", "no")
+        if color == "yes":
+            return self.instance.raw_stdout
+        else:
+            ansi_escape = re.compile(r'\x1b[^m]*m')
+            return ansi_escape.sub('', self.instance.raw_stdout)
+
+    def get_raw_stdout(self, obj):
+        request = self.context.get('request')
+        return request.build_absolute_uri("raw/")
 
     def get_facts(self, request):
         return self.instance.facts
@@ -339,6 +328,7 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
                   'kind',
                   'project',
                   'inventory',
+                  'save_result',
                   'vars',
                   'url',)
 
@@ -356,10 +346,35 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'kind',
                   'project',
                   'inventory',
+                  'save_result',
                   'vars',
                   'url',)
 
 
+class TemplateSerializer(_WithVariablesSerializer):
+    data = DictField(required=True, write_only=True)
+
+    class Meta:
+        model = models.Template
+        fields = (
+            'id',
+            'name',
+            'kind',
+            'data',
+        )
+
+
+class OneTemplateSerializer(TemplateSerializer):
+    data = DictField(required=True)
+
+    class Meta:
+        model = models.Template
+        fields = (
+            'id',
+            'name',
+            'kind',
+            'data',
+        )
 ###################################
 # Subclasses for operations
 # with hosts and groups
@@ -430,6 +445,7 @@ class InventorySerializer(_WithVariablesSerializer):
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     vars   = DictField(required=False)
+    all_hosts  = HostSerializer(read_only=True, many=True)
     hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
     groups = GroupSerializer(read_only=True, many=True, source="groups_list")
 
@@ -438,6 +454,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
         fields = ('id',
                   'name',
                   'hosts',
+                  'all_hosts',
                   "groups",
                   'vars',
                   'url',)

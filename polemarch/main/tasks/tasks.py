@@ -1,7 +1,7 @@
 # pylint: disable=broad-except,no-member,redefined-outer-name
 import logging
 
-from ...celery_app import app
+from ...wapp import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
 from ..models.utils import AnsibleModule, AnsiblePlaybook
@@ -42,7 +42,10 @@ class ScheduledTask(BaseTask):
 
     def run(self):
         from ..models import PeriodicTask
-        task = PeriodicTask.objects.get(id=self.job_id)
+        try:
+            task = PeriodicTask.objects.get(id=self.job_id)
+        except PeriodicTask.DoesNotExist:
+            return
         task.execute()
 
 

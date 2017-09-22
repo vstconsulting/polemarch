@@ -51,6 +51,7 @@ class PeriodicTask(AbstractModel):
                                     related_query_name="periodic_tasks")
     schedule    = models.CharField(max_length=4*1024)
     type        = models.CharField(max_length=10)
+    save_result = models.BooleanField(default=True)
 
     kinds = ["PLAYBOOK", "MODULE"]
     types = ["CRONTAB", "INTERVAL"]
@@ -86,12 +87,9 @@ class PeriodicTask(AbstractModel):
     @transaction.atomic()
     def set_vars(self, variables):
         command = "playbook"
-        ansible_args = {}
-        for key, value in variables.items():
-            ansible_args[key] = value
         if self.kind == "MODULE":
             command = "module"
-        AnsibleArgumentsReference().validate_args(command, ansible_args)
+        AnsibleArgumentsReference().validate_args(command, variables)
         return super(PeriodicTask, self).set_vars(variables)
 
     def get_schedule(self):
@@ -106,12 +104,16 @@ class PeriodicTask(AbstractModel):
             self.run_ansible_module()
 
     def run_ansible_module(self):
-        self.project.execute_ansible_module(self.mode, self.inventory.id,
-                                            sync=True, **self.vars)
+        self.project.execute_ansible_module(
+            self.mode, self.inventory.id, sync=True,
+            save_result=self.save_result, **self.vars
+        )
 
     def run_ansible_playbook(self):
-        self.project.execute_ansible_playbook(self.mode, self.inventory.id,
-                                              sync=True, **self.vars)
+        self.project.execute_ansible_playbook(
+            self.mode, self.inventory.id, sync=True,
+            save_result=self.save_result, **self.vars
+        )
 
 
 class Template(BModel):
@@ -210,6 +212,7 @@ class History(BModel):
         qs = qs.exclude(Q(line__contains="No config file") |
                         Q(line__contains="as config file"))
         data = "\n".join(qs.values_list("line", flat=True)) + "\n"
+        data = re.sub(r'\x1b[^m]*m', '', data)
         regex = (
             r"^([\S]{1,})\s\|\s([\S]{1,}) \=>"
             r" \{\s([^\r]*?\"[\w]{1,}\"\: .*?\s)\}\s"
@@ -222,7 +225,7 @@ class History(BModel):
     @property
     def raw_stdout(self):
         return "\n".join(self.raw_history_line
-                         .values_list("line", flat=True)[:10000000])
+                         .values_list("line", flat=True))
 
     @raw_stdout.setter
     @transaction.atomic
@@ -237,6 +240,11 @@ class History(BModel):
     @raw_stdout.deleter
     def raw_stdout(self):
         self.raw_history_line.all().delete()
+
+    def write_line(self, value, number):  # nocv
+        self.raw_history_line.create(
+            history=self, line_number=number, line=value
+        )
 
 
 class HistoryLines(BModel):

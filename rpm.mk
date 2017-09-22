@@ -4,7 +4,7 @@ define RPM_SPEC
 %define shortname $(NAME)
 %define file_permissions_user $(USER)
 %define file_permissions_group $(USER)
-%define venv_cmd virtualenv --no-site-packages
+%define venv_cmd $(PY) -m virtualenv --no-site-packages
 %define venv_name %{name}
 %define venv_install_dir /opt/%{venv_name}
 %define venv_dir %{buildroot}/%{venv_install_dir}
@@ -34,10 +34,11 @@ Vendor: $(VENDOR)
 License: ${LICENSE}
 AutoReq: No
 AutoProv: No
+BuildRequires: python, openssl-devel, libyaml-devel
 Requires: python, openssl-devel
-Requires: httpd, httpd-devel, logrotate
 Requires: python-virtualenv
 Requires: git
+Requires: libyaml-devel
 
 
 %description
@@ -55,6 +56,7 @@ $(DESCRIPTION)
 /var/lock/%{name}
 %attr(755,root,root) /etc/systemd/system/%{shortname}web.service
 %attr(755,root,root) /etc/systemd/system/%{shortname}worker.service
+%attr(755,root,root) /etc/tmpfiles.d/%{shortname}.conf
 
 %pre
 id -u %{file_permissions_user} &>/dev/null || useradd %{file_permissions_user}
@@ -77,6 +79,7 @@ venvctrl-relocate --source=%{venv_dir} --destination=/%{venv_install_dir}
 find %{venv_dir}/lib -type f -name "*.c" -print0 | xargs -0 rm -rf
 # Setup init scripts
 mkdir -p $$RPM_BUILD_ROOT/etc/systemd/system
+mkdir -p $$RPM_BUILD_ROOT/etc/tmpfiles.d
 mkdir -p $$RPM_BUILD_ROOT/etc/%{name}
 mkdir -p $$RPM_BUILD_ROOT/var/log/%{name}
 mkdir -p $$RPM_BUILD_ROOT/var/run/%{name}
@@ -85,17 +88,10 @@ mkdir -p $$RPM_BUILD_ROOT/usr/bin
 install -m 755 %{name}/main/settings.ini $$RPM_BUILD_ROOT/etc/%{name}/settings.ini.template
 install -m 755 initbin/%{shortname}web.service $$RPM_BUILD_ROOT/etc/systemd/system/%{shortname}web.service
 install -m 755 initbin/%{shortname}worker.service $$RPM_BUILD_ROOT/etc/systemd/system/%{shortname}worker.service
+install -m 755 initbin/%{shortname}.conf $$RPM_BUILD_ROOT/etc/tmpfiles.d/%{shortname}.conf
 
 %post
 sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl migrate > /dev/null 2>&1
-sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl webserver \
-                                          --setup-only --port=8080 \
-                                          --user %{shortname} --group %{shortname} \
-                                          --server-root=/opt/%{name}/httpd \
-                                          --log-directory=/var/log/%{name} \
-                                          --access-log \
-                                          --pid-file=/var/run/%{name}/web.pid \
-                                          >/dev/null 2>&1
 /usr/bin/systemctl enable %{shortname}web.service > /dev/null 2>&1
 /usr/bin/systemctl enable %{shortname}worker.service > /dev/null 2>&1
 /usr/bin/systemctl daemon-reload > /dev/null 2>&1

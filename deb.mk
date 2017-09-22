@@ -3,7 +3,7 @@ Source: $(NAME)
 Section: unknown
 Priority: optional
 Maintainer: $(VENDOR)
-Build-Depends: debhelper (>= 9), python-virtualenv, python-pip, apache2, apache2-dev, python-dev, gcc, libffi-dev, libssl-dev
+Build-Depends: debhelper (>= 9), python-virtualenv, python-pip, python-dev, gcc, libffi-dev, libssl-dev, libyaml-dev
 Standards-Version: 3.9.5
 Homepage: https://gitlab.com/vstconsulting/polemarch
 Vcs-Git: git@gitlab.com:vstconsulting/polemarch.git
@@ -11,7 +11,7 @@ Vcs-Browser: https://gitlab.com/vstconsulting/polemarch.git
 
 Package: $(NAME)
 Architecture: amd64
-Depends: $${shlibs:Depends}, $${misc:Depends}, apache2, python-virtualenv, libffi6, libssl-dev, sshpass, libpython2.7, git
+Depends: $${shlibs:Depends}, $${misc:Depends}, python-virtualenv, libffi6, libssl-dev, sshpass, libpython2.7, git, libyaml-dev
 Description: $(SUMMARY)
 $(DESCRIPTION)
 endef
@@ -80,7 +80,9 @@ override_dh_auto_install:
 	mkdir -p $(BUILDROOT)/etc/$(NAME)
 	# systemd services
 	mkdir -p $(BUILDROOT)/etc/systemd/system/
+	mkdir -p $(BUILDROOT)/etc/tmpfiles.d/
 	cp initbin/*.service $(BUILDROOT)/etc/systemd/system/
+	cp initbin/*.conf $(BUILDROOT)/etc/tmpfiles.d/
 	# settings
 	cp $(NAME)/main/settings.ini $(BUILDROOT)/etc/$(NAME)/
 %:
@@ -105,14 +107,6 @@ chown -R $(USER):$(USER) /var/run/$(NAME)
 chown -R $(USER):$(USER) /var/lock/$(NAME)
 # making migration and activate services
 sudo -u $(USER) /opt/$(NAME)/bin/polemarchctl migrate > /dev/null 2>&1
-sudo -u $(USER) /opt/$(NAME)/bin/polemarchctl webserver \
-                                          --setup-only --port=8080 \
-                                          --user $(USER) --group $(USER) \
-                                          --server-root=/opt/$(NAME)/httpd \
-                                          --log-directory=/var/log/$(NAME) \
-                                          --access-log \
-                                          --pid-file=/var/run/$(NAME)/web.pid \
-                                           > /dev/null 2>&1
 systemctl enable polemarchweb.service
 systemctl enable polemarchworker.service
 systemctl daemon-reload

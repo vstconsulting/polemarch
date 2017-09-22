@@ -1,0 +1,718 @@
+
+<!-- Список прокектов -->
+<script type="text/x-just" data-just="projects_list">
+    <section class="content-header">
+        <h1>
+            Projects
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Projects</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <a class="btn btn-primary"  href="/?new-project" onclick="spajs.open({ menuId:'new-project'}); return false;">Create project</a>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Projects
+                        <div class="input-group col-lg-2" style="float: right;">
+                            <input
+                                type="text"
+                                id="search-query-input"
+                                placeholder="Search by name"
+                                class="form-control"
+                                maxlength="255"
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmProjects.search($('#search-query-input').val()));"
+                            >
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmProjects.search($('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
+                            </div>
+                        </div>
+                        <% if(pmProjects.getTotalPages(pmProjects.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmProjects.paginationHtml(pmProjects.model.itemslist) %>
+                            </div>
+                        <% } %>
+
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmProjects.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
+                                    <th>Name</th>
+                                    <th style="width: 110px;">Status</th>
+                                    <th style="width: 95px;">Actions</th>
+                                </tr>
+                                <% for(var i in pmProjects.model.itemslist.results){ valid = pmProjects.model.itemslist.results[i].id; %>
+                                    <tr
+                                        class="item-row item-<%- valid %>  <%- pmProjects.model.selectedItems.justClass(valid, 'selected') %>"
+                                        data-id="<%- valid %>" >
+                                        <td class=""  onclick="pmProjects.toggleSelect(<%- valid %>); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td>
+                                            <a href="/?project/<%- valid %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%= pmProjects.model.items[valid].justText('name') %></a>
+                                        </td>
+                                        <td class="project-status <%- pmProjects.model.items[valid].justClassName('status', function(v){ return "project-status-"+v}) %>" >
+                                            <%= pmProjects.model.items[valid].justText('status') %>
+                                        </td>
+                                        <td >
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Actions
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-right">
+ 
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.showLoader(pmProjects.syncRepo(<%- valid %>)); return false;" >Sync</a>
+                                                    </li>
+                                                    <li role="separator" class="divider"></li>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/playbook/run'}); return false;" >Run playbook</a>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/ansible-module/run'}); return false;" >Run ansible module</a>
+                                                    </li>
+                                                    <li role="separator" class="divider"></li>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/periodic-tasks'}); return false;" >Periodic tasks</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.open({ menuId:'project/<%- valid %>/history'}); return false;" >History</a>
+                                                    </li>
+                                                    <li role="separator" class="divider"></li>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.showLoader(pmProjects.deleteItem(<%- valid %>)); return false;" >Delete</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="btn-group <%- pmProjects.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= pmProjects.model.justText('selectedCount') %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#" onclick="pmProjects.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
+                                </li> 
+                                <li>
+                                    <a href="#" onclick="pmProjects.deleteSelected(); return false;" >Delete all selected elements</a>
+                                </li>
+                                <li>
+                                    <a href="#" onclick="pmProjects.multiOperationsOnEachRow($('.multiple-select .item-row.selected'), 'syncRepo'); return false;" >Sync</a>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <% if(!query){ %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">  
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(pmProjects.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                    </li>
+                                    <li class=" <%- pmProjects.model.justNotClass('selectedCount', 'hide') %>" >
+                                        <a href="#" onclick="spajs.showLoader(pmProjects.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } %>
+                        <% if(pmProjects.getTotalPages(pmProjects.model.itemslist)){ %>
+                                <%= pmProjects.paginationHtml(pmProjects.model.itemslist) %>
+                        <% } %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+
+<!-- Страница прокекта -->
+<script type="text/x-just" data-just="projects_page">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?projects"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" ><%= pmProjects.model.items[item_id].justText('name') %></span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects"  onclick="return spajs.openURL(this.href);" >Projects</a></li>
+            <li class="active"><%- pmProjects.model.items[item_id].name.slice(0, 20) %></li>
+        </ol>
+    </section>
+
+    <section class="content"> 
+        <button type="button" onclick="spajs.showLoader(pmProjects.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save project</button>
+        <button type="button" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-warning" ><i class="fa fa-refresh" aria-hidden="true"></i> Sync</button>
+        <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>/playbook/run" onclick="return spajs.openURL(this.href);" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-play" aria-hidden="true"></i> Run playbook</a>
+        <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>/ansible-module/run" onclick="return spajs.openURL(this.href);" class="btn btn-info" ><i class="fa fa-terminal" aria-hidden="true"></i> Run module</a>
+        <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-clock-o" aria-hidden="true"></i> Periodic tasks</a>
+        <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>/history" onclick="return spajs.openURL(this.href);" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-history" aria-hidden="true"></i> History</a>
+
+
+        <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-danger danger-right" > 
+            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove project</span>
+        </button>
+
+
+        <div class="btn-group visible-sm visible-xs" role="group" style="float: right;" >
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li>
+                    <a href="#" onclick="spajs.open({ menuId:'project/<%- item_id %>/playbook/run'}); return false;" >Run playbook</a>
+                </li>
+                <li>
+                    <a href="#"
+                        onclick="spajs.open({ menuId:'project/<%- item_id %>/ansible-module/run'}); return false;" >Execute ansible module</a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a href="#" onclick="spajs.open({ menuId:'project/<%- item_id %>/periodic-tasks'}); return false;" >Periodic tasks</a>
+                </li>
+                <li>
+                    <a href="#" onclick="spajs.open({ menuId:'project/<%- item_id %>/history'}); return false;" >History</a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a href="#" onclick="spajs.showLoader(pmProjects.syncRepo(<%- item_id %>)); return false;" >Sync</a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a href="#" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" >Remove project</a>
+                </li>
+            </ul>
+        </div>
+
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Project<br>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Name</label>
+                                <input type="text"  placeholder="Enter project name"  id="project_<%- pmProjects.model.items[item_id].id %>_name" value="<%- pmProjects.model.items[item_id].name %>"  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div> 
+                            
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Repository type</label>
+                                <input type="text" disabled  placeholder="Enter project name" id="project_<%- pmProjects.model.items[item_id].id %>_type" value="<%- pmProjects.model.items[item_id].vars.repo_type %>"  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>  
+                        </div>
+                        <div class="row">
+                            <% if(pmProjects.model.items[item_id].vars.repo_type != "MANUAL"){ %>
+                                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                    <label class="control-label" >Repository URL</label>
+                                    <input type="text"  placeholder="Enter project repository"  id="project_<%- pmProjects.model.items[item_id].id %>_repository" value="<%- pmProjects.model.items[item_id].repository %>"  class="form-control" maxlength="255">
+                                    <div class="help-block" onmouseenter="$(this).children().popover();"> 
+                                        Enter <%= pmProjects.model.justText('repository_type') %> project repository url
+                                        <span class="glyphicon glyphicon-question-sign  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v != 'GIT' }) %>"
+                                            role="button"
+                                            data-trigger="hover"
+                                            title=""
+                                            data-placement="top"
+                                            data-html="true"
+                                            data-content="For example repository URL make be like this: `http://UserName@gitlab.com/UserName/ProjectRepository.git`"
+                                            data-original-title="GIT project repository URL"></span>
+
+                                        <span class="glyphicon glyphicon-question-sign  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v != 'TAR' }) %>"
+                                                role="button"
+                                                data-trigger="hover"
+                                                title=""
+                                                data-placement="top"
+                                                data-html="true"
+                                                data-content="For example repository URL make be like this: `http://example.com/ProjectRepository.tar`"
+                                                data-original-title="TAR project repository URL"></span>
+
+                                    </div>
+                                </div>
+                            <% } %>
+                            <% if(pmProjects.model.items[item_id].vars.repo_type != "TAR" || pmProjects.model.items[item_id].vars.repo_type != "MANUAL"){ %>
+                                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                    <label class="control-label" >Repository password</label>
+                                    <input type="password" 
+                                            placeholder="Enter repository password"
+                                            id="project_<%- pmProjects.model.items[item_id].id %>_password"
+                                            value="<%- pmProjects.model.items[item_id].vars.repo_password %>"
+                                            class="form-control"
+                                            maxlength="255">
+                                    <div class="help-block"></div>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </section> 
+        </div>
+
+        <!-- 
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Sub items<br>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <~ pmProjects.model.items[item_id].groups >
+                                <% console.log("projects", item_id, pmProjects.model.items[item_id].groups) %>
+                                <% for(var i in pmProjects.model.items[item_id].groups){ %>
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                        <label class="control-label" >Group</label>
+                                        <%- pmProjects.model.items[item_id].groups[i].name %>
+                                    </div>
+                                <% } %>
+                            <~>
+
+                            <~ pmProjects.model.items[item_id].hosts >
+                                <% for(var i in pmProjects.model.items[item_id].hosts){ %>
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                        <label class="control-label" >Host</label>
+                                        <%- pmProjects.model.items[item_id].hosts[i].name %>
+                                    </div>
+                                <% } %>
+                            <~>
+
+                            <~ pmProjects.model.items[item_id].inventories >
+                                <% for(var i in pmProjects.model.items[item_id].inventories){ %>
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                        <label class="control-label" >Inventory</label>
+                                        <%- pmProjects.model.items[item_id].inventories[i].name %>
+                                    </div>
+                                <% } %>
+                            <~>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+
+                                    <button
+                                            type="button"
+                                            onclick="spajs.showLoader(pmProjects.showAddSubGroupsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary"
+                                            >Edit existings groups</button>
+                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Create new group</button>
+
+                                    <button type="button"
+                                            onclick="spajs.showLoader(pmProjects.showAddSubHostsForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary"
+                                            >Edit existings hosts</button>
+                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Create new host</button>
+
+                                    <button type="button"
+                                            onclick="spajs.showLoader(pmProjects.showAddSubInventoriesForm(<%- item_id %>)); return false;"
+                                            class="btn btn-primary"
+                                            >Edit existings inventory</button>
+                                    <button type="button" onclick="spajs.open({ menuId:'project/<%- item_id %>/new-inventory'}); return false;" class="btn btn-primary" >Create new inventory</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>-->
+    </section>
+</script>
+
+<!-- Страница создания прокекта -->
+<script type="text/x-just" data-just="projects_new_page">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" >Create new project</span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
+            <li class="active">Create new project</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmProjects.addItem()); return false;" class="btn btn-primary" >Save project</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        New project<br>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Name</label>
+                                <input type="text"  placeholder="Enter project name"  id="new_project_name" value=""  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+ 
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Repository type</label>
+                                <select class="form-control select2" id="new_project_type" onchange="pmProjects.model.repository_type = this.value;" data-placeholder="Select a type" >
+                                    <% for(var i in pmProjects.model.supportedRepos){ %>
+                                        <option
+                                            <% if(pmProjects.model.repository_type = pmProjects.model.supportedRepos[i]){ %>selected<% } %> 
+                                            value="<%- pmProjects.model.supportedRepos[i] %>" ><%- pmProjects.model.supportedRepos[i] %></option>
+                                    <% } %>
+                                </select>
+                            </div> 
+                            
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v == 'MANUAL' }) %>">
+                                <label class="control-label" >Repository URL</label>
+                                <input type="text"  placeholder="Enter project repository"  id="new_project_repository" value=""  class="form-control" maxlength="255">
+                                
+                                <div class="help-block" onmouseenter="$(this).children().popover();">
+                                    Enter <%= pmProjects.model.justText('repository_type') %> project repository url
+                                    <span class="glyphicon glyphicon-question-sign  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v != 'GIT' }) %>"
+                                            role="button"
+                                            data-trigger="hover"
+                                            title=""
+                                            data-placement="top"
+                                            data-html="true"
+                                            data-content="For example repository URL make be like this: `http://UserName@gitlab.com/UserName/ProjectRepository.git`"
+                                            data-original-title="GIT project repository URL"></span>
+
+                                    <span class="glyphicon glyphicon-question-sign  <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v != 'TAR' }) %>"
+                                            role="button"
+                                            data-trigger="hover"
+                                            title=""
+                                            data-placement="top"
+                                            data-html="true"
+                                            data-content="For example repository URL make be like this: `http://example.com/ProjectRepository.tar`"
+                                            data-original-title="TAR project repository URL"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v == 'TAR' || v == 'MANUAL' }) %>">
+                                <label class="control-label" >Repository password</label>
+                                <input type="password"  placeholder="Enter repository password"  id="new_project_password" value=""  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section> 
+        </div>
+    </section>
+</script>
+
+<!-- Добавление списка подгрупп к прокекту -->
+<script type="text/x-just" data-just="add_existing_inventories_to_project">
+    <div class="row" id="add_existing_item_to_project">
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Edit sub inventories<br>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
+                                <% for(var i in pmInventories.model.itemslist.results){ %>
+                                    <option
+                                        value="<%- pmInventories.model.itemslist.results[i].id %>"
+                                        <% if(pmProjects.hasInventories(item_id, pmInventories.model.itemslist.results[i].id)){ %>selected<% } %> ><%- pmInventories.model.itemslist.results[i].name %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <button type="button" onclick="$('#add_existing_item_to_project').hide(); spajs.showLoader(pmProjects.setSubInventories(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_project').remove(); return false;" class="btn btn-default" >Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</script>
+
+
+<!-- Добавление списка подгрупп к прокекту -->
+<script type="text/x-just" data-just="add_existing_groups_to_project">
+    <div class="row" id="add_existing_item_to_project">
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Edit sub groups<br>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
+                                <% for(var i in pmGroups.model.itemslist.results){ %>
+                                    <option
+                                        value="<%- pmGroups.model.itemslist.results[i].id %>"
+                                        <% if(pmProjects.hasGroups(item_id, pmGroups.model.itemslist.results[i].id)){ %>selected<% } %> ><%- pmGroups.model.itemslist.results[i].name %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <button type="button" onclick="$('#add_existing_item_to_project').hide(); spajs.showLoader(pmProjects.setSubGroups(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_project').remove(); return false;" class="btn btn-default" >Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</script>
+
+<!-- Добавление списка хостов к прокекту -->
+<script type="text/x-just" data-just="add_existing_hosts_to_project">
+    <div class="row" id="add_existing_item_to_project">
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Edit sub hosts<br>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
+                                <% for(var i in pmHosts.model.itemslist.results){ %>
+                                    <option
+                                        value="<%- pmHosts.model.itemslist.results[i].id %>"
+                                        <% if(pmProjects.hasHosts(item_id, pmHosts.model.itemslist.results[i].id)){ %>selected<% } %> ><%- pmHosts.model.itemslist.results[i].name %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <button type="button" onclick="$('#add_existing_item_to_project').hide(); spajs.showLoader(pmProjects.setSubHosts(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_item_to_project').remove(); return false;" class="btn btn-default" >Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</script>
+
+<script type="text/x-just" data-just="projects_run_playbook">
+<section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+ 
+            <span class="h1-header" >Project `<%= pmProjects.model.items[item_id].justText('name') %>` run playbook options</span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[item_id].name.slice(0, 20) %></a></li>
+            <li class="active">Project tasks</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button"
+                onclick="spajs.showLoader(pmProjects.executePlaybook(<%- item_id %>)); return false;"
+                class="btn btn-warning" >Execute</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Run playbook
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="form-group col-lg-4">
+                                <label class="control-label" >Inventory</label>
+                                <select class="form-control select2"
+                                        id="inventories-autocomplete" 
+                                        data-placeholder="Select inventory" 
+                                        style="width:100%"  
+                                        onchange="pmProjects.model.selectedInventory = this.value;"
+                                >
+                                    <option selected value="0" disabled>Not set</option>
+                                    <% for(var i in pmInventories.model.itemslist.results){ %>
+                                        <option
+                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
+                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
+                                    <% } %>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-lg-4">
+                                <label class="control-label" >Playbook</label>
+                                <input type="text"
+                                        class="playbook-autocomplete form-control"
+                                        id="playbook-autocomplete"
+                                        value="">
+                            </div>
+                             
+                            <~ pmProjects.model.selectedInventory>
+                                <%= pmGroups.groupsAutocompleteTemplate(pmProjects.model.selectedInventory) %>
+                            <~>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="row">
+            <%= jsonEditor.editor({}, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true, excluded_options:['limit']}) %>
+        </div>
+    </section>
+</script>
+
+    
+<!-- Страница module_run_page in projects -->
+<script type="text/x-just" data-just="module_run_page">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+            <span class="h1-header" >Execute ansible module</span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?project/<%- item_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[item_id].name.slice(0, 20) %></a></li>
+            <li class="active">Execute ansible module</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute(<%- item_id %>, $('#inventories-autocomplete').val(), pmGroups.getGroupsAutocompleteValue(), $('#module-autocomplete').val())); return false;" class="btn btn-warning" >Execute</button>
+
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Execute ansible module
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-4">
+                                <label class="control-label" >Inventory</label>
+                                <select
+                                    class="form-control select2"
+                                    id="inventories-autocomplete"
+                                    data-placeholder="Select inventory"
+                                    style="width:100%"
+                                    onchange="pmModuleTemplates.selectInventory(this.value);"
+                                >
+                                    <option selected value="0" >Not set</option>
+                                    <% for(var i in pmInventories.model.itemslist.results){ %>
+                                        <option
+                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
+                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
+                                    <% } %>
+                                </select>
+                            </div>
+
+                            <~ pmModuleTemplates.model.selectedInventory> 
+                                <%= pmGroups.groupsAutocompleteTemplate(pmModuleTemplates.model.selectedInventory) %> 
+                            <~>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-lg-4">
+                                <label class="control-label" >Module</label>
+                                <input type="text"
+                                        class="module-autocomplete form-control"
+                                        id="module-autocomplete"
+                                        value="">
+                            </div>
+                        </div>
+
+                        <div class="row" >
+                            <div class="col-lg-12">
+                                <div class="">
+                                    <label class="control-label" >Args</label>
+                                    <input type="text"
+                                            class="form-control"
+                                            value=""
+                                            id="module-args-string"
+                                            onchange=""
+                                            onpaste=""  >
+                                   <!--<span class="input-group-addon" onclick=" " >
+                                         <span class="glyphicon glyphicon-pencil"></span>
+                                    </span>-->
+                                </div>
+                                <div class="help-block">
+                                    args (string) – which args must be passed to module. Just raw string with arguments. You can specify here contains of args option. For example ls -la for shell module.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="row">
+            <%= jsonEditor.editor({}, {block:'module', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
+        </div>
+    </section>
+</script>
+

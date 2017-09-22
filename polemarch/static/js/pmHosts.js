@@ -13,18 +13,12 @@ pmHosts.copyItem = function(item_id)
     {
         var data = thisObj.model.items[item_id];
         delete data.id;
-        $.ajax({
+        spajs.ajax.Call({
             url: "/api/v1/"+thisObj.model.name+"/",
             type: "POST",
             contentType:'application/json',
             data: JSON.stringify(data),
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                }
-            },
-            success: function(data)
+                        success: function(data)
             {
                 thisObj.model.items[data.id] = data
                 def.resolve(data.id)
@@ -58,27 +52,21 @@ pmHosts.addItem = function(parent_type, parent_item)
 
     if(data.type == "HOST"  && (!data.name || !this.validateHostName(data.name)))
     {
-        $.notify("Invalid value in filed name", "error");
+        $.notify("Invalid value in field name", "error");
         return;
     }
     else if(data.type == "RANGE"  && (!data.name || !this.validateRangeName(data.name)))
     {
-        $.notify("Invalid value in filed name", "error");
+        $.notify("Invalid value in field name", "error");
         return;
     }
 
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         { 
             $.notify("Host created", "success");
 
@@ -149,7 +137,7 @@ pmHosts.updateItem = function(item_id)
     {
         if(!data.name || !this.validateHostName(data.name) )
         {
-            $.notify("Invalid value in filed name", "error");
+            $.notify("Invalid value in field name", "error");
             return;
         }
     }
@@ -157,23 +145,17 @@ pmHosts.updateItem = function(item_id)
     {  
         if(!data.name || !this.validateRangeName(data.name) )
         {
-            $.notify("Invalid value in filed name", "error");
+            $.notify("Invalid value in field name", "error");
             return;
         }
     }
 
     var thisObj = this;
-    return $.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data:JSON.stringify(data),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
         success: function(data)
         { 
             thisObj.model.items[item_id] = data
@@ -196,18 +178,12 @@ for(var i =0; i< 10000; i++)
 setTimeout(function(){
     name = Math.random()+"-"+Math.random()
     name = name.replace(/\./g, "")
-    $.ajax({
+    spajs.ajax.Call({
             url: "/api/v1/hosts/",
             type: "POST",
             contentType:'application/json',
             data: JSON.stringify({name:name, type:"HOST"}),
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:/.test(settings.url) || /^https:/.test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                }
-            }
-    })
+                })
 }, i*400);
 }
  */ 

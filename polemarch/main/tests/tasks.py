@@ -111,6 +111,11 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             # check additional args
             self.assertIn("--user", call_args)
             self.assertIn("mysuperuser", call_args)
+            penguin_exists = False
+            for arg in call_args:
+                if "penguin" in arg:
+                    penguin_exists = True
+            self.assertTrue(penguin_exists)
             # check inventory
             inventory_path = call_args[3]
             with open(inventory_path, 'r') as inventory_file:
@@ -129,9 +134,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         # test simple execution
         answer = self.post_result(
             "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
-            data=json.dumps(dict(inventory=inv1, module="shell",
-                                 group="all", args="ls -la",
-                                 user="mysuperuser")))
+            data=json.dumps({"inventory": inv1, "module": "shell",
+                             "group": "all", "args": "ls -la",
+                             "user": "mysuperuser", "key-file": "penguin"}))
         self.assertEquals(subprocess_function.call_count, 1)
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible"))
@@ -285,7 +290,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEqual(history.initiator_object, self.user)
         History.objects.all().delete()
         # node are offline
-        check_status(subprocess.CalledProcessError(4, None, None), "OFFLINE")
+        check_status(subprocess.CalledProcessError(4, None, ""), "OFFLINE")
         History.objects.all().delete()
         # error at node
         check_status(subprocess.CalledProcessError(None, None, None), "ERROR")
@@ -496,6 +501,25 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible-playbook"))
         self.assertTrue(call_args[1].endswith("p1.yml"))
+        subprocess_function.reset_mock()
+        data['save_result'] = False
+        id = self.get_result("post", url, 201, data=json.dumps(data))['id']
+        count = History.objects.all().count()
+        ScheduledTask.delay(id)
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertTrue(call_args[0].endswith("ansible-playbook"))
+        self.assertTrue(call_args[1].endswith("p1.yml"))
+        self.assertCount(History.objects.all(), count)
+
+        def side_effect(*args, **kwargs):
+            raise Exception("Test text")
+
+        subprocess_function.reset_mock()
+        subprocess_function.side_effect = side_effect
+        ScheduledTask(id)
+        self.assertEquals(subprocess_function.call_count, 1)
+        self.assertCount(History.objects.all(), count)
 
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
@@ -661,7 +685,7 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                           status="OK", project=self.ph.id,
                           start_time=self.histories[0].start_time.strftime(df),
                           stop_time=self.histories[0].stop_time.strftime(df),
-                          raw_inventory="inventory", raw_stdout="text",
+                          raw_inventory="inventory",
                           inventory=self.history_inventory.id,
                           initiator=self.user.id, initiator_type="users")
 
@@ -709,6 +733,36 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
 
         self.change_identity()
         self.list_test(url, 0)
+
+    def test_history_raw_output(self):
+        raw_stdout = "[0;35mdeprecate" \
+                     "[0;32mok" \
+                     "[1;31munreachable" \
+                     "[0;36mskipping" \
+                     "[1;35mwarning" \
+                     "[0;33mchanged" \
+                     "[0;31mfatal"
+        nocolor = "deprecate" \
+                  "ok" \
+                  "unreachable" \
+                  "skipping" \
+                  "warning" \
+                  "changed" \
+                  "fatal"
+        default_kwargs = dict(project=self.ph, mode="task.yml",
+                              raw_inventory="inventory",
+                              inventory=self.history_inventory,
+                              initiator=self.user.id,
+                              status="OK",
+                              start_time=now() - timedelta(hours=15),
+                              stop_time=now() - timedelta(hours=14))
+        default_kwargs['raw_stdout'] = raw_stdout
+        history = History.objects.create(**default_kwargs)
+        url = "/api/v1/history/{}/raw/".format(history.id)
+        result = self.get_result("get", url)
+        self.assertEquals(result, nocolor)
+        result = self.get_result("get", url + "?color=yes")
+        self.assertEquals(result, raw_stdout)
 
     def test_history_facts(self):
         history_kwargs = dict(project=self.ph, mode="setup",

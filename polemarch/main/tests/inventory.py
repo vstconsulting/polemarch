@@ -81,6 +81,12 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         self.h4 = Host.objects.create(name="127.0.0.[5:6]",
                                       type="RANGE", vars=self.vars2)
 
+    def test_string_vars(self):
+        vars3 = json.dumps(self.vars3)
+        host = Host.objects.create(name="127.0.0.1",
+                                   type="HOST", vars=vars3)
+        self.assertEquals(host.vars['auth_user'], 'centos')
+
     def test_create_delete_host(self):
         url = "/api/v1/hosts/"
         self.list_test(url, 4)

@@ -1,25 +1,18 @@
-__version__ = "0.0.7"
+from .environment import prepare_environment
 
-def _main(settings="polemarch.main.settings"):
+__version__ = "0.0.8"
+
+def _main(**kwargs):
     # pylint: disable=unused-variable
-    import os
     import sys
-    os.environ.setdefault('C_FORCE_ROOT', 'true')
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
-
-    try:
-        from django.core.management import execute_from_command_line
-    except ImportError:
-        # The above import may fail for some other reason. Ensure that the
-        # issue is really that Django is missing to avoid masking other
-        # exceptions on Python 2.
-        try:
-            import django
-        except ImportError:
-            raise ImportError(
-                "Couldn't import Django. Are you sure it's installed and "
-                "available on your PYTHONPATH environment variable? Did you "
-                "forget to activate a virtual environment?"
-            )
-        raise
+    from django.core.management import execute_from_command_line
+    prepare_environment(**kwargs)
     execute_from_command_line(sys.argv)
+
+def get_app(**kwargs):
+    from celery import Celery
+    prepare_environment(**kwargs)
+    celery_app = Celery('polemarch')
+    celery_app.config_from_object('django.conf:settings', namespace='CELERY')
+    celery_app.autodiscover_tasks()
+    return celery_app

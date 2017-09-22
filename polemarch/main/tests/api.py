@@ -13,6 +13,7 @@ from .tasks import (ApiTasksTestCase,
                     ApiTemplateTestCase,
                     ApiHistoryTestCase)
 from .ansible import ApiAnsibleTestCase
+from .repo_backends import RepoBackendsTestCase
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -36,8 +37,6 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 302)
         response = self.client.get('/')
         self.assertRedirects(response, self.login_url + '?next=/')
-        response = self.client.get('/help/')
-        self.assertEqual(response.status_code, 200)
 
         client = Client()
         data = {'username': self.user.data['username'],
@@ -211,7 +210,7 @@ class APITestCase(ApiUsersTestCase,
                   ApiInventoriesTestCase, ApiProjectsTestCase,
                   ApiTasksTestCase, ApiPeriodicTasksTestCase,
                   ApiBulkTestCase, ApiTemplateTestCase, ApiHistoryTestCase,
-                  ApiAnsibleTestCase):
+                  ApiAnsibleTestCase, RepoBackendsTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 

@@ -1,19 +1,20 @@
 # Main
-configparser==3.5.0b2
+configparser==3.5.0
 celery>4.0.3,<=4.1.0
 six
+pyyaml
 sqlalchemy
 ansible>=2.1, <=2.3.2
 paramiko<=2.2.1
 django-docs==0.2.1
 
 # API
-djangorestframework>=3.4, <4.0
+djangorestframework>=3.4, <=3.6.4
 django-filter
 django-crispy-forms
 django-celery-beat==1.0.1
 jsonfield==2.0.2
-mod-wsgi==4.5.17
+uWSGI==2.0.15
 
 # Repo types
 gitpython==2.1.5

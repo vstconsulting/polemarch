@@ -39,3 +39,12 @@ class ApiAnsibleTestCase(_ApiGHBaseTestCase):
         filter_str = "cloud.amazon"
         self.assertCount(self.get_result("get", url+"?filter="+filter_str),
                          len(_mods.get(filter_str)))
+        url = url + "?detailed=1&fields=module,short_description,description"
+        url += "&filter=^cloud.amazon"
+        result = self.get_result("get", url)
+        self.assertCount(result, len(_mods.get(filter_str)))
+        self.assertIn("module", result[0]['data'])
+        self.assertIn("short_description", result[0]['data'])
+        self.assertIn("description", result[0]['data'])
+        self.assertIn("path", result[0])
+        self.assertNotIn("notes", result[0])

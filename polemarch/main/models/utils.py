@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 import sys
 from os.path import dirname
+import logging
 from collections import namedtuple
 
 from django.utils import timezone
@@ -9,6 +11,7 @@ from ...main.utils import (tmp_file, CmdExecutor,
                            KVExchanger, CalledProcessError)
 
 
+logger = logging.getLogger("polemarch")
 PolemarchInventory = namedtuple("PolemarchInventory", "raw keys")
 AnsibleExtra = namedtuple('AnsibleExtraArgs', [
     'args',
@@ -17,6 +20,32 @@ AnsibleExtra = namedtuple('AnsibleExtraArgs', [
 
 
 # Classes and methods for support
+class DummyHistory(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __setattr__(self, key, value):
+        pass
+
+    def __getattr__(self, item):
+        return None  # nocv
+
+    @property
+    def raw_stdout(self):
+        return ""
+
+    @raw_stdout.setter
+    def raw_stdout(self, value):
+        logger.info(value)  # nocv
+
+    def write_line(self, value, number):
+        # pylint: disable=unused-argument
+        logger.info(value)  # nocv
+
+    def save(self):
+        pass
+
+
 class Executor(CmdExecutor):
     def __init__(self, history):
         super(Executor, self).__init__()
@@ -25,11 +54,11 @@ class Executor(CmdExecutor):
 
     @property
     def output(self):
-        return self.history.raw_stdout
+        return self.history.raw_stdout  # nocv
 
     @output.setter
     def output(self, value):
-        pass
+        pass  # nocv
 
     def line_handler(self, proc, line):
         cancel = KVExchanger(self.CANCEL_PREFIX + str(self.history.id)).get()
@@ -42,9 +71,7 @@ class Executor(CmdExecutor):
 
     def write_output(self, line):
         self.counter += 1
-        self.history.raw_history_line.create(history=self.history,
-                                             line_number=self.counter,
-                                             line=line)
+        self.history.write_line(line, self.counter)
 
     def execute(self, cmd, cwd):
         self.history.raw_args = " ".join(cmd)
@@ -91,7 +118,7 @@ class AnsibleCommand(object):
         return AnsibleExtra(extra_args, files)
 
     def get_workdir(self):
-        return self.history.project.path
+        return self.project.path
 
     @property
     def workdir(self):
@@ -101,8 +128,9 @@ class AnsibleCommand(object):
     def path_to_ansible(self):
         return dirname(sys.executable) + "/" + self.command_type
 
-    def prepare(self, target, inventory, history):
-        self.target, self.history = target, history
+    def prepare(self, target, inventory, history, project):
+        self.target, self.project = target, project
+        self.history = history if history else DummyHistory()
         self.inventory_object = self.Inventory(*inventory.get_inventory())
         self.history.raw_inventory = self.inventory_object.raw
         self.history.status = "RUN"
@@ -116,15 +144,15 @@ class AnsibleCommand(object):
     def error_handler(self, exception):
         default_code = self.status_codes["other"]
         if isinstance(exception, CalledProcessError):
-            self.history.raw_stdout = str(exception.output)
+            self.history.raw_stdout = "{}".format(exception.output)
             self.history.status = self.status_codes.get(exception.returncode,
                                                         default_code)
         else:
             self.history.raw_stdout = self.history.raw_stdout + str(exception)
             self.history.status = default_code
 
-    def execute(self, target, inventory, history, **extra_args):
-        self.prepare(target, inventory, history)
+    def execute(self, target, inventory, history, project, **extra_args):
+        self.prepare(target, inventory, history, project)
         self.history.status = "OK"
         try:
             extra = self.__parse_extra_args(**extra_args)

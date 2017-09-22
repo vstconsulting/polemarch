@@ -33,9 +33,16 @@ class _AbstractRouter(routers.DefaultRouter):
                      self).get_default_base_name(viewset)  # nocv
 
     def register_view(self, prefix, view, name=None):
-        if name is None:
-            name = view().get_view_name().lower()
+        name = name or view().get_view_name().lower()
         self.custom_urls.append((prefix, view, name))
+
+    def unregister(self, prefix):
+        index = 0
+        for reg_prefix, _, _ in self.registry:
+            if reg_prefix == prefix:
+                del self.registry[index]
+                break
+            index += 1
 
 
 class APIRouter(_AbstractRouter):
@@ -108,8 +115,7 @@ class MainRouter(_AbstractRouter):
         return API.as_view(api_root_dict=api_root_dict)
 
     def register_router(self, prefix, router, name=None):
-        if name is None:
-            name = router.root_view_name
+        name = name or router.root_view_name
         self.routers.append((prefix, router, name))
 
     def get_urls(self):

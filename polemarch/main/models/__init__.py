@@ -8,6 +8,7 @@ from django_celery_beat.models import IntervalSchedule, CrontabSchedule
 from django.db.models import signals
 from django.dispatch import receiver
 from django.core.validators import ValidationError
+from django.conf import settings
 
 from .vars import Variable
 from .hosts import Host, Group, Inventory
@@ -96,6 +97,7 @@ def clean_dirs(instance, **kwargs):
 
 @receiver(signals.post_save, sender=PeriodicTask)
 def save_to_beat(instance, **kwargs):
+    task = settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"]
     manager = django_celery_beat.models.PeriodicTask.objects
     delete_from_beat(instance)
     if instance.type == "INTERVAL":
@@ -105,14 +107,14 @@ def save_to_beat(instance, **kwargs):
                                                              period=units)
         manager.create(interval=schedule,
                        name=str(instance.id),
-                       task='polemarch.main.tasks.tasks.ScheduledTask',
+                       task=task,
                        args=json.dumps([instance.id]))
     elif instance.type == "CRONTAB":
         cron_data = instance.crontab_kwargs
         schedule, _ = CrontabSchedule.objects.get_or_create(**cron_data)
         manager.create(crontab=schedule,
                        name=str(instance.id),
-                       task='polemarch.main.tasks.tasks.ScheduledTask',
+                       task=task,
                        args=json.dumps([instance.id]))
 
 

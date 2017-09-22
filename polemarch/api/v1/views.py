@@ -1,4 +1,7 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
+from functools import reduce
+
+import operator
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse
@@ -151,8 +154,8 @@ class HistoryViewSet(base.HistoryModelViewSet):
 
     @detail_route(methods=["get"])
     def raw(self, request, *args, **kwargs):
-        obj = self.get_object()
-        return HttpResponse(obj.raw_stdout, content_type="text/plain")
+        result = self.get_serializer(self.get_object()).get_raw(request)
+        return HttpResponse(result, content_type="text/plain")
 
     @detail_route(methods=["get"])
     def lines(self, request, *args, **kwargs):
@@ -180,6 +183,32 @@ class TemplateViewSet(base.ModelViewSetSet):
     serializer_class = serializers.TemplateSerializer
     serializer_class_one = serializers.OneTemplateSerializer
     filter_class = filters.TemplateFilter
+
+    def __get_extra_project_qs(self, qs):
+        query_projects = [
+            Q(template_data__contains='"project": {}'.format(i))
+            for i in self.get_user_aval_projects()
+            if i is not None
+        ]
+        query_projects.append(~Q(template_data__contains='"project":'))
+        return qs.filter(reduce(operator.or_, query_projects))
+
+    def __get_extra_inventories_qs(self, qs):
+        query_inventories = [
+            Q(template_data__contains='"inventory": {}'.format(i))
+            for i in self.get_user_aval_related("inventories")
+            if i is not None
+        ]
+        query_inventories.append(~Q(template_data__contains='"inventory":'))
+        return qs.filter(reduce(operator.or_, query_inventories))
+
+    def _get_extra_queryset(self):
+        base_qs = self.queryset
+        qs_projects = self.__get_extra_project_qs(base_qs)
+        qs_invs = self.__get_extra_inventories_qs(qs_projects)
+        query_usered = Q(related_objects__user=self.request.user)
+        qs_usered = base_qs.filter(query_usered)
+        return (qs_invs | qs_usered).distinct()
 
     @list_route(methods=["get"], url_path="supported-kinds")
     def supported_kinds(self, request):
@@ -271,7 +300,9 @@ class AnsibleViewSet(base.ListNonModelViewSet):
 
     @list_route(methods=["get"])
     def modules(self, request):
-        _mods = utils.AnsibleModules().get(
+        detailed = int(request.query_params.get("detailed", "0"))
+        fields = request.query_params.get("fields", "")
+        _mods = utils.AnsibleModules(detailed, fields).get(
             request.query_params.get("filter", "")
         )
         return base.Response(_mods, 200).resp

@@ -41,7 +41,7 @@ SECRET_FILE = os.getenv("POLEMARCH_SECRET_FILE", "/etc/polemarch/secret")
 SECRET_KEY = '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
 try:
     with open(SECRET_FILE, "r") as secret_file:
-        SECRET_KEY = secret_file.read()  # nocv
+        SECRET_KEY = secret_file.read().strip()  # nocv
 except IOError:
     pass
 
@@ -119,7 +119,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'polemarch.main.wsgi.application'
+WSGI = 'polemarch.main.wsgi'
+WSGI_APPLICATION = "{}.application".format(WSGI)
 
 try:
     __DB_SETTINGS = {k.upper():v.format(**__kwargs) for k,v in config.items('database')}
@@ -185,8 +186,8 @@ PAGE_LIMIT = config.getint("web", "page_limit", fallback=1000)
 # Rest Api settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
@@ -352,6 +353,22 @@ REPO_BACKENDS = {
     "MANUAL": {
         "BACKEND": "polemarch.main.repo_backends.Manual",
     }
+}
+
+
+TASKS_HANDLERS = {
+    "REPO": {
+        "BACKEND": "polemarch.main.tasks.RepoTask"
+    },
+    "SCHEDUER": {
+        "BACKEND": "polemarch.main.tasks.ScheduledTask"
+    },
+    "MODULE": {
+        "BACKEND": "polemarch.main.tasks.ExecuteAnsibleModule"
+    },
+    "PLAYBOOK": {
+        "BACKEND": "polemarch.main.tasks.ExecuteAnsiblePlaybook"
+    },
 }
 
 

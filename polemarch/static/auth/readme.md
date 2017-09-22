@@ -1,1 +1,1 @@
-# Ресурсы для страницы авторизации
+# Resources for the authorization page

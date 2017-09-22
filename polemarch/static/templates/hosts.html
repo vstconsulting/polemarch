@@ -1,0 +1,256 @@
+
+
+<!-- Список хостов -->
+<script type="text/x-just" data-just="hosts_list">
+    <section class="content-header">
+        <h1>
+            Hosts
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Hosts</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <a class="btn btn-primary"  href="/?new-host" onclick="spajs.open({ menuId:'new-host'}); return false;">Create host</a>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Hosts
+
+                        <div class="input-group col-lg-2" style="float: right;">
+                            <input
+                                type="text"
+                                id="search-query-input"
+                                placeholder="Search by name"
+                                class="form-control"
+                                maxlength="255"
+                                value="<%- query %>"
+                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmHosts.search($('#search-query-input').val()));"
+                            >
+                            <div class="input-group-addon" onclick="spajs.showLoader(pmHosts.search($('#search-query-input').val()));">
+                                <span class="glyphicon glyphicon-search" ></span>
+                            </div>
+                        </div>
+                        <% if(pmHosts.getTotalPages(pmHosts.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmHosts.paginationHtml(pmHosts.model.itemslist) %>
+                            </div>
+                        <% } %>
+
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmHosts.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
+                                    <th>Name</th>
+                                    <th style="width: 70px;" class="hidden-xs">Type</th>
+                                    <th style="width: 80px;" class="hidden-xs">Actions</th>
+                                    <th style="width: 95px;" class="visible-xs">Actions</th>
+                                </tr>
+                                <% for(var i in pmHosts.model.itemslist.results){ %>
+                                    <tr
+                                        class="item-row item-<%- pmHosts.model.itemslist.results[i].id %>  <%- pmHosts.model.selectedItems.justClass(pmHosts.model.itemslist.results[i].id, 'selected') %>"
+                                        data-id="<%- pmHosts.model.itemslist.results[i].id %>" >
+                                        <td class=""  onclick="pmHosts.toggleSelect(<%- pmHosts.model.itemslist.results[i].id %>); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td>
+                                            <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%- pmHosts.model.itemslist.results[i].name %></a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <span><%- pmHosts.model.itemslist.results[i].type %></span>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
+                                                class="btn btn-danger"
+                                                onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a>
+                                        </td>
+                                        <td class="visible-xs">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Actions
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-right">
+                                                    <li>
+                                                        <a href="/?host/<%- pmHosts.model.itemslist.results[i].id %>"
+                                                            onclick="spajs.showLoader(pmHosts.deleteItem(<%- pmHosts.model.itemslist.results[i].id %>)); return false;" >Delete</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer clearfix">
+                        <div class="btn-group <%- pmHosts.model.justNotClass('selectedCount', 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= pmHosts.model.justText('selectedCount') %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#"
+                                        onclick="pmHosts.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
+                                </li> 
+                                <li>
+                                    <a href="#" onclick="pmHosts.deleteSelected(); return false;" >Delete all selected elements</a>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <% if(!query){ %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">  
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(pmHosts.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                    </li>
+                                    <li class=" <%- pmHosts.model.justNotClass('selectedCount', 'hide') %>" >
+                                        <a href="#" onclick="spajs.showLoader(pmHosts.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <% } %>
+                        <% if(pmHosts.getTotalPages(pmHosts.model.itemslist)){ %>
+                                <%= pmHosts.paginationHtml(pmHosts.model.itemslist) %>
+                        <% } %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<!-- Страница хоста -->
+<script type="text/x-just" data-just="hosts_page">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" ><%= pmHosts.model.items[item_id].justText('name') %></span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?hosts"  onclick="return spajs.openURL(this.href);" >Hosts</a></li>
+            <li class="active"><%- pmHosts.model.items[item_id].name.slice(0, 20) %></li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmHosts.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save host</button>
+        <button type="button" onclick="spajs.showLoader(pmHosts.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy host" ><span class="glyphicon glyphicon-duplicate" ></span></button>
+        <button type="button" onclick="spajs.showLoader(pmHosts.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
+            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove host</span> 
+        </button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Host<br>
+                        <div class="box-tools pull-right">
+                        </div>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Name</label>
+                                <input type="text"  placeholder="Enter host name"  id="host_<%- pmHosts.model.items[item_id].id %>_name" value="<%- pmHosts.model.items[item_id].name %>"  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Type</label>
+                                <select class="form-control" id="host_<%- pmHosts.model.items[item_id].id %>_type">
+                                    <option value="HOST" <% if(pmHosts.model.items[item_id].type == 'HOST'){ %> selected <% } %> >HOST</option>
+                                    <option value="RANGE" <% if(pmHosts.model.items[item_id].type == 'RANGE'){ %> selected <% } %> >RANGE</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <%= jsonEditor.editor(pmHosts.model.items[item_id].vars, {block:'hosts'}) %>
+        </div>
+    </section>
+</script>
+
+<!-- Страница создания хоста -->
+<script type="text/x-just" data-just="hosts_new_page">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" >Create new host</span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?hosts" onclick="return spajs.openURL(this.href);" >Hosts</a></li>
+            <li class="active">Create new host</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(pmHosts.addItem('<%- parent_type %>', <%- parent_item %>)); return false;" class="btn btn-primary" >Save host</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        New user<br>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="row">
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Name</label>
+                                <input type="text"  placeholder="Enter host name"  id="new_host_name" value=""  class="form-control" maxlength="255">
+                                <div class="help-block"></div>
+                            </div>
+
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Type</label>
+                                <select class="form-control" id="new_host_type">
+                                    <option value="HOST" selected >HOST</option>
+                                    <option value="RANGE">RANGE</option>
+                                </select>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <%= jsonEditor.editor({}, {block:'hosts'}) %>
+        </div>
+    </section>
+</script>

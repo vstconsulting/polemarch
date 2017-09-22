@@ -12,7 +12,7 @@ Red Hat/CentOS installation
 
    .. sourcecode:: bash
 
-      sudo yum localinstall polemarch-0.0.X-0.x86_64.rpm.
+      sudo yum localinstall polemarch-X.X.X-X.x86_64.rpm.
 
 3. Run services with commands
 
@@ -41,7 +41,7 @@ Ubuntu/Debian installation
 
    .. sourcecode:: bash
 
-      sudo dpkg -i polemarch_0.0.X-1_amd64.deb || sudo apt-get install -f
+      sudo dpkg -i polemarch_X.X.X-X_amd64.deb || sudo apt-get install -f
 
 3. Run services with commands
 
@@ -81,3 +81,9 @@ To load the saved data, use:
    .. sourcecode:: bash
 
       sudo -u polemarch /opt/polemarch/bin/polemarchctl loaddata /home/polemarch/backup.json
+
+
+Update
+------
+
+Before updating any type of package strongly recommended to stop all services and create backup for safe.

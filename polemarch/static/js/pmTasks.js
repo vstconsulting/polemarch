@@ -20,14 +20,14 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
 
     if(!(project_id/1))
     {
-        $.notify("Invalid filed `project` ", "error");
+        $.notify("Invalid field `project` ", "error");
         def.reject();
         return def.promise();
     }
 
     if(!(inventory/1))
     {
-        $.notify("Invalid filed `inventory` ", "error");
+        $.notify("Invalid field `inventory` ", "error");
         def.reject();
         return def.promise();
     }
@@ -39,18 +39,12 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
     
     data_vars.playbook = playbook
     data_vars.inventory = inventory
-    $.ajax({
+    spajs.ajax.Call({
         url: "/api/v1/projects/"+project_id+"/execute-playbook/",
         type: "POST",
         data:JSON.stringify(data_vars),
         contentType:'application/json',
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data) 
+                success: function(data) 
         {
             $.notify("Started", "success"); 
             if(data && data.history_id)
@@ -93,18 +87,12 @@ pmTasks.loadItems = function(limit, offset)
     }
 
     var thisObj = this;
-    return jQuery.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/",
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             //console.log("update Items", data)
             data.limit = limit
@@ -146,18 +134,12 @@ pmTasks.sendSearchQuery = function(query, limit, offset)
     }
 
     var thisObj = this;
-    return jQuery.ajax({
+    return spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/?"+q.join('&'),
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
-        beforeSend: function(xhr, settings) {
-            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                // Only send the token to relative URLs i.e. locally.
-                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-            }
-        },
-        success: function(data)
+                success: function(data)
         {
             //console.log("update Items", data)
             thisObj.model.itemslist = data
