@@ -37,7 +37,7 @@ Red Hat/CentOS installation
 
    .. sourcecode:: bash
 
-      sudo yum localinstall polemarch-0.0.X-0.x86_64.rpm.
+      sudo yum localinstall polemarch-X.X.X-0.x86_64.rpm.
 
 3. Run services with commands
 
@@ -66,7 +66,7 @@ Ubuntu/Debian installation
 
    .. sourcecode:: bash
 
-      sudo dpkg -i polemarch_0.0.X-1_amd64.deb || sudo apt-get install -f
+      sudo dpkg -i polemarch_X.X.X-0_amd64.deb || sudo apt-get install -f
 
 3. Run services with commands
 
@@ -124,13 +124,13 @@ explanation, which dependencies and why they are needed. System packages
 
    .. sourcecode:: bash
 
-      sudo apt-get install apache2 apache2-dev python-pip python-dev libffi-dev libssl-dev git sshpass
+      sudo apt-get install python-pip python-dev libffi-dev libssl-dev git sshpass libyaml-dev
 
 Python dependencies:
 
    .. sourcecode:: bash
 
-      pip install -r requirements-git.txt -r requirements.txt -r requirements-doc.txt tox --user
+      pip install -r requirements-git.txt -r requirements.txt -r requirements-doc.txt tox
 
 5. Initialize empty database with all required stuff (tables and so on)
    for Polemarch:
@@ -139,18 +139,25 @@ Python dependencies:
 
       ./polemarchctl migrate
 
-6. Run Polemarch and investigate with your debugger how it works to find out
-   what need to be changed:
+6. Enable debug in settings.ini. You can edit ``polemarch/main/settings.ini``
+   but make sure that changes in that file does not goes to you commit. Or you
+   can copy ``polemarch/main/settings.ini`` to ``/etc/polemarch/settings.ini``
+   (default settings location for Polemarch). Type ``debug = true`` in section
+   ``[main]``. Otherwise there will no available static files and debug
+   features when you start development web-server.
+
+6. Run Polemarch GUI with development web-server and investigate with your
+   debugger how it works to find out what need to be changed:
 
    .. sourcecode:: bash
 
       # run web-server
-      ./polemarchctl webserver -P 8080
+      python polemarchctl runserver  0.0.0.0:8080
 
    .. sourcecode:: bash
 
       # run worker
-      ~/.local/bin/celery -A polemarch.celery_app:app worker -l INFO -B -S django
+      python /usr/local/bin/celery -A polemarch.wapp:app worker -l INFO -B -S django
 
 7. You may also want to change ``./polemarch/main/settings.ini`` to enable
    ``debug`` setting and to change ``log_level`` for easy debugging.

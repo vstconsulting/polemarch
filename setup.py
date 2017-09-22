@@ -159,11 +159,6 @@ setup(
     ] + REQUIRES,
     dependency_links=[
     ] + REQUIRES_git,
-    extras_require={
-        "apache": [
-            "mod_wsgi==4.5.14"
-        ]
-    },
     cmdclass=cmdclass,
     command_options={
         'build_sphinx': {
