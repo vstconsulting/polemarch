@@ -110,6 +110,18 @@ pmAnsibleModule.fastCommandWidget = function(holder)
     })
 }
 
+pmAnsibleModule.fastCommandWidget_RunBtn = function()
+{ 
+    return pmAnsibleModule.execute(
+                $('#projects-autocomplete').val(), 
+                $('#inventories-autocomplete').val(),
+                pmGroups.getGroupsAutocompleteValue(),
+                'shell',
+                $('#module-args-string').val(),
+                {}
+            )
+}
+
 pmAnsibleModule.loadAllModule = function()
 {
     var def = new $.Deferred();

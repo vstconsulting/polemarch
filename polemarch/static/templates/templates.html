@@ -89,12 +89,13 @@
                                     value=""
                                     id="module-args-string"
                                     onchange=""
-                                    onpaste=""  >
+                                    onpaste=""
+                                    onkeypress="if((event.keyCode === 10 || event.keyCode === 13)){ spajs.showLoader(pmAnsibleModule.fastCommandWidget_RunBtn()) }" >
                             <span class="input-group-btn" onclick=" " >
                                 <button 
                                 class="btn btn-primary"
                                 type="button"
-                                onclick="spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), pmGroups.getGroupsAutocompleteValue(), 'shell', $('#module-args-string').val(), {}))"
+                                onclick="spajs.showLoader(pmAnsibleModule.fastCommandWidget_RunBtn())"
                                 ><span class="glyphicon glyphicon-send"></span> Run command</button> 
                             </span>
                         </div> 
