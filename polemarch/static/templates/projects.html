@@ -275,7 +275,7 @@
                                     </div>
                                 </div>
                             <% } %>
-                            <% if(pmProjects.model.items[item_id].vars.repo_type != "TAR" || pmProjects.model.items[item_id].vars.repo_type != "MANUAL"){ %>
+                            <% if(pmProjects.model.items[item_id].vars.repo_type != "TAR" && pmProjects.model.items[item_id].vars.repo_type != "MANUAL"){ %>
                                 <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                     <label class="control-label" >Repository password</label>
                                     <input type="password" 
