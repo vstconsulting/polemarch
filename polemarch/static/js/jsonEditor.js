@@ -145,7 +145,17 @@ jsonEditor.options['item']['ansible_shell_executable'] = {
                 possible to use /bin/sh (i.e. /bin/sh is not installed on the\n\
                 target machine or cannot be run from sudo.).'
 }
-  
+
+jsonEditor.options['hosts'] = {};
+mergeDeep(jsonEditor.options['hosts'], jsonEditor.options['item'])
+
+jsonEditor.options['groups'] = {};
+mergeDeep(jsonEditor.options['groups'], jsonEditor.options['item'])
+
+jsonEditor.options['inventories'] = {};
+mergeDeep(jsonEditor.options['inventories'], jsonEditor.options['item'])
+
+
 ////////////////////////////////////////////////
 // jsonEditor
 ////////////////////////////////////////////////
@@ -156,35 +166,35 @@ jsonEditor.editor = function(json, opt)
     {
         opt = {}
     }
-    
+
     if(!opt.title1)
     {
         opt.title1 = 'Variables'
     }
-    
+
     if(!opt.prefix)
     {
         opt.prefix = 'prefix'
     }
     opt.prefix = opt.prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
-    
+
     if(!opt.title2)
     {
         opt.title2 = 'Adding new variable'
     }
-    
+
     return spajs.just.render('jsonEditor', {data:json, optionsblock:opt.block, opt:opt})
 }
 
 jsonEditor.jsonEditorScrollTo = function(param_name, prefix)
-{ 
+{
     if(!prefix)
     {
         prefix = "prefix"
     }
-    
+
     prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
-    $("body").scrollTo("#json_"+param_name+"_line"+prefix) 
+    $("body").scrollTo("#json_"+param_name+"_line"+prefix)
 }
 
 jsonEditor.jsonEditorGetValues = function(prefix)
@@ -194,7 +204,7 @@ jsonEditor.jsonEditorGetValues = function(prefix)
         prefix = "prefix"
     }
     prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
-    
+
     var data = {}
     var arr = $(".jsonEditor-data"+prefix)
     for(var i = 0; i< arr.length; i++)
@@ -224,7 +234,7 @@ jsonEditor.jsonEditorRmVar = function(name, prefix)
     {
         prefix = "prefix"
     }
-    
+
     prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
     $('#json_'+name+'_line'+prefix+'').remove()
     if(!$(".jsonEditor-data"+prefix).length)
@@ -238,22 +248,22 @@ jsonEditor.jsonEditorRmVar = function(name, prefix)
  * @param {string} name
  * @param {string} value
  * @param {string} optionsblock
- * @param {string} prefix 
+ * @param {string} prefix
  */
 jsonEditor.__devAddVar = function(name, value, optionsblock, prefix)
-{ 
+{
     if(!prefix)
     {
         prefix = "prefix"
     }
-    
+
     if(!optionsblock)
     {
         optionsblock = 'base'
     }
 
-    
-    $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:{prefix:prefix}})) 
+
+    $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:{prefix:prefix}}))
     $("#jsonEditorVarListHolder"+prefix).show()
 }
 
@@ -264,7 +274,7 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
         prefix = "prefix"
     }
     prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
-    
+
     if(!optionsblock)
     {
         optionsblock = 'base'
@@ -301,7 +311,7 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
             }
         }
     }
-    
+
     if(optionsblock && jsonEditor.options[optionsblock] && jsonEditor.options[optionsblock][name])
     {
         var optInfo = jsonEditor.options[optionsblock][name]
@@ -314,23 +324,23 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
 
     $('#new_json_name'+prefix).val('')
     $('#new_json_value'+prefix).val('')
-    
+
     var opt = {
         prefix:prefix
     }
 
-    $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:opt})) 
+    $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:opt}))
     $("#jsonEditorVarListHolder"+prefix).show()
 }
 
 jsonEditor.initAutoComplete = function(optionsblock, prefix)
-{ 
+{
     if(!prefix)
     {
         prefix = "prefix"
     }
     prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
-    
+
     new autoComplete({
         selector: '#new_json_name'+prefix,
         minChars: 0,
@@ -344,7 +354,7 @@ jsonEditor.initAutoComplete = function(optionsblock, prefix)
         onSelect: function(event, term, item)
         {
             //console.log('onSelect', term, item);
-            var value = $(item).attr('data-value'); 
+            var value = $(item).attr('data-value');
             $("#new_json_name"+prefix).val(value);
         },
         source: function(term, response)
@@ -355,7 +365,7 @@ jsonEditor.initAutoComplete = function(optionsblock, prefix)
             for(var i in jsonEditor.options[optionsblock])
             {
                 var val = jsonEditor.options[optionsblock][i]
-                if(i.toLowerCase().indexOf(term) != -1 
+                if(i.toLowerCase().indexOf(term) != -1
                         || (val['shortopts'] && val['shortopts'][0] && val['shortopts'][0].toLowerCase().indexOf(term) != -1) )
                 {
                     val.value = i
@@ -371,7 +381,7 @@ jsonEditor.initAutoComplete = function(optionsblock, prefix)
 }
 
 jsonEditor.initForm = function(optionsblock, prefix)
-{ 
+{
     if(!prefix)
     {
         prefix = "prefix"
@@ -383,40 +393,33 @@ jsonEditor.initForm = function(optionsblock, prefix)
         jsonEditor.initAutoComplete(optionsblock, prefix)
         return;
     }
-     
-    return spajs.ajax.Call({
-        url: "/api/v1/ansible/cli_reference/",
-        type: "GET",
-        contentType:'application/json',
-        data: "",
-        success: function(data)
-        {
-            Object.assign(jsonEditor.options, data)
-            
-            jsonEditor.options['hosts'] = {};
-            mergeDeep(jsonEditor.options['hosts'], jsonEditor.options['item'])
-            
-            jsonEditor.options['groups'] = {};
-            mergeDeep(jsonEditor.options['groups'], jsonEditor.options['item'])
-            
-            jsonEditor.options['inventories'] = {};
-            mergeDeep(jsonEditor.options['inventories'], jsonEditor.options['item'])
-            jsonEditor.initAutoComplete(optionsblock, prefix)
-            
-            jsonEditor.model.isLoaded_cli_reference = true;
-        }
-    }); 
+
+    if(!jsonEditor.model.isLoaded_cli_reference)
+    {
+        jsonEditor.model.isLoaded_cli_reference = true;
+        return spajs.ajax.Call({
+            url: "/api/v1/ansible/cli_reference/",
+            type: "GET",
+            contentType:'application/json',
+            data: "",
+            success: function(data)
+            {
+                Object.assign(jsonEditor.options, data) 
+                jsonEditor.initAutoComplete(optionsblock, prefix) 
+            }
+        });
+    }
 }
 
 jsonEditor.loadFile = function(event, element)
 {
-    console.log("jsonEditor.loadFile", event.target.files) 
+    console.log("jsonEditor.loadFile", event.target.files)
     for(var i=0; i<event.target.files.length; i++)
-    { 
+    {
         if( event.target.files[i].size > 1024*1024*1)
-        { 
+        {
             $.notify("File too large", "error");
-            console.log("File too large " + event.target.files[i].size) 
+            console.log("File too large " + event.target.files[i].size)
             continue;
         }
 
@@ -425,8 +428,8 @@ jsonEditor.loadFile = function(event, element)
         {
             $(element).val(e.target.result)
         }
-        
-        reader.readAsText(event.target.files[i]); 
+
+        reader.readAsText(event.target.files[i]);
         return;
     }
 }
