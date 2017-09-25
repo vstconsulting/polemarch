@@ -38,9 +38,9 @@ case this manual is also applicable with only one exception: use command
       sudo pip install --upgrade pip
       sudo pip install --upgrade virtualenv
 
-3. Create virtualenv for Polemarch. You can also install Polemarch
-   with his dependencies system-wide. But DON'T use ``pip install --user``,
-   because Polemarch will not work correctly with that.
+3. Create virtualenv for Polemarch. It is only supported method to run
+   Polemarch. Don't try to install it system-wide or locally using
+   ``pip install --user``.
 
    .. sourcecode:: bash
 
@@ -114,7 +114,11 @@ case this manual is also applicable with only one exception: use command
 
    .. sourcecode:: bash
 
-      celery -A polemarch.wapp:app worker -B -S django
+      celery -A polemarch.wapp:app worker -B -S schedule_file
+
+   Here ``schedule_file`` is path to file, which Celery will use to store info
+   about scheduling to run periodic tasks. You may prefer some other location
+   for that file.
 
 Congratulations! After all those commands if the moon and stars are in the
 right position and your beard is impressive enough you end up with up and
