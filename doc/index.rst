@@ -16,6 +16,8 @@ Official site: https://gitlab.com/vstconsulting/polemarch
    restapi
    config
    gui
+   contribute
+   cla
 
 
 
