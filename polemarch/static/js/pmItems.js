@@ -64,6 +64,11 @@ pmItems.toggleSelect = function(item_id, mode)
     return this.model.selectedItems[item_id];
 }
 
+/**
+ * Выделеть всё или снять выделение
+ * @param {boolean} mode 
+ * @returns {promise}
+ */
 pmItems.toggleSelectEachItem = function(mode)
 {
     var thisObj = this;
@@ -367,7 +372,7 @@ pmItems.sendSearchQuery = function(query, limit, offset)
         } 
         q.push(encodeURIComponent(i)+"="+encodeURIComponent(query[i]))
     }
-
+ 
     var thisObj = this;
     return spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/?"+q.join('&'),
@@ -379,7 +384,7 @@ pmItems.sendSearchQuery = function(query, limit, offset)
             //console.log("update Items", data)
             data.limit = limit
             data.offset = offset
-            thisObj.model.itemslist = data
+            thisObj.model.itemslist = data 
             //thisObj.model.items = {}
 
             for(var i in data.results)

@@ -134,10 +134,10 @@
                                 </button>
                                 <ul class="dropdown-menu">  
                                     <li>
-                                        <a href="#" onclick="spajs.showLoader(pmPeriodicTasks.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                        <a href="#" onclick="spajs.showLoader(pmPeriodicTasks.toggleSelectEachItem(true, <%- project_id %>)); return false;" >Select all</a>
                                     </li>
                                     <li class=" <%- pmPeriodicTasks.model.justNotClass('selectedCount', 'hide') %>" >
-                                        <a href="#" onclick="spajs.showLoader(pmPeriodicTasks.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                        <a href="#" onclick="spajs.showLoader(pmPeriodicTasks.toggleSelectEachItem(false, <%- project_id %>)); return false;" >Unselect all</a>
                                     </li>
                                 </ul>
                             </div>

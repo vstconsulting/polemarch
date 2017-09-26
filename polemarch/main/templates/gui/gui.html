@@ -42,21 +42,25 @@
     $(document).ready(function()
     {
         var templates = [
-            'common',
-            'jsonEditor',
-            'crontabEditor',
-            'dashboard',
-            'groups',
-            'hosts',
-            'users',
-            'inventories',
-            'templates',
-            'projects',
-            'periodic-task',
-            'history'
+            'templates/common',
+            'templates/jsonEditor',
+            'templates/crontabEditor',
+            'templates/pmDashboard',
+            'templates/pmGroups',
+            'templates/pmHosts',
+            'templates/pmUsers',
+            'templates/pmInventories',
+            'templates/pmTasksTemplates',
+            'templates/pmProjects',
+            'templates/pmPeriodicTasks',
+            'templates/pmHistory',
+            'templates/pmTasksTemplates',
+            'templates/pmModuleTemplates',
+            'templates/pmAnsibleModule'
         ]
         
-         
+        // alert("New-")
+          
         $.when(loadTplArray(templates)).done(function()
         {
             polemarch.start({
