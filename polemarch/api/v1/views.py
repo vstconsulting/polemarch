@@ -217,6 +217,7 @@ class TemplateViewSet(base.ModelViewSetSet):
 
 class BulkViewSet(rest_views.APIView):
     permission_classes = (StaffPermission,)
+    serializer_classes = serializers
 
     _op_types = {
         "add": "perform_create",
@@ -232,7 +233,7 @@ class BulkViewSet(rest_views.APIView):
         if item not in self._allowed_types:
             raise excepts.UnsupportedMediaType(media_type=item)
         item = "One{}Serializer".format(item.title())
-        return getattr(serializers, item)
+        return getattr(self.serializer_classes, item)
 
     def get_serializer(self, *args, **kwargs):
         kwargs["context"] = {'request': self.request}
