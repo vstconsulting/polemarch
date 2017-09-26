@@ -103,7 +103,7 @@ default_deb_tests:
   <<: *packing-test
   image: onegreyonewhite/tox:ubuntu
   script:
-   - make deb
+   - make deb RELEASE=${CI_BUILD_ID}
    - echo "echo 'hello'" > /bin/systemctl
    - sudo apt install ./dist/*.deb -y -q
    - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt

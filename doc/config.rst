@@ -213,3 +213,12 @@ Section ``[web]``.
 
 Here placed settings related to web-server. It is settings like: allowed hosts,
 static files directory or pagination limit.
+
+Production web settings
+-----------------------
+
+Section ``[uwsgi]``.
+
+Here placed settings related to web-server used by Polemarch in production
+(for deb and rpm packages by default). Most of them related to system paths
+(logging, PID-file and so on).
