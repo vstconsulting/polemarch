@@ -1,9 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
-import sys
 
-from django.core.management import call_command
 from django.conf import settings
 from ..base import ServiceCommand
 
@@ -109,5 +107,7 @@ class Command(ServiceCommand):
 
     def handle(self, *args, **options):
         super(Command, self).handle(*args, **options)
-        call_command(*self._get_options(options),
-                     stdout=sys.stdout)
+        self._error("This command is DEPRECATED! No longer working.")
+        return
+        # call_command(*self._get_options(options),
+        #             stdout=sys.stdout)

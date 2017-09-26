@@ -6,14 +6,13 @@ to install it to system for which those packages not provided (Ubuntu 14.04,
 CentOS 6, etc) or customize your installation in more wide range, you may
 appreciate our source distribution. Here is simple manual how to install it.
 
-Let's assume that you have already downloaded Polemarch distribution - file
-``polemarch-0.0.1.tar.gz`` placed in your home directory. Here what you need
-to do:
+We assume that you have already downloaded Polemarch distribution - file
+``polemarch-X.X.X.tar.gz`` placed in your home directory. But of course you
+can install directly from PyPI without manually downloading package. In that
+case this manual is also applicable with only one exception: use command
+``pip install polemarch`` at 4 stage.
 
 1. **Prerequisites**:
-
-   * Apache web server and his development headers (packages
-     ``apache2``, ``apache2-dev`` in Ubuntu).
 
    * Python pip installed (package ``python-pip`` in Ubuntu).
 
@@ -21,7 +20,9 @@ to do:
 
    * Openssl development headers (``libssl-dev`` in Ubuntu).
 
-   * libffi (``libffi-dev`` in Ubuntu).
+   * libffi development headers (``libffi-dev`` in Ubuntu).
+
+   * LibYAML development headers (``libyaml-dev`` in Ubuntu)
 
    Optional:
 
@@ -29,32 +30,33 @@ to do:
 
    * ``sshpass`` to get working ssh password auth during playbook execution.
 
-2. Run installation:
+2. Make sure you have latest pip and virtualenv in your system. You can do it
+   with those commands:
 
    .. sourcecode:: bash
 
-      pip install polemarch --user
+      sudo pip install --upgrade pip
+      sudo pip install --upgrade virtualenv
 
-   **Caution**: without ``--user`` switch this operation installs many binaries
-   in system ``bin`` folder and many python libraries in system ``lib`` folder.
-   It can break some of your packages installed by regular package management
-   system. We recommend you to use ``--user`` switch of pip to install
-   Polemarch only for current user in his home directory, but it is up to you
-   to make decision.
-
-3. After installation you have available command - ``polemarchctl`` in your
-   ``.local/bin/`` directory. We suggest you to add it to your path like this:
+3. Create virtualenv for Polemarch. It is only supported method to run
+   Polemarch. Don't try to install it system-wide or locally using
+   ``pip install --user``.
 
    .. sourcecode:: bash
 
-      export PATH=$PATH:~/.local/bin
+      virtualenv polemarch
+      cd polemarch
+      source bin/activate
 
-   You can type this command without arguments to get help about available
-   subcommands. For every subcommand you can get help by entering
-   ``polemarchctl help <subcommand>``. Probably you have to use only two
-   commands: ``migrate`` and ``webserver``. First one is to create database
-   structure for you Polemarch installation (by default it is creates SQLite
-   database). Use it right after installation and every time after update in
+4. Run installation:
+
+   .. sourcecode:: bash
+
+      pip install ../polemarch-X.X.X.tar.gz
+
+5. Now we need to create database structure for your
+   Polemarch installation (by default it is creates SQLite database).
+   Use this command right after installation and every time after update in
    order to update you database schema for new version of Polemarch (you don't
    lose your old data during this process).
 
@@ -62,29 +64,61 @@ to do:
 
       polemarchctl migrate
 
-4. Second one is ``webserver``. It is to run web-GUI of Polemarch under Apache.
-   Here of example how to use this subcommand:
+6. Next part is start Polemarch web-server. Web-GUI of Polemarch works
+   under uWSGI web-server. Before you start it, you must customize folders in
+   config file, because by default our configuration suitable for .deb or
+   .rpm installation, not for PyPI. Copy standard config template to preferred
+   location and then edit it:
 
    .. sourcecode:: bash
 
-      polemarchctl webserver -P 8080
+      cp lib/python2.7/site-packages/polemarch/main/settings.ini ./
+      vi settings.ini
 
-   It will start Polemarch GUI listening at 8080 port. All logging redirected
-   to stderr.
+   You must change options ``static-map``, ``pidfile`` and ``daemonize`` in
+   ``[uwsgi]`` section to something like this (replace
+   ``/home/username/polemarch`` with absolute path to your virtualenv created
+   before):
 
-5. And finally to make your Polemarch able to actually run jobs, you must start
+   .. sourcecode:: ini
+
+      [uwsgi]
+      static-map = /static=/home/username/polemarch/lib/python2.7/site-packages/polemarch/static
+      pidfile = /tmp/polemarchweb.pid
+      daemonize = /tmp/polemarchweb.log
+
+7. Then we just run it with command. We use ``web.ini`` instead of previously
+   edited ``settings.ini`` because ``web.ini`` does some basic configuration
+   and then executes ``settings.ini`` (replace ``/home/username/polemarch``
+   with absolute path to your virtualenv created before):
+
+   .. sourcecode:: bash
+
+      export POLEMARCH_SETTINGS_FILE=/home/username/polemarch/settings.ini
+      uwsgi ./lib/python2.7/site-packages/polemarch/web.ini
+
+   It will start Polemarch GUI listening at 8080 port. To stop daemon later
+   you can use command:
+
+   .. sourcecode:: bash
+
+      uwsgi --stop /tmp/polemarchweb.pid
+
+   Where path to your pid file is same, which you specified in configuration
+   before.
+
+8. And finally to make your Polemarch able to actually run jobs, you must start
    at least one worker process. Because worker executes long-running tasks,
    such as running jobs or cloning repositories. Without him web-gui absolutely
    useless. Start it with this command:
 
    .. sourcecode:: bash
 
-      celery -A polemarch.wapp:app worker -B -S django
+      celery -A polemarch.wapp:app worker -B -S schedule_file
 
-   Celery is distributed task queue included in Polemarch installation. All
-   options above is required to for worker to run properly. But there is many
-   additional options which you can learn from Celery help. Use ``celery -h``
-   for details.
+   Here ``schedule_file`` is path to file, which Celery will use to store info
+   about scheduling to run periodic tasks. You may prefer some other location
+   for that file.
 
 Congratulations! After all those commands if the moon and stars are in the
 right position and your beard is impressive enough you end up with up and
