@@ -20,9 +20,9 @@ function getCookie(name)
 }
 
 function loadTpl(name)
-{ 
+{  
     return jQuery.ajax({
-       url: window.pmStaticPath+"/templates/"+name+".html",
+       url: window.pmStaticPath+"/"+name+".html",
        type: "GET",
        success: function(res)
        {
