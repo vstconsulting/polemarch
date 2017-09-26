@@ -786,5 +786,5 @@ class AnsibleModules(Modules):
         doc_data = load(data, Loader=Loader)
         result["data"] = OrderedDict()
         for field in self.fields:
-            result["data"][field] = doc_data[field]
+            result["data"][field] = doc_data.get(field, None)
         return result
