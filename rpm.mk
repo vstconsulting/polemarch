@@ -92,9 +92,9 @@ install -m 755 initbin/%{shortname}.conf $$RPM_BUILD_ROOT/etc/tmpfiles.d/%{short
 
 %post
 sudo -u %{name} /opt/%{name}/bin/%{shortname}ctl migrate > /dev/null 2>&1
+/usr/bin/systemctl daemon-reload > /dev/null 2>&1
 /usr/bin/systemctl enable %{shortname}web.service > /dev/null 2>&1
 /usr/bin/systemctl enable %{shortname}worker.service > /dev/null 2>&1
-/usr/bin/systemctl daemon-reload > /dev/null 2>&1
 
 %preun
 /usr/bin/systemctl disable %{shortname}web.service > /dev/null 2>&1

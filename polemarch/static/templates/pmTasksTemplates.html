@@ -1,6 +1,6 @@
 
 <!-- Список templates_list -->
-<script type="text/x-just" data-just="templates_widget"> 
+<script type="text/x-just" data-just="templates_widget">
     <section class="col-lg-6 col-sm-12 col-xs-12">
         <div class="box box-info">
             <div class="box-header with-border">
@@ -9,7 +9,7 @@
             <div class="box-body">
                 <table class="table table-bordered">
                     <tbody>
-                        <tr> 
+                        <tr>
                             <th>Name</th>
                             <th style="width: 105px;" >Actions</th>
                         </tr>
@@ -20,7 +20,7 @@
                                 <td>
                                     <a href="/?template/<%- val.kind %>/<%- val.id %>" class="item-name"
                                             onclick="return spajs.openURL(this.href);" ><%- val.name %></a>
-                                </td> 
+                                </td>
                                 <td>
                                     <a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- val.kind %>'].execute(<%- val.id %>)); return false;">Execute</a>
                                 </td>
@@ -28,83 +28,10 @@
                         <% } %>
                     </tbody>
                 </table>
-            </div> 
-        </div>
-    </section> 
-</script>
-
-<!-- Список templates_list -->
-<script type="text/x-just" data-just="fastcommand_widget"> 
-    <section class="col-lg-12 col-sm-12 col-xs-12">
-        <div class="box box-info">
-            <div class="box-header with-border">
-                Run shell command
             </div>
-            <div class="box-body">
-                <div class="row">
-                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-sm-4">
-                        <label class="control-label" >Project</label>
-                        <select
-                            class="form-control select2"
-                            id="projects-autocomplete"
-                            data-placeholder="Select project"
-                            style="width:100%" 
-                        >
-                            <option selected value="0" disabled>Not set</option>
-                            <% for(var i in pmProjects.model.itemslist.results){ %>
-                                <option
-                                    value="<%- pmProjects.model.itemslist.results[i].id %>"
-                                    ><%- pmProjects.model.itemslist.results[i].name %></option>
-                            <% } %>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-sm-4">
-                        <label class="control-label" >Inventory</label>
-                        <select
-                            class="form-control select2"
-                            id="inventories-autocomplete"
-                            data-placeholder="Select inventory"
-                            style="width:100%"
-                            onchange="pmModuleTemplates.selectInventory(this.value);"
-                        >
-                            <option selected value="0" disabled>Not set</option>
-                            <% for(var i in pmInventories.model.itemslist.results){ %>
-                                <option
-                                    value="<%- pmInventories.model.itemslist.results[i].id %>"
-                                    ><%- pmInventories.model.itemslist.results[i].name %></option>
-                            <% } %>
-                        </select>
-                    </div>
-
-                    <~ pmModuleTemplates.model.selectedInventory>
-                        <%= pmGroups.groupsAutocompleteTemplate(pmModuleTemplates.model.selectedInventory) %>
-                    <~>
-                    
-                    <div class="col-lg-12 col-sm-12">
-                        <label class="control-label" >Shell command</label>
-                        <div class="input-group">
-                            <input type="text"
-                                    class="form-control"
-                                    value=""
-                                    id="module-args-string"
-                                    onchange=""
-                                    onpaste=""  >
-                            <span class="input-group-btn" onclick=" " >
-                                <button 
-                                class="btn btn-primary"
-                                type="button"
-                                onclick="spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), pmGroups.getGroupsAutocompleteValue(), 'shell', $('#module-args-string').val(), {}))"
-                                ><span class="glyphicon glyphicon-send"></span> Run command</button> 
-                            </span>
-                        </div> 
-                    </div>
-                </div>
-            </div> 
         </div>
-    </section> 
+    </section>
 </script>
-
 
 <!-- Список templates_list -->
 <script type="text/x-just" data-just="templates_list">
@@ -121,12 +48,12 @@
     <section class="content">
         <a href="<%- polemarch.opt.host %>/?template/new-task" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >Create task template</a>
         <a href="<%- polemarch.opt.host %>/?template/new-module" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >Create module template</a>
-          
+
         <span class="btn btn-default textfile" style="margin-left: 10px;" >
             <input type="file" class="input-file"  onchange="spajs.showLoader(pmTasksTemplates.importFromFile(event));"  >
             <span class="glyphicon glyphicon-file"></span> Import template
         </span>
-                        
+
         <br>
         <br>
         <div class="row">
@@ -199,7 +126,7 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a href="#" onclick="pmTasksTemplates.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
-                                </li> 
+                                </li>
                                 <li>
                                     <a href="#" onclick="pmTasksTemplates.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
@@ -209,14 +136,14 @@
                                 </li>
                             </ul>
                         </div>
-                        
+
                         <% if(!query){ %>
                             <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Select
                                     <span class="caret"></span>
                                 </button>
-                                <ul class="dropdown-menu">  
+                                <ul class="dropdown-menu">
                                     <li>
                                         <a href="#" onclick="spajs.showLoader(pmTasksTemplates.toggleSelectEachItem(true)); return false;" >Select all</a>
                                     </li>
@@ -232,243 +159,6 @@
                     </div>
                 </div>
             </section>
-        </div>
-    </section>
-</script>
-
-<script type="text/x-just" data-just="templates_module_page">
-<section class="content-header">
-        <h1>
-            <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
-                <span class="glyphicon glyphicon-arrow-left"></span>
-            </a>
-            <span class="h1-header" >Module template `<%= pmModuleTemplates.model.items[item_id].justText('name') %>`</span>
-
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
-            <li class="active"><%- pmModuleTemplates.model.items[item_id].name.slice(0, 20) %></li>
-        </ol>
-    </section>
-
-    <section class="content">
-        <button type="button" onclick="spajs.showLoader(pmModuleTemplates.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save</button>
-        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), pmGroups.getGroupsAutocompleteValue(), $('#module-autocomplete').val(), $('#module-args-string').val(), jsonEditor.jsonEditorGetValues())); return false;"
-               class="btn btn-warning" >Execute</button>
-        <button type="button" onclick="spajs.showLoader(pmModuleTemplates.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy template" ><span class="glyphicon glyphicon-duplicate" ></span></button>
-
-        <button type="button" onclick="spajs.showLoader(pmModuleTemplates.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
-            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove template</span>
-        </button>
-        <br>
-        <br>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        Run module template
-                    </div>
-                    <div class="box-body">
-
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Template name</label>
-                                <input type="text"
-                                        placeholder="Enter name"
-                                        id="Templates-name"
-                                        value="<%- pmModuleTemplates.model.items[item_id].name %>"
-                                        class="form-control"
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Project</label>
-                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
-                                    <option selected value="0" >Not set</option>
-                                    <% for(var i in pmProjects.model.itemslist.results){ %>
-                                        <option
-                                            <% if(pmProjects.model.itemslist.results[i].id == pmModuleTemplates.model.items[item_id].data.project ){ %>selected<% } %>
-                                            value="<%- pmProjects.model.itemslist.results[i].id %>"
-                                            ><%- pmProjects.model.itemslist.results[i].name %></option>
-                                    <% } %>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Inventory</label>
-                                <select
-                                    class="form-control select2"
-                                    id="inventories-autocomplete"
-                                    data-placeholder="Select inventory"
-                                    style="width:100%"
-                                    onchange="pmModuleTemplates.selectInventory(this.value);"
-                                >
-                                    <option value="0" >Not set</option>
-                                    <% for(var i in pmInventories.model.itemslist.results){ %>
-                                        <option
-                                            <% if(pmInventories.model.itemslist.results[i].id == pmModuleTemplates.model.items[item_id].data.inventory ){ %>selected<% } %>
-                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
-                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
-                                    <% } %>
-                                </select>
-                            </div>
-
-                            <~ pmModuleTemplates.model.selectedInventory> 
-                                <%= pmGroups.groupsAutocompleteTemplate(pmModuleTemplates.model.selectedInventory, pmModuleTemplates.model.items[item_id].data.group) %>
-                            <~>
-                        </div>
-
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Module</label>
-                                <input type="text"
-                                        class="module-autocomplete form-control"
-                                        id="module-autocomplete"
-                                        value="<%- pmModuleTemplates.model.items[item_id].data.module %>">
-                            </div>
-                        </div>
-                        <div class="row" >
-                            <div class="col-lg-12">
-                                <div class="">
-                                    <label class="control-label" >Args</label>
-                                    <input type="text"
-                                            class="form-control"
-                                            value="<%- pmModuleTemplates.model.items[item_id].data.args %>"
-                                            id="module-args-string"
-                                            onchange=""
-                                            onpaste=""  >
-                                   <!--<span class="input-group-addon" onclick=" " >
-                                         <span class="glyphicon glyphicon-pencil"></span>
-                                    </span>-->
-                                </div>
-                                <div class="help-block">
-                                    args (string) – which args must be passed to module. Just raw string with arguments. You can specify here contains of args option. For example ls -la for shell module.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="row">
-            <%= jsonEditor.editor(pmModuleTemplates.model.items[item_id].data.vars, {block:'module', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
-        </div>
-    </section>
-</script>
-
-<script type="text/x-just" data-just="templates_new_module_page">
-<section class="content-header">
-        <h1>
-            <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
-                <span class="glyphicon glyphicon-arrow-left"></span>
-            </a>
-            <span class="h1-header" >New template for run module</span>
-
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
-            <li class="active">New module template</li>
-        </ol>
-    </section>
-
-    <section class="content">
-        <button type="button" onclick="spajs.showLoader(pmModuleTemplates.addItem()); return false;" class="btn btn-primary" >Create</button>
-        <br>
-        <br>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        Run module template
-                    </div>
-                    <div class="box-body">
-
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Template name</label>
-                                <input type="text"
-                                        placeholder="Enter name"
-                                        id="Templates-name"
-                                        value=""
-                                        class="form-control"
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Project</label>
-                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
-                                    <option selected value="0" >Not set</option>
-                                    <% for(var i in pmProjects.model.itemslist.results){ %>
-                                        <option 
-                                            value="<%- pmProjects.model.itemslist.results[i].id %>"
-                                            ><%- pmProjects.model.itemslist.results[i].name %></option>
-                                    <% } %>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Inventory</label>
-                                <select
-                                    class="form-control select2"
-                                    id="inventories-autocomplete"
-                                    data-placeholder="Select inventory"
-                                    style="width:100%"
-                                    onchange="pmModuleTemplates.selectInventory(this.value);"
-                                >
-                                    <option selected value="0" >Not set</option>
-                                    <% for(var i in pmInventories.model.itemslist.results){ %>
-                                        <option
-                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
-                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
-                                    <% } %>
-                                </select>
-                            </div>
-
-                            <~ pmModuleTemplates.model.selectedInventory>
-                                <%= pmGroups.groupsAutocompleteTemplate(pmModuleTemplates.model.selectedInventory) %>
-                            <~>
-                        </div>
-
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Module</label>
-                                <input type="text"
-                                        class="module-autocomplete form-control"
-                                        id="module-autocomplete"
-                                        value="">
-                            </div>
-                        </div>
-                        <div class="row" >
-                            <div class="col-lg-12">
-                                <div class="">
-                                    <label class="control-label" >Args</label>
-                                    <input type="text"
-                                            class="form-control"
-                                            value=""
-                                            id="module-args-string"
-                                            onchange=""
-                                            onpaste=""  >
-                                   <!--<span class="input-group-addon" onclick=" " >
-                                         <span class="glyphicon glyphicon-pencil"></span>
-                                    </span>-->
-                                </div>
-                                <div class="help-block">
-                                    args (string) – which args must be passed to module. Just raw string with arguments. You can specify here contains of args option. For example ls -la for shell module.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="row">
-            <%= jsonEditor.editor({}, {block:'module', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
 </script>
@@ -493,9 +183,9 @@
         <button type="button" onclick="spajs.showLoader(pmTasksTemplates.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save</button>
         <button type="button" onclick="spajs.showLoader(pmTasks.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), $('#playbook-autocomplete').val(), jsonEditor.jsonEditorGetValues())); return false;"
                class="btn btn-warning" >Execute</button>
-        
+
         <button type="button" onclick="spajs.showLoader(pmTasksTemplates.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy template" ><span class="glyphicon glyphicon-duplicate" ></span></button>
-        
+
         <button type="button" onclick="spajs.showLoader(pmTasksTemplates.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
             <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove template</span>
         </button>
@@ -524,10 +214,10 @@
                                 <label class="control-label" >Project</label>
                                 <select
                                 onchange="pmTasksTemplates.selectProject(this.value);"
-                                class="form-control select2" 
+                                class="form-control select2"
                                 id="projects-autocomplete"
                                 data-placeholder="Select project"
-                                style="width:100%" > 
+                                style="width:100%" >
                                     <option <% if(!pmTasksTemplates.model.items[item_id].data.project){ %> selected <% } %> value="0" >Not set</option>
                                     <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
@@ -613,7 +303,7 @@
                                 <label class="control-label" >Project</label>
                                 <select
                                 onchange="pmTasksTemplates.selectProject(this.value);"
-                                class="form-control select2" 
+                                class="form-control select2"
                                 id="projects-autocomplete"
                                 data-placeholder="Select project"
                                 style="width:100%" >
