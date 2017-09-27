@@ -22,15 +22,11 @@ function getCookie(name)
 function loadTpl(name)
 {  
     return jQuery.ajax({
-       url: window.pmStaticPath+"/"+name+".html",
+       url: window.pmStaticPath+""+name+".html",
        type: "GET",
        success: function(res)
        {
             $("body").append(res)  
-       },
-       error:function(res)
-       {
-            $.notify("Error in template loaging", "error");
        }
     })
 }
