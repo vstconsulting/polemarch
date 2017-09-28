@@ -167,23 +167,25 @@
                 <div class="row">
                     <div class="form-group col-lg-12">
                         <label class=" col-sm-2 col-lg-2 control-label">
-                            Name
+                            Name 
                         </label>
                         <div class="input-group  col-sm-10 col-lg-10 col-xs-12"  >
                         
                             <% if(opt.select2){ %>
                                 <~ jsonEditor.model.isLoaded_cli_reference>
-                                    <select class="form-control select2" id="new_json_name<%- opt.prefix%>" data-placeholder="Select param" >
-                                        <option selected="" disabled="" value="" disabled>Not set</option>
-                                        <% for(var i in jsonEditor.options[optionsblock]){ %> 
-                                            <% if($.inArray(i, opt.excluded_options) == -1){ %>
-                                                <option value="<%- i %>" >
-                                                    <%- i %> (<%- jsonEditor.options[optionsblock][i].help %>)
-                                                </option> 
+                                    <% if(jsonEditor.model.isLoaded_cli_reference){ %>
+                                        <select class="form-control select2" id="new_json_name<%- opt.prefix%>" data-placeholder="Select param" >
+                                            <option selected="" disabled="" value="" disabled>Not set</option>
+                                            <% for(var i in jsonEditor.options[optionsblock]){ %> 
+                                                <% if($.inArray(i, opt.excluded_options) == -1){ %>
+                                                    <option value="<%- i %>" >
+                                                        <%- i %> (<%- jsonEditor.options[optionsblock][i].help %>)
+                                                    </option> 
+                                                <% } %>
                                             <% } %>
-                                        <% } %>
-                                    </select>
-                                    <=js $("#new_json_name<%- opt.prefix%>").select2() js=> 
+                                        </select> 
+                                        <=js $("#new_json_name<%- opt.prefix%>").select2() js=> 
+                                    <% } %> 
                                 <~>
                             <% }else{ %>
                                 <input type="text" placeholder="Enter name" id="new_json_name<%- opt.prefix%>" value=""  class="form-control" >

@@ -5,6 +5,7 @@ function jsonEditor(){
 
 jsonEditor.model = {}
 jsonEditor.model.isLoaded_cli_reference = false;
+jsonEditor.model.isLoading_cli_reference = false;
 
 jsonEditor.options = {};
 
@@ -381,22 +382,23 @@ jsonEditor.initAutoComplete = function(optionsblock, prefix)
 }
 
 jsonEditor.initForm = function(optionsblock, prefix)
-{
+{ 
     if(!prefix)
     {
         prefix = "prefix"
     }
     prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
 
+    console.log(optionsblock, jsonEditor.options[optionsblock])
     if(jsonEditor.options[optionsblock])
     {
         jsonEditor.initAutoComplete(optionsblock, prefix)
         return;
     }
 
-    if(!jsonEditor.model.isLoaded_cli_reference)
+    if(!jsonEditor.model.isLoaded_cli_reference && !jsonEditor.model.isLoading_cli_reference)
     {
-        jsonEditor.model.isLoaded_cli_reference = true;
+        jsonEditor.model.isLoading_cli_reference = true;
         return spajs.ajax.Call({
             url: "/api/v1/ansible/cli_reference/",
             type: "GET",
@@ -406,6 +408,7 @@ jsonEditor.initForm = function(optionsblock, prefix)
             {
                 Object.assign(jsonEditor.options, data) 
                 jsonEditor.initAutoComplete(optionsblock, prefix) 
+                jsonEditor.model.isLoaded_cli_reference = true;
             }
         });
     }

@@ -202,6 +202,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
  * Вернёт код для поля автокомплита модулей
  * @param {String} id
  * @returns HTML templte
+ * @private
  */
 pmAnsibleModule.moduleAutocompleteFiled = function(opt)
 {
@@ -272,6 +273,7 @@ pmAnsibleModule.moduleAutocompleteFiled = function(opt)
  * Вернёт код для поля ввода аргументов к запуску модуля
  * @param {String} id
  * @returns HTML templte
+ * @private
  */
 pmAnsibleModule.argsAutocompleteFiled = function(opt)
 {
