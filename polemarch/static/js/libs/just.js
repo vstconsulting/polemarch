@@ -160,19 +160,19 @@
                                     /*
                                         myline = {line:[1, 2, 3]}
                                         $(".content").html(spajs.just.render('test2', myline))
-                                     */
-/*
-<!-- Подключаем шаблон для списка записей -->
-<script id="test-list" type="text/x-just" style="display: none;" data-just="test">
-    AAA
-        <~var j in line>
-            <div>
-                <%= j %> - <%= line.justTpl(j) %>
-            </div>
-        <~>
-    BBB
-</script>
-
+                                    */
+                                    
+                                    /*
+                                        <!-- Подключаем шаблон для списка записей -->
+                                        <script id="test-list" type="text/x-just" style="display: none;" data-just="test">
+                                            AAA
+                                                <~var j in line>
+                                                    <div>
+                                                        <%= j %> - <%= line.justTpl(j) %>
+                                                    </div>
+                                                <~>
+                                            BBB
+                                        </script> 
                                     */
                                     var
 						lineNo = 1,
@@ -409,6 +409,57 @@
                             return html;
 			};
 			this.render = this.renderSync
+
+                        /**
+                         * Генерирует случайную строку
+                         * @private
+                         */
+                        this.getUUID = function()
+                        {
+                            var s = ""
+                            var str = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890";
+                            for(var i = 0; i< 24; i++)
+                            {
+                                s += str[Math.floor(Math.random()*(str.length-1))]
+                            }
+                            return s
+                        }     
+                        
+                        
+                        if(window.__JUST_onInsertFunctions === undefined)
+                        {
+                            window.__JUST_onInsertFunctions = {}
+                        }
+                        /**
+                         * При вставке этого html в дом дерево будет выполнена функция func
+                         * @param {type} html
+                         * @param {type} func
+                         * @returns {unresolved}
+                         */
+			this.onInsert = function(html, func, once)
+                        {
+                            var key = this.getUUID()
+                            window.__JUST_onInsertFunctions[key] = {func:func, count:0};
+                            
+                            var funcCall = "";
+                            if(once)
+                            {
+                                funcCall = " if(window.__JUST_onInsertFunctions['"+key+"'] !== undefined){"
+                                        + " window.__JUST_onInsertFunctions['"+key+"'].func(window.__JUST_onInsertFunctions['"+key+"'].count);"
+                                        + " window.__JUST_onInsertFunctions['"+key+"'].count+=1;"
+                                        + " delete window.__JUST_onInsertFunctions['"+key+"'];"
+                                        + " } ";
+                            }
+                            else
+                            { 
+                                funcCall = "window.__JUST_onInsertFunctions['"+key+"'].func(window.__JUST_onInsertFunctions['"+key+"'].count);" 
+                                        + " window.__JUST_onInsertFunctions['"+key+"'].count+=1;"
+                            }
+                            
+                            html += "<="+window.JustEvalJsPattern_pageUUID+" "+funcCall+" "+window.JustEvalJsPattern_pageUUID+"=>";
+                            return html;
+                        }
+                        
                         // Начинает сохранение данных о отрисовываемых шаблонов
 			this.startRecoding = function ()
                         {

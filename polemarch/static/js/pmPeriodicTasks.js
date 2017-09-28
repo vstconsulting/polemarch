@@ -182,6 +182,45 @@ pmPeriodicTasks.execute = function(project_id, item_id)
     return def.promise();
 }
 
+/**
+ * Выделеть всё или снять выделение
+ * @param {boolean} mode
+ * @param {integer} project_id проект для которого с тасками работаем.
+ * @returns {promise}
+ */
+pmPeriodicTasks.toggleSelectEachItem = function(mode, project_id)
+{ 
+    var thisObj = this;
+    return $.when(this.searchItems(project_id, 'project')).done(function()
+    {
+        var delta = 0;
+        for(var i in thisObj.model.itemslist.results)
+        {
+            var item_id = thisObj.model.itemslist.results[i].id
+
+            if(thisObj.model.selectedItems[item_id] != mode)
+            {
+                if(mode)
+                {
+                    delta++
+                }
+                else
+                {
+                    delta--
+                }
+            }
+            thisObj.model.selectedItems[item_id] = mode
+        }
+        thisObj.model.selectedCount += delta
+        
+        if(thisObj.model.selectedCount < 0)
+        {
+            thisObj.model.selectedCount = 0;
+        }
+
+    }).promise()
+}
+
 pmPeriodicTasks.showList = function(holder, menuInfo, data)
 {
     var thisObj = this;
@@ -213,10 +252,10 @@ pmPeriodicTasks.search = function(project_id, query)
 }
 
 pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
-{
+{ 
     var thisObj = this;
     var project_id = data.reg[1];
-    return $.when(this.sendSearchQuery({playbook: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
+    return $.when(this.sendSearchQuery({name: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
     }).fail(function()

@@ -56,6 +56,7 @@ uninstall:
 	$(PIP) uninstall $(NAME)
 
 clean: build-clean
+	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf htmlcov
 	-rm -rf .coverage
 	-rm -rf dist

@@ -119,7 +119,7 @@ build_zip:
   script:
    - make rpm RELEASE=${CI_BUILD_ID}
   artifacts:
-    expire_in: 20 minutes
+    expire_in: 30 minutes
     paths:
     - dist/
   retry: 2

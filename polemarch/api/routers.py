@@ -36,13 +36,19 @@ class _AbstractRouter(routers.DefaultRouter):
         name = name or view().get_view_name().lower()
         self.custom_urls.append((prefix, view, name))
 
-    def unregister(self, prefix):
+    def _unreg(self, prefix, objects_list):
         index = 0
-        for reg_prefix, _, _ in self.registry:
+        for reg_prefix, _, _ in objects_list:
             if reg_prefix == prefix:
-                del self.registry[index]
+                del objects_list[index]
                 break
             index += 1
+
+    def unregister_view(self, prefix):
+        self._unreg(prefix, self.custom_urls)  # nocv
+
+    def unregister(self, prefix):
+        self._unreg(prefix, self.registry)
 
 
 class APIRouter(_AbstractRouter):
@@ -117,6 +123,9 @@ class MainRouter(_AbstractRouter):
     def register_router(self, prefix, router, name=None):
         name = name or router.root_view_name
         self.routers.append((prefix, router, name))
+
+    def unregister_router(self, prefix):
+        self._unreg(prefix, self.routers)  # nocv
 
     def get_urls(self):
         urls = super(MainRouter, self).get_urls()

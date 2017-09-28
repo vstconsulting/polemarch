@@ -73,13 +73,17 @@ ext_list = [
     'polemarch.main.context_processors',
 
 ]
+
+if not os.path.exists(ext_list[0].replace(".", "/")+ext):
+    ext = ".py" if ext == ".c" else ".c"
+
 extensions_dict = dict((
     (exten, [exten.replace(".", "/")+ext]) for exten in ext_list
 ))
 
 ext_modules = list(Extension(m, f) for m, f in extensions_dict.items())
 
-if use_cython:
+if use_cython and has_cython:
     ext_modules = cythonize(ext_modules)
 
 
