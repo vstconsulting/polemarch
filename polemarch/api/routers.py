@@ -37,6 +37,7 @@ class _AbstractRouter(routers.DefaultRouter):
         self.custom_urls.append((prefix, view, name))
 
     def _unreg(self, prefix, objects_list):
+        del self._urls
         index = 0
         for reg_prefix, _, _ in objects_list:
             if reg_prefix == prefix:
