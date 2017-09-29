@@ -67,8 +67,8 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
         thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
 
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id}))
-        $("#inventories-autocomplete").select2();
-        //$("#projects-autocomplete").select2();
+        $("#inventories-autocomplete").select2({ width: '100%' });
+        //$("#projects-autocomplete").select2({ width: '100%' });
 
         new autoComplete({
             selector: '#playbook-autocomplete',
@@ -130,8 +130,8 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {}))
 
-        $("#inventories-autocomplete").select2();
-        //$("#projects-autocomplete").select2();
+        $("#inventories-autocomplete").select2({ width: '100%' });
+        //$("#projects-autocomplete").select2({ width: '100%' });
 
         new autoComplete({
             selector: '#playbook-autocomplete',
