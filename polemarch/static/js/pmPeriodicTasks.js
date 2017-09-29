@@ -138,7 +138,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
             return def.promise();
         }
         data.group = pmGroups.getGroupsAutocompleteValue()
-        data.args = $("#module-args-string").val()
+        data.args = moduleArgsEditor.getModuleArgs()
     }
     else
     {
@@ -273,7 +273,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
         thisObj.model.newitem = {type:'INTERVAL', kind:'PLAYBOOK'}
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {project_id:project_id}))
 
-        $('#new_periodic-tasks_inventory').select2();
+        $('#new_periodic-tasks_inventory').select2({ width: '100%' });
 
         new autoComplete({
             selector: '#new_periodic-tasks_playbook',
@@ -324,7 +324,7 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
         pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory)
         
-        $('#periodic-tasks_'+item_id+'_inventory').select2();
+        $('#periodic-tasks_'+item_id+'_inventory').select2({ width: '100%' });
 
         new autoComplete({
             selector: '#periodic-tasks_'+item_id+'_playbook',
@@ -445,7 +445,7 @@ pmPeriodicTasks.addItem = function(project_id)
     if(data.kind == "MODULE")
     {
         data.vars.group = pmGroups.getGroupsAutocompleteValue()
-        data.vars.args =  $("#module-args-string").val();
+        data.vars.args =  moduleArgsEditor.getModuleArgs();
     }
     
     spajs.ajax.Call({
@@ -577,7 +577,7 @@ pmPeriodicTasks.updateItem = function(item_id)
     if(data.kind == "MODULE")
     {
         data.vars.group = pmGroups.getGroupsAutocompleteValue()
-        data.vars.args =  $("#module-args-string").val();
+        data.vars.args =  moduleArgsEditor.getModuleArgs();
     }
     var thisObj = this;
     return spajs.ajax.Call({
