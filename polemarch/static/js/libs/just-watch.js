@@ -401,10 +401,22 @@ var justReactive = {
                     {
                         if(attrVal)
                         {
-                            el[j].setAttribute(newval.just_ids[i].attrName, attrVal);
+                            if(el[j][newval.just_ids[i].attrName])
+                            {
+                                el[j][newval.just_ids[i].attrName] = attrVal
+                            }
+                            else
+                            {
+                                el[j].setAttribute(newval.just_ids[i].attrName, attrVal);
+                            } 
                         }
                         else
                         {
+                            if(el[j][newval.just_ids[i].attrName])
+                            {
+                                el[j][newval.just_ids[i].attrName] = null
+                            }
+                            
                             el[j].removeAttribute(newval.just_ids[i].attrName);
                         }
                     }
