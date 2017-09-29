@@ -112,11 +112,11 @@ pmModuleTemplates.addItem = function()
     data.name = $("#Templates-name").val()
     data.kind = this.model.kind
     data.data = {
-        module:$("#module-autocomplete").val(),
+        module:moduleArgsEditor.getSelectedModuleName(),
         inventory:$("#inventories-autocomplete").val(),
         project:$("#projects-autocomplete").val(),
         group:pmGroups.getGroupsAutocompleteValue(),
-        args:$("#module-args-string").val(),
+        args:moduleArgsEditor.getModuleArgs(),
         vars:jsonEditor.jsonEditorGetValues(),
     }
 
@@ -161,11 +161,11 @@ pmModuleTemplates.updateItem = function(item_id)
     data.name = $("#Templates-name").val()
     data.kind = this.model.kind
     data.data = {
-        module:$("#module-autocomplete").val(),
+        module:moduleArgsEditor.getSelectedModuleName(),
         inventory:$("#inventories-autocomplete").val(),
         project:$("#projects-autocomplete").val(),
         group:pmGroups.getGroupsAutocompleteValue(),
-        args:$("#module-args-string").val(),
+        args:moduleArgsEditor.getModuleArgs(),
         vars:jsonEditor.jsonEditorGetValues(),
     }
 

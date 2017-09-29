@@ -84,13 +84,10 @@
                             <~>
                         </div>
 
-                        <%= 
-                            pmAnsibleModule.moduleFileds(
-                                {
-                                    module:{id:'module-autocomplete', value:pmModuleTemplates.model.items[item_id].data.module },
-                                    args:{id:'module-args-string', value:pmModuleTemplates.model.items[item_id].data.args }
-                                }) 
-                        %>
+                        <%= moduleArgsEditor.moduleFileds({
+                                    module:{value:pmModuleTemplates.model.items[item_id].data.module },
+                                    args:{value:pmModuleTemplates.model.items[item_id].data.args }
+                                }) %>
                     </div>
                 </div>
             </section>
@@ -177,12 +174,7 @@
                             <~>
                         </div>
 
-                        <%= 
-                            pmAnsibleModule.moduleFileds(
-                                {
-                                    module:{id:'module-autocomplete'}, args:{id:'module-args-string'}
-                                }) 
-                        %>
+                        <%= moduleArgsEditor.moduleFileds() %>
                     </div>
                 </div>
             </section>
