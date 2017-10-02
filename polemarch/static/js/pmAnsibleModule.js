@@ -11,6 +11,8 @@ var pmAnsibleModule = {
     }
 }
 
+pmAnsibleModule.model.className = "pmAnsibleModule"
+
 pmAnsibleModule.selectInventory = function(inventory_id)
 {
     var def = new $.Deferred();

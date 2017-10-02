@@ -25,21 +25,8 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Periodic tasks
-                        <div class="input-group col-lg-2" style="float: right;">
-                            <input
-                                type="text"
-                                id="search-query-input"
-                                placeholder="Search by name"
-                                class="form-control"
-                                maxlength="255"
-                                value="<%- query %>"
-                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmPeriodicTasks.search(<%- project_id %>, $('#search-query-input').val()));"
-                            >
-                            <div class="input-group-addon" onclick="spajs.showLoader(pmPeriodicTasks.search(<%- project_id %>, $('#search-query-input').val()));">
-                                <span class="glyphicon glyphicon-search" ></span>
-                            </div>
-                        </div>
+                        Periodic tasks 
+                        <%= pmPeriodicTasks.searchFiled({query:query, project_id:project_id}) %>  
                         <% if(pmPeriodicTasks.getTotalPages(pmPeriodicTasks.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
                                 <%= pmPeriodicTasks.paginationHtml(pmPeriodicTasks.model.itemslist) %>

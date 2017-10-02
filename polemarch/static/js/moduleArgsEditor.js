@@ -81,10 +81,8 @@ moduleArgsEditor.moduleAutocompleteFiled = function(opt)
                             matches.push(val)
                         }
                     }
-                    if(matches.length)
-                    {
-                        response(matches);
-                    }
+                    
+                    response(matches); 
                 }
             });
         })

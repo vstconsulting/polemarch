@@ -31,3 +31,21 @@
 <% } %>
 </script>
 
+<script  type="text/x-just" style="display: none;" data-just="searchFiled">
+    <div class="input-group col-lg-2" style="float: right;">
+        <input
+            type="text"
+            id="search-query-input"
+            placeholder="Search by name"
+            class="form-control"
+            maxlength="255"
+            value="<%- opt.query %>"
+            onkeyup="if(event.keyCode == 13) spajs.showLoader(<%- opt.className %>.search(this.value), <%- opt.className %>.model.searchAdditionalData);"
+        >
+        <div class="input-group-addon" onclick="spajs.showLoader(<%- opt.className %>.search($('#search-query-input').val(), <%- opt.className %>.model.searchAdditionalData));">
+            <span class="glyphicon glyphicon-search" ></span>
+        </div>
+    </div>
+</script>
+
+

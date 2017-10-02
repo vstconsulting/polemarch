@@ -20,21 +20,8 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Groups
-                        <div class="input-group col-lg-2" style="float: right;">
-                            <input
-                                type="text"
-                                id="search-query-input"
-                                placeholder="Search by name"
-                                class="form-control"
-                                maxlength="255"
-                                value="<%- query %>"
-                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmGroups.search($('#search-query-input').val()));"
-                            >
-                            <div class="input-group-addon" onclick="spajs.showLoader(pmGroups.search($('#search-query-input').val()));">
-                                <span class="glyphicon glyphicon-search" ></span>
-                            </div>
-                        </div>
+                        Groups 
+                        <%= pmGroups.searchFiled({query:query}) %>  
                         <% if(pmGroups.getTotalPages(pmGroups.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
                                 <%= pmGroups.paginationHtml(pmGroups.model.itemslist) %>
