@@ -4,6 +4,7 @@ var pmHistory = inheritance(pmItems)
 pmHistory.model.name = "history"
 pmHistory.model.linePerPage = 130;
 pmHistory.justDeepWatch('model');
+pmHistory.model.className = "pmHistory"
 
 pmHistory.cancelTask = function(item_id)
 {
@@ -35,25 +36,34 @@ pmHistory.showSearchResults = function(holder, menuInfo, data)
     })
 }
 
-pmHistory.search = function(project_id, query)
-{
-    if(!project_id)
+pmPeriodicTasks.search = function(query, options)
+{ 
+    if(options.inventory_id)
     {
         if(!query || !trim(query))
         {
-            return spajs.open({ menuId:this.model.name, reopen:true});
+            return spajs.open({ menuId:'inventory/' + options.inventory_id +"/" + this.model.name, reopen:true});
         }
 
-        return spajs.open({ menuId:this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+        return spajs.open({ menuId:'inventory/' + options.inventory_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
     }
-
-    if(!query || !trim(query))
+    else if(options.project_id)
     {
-        return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name, reopen:true});
-    }
+        if(!query || !trim(query))
+        {
+            return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name, reopen:true});
+        }
 
-    return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+        return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+    }
+    else if(!query || !trim(query))
+    {
+        return spajs.open({ menuId:this.model.name, reopen:true});
+    }
+    
+    return spajs.open({ menuId:this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
 }
+ 
 
 pmHistory.showListInProjects = function(holder, menuInfo, data)
 {

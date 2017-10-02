@@ -3,6 +3,7 @@ var pmHosts = inheritance(pmItems)
 
 pmHosts.model.name = "hosts"
 pmHosts.model.page_name = "host"
+pmHosts.model.className = "pmHosts"
 
 pmHosts.copyItem = function(item_id)
 {

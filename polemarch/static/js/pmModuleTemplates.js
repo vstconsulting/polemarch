@@ -4,6 +4,7 @@ var pmModuleTemplates =  inheritance(pmTemplates)
 pmModuleTemplates.model.name = "templates"
 pmModuleTemplates.model.page_name = "template"
 pmModuleTemplates.model.selectedInventory = 0
+pmModuleTemplates.model.className = "pmModuleTemplates"
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmModuleTemplates.model.kind = "Module"

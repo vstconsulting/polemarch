@@ -19,6 +19,7 @@ pmItems.model.items = {}
 pmItems.model.name = "based"
 pmItems.model.page_name = "based"
 pmItems.model.selectedCount = 0;
+pmItems.model.className = "pmItems"
 
 pmItems.toggleSelect = function(item_id, mode)
 {
@@ -171,8 +172,15 @@ pmItems.showList = function(holder, menuInfo, data)
     })
 }
 
-pmItems.search = function(query)
+pmItems.searchFiled = function(options)
 {
+    options.className = this.model.className;
+    this.model.searchAdditionalData = options
+    return spajs.just.render('searchFiled', {opt:options});
+}
+
+pmItems.search = function(query, options)
+{ 
     if(!query || !trim(query))
     {
         return spajs.open({ menuId:this.model.name, reopen:true});

@@ -3,6 +3,7 @@ var pmUsers = inheritance(pmItems)
  
 pmUsers.model.name = "users"
 pmUsers.model.page_name = "user"
+pmUsers.model.className = "pmUsers"
   
 pmUsers.copyItem = function(item_id)
 {

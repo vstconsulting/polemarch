@@ -5,6 +5,7 @@ var pmTasksTemplates = inheritance(pmTemplates)
 
 pmTasksTemplates.model.name = "templates"
 pmTasksTemplates.model.page_name = "template"
+pmTasksTemplates.model.className = "pmTasksTemplates"
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmTasksTemplates.model.kind = "Task"

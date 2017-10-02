@@ -6,6 +6,8 @@ var pmDashboard = {
     }
 }
 
+pmDashboard.model.className = "pmDashboard"
+
 pmDashboard.model.count = {
     projects:'-',
     inventories:'-',

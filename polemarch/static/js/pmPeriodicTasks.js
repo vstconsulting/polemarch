@@ -4,6 +4,7 @@ var pmPeriodicTasks = inheritance(pmItems)
 pmPeriodicTasks.model.page_name = "periodic-task"
 pmPeriodicTasks.model.name = "periodic-tasks"  
 pmPeriodicTasks.model.selectedInventory = 0;
+pmPeriodicTasks.model.className = "pmPeriodicTasks"
 
 pmPeriodicTasks.copyAndEdit = function(item_id)
 {
@@ -241,14 +242,14 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
     }).promise();
 }
 
-pmPeriodicTasks.search = function(project_id, query)
+pmPeriodicTasks.search = function(query, options)
 {
     if(!query || !trim(query))
     {
-        return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name, reopen:true});
+        return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name, reopen:true});
     }
 
-    return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+    return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
 }
 
 pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)

@@ -23,20 +23,7 @@
                 <div class="box box-info">
                     <div class="box-header with-border">
                         Users
-                        <div class="input-group col-lg-2" style="float: right;">
-                            <input
-                                type="text"
-                                id="search-query-input"
-                                placeholder="Search by name"
-                                class="form-control"
-                                maxlength="255"
-                                value="<%- query %>"
-                                onkeyup="if(event.keyCode == 13) spajs.showLoader(pmUsers.search($('#search-query-input').val()));"
-                            >
-                            <div class="input-group-addon" onclick="spajs.showLoader(pmUsers.search($('#search-query-input').val()));">
-                                <span class="glyphicon glyphicon-search" ></span>
-                            </div>
-                        </div>
+                        <%= pmUsers.searchFiled({query:query}) %> 
                         <% if(pmUsers.getTotalPages(pmUsers.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
                                 <%= pmUsers.paginationHtml(pmUsers.model.itemslist) %>

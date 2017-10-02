@@ -3,6 +3,7 @@ var pmProjects = inheritance(pmItems)
 pmProjects.model.name = "projects"
 jsonEditor.options[pmProjects.model.name] = {};
 pmProjects.model.selectedInventory = 0
+pmProjects.model.className = "pmProjects"
 
 jsonEditor.options[pmProjects.model.name]['repo_password'] = {
     type:'password',

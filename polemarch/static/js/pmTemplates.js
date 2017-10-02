@@ -6,6 +6,7 @@ pmTemplates.model.name = "templates"
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmTemplates.model.kind = "Task,Module"
+pmTemplates.model.className = "pmTemplates"
 
 pmTemplates.copyAndEdit = function(item_id)
 {
