@@ -358,16 +358,16 @@ REPO_BACKENDS = {
 
 TASKS_HANDLERS = {
     "REPO": {
-        "BACKEND": "polemarch.main.tasks.RepoTask"
+        "BACKEND": "polemarch.main.tasks.tasks.RepoTask"
     },
     "SCHEDUER": {
-        "BACKEND": "polemarch.main.tasks.ScheduledTask"
+        "BACKEND": "polemarch.main.tasks.tasks.ScheduledTask"
     },
     "MODULE": {
-        "BACKEND": "polemarch.main.tasks.ExecuteAnsibleModule"
+        "BACKEND": "polemarch.main.tasks.tasks.ExecuteAnsibleModule"
     },
     "PLAYBOOK": {
-        "BACKEND": "polemarch.main.tasks.ExecuteAnsiblePlaybook"
+        "BACKEND": "polemarch.main.tasks.tasks.ExecuteAnsiblePlaybook"
     },
 }
 
