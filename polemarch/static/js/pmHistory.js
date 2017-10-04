@@ -27,7 +27,9 @@ pmHistory.cancelTask = function(item_id)
 pmHistory.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
-    return $.when(this.sendSearchQuery({mode:decodeURIComponent(data.reg[1])})).done(function()
+    
+    var search = pmItems.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')  
+    return $.when(this.sendSearchQuery(search)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
     }).fail(function()
@@ -110,7 +112,12 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
 {
     var thisObj = this;
     var project_id = data.reg[1];
-    return $.when(this.sendSearchQuery({mode: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
+    
+    var search = pmItems.searchStringToObject(decodeURIComponent(data.reg[2]), 'mode')
+    search['project'] = project_id
+    
+    
+    return $.when(this.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
     }).fail(function()

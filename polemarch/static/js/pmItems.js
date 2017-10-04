@@ -192,7 +192,7 @@ pmItems.search = function(query, options)
 pmItems.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
-    return $.when(this.searchItems(decodeURIComponent(data.reg[1]))).done(function()
+    return $.when(this.sendSearchQuery(pmItems.searchStringToObject(decodeURIComponent(data.reg[1])))).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
     }).fail(function()
@@ -354,8 +354,62 @@ pmItems.loadItems = function(limit, offset)
     });
 }
 
+/** 
+ * @param {string} query строка запроса
+ * @returns {pmItems.searchStringToObject.search} объект для поиска 
+ */
+pmItems.searchStringToObject = function(query, defaultName)
+{ 
+    var search = {} 
+    if(query.indexOf("=") == -1)
+    {
+        if(!defaultName)
+        {
+            defaultName = 'name'
+        }
+        
+        search[defaultName] = query;
+    }
+    else
+    {
+        var vars = query.split(",")
+        for(var i in vars)
+        {
+            if(vars[i].indexOf("=") == -1)
+            {
+                continue;
+            }
+            
+            var arg = vars[i].split("=")
+            
+            if(!search[arg[0]])
+            {
+                search[arg[0]] = arg[1]
+            }
+            else if(Array.isArray(search[arg[0]+"__in"]))
+            {
+                search[arg[0]].push(arg[1])
+            }
+            else 
+            {
+                search[arg[0]+"__in"] = [search[arg[0]], arg[1]]
+                delete search[arg[0]]
+            }
+        }
+    }
+    
+    return search;
+}
+
+/**
+ * Функция поиска
+ * @param {string|object} query запрос
+ * @param {integer} limit
+ * @param {integer} offset
+ * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
+ */
 pmItems.sendSearchQuery = function(query, limit, offset)
-{
+{ 
     if(!limit)
     {
         limit = 999;
@@ -383,11 +437,11 @@ pmItems.sendSearchQuery = function(query, limit, offset)
  
     var thisObj = this;
     return spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/?"+q.join('&'),
-        type: "GET",
+        url: "/api/v1/"+this.model.name+"/filter/",
+        type: "POST",
         contentType:'application/json',
-        data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
-                success: function(data)
+        data: JSON.stringify({filter:query}), // "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
+        success: function(data)
         {
             //console.log("update Items", data)
             data.limit = limit
