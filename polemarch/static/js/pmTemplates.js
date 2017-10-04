@@ -38,7 +38,7 @@ pmTemplates.showSearchResults = function(holder, menuInfo, data)
     var thisObj = this;
     var query = decodeURIComponent(data.reg[1])
 
-    var search = pmItems.searchStringToObject(query)
+    var search = this.searchStringToObject(query)
     search['kind'] = thisObj.model.kind
     return $.when(this.sendSearchQuery(search)).done(function()
     {

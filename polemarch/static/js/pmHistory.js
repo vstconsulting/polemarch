@@ -28,7 +28,7 @@ pmHistory.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
     
-    var search = pmItems.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')  
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')  
     return $.when(this.sendSearchQuery(search)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
@@ -42,23 +42,23 @@ pmPeriodicTasks.search = function(query, options)
 { 
     if(options.inventory_id)
     {
-        if(!query || !trim(query))
+        if(this.isEmptySearchQuery(query))
         {
             return spajs.open({ menuId:'inventory/' + options.inventory_id +"/" + this.model.name, reopen:true});
         }
 
-        return spajs.open({ menuId:'inventory/' + options.inventory_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+        return spajs.open({ menuId:'inventory/' + options.inventory_id +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query), 'mode'), reopen:true});
     }
     else if(options.project_id)
     {
-        if(!query || !trim(query))
+        if(this.isEmptySearchQuery(query))
         {
             return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name, reopen:true});
         }
 
-        return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+        return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query), 'mode'), reopen:true});
     }
-    else if(!query || !trim(query))
+    else if(this.isEmptySearchQuery(query))
     {
         return spajs.open({ menuId:this.model.name, reopen:true});
     }
@@ -113,10 +113,9 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
     var thisObj = this;
     var project_id = data.reg[1];
     
-    var search = pmItems.searchStringToObject(decodeURIComponent(data.reg[2]), 'mode')
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]), 'mode')
     search['project'] = project_id
-    
-    
+     
     return $.when(this.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))

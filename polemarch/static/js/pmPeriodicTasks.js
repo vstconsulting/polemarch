@@ -244,12 +244,12 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
 
 pmPeriodicTasks.search = function(query, options)
 {
-    if(!query || !trim(query))
+    if(this.isEmptySearchQuery(query))
     {
         return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name, reopen:true});
     }
 
-    return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+    return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
 }
 
 pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
@@ -258,7 +258,7 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
     var project_id = data.reg[1];
     
     
-    var search = pmItems.searchStringToObject(decodeURIComponent(data.reg[2]))
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]))
     search['project'] = project_id
     
     return $.when(this.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
