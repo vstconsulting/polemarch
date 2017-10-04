@@ -38,7 +38,9 @@ pmTemplates.showSearchResults = function(holder, menuInfo, data)
     var thisObj = this;
     var query = decodeURIComponent(data.reg[1])
 
-    return $.when(this.sendSearchQuery({kind:thisObj.model.kind, name:query})).done(function()
+    var search = pmItems.searchStringToObject(query)
+    search['kind'] = thisObj.model.kind
+    return $.when(this.sendSearchQuery(search)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:query}))
     }).fail(function()

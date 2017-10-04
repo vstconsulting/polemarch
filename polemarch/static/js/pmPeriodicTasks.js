@@ -256,7 +256,12 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
 { 
     var thisObj = this;
     var project_id = data.reg[1];
-    return $.when(this.sendSearchQuery({name: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
+    
+    
+    var search = pmItems.searchStringToObject(decodeURIComponent(data.reg[2]))
+    search['project'] = project_id
+    
+    return $.when(this.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
     }).fail(function()
