@@ -26,7 +26,7 @@ TMP_DIR = "/tmp"
 __kwargs = dict(HOME=BASE_DIR, PY=PY_VER, TMP=TMP_DIR)
 
 # Hack for keep user settings in /etc/polemarch/settings.ini
-# or in file thats setups in env IHS_SETTINGS_FILE
+# or in file thats setups in env POLEMARCH_SETTINGS_FILE
 CONFIG_FILE = os.getenv("POLEMARCH_SETTINGS_FILE", "/etc/polemarch/settings.ini")
 config = ConfigParser()
 config.read([CONFIG_FILE, os.path.join(BASE_DIR, 'main/settings.ini')])
