@@ -378,43 +378,12 @@ pmItems.searchStringToObject = function(query, defaultName)
         return search;
     }
     
-    
-    if(query.indexOf("=") == -1)
+    if(!defaultName)
     {
-        if(!defaultName)
-        {
-            defaultName = 'name'
-        }
-
-        search[defaultName] = query;
+        defaultName = 'name'
     }
-    else
-    {
-        var vars = query.split(",")
-        for(var i in vars)
-        {
-            if(vars[i].indexOf("=") == -1)
-            {
-                continue;
-            }
 
-            var arg = vars[i].split("=")
-
-            if(!search[arg[0]])
-            {
-                search[arg[0]] = arg[1]
-            }
-            else if(Array.isArray(search[arg[0]+"__in"]))
-            {
-                search[arg[0]].push(arg[1])
-            }
-            else
-            {
-                search[arg[0]+"__in"] = [search[arg[0]], arg[1]]
-                delete search[arg[0]]
-            }
-        }
-    }
+    search[defaultName] = query;
 
     return search;
 }
