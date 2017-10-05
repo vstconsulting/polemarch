@@ -395,10 +395,8 @@ jsonEditor.initForm = function(optionsblock, prefix)
         jsonEditor.initAutoComplete(optionsblock, prefix)
         return;
     }
-
-    if(!jsonEditor.model.isLoaded_cli_reference && !jsonEditor.model.isLoading_cli_reference)
+    else
     {
-        jsonEditor.model.isLoading_cli_reference = true;
         return spajs.ajax.Call({
             url: "/api/v1/ansible/cli_reference/",
             type: "GET",
@@ -407,8 +405,7 @@ jsonEditor.initForm = function(optionsblock, prefix)
             success: function(data)
             {
                 Object.assign(jsonEditor.options, data) 
-                jsonEditor.initAutoComplete(optionsblock, prefix) 
-                jsonEditor.model.isLoaded_cli_reference = true;
+                jsonEditor.initAutoComplete(optionsblock, prefix)  
             }
         });
     }
