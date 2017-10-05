@@ -244,12 +244,12 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
 
 pmPeriodicTasks.search = function(query, options)
 {
-    if(!query || !trim(query))
+    if(this.isEmptySearchQuery(query))
     {
         return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name, reopen:true});
     }
 
-    return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+    return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
 }
 
 pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
@@ -258,7 +258,7 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
     var project_id = data.reg[1];
     
     
-    var search = pmItems.searchStringToObject(decodeURIComponent(data.reg[2]))
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]))
     search['project'] = project_id
     
     return $.when(this.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
@@ -410,7 +410,7 @@ pmPeriodicTasks.addItem = function(project_id)
 
     if(data.kind == "MODULE")
     {
-        data.mode = $("#new_periodic-tasks_module").val()
+        data.mode = moduleArgsEditor.getSelectedModuleName()
         if(!data.mode)
         {
             $.notify("Module name is empty", "error");
@@ -517,6 +517,8 @@ pmPeriodicTasks.loadItem = function(item_id)
  */
 pmPeriodicTasks.updateItem = function(item_id)
 {
+    var def = new $.Deferred();
+
     var data = {}
     
     data.type = $("#periodic-tasks_"+item_id+"_type").val()
@@ -544,7 +546,7 @@ pmPeriodicTasks.updateItem = function(item_id)
     
     if(data.kind == "MODULE")
     {
-        data.mode = $("#periodic-tasks_"+item_id+"_module").val()
+        data.mode = moduleArgsEditor.getSelectedModuleName()
         if(!data.mode)
         {
             $.notify("Module name is empty", "error");

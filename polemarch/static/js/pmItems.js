@@ -7,7 +7,7 @@ function inheritance(obj)
 
 function pmItems()
 {
-    
+
 }
 
 pmItems.pageSize = 20;
@@ -67,7 +67,7 @@ pmItems.toggleSelect = function(item_id, mode)
 
 /**
  * Выделеть всё или снять выделение
- * @param {boolean} mode 
+ * @param {boolean} mode
  * @returns {promise}
  */
 pmItems.toggleSelectEachItem = function(mode)
@@ -94,7 +94,7 @@ pmItems.toggleSelectEachItem = function(mode)
             thisObj.model.selectedItems[item_id] = mode
         }
         thisObj.model.selectedCount += delta
-        
+
         if(thisObj.model.selectedCount < 0)
         {
             thisObj.model.selectedCount = 0;
@@ -180,19 +180,29 @@ pmItems.searchFiled = function(options)
 }
 
 pmItems.search = function(query, options)
-{ 
-    if(!query || !trim(query))
+{
+    if(this.isEmptySearchQuery(query))
     {
         return spajs.open({ menuId:this.model.name, reopen:true});
     }
+ 
+    return spajs.open({ menuId:this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
+}
 
-    return spajs.open({ menuId:this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+pmItems.isEmptySearchQuery = function(query)
+{
+    if(!query || !trim(query))
+    {
+        return true;
+    }
+ 
+    return false;
 }
 
 pmItems.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
-    return $.when(this.sendSearchQuery(pmItems.searchStringToObject(decodeURIComponent(data.reg[1])))).done(function()
+    return $.when(this.sendSearchQuery(this.searchStringToObject(decodeURIComponent(data.reg[1])))).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
     }).fail(function()
@@ -226,18 +236,18 @@ pmItems.copyItem = function(item_id)
                 def.reject(e)
             }
         });
-    }).fail(function(){ 
+    }).fail(function(){
         def.reject(e)
     })
 
     return def.promise();
-} 
+}
 
 pmItems.importItem = function(data)
 {
     var def = new $.Deferred();
     var thisObj = this;
- 
+
     spajs.ajax.Call({
         url: "/api/v1/"+thisObj.model.name+"/",
         type: "POST",
@@ -254,7 +264,7 @@ pmItems.importItem = function(data)
             polemarch.showErrors(e)
             def.reject(e)
         }
-    }); 
+    });
     return def.promise();
 }
 
@@ -296,7 +306,7 @@ pmItems.showItem = function(holder, menuInfo, data)
 pmItems.showNewItemPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
-    
+
     var text = spajs.just.render(this.model.name+'_new_page', {parent_item:data.reg[2], parent_type:data.reg[1]})
     console.log(text)
     $(holder).insertTpl(text)
@@ -354,20 +364,28 @@ pmItems.loadItems = function(limit, offset)
     });
 }
 
-/** 
+/**
+ * Преобразует строку поиска в объект с параметрами для фильтрации
  * @param {string} query строка запроса
- * @returns {pmItems.searchStringToObject.search} объект для поиска 
+ * @param {string} defaultName имя параметра по умолчанию
+ * @returns {pmItems.searchStringToObject.search} объект для поиска
  */
 pmItems.searchStringToObject = function(query, defaultName)
-{ 
-    var search = {} 
+{
+    var search = {}
+    if(query == "")
+    {
+        return search;
+    }
+    
+    
     if(query.indexOf("=") == -1)
     {
         if(!defaultName)
         {
             defaultName = 'name'
         }
-        
+
         search[defaultName] = query;
     }
     else
@@ -379,9 +397,9 @@ pmItems.searchStringToObject = function(query, defaultName)
             {
                 continue;
             }
-            
+
             var arg = vars[i].split("=")
-            
+
             if(!search[arg[0]])
             {
                 search[arg[0]] = arg[1]
@@ -390,15 +408,26 @@ pmItems.searchStringToObject = function(query, defaultName)
             {
                 search[arg[0]].push(arg[1])
             }
-            else 
+            else
             {
                 search[arg[0]+"__in"] = [search[arg[0]], arg[1]]
                 delete search[arg[0]]
             }
         }
     }
-    
+
     return search;
+}
+
+/**
+ * Преобразует строку и объект поиска в строку для урла страницы поиска
+ * @param {string} query строка запроса
+ * @param {string} defaultName имя параметра по умолчанию
+ * @returns {string} строка для параметра страницы поиска
+ */
+pmItems.searchObjectToString = function(query, defaultName)
+{
+    return encodeURIComponent(query);
 }
 
 /**
@@ -409,7 +438,7 @@ pmItems.searchStringToObject = function(query, defaultName)
  * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
  */
 pmItems.sendSearchQuery = function(query, limit, offset)
-{ 
+{
     if(!limit)
     {
         limit = 999;
@@ -419,7 +448,7 @@ pmItems.sendSearchQuery = function(query, limit, offset)
     {
         offset = 0;
     }
- 
+
     var q = [];
     for(var i in query)
     {
@@ -428,13 +457,13 @@ pmItems.sendSearchQuery = function(query, limit, offset)
             for(var j in query[i])
             {
                 query[i][j] = encodeURIComponent(query[i][j])
-            } 
+            }
             q.push(encodeURIComponent(i)+"="+query[i].join(","))
             continue;
-        } 
+        }
         q.push(encodeURIComponent(i)+"="+encodeURIComponent(query[i]))
     }
- 
+
     var thisObj = this;
     return spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/filter/",
@@ -446,7 +475,7 @@ pmItems.sendSearchQuery = function(query, limit, offset)
             //console.log("update Items", data)
             data.limit = limit
             data.offset = offset
-            thisObj.model.itemslist = data 
+            thisObj.model.itemslist = data
             //thisObj.model.items = {}
 
             for(var i in data.results)
@@ -482,7 +511,7 @@ pmItems.loadItem = function(item_id)
 {
     var def = new $.Deferred();
     var thisObj = this;
-    
+
     spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "GET",
@@ -502,7 +531,7 @@ pmItems.loadItem = function(item_id)
             def.reject(e)
         }
     });
-    
+
     return def.promise();
 }
 
@@ -706,7 +735,7 @@ pmItems.getTotalPages = function(list)
 
 
 pmItems.exportSelecedToFile = function(){
-    
+
     var item_ids = []
     for(var i in this.model.selectedItems)
     {
@@ -715,7 +744,7 @@ pmItems.exportSelecedToFile = function(){
             item_ids.push(i)
         }
     }
-    
+
     return this.exportToFile(item_ids)
 }
 
