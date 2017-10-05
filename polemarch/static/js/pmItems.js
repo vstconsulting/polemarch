@@ -373,6 +373,12 @@ pmItems.loadItems = function(limit, offset)
 pmItems.searchStringToObject = function(query, defaultName)
 {
     var search = {}
+    if(query == "")
+    {
+        return search;
+    }
+    
+    
     if(query.indexOf("=") == -1)
     {
         if(!defaultName)

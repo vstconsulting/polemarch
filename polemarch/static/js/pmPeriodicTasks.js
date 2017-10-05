@@ -410,7 +410,7 @@ pmPeriodicTasks.addItem = function(project_id)
 
     if(data.kind == "MODULE")
     {
-        data.mode = $("#new_periodic-tasks_module").val()
+        data.mode = moduleArgsEditor.getSelectedModuleName()
         if(!data.mode)
         {
             $.notify("Module name is empty", "error");
@@ -517,6 +517,8 @@ pmPeriodicTasks.loadItem = function(item_id)
  */
 pmPeriodicTasks.updateItem = function(item_id)
 {
+    var def = new $.Deferred();
+
     var data = {}
     
     data.type = $("#periodic-tasks_"+item_id+"_type").val()
@@ -544,7 +546,7 @@ pmPeriodicTasks.updateItem = function(item_id)
     
     if(data.kind == "MODULE")
     {
-        data.mode = $("#periodic-tasks_"+item_id+"_module").val()
+        data.mode = moduleArgsEditor.getSelectedModuleName()
         if(!data.mode)
         {
             $.notify("Module name is empty", "error");
