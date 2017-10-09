@@ -6,7 +6,7 @@
  */
 
 
-var JustEvalJsPattern_reg_pageUUID = new RegExp("<="+window.JustEvalJsPattern_pageUUID+"(.*?)"+window.JustEvalJsPattern_pageUUID+"=>", "g")
+var __JustEvalJsPattern_reg_pageUUID = new RegExp("<="+window.JUST.JustEvalJsPattern_pageUUID+"(.*?)"+window.JUST.JustEvalJsPattern_pageUUID+"=>", "g")
 /**
  * Плагин для вставки шаблона в тело элемента
  * @param {string} tplText
@@ -25,7 +25,7 @@ $.fn.insertTpl = function(tplText)
     {
         tplText = ""+tplText
     }
-    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
+    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
 
     if(window.cordova && 0)
     {
@@ -37,12 +37,12 @@ $.fn.insertTpl = function(tplText)
         $(this).html(html)
     });
 
-    var js = tplText.match(JustEvalJsPattern_reg_pageUUID)
+    var js = tplText.match(window.__JustEvalJsPattern_reg_pageUUID)
     for(var i in js)
     {
         if(js[i] && js[i].length > 8);
         {
-            var code = js[i].substr(2 +window.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JustEvalJsPattern_pageUUID.length*2))
+            var code = js[i].substr(2 +window.JUST.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JUST.JustEvalJsPattern_pageUUID.length*2))
             //console.log(i, code)
             eval(code);
         }
@@ -63,7 +63,7 @@ $.fn.appendTpl = function(tplText)
         tplText = ""+tplText
     }
 
-    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
+    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
 
     if(window.cordova && 0)
     {
@@ -102,7 +102,7 @@ $.fn.prependTpl = function(tplText)
         tplText = ""+tplText
     }
 
-    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
+    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
 
     if(window.cordova && 0)
     {
@@ -390,7 +390,7 @@ var justReactive = {
                     }
                 }
             }
-            else if(newval.just_ids[i].type == 'attr')
+            else if(newval.just_ids[i].type == 'attr' || newval.just_ids[i].type == 'bindAttr')
             {
                 // class - вставить атрибут на страницу.
                 var el = document.querySelectorAll("[data-just-watch-"+newval.just_ids[i].id+"]");
@@ -624,6 +624,66 @@ var justReactive = {
                 return " data-just-watch-"+id+" ";
             }
         }
+        else if(opt.type == 'bindAttr')
+        {
+            var val = opt.callBack(this[opt.prop], opt.customData)
+            console.log("bindAttr", opt.prop, val);
+            var html = ""
+            if(val)
+            {
+                html = " data-just-watch-"+id+"=\"true\" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/\"/g, "\\\"") +"\"";
+            }
+            else
+            {
+                html = " data-just-watch-"+id+"=\"true\" ";
+            }
+            
+            var thisObj = this
+            html = window.JUST.onInsert(html, function()
+            {
+                //console.log("on insert bindAttr", id, opt.prop, val);
+                var element = document.querySelector("[data-just-watch-"+id+"=true]")
+                
+                if(opt.attrName == 'value')
+                {
+                    element.addEventListener('keyup', function() 
+                    {
+                        if(thisObj[opt.prop] != element.value)
+                        { 
+                            console.log("keyup", element.value);
+                            thisObj[opt.prop] = element.value;
+                        }
+                    }, false);
+
+                    element.addEventListener('blur', function() 
+                    {
+                        if(thisObj[opt.prop] != element.value)
+                        { 
+                            console.log("blur", element.value);
+                            thisObj[opt.prop] = element.value;
+                        }
+                    }, false);
+                }
+                 
+                var observer = new MutationObserver(function(mutations) 
+                {
+                    console.log("observer", mutations);
+                    mutations.forEach(function(mutation) 
+                    { 
+                        if(mutation.type == "attributes" && mutation.attributeName == opt.attrName)
+                        {
+                            console.log("set new value");
+                            thisObj[opt.prop] = mutation.target.getAttribute(opt.attrName);
+                        } 
+                    });    
+                });
+
+                observer.observe(element, { attributes: true, characterData: true}); 
+
+            })
+            
+            return html;
+        } 
 
         return opt.callBack(this[opt.prop], opt.customData)
     }
@@ -710,13 +770,22 @@ Object.defineProperty(Object.prototype, "justClassName", {
     }
 });
 
-// Проставляет атрибут
+// Проставляет атрибут (односторонний биндинг от модели в дом элементы)
 Object.defineProperty(Object.prototype, "justAttr", {
     enumerable: false
   , configurable: true
   , writable: false
   , value: function(prop, attrName, callBack, customData){ return justReactive.setValue.apply(this, [{type:'attr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
 });
+
+// Проставляет атрибут (двухсторонний биндинг атрибутов)
+Object.defineProperty(Object.prototype, "bindAttr", {
+    enumerable: false
+  , configurable: true
+  , writable: false
+  , value: function(prop, attrName, callBack, customData){ return justReactive.setValue.apply(this, [{type:'bindAttr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
+});
+
 
 /**
  * Добавление точки отслеживания

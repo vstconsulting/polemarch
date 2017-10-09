@@ -11,6 +11,65 @@
  */
 (function () {
 	'use strict';
+         
+        /**
+         * Генерирует случайную строку
+         * @private
+         */
+        var getUUID = function()
+        {
+            var s = ""
+            var str = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890";
+            for(var i = 0; i< 24; i++)
+            {
+                s += str[Math.floor(Math.random()*(str.length-1))]
+            }
+            return s
+        } 
+ 
+        var __JUST_onInsertFunctions = {}
+
+        /**
+         * При вставке этого html в дом дерево будет выполнена функция func
+         * @param {type} html
+         * @param {type} func
+         * @returns {unresolved}
+         */
+        var onInsert = function(html, func, once)
+        {
+            var key = getUUID()
+            window.JUST.__JUST_onInsertFunctions[key] = {func:func, count:0};
+
+            var funcCall = "";
+            if(once)
+            {
+                funcCall = " if(window.JUST.__JUST_onInsertFunctions['"+key+"'] !== undefined){"
+                        + " window.JUST.__JUST_onInsertFunctions['"+key+"'].func(window.JUST.__JUST_onInsertFunctions['"+key+"'].count);"
+                        + " window.JUST.__JUST_onInsertFunctions['"+key+"'].count+=1;"
+                        + " delete window.JUST.__JUST_onInsertFunctions['"+key+"'];"
+                        + " } ";
+            }
+            else
+            { 
+                funcCall = "window.JUST.__JUST_onInsertFunctions['"+key+"'].func(window.JUST.__JUST_onInsertFunctions['"+key+"'].count);" 
+                        + " window.JUST.__JUST_onInsertFunctions['"+key+"'].count+=1;"
+            }
+
+            html += "<="+window.JUST.JustEvalJsPattern_pageUUID+" "+funcCall+" "+window.JUST.JustEvalJsPattern_pageUUID+"=>";
+            return html;
+        }
+
+        var JustEvalJsPattern_pageUUID = getUUID("pageUUID");
+
+
+        var JustEvalJsPattern = function(text) 
+        {
+            //console.log(text.replace(/^<=|=>$/g, ""))
+            return "<="+window.JUST.JustEvalJsPattern_pageUUID+text.replace(/^<=js|js=>$/g, "")+window.JUST.JustEvalJsPattern_pageUUID+"=>"
+        }
+
+
+        
 	var
 		JUST = function (newOptions) 
                 {
@@ -411,54 +470,12 @@
 			this.render = this.renderSync
 
                         /**
-                         * Генерирует случайную строку
-                         * @private
-                         */
-                        this.getUUID = function()
-                        {
-                            var s = ""
-                            var str = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890";
-                            for(var i = 0; i< 24; i++)
-                            {
-                                s += str[Math.floor(Math.random()*(str.length-1))]
-                            }
-                            return s
-                        }     
-                        
-                        
-                        if(window.__JUST_onInsertFunctions === undefined)
-                        {
-                            window.__JUST_onInsertFunctions = {}
-                        }
-                        /**
                          * При вставке этого html в дом дерево будет выполнена функция func
                          * @param {type} html
                          * @param {type} func
                          * @returns {unresolved}
                          */
-			this.onInsert = function(html, func, once)
-                        {
-                            var key = this.getUUID()
-                            window.__JUST_onInsertFunctions[key] = {func:func, count:0};
-                            
-                            var funcCall = "";
-                            if(once)
-                            {
-                                funcCall = " if(window.__JUST_onInsertFunctions['"+key+"'] !== undefined){"
-                                        + " window.__JUST_onInsertFunctions['"+key+"'].func(window.__JUST_onInsertFunctions['"+key+"'].count);"
-                                        + " window.__JUST_onInsertFunctions['"+key+"'].count+=1;"
-                                        + " delete window.__JUST_onInsertFunctions['"+key+"'];"
-                                        + " } ";
-                            }
-                            else
-                            { 
-                                funcCall = "window.__JUST_onInsertFunctions['"+key+"'].func(window.__JUST_onInsertFunctions['"+key+"'].count);" 
-                                        + " window.__JUST_onInsertFunctions['"+key+"'].count+=1;"
-                            }
-                            
-                            html += "<="+window.JustEvalJsPattern_pageUUID+" "+funcCall+" "+window.JustEvalJsPattern_pageUUID+"=>";
-                            return html;
-                        }
+			this.onInsert = onInsert
                         
                         // Начинает сохранение данных о отрисовываемых шаблонов
 			this.startRecoding = function ()
@@ -624,33 +641,12 @@
 		};
 
 		window.JUST = JUST;
+		window.JUST.onInsert = onInsert;
+		window.JUST.getUUID = getUUID;
+		window.JUST.__JUST_onInsertFunctions = __JUST_onInsertFunctions;
+		window.JUST.JustEvalJsPattern_pageUUID = JustEvalJsPattern_pageUUID;
+		window.JUST.JustEvalJsPattern = JustEvalJsPattern;
 }());
-
-
-function getUUID(s)
-{
-    if(!s)
-    {
-        s = ""
-    }
-    
-    var str = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890";
-    for(var i = 0; i< 24; i++)
-    {
-        s += str[Math.floor(Math.random()*(str.length-1))]
-    }
-    return s
-}
-
-window.JustEvalJsPattern_pageUUID = getUUID("pageUUID");
-
-
-function JustEvalJsPattern(text) 
-{
-    //console.log(text.replace(/^<=|=>$/g, ""))
-    return "<="+window.JustEvalJsPattern_pageUUID+text.replace(/^<=js|js=>$/g, "")+window.JustEvalJsPattern_pageUUID+"=>"
-}
-
 
 function JustEscapeHtml(text) {
   var map = {
