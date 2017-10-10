@@ -209,7 +209,7 @@ function render(name, callback)
     }
 
     var def = new $.Deferred();
-    var time = 10
+    var time = 4
 
     setTimeout(function(name){
         console.log("render " + name)
@@ -221,7 +221,7 @@ function render(name, callback)
             }
 
             def.resolve()
-        }, 10)
+        }, time)
     }, time, name, 0)
 
     return def.promise();
@@ -1509,15 +1509,15 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
     var inventory = undefined;
 
     syncQUnit.addTest('Парсинг inventory', function ( assert )
-    {
+    { 
         var done = assert.async();
         inventory = pmInventories.parseFromText(pmInventoriesText)
         inventory.name = "inventory"
-        pmInventories.model.importedInventories = []
-        pmInventories.model.importedInventories.push({
+        pmInventories.model.importedInventories = {}
+        pmInventories.model.importedInventories = {
             inventory:inventory,
             text:pmInventoriesText
-        })
+        }
 
         var res = deepEqual(etalon, inventory)   
         assert.ok(res, 'Сравнение инвентория распарсенного и оригинального');
@@ -1525,7 +1525,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
     });
  
     syncQUnit.addTest('Импорт не валидного inventory 1', function ( assert )
-    { 
+    {  
         var done = assert.async();
         
         $.when(spajs.open({ menuId:"inventories/import"})).done(function()
@@ -1550,7 +1550,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
     });
 
     syncQUnit.addTest('Импорт валидного inventory', function ( assert )
-    { 
+    {  
         jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', 'inventory') 
         for(var i in inventory.hosts)
         {
@@ -1583,7 +1583,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
     });
 
     syncQUnit.addTest('Импорт не валидного inventory', function ( assert )
-    {
+    { 
         var done = assert.async();
         inventory.groups["error group"] = {
             "vars": {},

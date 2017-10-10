@@ -324,7 +324,7 @@ pmInventories.importInventoriesAndOpen = function(inventory)
 pmInventories.importInventory = function(inventory)
 { 
     var def2 = new $.Deferred(); 
-    var vars = jsonEditor.jsonEditorGetValues('inventory')
+    var vars = jsonEditor.jsonEditorGetValues('inventory') 
     if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
     {
         // <!--Вставка файла -->
@@ -351,7 +351,6 @@ pmInventories.importInventory = function(inventory)
     for(var i in inventory.groups)
     {
         var val = inventory.groups[i]
-
         var vars = jsonEditor.jsonEditorGetValues('group'+i)
         if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
         {
@@ -700,7 +699,7 @@ pmInventories.showImportPage = function(holder, menuInfo, data)
 
 pmInventories.renderImportedInventory = function(imported)
 {
-    if(!imported)
+    if(!imported || !imported.inventory || !imported.text)
     {
         return ""
     }
