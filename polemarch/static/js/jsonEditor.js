@@ -161,6 +161,19 @@ mergeDeep(jsonEditor.options['inventories'], jsonEditor.options['item'])
 // jsonEditor
 ////////////////////////////////////////////////
 
+/**
+ * Хранит данные модели для всех редакторов на странице.
+ * Ключ берётся как `opt.prefix`
+ * @type Object
+ */
+jsonEditor.model.data = {}
+
+/**
+ * Строит форму заполнения vars
+ * @param {Object} json объект для заполнения параметрами и их значениями (имеет двусторонний биндинг)
+ * @param {Object} opt
+ * @returns {string} текст шаблона формы
+ */
 jsonEditor.editor = function(json, opt)
 {
     if(!opt)
@@ -173,16 +186,17 @@ jsonEditor.editor = function(json, opt)
         opt.title1 = 'Variables'
     }
 
+    if(!opt.title2)
+    {
+        opt.title2 = 'Adding new variable'
+    }
+
     if(!opt.prefix)
     {
         opt.prefix = 'prefix'
     }
     opt.prefix = opt.prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
-
-    if(!opt.title2)
-    {
-        opt.title2 = 'Adding new variable'
-    }
+    jsonEditor.model.data[opt.prefix] = json;
 
     return spajs.just.render('jsonEditor', {data:json, optionsblock:opt.block, opt:opt})
 }
@@ -206,7 +220,14 @@ jsonEditor.jsonEditorGetValues = function(prefix)
     }
     prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
 
-    var data = {}
+    if(jsonEditor.model.data[prefix] === undefined)
+    {
+        return {}
+    }
+    
+    return jsonEditor.model.data[prefix];
+
+    /*var data = {}
     var arr = $(".jsonEditor-data"+prefix)
     for(var i = 0; i< arr.length; i++)
     {
@@ -226,7 +247,7 @@ jsonEditor.jsonEditorGetValues = function(prefix)
         }
     }
 
-    return data
+    return data*/
 }
 
 jsonEditor.jsonEditorRmVar = function(name, prefix)
@@ -242,6 +263,8 @@ jsonEditor.jsonEditorRmVar = function(name, prefix)
     {
         $("#jsonEditorVarListHolder"+prefix).hide()
     }
+
+    delete jsonEditor.model.data[prefix][name]
 }
 
 /**
@@ -263,7 +286,7 @@ jsonEditor.__devAddVar = function(name, value, optionsblock, prefix)
         optionsblock = 'base'
     }
 
-
+    jsonEditor.model.data[prefix][name] = value
     $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:{prefix:prefix}}))
     $("#jsonEditorVarListHolder"+prefix).show()
 }
@@ -296,11 +319,6 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
         return;
     }
 
-    /*if(/^--/.test(name))
-    {
-        name = name.replace(/^--/, "ansible_")
-    }*/
-
     if(/^-[A-z0-9]$/.test(name))
     {
         for(var i in jsonEditor.options[optionsblock])
@@ -330,6 +348,7 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
         prefix:prefix
     }
 
+    jsonEditor.model.data[prefix][name] = value
     $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:opt}))
     $("#jsonEditorVarListHolder"+prefix).show()
 }
@@ -382,7 +401,7 @@ jsonEditor.initAutoComplete = function(optionsblock, prefix)
 }
 
 jsonEditor.initForm = function(optionsblock, prefix)
-{ 
+{
     if(!prefix)
     {
         prefix = "prefix"
@@ -404,8 +423,9 @@ jsonEditor.initForm = function(optionsblock, prefix)
             data: "",
             success: function(data)
             {
-                Object.assign(jsonEditor.options, data) 
-                jsonEditor.initAutoComplete(optionsblock, prefix)  
+                Object.assign(jsonEditor.options, data)
+                jsonEditor.initAutoComplete(optionsblock, prefix)
+                jsonEditor.model.isLoaded_cli_reference = true;
             }
         });
     }
@@ -426,6 +446,7 @@ jsonEditor.loadFile = function(event, element)
         var reader = new FileReader();
         reader.onload = function(e)
         {
+            $(element)[0].setAttribute("value", e.target.result)
             $(element).val(e.target.result)
         }
 

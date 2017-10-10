@@ -6,7 +6,7 @@
  */
 
 
-var JustEvalJsPattern_reg_pageUUID = new RegExp("<="+window.JustEvalJsPattern_pageUUID+"(.*?)"+window.JustEvalJsPattern_pageUUID+"=>", "g")
+var __JustEvalJsPattern_reg_pageUUID = new RegExp("<="+window.JUST.JustEvalJsPattern_pageUUID+"(.*?)"+window.JUST.JustEvalJsPattern_pageUUID+"=>", "g")
 /**
  * Плагин для вставки шаблона в тело элемента
  * @param {string} tplText
@@ -25,24 +25,19 @@ $.fn.insertTpl = function(tplText)
     {
         tplText = ""+tplText
     }
-    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
-
-    if(window.cordova && 0)
-    {
-        html = html.replace(/ onclick=/gmi, "ontouchstart=")
-    }
-
+    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
+ 
     this.each(function()
     {
         $(this).html(html)
     });
 
-    var js = tplText.match(JustEvalJsPattern_reg_pageUUID)
+    var js = tplText.match(window.__JustEvalJsPattern_reg_pageUUID)
     for(var i in js)
     {
         if(js[i] && js[i].length > 8);
         {
-            var code = js[i].substr(2 +window.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JustEvalJsPattern_pageUUID.length*2))
+            var code = js[i].substr(2 +window.JUST.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JUST.JustEvalJsPattern_pageUUID.length*2))
             //console.log(i, code)
             eval(code);
         }
@@ -62,31 +57,24 @@ $.fn.appendTpl = function(tplText)
     {
         tplText = ""+tplText
     }
-
-    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
-
-    if(window.cordova && 0)
-    {
-        html = html.replace(/ onclick=/gmi, "ontouchstart=")
-    }
-
+    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
+ 
     this.each(function()
     {
         $(this).append(html)
     });
 
-    /*
-    var js = tplText.match(/<js=(.*?)=js>/g)
+    var js = tplText.match(window.__JustEvalJsPattern_reg_pageUUID)
     for(var i in js)
     {
         if(js[i] && js[i].length > 8);
         {
-            var code = js[i].substr(4, js[i].length - 8)
-            console.log(i, code)
+            var code = js[i].substr(2 +window.JUST.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JUST.JustEvalJsPattern_pageUUID.length*2))
+            //console.log(i, code)
             eval(code);
         }
     }
-    */
+
     return this;
 };
 
@@ -101,31 +89,24 @@ $.fn.prependTpl = function(tplText)
     {
         tplText = ""+tplText
     }
-
-    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
-
-    if(window.cordova && 0)
-    {
-        html = html.replace(/ onclick=/gmi, "ontouchstart=")
-    }
-
+    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
+ 
     this.each(function()
     {
         $(this).prepend(html)
     });
 
-    /*
-    var js = tplText.match(/<js=(.*?)=js>/g)
+    var js = tplText.match(window.__JustEvalJsPattern_reg_pageUUID)
     for(var i in js)
     {
         if(js[i] && js[i].length > 8);
         {
-            var code = js[i].substr(4, js[i].length - 8)
-            console.log(i, code)
+            var code = js[i].substr(2 +window.JUST.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JUST.JustEvalJsPattern_pageUUID.length*2))
+            //console.log(i, code)
             eval(code);
         }
     }
-    */
+
     return this;
 };
 
@@ -181,7 +162,7 @@ var justReactive = {
         {
             level = 0;
         }
-        
+
         var res = Object.getOwnPropertyDescriptor(obj, prop);
         if(!res)
         {
@@ -189,7 +170,7 @@ var justReactive = {
             obj.justWatch(prop);
             return;
         }
-        
+
         if(res.hasOwnProperty('get') || res.hasOwnProperty('set'))
         {
             if(obj[prop] !== newval)
@@ -198,7 +179,7 @@ var justReactive = {
             }
             return;
         }
-        
+
         if(typeof obj[prop] != "object" || obj[prop] == null)
         {
             obj[prop] = newval;
@@ -212,9 +193,9 @@ var justReactive = {
             {
                 obj[prop].splice(newval.length, obj[prop].length - newval.length);
             }
-            
+
             for(var i in newval)
-            { 
+            {
                 if(typeof newval[i] == "object" && newval[i] != null)
                 {
                     if(level < 100)
@@ -231,8 +212,8 @@ var justReactive = {
             }
             return;
         }
-        
-        
+
+
         var v1arr = {}
         for(var i in obj[prop])
         {
@@ -281,7 +262,7 @@ var justReactive = {
             {
                 // innerHTML - вставить без обработки на страницу.
                 var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
-                if(el) el.innerHTML = newval.just_ids[i].callBack(val, newval.just_ids[i].customData) 
+                if(el) el.innerHTML = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
             }
             else if(newval.just_ids[i].type == 'textContent')
             {
@@ -390,7 +371,7 @@ var justReactive = {
                     }
                 }
             }
-            else if(newval.just_ids[i].type == 'attr')
+            else if(newval.just_ids[i].type == 'attr' || newval.just_ids[i].type == 'bindAttr')
             {
                 // class - вставить атрибут на страницу.
                 var el = document.querySelectorAll("[data-just-watch-"+newval.just_ids[i].id+"]");
@@ -408,7 +389,7 @@ var justReactive = {
                             else
                             {
                                 el[j].setAttribute(newval.just_ids[i].attrName, attrVal);
-                            } 
+                            }
                         }
                         else
                         {
@@ -416,7 +397,7 @@ var justReactive = {
                             {
                                 el[j][newval.just_ids[i].attrName] = null
                             }
-                            
+
                             el[j].removeAttribute(newval.just_ids[i].attrName);
                         }
                     }
@@ -437,7 +418,7 @@ var justReactive = {
         {
             opt.callBack = justReactive.defaultcallBack
         }
-        
+
         var oldValue = this[opt.prop]
 
         // Проверка того нетули уже наблюдения за этим объектом
@@ -454,10 +435,10 @@ var justReactive = {
                 val:oldValue,
                 just_ids:[
                     {
-                        id:id, 
+                        id:id,
                         callBack:opt.callBack,
-                        type:opt.type, 
-                        className:opt.className, 
+                        type:opt.type,
+                        className:opt.className,
                         attrName:opt.attrName,
                         customData:opt.customData
                     }
@@ -624,6 +605,85 @@ var justReactive = {
                 return " data-just-watch-"+id+" ";
             }
         }
+        else if(opt.type == 'bindAttr')
+        {
+            var val = opt.callBack(this[opt.prop], opt.customData)
+            console.log("bindAttr", opt.prop, val);
+            var html = ""
+            if(val)
+            {
+                html = " data-just-watch-"+id+"=\"true\" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/\"/g, "\\\"") +"\"";
+            }
+            else
+            {
+                html = " data-just-watch-"+id+"=\"true\" ";
+            }
+
+            var thisObj = this
+            html = window.JUST.onInsert(html, function()
+            {
+                //console.log("on insert bindAttr", id, opt.prop, val);
+                var element = document.querySelector("[data-just-watch-"+id+"=true]")
+
+                if(opt.attrName == 'value')
+                {
+                    /*element.addEventListener('change', function()
+                    {
+                        if(thisObj[opt.prop] != element.value)
+                        {
+                            console.log("change", element.value);
+                            thisObj[opt.prop] = element.value;
+                        }
+                    }, false);
+
+                    element.addEventListener('keyup', function()
+                    {
+                        if(thisObj[opt.prop] != element.value)
+                        {
+                            console.log("keyup", element.value);
+                            thisObj[opt.prop] = element.value;
+                        }
+                    }, false);/**/
+
+                    element.addEventListener('input', function()
+                    {
+                        if(thisObj[opt.prop] != element.value)
+                        {
+                            console.log("input", element.value);
+                            thisObj[opt.prop] = element.value;
+                        }
+                    }, false);
+
+                    /*element.addEventListener('blur', function()
+                    {
+                        if(thisObj[opt.prop] != element.value)
+                        {
+                            console.log("blur", element.value);
+                            thisObj[opt.prop] = element.value;
+                        }
+                    }, false);/**/
+                }
+
+                var observer = new MutationObserver(function(mutations)
+                {
+                    console.log("observer", mutations);
+                    mutations.forEach(function(mutation)
+                    {
+                        if(mutation.type == "attributes" && mutation.attributeName == opt.attrName && thisObj[opt.prop] != mutation.target.getAttribute(opt.attrName))
+                        {
+                            console.log("set new value");
+                            thisObj[opt.prop] = mutation.target.getAttribute(opt.attrName);
+                            element.value = mutation.target.getAttribute(opt.attrName)
+                        }
+                    });
+                });
+
+                observer.observe(element, { attributes: true, characterData: true});
+
+            })
+
+            return html;
+        }
 
         return opt.callBack(this[opt.prop], opt.customData)
     }
@@ -710,13 +770,22 @@ Object.defineProperty(Object.prototype, "justClassName", {
     }
 });
 
-// Проставляет атрибут
+// Проставляет атрибут (односторонний биндинг от модели в дом элементы)
 Object.defineProperty(Object.prototype, "justAttr", {
     enumerable: false
   , configurable: true
   , writable: false
   , value: function(prop, attrName, callBack, customData){ return justReactive.setValue.apply(this, [{type:'attr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
 });
+
+// Проставляет атрибут (двухсторонний биндинг атрибутов)
+Object.defineProperty(Object.prototype, "bindAttr", {
+    enumerable: false
+  , configurable: true
+  , writable: false
+  , value: function(prop, attrName, callBack, customData){ return justReactive.setValue.apply(this, [{type:'bindAttr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
+});
+
 
 /**
  * Добавление точки отслеживания
@@ -772,7 +841,7 @@ Object.defineProperty(Object.prototype, "justDeepWatch", {
         return true;
     }
 });
- 
+
 /*
  * https://gist.github.com/eligrey/384583
  *

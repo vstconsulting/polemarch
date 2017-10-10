@@ -161,7 +161,13 @@
                         <div class="row">
                             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Username</label>
-                                <input type="text"  placeholder="Enter username"  id="user_<%- pmUsers.model.items[item_id].id %>_username" value="<%- pmUsers.model.items[item_id].username %>"  class="form-control" maxlength="255">
+                                <input type="text" 
+                                    placeholder="Enter username" 
+                                    id="user_<%= pmUsers.model.items[item_id].id %>_username"  
+                                    class="form-control"
+                                    maxlength="255"
+                                    <%= pmUsers.model.items[item_id].justAttr('username', 'value') %>
+                                >
                                 <div class="help-block"></div>
                             </div>
 

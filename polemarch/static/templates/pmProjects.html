@@ -38,7 +38,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 110px;">Status</th>
+                                    <th style="width: 110px;" class="hidden-xs hidden-sm">Status</th>
                                     <th style="width: 95px;">Actions</th>
                                 </tr>
                                 <% for(var i in pmProjects.model.itemslist.results){ valid = pmProjects.model.itemslist.results[i].id; %>
@@ -53,7 +53,7 @@
                                             <a href="/?project/<%- valid %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= pmProjects.model.items[valid].justText('name') %></a>
                                         </td>
-                                        <td class="project-status <%- pmProjects.model.items[valid].justClassName('status', function(v){ return "project-status-"+v}) %>" >
+                                        <td class="hidden-xs hidden-sm project-status <%- pmProjects.model.items[valid].justClassName('status', function(v){ return "project-status-"+v}) %>" >
                                             <%= pmProjects.model.items[valid].justText('status') %>
                                         </td>
                                         <td >

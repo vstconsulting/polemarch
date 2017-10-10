@@ -212,6 +212,14 @@ pmInventories.parseFromText = function(text)
     for(var i in lines)
     {
         var line = lines[i]
+        
+        if(/^\s*[#;]\s+inventory name: (.*)/ig.test(line))
+        {
+            var name = /^\s*[#;]\s+inventory name: (.*)/ig.exec(line)
+            inventory.name = name[1]
+            continue;
+        }
+         
         if(/^\s*$/ig.test(line))
         {
             continue;
@@ -266,7 +274,7 @@ pmInventories.importFromFile = function(files_event)
 {
     var def = new $.Deferred();
     this.model.files = files_event
-    this.model.importedInventories = []
+    this.model.importedInventories = {}
     var thisObj = this;
     for(var i=0; i<files_event.target.files.length; i++)
     {
@@ -276,17 +284,16 @@ pmInventories.importFromFile = function(files_event)
             return function(e)
             {
                 console.log(e)
-                thisObj.model.importedInventories = []
-                thisObj.model.importedInventories.push({
+                thisObj.model.importedInventories = {
                     inventory:pmInventories.parseFromText(e.target.result),
                     text:e.target.result
-                })
+                }
             };
         })(i);
         reader.readAsText(files_event.target.files[i]);
 
         // Нет поддержки загрузки более одного файла за раз.
-        // break;
+        break;
     }
     return def.promise();
 }
@@ -301,10 +308,7 @@ pmInventories.openImportPageAndImportFiles = function(files_event)
 
 pmInventories.importInventories = function()
 {
-    for(var i in pmInventories.model.importedInventories)
-    {
-        return pmInventories.importInventory(pmInventories.model.importedInventories[i].inventory)
-    }
+    return pmInventories.importInventory(pmInventories.model.importedInventories.inventory)
 }
 
 pmInventories.importInventoriesAndOpen = function(inventory)
@@ -320,7 +324,7 @@ pmInventories.importInventoriesAndOpen = function(inventory)
 pmInventories.importInventory = function(inventory)
 { 
     var def2 = new $.Deferred(); 
-    var vars = jsonEditor.jsonEditorGetValues('inventory')
+    var vars = jsonEditor.jsonEditorGetValues('inventory') 
     if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
     {
         // <!--Вставка файла -->
@@ -347,7 +351,6 @@ pmInventories.importInventory = function(inventory)
     for(var i in inventory.groups)
     {
         var val = inventory.groups[i]
-
         var vars = jsonEditor.jsonEditorGetValues('group'+i)
         if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
         {
@@ -696,6 +699,11 @@ pmInventories.showImportPage = function(holder, menuInfo, data)
 
 pmInventories.renderImportedInventory = function(imported)
 {
+    if(!imported || !imported.inventory || !imported.text)
+    {
+        return ""
+    }
+    
     var text = spajs.just.render(this.model.name+'_imported_inventory', {inventory:imported.inventory, text:imported.text})
     return text;
 }
