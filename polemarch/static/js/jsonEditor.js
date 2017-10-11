@@ -195,6 +195,7 @@ jsonEditor.editor = function(json, opt)
     {
         opt.prefix = 'prefix'
     }
+    
     opt.prefix = opt.prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
     jsonEditor.model.data[opt.prefix] = json;
 
@@ -265,6 +266,8 @@ jsonEditor.jsonEditorRmVar = function(name, prefix)
     }
 
     delete jsonEditor.model.data[prefix][name]
+    tabSignal.emit(prefix+".jsonEditorUpdate",{name:name, value:undefined, prefix:prefix})
+    tabSignal.emit("jsonEditorUpdate",{name:name, value:undefined, prefix:prefix})
 }
 
 /**
@@ -289,6 +292,9 @@ jsonEditor.__devAddVar = function(name, value, optionsblock, prefix)
     jsonEditor.model.data[prefix][name] = value
     $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:{prefix:prefix}}))
     $("#jsonEditorVarListHolder"+prefix).show()
+    
+    tabSignal.emit(prefix+".jsonEditorUpdate",{name:name, value:value, prefix:prefix})
+    tabSignal.emit("jsonEditorUpdate",{name:name, value:value, prefix:prefix})
 }
 
 jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
@@ -351,6 +357,9 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
     jsonEditor.model.data[prefix][name] = value
     $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:opt}))
     $("#jsonEditorVarListHolder"+prefix).show()
+    
+    tabSignal.emit(prefix+".jsonEditorUpdate",{name:name, value:value, prefix:prefix})
+    tabSignal.emit("jsonEditorUpdate",{name:name, value:value, prefix:prefix})
 }
 
 jsonEditor.initAutoComplete = function(optionsblock, prefix)
@@ -431,7 +440,7 @@ jsonEditor.initForm = function(optionsblock, prefix)
     }
 }
 
-jsonEditor.loadFile = function(event, element)
+jsonEditor.loadFile = function(event, element, name, prefix)
 {
     console.log("jsonEditor.loadFile", event.target.files)
     for(var i=0; i<event.target.files.length; i++)
@@ -448,6 +457,8 @@ jsonEditor.loadFile = function(event, element)
         {
             $(element)[0].setAttribute("value", e.target.result)
             $(element).val(e.target.result)
+            tabSignal.emit(prefix+".jsonEditorUpdate",{name:name, value:e.target.result, prefix:prefix})
+            tabSignal.emit("jsonEditorUpdate",{name:name, value:e.target.result, prefix:prefix})
         }
 
         reader.readAsText(event.target.files[i]);

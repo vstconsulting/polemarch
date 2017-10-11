@@ -172,7 +172,8 @@ pmInventories.parseLine = function(index, line, section, inventory)
 
         pmInventories.addGroupIfNotExists(inventory, section)
         inventory.groups[section].children = true
-        inventory.groups[section].groups.push(line)
+        inventory.groups[section].groups.push(line) 
+        pmInventories.addGroupIfNotExists(inventory, line) 
         return true;
     }
 
@@ -180,6 +181,12 @@ pmInventories.parseLine = function(index, line, section, inventory)
     return false;
 }
 
+/**
+ * Добавляет группу в инвенторий если её ещё нет
+ * @param {Object} inventory
+ * @param {string} group_name имя группы
+ * @returns {Boolean} true если группа добавлена.
+ */
 pmInventories.addGroupIfNotExists = function(inventory, group_name)
 { 
     if(!inventory.groups[group_name])
@@ -189,7 +196,11 @@ pmInventories.addGroupIfNotExists = function(inventory, group_name)
             groups:[],
             hosts:[],
         }
+        
+        return true;
     }
+    
+    return false;
 }
 
 /**
@@ -699,7 +710,7 @@ pmInventories.showImportPage = function(holder, menuInfo, data)
 
 pmInventories.renderImportedInventory = function(imported)
 {
-    if(!imported || !imported.inventory || !imported.text)
+    if(!imported || !imported.inventory)
     {
         return ""
     }

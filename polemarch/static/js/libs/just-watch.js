@@ -252,7 +252,11 @@ var justReactive = {
         //console.log("setter", newval);
         for(var i in newval.just_ids)
         {
-            if(newval.just_ids[i].type == 'innerTPL')
+            if(newval.just_ids[i].type == "watch")
+            { 
+                newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+            }
+            else if(newval.just_ids[i].type == 'innerTPL')
             {
                 // innerTPL - вставить на страницу обработав как шаблон.
                 var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
@@ -459,10 +463,10 @@ var justReactive = {
 
                     if(val && val.__add_justHtml_test === "__justReactive_test")
                     {
-                        if(val.type == "watch")
+                        /*if(val.type == "watch" && !val.callBack)
                         {
                             return val;
-                        }
+                        }*/
 
                         // Добавление точки отслеживания, значение не меняем.
                         //console.log("setter add", newval);
@@ -626,25 +630,7 @@ var justReactive = {
                 var element = document.querySelector("[data-just-watch-"+id+"=true]")
 
                 if(opt.attrName == 'value')
-                {
-                    /*element.addEventListener('change', function()
-                    {
-                        if(thisObj[opt.prop] != element.value)
-                        {
-                            console.log("change", element.value);
-                            thisObj[opt.prop] = element.value;
-                        }
-                    }, false);
-
-                    element.addEventListener('keyup', function()
-                    {
-                        if(thisObj[opt.prop] != element.value)
-                        {
-                            console.log("keyup", element.value);
-                            thisObj[opt.prop] = element.value;
-                        }
-                    }, false);/**/
-
+                { 
                     element.addEventListener('input', function()
                     {
                         if(thisObj[opt.prop] != element.value)
@@ -652,16 +638,7 @@ var justReactive = {
                             console.log("input", element.value);
                             thisObj[opt.prop] = element.value;
                         }
-                    }, false);
-
-                    /*element.addEventListener('blur', function()
-                    {
-                        if(thisObj[opt.prop] != element.value)
-                        {
-                            console.log("blur", element.value);
-                            thisObj[opt.prop] = element.value;
-                        }
-                    }, false);/**/
+                    }, false); 
                 }
 
                 var observer = new MutationObserver(function(mutations)
@@ -795,12 +772,14 @@ Object.defineProperty(Object.prototype, "justWatch", {
     enumerable: false
   , configurable: true
   , writable: false
-  , value: function(prop)
+  , value: function(prop, callBack, customData)
     {
         return justReactive.setValue.apply(this, [{
                 type:'watch',
                 prop:prop,
-                deep:false
+                deep:false,
+                callBack:callBack,
+                customData:customData
             }])
     }
 });

@@ -23,7 +23,7 @@
                         <% } %>
 
                         <span class="btn btn-default btn-right textfile" style="float: right; margin-left: 10px;" >
-                            <input type="file" class="input-file"  onchange="jsonEditor.loadFile(event, '#json_<%- name %>_value<%- opt.prefix %>');"  >
+                            <input type="file" class="input-file"  onchange="jsonEditor.loadFile(event, '#json_<%- name %>_value<%- opt.prefix %>', '<%- name %>', '<%- opt.prefix %>');"  >
                             <span class="glyphicon glyphicon-file"></span>
                         </span>
                         <div style="clear: both; padding-top: 10px;" ></div>

@@ -533,3 +533,9 @@ table{
     float: right;
     margin-left: 5px;
 }
+
+.resize-options{
+    max-width: 100%;
+    min-width: 100%;
+    width: 100%;
+}
