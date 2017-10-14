@@ -130,10 +130,10 @@ var justReactive = {
               , configurable: true
               , writable: true
               , value: function(){
-                  //console.log("watch method", method, arguments);
-                  Array.prototype[method].apply(this, arguments);
+                  //console.log("watch method", method, arguments, this);
+                  var res = Array.prototype[method].apply(this, arguments);
                   setter.apply(this,["__justReactive_update"]);
-                  return this;
+                  return res;
               }
         });
     },
@@ -152,7 +152,7 @@ var justReactive = {
         'slice',
         'some',
         'sort',
-        'splice',
+        //'splice',
         'unshift',
         'unshift'
     ],
@@ -191,6 +191,7 @@ var justReactive = {
         {
             if(newval.length < obj[prop].length)
             {
+                console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
                 obj[prop].splice(newval.length, obj[prop].length - newval.length);
             }
 
@@ -532,7 +533,29 @@ var justReactive = {
                 });
 
                 if(Array.isArray(newval.val))
-                {
+                { 
+                    Object.defineProperty(this[opt.prop], 'splice', {
+                            enumerable: false
+                          , configurable: true
+                          , writable: true
+                          , value: function(){
+                                //console.log("watch splice method", arguments);
+
+                                var keys = Object.keys(newval.val);
+                                var tmpRes = Array.prototype['splice'].apply(keys, arguments);
+                                var res = newval.val[tmpRes]
+
+                                var newObj = []
+                                for(var i in keys)
+                                {
+                                    newObj[keys[i]] = newval.val[keys[i]]
+                                }
+ 
+                                setter.apply(this,newObj);
+                                return res;
+                        }
+                    });
+
                     for(var i in justReactive.methods)
                     {
                         justReactive.addMethod.apply(this, [setter, opt.prop, justReactive.methods[i]])
@@ -766,12 +789,15 @@ Object.defineProperty(Object.prototype, "bindAttr", {
 
 /**
  * Добавление точки отслеживания
+ * Может быть полезно чтоб при присвоении в этот другого объекта объект происходила замена таким образом чтоб у общих для них свойств были вызваны сеттеры
  * @example this.model.items.justWatch(item_id);
  */
 Object.defineProperty(Object.prototype, "justWatch", {
     enumerable: false
   , configurable: true
   , writable: false
+  //, get:
+  //, set:
   , value: function(prop, callBack, customData)
     {
         return justReactive.setValue.apply(this, [{

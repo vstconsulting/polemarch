@@ -417,7 +417,7 @@ jsonEditor.initForm = function(optionsblock, prefix)
     }
     prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
 
-    console.log(optionsblock, jsonEditor.options[optionsblock])
+    //console.log(optionsblock, jsonEditor.options[optionsblock])
     if(jsonEditor.options[optionsblock])
     {
         jsonEditor.initAutoComplete(optionsblock, prefix)
