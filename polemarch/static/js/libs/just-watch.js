@@ -192,7 +192,7 @@ var justReactive = {
             if(newval.length < obj[prop].length)
             {
                 console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
-                obj[prop].splice(newval.length, obj[prop].length - newval.length);
+                Array.prototype.splice.apply(obj[prop], [newval.length, obj[prop].length - newval.length]); 
             }
 
             for(var i in newval)
@@ -504,13 +504,13 @@ var justReactive = {
                             newval.val = val;
                         }
 
-                        if(Array.isArray(val))
+                        /*if(Array.isArray(val))
                         {
                             for(var i in justReactive.methods)
                             {
                                 justReactive.addMethod.apply(this, [setter, opt.prop, justReactive.methods[i]])
                             }
-                        }
+                        }*/
                     }
 
                     // Обновляем значения в DOM не сразу а с задержкой в 10мс
@@ -543,15 +543,21 @@ var justReactive = {
 
                                 var keys = Object.keys(newval.val);
                                 var tmpRes = Array.prototype['splice'].apply(keys, arguments);
-                                var res = newval.val[tmpRes]
-
+                                var res = []
+                                for(var i in tmpRes)
+                                {
+                                    res[i] = newval.val[tmpRes[i]]
+                                }
+  
                                 var newObj = []
                                 for(var i in keys)
                                 {
-                                    newObj[keys[i]] = newval.val[keys[i]]
+                                    newObj[i] = newval.val[keys[i]]
                                 }
- 
-                                setter.apply(this,newObj);
+                                
+                                newval.val = newObj
+                                justReactive.applyFunc(newval.val, newval)
+                                //setter.apply(this, [newObj]);
                                 return res;
                         }
                     });
