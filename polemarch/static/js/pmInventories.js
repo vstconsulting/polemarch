@@ -203,6 +203,7 @@ pmInventories.addGroupIfNotExists = function(inventory, group_name)
     return false;
 }
 
+
 /**
  * Парсит файла инвентория
  * @param {string} text текст файла инвентория
@@ -275,9 +276,50 @@ pmInventories.parseFromText = function(text)
         pmInventories.parseLine(i, line, cSection, inventory)
     }
 
+    pmInventories.addHierarchyDataToInventoryGroups(inventory)
     console.log("\n\ninventory", inventory)
     return inventory;
 }
+
+
+
+pmInventories.addHierarchyDataToInventoryGroups = function(inventory, group_name, level, parent_name)
+{
+    if(!level)
+    {
+        level = 0
+    }
+    
+    if(parent_name === undefined)
+    {
+        parent_name = []
+    }
+    
+    if(group_name === undefined || group_name == 'all')
+    {
+        for(var i in inventory.groups)
+        {  
+            pmInventories.addHierarchyDataToInventoryGroups(inventory, inventory.groups[i], 1, [])
+        }
+        
+        return;
+    }
+    
+    parent_name.push(group_name)
+    inventory.groups[group_name].dataLevel = {
+        level:level,
+        parent_name:parent_name,
+    }
+    
+    for(var i in inventory.groups[group_name].groups)
+    {  
+        pmInventories.addHierarchyDataToInventoryGroups(inventory, inventory.groups[group_name].groups[i], level+1, parent_name)
+    }
+    
+    return;
+}
+
+
 
 // ansible_ssh_private_key_file - запрашивать значение этого параметра.
 
