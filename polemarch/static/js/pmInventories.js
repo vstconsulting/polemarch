@@ -283,43 +283,77 @@ pmInventories.parseFromText = function(text)
 
 
 
-pmInventories.addHierarchyDataToInventoryGroups = function(inventory, group_name, level, parent_name)
+/**
+ * Формирует вспомагательную информацию в объекте инвентория о вложенности групп друг в друга.
+ * @param {Object} inventory Инвенторий (Обязательный)
+ * @param {string} group_name (не обязательный)
+ * @param {integer} level (не обязательный)
+ * @param {Array} parents (не обязательный)
+ */
+pmInventories.addHierarchyDataToInventoryGroups = function(inventory, group_name, level, parents)
 {
     if(!level)
     {
         level = 0
     }
     
-    if(parent_name === undefined)
+    if(parents === undefined)
     {
-        parent_name = []
+        parents = []
     }
     
     if(group_name === undefined || group_name == 'all')
     {
         for(var i in inventory.groups)
         {  
-            pmInventories.addHierarchyDataToInventoryGroups(inventory, inventory.groups[i], 1, [])
+            delete inventory.groups[i]['dataLevel']
+        }
+        
+        for(var i in inventory.groups)
+        {  
+            pmInventories.addHierarchyDataToInventoryGroups(inventory, i, 1, ['all'])
         }
         
         return;
     }
     
-    parent_name.push(group_name)
+    
+    if(inventory.groups[group_name].dataLevel && inventory.groups[group_name].dataLevel.level >= level )
+    {
+        return;
+    } 
+    
+    parents.push(group_name)
     inventory.groups[group_name].dataLevel = {
         level:level,
-        parent_name:parent_name,
+        parents:parents,
     }
     
     for(var i in inventory.groups[group_name].groups)
-    {  
-        pmInventories.addHierarchyDataToInventoryGroups(inventory, inventory.groups[group_name].groups[i], level+1, parent_name)
+    {   
+        var hasError = false;
+        for(var j in inventory.groups[group_name].dataLevel.parents)
+        {  
+            var val = inventory.groups[group_name].dataLevel.parents[j]
+            if(val == inventory.groups[group_name].groups[i])
+            {
+                inventory.groups[group_name].dataLevel.error = "Group `"+val+"` is recursive include into group `"+inventory.groups[group_name].groups[i]+"`";
+                console.warn(inventory.groups[group_name].dataLevel.error)
+                hasError = true
+                break;
+            }
+        }
+        
+        if(hasError)
+        {
+            continue;
+        }
+        
+        pmInventories.addHierarchyDataToInventoryGroups(inventory, inventory.groups[group_name].groups[i], level+1, parents.slice())
     }
     
     return;
 }
-
-
 
 // ansible_ssh_private_key_file - запрашивать значение этого параметра.
 
