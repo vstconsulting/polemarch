@@ -119,7 +119,7 @@ var justReactive = {
     justStrip:function(html)
     {
        var tmp = document.createElement("DIV");
-       tmp.innerHTML = html;
+       tmp.innerHTML = html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
        return tmp.textContent || tmp.innerText || "";
     },
 
@@ -630,8 +630,8 @@ var justReactive = {
         {
             var val = opt.callBack(this[opt.prop], opt.customData)
             if(val)
-            {
-                return " data-just-watch-"+id+" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/\"/g, "\\\"") +"\"";
+            { 
+                return " data-just-watch-"+id+" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/"/g, '&quot;') +"\"";
             }
             else
             {
@@ -644,8 +644,8 @@ var justReactive = {
             console.log("bindAttr", opt.prop, val);
             var html = ""
             if(val)
-            {
-                html = " data-just-watch-"+id+"=\"true\" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/\"/g, "\\\"") +"\"";
+            { 
+                html = " data-just-watch-"+id+"=\"true\" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/"/g, '&quot;') +"\"";
             }
             else
             {
