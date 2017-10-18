@@ -1,25 +1,45 @@
-/**
- * Класс для запуска модулей Ansible.
- *
- */ 
+
+var moduleArgsEditor = {}
+
+moduleArgsEditor.model = {}
+
+
+moduleArgsEditor.loadAllModule = function()
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    spajs.ajax.Call({
+        url: "/api/v1/ansible/modules/",
+        type: "GET",
+        contentType:'application/json',
+        success: function(data)
+        {
+            thisObj.model.ansible_modules = data
+            def.resolve();
+        },
+        error:function(e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+            def.reject();
+        }
+    });
+    return def.promise();
+}
 
 /**
  * Вернёт код для поля автокомплита модулей
  * @param {String} id
  * @returns HTML templte
+ * @private
  */
-pmAnsibleModule.moduleAutocompleteFiled = function(opt)
+moduleArgsEditor.moduleAutocompleteFiled = function(opt)
 {
     if(opt === undefined)
     {
         opt = {}
     }
-    
-    if(!opt.id)
-    {
-        opt.id = "module-autocomplete"
-    }
-    
+     
     if(!opt.value)
     {
         opt.value = ""
@@ -29,14 +49,14 @@ pmAnsibleModule.moduleAutocompleteFiled = function(opt)
     
     html = spajs.just.onInsert(html, function()
     {
-        $.when(pmAnsibleModule.loadAllModule()).done(function()
+        $.when(moduleArgsEditor.loadAllModule()).done(function()
         {
             new autoComplete({
-                selector: '#'+opt.id,
+                selector: '#module-autocomplete',
                 minChars: 0,
                 cache:false,
                 showByClick:false,
-                menuClass:opt.id,
+                menuClass:"module-autocomplete",
                 renderItem: function(item, search)
                 {
                     var name = item.replace(/^.*\.(.*?)$/, "$1")
@@ -53,18 +73,16 @@ pmAnsibleModule.moduleAutocompleteFiled = function(opt)
                     term = term.toLowerCase();
 
                     var matches = []
-                    for(var i in pmAnsibleModule.model.ansible_modules)
+                    for(var i in moduleArgsEditor.model.ansible_modules)
                     {
-                        var val = pmAnsibleModule.model.ansible_modules[i]
+                        var val = moduleArgsEditor.model.ansible_modules[i]
                         if(val.toLowerCase().indexOf(term) != -1)
                         {
                             matches.push(val)
                         }
                     }
-                    if(matches.length)
-                    {
-                        response(matches);
-                    }
+                    
+                    response(matches); 
                 }
             });
         })
@@ -77,18 +95,14 @@ pmAnsibleModule.moduleAutocompleteFiled = function(opt)
  * Вернёт код для поля ввода аргументов к запуску модуля
  * @param {String} id
  * @returns HTML templte
+ * @private
  */
-pmAnsibleModule.argsAutocompleteFiled = function(opt)
+moduleArgsEditor.argsAutocompleteFiled = function(opt)
 {
     if(opt === undefined)
     {
         opt = {}
-    }
-    
-    if(!opt.id)
-    {
-        opt.id = "module-autocomplete"
-    }
+    } 
     
     if(!opt.value)
     {
@@ -104,7 +118,7 @@ pmAnsibleModule.argsAutocompleteFiled = function(opt)
  * @param {String} id
  * @returns HTML templte
  */
-pmAnsibleModule.moduleFileds = function(opt)
+moduleArgsEditor.moduleFileds = function(opt)
 {
     if(opt === undefined)
     {
@@ -123,4 +137,15 @@ pmAnsibleModule.moduleFileds = function(opt)
     
     var html = spajs.just.render('moduleFileds_template', opt) 
     return html;
+}
+
+
+moduleArgsEditor.getModuleArgs = function(opt)
+{
+    return $("#module-args-string").val()
+}
+
+moduleArgsEditor.getSelectedModuleName = function(opt)
+{
+    return $("#module-autocomplete").val()
 }

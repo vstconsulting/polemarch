@@ -84,28 +84,11 @@
                             <~>
                         </div>
 
-                        <div class="row"> 
-                            <%= pmAnsibleModule.moduleAutocompleteFiled({id:'module-autocomplete', value:pmModuleTemplates.model.items[item_id].data.module}) %>
-                        </div>
-                        <div class="row" >
-                            <div class="col-lg-12">
-                                <div class="">
-                                    <label class="control-label" >Args</label>
-                                    <input type="text"
-                                            class="form-control"
-                                            value="<%- pmModuleTemplates.model.items[item_id].data.args %>"
-                                            id="module-args-string"
-                                            onchange=""
-                                            onpaste=""  >
-                                   <!--<span class="input-group-addon" onclick=" " >
-                                         <span class="glyphicon glyphicon-pencil"></span>
-                                    </span>-->
-                                </div>
-                                <div class="help-block">
-                                    args (string) – which args must be passed to module. Just raw string with arguments. You can specify here contains of args option. For example ls -la for shell module.
-                                </div>
-                            </div>
-                        </div>
+                        <%= moduleArgsEditor.moduleFileds({
+                                module:{value:pmModuleTemplates.model.items[item_id].data.module },
+                                args:{value:pmModuleTemplates.model.items[item_id].data.args }
+                            }) 
+                        %>
                     </div>
                 </div>
             </section>
@@ -192,28 +175,7 @@
                             <~>
                         </div>
 
-                        <div class="row">
-                            <%= pmAnsibleModule.moduleAutocompleteFiled({id:'module-autocomplete'}) %>
-                        </div>
-                        <div class="row" >
-                            <div class="col-lg-12">
-                                <div class="">
-                                    <label class="control-label" >Args</label>
-                                    <input type="text"
-                                            class="form-control"
-                                            value=""
-                                            id="module-args-string"
-                                            onchange=""
-                                            onpaste=""  >
-                                   <!--<span class="input-group-addon" onclick=" " >
-                                         <span class="glyphicon glyphicon-pencil"></span>
-                                    </span>-->
-                                </div>
-                                <div class="help-block">
-                                    args (string) – which args must be passed to module. Just raw string with arguments. You can specify here contains of args option. For example ls -la for shell module.
-                                </div>
-                            </div>
-                        </div>
+                        <%= moduleArgsEditor.moduleFileds() %>
                     </div>
                 </div>
             </section>

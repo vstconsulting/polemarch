@@ -6,7 +6,7 @@
  */
 
 
-var JustEvalJsPattern_reg_pageUUID = new RegExp("<="+window.JustEvalJsPattern_pageUUID+"(.*?)"+window.JustEvalJsPattern_pageUUID+"=>", "g")
+var __JustEvalJsPattern_reg_pageUUID = new RegExp("<="+window.JUST.JustEvalJsPattern_pageUUID+"(.*?)"+window.JUST.JustEvalJsPattern_pageUUID+"=>", "g")
 /**
  * Плагин для вставки шаблона в тело элемента
  * @param {string} tplText
@@ -25,24 +25,19 @@ $.fn.insertTpl = function(tplText)
     {
         tplText = ""+tplText
     }
-    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
-
-    if(window.cordova && 0)
-    {
-        html = html.replace(/ onclick=/gmi, "ontouchstart=")
-    }
-
+    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
+ 
     this.each(function()
     {
         $(this).html(html)
     });
 
-    var js = tplText.match(JustEvalJsPattern_reg_pageUUID)
+    var js = tplText.match(window.__JustEvalJsPattern_reg_pageUUID)
     for(var i in js)
     {
         if(js[i] && js[i].length > 8);
         {
-            var code = js[i].substr(2 +window.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JustEvalJsPattern_pageUUID.length*2))
+            var code = js[i].substr(2 +window.JUST.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JUST.JustEvalJsPattern_pageUUID.length*2))
             //console.log(i, code)
             eval(code);
         }
@@ -62,31 +57,24 @@ $.fn.appendTpl = function(tplText)
     {
         tplText = ""+tplText
     }
-
-    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
-
-    if(window.cordova && 0)
-    {
-        html = html.replace(/ onclick=/gmi, "ontouchstart=")
-    }
-
+    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
+ 
     this.each(function()
     {
         $(this).append(html)
     });
 
-    /*
-    var js = tplText.match(/<js=(.*?)=js>/g)
+    var js = tplText.match(window.__JustEvalJsPattern_reg_pageUUID)
     for(var i in js)
     {
         if(js[i] && js[i].length > 8);
         {
-            var code = js[i].substr(4, js[i].length - 8)
-            console.log(i, code)
+            var code = js[i].substr(2 +window.JUST.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JUST.JustEvalJsPattern_pageUUID.length*2))
+            //console.log(i, code)
             eval(code);
         }
     }
-    */
+
     return this;
 };
 
@@ -101,31 +89,24 @@ $.fn.prependTpl = function(tplText)
     {
         tplText = ""+tplText
     }
-
-    var html = tplText.replace(JustEvalJsPattern_reg_pageUUID, "")
-
-    if(window.cordova && 0)
-    {
-        html = html.replace(/ onclick=/gmi, "ontouchstart=")
-    }
-
+    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
+ 
     this.each(function()
     {
         $(this).prepend(html)
     });
 
-    /*
-    var js = tplText.match(/<js=(.*?)=js>/g)
+    var js = tplText.match(window.__JustEvalJsPattern_reg_pageUUID)
     for(var i in js)
     {
         if(js[i] && js[i].length > 8);
         {
-            var code = js[i].substr(4, js[i].length - 8)
-            console.log(i, code)
+            var code = js[i].substr(2 +window.JUST.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JUST.JustEvalJsPattern_pageUUID.length*2))
+            //console.log(i, code)
             eval(code);
         }
     }
-    */
+
     return this;
 };
 
@@ -149,10 +130,10 @@ var justReactive = {
               , configurable: true
               , writable: true
               , value: function(){
-                  //console.log("watch method", method, arguments);
-                  Array.prototype[method].apply(this, arguments);
+                  //console.log("watch method", method, arguments, this);
+                  var res = Array.prototype[method].apply(this, arguments);
                   setter.apply(this,["__justReactive_update"]);
-                  return this;
+                  return res;
               }
         });
     },
@@ -171,7 +152,7 @@ var justReactive = {
         'slice',
         'some',
         'sort',
-        'splice',
+        //'splice',
         'unshift',
         'unshift'
     ],
@@ -181,7 +162,7 @@ var justReactive = {
         {
             level = 0;
         }
-        
+
         var res = Object.getOwnPropertyDescriptor(obj, prop);
         if(!res)
         {
@@ -189,7 +170,7 @@ var justReactive = {
             obj.justWatch(prop);
             return;
         }
-        
+
         if(res.hasOwnProperty('get') || res.hasOwnProperty('set'))
         {
             if(obj[prop] !== newval)
@@ -198,7 +179,7 @@ var justReactive = {
             }
             return;
         }
-        
+
         if(typeof obj[prop] != "object" || obj[prop] == null)
         {
             obj[prop] = newval;
@@ -210,11 +191,12 @@ var justReactive = {
         {
             if(newval.length < obj[prop].length)
             {
-                obj[prop].splice(newval.length, obj[prop].length - newval.length);
+                console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
+                Array.prototype.splice.apply(obj[prop], [newval.length, obj[prop].length - newval.length]); 
             }
-            
+
             for(var i in newval)
-            { 
+            {
                 if(typeof newval[i] == "object" && newval[i] != null)
                 {
                     if(level < 100)
@@ -231,8 +213,8 @@ var justReactive = {
             }
             return;
         }
-        
-        
+
+
         var v1arr = {}
         for(var i in obj[prop])
         {
@@ -271,7 +253,11 @@ var justReactive = {
         //console.log("setter", newval);
         for(var i in newval.just_ids)
         {
-            if(newval.just_ids[i].type == 'innerTPL')
+            if(newval.just_ids[i].type == "watch")
+            { 
+                newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+            }
+            else if(newval.just_ids[i].type == 'innerTPL')
             {
                 // innerTPL - вставить на страницу обработав как шаблон.
                 var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
@@ -281,7 +267,7 @@ var justReactive = {
             {
                 // innerHTML - вставить без обработки на страницу.
                 var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
-                if(el) el.innerHTML = newval.just_ids[i].callBack(val, newval.just_ids[i].customData) 
+                if(el) el.innerHTML = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
             }
             else if(newval.just_ids[i].type == 'textContent')
             {
@@ -390,7 +376,7 @@ var justReactive = {
                     }
                 }
             }
-            else if(newval.just_ids[i].type == 'attr')
+            else if(newval.just_ids[i].type == 'attr' || newval.just_ids[i].type == 'bindAttr')
             {
                 // class - вставить атрибут на страницу.
                 var el = document.querySelectorAll("[data-just-watch-"+newval.just_ids[i].id+"]");
@@ -401,10 +387,22 @@ var justReactive = {
                     {
                         if(attrVal)
                         {
-                            el[j].setAttribute(newval.just_ids[i].attrName, attrVal);
+                            if(el[j][newval.just_ids[i].attrName])
+                            {
+                                el[j][newval.just_ids[i].attrName] = attrVal
+                            }
+                            else
+                            {
+                                el[j].setAttribute(newval.just_ids[i].attrName, attrVal);
+                            }
                         }
                         else
                         {
+                            if(el[j][newval.just_ids[i].attrName])
+                            {
+                                el[j][newval.just_ids[i].attrName] = null
+                            }
+
                             el[j].removeAttribute(newval.just_ids[i].attrName);
                         }
                     }
@@ -425,7 +423,7 @@ var justReactive = {
         {
             opt.callBack = justReactive.defaultcallBack
         }
-        
+
         var oldValue = this[opt.prop]
 
         // Проверка того нетули уже наблюдения за этим объектом
@@ -442,10 +440,10 @@ var justReactive = {
                 val:oldValue,
                 just_ids:[
                     {
-                        id:id, 
+                        id:id,
                         callBack:opt.callBack,
-                        type:opt.type, 
-                        className:opt.className, 
+                        type:opt.type,
+                        className:opt.className,
                         attrName:opt.attrName,
                         customData:opt.customData
                     }
@@ -466,10 +464,10 @@ var justReactive = {
 
                     if(val && val.__add_justHtml_test === "__justReactive_test")
                     {
-                        if(val.type == "watch")
+                        /*if(val.type == "watch" && !val.callBack)
                         {
                             return val;
-                        }
+                        }*/
 
                         // Добавление точки отслеживания, значение не меняем.
                         //console.log("setter add", newval);
@@ -506,13 +504,13 @@ var justReactive = {
                             newval.val = val;
                         }
 
-                        if(Array.isArray(val))
+                        /*if(Array.isArray(val))
                         {
                             for(var i in justReactive.methods)
                             {
                                 justReactive.addMethod.apply(this, [setter, opt.prop, justReactive.methods[i]])
                             }
-                        }
+                        }*/
                     }
 
                     // Обновляем значения в DOM не сразу а с задержкой в 10мс
@@ -535,7 +533,35 @@ var justReactive = {
                 });
 
                 if(Array.isArray(newval.val))
-                {
+                { 
+                    Object.defineProperty(this[opt.prop], 'splice', {
+                            enumerable: false
+                          , configurable: true
+                          , writable: true
+                          , value: function(){
+                                //console.log("watch splice method", arguments);
+
+                                var keys = Object.keys(newval.val);
+                                var tmpRes = Array.prototype['splice'].apply(keys, arguments);
+                                var res = []
+                                for(var i in tmpRes)
+                                {
+                                    res[i] = newval.val[tmpRes[i]]
+                                }
+  
+                                var newObj = []
+                                for(var i in keys)
+                                {
+                                    newObj[i] = newval.val[keys[i]]
+                                }
+                                
+                                newval.val = newObj
+                                justReactive.applyFunc(newval.val, newval)
+                                //setter.apply(this, [newObj]);
+                                return res;
+                        }
+                    });
+
                     for(var i in justReactive.methods)
                     {
                         justReactive.addMethod.apply(this, [setter, opt.prop, justReactive.methods[i]])
@@ -611,6 +637,58 @@ var justReactive = {
             {
                 return " data-just-watch-"+id+" ";
             }
+        }
+        else if(opt.type == 'bindAttr')
+        {
+            var val = opt.callBack(this[opt.prop], opt.customData)
+            console.log("bindAttr", opt.prop, val);
+            var html = ""
+            if(val)
+            {
+                html = " data-just-watch-"+id+"=\"true\" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/\"/g, "\\\"") +"\"";
+            }
+            else
+            {
+                html = " data-just-watch-"+id+"=\"true\" ";
+            }
+
+            var thisObj = this
+            html = window.JUST.onInsert(html, function()
+            {
+                //console.log("on insert bindAttr", id, opt.prop, val);
+                var element = document.querySelector("[data-just-watch-"+id+"=true]")
+
+                if(opt.attrName == 'value')
+                { 
+                    element.addEventListener('input', function()
+                    {
+                        if(thisObj[opt.prop] != element.value)
+                        {
+                            console.log("input", element.value);
+                            thisObj[opt.prop] = element.value;
+                        }
+                    }, false); 
+                }
+
+                var observer = new MutationObserver(function(mutations)
+                {
+                    console.log("observer", mutations);
+                    mutations.forEach(function(mutation)
+                    {
+                        if(mutation.type == "attributes" && mutation.attributeName == opt.attrName && thisObj[opt.prop] != mutation.target.getAttribute(opt.attrName))
+                        {
+                            console.log("set new value");
+                            thisObj[opt.prop] = mutation.target.getAttribute(opt.attrName);
+                            element.value = mutation.target.getAttribute(opt.attrName)
+                        }
+                    });
+                });
+
+                observer.observe(element, { attributes: true, characterData: true});
+
+            })
+
+            return html;
         }
 
         return opt.callBack(this[opt.prop], opt.customData)
@@ -698,7 +776,7 @@ Object.defineProperty(Object.prototype, "justClassName", {
     }
 });
 
-// Проставляет атрибут
+// Проставляет атрибут (односторонний биндинг от модели в дом элементы)
 Object.defineProperty(Object.prototype, "justAttr", {
     enumerable: false
   , configurable: true
@@ -706,20 +784,34 @@ Object.defineProperty(Object.prototype, "justAttr", {
   , value: function(prop, attrName, callBack, customData){ return justReactive.setValue.apply(this, [{type:'attr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
 });
 
+// Проставляет атрибут (двухсторонний биндинг атрибутов)
+Object.defineProperty(Object.prototype, "bindAttr", {
+    enumerable: false
+  , configurable: true
+  , writable: false
+  , value: function(prop, attrName, callBack, customData){ return justReactive.setValue.apply(this, [{type:'bindAttr', prop:prop, callBack:callBack, attrName:attrName, customData:customData}])}
+});
+
+
 /**
  * Добавление точки отслеживания
+ * Может быть полезно чтоб при присвоении в этот другого объекта объект происходила замена таким образом чтоб у общих для них свойств были вызваны сеттеры
  * @example this.model.items.justWatch(item_id);
  */
 Object.defineProperty(Object.prototype, "justWatch", {
     enumerable: false
   , configurable: true
   , writable: false
-  , value: function(prop)
+  //, get:
+  //, set:
+  , value: function(prop, callBack, customData)
     {
         return justReactive.setValue.apply(this, [{
                 type:'watch',
                 prop:prop,
-                deep:false
+                deep:false,
+                callBack:callBack,
+                customData:customData
             }])
     }
 });
@@ -760,7 +852,7 @@ Object.defineProperty(Object.prototype, "justDeepWatch", {
         return true;
     }
 });
- 
+
 /*
  * https://gist.github.com/eligrey/384583
  *

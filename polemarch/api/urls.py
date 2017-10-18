@@ -28,7 +28,6 @@ router.register_router(r'v1/', router_v1)
 
 # Register globals
 
-
 urls = [
     url(r'^api/', include(router.urls)),
 ]

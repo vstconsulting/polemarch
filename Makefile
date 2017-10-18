@@ -46,7 +46,6 @@ compile: build-clean
 	-rm -rf dist
 	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf polemarch/doc/*
-	$(PY) setup.py build_sphinx --build-dir polemarch/doc
 	$(PY) setup.py compile -v
 
 install:

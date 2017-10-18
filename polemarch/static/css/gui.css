@@ -441,6 +441,7 @@ table{
     z-index: 1;
     opacity: 0;
     cursor: pointer;
+    overflow: hidden;
 }
 
 .history-status{
@@ -531,4 +532,10 @@ table{
 .btn-right{ 
     float: right;
     margin-left: 5px;
+}
+
+.resize-options{
+    max-width: 100%;
+    min-width: 100%;
+    width: 100%;
 }

@@ -7,6 +7,7 @@
 var pmTasks = inheritance(pmItems)
 
 pmTasks.model.name = "tasks"
+pmTasks.model.className = "pmTasks"
 
 pmTasks.execute = function(project_id, inventory, playbook, data_vars)
 {

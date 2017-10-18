@@ -2,6 +2,7 @@
 var pmGroups = inheritance(pmItems)
 pmGroups.model.name = "groups"
 pmGroups.model.page_name = "group"
+pmGroups.model.className = "pmGroups"
 
 pmGroups.copyItem = function(item_id)
 {
@@ -375,7 +376,7 @@ pmGroups.showAddSubGroupsForm = function(item_id, holder)
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_group', {item_id:item_id}))
-        $("#polemarch-model-items-select").select2();
+        $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
     }).promise()
@@ -390,7 +391,7 @@ pmGroups.showAddSubHostsForm = function(item_id, holder)
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_group', {item_id:item_id}))
-        $("#polemarch-model-items-select").select2();
+        $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
     }).promise()

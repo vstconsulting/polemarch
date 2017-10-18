@@ -26,10 +26,12 @@ TMP_DIR = "/tmp"
 __kwargs = dict(HOME=BASE_DIR, PY=PY_VER, TMP=TMP_DIR)
 
 # Hack for keep user settings in /etc/polemarch/settings.ini
-# or in file thats setups in env IHS_SETTINGS_FILE
+# or in file thats setups in env POLEMARCH_SETTINGS_FILE
+DEV_SETTINGS_FILE = os.getenv("POLEMARCH_DEV_SETTINGS_FILE",
+                              os.path.join(BASE_DIR, 'main/settings.ini'))
 CONFIG_FILE = os.getenv("POLEMARCH_SETTINGS_FILE", "/etc/polemarch/settings.ini")
 config = ConfigParser()
-config.read([CONFIG_FILE, os.path.join(BASE_DIR, 'main/settings.ini')])
+config.read([CONFIG_FILE, DEV_SETTINGS_FILE])
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
@@ -358,16 +360,16 @@ REPO_BACKENDS = {
 
 TASKS_HANDLERS = {
     "REPO": {
-        "BACKEND": "polemarch.main.tasks.RepoTask"
+        "BACKEND": "polemarch.main.tasks.tasks.RepoTask"
     },
     "SCHEDUER": {
-        "BACKEND": "polemarch.main.tasks.ScheduledTask"
+        "BACKEND": "polemarch.main.tasks.tasks.ScheduledTask"
     },
     "MODULE": {
-        "BACKEND": "polemarch.main.tasks.ExecuteAnsibleModule"
+        "BACKEND": "polemarch.main.tasks.tasks.ExecuteAnsibleModule"
     },
     "PLAYBOOK": {
-        "BACKEND": "polemarch.main.tasks.ExecuteAnsiblePlaybook"
+        "BACKEND": "polemarch.main.tasks.tasks.ExecuteAnsiblePlaybook"
     },
 }
 

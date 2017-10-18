@@ -75,6 +75,14 @@ Ubuntu/Debian installation
       sudo service polemarchweb start
       sudo service polemarchworker start
 
+Note for Debian 9 users: Polemarch currently built with libssl1.0.0, so you
+need to install it for your distro:
+
+   .. sourcecode:: bash
+
+      wget http://ftp.us.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.2l-1~bpo8+1_amd64.deb
+      sudo dpkg -i libssl1.0.0_1.0.2l-1~bpo8+1_amd64.deb
+
 That's it. Polemarch web panel on 8080 port. Default administrative account is
 admin/admin.
 

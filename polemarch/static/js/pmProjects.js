@@ -3,6 +3,7 @@ var pmProjects = inheritance(pmItems)
 pmProjects.model.name = "projects"
 jsonEditor.options[pmProjects.model.name] = {};
 pmProjects.model.selectedInventory = 0
+pmProjects.model.className = "pmProjects"
 
 jsonEditor.options[pmProjects.model.name]['repo_password'] = {
     type:'password',
@@ -55,7 +56,7 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:project_id, query:project_id}))
 
-        $("#inventories-autocomplete").select2();
+        $("#inventories-autocomplete").select2({ width: '100%' });
 
         new autoComplete({
             selector: '#playbook-autocomplete',
@@ -230,7 +231,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
     return $.when(pmInventories.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
-        $("#polemarch-model-items-select").select2();
+        $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
     }).promise()
@@ -245,7 +246,7 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
     return $.when(pmInventories.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
-        $("#polemarch-model-items-select").select2();
+        $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
     }).promise()
@@ -260,7 +261,7 @@ pmProjects.showAddSubGroupsForm = function(item_id, holder)
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_project', {item_id:item_id}))
-        $("#polemarch-model-items-select").select2();
+        $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
     }).promise()
@@ -275,7 +276,7 @@ pmProjects.showAddSubHostsForm = function(item_id, holder)
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_project").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_project', {item_id:item_id}))
-        $("#polemarch-model-items-select").select2();
+        $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
     }).promise()

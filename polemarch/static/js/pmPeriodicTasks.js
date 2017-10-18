@@ -4,6 +4,7 @@ var pmPeriodicTasks = inheritance(pmItems)
 pmPeriodicTasks.model.page_name = "periodic-task"
 pmPeriodicTasks.model.name = "periodic-tasks"  
 pmPeriodicTasks.model.selectedInventory = 0;
+pmPeriodicTasks.model.className = "pmPeriodicTasks"
 
 pmPeriodicTasks.copyAndEdit = function(item_id)
 {
@@ -138,7 +139,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
             return def.promise();
         }
         data.group = pmGroups.getGroupsAutocompleteValue()
-        data.args = $("#module-args-string").val()
+        data.args = moduleArgsEditor.getModuleArgs()
     }
     else
     {
@@ -241,21 +242,26 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
     }).promise();
 }
 
-pmPeriodicTasks.search = function(project_id, query)
+pmPeriodicTasks.search = function(query, options)
 {
-    if(!query || !trim(query))
+    if(this.isEmptySearchQuery(query))
     {
-        return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name, reopen:true});
+        return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name, reopen:true});
     }
 
-    return spajs.open({ menuId:'project/' + project_id +"/" + this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+    return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
 }
 
 pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
 { 
     var thisObj = this;
     var project_id = data.reg[1];
-    return $.when(this.sendSearchQuery({name: decodeURIComponent(data.reg[2]), project:project_id}), pmProjects.loadItem(project_id)).done(function()
+    
+    
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]))
+    search['project'] = project_id
+    
+    return $.when(this.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
     }).fail(function()
@@ -273,7 +279,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
         thisObj.model.newitem = {type:'INTERVAL', kind:'PLAYBOOK'}
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {project_id:project_id}))
 
-        $('#new_periodic-tasks_inventory').select2();
+        $('#new_periodic-tasks_inventory').select2({ width: '100%' });
 
         new autoComplete({
             selector: '#new_periodic-tasks_playbook',
@@ -324,7 +330,7 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
         pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory)
         
-        $('#periodic-tasks_'+item_id+'_inventory').select2();
+        $('#periodic-tasks_'+item_id+'_inventory').select2({ width: '100%' });
 
         new autoComplete({
             selector: '#periodic-tasks_'+item_id+'_playbook',
@@ -404,7 +410,7 @@ pmPeriodicTasks.addItem = function(project_id)
 
     if(data.kind == "MODULE")
     {
-        data.mode = $("#new_periodic-tasks_module").val()
+        data.mode = moduleArgsEditor.getSelectedModuleName()
         if(!data.mode)
         {
             $.notify("Module name is empty", "error");
@@ -445,7 +451,7 @@ pmPeriodicTasks.addItem = function(project_id)
     if(data.kind == "MODULE")
     {
         data.vars.group = pmGroups.getGroupsAutocompleteValue()
-        data.vars.args =  $("#module-args-string").val();
+        data.vars.args =  moduleArgsEditor.getModuleArgs();
     }
     
     spajs.ajax.Call({
@@ -511,6 +517,8 @@ pmPeriodicTasks.loadItem = function(item_id)
  */
 pmPeriodicTasks.updateItem = function(item_id)
 {
+    var def = new $.Deferred();
+
     var data = {}
     
     data.type = $("#periodic-tasks_"+item_id+"_type").val()
@@ -538,7 +546,7 @@ pmPeriodicTasks.updateItem = function(item_id)
     
     if(data.kind == "MODULE")
     {
-        data.mode = $("#periodic-tasks_"+item_id+"_module").val()
+        data.mode = moduleArgsEditor.getSelectedModuleName()
         if(!data.mode)
         {
             $.notify("Module name is empty", "error");
@@ -577,7 +585,7 @@ pmPeriodicTasks.updateItem = function(item_id)
     if(data.kind == "MODULE")
     {
         data.vars.group = pmGroups.getGroupsAutocompleteValue()
-        data.vars.args =  $("#module-args-string").val();
+        data.vars.args =  moduleArgsEditor.getModuleArgs();
     }
     var thisObj = this;
     return spajs.ajax.Call({

@@ -6,7 +6,7 @@
         <div class="form-group
                     <% if(thisOpt.type == 'textarea' || thisOpt.type == 'textfile' || thisOpt.type == 'keyfile' ){ %> col-lg-12 <% }else{ %> col-lg-12 <% } %>
                     <% if(thisOpt.type == 'boolean' ){ %> boolean-select <% } %>"
-                id="json_<%- name %>_line<%- opt.prefix%>">
+                id="json_<%- name %>_line<%- opt.prefix %>">
             <label
                     class=" col-sm-4 col-lg-3 control-label <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
                     for="#json_<%- name %>"
@@ -17,30 +17,32 @@
             <div class="input-group col-xs-12 col-sm-8 col-lg-9">
                     <% if(thisOpt.type == 'textfile' || thisOpt.type == 'keyfile' ){ %>
                         <% if(!thisOpt.required){ %>
-                            <span class="btn btn-default btn-right"  onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix%>');" style="float: right; margin-left: 10px;" >
+                            <span class="btn btn-default btn-right"  onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix %>');" style="float: right; margin-left: 10px;" >
                                 <span class="glyphicon glyphicon-remove"></span>
                             </span>
                         <% } %>
 
                         <span class="btn btn-default btn-right textfile" style="float: right; margin-left: 10px;" >
-                            <input type="file" class="input-file"  onchange="jsonEditor.loadFile(event, '#json_<%- name %>_value<%- opt.prefix%>');"  >
+                            <input type="file" class="input-file"  onchange="jsonEditor.loadFile(event, '#json_<%- name %>_value<%- opt.prefix %>', '<%- name %>', '<%- opt.prefix %>');"  >
                             <span class="glyphicon glyphicon-file"></span>
                         </span>
                         <div style="clear: both; padding-top: 10px;" ></div>
                         <textarea
                                data-type="<%- thisOpt.type %>"
                                placeholder="Enter value"
-                               id="json_<%- name %>_value<%- opt.prefix%>"
-                               class="form-control jsonEditor-data<%- opt.prefix%>"
+                               id="json_<%- name %>_value<%- opt.prefix %>"
+                               class="form-control jsonEditor-data<%- opt.prefix %>"
                                data-json-name="<%- name %>"
                                rows="4"
                                style="resize:vertical;"
+                                <%= jsonEditor.model.data[opt.prefix].bindAttr(name, 'value') %> 
                                ><%- value %></textarea>
                     <% } else { %>
                             <% if(thisOpt.type == 'select' ){ %>
-                                <select class="form-control jsonEditor-data<%- opt.prefix%>"
-                                        id="json_<%- name %>_value<%- opt.prefix%>"
+                                <select class="form-control jsonEditor-data<%- opt.prefix %>"
+                                        id="json_<%- name %>_value<%- opt.prefix %>"
                                         data-json-name="<%- name %>"
+                                        <%= jsonEditor.model.data[opt.prefix].bindAttr(name, 'value') %> 
                                         data-type="<%- thisOpt.type %>" >
                                     <% for(var i in thisOpt.options){ %>
                                        <option value="<%- thisOpt.options[i] %>" <% if(value == thisOpt.options[i]){ %>selected<% } %>><%- thisOpt.options[i] %></option>
@@ -50,17 +52,17 @@
                                 <input type="password"
                                        placeholder="Enter value"
                                        data-type="<%- thisOpt.type %>"
-                                       id="json_<%- name %>_value<%- opt.prefix%>"
-                                       value="<%- value %>"
-                                       class="form-control jsonEditor-data<%- opt.prefix%>"
+                                       id="json_<%- name %>_value<%- opt.prefix %>" 
+                                       <%= jsonEditor.model.data[opt.prefix].bindAttr(name, 'value') %> 
+                                       class="form-control jsonEditor-data<%- opt.prefix %>"
                                        data-json-name="<%- name %>"
                                        >
                             <% } else if(thisOpt.type == 'boolean' ){ %>
-                                <div class="form-control jsonEditor-data<%- opt.prefix%> selected"
+                                <div class="form-control jsonEditor-data<%- opt.prefix %> selected"
                                         onselectstart="return false"
                                         onmousedown="return false"
                                         style="cursor: pointer;"
-                                        id="json_<%- name %>_value<%- opt.prefix%>"
+                                        id="json_<%- name %>_value<%- opt.prefix %>"
                                         data-json-name="<%- name %>"
                                         data-type="<%- thisOpt.type %>" >
                                     <div class="ico-on fa fa-toggle-on"></div>
@@ -71,25 +73,26 @@
                                 <textarea
                                        data-type="<%- thisOpt.type %>"
                                        placeholder="Enter value"
-                                       id="json_<%- name %>_value<%- opt.prefix%>"
-                                       class="form-control jsonEditor-data<%- opt.prefix%>"
+                                       id="json_<%- name %>_value<%- opt.prefix %>"
+                                       class="form-control jsonEditor-data<%- opt.prefix %>"
                                        data-json-name="<%- name %>"
                                        rows="4"
                                        style="resize:vertical;"
+                                       <%= jsonEditor.model.data[opt.prefix].bindAttr(name, 'value') %> 
                                        ><%- value %></textarea>
                             <% } else { %>
                                 <input type="text"
                                        data-type="text"
                                        placeholder="Enter value"
-                                       id="json_<%- name %>_value<%- opt.prefix%>"
-                                       value="<%- value %>"
-                                       class="form-control jsonEditor-data<%- opt.prefix%>"
+                                       id="json_<%- name %>_value<%- opt.prefix %>"
+                                       <%= jsonEditor.model.data[opt.prefix].bindAttr(name, 'value') %> 
+                                       class="form-control jsonEditor-data<%- opt.prefix %>"
                                        data-json-name="<%- name %>"
                                        >
                             <% } %>
 
                             <% if(!thisOpt.required){ %>
-                                <span class="input-group-addon  btn btn-danger" onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix%>');">
+                                <span class="input-group-addon  btn btn-danger" onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix %>');">
                                     <span class="glyphicon glyphicon-remove"></span>
                                 </span>
                             <% } %>
@@ -112,7 +115,7 @@
             <% } %>
         </div>
     <% }else{ %>
-        <div class="form-group col-lg-12" id="json_<%- name %>_line<%- opt.prefix%>">
+        <div class="form-group col-lg-12" id="json_<%- name %>_line<%- opt.prefix %>">
             <label class="control-label  col-sm-4 col-lg-3 <% if(/^ansible_/.test(name)){ %>ansible_var<% } %>"
                     for="#json_<%- name %>"
                     style="word-wrap: break-word;">
@@ -121,13 +124,13 @@
             <div class="input-group  col-sm-8 col-lg-9">
                 <input type="text"
                        placeholder="Enter value"
-                       id="json_<%- name %>_value<%- opt.prefix%>"
-                       value="<%- value %>"
-                       class="form-control jsonEditor-data<%- opt.prefix%>"
+                       id="json_<%- name %>_value<%- opt.prefix %>"
+                       <%= jsonEditor.model.data[opt.prefix].bindAttr(name, 'value') %> 
+                       class="form-control jsonEditor-data<%- opt.prefix %>"
                        data-json-name="<%- name %>"
                        data-type="text"
                        >
-                <span class="input-group-addon  btn btn-danger" onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix%>');">
+                <span class="input-group-addon  btn btn-danger" onclick="jsonEditor.jsonEditorRmVar('<%- name %>', '<%- opt.prefix %>');">
                     <span class="glyphicon glyphicon-remove"></span>
                 </span>
             </div>
@@ -138,7 +141,9 @@
 <!-- jsonEditor -->
 <script type="text/x-just" data-just="jsonEditor">
 
-<section class="col-lg-12"  id="jsonEditorVarListHolder<%- opt.prefix%>" style=" <% if(Object.keys(data).length == 0){ %>display:none<% } %>">
+<section class="col-lg-12"  id="jsonEditorVarListHolder<%- opt.prefix %>" style=" <% if(Object.keys(data).length == 0){ %>display:none<% } %>">
+
+    <% if(!opt.noBox){ %>
     <div class="box box-info">
         <div class="box-header with-border">
             <%- opt.title1 %><br>
@@ -146,49 +151,56 @@
         <div class="box-body">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="row" id="jsonEditorVarList<%- opt.prefix%>">
+    <% } %>
+                    <div class="row" id="jsonEditorVarList<%- opt.prefix %>">
                         <% for(var i in data){ %>
                             <%= this.partial('jsonEditorLine', { name:i, value:data[i], optionsblock:optionsblock, opt:opt }) %>
                         <% } %>
                     </div>
+    <% if(!opt.noBox){ %>
                 </div>
             </div>
         </div>
     </div>
+    <% } %>
 </section>
 
 <% if(!opt.hideAddVarsForm){ %>
+    <% if(!opt.noBox){ %>
     <section class="col-lg-12">
         <div class="box box-info">
             <div class="box-header with-border">
                 <%- opt.title2 %><br>
             </div>
             <div class="box-body">
+    <% } %>
                 <div class="row">
                     <div class="form-group col-lg-12">
                         <label class=" col-sm-2 col-lg-2 control-label">
-                            Name
+                            Name 
                         </label>
                         <div class="input-group  col-sm-10 col-lg-10 col-xs-12"  >
                         
                             <% if(opt.select2){ %>
                                 <~ jsonEditor.model.isLoaded_cli_reference>
-                                    <select class="form-control select2" id="new_json_name<%- opt.prefix%>" data-placeholder="Select param" >
-                                        <option selected="" disabled="" value="" disabled>Not set</option>
-                                        <% for(var i in jsonEditor.options[optionsblock]){ %> 
-                                            <% if($.inArray(i, opt.excluded_options) == -1){ %>
-                                                <option value="<%- i %>" >
-                                                    <%- i %> (<%- jsonEditor.options[optionsblock][i].help %>)
-                                                </option> 
+                                    <% if(jsonEditor.model.isLoaded_cli_reference){ %>
+                                        <select class="form-control select2" id="new_json_name<%- opt.prefix %>" data-placeholder="Select param" >
+                                            <option selected="" disabled="" value="" disabled>Not set</option>
+                                            <% for(var i in jsonEditor.options[optionsblock]){ %> 
+                                                <% if($.inArray(i, opt.excluded_options) == -1){ %>
+                                                    <option value="<%- i %>" >
+                                                        <%- i %> (<%- jsonEditor.options[optionsblock][i].help %>)
+                                                    </option> 
+                                                <% } %>
                                             <% } %>
-                                        <% } %>
-                                    </select>
-                                    <=js $("#new_json_name<%- opt.prefix%>").select2() js=> 
+                                        </select> 
+                                        <=js $("#new_json_name<%- opt.prefix %>").select2({ width: '100%' }) js=> 
+                                    <% } %> 
                                 <~>
                             <% }else{ %>
-                                <input type="text" placeholder="Enter name" id="new_json_name<%- opt.prefix%>" value=""  class="form-control" >
+                                <input type="text" placeholder="Enter name" id="new_json_name<%- opt.prefix %>" value=""  class="form-control" >
                             <% } %>
-                            <=js jsonEditor.initForm('<%- optionsblock %>', '<%- opt.prefix%>') js=> 
+                            <=js jsonEditor.initForm('<%- optionsblock %>', '<%- opt.prefix %>') js=> 
                             
                             <div class="help-block"></div>
                         </div>
@@ -202,7 +214,7 @@
                             Value
                         </label>
                         <div class="input-group col-sm-10 col-lg-10 col-xs-12"  >
-                            <textarea placeholder="Enter value" id="new_json_value<%- opt.prefix%>" class="form-control"  style="resize:vertical;"></textarea>
+                            <textarea placeholder="Enter value" id="new_json_value<%- opt.prefix %>" class="form-control"  style="resize:vertical;"></textarea>
                             <div class="help-block"></div>
                         </div>
                     </div>
@@ -210,13 +222,14 @@
 
                 <div class="row">
                     <div class="form-group col-lg-1">
-                        <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>', '<%- opt.prefix%>');" >Add varible</span>
+                        <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>', '<%- opt.prefix %>');" >Add varible</span>
                     </div>
                 </div>
+    <% if(!opt.noBox){ %>
             </div>
         </div>
     </section> 
+    <% } %>
     
 <% } %>
 </script>
-

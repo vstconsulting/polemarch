@@ -4,6 +4,7 @@ var pmModuleTemplates =  inheritance(pmTemplates)
 pmModuleTemplates.model.name = "templates"
 pmModuleTemplates.model.page_name = "template"
 pmModuleTemplates.model.selectedInventory = 0
+pmModuleTemplates.model.className = "pmModuleTemplates"
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmModuleTemplates.model.kind = "Module"
@@ -45,8 +46,8 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
         $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).always(function()
         {
             $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_module_page', {item_id:item_id})) 
-            $("#inventories-autocomplete").select2();
-            $("#projects-autocomplete").select2();
+            $("#inventories-autocomplete").select2({ width: '100%' });
+            $("#projects-autocomplete").select2({ width: '100%' });
  
             def.resolve();
         });
@@ -66,8 +67,8 @@ pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_module_page', {}))
 
-        $("#inventories-autocomplete").select2();
-        $("#projects-autocomplete").select2();
+        $("#inventories-autocomplete").select2({ width: '100%' });
+        $("#projects-autocomplete").select2({ width: '100%' });
  
         def.resolve();
     }).fail(function()
@@ -112,11 +113,11 @@ pmModuleTemplates.addItem = function()
     data.name = $("#Templates-name").val()
     data.kind = this.model.kind
     data.data = {
-        module:$("#module-autocomplete").val(),
+        module:moduleArgsEditor.getSelectedModuleName(),
         inventory:$("#inventories-autocomplete").val(),
         project:$("#projects-autocomplete").val(),
         group:pmGroups.getGroupsAutocompleteValue(),
-        args:$("#module-args-string").val(),
+        args:moduleArgsEditor.getModuleArgs(),
         vars:jsonEditor.jsonEditorGetValues(),
     }
 
@@ -161,11 +162,11 @@ pmModuleTemplates.updateItem = function(item_id)
     data.name = $("#Templates-name").val()
     data.kind = this.model.kind
     data.data = {
-        module:$("#module-autocomplete").val(),
+        module:moduleArgsEditor.getSelectedModuleName(),
         inventory:$("#inventories-autocomplete").val(),
         project:$("#projects-autocomplete").val(),
         group:pmGroups.getGroupsAutocompleteValue(),
-        args:$("#module-args-string").val(),
+        args:moduleArgsEditor.getModuleArgs(),
         vars:jsonEditor.jsonEditorGetValues(),
     }
 

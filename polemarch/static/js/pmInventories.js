@@ -3,6 +3,7 @@
 var pmInventories = inheritance(pmItems)
 pmInventories.model.name = "inventories"
 pmInventories.model.page_name = "inventory"
+pmInventories.model.className = "pmInventories"
 
 /**
  * Параметры из секции *:vars
@@ -171,7 +172,8 @@ pmInventories.parseLine = function(index, line, section, inventory)
 
         pmInventories.addGroupIfNotExists(inventory, section)
         inventory.groups[section].children = true
-        inventory.groups[section].groups.push(line)
+        inventory.groups[section].groups.push(line) 
+        pmInventories.addGroupIfNotExists(inventory, line) 
         return true;
     }
 
@@ -179,6 +181,12 @@ pmInventories.parseLine = function(index, line, section, inventory)
     return false;
 }
 
+/**
+ * Добавляет группу в инвенторий если её ещё нет
+ * @param {Object} inventory
+ * @param {string} group_name имя группы
+ * @returns {Boolean} true если группа добавлена.
+ */
 pmInventories.addGroupIfNotExists = function(inventory, group_name)
 { 
     if(!inventory.groups[group_name])
@@ -188,8 +196,13 @@ pmInventories.addGroupIfNotExists = function(inventory, group_name)
             groups:[],
             hosts:[],
         }
+        
+        return true;
     }
+    
+    return false;
 }
+
 
 /**
  * Парсит файла инвентория
@@ -211,6 +224,14 @@ pmInventories.parseFromText = function(text)
     for(var i in lines)
     {
         var line = lines[i]
+        
+        if(/^\s*[#;]\s+inventory name: (.*)/ig.test(line))
+        {
+            var name = /^\s*[#;]\s+inventory name: (.*)/ig.exec(line)
+            inventory.name = name[1]
+            continue;
+        }
+         
         if(/^\s*$/ig.test(line))
         {
             continue;
@@ -255,8 +276,83 @@ pmInventories.parseFromText = function(text)
         pmInventories.parseLine(i, line, cSection, inventory)
     }
 
+    pmInventories.addHierarchyDataToInventoryGroups(inventory)
     console.log("\n\ninventory", inventory)
     return inventory;
+}
+
+
+
+/**
+ * Формирует вспомагательную информацию в объекте инвентория о вложенности групп друг в друга.
+ * @param {Object} inventory Инвенторий (Обязательный)
+ * @param {string} group_name (не обязательный)
+ * @param {integer} level (не обязательный)
+ * @param {Array} parents (не обязательный)
+ */
+pmInventories.addHierarchyDataToInventoryGroups = function(inventory, group_name, level, parents)
+{
+    if(!level)
+    {
+        level = 0
+    }
+    
+    if(parents === undefined)
+    {
+        parents = []
+    }
+    
+    if(group_name === undefined || group_name == 'all')
+    {
+        for(var i in inventory.groups)
+        {  
+            delete inventory.groups[i]['dataLevel']
+        }
+        
+        for(var i in inventory.groups)
+        {  
+            pmInventories.addHierarchyDataToInventoryGroups(inventory, i, 1, ['all'])
+        }
+        
+        return;
+    }
+    
+    
+    if(inventory.groups[group_name].dataLevel && inventory.groups[group_name].dataLevel.level >= level )
+    {
+        return;
+    } 
+    
+    parents.push(group_name)
+    inventory.groups[group_name].dataLevel = {
+        level:level,
+        parents:parents,
+    }
+    
+    for(var i in inventory.groups[group_name].groups)
+    {   
+        var hasError = false;
+        for(var j in inventory.groups[group_name].dataLevel.parents)
+        {  
+            var val = inventory.groups[group_name].dataLevel.parents[j]
+            if(val == inventory.groups[group_name].groups[i])
+            {
+                inventory.groups[group_name].dataLevel.error = "Group `"+val+"` is recursive include into group `"+inventory.groups[group_name].groups[i]+"`";
+                console.warn(inventory.groups[group_name].dataLevel.error)
+                hasError = true
+                break;
+            }
+        }
+        
+        if(hasError)
+        {
+            continue;
+        }
+        
+        pmInventories.addHierarchyDataToInventoryGroups(inventory, inventory.groups[group_name].groups[i], level+1, parents.slice())
+    }
+    
+    return;
 }
 
 // ansible_ssh_private_key_file - запрашивать значение этого параметра.
@@ -265,7 +361,7 @@ pmInventories.importFromFile = function(files_event)
 {
     var def = new $.Deferred();
     this.model.files = files_event
-    this.model.importedInventories = []
+    this.model.importedInventories = {}
     var thisObj = this;
     for(var i=0; i<files_event.target.files.length; i++)
     {
@@ -275,17 +371,16 @@ pmInventories.importFromFile = function(files_event)
             return function(e)
             {
                 console.log(e)
-                thisObj.model.importedInventories = []
-                thisObj.model.importedInventories.push({
+                thisObj.model.importedInventories = {
                     inventory:pmInventories.parseFromText(e.target.result),
                     text:e.target.result
-                })
+                }
             };
         })(i);
         reader.readAsText(files_event.target.files[i]);
 
         // Нет поддержки загрузки более одного файла за раз.
-        // break;
+        break;
     }
     return def.promise();
 }
@@ -300,10 +395,7 @@ pmInventories.openImportPageAndImportFiles = function(files_event)
 
 pmInventories.importInventories = function()
 {
-    for(var i in pmInventories.model.importedInventories)
-    {
-        return pmInventories.importInventory(pmInventories.model.importedInventories[i].inventory)
-    }
+    return pmInventories.importInventory(pmInventories.model.importedInventories.inventory)
 }
 
 pmInventories.importInventoriesAndOpen = function(inventory)
@@ -319,7 +411,7 @@ pmInventories.importInventoriesAndOpen = function(inventory)
 pmInventories.importInventory = function(inventory)
 { 
     var def2 = new $.Deferred(); 
-    var vars = jsonEditor.jsonEditorGetValues('inventory')
+    var vars = jsonEditor.jsonEditorGetValues('inventory') 
     if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
     {
         // <!--Вставка файла -->
@@ -346,7 +438,6 @@ pmInventories.importInventory = function(inventory)
     for(var i in inventory.groups)
     {
         var val = inventory.groups[i]
-
         var vars = jsonEditor.jsonEditorGetValues('group'+i)
         if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
         {
@@ -695,6 +786,11 @@ pmInventories.showImportPage = function(holder, menuInfo, data)
 
 pmInventories.renderImportedInventory = function(imported)
 {
+    if(!imported || !imported.inventory)
+    {
+        return ""
+    }
+    
     var text = spajs.just.render(this.model.name+'_imported_inventory', {inventory:imported.inventory, text:imported.text})
     return text;
 }
@@ -850,7 +946,7 @@ pmInventories.showAddSubGroupsForm = function(item_id, holder)
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
-        $("#polemarch-model-items-select").select2();
+        $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
     }).promise()
@@ -865,7 +961,7 @@ pmInventories.showAddSubHostsForm = function(item_id, holder)
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_inventory', {item_id:item_id}))
-        $("#polemarch-model-items-select").select2();
+        $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
     }).promise()
