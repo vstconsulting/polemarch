@@ -130,10 +130,10 @@ var justReactive = {
               , configurable: true
               , writable: true
               , value: function(){
-                  //console.log("watch method", method, arguments);
-                  Array.prototype[method].apply(this, arguments);
+                  //console.log("watch method", method, arguments, this);
+                  var res = Array.prototype[method].apply(this, arguments);
                   setter.apply(this,["__justReactive_update"]);
-                  return this;
+                  return res;
               }
         });
     },
@@ -152,7 +152,7 @@ var justReactive = {
         'slice',
         'some',
         'sort',
-        'splice',
+        //'splice',
         'unshift',
         'unshift'
     ],
@@ -191,7 +191,8 @@ var justReactive = {
         {
             if(newval.length < obj[prop].length)
             {
-                obj[prop].splice(newval.length, obj[prop].length - newval.length);
+                console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
+                Array.prototype.splice.apply(obj[prop], [newval.length, obj[prop].length - newval.length]); 
             }
 
             for(var i in newval)
@@ -252,7 +253,11 @@ var justReactive = {
         //console.log("setter", newval);
         for(var i in newval.just_ids)
         {
-            if(newval.just_ids[i].type == 'innerTPL')
+            if(newval.just_ids[i].type == "watch")
+            { 
+                newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+            }
+            else if(newval.just_ids[i].type == 'innerTPL')
             {
                 // innerTPL - вставить на страницу обработав как шаблон.
                 var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
@@ -459,10 +464,10 @@ var justReactive = {
 
                     if(val && val.__add_justHtml_test === "__justReactive_test")
                     {
-                        if(val.type == "watch")
+                        /*if(val.type == "watch" && !val.callBack)
                         {
                             return val;
-                        }
+                        }*/
 
                         // Добавление точки отслеживания, значение не меняем.
                         //console.log("setter add", newval);
@@ -499,13 +504,13 @@ var justReactive = {
                             newval.val = val;
                         }
 
-                        if(Array.isArray(val))
+                        /*if(Array.isArray(val))
                         {
                             for(var i in justReactive.methods)
                             {
                                 justReactive.addMethod.apply(this, [setter, opt.prop, justReactive.methods[i]])
                             }
-                        }
+                        }*/
                     }
 
                     // Обновляем значения в DOM не сразу а с задержкой в 10мс
@@ -528,7 +533,35 @@ var justReactive = {
                 });
 
                 if(Array.isArray(newval.val))
-                {
+                { 
+                    Object.defineProperty(this[opt.prop], 'splice', {
+                            enumerable: false
+                          , configurable: true
+                          , writable: true
+                          , value: function(){
+                                //console.log("watch splice method", arguments);
+
+                                var keys = Object.keys(newval.val);
+                                var tmpRes = Array.prototype['splice'].apply(keys, arguments);
+                                var res = []
+                                for(var i in tmpRes)
+                                {
+                                    res[i] = newval.val[tmpRes[i]]
+                                }
+  
+                                var newObj = []
+                                for(var i in keys)
+                                {
+                                    newObj[i] = newval.val[keys[i]]
+                                }
+                                
+                                newval.val = newObj
+                                justReactive.applyFunc(newval.val, newval)
+                                //setter.apply(this, [newObj]);
+                                return res;
+                        }
+                    });
+
                     for(var i in justReactive.methods)
                     {
                         justReactive.addMethod.apply(this, [setter, opt.prop, justReactive.methods[i]])
@@ -626,25 +659,7 @@ var justReactive = {
                 var element = document.querySelector("[data-just-watch-"+id+"=true]")
 
                 if(opt.attrName == 'value')
-                {
-                    /*element.addEventListener('change', function()
-                    {
-                        if(thisObj[opt.prop] != element.value)
-                        {
-                            console.log("change", element.value);
-                            thisObj[opt.prop] = element.value;
-                        }
-                    }, false);
-
-                    element.addEventListener('keyup', function()
-                    {
-                        if(thisObj[opt.prop] != element.value)
-                        {
-                            console.log("keyup", element.value);
-                            thisObj[opt.prop] = element.value;
-                        }
-                    }, false);/**/
-
+                { 
                     element.addEventListener('input', function()
                     {
                         if(thisObj[opt.prop] != element.value)
@@ -652,16 +667,7 @@ var justReactive = {
                             console.log("input", element.value);
                             thisObj[opt.prop] = element.value;
                         }
-                    }, false);
-
-                    /*element.addEventListener('blur', function()
-                    {
-                        if(thisObj[opt.prop] != element.value)
-                        {
-                            console.log("blur", element.value);
-                            thisObj[opt.prop] = element.value;
-                        }
-                    }, false);/**/
+                    }, false); 
                 }
 
                 var observer = new MutationObserver(function(mutations)
@@ -789,18 +795,23 @@ Object.defineProperty(Object.prototype, "bindAttr", {
 
 /**
  * Добавление точки отслеживания
+ * Может быть полезно чтоб при присвоении в этот другого объекта объект происходила замена таким образом чтоб у общих для них свойств были вызваны сеттеры
  * @example this.model.items.justWatch(item_id);
  */
 Object.defineProperty(Object.prototype, "justWatch", {
     enumerable: false
   , configurable: true
   , writable: false
-  , value: function(prop)
+  //, get:
+  //, set:
+  , value: function(prop, callBack, customData)
     {
         return justReactive.setValue.apply(this, [{
                 type:'watch',
                 prop:prop,
-                deep:false
+                deep:false,
+                callBack:callBack,
+                customData:customData
             }])
     }
 });

@@ -124,17 +124,17 @@ pmItems.validateHostName = function(name)
         domenTest : /^((\.{0,1}[a-z0-9][a-z0-9-]{0,62}[a-z0-9]\.{0,1})*)$/
     }
 
-    if(regexp.ipTest.test(name))
+    if(regexp.ipTest.test(name.toLowerCase()))
     {
         return true;
     }
 
-    if(regexp.ip6Test.test(name))
+    if(regexp.ip6Test.test(name.toLowerCase()))
     {
         return true;
     }
 
-    if(regexp.domenTest.test(name))
+    if(regexp.domenTest.test(name.toLowerCase()))
     {
         return true;
     }
