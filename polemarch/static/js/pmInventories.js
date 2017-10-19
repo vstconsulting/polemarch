@@ -1180,3 +1180,19 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
     });
     return def.promise();
 }
+
+pmInventories.validateGroupName = function(name)
+{
+    if(!name)
+    {
+        return false;
+    }
+ 
+    if(/^[a-zA-Z0-9\-\._]*$/.test(name.toLowerCase()))
+    {
+        return true;
+    } 
+    
+    return false;
+}
+
