@@ -118,9 +118,14 @@ var justReactive = {
      */
     justStrip:function(html)
     {
-       var tmp = document.createElement("DIV");
-       tmp.innerHTML = html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-       return tmp.textContent || tmp.innerText || "";
+        if(typeof html != "string")
+        {
+            return "";
+        }
+            
+        var tmp = document.createElement("DIV");
+        tmp.innerHTML = html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return tmp.textContent || tmp.innerText || "";
     },
 
     addMethod:function(setter, prop, method)

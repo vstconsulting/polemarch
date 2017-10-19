@@ -1280,232 +1280,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
         })
     });
 
-    var etalon = {
-        "hosts": [
-          {
-            "name": "1.2.3.[1:255]",
-            "type": "RANGE",
-            "vars": {
-
-            }
-          },
-          {
-            "name": "124.3.4.[44:55]",
-            "type": "RANGE",
-            "vars": {
-
-            }
-          },
-          {
-            "name": "124.3.5.[1:250]",
-            "type": "RANGE",
-            "vars": {
-              "ansible_host": "10.20.0.2",
-              "ansible_user": "root",
-              "ansible_ssh_pass": "eadgbe",
-              "ansible_ssh_private_key_file": "/root/f.txt" 
-            }
-          },
-          {
-            "name": "124.3.5.[1:251]",
-            "type": "RANGE",
-            "vars": {
-              "ansible_host": "10.20.0.2",
-              "ansible_user": "root",
-              "ansible_ssh_pass": "eadgbe"
-            }
-          },
-          {
-            "name": "124.3.5.[1:252]",
-            "type": "RANGE",
-            "vars": {
-              "ansible_host": "10.20.0.12",
-              "ansible_user": "r\"o\\'ot",
-              "ansible_ssh_pass": "eadgbe"
-            }
-          }
-        ],
-        "groups": {
-          "git": {
-            "vars": {
-
-            },
-            "groups": [
-              "ci",
-              "git-servers"
-            ],
-            "hosts": [
-
-            ],
-            "children": true
-          },
-          "cloud": {
-            "vars": {
-
-            },
-            "groups": [
-              "git",
-              "services",
-              "test"
-            ],
-            "hosts": [
-
-            ],
-            "children": true
-          },
-          "test": {
-            "vars": {
-              "ansible_ssh_private_key_file": "/root/f.txt"
-            },
-            "groups": [
-
-            ],
-            "hosts": [
-              {
-                "name": "test.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_user": "centos"
-                }
-              },
-              {
-                "name": "test2.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "172.16.1.26"
-                }
-              }
-            ]
-          },
-          "ci": {
-            "vars": {
-
-            },
-            "groups": [
-
-            ],
-            "hosts": [
-              {
-                "name": "git-ci-1",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "172.16.1.13",
-                  "ansible_ssh_private_key_file": "/root/f.txt"
-                }
-              },
-              {
-                "name": "git-ci-2",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "172.16.1.14"
-                }
-              }
-            ]
-          },
-          "git-servers": {
-            "vars": {
-
-            },
-            "groups": [
-
-            ],
-            "hosts": [
-              {
-                "name": "git.vst.lan",
-                "type": "HOST",
-                "vars": {
-
-                }
-              }
-            ]
-          },
-          "services": {
-            "vars": {
-
-            },
-            "groups": [
-
-            ],
-            "hosts": [
-              {
-                "name": "chat.vstconsulting.net",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "172.16.1.16"
-                }
-              },
-              {
-                "name": "pipc.vst.lan",
-                "type": "HOST",
-                "vars": {
-
-                }
-              },
-              {
-                "name": "redmine.vst.lan",
-                "type": "HOST",
-                "vars": {
-
-                }
-              }
-            ]
-          },
-          "openstack": {
-            "vars": {
-
-            },
-            "groups": [
-
-            ],
-            "hosts": [
-              {
-                "name": "fuel.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "10.20.0.2",
-                  "ansible_user": "root",
-                  "ansible_ssh_pass": "eadgbe"
-                }
-              },
-              {
-                "name": "os-compute-1.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "10.20.0.9"
-                }
-              },
-              {
-                "name": "os-compute-2.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "10.20.0.13",
-                  "ansible_ssh_private_key_file": "/root/f.txt"
-                }
-              },
-              {
-                "name": "os-controller-1.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "10.20.0.6"
-                }
-              },
-              {
-                "name": "os-controller-2.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "10.20.0.8"
-                }
-              }
-            ]
-          }
-        },
-        "vars": {
-          "ansible_user": "grey",
-          "ansible_ssh_private_key_file": "/root/f.txt",
-          "ansible_ssh_extra_args": "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-        },
-        name : "inventory",
-    }
+    var etalon = {"hosts":[{"name":"1.2.3.[1:255]","type":"RANGE","vars":{}},{"name":"124.3.4.[44:55]","type":"RANGE","vars":{}},{"name":"124.3.5.[1:250]","type":"RANGE","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"124.3.5.[1:251]","type":"RANGE","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"124.3.5.[1:252]","type":"RANGE","vars":{"ansible_host":"10.20.0.12","ansible_user":"r\"o\\'ot","ansible_ssh_pass":"eadgbe"}}],"groups":{"git":{"vars":{},"groups":["ci","git-servers"],"hosts":[],"children":true,"dataLevel":{"level":2,"parents":["all","cloud","git"]}},"ci":{"vars":{},"groups":[],"hosts":[{"name":"git-ci-1","type":"HOST","vars":{"ansible_host":"172.16.1.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"git-ci-2","type":"HOST","vars":{"ansible_host":"172.16.1.14"}}],"dataLevel":{"level":3,"parents":["all","cloud","git","ci"]}},"git-servers":{"vars":{},"groups":[],"hosts":[{"name":"git.vst.lan","type":"HOST","vars":{}}],"dataLevel":{"level":3,"parents":["all","cloud","git","git-servers"]}},"cloud":{"vars":{},"groups":["git","services","test"],"hosts":[],"children":true,"dataLevel":{"level":1,"parents":["all","cloud"]}},"services":{"vars":{},"groups":[],"hosts":[{"name":"chat.vstconsulting.net","type":"HOST","vars":{"ansible_host":"172.16.1.16"}},{"name":"pipc.vst.lan","type":"HOST","vars":{}},{"name":"redmine.vst.lan","type":"HOST","vars":{}}],"dataLevel":{"level":2,"parents":["all","cloud","services"]}},"test":{"vars":{"ansible_ssh_private_key_file":"/root/f.txt"},"groups":[],"hosts":[{"name":"test.vst.lan","type":"HOST","vars":{"ansible_user":"centos"}},{"name":"test2.vst.lan","type":"HOST","vars":{"ansible_host":"172.16.1.26"}}],"dataLevel":{"level":2,"parents":["all","cloud","test"]}},"openstack":{"vars":{},"groups":[],"hosts":[{"name":"fuel.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"os-compute-1.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.9"}},{"name":"os-compute-2.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"os-controller-1.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.6"}},{"name":"os-controller-2.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.8"}}],"dataLevel":{"level":1,"parents":["all","openstack"]}}},"vars":{"ansible_user":"grey","ansible_ssh_private_key_file":"/root/f.txt","ansible_ssh_extra_args":"-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"},"name":"inventory"}
     var inventory = undefined;
 
     syncQUnit.addTest('Парсинг inventory', function ( assert )
@@ -1518,7 +1293,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             inventory:inventory,
             text:pmInventoriesText
         }
-
+ 
         var res = deepEqual(etalon, inventory)   
         assert.ok(res, 'Сравнение инвентория распарсенного и оригинального');
         render(done)
@@ -1614,47 +1389,38 @@ G9zCmFuc2libGVfc3NoX3ByaXZhdGVfa2V5X2ZpbGU9L2hvbWUvY2VwcmV1L2RlZmF1bHQucGVtCmFu\
 c2libGVfYmVjb21lPXRydWU="
         inventoryText = Base64.decode(inventoryText)
         
-        var inventory = pmInventories.parseFromText(inventoryText)
+        inventory = pmInventories.parseFromText(inventoryText)
         var etalon = {
-            "hosts": [],
-            "groups": {
-              "servers": {
-                "vars": {
-                  "ansible_user": "centos",
-                  "ansible_ssh_private_key_file": "/home/cepreu/default.pem",
-                  "ansible_become": "true"
+            "hosts":[],
+            "groups":{
+                "servers":{
+                    "vars":{"ansible_user":"centos","ansible_ssh_private_key_file":"/home/cepreu/default.pem","ansible_become":"true"},
+                    "groups":["usual","unusual"],
+                    "hosts":[],
+                    "children":true,
+                    "dataLevel":{"level":1,"parents":["all","servers"]}
                 },
-                "groups": [
-                  "usual",
-                  "unusual"
-                ],
-                "hosts": [],
-                "children": true
-              },
-              "usual": {
-                "vars": {},
-                "groups": [],
-                "hosts": [
-                  {
-                    "name": "172.16.1.[30:31]",
-                    "type": "RANGE",
-                    "vars": {
-
-                    }
-                  }
-                ]
-              },
-              "unusual": {
-                "vars": {},
-                "groups": [],
-                "hosts": []
-              }
+                "usual":{
+                    "vars":{},
+                    "groups":[],
+                    "hosts":[
+                        {"name":"172.16.1.[30:31]","type":"RANGE","vars":{}}
+                    ],
+                    "dataLevel":{"level":2,"parents":["all","servers","usual"]}
+                },
+                "unusual":{
+                    "vars":{},
+                    "groups":[],
+                    "hosts":[],
+                    "dataLevel":{"level":2,"parents":["all","servers","unusual"]}
+                }
             },
-            "vars": {},
-            name:"inventory"
-          }
+            "vars":{},
+            "name":"inventory"
+        }
+        
         inventory.name = "inventory"
-      
+       
         var res = deepEqual(etalon, inventory)
         assert.ok(res, 'Сравнение инвентория 2 распарсенного и оригинального');
         render(done)
