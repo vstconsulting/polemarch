@@ -235,6 +235,11 @@ function saveReport()
 }
 
 /**
+ * В этом массиве должны быть qunit тесты для приложения
+ */ 
+window.qunitTestsArray = []
+ 
+/**
  * Вставляет Qunit и запускает выполнение тестов.
  */
 function injectQunit()
@@ -282,7 +287,10 @@ function injectQunit()
             }
         })
 
-        qunitAddTests()
+        for(var i in window.qunitTestsArray)
+        {
+            window.qunitTestsArray[i].call()
+        }
         syncQUnit.nextTest()
 
     }, 500)
@@ -321,9 +329,9 @@ syncQUnit.nextTest = function(name, test)
 ///////////////////////////////////////////////
 
 /**
- * В этой функции должны быть qunit тесты для приложения
+ * qunitAddTests_trim
  */
-function qunitAddTests()
+window.qunitTestsArray.push(function()
 {
     syncQUnit.addTest('trim', function ( assert ) {
         var done = assert.async();
@@ -338,21 +346,13 @@ function qunitAddTests()
         assert.equal(trim('    x   y  '), 'x   y', 'Табы и пробелы внутри строки не трогаем');
 
         render(done);
-    });
-
-    qunitAddTests_users()
-    qunitAddTests_hosts()
-    qunitAddTests_groups()
-    qunitAddTests_inventories()
-    qunitAddTests_projects()
-    qunitAddTests_templates_task()
-    qunitAddTests_templates_modules()
-}
+    }); 
+})
 
 /**
  * Тестирование users
  */
-function qunitAddTests_users()
+window.qunitTestsArray.push(function()
 {
     syncQUnit.addTest('Открытие списка пользователей', function ( assert )
     {
@@ -584,13 +584,13 @@ function qunitAddTests_users()
             render(done)
         })
     });
-}
+})
 
 
 /**
  * Тестирование hosts
  */
-function qunitAddTests_hosts()
+window.qunitTestsArray.push(function()
 {
     syncQUnit.addTest('Открытие списка хостов', function ( assert )
     {
@@ -744,13 +744,13 @@ function qunitAddTests_hosts()
             render(done)
         })
     });
-}
+})
 
 
 /**
  * Тестирование groups
  */
-function qunitAddTests_groups()
+window.qunitTestsArray.push(function()
 {
     syncQUnit.addTest('Проверка функции validateHostName', function ( assert ) {
         var done = assert.async();
@@ -1004,13 +1004,13 @@ function qunitAddTests_groups()
             render(done)
         })
     });
-}
+})
 
 
 /**
  * Тестирование inventories
  */
-function qunitAddTests_inventories()
+window.qunitTestsArray.push(function()
 {
     syncQUnit.addTest('Список инвенториев', function ( assert )
     {
@@ -1425,12 +1425,12 @@ c2libGVfYmVjb21lPXRydWU="
         assert.ok(res, 'Сравнение инвентория 2 распарсенного и оригинального');
         render(done)
     }); 
-}
+})
 
 /**
  * Тестирование projects
  */
-function qunitAddTests_projects()
+window.qunitTestsArray.push(function()
 {
     syncQUnit.addTest('Список проектов', function ( assert )
     {
@@ -2101,10 +2101,13 @@ function qunitAddTests_projects()
             render(done)
         })
     });
-}
+})
 
-function qunitAddTests_templates_task(){
-
+/**
+ * Тестирование шаблонов
+ */
+window.qunitTestsArray.push(function()
+{
     syncQUnit.addTest('Список шаблонов', function ( assert )
     {
         var done = assert.async();
@@ -2282,10 +2285,13 @@ function qunitAddTests_templates_task(){
             render(done)
         })
     });
-}
+})
 
-function qunitAddTests_templates_modules(){
-
+/**
+ * Тестирование шаблонов модулей
+ */
+window.qunitTestsArray.push(function()
+{
     syncQUnit.addTest('Список шаблонов', function ( assert )
     {
         var done = assert.async();
@@ -2466,10 +2472,12 @@ function qunitAddTests_templates_modules(){
             render(done)
         })
     });
-}
-
-
-function qunitAddTests_history()
+})
+ 
+/**
+ * Тестирование history
+ */
+window.qunitTestsArray.push(function()
 {
     syncQUnit.addTest('Страница history', function ( assert )
     {
@@ -2486,8 +2494,9 @@ function qunitAddTests_history()
         })
     });
 
-    syncQUnit.addTest('Страница history', function ( assert )
+    syncQUnit.addTest('Страница history 2', function ( assert )
     {
+        debugger;
         var done = assert.async();
 
         if(!pmHistory.model.itemslist.results.length)
@@ -2496,7 +2505,7 @@ function qunitAddTests_history()
             render(done)
         }
 
-        $.when(spajs.open({ menuId:"history/"+pmHistory.model.itemslist.results[0].id+"/"})).done(function()
+        $.when(spajs.open({ menuId:"history/"+pmHistory.model.itemslist.results[0].id})).done(function()
         {
             assert.ok(true, 'Успешно открыта страница history');
             render(done)
@@ -2507,6 +2516,5 @@ function qunitAddTests_history()
         })
     });
 
-}
+})
 
-injectQunit()
