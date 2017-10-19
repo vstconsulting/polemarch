@@ -3,6 +3,7 @@ import sys
 
 try:
     from sphinx.setup_command import BuildDoc
+    import sphinx
     has_sphinx = True
 except ImportError:
     has_sphinx = False
@@ -123,6 +124,10 @@ cmdclass = {
 
 if has_sphinx:
     cmdclass['build_sphinx'] = BuildDoc
+    if [i for i in ['compile', 'install', 'sdist'] if i in sys.argv]:
+        sphinx.build_main(['setup.py', '-b', 'html',
+                           './doc/',
+                           './polemarch/doc/html/'])
 
 setup(
     name=name,
