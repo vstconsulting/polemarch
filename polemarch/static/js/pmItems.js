@@ -716,14 +716,3 @@ pmItems.exportSelecedToFile = function(){
 
     return this.exportToFile(item_ids)
 }
-
-
-/**
- * Тестовый тест, чтоб было видно что тесты вообще хоть как то работают.
- */
-function trim(s)
-{
-    if(s) return s.replace(/^ */g, "").replace(/ *$/g, "")
-    return '';
-}
-

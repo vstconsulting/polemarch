@@ -12,3 +12,74 @@ function loadQUnitTests()
         } 
     }, 1000)
 }
+
+
+function addslashes(string) {
+    return string.replace(/\\/g, '\\\\').
+        replace(/\u0008/g, '\\b').
+        replace(/\t/g, '\\t').
+        replace(/\n/g, '\\n').
+        replace(/\f/g, '\\f').
+        //replace(/\r/g, '\\r').
+        //replace(/\a/g, '\\a').
+        replace(/\v/g, '\\v').
+        //replace(/\e/g, '\\e').
+        replace(/'/g, '\\\'').
+        replace(/"/g, '\\"');
+}
+
+function stripslashes (str) {
+  //       discuss at: http://locutus.io/php/stripslashes/
+  //      original by: Kevin van Zonneveld (http://kvz.io)
+  //      improved by: Ates Goral (http://magnetiq.com)
+  //      improved by: marrtins
+  //      improved by: rezna
+  //         fixed by: Mick@el
+  //      bugfixed by: Onno Marsman (https://twitter.com/onnomarsman)
+  //      bugfixed by: Brett Zamir (http://brett-zamir.me)
+  //         input by: Rick Waldron
+  //         input by: Brant Messenger (http://www.brantmessenger.com/)
+  // reimplemented by: Brett Zamir (http://brett-zamir.me)
+  //        example 1: stripslashes('Kevin\'s code')
+  //        returns 1: "Kevin's code"
+  //        example 2: stripslashes('Kevin\\\'s code')
+  //        returns 2: "Kevin\'s code"
+  return (str + '')
+    .replace(/\\(.?)/g, function (s, n1) {
+      switch (n1) {
+        case '\\':
+          return '\\'
+        case '0':
+          return '\u0000'
+        case 't':
+          return "\t"
+        case 'n':
+          return "\n"
+        case 'f':
+          return "\f"
+        //case 'e':
+        //  return "\e"
+        case 'v':
+          return "\v"
+        //case 'a':
+        //  return "\a"
+        case 'b':
+          return "\b"
+        //case 'r':
+        //  return "\r"
+        case '':
+          return ''
+        default:
+          return n1
+      }
+    })
+}
+/**
+ * Тестовый тест, чтоб было видно что тесты вообще хоть как то работают.
+ */
+function trim(s)
+{
+    if(s) return s.replace(/^ */g, "").replace(/ *$/g, "")
+    return '';
+}
+
