@@ -347,6 +347,24 @@ window.qunitTestsArray.push(function()
 
         render(done);
     }); 
+    
+    syncQUnit.addTest('trim', function ( assert ) {
+        var done = assert.async();
+        
+        var stringArr = [
+            "abc",
+            "A \" A",
+            "A ' \\ \\\\ \t \\ \ g \" ' \' ",
+            '"',
+            'a"b\' g \" \t \ \\ \\\ c', 
+            ' \' \\ " \t \r  \b \e \c \d \n' ,
+        ];
+        for(var i in stringArr)
+        {
+            assert.equal(stripslashes(addslashes(stringArr[i])), stringArr[i], "i:"+stringArr[i]); 
+        }
+        render(done);
+    }); 
 })
 
 /**
@@ -1214,7 +1232,7 @@ N0PTEwLjIwLjAuOAo="
 124.3.4.[44:55]
 124.3.5.[1:250] ansible_host=10.20.0.2 ansible_user=root ansible_ssh_pass=eadgbe ansible_ssh_private_key_file=/root/f.txt
 124.3.5.[1:251] ansible_host="10.20.0.2" ansible_user='root' ansible_ssh_pass=eadgbe
-124.3.5.[1:252] ansible_host="10.20.0.12" ansible_user='r"o\'ot' ansible_ssh_pass=eadgbe
+124.3.5.[1:252] ansible_host="10.20.0.12" ansible_user="r\"o\'ot" ansible_ssh_pass=eadgbe
 
 # Global vars
 [all:vars]
@@ -1280,7 +1298,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
         })
     });
 
-    var etalon = {"hosts":[{"name":"1.2.3.[1:255]","type":"RANGE","vars":{}},{"name":"124.3.4.[44:55]","type":"RANGE","vars":{}},{"name":"124.3.5.[1:250]","type":"RANGE","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"124.3.5.[1:251]","type":"RANGE","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"124.3.5.[1:252]","type":"RANGE","vars":{"ansible_host":"10.20.0.12","ansible_user":"r\"o\\'ot","ansible_ssh_pass":"eadgbe"}}],"groups":{"git":{"vars":{},"groups":["ci","git-servers"],"hosts":[],"children":true,"dataLevel":{"level":2,"parents":["all","cloud","git"]}},"ci":{"vars":{},"groups":[],"hosts":[{"name":"git-ci-1","type":"HOST","vars":{"ansible_host":"172.16.1.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"git-ci-2","type":"HOST","vars":{"ansible_host":"172.16.1.14"}}],"dataLevel":{"level":3,"parents":["all","cloud","git","ci"]}},"git-servers":{"vars":{},"groups":[],"hosts":[{"name":"git.vst.lan","type":"HOST","vars":{}}],"dataLevel":{"level":3,"parents":["all","cloud","git","git-servers"]}},"cloud":{"vars":{},"groups":["git","services","test"],"hosts":[],"children":true,"dataLevel":{"level":1,"parents":["all","cloud"]}},"services":{"vars":{},"groups":[],"hosts":[{"name":"chat.vstconsulting.net","type":"HOST","vars":{"ansible_host":"172.16.1.16"}},{"name":"pipc.vst.lan","type":"HOST","vars":{}},{"name":"redmine.vst.lan","type":"HOST","vars":{}}],"dataLevel":{"level":2,"parents":["all","cloud","services"]}},"test":{"vars":{"ansible_ssh_private_key_file":"/root/f.txt"},"groups":[],"hosts":[{"name":"test.vst.lan","type":"HOST","vars":{"ansible_user":"centos"}},{"name":"test2.vst.lan","type":"HOST","vars":{"ansible_host":"172.16.1.26"}}],"dataLevel":{"level":2,"parents":["all","cloud","test"]}},"openstack":{"vars":{},"groups":[],"hosts":[{"name":"fuel.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"os-compute-1.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.9"}},{"name":"os-compute-2.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"os-controller-1.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.6"}},{"name":"os-controller-2.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.8"}}],"dataLevel":{"level":1,"parents":["all","openstack"]}}},"vars":{"ansible_user":"grey","ansible_ssh_private_key_file":"/root/f.txt","ansible_ssh_extra_args":"-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"},"name":"inventory"}
+    var etalon = {"hosts":[{"name":"1.2.3.[1:255]","type":"RANGE","vars":{}},{"name":"124.3.4.[44:55]","type":"RANGE","vars":{}},{"name":"124.3.5.[1:250]","type":"RANGE","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"124.3.5.[1:251]","type":"RANGE","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"124.3.5.[1:252]","type":"RANGE","vars":{"ansible_host":"10.20.0.12","ansible_user":"r\"o\'ot","ansible_ssh_pass":"eadgbe"}}],"groups":{"git":{"vars":{},"groups":["ci","git-servers"],"hosts":[],"children":true,"dataLevel":{"level":2,"parents":["all","cloud","git"]}},"ci":{"vars":{},"groups":[],"hosts":[{"name":"git-ci-1","type":"HOST","vars":{"ansible_host":"172.16.1.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"git-ci-2","type":"HOST","vars":{"ansible_host":"172.16.1.14"}}],"dataLevel":{"level":3,"parents":["all","cloud","git","ci"]}},"git-servers":{"vars":{},"groups":[],"hosts":[{"name":"git.vst.lan","type":"HOST","vars":{}}],"dataLevel":{"level":3,"parents":["all","cloud","git","git-servers"]}},"cloud":{"vars":{},"groups":["git","services","test"],"hosts":[],"children":true,"dataLevel":{"level":1,"parents":["all","cloud"]}},"services":{"vars":{},"groups":[],"hosts":[{"name":"chat.vstconsulting.net","type":"HOST","vars":{"ansible_host":"172.16.1.16"}},{"name":"pipc.vst.lan","type":"HOST","vars":{}},{"name":"redmine.vst.lan","type":"HOST","vars":{}}],"dataLevel":{"level":2,"parents":["all","cloud","services"]}},"test":{"vars":{"ansible_ssh_private_key_file":"/root/f.txt"},"groups":[],"hosts":[{"name":"test.vst.lan","type":"HOST","vars":{"ansible_user":"centos"}},{"name":"test2.vst.lan","type":"HOST","vars":{"ansible_host":"172.16.1.26"}}],"dataLevel":{"level":2,"parents":["all","cloud","test"]}},"openstack":{"vars":{},"groups":[],"hosts":[{"name":"fuel.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"os-compute-1.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.9"}},{"name":"os-compute-2.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"os-controller-1.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.6"}},{"name":"os-controller-2.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.8"}}],"dataLevel":{"level":1,"parents":["all","openstack"]}}},"vars":{"ansible_user":"grey","ansible_ssh_private_key_file":"/root/f.txt","ansible_ssh_extra_args":"-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"},"name":"inventory"}
     var inventory = undefined;
 
     syncQUnit.addTest('Парсинг inventory', function ( assert )
@@ -1293,7 +1311,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             inventory:inventory,
             text:pmInventoriesText
         }
- 
+  
         var res = deepEqual(etalon, inventory)   
         assert.ok(res, 'Сравнение инвентория распарсенного и оригинального');
         render(done)
@@ -1326,24 +1344,20 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
 
     syncQUnit.addTest('Импорт валидного inventory', function ( assert )
     {  
-        jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', 'inventory') 
+        delete inventory.vars.ansible_ssh_private_key_file
         for(var i in inventory.hosts)
-        {
-            var val = inventory.hosts[i]
-            jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', 'host'+val.name) 
+        { 
+            delete inventory.hosts[i].vars.ansible_ssh_private_key_file 
         }
         for(var i in inventory.groups)
         {
-            var val = inventory.groups[i]
-            jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', "group"+i) 
-            
-            for(var j in val.hosts)
+            delete inventory.groups[i].vars.ansible_ssh_private_key_file   
+            for(var j in inventory.groups[i].hosts)
             {
-                var hval = val.hosts[j]
-                jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', "host"+hval.name) 
+                delete inventory.groups[i].hosts[j].vars.ansible_ssh_private_key_file   
             }
         }
-          
+         
         var done = assert.async();
         $("#inventory_name").val("inventory")
         $.when(pmInventories.importInventory(inventory)).done(function()
@@ -2495,8 +2509,7 @@ window.qunitTestsArray.push(function()
     });
 
     syncQUnit.addTest('Страница history 2', function ( assert )
-    {
-        debugger;
+    { 
         var done = assert.async();
 
         if(!pmHistory.model.itemslist.results.length)

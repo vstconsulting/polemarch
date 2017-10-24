@@ -12,7 +12,7 @@ pmInventories.model.className = "pmInventories"
 pmInventories.parseMonoVarsLine = function(index, line)
 {
     var vars = {}
-    var param = /^([^=]+)=(.*)$/.exec(line)
+    var param = /^([^=]+)="(.*)"$/.exec(line)
 
     if(param)
     {
@@ -20,17 +20,25 @@ pmInventories.parseMonoVarsLine = function(index, line)
     }
     else
     {
-        throw "Error in line "+index+" invalid varibles string ("+line+")"
+        param = /^([^=]+)=(.*)$/.exec(line)
+        if(param)
+        {
+            vars[param[1]] = param[2]
+        }
+        else
+        {
+            throw "Error in line "+index+" invalid varibles string ("+line+")"
+        }
     }
     return vars;
 }
-
+ 
 /**
  * Параметры хоста
  * Строка где может быть несколько параметров ключ=значение через пробел
  */
 pmInventories.parseVarsLine = function(index, line)
-{
+{ 
     var vars = {}
     do{
         if(line.length == 0)
@@ -38,37 +46,37 @@ pmInventories.parseVarsLine = function(index, line)
             break;
         }
 
-        var params = /^([^=]+)=["'](.*?)["'] [^=]+=/.exec(line)
+        var params = /^([^=]+)=["'](.*?)["'] +[^=]+=/.exec(line)
         if(params)
         {
-            params[1] = trim(params[1])
-            vars[params[1]] = params[2]
+            params[1] = trim(params[1]) 
+            vars[params[1]] = stripslashes(params[2])
             line = trim(line.slice(params[1].length + params[2].length + 3))
             continue;
         }
 
-        params = /^([^=]+)=["'](.*?)["']$/.exec(line)
+        params = /^([^=]+)=([^ ]*) +[^=]+=/.exec(line)
         if(params)
         {
-            params[1] = trim(params[1])
-            vars[params[1]] = params[2]
-            break;
-        }
-
-        params = /^([^=]+)=(.*?) [^=]+=/.exec(line)
-        if(params)
-        {
-            params[1] = trim(params[1])
-            vars[params[1]] = params[2]
+            params[1] = trim(params[1]) 
+            vars[params[1]] = stripslashes(params[2])
             line = trim(line.slice(params[1].length + params[2].length + 1))
             continue;
         }
 
-        params = /^([^=]+)=(.*?)$/.exec(line)
+        params = /^([^=]+)=["'](.*?)["'] *$/.exec(line)
         if(params)
         {
-            params[1] = trim(params[1])
-            vars[params[1]] = params[2]
+            params[1] = trim(params[1]) 
+            vars[params[1]] = stripslashes(params[2])
+            break;
+        }
+
+        params = /^([^=]+)=([^ ]*) *$/.exec(line)
+        if(params)
+        {
+            params[1] = trim(params[1]) 
+            vars[params[1]] = stripslashes(params[2])
             line = trim(line.slice(params[1].length + params[2].length + 1))
             continue;
         }
@@ -223,7 +231,7 @@ pmInventories.parseFromText = function(text)
 
     for(var i in lines)
     {
-        var line = lines[i]
+        var line = lines[i].replace(/^ */g, "") 
         
         if(/^\s*[#;]\s+inventory name: (.*)/ig.test(line))
         {
@@ -408,28 +416,41 @@ pmInventories.importInventoriesAndOpen = function(inventory)
     }).promise()
 }
 
+pmInventories.showGroupVarsModal = function(opt)
+{
+    return jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "group"+opt.name)
+}
+
+pmInventories.showHostVarsModal = function(opt)
+{ 
+    return jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+opt.name)
+}
+
+pmInventories.showInventoryVarsModal = function(opt)
+{ 
+    return jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "inventory")
+}
+
 pmInventories.importInventory = function(inventory)
 { 
-    var def2 = new $.Deferred(); 
-    var vars = jsonEditor.jsonEditorGetValues('inventory') 
-    if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+    var def2 = new $.Deferred();  
+    if(inventory.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(inventory.vars.ansible_ssh_private_key_file))
     {
         // <!--Вставка файла -->
-        $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-        jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "inventory")
+        $.notify("Error in field ansible_ssh_private_key_file invalid value", "error"); 
+        pmInventories.showInventoryVarsModal();
         def2.reject()
         return def2.promise();
     }
 
     for(var i in inventory.hosts)
     {
-        var val = inventory.hosts[i]
-        var vars = jsonEditor.jsonEditorGetValues('host'+val.name)
-        if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+        var val = inventory.hosts[i] 
+        if(val.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(val.vars.ansible_ssh_private_key_file))
         {
             // <!--Вставка файла -->
             $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-            jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+val.name)
+            pmInventories.showHostVarsModal({group:'all', name:val.name});
             def2.reject()
             return def2.promise();
         }
@@ -437,26 +458,24 @@ pmInventories.importInventory = function(inventory)
 
     for(var i in inventory.groups)
     {
-        var val = inventory.groups[i]
-        var vars = jsonEditor.jsonEditorGetValues('group'+i)
-        if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+        var val = inventory.groups[i] 
+        if(val.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(val.vars.ansible_ssh_private_key_file))
         {
             // <!--Вставка файла -->
             $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-            jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "group"+i)
+            pmInventories.showGroupVarsModal({name:i}); 
             def2.reject()
             return def2.promise();
         }
 
         for(var j in val.hosts)
         {
-            var hval = val.hosts[j]
-            var vars = jsonEditor.jsonEditorGetValues('host'+hval.name)
-            if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+            var hval = val.hosts[j] 
+            if(hval.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(hval.vars.ansible_ssh_private_key_file))
             {
                 // <!--Вставка файла -->
-                $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-                jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+hval.name)
+                $.notify("Error in field ansible_ssh_private_key_file invalid value", "error"); 
+                pmInventories.showHostVarsModal({group:i, name:hval.name});
                 def2.reject()
                 return def2.promise();
             }
@@ -479,7 +498,7 @@ pmInventories.importInventory = function(inventory)
 
     var inventoryObject = {
         name:inventory.name,
-        vars:jsonEditor.jsonEditorGetValues('inventory')
+        vars:inventory.vars
     }
     
     var deleteBulk = []
@@ -502,7 +521,7 @@ pmInventories.importInventory = function(inventory)
                 data:{
                     name:i,
                     children:val.children,
-                    vars:jsonEditor.jsonEditorGetValues('group'+i)
+                    vars:val.vars
                 }
             })
 
@@ -515,7 +534,7 @@ pmInventories.importInventory = function(inventory)
                     data:{
                         name:hval.name,
                         type:hval.type,
-                        vars:jsonEditor.jsonEditorGetValues('host'+hval.name)
+                        vars:hval.vars
                     }
                 })
             }
@@ -532,7 +551,7 @@ pmInventories.importInventory = function(inventory)
                 data:{
                     name:val.name,
                     type:val.type,
-                    vars:jsonEditor.jsonEditorGetValues('host'+val.name)
+                    vars:val.vars
                 }
             })
         }
