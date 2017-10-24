@@ -20,8 +20,8 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Groups 
-                        <%= pmGroups.searchFiled({query:query}) %>  
+                        <div style="float:left;">Groups</div>
+                        <%= pmGroups.searchFiled({query:query}) %>
                         <% if(pmGroups.getTotalPages(pmGroups.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
                                 <%= pmGroups.paginationHtml(pmGroups.model.itemslist) %>
@@ -108,20 +108,20 @@
                                 <li>
                                     <a href="#"
                                         onclick="pmGroups.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
-                                </li> 
+                                </li>
                                 <li>
                                     <a href="#" onclick="pmGroups.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
                             </ul>
                         </div>
-                        
+
                         <% if(!query){ %>
                             <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Select
                                     <span class="caret"></span>
                                 </button>
-                                <ul class="dropdown-menu">  
+                                <ul class="dropdown-menu">
                                     <li>
                                         <a href="#" onclick="spajs.showLoader(pmGroups.toggleSelectEachItem(true)); return false;" >Select all</a>
                                     </li>
@@ -218,7 +218,7 @@
                             <~ pmGroups.model.items[item_id].groups >
                                 <% for(var i in pmGroups.model.items[item_id].groups){ %>
                                     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                        <label class="control-label" >Group</label> 
+                                        <label class="control-label" >Group</label>
                                         <a href="<%- polemarch.opt.host %>/?group/<%- pmGroups.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
                                             <%- pmGroups.model.items[item_id].groups[i].name %>
                                         </a>
@@ -229,7 +229,7 @@
                             <~ pmGroups.model.items[item_id].hosts >
                                 <% for(var i in pmGroups.model.items[item_id].hosts){ %>
                                     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                        <label class="control-label" >Host</label> 
+                                        <label class="control-label" >Host</label>
                                         <a href="<%- polemarch.opt.host %>/?host/<%- pmGroups.model.items[item_id].hosts[i].id %>" onclick="return spajs.openURL(this.href);" >
                                             <%- pmGroups.model.items[item_id].hosts[i].name %>
                                         </a>
@@ -395,32 +395,31 @@
 <script type="text/x-just" data-just="groups_autocomplete_filed">
     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-sm-4">
         <label class="control-label" >Group</label>
-        
-        <% if(!selectedInventory){ %>  
+
+        <% if(!selectedInventory){ %>
             <div class="input-group">
                 <input type="text"
-                        placeholder="Enter name" 
-                        id="groups_autocomplete_filed<%- prefix %>" 
+                        placeholder="Enter name"
+                        id="groups_autocomplete_filed<%- prefix %>"
                         value="<%- value %>"
                         class="form-control disabled"
-                        aria-describedby="input-addon<%- prefix %>" 
-                        disabled >  
+                        aria-describedby="input-addon<%- prefix %>"
+                        disabled >
                 <span class="input-group-addon" id="input-addon<%- prefix %>"  style="cursor: pointer;" >
                     <span class='glyphicon glyphicon-remove' ></span>
-                </span> 
+                </span>
             </div>
-        <% }else{ %> 
+        <% }else{ %>
             <div class="input-group">
-                <input type="text" placeholder="Enter name" id="groups_autocomplete_filed<%- prefix %>" value="<%- value %>"  class="form-control" aria-describedby="input-addon<%- prefix %>" >  
+                <input type="text" placeholder="Enter name" id="groups_autocomplete_filed<%- prefix %>" value="<%- value %>"  class="form-control" aria-describedby="input-addon<%- prefix %>" >
                 <span class="input-group-addon" id="input-addon<%- prefix %>" onclick="$('#groups_autocomplete_filed<%- prefix %>').val('');" style="cursor: pointer;" >
                     <span class='glyphicon glyphicon-remove' ></span>
                 </span>
             </div>
-        <% } %> 
+        <% } %>
         <div class="help-block">
             Limit to one or more hosts and groups
             <a class="glyphicon glyphicon-question-sign" href="https://ansible-tips-and-tricks.readthedocs.io/en/latest/ansible/commands/#limit-to-one-or-more-hosts" target="_blank"></a>
         </div>
     </div>
 </script>
-  

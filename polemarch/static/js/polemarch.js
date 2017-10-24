@@ -123,7 +123,7 @@ polemarch.start = function(options)
     // users
     spajs.addMenu({
         id:"users", 
-        urlregexp:[/^users$/, /^user$/, /^users\/page\/([0-9]+)$/],
+        urlregexp:[/^users$/, /^user$/, /^users\/search\/?$/, /^users\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmUsers.showList(holder, menuInfo, data);}
     })
     
@@ -149,7 +149,7 @@ polemarch.start = function(options)
     // hosts
     spajs.addMenu({
         id:"hosts", 
-        urlregexp:[/^hosts$/, /^host$/, /^hosts\/page\/([0-9]+)$/],
+        urlregexp:[/^hosts$/, /^host$/, /^hosts\/search\/?$/, /^hosts\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showList(holder, menuInfo, data);}
     })
     
@@ -175,7 +175,7 @@ polemarch.start = function(options)
     // groups
     spajs.addMenu({
         id:"groups", 
-        urlregexp:[/^groups$/, /^group$/, /^groups\/page\/([0-9]+)$/],
+        urlregexp:[/^groups$/, /^group$/, /^groups\/search\/?$/, /^groups\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showList(holder, menuInfo, data);}
     })
     
@@ -200,7 +200,7 @@ polemarch.start = function(options)
     // inventories
     spajs.addMenu({
         id:"inventories", 
-        urlregexp:[/^inventories$/, /^inventory$/, /^inventories\/page\/([0-9]+)$/],
+        urlregexp:[/^inventories$/, /^inventory$/, /^inventories\/search\/?$/, /^inventories\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showList(holder, menuInfo, data);}
     })
     
@@ -238,7 +238,7 @@ polemarch.start = function(options)
     // projects
     spajs.addMenu({
         id:"projects", 
-        urlregexp:[/^projects$/, /^project$/, /^projects\/page\/([0-9]+)$/],
+        urlregexp:[/^projects$/, /^projects\/search\/?$/, /^project$/, /^projects\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmProjects.showUpdatedList(holder, menuInfo, data);},
         onClose:function(){return pmProjects.stopUpdates();},
     })
@@ -301,7 +301,7 @@ polemarch.start = function(options)
     // history
     spajs.addMenu({
         id:"history", 
-        urlregexp:[/^history$/, /^history\/page\/([0-9]+)$/],
+        urlregexp:[/^history$/, /^history\/search\/?$/, /^history\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showUpdatedList(holder, menuInfo, data);}, 
         onClose:function(){return pmHistory.stopUpdates();},
     })

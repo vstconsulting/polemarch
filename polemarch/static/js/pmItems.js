@@ -153,6 +153,13 @@ pmItems.validateRangeName = function(name)
 }
 
 
+/**
+ * Строит страницу со списком объектоа
+ * @param {type} holder
+ * @param {type} menuInfo
+ * @param {type} data
+ * @returns {$.Deferred}
+ */
 pmItems.showList = function(holder, menuInfo, data)
 {
     var thisObj = this;
@@ -172,6 +179,10 @@ pmItems.showList = function(holder, menuInfo, data)
     })
 }
 
+/** 
+ * @param {string} query 
+ * @returns {HTML} Шаблон формы поиска
+ */
 pmItems.searchFiled = function(options)
 {
     options.className = this.model.className;
@@ -179,6 +190,11 @@ pmItems.searchFiled = function(options)
     return spajs.just.render('searchFiled', {opt:options});
 }
 
+/**
+ * Выполняет переход на страницу с результатами поиска
+ * @param {string} query 
+ * @returns {$.Deferred}
+ */
 pmItems.search = function(query, options)
 {
     if(this.isEmptySearchQuery(query))
@@ -189,6 +205,11 @@ pmItems.search = function(query, options)
     return spajs.open({ menuId:this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
 }
 
+/**
+ * Если поисковый запрос пуст то вернёт true
+ * @param {type} query
+ * @returns {Boolean}
+ */
 pmItems.isEmptySearchQuery = function(query)
 {
     if(!query || !trim(query))
@@ -199,6 +220,13 @@ pmItems.isEmptySearchQuery = function(query)
     return false;
 }
 
+/**
+ * Строит страницу результатов поиска на основе урла страницы
+ * @param {type} holder
+ * @param {type} menuInfo
+ * @param {type} data
+ * @returns {$.Deferred}
+ */
 pmItems.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
@@ -410,15 +438,19 @@ pmItems.sendSearchQuery = function(query, limit, offset)
 {
     if(!limit)
     {
-        limit = 999;
+        limit = 999; 
     }
 
     if(!offset)
     {
-        offset = 0;
+        offset = 0; 
     }
 
     var q = [];
+    
+    q.push("limit="+encodeURIComponent(limit))
+    q.push("offset="+encodeURIComponent(offset))
+    
     for(var i in query)
     {
         if(Array.isArray(query[i]))
@@ -432,13 +464,13 @@ pmItems.sendSearchQuery = function(query, limit, offset)
         }
         q.push(encodeURIComponent(i)+"="+encodeURIComponent(query[i]))
     }
+    
 
     var thisObj = this;
     return spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/filter/",
-        type: "POST",
-        contentType:'application/json',
-        data: JSON.stringify({filter:query}), // "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
+        url: "/api/v1/"+this.model.name+"/?"+q.join("&"),
+        type: "GET",
+        contentType:'application/json', 
         success: function(data)
         {
             //console.log("update Items", data)

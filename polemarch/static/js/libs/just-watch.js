@@ -538,7 +538,7 @@ var justReactive = {
                 });
 
                 if(Array.isArray(newval.val))
-                { 
+                {
                     Object.defineProperty(this[opt.prop], 'splice', {
                             enumerable: false
                           , configurable: true
