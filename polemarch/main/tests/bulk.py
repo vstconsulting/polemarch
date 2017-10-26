@@ -117,6 +117,8 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
             kind="Task",
             data=dict(
                 playbook="test.yml",
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
                 vars=dict(
                     connection="paramiko",
                     tags="update",

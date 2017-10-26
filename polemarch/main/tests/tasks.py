@@ -537,6 +537,8 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             kind="Task",
             data=dict(
                 playbook="test.yml",
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
                 vars=dict(
                     connection="paramiko",
                     tags="update",
@@ -549,11 +551,17 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         tmplt_data = dict(
             name="test_tmplt",
             kind="Task",
-            data=dict(vars={})
+            data=dict(
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
+                vars=dict()
+            )
         )
         job_template = Template.objects.create(**tmplt_data)
         job_template.data = json.dumps(dict(
                 playbook="test.yml",
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
                 vars=dict(
                     connection="paramiko",
                     tags="update",
@@ -620,6 +628,7 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             data=dict(
                 module="shell",
                 group="all",
+                project=self.pr_tmplt.id,
                 inventory=222233222,
                 args="ls -la",
                 vars=dict(
