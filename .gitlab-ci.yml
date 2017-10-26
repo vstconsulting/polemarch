@@ -67,7 +67,7 @@ stages:
 code_style:
   stage: code_standarts
   script:
-   - make test ENVS=pep,flake,pylint
+   - make test ENVS=flake,pylint
   only:
     - /^issue_.*$/
   retry: 2
@@ -151,7 +151,7 @@ pep8_checks:
    - master
    - developer
   script:
-   - make test ENVS=pep,flake
+   - make test ENVS=flake
   allow_failure: false
   retry: 2
 

@@ -1,5 +1,4 @@
 from django.conf import settings
-from .. import __version__ as polemarch_version
 
 
 def settings_constants(request):
