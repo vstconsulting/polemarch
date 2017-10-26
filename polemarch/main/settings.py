@@ -16,7 +16,9 @@ import sys
 from configparser import ConfigParser, NoSectionError
 
 from . import __file__ as file
+from .. import __version__ as polemarch_version
 
+POLEMARCH_VERSION = polemarch_version
 APACHE = False if ("runserver" in sys.argv) else True
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)

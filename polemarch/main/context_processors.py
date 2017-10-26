@@ -15,5 +15,5 @@ def project_args(request):
     host_url = request.build_absolute_uri('/')
     return {
         "host_url": host_url,
-        "polemarch_version": polemarch_version
+        "polemarch_version": getattr(settings, 'POLEMARCH_VERSION', False)
     }
