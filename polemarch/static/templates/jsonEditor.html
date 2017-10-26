@@ -186,10 +186,11 @@
                                     <% if(jsonEditor.model.isLoaded_cli_reference){ %>
                                         <select class="form-control select2" id="new_json_name<%- opt.prefix %>" data-placeholder="Select param" >
                                             <option selected="" disabled="" value="" disabled>Not set</option>
-                                            <% for(var i in jsonEditor.options[optionsblock]){ %> 
-                                                <% if($.inArray(i, opt.excluded_options) == -1){ %>
-                                                    <option value="<%- i %>" >
-                                                        <%- i %> (<%- jsonEditor.options[optionsblock][i].help %>)
+                                            <% keys = Object.keys(jsonEditor.options[optionsblock]).sort(); 
+                                               for(var i in keys){ %> 
+                                                <% if($.inArray(keys[i], opt.excluded_options) == -1){ %>
+                                                    <option value="<%- keys[i] %>" >
+                                                        <%- keys[i] %> (<%- jsonEditor.options[optionsblock][keys[i]].help %>)
                                                     </option> 
                                                 <% } %>
                                             <% } %>

@@ -403,10 +403,30 @@ jsonEditor.initAutoComplete = function(optionsblock, prefix)
             }
             if(matches.length)
             {
-                response(matches);
+                response(matches.sort(jsonEditor.sortFunction));
             }
         }
     });
+}
+
+jsonEditor.sortFunction = function(a, b)
+{ 
+    a = a.value
+    b = b.value
+    for(var i in a)
+    {
+        if(b.length <= i)
+        { 
+            return 1;
+        }
+
+        if(a.charCodeAt(i) != b.charCodeAt(i))
+        { 
+            return a.charCodeAt(i) - b.charCodeAt(i)
+        }
+    }
+ 
+    return 0;
 }
 
 jsonEditor.initForm = function(optionsblock, prefix)

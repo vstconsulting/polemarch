@@ -134,6 +134,10 @@ pmHistory.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[1];
     return $.when(this.loadItem(item_id)).done(function()
     {
+        if(pmHistory.model.items[item_id].initiator > 0 )
+        { 
+            pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
+        } 
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
@@ -150,6 +154,10 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
     var item_id = data.reg[2];
     return $.when(this.loadItem(item_id), pmProjects.loadItem(project_id)).done(function()
     {
+        if(pmHistory.model.items[item_id].initiator > 0 )
+        { 
+            pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
+        } 
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
@@ -228,7 +236,7 @@ pmHistory.loadItem = function(item_id)
         type: "GET",
         contentType:'application/json',
         data: "",
-                success: function(data)
+        success: function(data)
         {
             data.test = Math.random();
 
@@ -248,14 +256,14 @@ pmHistory.loadItem = function(item_id)
             if(data.project && !pmProjects.model.items[data.project])
             {
                 $.when(pmProjects.loadItem(data.project)).done(function(){
-                    def.resolve()
+                    def.resolve(data)
                 }).fail(function(){
                     def.reject()
                 })
             }
             else
             {
-                def.resolve()
+                def.resolve(data)
             }
         },
         error:function(e)
@@ -303,6 +311,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
             //thisObj.model.items = {}
 
             var projects = [];
+            var usersIds = [];
             for(var i in data.results)
             {
                 var val = data.results[i]
@@ -312,20 +321,31 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
                 {
                     projects.push(val.project)
                 }
+                
+                if(val.initiator > 0 && val.initiator_type == 'users')
+                {
+                    usersIds.push(val.initiator); 
+                }
             }
-
-            if(projects.length > 0)
+            
+            var users_promise = undefined;
+            var projects_promise = undefined;
+            
+            if(usersIds.length)
             {
-                $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
-                    def.resolve()
-                }).fail(function(){
-                    def.reject()
-                })
+                users_promise = pmUsers.loadItemsByIds(usersIds)
             }
-            else
+            
+            if(projects.length)
             {
-                def.resolve()
+                projects_promise = pmProjects.sendSearchQuery({id:projects.join(',')})
             }
+              
+            $.when(users_promise, projects_promise).done(function(){
+                def.resolve(data)
+            }).fail(function(){
+                def.reject()
+            })  
         },
         error:function(e)
         {
@@ -370,6 +390,7 @@ pmHistory.loadItems = function(limit, offset)
             //thisObj.model.items = {}
 
             var projects = [];
+            var usersIds = [];
             for(var i in data.results)
             {
                 var val = data.results[i]
@@ -380,20 +401,31 @@ pmHistory.loadItems = function(limit, offset)
                 {
                     projects.push(val.project)
                 }
+                 
+                if(val.initiator > 0 && val.initiator_type == 'users')
+                {
+                    usersIds.push(val.initiator); 
+                }
             }
 
+            var users_promise = undefined;
+            var projects_promise = undefined;
+            
+            if(usersIds.length)
+            {
+                users_promise = pmUsers.loadItemsByIds(usersIds)
+            }
+            
             if(projects.length)
             {
-                $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
-                    def.resolve()
-                }).fail(function(){
-                    def.reject()
-                })
+                projects_promise = pmProjects.sendSearchQuery({id:projects.join(',')})
             }
-            else
-            {
-                def.resolve()
-            }
+              
+            $.when(users_promise, projects_promise).done(function(){
+                def.resolve(data)
+            }).fail(function(){
+                def.reject()
+            }) 
         },
         error:function(e)
         {
