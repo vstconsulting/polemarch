@@ -505,6 +505,18 @@ pmItems.searchItems = function(query, attrName, limit, offset)
     return this.sendSearchQuery(q, limit, offset);
 }
 
+pmItems.loadItemsByIds = function(ids)
+{ 
+    var q = {id_in:ids} 
+    for(var i in ids)
+    { 
+        if(this.model.items[ids[i]] === undefined)
+        {
+            this.model.items[ids[i]] = {}
+        } 
+    }
+    return this.sendSearchQuery(q);
+}
 /**
  * Обновляет поле модел this.model.items[item_id] и ложит туда пользователя
  */
@@ -512,7 +524,12 @@ pmItems.loadItem = function(item_id)
 {
     var def = new $.Deferred();
     var thisObj = this;
-
+    
+    if(thisObj.model.items[item_id] === undefined)
+    {
+        thisObj.model.items[item_id] = {}
+    }
+  
     spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "GET",

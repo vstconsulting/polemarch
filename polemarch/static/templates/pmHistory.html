@@ -35,6 +35,7 @@
                                         </th>
                                         <th>Name</th>
                                         <th class="hidden-xs hidden-sm">Type</th>
+                                        <th style="width: 110px;" class="hidden-xs hidden-sm">Initiator</th>
                                         <th style="width: 110px;">Status</th>
                                         <th style="width: 160px;" class="hidden-xs">Start time</th>
                                         <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
@@ -59,6 +60,16 @@
                                                     </a>
                                                 <% }else{ %>
                                                     Module
+                                                <% } %>
+                                            </td>
+
+                                            <td class="hidden-xs hidden-sm">
+                                                <% if(val.initiator > 0  && val.initiator_type == 'users'){ %>
+                                                    <a href="<%- polemarch.opt.host %>/?<%- val.initiator_type %>/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
+                                                        <%= pmUsers.model.items[pmHistory.model.items[val.id].initiator].justText('username') %> 
+                                                    </a>
+                                                <% }else{ %>
+                                                    <%- pmHistory.model.items[item_id].initiator_type %>
                                                 <% } %>
                                             </td>
 
@@ -158,6 +169,7 @@
                                     </th>
                                     <th>Name</th>
                                     <th style="width: 110px;">Status</th>
+                                    <th style="width: 110px;" class="hidden-xs hidden-sm">Initiator</th>
                                     <th style="width: 160px;" class="hidden-xs">Start time</th>
                                     <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
                                 </tr>
@@ -170,12 +182,22 @@
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
                                             <td>
-                                            <a href="/?project/<%- project_id %>/history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
+                                                <a href="/?project/<%- project_id %>/history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
                                                         onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].mode %></a>
                                             </td>
                                             <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %>  <%- pmHistory.model.items[val.id].justClassName('status', function(v){ return "history-status-"+v}) %>" >
                                                 <%= pmHistory.model.items[val.id].justText('status') %>
                                             </td>
+                                            <td class="hidden-xs hidden-sm">
+                                                <% if(val.initiator > 0  && val.initiator_type == 'users'){ %>
+                                                    <a href="<%- polemarch.opt.host %>/?<%- val.initiator_type %>/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
+                                                        <%= pmUsers.model.items[pmHistory.model.items[val.id].initiator].justText('username') %> 
+                                                    </a>
+                                                <% }else{ %>
+                                                    <%- pmHistory.model.items[item_id].initiator_type %>
+                                                <% } %>
+                                            </td>
+
                                             <td class="hidden-xs">
                                                 <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
                                             </td>
@@ -266,6 +288,7 @@
                                     <th>Name</th>
                                     <th class="hidden-xs hidden-sm">Type</th>
                                     <th style="width: 110px;">Status</th>
+                                    <th style="width: 110px;" class="hidden-xs hidden-sm">Initiator</th>
                                     <th style="width: 160px;" class="hidden-xs">Start time</th>
                                     <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
                                 </tr>
@@ -294,6 +317,16 @@
                                         <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %>  <%- pmHistory.model.items[val.id].justClassName('status', function(v){ return "history-status-"+v}) %>" >
                                             <%= pmHistory.model.items[val.id].justText('status') %>
                                         </td>
+                                        <td class="hidden-xs hidden-sm">
+                                            <% if(val.initiator > 0  && val.initiator_type == 'users'){ %>
+                                                <a href="<%- polemarch.opt.host %>/?<%- val.initiator_type %>/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
+                                                    <%= pmUsers.model.items[pmHistory.model.items[val.id].initiator].justText('username') %> 
+                                                </a>
+                                            <% }else{ %>
+                                                <%- pmHistory.model.items[item_id].initiator_type %>
+                                            <% } %>
+                                        </td>
+
                                         <td class="hidden-xs">
                                             <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
@@ -426,12 +459,12 @@
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
-                                        <% if(pmHistory.model.items[item_id].initiator > 0 ){ %>
+                                        <% if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'users' ){ %>
                                             <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                <%- pmHistory.model.items[item_id].initiator_type %>
+                                                <%= pmUsers.model.items[pmHistory.model.items[item_id].initiator].justText('username') %> 
                                             </a>
                                         <% }else{ %>
-                                            From scheduler
+                                            From <%- pmHistory.model.items[item_id].initiator_type %>
                                         <% } %>
                                 </div>
                                 <div class="help-block"></div>
@@ -575,12 +608,12 @@
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
-                                        <% if(pmHistory.model.items[item_id].initiator > 0 ){ %>
+                                        <% if(pmHistory.model.items[item_id].initiator > 0 && pmHistory.model.items[item_id].initiator_type == 'users'){ %>
                                             <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                <%- pmHistory.model.items[item_id].initiator_type %>
+                                                <%= pmUsers.model.items[pmHistory.model.items[item_id].initiator].justText('username') %> 
                                             </a>
                                         <% }else{ %>
-                                            From scheduler
+                                            From <%- pmHistory.model.items[item_id].initiator_type %>
                                         <% } %>
                                 </div>
                                 <div class="help-block"></div>
