@@ -1,6 +1,7 @@
+# pylint: disable=unused-argument
 from django.conf import settings
-from .base import models, BModel, BQuerySet
 from django.contrib.auth.models import User as BaseUser
+from .base import models, BModel, BQuerySet
 
 
 def first_staff_user():
