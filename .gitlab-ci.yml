@@ -38,6 +38,7 @@ stages:
 .pack_tamplate: &packing-test
   stage: packaging-test
   variables:
+    MYSQL_ROOT_PASSWORD: 'polemarch'
     MYSQL_DATABASE: 'polemarch'
     MYSQL_USER: 'polemarch'
     MYSQL_PASSWORD: 'polemarch'
