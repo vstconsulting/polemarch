@@ -375,9 +375,22 @@ TASKS_HANDLERS = {
     },
 }
 
+ACL = {
+    "DEFAULT_ACL_CLASSES": {
+        "ACLPermission": "polemarch.main.models.acl_models.ACLPermission",
+        "ACLModel": "polemarch.main.models.acl_models.ACLModel",
+        "ACLPermissionSubclass": "polemarch.main.models.acl_models.ACLPermissionSubclass",
+        "ACLGroupSubclass": "polemarch.main.models.acl_models.ACLGroupSubclass",
+        "ACLQuerySet": "polemarch.main.models.acl_models.ACLQuerySet",
+    }
+}
+
 
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     REPO_BACKENDS["TEST"] = {
         "BACKEND": "polemarch.main.tests.repo_backends.Test",
     }
+    PROJECTS_DIR = '/tmp/polemarch_projects' + str(PY_VER)
+    os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
+

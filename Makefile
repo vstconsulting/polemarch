@@ -1,6 +1,6 @@
 PIP=pip2
 PY=python2
-LOC_TEST_ENVS = build,py27-django18-coverage,py34-django111-coverage,flake,pylint
+LOC_TEST_ENVS = build,py27-django111-coverage,py34-django111-coverage,flake,pylint
 ENVS = $(LOC_TEST_ENVS)
 TESTS =
 NAME = polemarch

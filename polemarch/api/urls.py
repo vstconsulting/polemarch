@@ -11,6 +11,7 @@ router = MainRouter(perms=(permissions.IsAuthenticated,))
 router_v1 = APIRouter(perms=(permissions.IsAuthenticated,))
 router_v1.root_view_name = 'v1'
 router_v1.register(r'users', v1.UserViewSet)
+router_v1.register(r'teams', v1.TeamViewSet)
 router_v1.register(r'hosts', v1.HostViewSet)
 router_v1.register(r'groups', v1.GroupViewSet)
 router_v1.register(r'inventories', v1.InventoryViewSet)

@@ -162,3 +162,12 @@ class HistoryLinesFilter(filters.FilterSet):
         fields = (
             'line_number',
         )
+
+
+class TeamFilter(_BaseFilter):
+    class Meta:
+        model = models.UserGroup
+        fields = (
+            'id',
+            "name"
+        )

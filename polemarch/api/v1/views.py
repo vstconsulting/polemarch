@@ -1,19 +1,16 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
-from functools import reduce
 
-import operator
 from django.db import transaction
-from django.db.models import Q
 from django.http import HttpResponse
 from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 
-from ...main import utils
-from .. import base
-from ..permissions import SuperUserPermission, StaffPermission
 from . import filters
 from . import serializers
+from .. import base
+from ..permissions import SuperUserPermission, StaffPermission
+from ...main import utils
 
 
 class TokenView(token_views.ObtainAuthToken):
@@ -58,7 +55,14 @@ class UserViewSet(base.ModelViewSetSet):
         return base.Response(serializer.data, 200).resp
 
 
-class HostViewSet(base.ModelViewSetSet):
+class TeamViewSet(base.ModelViewSetSet):
+    model = serializers.models.UserGroup
+    serializer_class = serializers.TeamSerializer
+    serializer_class_one = serializers.OneTeamSerializer
+    filter_class = filters.TeamFilter
+
+
+class HostViewSet(base.OwnerMixin, base.ModelViewSetSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
     serializer_class_one = serializers.OneHostSerializer
@@ -146,12 +150,6 @@ class HistoryViewSet(base.HistoryModelViewSet):
     serializer_class_one = serializers.OneHistorySerializer
     filter_class = filters.HistoryFilter
 
-    def _get_extra_queryset(self):
-        return self.queryset.filter(
-            Q(initiator=self.request.user.id, initiator_type="users") |
-            Q(project__in=self.get_user_aval_projects())
-        ).distinct()
-
     @detail_route(methods=["get"])
     def raw(self, request, *args, **kwargs):
         result = self.get_serializer(self.get_object()).get_raw(request)
@@ -183,32 +181,6 @@ class TemplateViewSet(base.ModelViewSetSet):
     serializer_class = serializers.TemplateSerializer
     serializer_class_one = serializers.OneTemplateSerializer
     filter_class = filters.TemplateFilter
-
-    def __get_extra_project_qs(self, qs):
-        query_projects = [
-            Q(template_data__contains='"project": {}'.format(i))
-            for i in self.get_user_aval_projects()
-            if i is not None
-        ]
-        query_projects.append(~Q(template_data__contains='"project":'))
-        return qs.filter(reduce(operator.or_, query_projects))
-
-    def __get_extra_inventories_qs(self, qs):
-        query_inventories = [
-            Q(template_data__contains='"inventory": {}'.format(i))
-            for i in self.get_user_aval_related("inventories")
-            if i is not None
-        ]
-        query_inventories.append(~Q(template_data__contains='"inventory":'))
-        return qs.filter(reduce(operator.or_, query_inventories))
-
-    def _get_extra_queryset(self):
-        base_qs = self.queryset
-        qs_projects = self.__get_extra_project_qs(base_qs)
-        qs_invs = self.__get_extra_inventories_qs(qs_projects)
-        query_usered = Q(related_objects__user=self.request.user)
-        qs_usered = base_qs.filter(query_usered)
-        return (qs_invs | qs_usered).distinct()
 
     @list_route(methods=["get"], url_path="supported-kinds")
     def supported_kinds(self, request):

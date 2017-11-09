@@ -27,7 +27,7 @@ from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation
-from ansible import modules as ansible_modules
+from ansible import modules as ansible_modules, __version__ as ansible_version
 from ansible.cli.adhoc import AdHocCLI
 from ansible.cli.playbook import PlaybookCLI
 
@@ -763,6 +763,11 @@ class AnsibleModules(Modules):
         'short_description',
     ]
 
+    try:
+        cache = caches["ansible"]
+    except InvalidCacheBackendError:
+        cache = caches["default"]
+
     def __init__(self, detailed=False, fields=None):
         super(AnsibleModules, self).__init__()
         self.detailed = detailed
@@ -776,6 +781,14 @@ class AnsibleModules(Modules):
         except BaseException as exception_object:
             return exception_object
 
+    def __get_detail_info_from_cache(self, key, data):
+        cache_key = "cache_ansible_{}_{}".format(ansible_version, key)
+        doc_data = self.cache.get(cache_key, None)
+        if doc_data is None:  # nocv
+            doc_data = load(data, Loader=Loader)
+            self.cache.set(cache_key, doc_data, 86400*7)
+        return doc_data
+
     def _get_info(self, key):
         data = self._get_mod_info(key, "DOCUMENTATION")
         if isinstance(data, BaseException) or data is None:
@@ -783,7 +796,7 @@ class AnsibleModules(Modules):
         if not self.detailed:
             return key
         result = OrderedDict(path=key)
-        doc_data = load(data, Loader=Loader)
+        doc_data = self.__get_detail_info_from_cache(key, data)
         result["data"] = OrderedDict()
         for field in self.fields:
             result["data"][field] = doc_data.get(field, None)

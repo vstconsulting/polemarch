@@ -14,6 +14,7 @@ from .tasks import (ApiTasksTestCase,
                     ApiHistoryTestCase)
 from .ansible import ApiAnsibleTestCase
 from .repo_backends import RepoBackendsTestCase
+from ..models import UserGroup
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -203,6 +204,41 @@ class ApiUsersTestCase(BaseTestCase):
         url = "/api/v1/users/{}/".format(idself)
         self.assertRCode(client.delete(url), 409)
         self._logout(client)
+
+    def test_api_groups(self):
+        url = '/api/v1/teams/'
+        range_groups = 10
+        for i in range(range_groups):
+            UserGroup.objects.create(name="test_group_{}".format(i))
+        self.list_test(url, range_groups)
+        ug = UserGroup.objects.all().last()
+        self.details_test(
+            url + "{}/".format(ug.id),
+            name=ug.name, id=ug.id
+        )
+        data = [
+            dict(name="test_group_{}".format(i))
+            for i in range(range_groups, range_groups+10)
+        ]
+        results_id = self.mass_create(url, data, "name")
+        for team_id in results_id:
+            self.get_result("delete", url + "{}/".format(team_id))
+        self.list_test(url, range_groups)
+        # Test users in groups
+        url_ug = "{}{}/".format(url, ug.id)
+        self.get_result("patch", url_ug, data=json.dumps({
+            "users_list": [self.user.id]
+        }))
+        result = self.get_result("get", url_ug)
+        self.assertCount(result["users"], 1)
+        self.assertEqual(result["users"][0]["id"], self.user.id)
+        self.assertEqual(result["users"][0]["username"], self.user.username)
+        self.assertIn(self.user.id, result["users_list"])
+        self.get_result("patch", url_ug, data=json.dumps({
+            "users_list": []
+        }))
+        result = self.get_result("get", url_ug)
+        self.assertCount(result["users"], 0)
 
 
 class APITestCase(ApiUsersTestCase,

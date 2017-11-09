@@ -6,7 +6,7 @@ import logging
 from django.db import transaction
 from django.db.models import Q
 
-from .base import BManager, models
+from .base import BManager, models, ManyToManyFieldACL
 from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex
 from ..utils import get_render
@@ -108,7 +108,7 @@ class GroupQuerySet(AbstractVarsQuerySet):
 class Group(AbstractModel):
     CiclicDependencyError = CiclicDependencyError
     objects     = BManager.from_queryset(GroupQuerySet)()
-    hosts       = models.ManyToManyField(Host, related_query_name="groups")
+    hosts       = ManyToManyFieldACL(Host, related_query_name="groups")
     parents     = models.ManyToManyField('Group', blank=True, null=True,
                                          related_query_name="childrens")
     children    = models.BooleanField(default=False)
@@ -138,7 +138,7 @@ class Group(AbstractModel):
 
 class Inventory(AbstractModel):
     objects     = BManager.from_queryset(AbstractVarsQuerySet)()
-    hosts       = models.ManyToManyField(Host)
+    hosts       = ManyToManyFieldACL(Host)
     groups      = models.ManyToManyField(Group)
 
     class Meta:

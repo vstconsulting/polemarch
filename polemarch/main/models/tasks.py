@@ -21,6 +21,7 @@ from ..exceptions import DataNotReady, NotApplicable
 from .base import BModel, BManager, BQuerySet, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project
+from .acl import ACLModel
 
 logger = logging.getLogger("polemarch")
 
@@ -116,7 +117,7 @@ class PeriodicTask(AbstractModel):
         )
 
 
-class Template(BModel):
+class Template(ACLModel):
     name          = models.CharField(max_length=512)
     kind          = models.CharField(max_length=32)
     template_data = models.TextField(default="")

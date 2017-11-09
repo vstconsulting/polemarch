@@ -10,9 +10,11 @@ from django.db.models import Q
 
 from rest_framework import serializers
 from rest_framework import exceptions
+from rest_framework.exceptions import PermissionDenied
 
 from ...main import models
 from ..base import Response
+from ...main.models.acl import ACLPermission
 
 
 # NOTE: we can freely remove that because according to real behaviour all our
@@ -35,12 +37,21 @@ class ModelRelatedField(serializers.PrimaryKeyRelatedField):
 
 class DictField(serializers.CharField):
     def to_internal_value(self, data):
-        tstr = isinstance(data, (six.string_types, six.text_type))
-        tdict = isinstance(data, dict)
-        return data if tdict or tstr else self.fail("Unknown type.")
+        return (
+            data
+            if (
+                isinstance(data, (six.string_types, six.text_type)) or
+                isinstance(data, (dict, list))
+            )
+            else self.fail("Unknown type.")
+        )
 
     def to_representation(self, value):
-        return json.loads(value) if not isinstance(value, dict) else value
+        return (
+            json.loads(value)
+            if not isinstance(value, (dict, list))
+            else value
+        )
 
 
 # Serializers
@@ -70,7 +81,6 @@ class UserSerializer(serializers.ModelSerializer):
         if not raw_passwd == "True":
             user.set_password(creditals['password'])
             user.save()
-        user.related_objects.get_or_create()
         return user
 
     def is_valid(self, raise_exception=False):
@@ -106,7 +116,36 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
+class TeamSerializer(serializers.ModelSerializer):
+    users_list = DictField(required=False, write_only=True)
+
+    class Meta:
+        model = models.UserGroup
+        fields = (
+            'id',
+            "name",
+            "users_list",
+            'url',
+        )
+
+
+class OneTeamSerializer(TeamSerializer):
+    users = UserSerializer(many=True, required=False)
+    users_list = DictField(required=False)
+
+    class Meta:
+        model = models.UserGroup
+        fields = (
+            'id',
+            "name",
+            "users",
+            "users_list",
+            'url',
+        )
+
+
 class OneUserSerializer(UserSerializer):
+    groups = TeamSerializer(read_only=True, many=True)
     raw_password = serializers.HiddenField(default=False, initial=False)
 
     class Meta:
@@ -120,6 +159,7 @@ class OneUserSerializer(UserSerializer):
                   'first_name',
                   'last_name',
                   'email',
+                  'groups',
                   'url',)
         read_only_fields = ('is_superuser',
                             'date_joined',)
@@ -201,16 +241,17 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
                       POST="add",
                       PUT="set",
                       GET="all")
+    perms_msg = "You do not have permission to perform this action."
 
     def _get_objects(self, model, objs_id):
         user = self.context['request'].user
         qs = model.objects.all()
         if not user.is_staff:
-            projs = user.related_objects.values_list('projects', flat=True)
-            qs = qs.filter(
-                Q(related_objects__user=user) |
-                Q(related_objects__projects__in=projs)
-            )
+            # FIXME: groups not counted. Probably test miss that.
+            his_permissions = ACLPermission.objects.filter(user=user,
+                                                           role="MASTER")
+            qs = qs.filter(Q(owner=user) |
+                           Q(permissions__in=his_permissions))
         return list(qs.filter(id__in=objs_id))
 
     def get_operation(self, method, data, attr):
@@ -226,13 +267,10 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def _do_with_vars(self, method_name, *args, **kwargs):
+        if method_name == "create":
+            kwargs['validated_data']["owner"] = self.current_user()
         method = getattr(super(_WithVariablesSerializer, self), method_name)
         instance = method(*args, **kwargs)
-        if method.__name__ == "create":
-            user = self.context['request'].user
-            instance.related_objects.add(
-                models.TypesPermissions.objects.get_or_create(user=user)[0]
-            )
         return instance
 
     @transaction.atomic()
@@ -240,13 +278,12 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         action = self.operations[method]
         tp = getattr(self.instance, attr)
         if action == "all":
-            if attr == "related_objects":
+            if attr == "permissions":
                 answer = tp.values_list("user__id", flat=True)
             else:
                 answer = tp.values_list("id", flat=True)
             return Response(answer, status=200)
         elif action == "set":
-            # Because django<=1.9 does not support .set()
             getattr(tp, "clear")()
             action = "add"
         getattr(tp, action)(*obj_list)
@@ -255,16 +292,47 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return self._do_with_vars("create", validated_data=validated_data)
 
+    def current_user(self):
+        return self.context['request'].user
+
     def update(self, instance, validated_data):
         if "children" in validated_data:
             raise exceptions.ValidationError("Children not allowed to update.")
         return self._do_with_vars("update", instance,
                                   validated_data=validated_data)
 
+    def __get_all_permission_serializer(self):
+        return PermissionsSerializer(
+            self.instance.permissions.all(), many=True
+        )
+
+    def __permission_set(self, data):
+        for permission_args in data:
+            self.instance.permissions.create(**permission_args)
+
+    @transaction.atomic
     def permissions(self, request):
-        pms = models.TypesPermissions.objects.filter(user__id__in=request.data)
-        return self._operate(request.method, request.data,
-                             "related_objects", pms)
+        if request.method != "GET" and \
+                not self.instance.manageable_by(self.current_user()):
+            raise PermissionDenied(self.perms_msg)
+        if request.method == "DELETE":
+            self.instance.permissions.filter_by_data(request.data).delete()
+        elif request.method == "POST":
+            self.__permission_set(request.data)
+        elif request.method == "PUT":
+            self.instance.permissions.clear()
+            self.__permission_set(request.data)
+        return Response(self.__get_all_permission_serializer().data, 200)
+
+    def owner(self, request):
+        if request.method == "GET":
+            return Response(self.instance.owner.id, 200)
+        elif request.method == "PUT":
+            if not self.instance.owned_by(self.current_user()):
+                raise PermissionDenied(self.perms_msg)
+            user = User.objects.get(pk=request.data)
+            self.instance.set_owner(user)
+            return Response("Owner changed", 200)
 
 
 class HostSerializer(_WithVariablesSerializer):
@@ -280,6 +348,7 @@ class HostSerializer(_WithVariablesSerializer):
 
 
 class OneHostSerializer(HostSerializer):
+    owner = UserSerializer(read_only=True)
     vars = DictField(required=False)
 
     class Meta:
@@ -288,6 +357,7 @@ class OneHostSerializer(HostSerializer):
                   'name',
                   'type',
                   'vars',
+                  'owner',
                   'url',)
 
 
@@ -334,6 +404,7 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
+    owner = UserSerializer(read_only=True)
     vars = DictField(required=False)
 
     class Meta:
@@ -347,6 +418,7 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'project',
                   'inventory',
                   'save_result',
+                  'owner',
                   'vars',
                   'url',)
 
@@ -407,6 +479,7 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
     vars   = DictField(required=False)
     hosts  = HostSerializer(read_only=True, many=True)
     groups = GroupSerializer(read_only=True, many=True)
+    owner = UserSerializer(read_only=True)
 
     class Meta:
         model = models.Group
@@ -416,6 +489,7 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
                   "groups",
                   'vars',
                   'children',
+                  'owner',
                   'url',)
 
     class ValidationException(exceptions.ValidationError):
@@ -448,6 +522,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     all_hosts  = HostSerializer(read_only=True, many=True)
     hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
     groups = GroupSerializer(read_only=True, many=True, source="groups_list")
+    owner = UserSerializer(read_only=True)
 
     class Meta:
         model = models.Inventory
@@ -457,6 +532,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
                   'all_hosts',
                   "groups",
                   'vars',
+                  'owner',
                   'url',)
 
 
@@ -485,6 +561,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     hosts       = HostSerializer(read_only=True, many=True)
     groups      = GroupSerializer(read_only=True, many=True)
     inventories = InventorySerializer(read_only=True, many=True)
+    owner = UserSerializer(read_only=True)
 
     class Meta:
         model = models.Project
@@ -496,6 +573,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   "groups",
                   'inventories',
                   'vars',
+                  'owner',
                   'url',)
 
     def inventories_operations(self, method, data):
@@ -524,3 +602,14 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
 
     def execute_module(self, request):
         return self._execution("module", request)
+
+
+class PermissionsSerializer(serializers.ModelSerializer):
+    member = serializers.IntegerField()
+    member_type = serializers.CharField()
+
+    class Meta:
+        model = models.ACLPermission
+        fields = ("member",
+                  "role",
+                  "member_type")

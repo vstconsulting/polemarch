@@ -37,8 +37,10 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         url = "/api/v1/tasks/"
         self.list_test(url, Task.objects.all().count())
 
-    correct_simple_inventory = "127.0.1.1 ansible_user=centos " +\
-                               "ansible_ssh_private_key_file="
+    correct_simple_inventory = (
+        "127.0.1.1 ansible_user=centos "
+        "ansible_ssh_private_key_file="
+    )
 
     def create_inventory(self):
         inventory_data = dict(name="Inv1", vars={})
@@ -739,9 +741,6 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         self.assertEqual(line_number, 3, result)
 
         self.get_result("delete", url + "{}/".format(self.histories[0].id))
-
-        self.change_identity()
-        self.list_test(url, 0)
 
     def test_history_raw_output(self):
         raw_stdout = "[0;35mdeprecate" \

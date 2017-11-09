@@ -52,3 +52,15 @@ class BGroupedModel(BModel):
 
     class Meta:
         abstract = True
+
+
+class AccessExtendsFieldMixin(object):
+    access_to_related = True
+
+
+class ManyToManyFieldACL(models.ManyToManyField, AccessExtendsFieldMixin):
+    pass
+
+
+class ForeignKeyACL(models.ForeignKey, AccessExtendsFieldMixin):
+    pass

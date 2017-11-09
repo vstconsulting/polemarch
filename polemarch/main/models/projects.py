@@ -11,6 +11,7 @@ from . import hosts as hosts_models
 from .vars import AbstractModel, AbstractVarsQuerySet, BManager, models
 from ..exceptions import PMException
 from ..utils import ModelHandlers
+from .base import ManyToManyFieldACL
 
 
 logger = logging.getLogger("polemarch")
@@ -35,8 +36,8 @@ class Project(AbstractModel):
     status        = models.CharField(max_length=32, default="NEW")
     inventories   = models.ManyToManyField(hosts_models.Inventory,
                                            blank=True, null=True)
-    hosts         = models.ManyToManyField(hosts_models.Host,
-                                           blank=True, null=True)
+    hosts         = ManyToManyFieldACL(hosts_models.Host,
+                                       blank=True, null=True)
     groups        = models.ManyToManyField(hosts_models.Group,
                                            blank=True, null=True)
 

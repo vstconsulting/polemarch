@@ -31,8 +31,11 @@ class BaseTestCase(TestCase):
         self.user = self._create_user(is_super_user)
         return old_user
 
+    def random_name(self, length=8):
+        return ''.join(random.sample(string.ascii_lowercase, length))
+
     def _create_user(self, is_super_user=True):
-        username = ''.join(random.sample(string.ascii_lowercase, 8))
+        username = self.random_name()
         email = username + '@gmail.com'
         password = username.upper()
         if is_super_user:
@@ -43,7 +46,6 @@ class BaseTestCase(TestCase):
             user = User.objects.create_user(username=username,
                                             password=password,
                                             email=email)
-        user.related_objects.get_or_create()
         user.data = {'username': username, 'password': password}
         return user
 
