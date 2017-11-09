@@ -84,6 +84,10 @@ code_style:
   stage: code_standarts
   script:
    - make test ENVS=flake,pylint
+  cache:
+    paths:
+      - .tox/pylint
+      - .tox/flake
   only:
     - /^.{0,}issue_.*$/
   retry: 2
@@ -101,6 +105,7 @@ py34-django111-coverage:
 default_rpm_tests:
   <<: *packing-test
   script:
+   - cat /etc/hosts
    - make rpm RELEASE=${CI_BUILD_ID}
    - sudo yum install dist/*.rpm -y -q
    - sudo cat test_settings.ini > /etc/polemarch/settings.ini
@@ -112,6 +117,7 @@ default_oracle_tests:
   <<: *packing-test
   image: onegreyonewhite/tox:oracle
   script:
+   - cat /etc/hosts
    - make rpm RELEASE=${CI_BUILD_ID}
    - sudo yum install dist/*.rpm -y -q
    - sudo cat test_settings.ini > /etc/polemarch/settings.ini
@@ -123,6 +129,7 @@ default_deb_tests:
   <<: *packing-test
   image: onegreyonewhite/tox:ubuntu
   script:
+   - cat /etc/hosts
    - make deb RELEASE=${CI_BUILD_ID}
    - echo "echo 'hello'" > /bin/systemctl
    - sudo apt install ./dist/*.deb -y -q
