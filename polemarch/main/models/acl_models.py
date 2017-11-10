@@ -15,7 +15,7 @@ class ACLPermissionQuerySet(BQuerySet):
 class ACLPermissionAbstract(BModel):
     objects = ACLPermissionQuerySet.as_manager()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
-    uagroup = models.ForeignKey('UserGroup', blank=True, null=True)
+    uagroup = models.ForeignKey('main.UserGroup', blank=True, null=True)
 
     class Meta:
         abstract = True
@@ -32,7 +32,7 @@ class ACLPermissionSubclass(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               default=first_staff_user,
                               related_name="polemarch_%(class)s_set")
-    permissions = models.ManyToManyField("ACLPermission",
+    permissions = models.ManyToManyField("main.ACLPermission",
                                          blank=True, null=True)
 
     class Meta:
