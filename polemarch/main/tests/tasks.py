@@ -548,6 +548,12 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             )
         )
         self.job_template = Template.objects.create(**self.tmplt_data)
+        # Ugly hack for fix some errors
+        self.tmplt_data.update(dict(
+            name=self.job_template.name,
+            kind=self.job_template.kind,
+            data=self.job_template.data
+        ))
 
     def test_string_template_data(self):
         tmplt_data = dict(
@@ -611,7 +617,7 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                 mode="ping",
                 type="INTERVAL",
                 name="somename",
-                project=2222332221,
+                project=self.pr_tmplt.id,
                 kind="MODULE",
                 inventory=222233222,
                 schedule="12",
@@ -621,6 +627,11 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             )
         )
         ptask_template = Template.objects.create(**ptask_template_data)
+        ptask_template_data.update(dict(
+            name=ptask_template.name,
+            kind=ptask_template.kind,
+            data=ptask_template.data
+        ))
         self.details_test(url + "{}/".format(ptask_template.id),
                           **ptask_template_data)
 
@@ -640,6 +651,11 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             )
         )
         module_template = Template.objects.create(**module_template_data)
+        module_template_data.update(dict(
+            name=module_template.name,
+            kind=module_template.kind,
+            data=module_template.data
+        ))
         self.details_test(url + "{}/".format(module_template.id),
                           **module_template_data)
         # test validation
