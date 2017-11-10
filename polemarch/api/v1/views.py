@@ -86,7 +86,7 @@ class _GroupedViewSet(object):
         return self._get_result(request, serializer.groups_operations)
 
 
-class GroupViewSet(base.ModelViewSetSet, _GroupedViewSet):
+class GroupViewSet(base.OwnerMixin, base.ModelViewSetSet, _GroupedViewSet):
     model = serializers.models.Group
     serializer_class = serializers.GroupSerializer
     serializer_class_one = serializers.OneGroupSerializer

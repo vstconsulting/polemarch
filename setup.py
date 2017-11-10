@@ -82,10 +82,13 @@ extensions_dict = dict((
     (exten, [exten.replace(".", "/")+ext]) for exten in ext_list
 ))
 
-ext_modules = list(Extension(m, f) for m, f in extensions_dict.items())
+if 'develop' in sys.argv:
+    ext_modules = []
+else:
+    ext_modules = list(Extension(m, f) for m, f in extensions_dict.items())
 
-if use_cython and has_cython:
-    ext_modules = cythonize(ext_modules)
+    if use_cython and has_cython:
+        ext_modules = cythonize(ext_modules)
 
 
 class PostInstallCommand(install):
