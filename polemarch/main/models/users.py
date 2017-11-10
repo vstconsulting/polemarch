@@ -6,10 +6,14 @@ import logging
 from django.contrib.auth.models import Group as BaseGroup
 from django.contrib.auth.models import User as BaseUser
 from .base import models
-from .acl import ACLPermissionSubclass, ACLGroupSubclass
+from .acl import ACLPermissionSubclass, ACLGroupSubclass, ACLPermissionAbstract
 
 
 logger = logging.getLogger("polemarch")
+
+
+class ACLPermission(ACLPermissionAbstract):
+    role = models.CharField(max_length=10)
 
 
 class UserGroup(BaseGroup, ACLPermissionSubclass, ACLGroupSubclass):

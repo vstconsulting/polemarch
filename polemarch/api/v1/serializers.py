@@ -14,7 +14,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from ...main import models
 from ..base import Response
-from ...main.models.acl import ACLPermission
+from ...main.models import ACLPermission
 
 
 # NOTE: we can freely remove that because according to real behaviour all our

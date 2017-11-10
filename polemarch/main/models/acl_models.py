@@ -12,11 +12,13 @@ class ACLPermissionQuerySet(BQuerySet):
     use_for_related_fields = True
 
 
-class ACLPermission(BModel):
+class ACLPermissionAbstract(BModel):
     objects = ACLPermissionQuerySet.as_manager()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
     uagroup = models.ForeignKey('UserGroup', blank=True, null=True)
-    role = models.CharField(max_length=10)
+
+    class Meta:
+        abstract = True
 
 
 class ACLQuerySet(BQuerySet):

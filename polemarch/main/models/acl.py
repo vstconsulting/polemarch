@@ -1,8 +1,8 @@
 from django.conf import settings
 from ..utils import import_class
 
-ACLPermission = import_class(
-    settings.ACL['DEFAULT_ACL_CLASSES']["ACLPermission"]
+ACLPermissionAbstract = import_class(
+    settings.ACL['DEFAULT_ACL_CLASSES']["ACLPermissionAbstract"]
 )
 ACLPermissionSubclass = import_class(
     settings.ACL['DEFAULT_ACL_CLASSES']["ACLPermissionSubclass"]

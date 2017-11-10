@@ -377,7 +377,7 @@ TASKS_HANDLERS = {
 
 ACL = {
     "DEFAULT_ACL_CLASSES": {
-        "ACLPermission": "polemarch.main.models.acl_models.ACLPermission",
+        "ACLPermissionAbstract": "polemarch.main.models.acl_models.ACLPermissionAbstract",
         "ACLModel": "polemarch.main.models.acl_models.ACLModel",
         "ACLPermissionSubclass": "polemarch.main.models.acl_models.ACLPermissionSubclass",
         "ACLGroupSubclass": "polemarch.main.models.acl_models.ACLGroupSubclass",

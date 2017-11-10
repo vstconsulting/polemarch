@@ -13,8 +13,7 @@ from django.conf import settings
 from .vars import Variable
 from .hosts import Host, Group, Inventory
 from .projects import Project
-from .users import UserGroup
-from .acl import ACLPermission
+from .users import UserGroup, ACLPermission
 from .tasks import Task, PeriodicTask, History, HistoryLines, Template
 from ..validators import RegexValidator
 from ..exceptions import UnknownTypeException
