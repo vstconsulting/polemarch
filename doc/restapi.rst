@@ -1489,7 +1489,10 @@ Templates
    :query id: id of project if we want to filter by it.
    :query id__not: id of project, which we want to filter out.
    :query name: filter by name.
+   :query name__not: filter by name, which we want to filter out.
    :query kind: filter by ``kind``.
+   :query project: filter by ``project``.
+   :query inventory: filter by ``inventory``.
 
    Example request:
 

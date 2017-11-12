@@ -121,10 +121,15 @@ class Template(ACLModel):
     name          = models.CharField(max_length=512)
     kind          = models.CharField(max_length=32)
     template_data = models.TextField(default="")
+    inventory     = models.CharField(max_length=128,
+                                     default=None, blank=True, null=True)
+    project       = models.ForeignKey(Project,
+                                      on_delete=models.SET_NULL,
+                                      default=None, blank=True, null=True)
 
     class Meta:
         index_together = [
-            ["id", "name", "kind"]
+            ["id", "name", "kind", "inventory", "project"]
         ]
 
     template_fields = {}
@@ -136,22 +141,60 @@ class Template(ACLModel):
     template_fields["Host"] = ["name", "vars"]
     template_fields["Group"] = template_fields["Host"] + ["children"]
 
+    def get_data(self):
+        data = json.loads(self.template_data)
+        if "project" in self.template_fields[self.kind] and self.project:
+            data['project'] = self.project.id
+        if "inventory" in self.template_fields[self.kind] and self.inventory:
+            try:
+                data['inventory'] = int(self.inventory)
+            except ValueError:
+                data['inventory'] = self.inventory
+        return data
+
+    def _convert_to_data(self, value):
+        if isinstance(value, (six.string_types, six.text_type)):
+            return json.loads(value)
+        elif isinstance(value, (dict, OrderedDict, list)):
+            return value
+        else:
+            raise ValueError("Unknown data type set.")
+
+    def set_data(self, value):
+        data = self._convert_to_data(value)
+        project_id = data.pop('project', None)
+        inventory_id = data.pop('inventory', None)
+        if "project" in self.template_fields[self.kind]:
+            self.project = (
+                Project.objects.get(pk=project_id) if project_id
+                else project_id
+            )
+        if "inventory" in self.template_fields[self.kind]:
+            try:
+                self.inventory = Inventory.objects.get(pk=int(inventory_id)).id
+            except (ValueError, TypeError, Inventory.DoesNotExist):
+                self.inventory = inventory_id
+        self.template_data = json.dumps(data)
+
+    def __setattr__(self, key, value):
+        if key == "data":
+            self.set_data(value)
+        else:
+            super(Template, self).__setattr__(key, value)
+
     @property
     def data(self):
-        return json.loads(self.template_data)
+        return self.get_data()
 
     @data.setter
     def data(self, value):
-        if isinstance(value, (six.string_types, six.text_type)):
-            self.template_data = json.dumps(json.loads(value))
-        elif isinstance(value, (dict, OrderedDict, list)):
-            self.template_data = json.dumps(value)
-        else:
-            raise ValueError("Unknown data type set.")
+        return self.set_data(value)
 
     @data.deleter
     def data(self):
         self.template_data = ""  # nocv
+        self.inventory = None  # nocv
+        self.project = None  # nocv
 
 
 class HistoryQuerySet(BQuerySet):
