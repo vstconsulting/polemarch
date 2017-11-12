@@ -667,6 +667,20 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.make_test(url, module_template_data, update_func, "group")
         self.make_test(url, ptask_template_data, update_func, "group")
 
+        # Filters
+        # by Project
+        search_url = "{}?project={}".format(url, self.pr_tmplt.id)
+        real_count = Template.objects.filter(project=self.pr_tmplt).count()
+        res = self.get_result("get", search_url)
+        self.assertEqual(res["count"], real_count, [res, real_count])
+        # by Inventory
+        search_url = "{}?inventory={}".format(url, self.history_inventory.id)
+        real_count = Template.objects.filter(
+            inventory=str(self.history_inventory.id)
+        ).count()
+        res = self.get_result("get", search_url)
+        self.assertEqual(res["count"], real_count, [res, real_count])
+
 
 class ApiHistoryTestCase(_ApiGHBaseTestCase):
     def setUp(self):
