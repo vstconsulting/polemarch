@@ -6,17 +6,18 @@ import logging
 from django.contrib.auth.models import Group as BaseGroup
 from django.contrib.auth.models import User as BaseUser
 from .base import models
-from .acl import ACLPermissionSubclass, ACLGroupSubclass, ACLPermissionAbstract
+from . import acl
 
 
 logger = logging.getLogger("polemarch")
 
 
-class ACLPermission(ACLPermissionAbstract):
+class ACLPermission(acl.ACLPermissionAbstract):
     role = models.CharField(max_length=10)
 
 
-class UserGroup(BaseGroup, ACLPermissionSubclass, ACLGroupSubclass):
+class UserGroup(BaseGroup, acl.ACLPermissionSubclass, acl.ACLGroupSubclass):
+    objects = acl.ACLQuerySet.as_manager()
     parent = models.OneToOneField(BaseGroup, parent_link=True)
     users = BaseGroup.user_set
 

@@ -286,7 +286,7 @@ class StatisticViewSet(base.ListNonModelViewSet):
 
     def _get_count_by_user(self, model):
         user = self.request.user
-        filter_models = (serializers.User, serializers.models.UserGroup)
+        filter_models = (serializers.User,)
         if model not in filter_models:
             return model.objects.all().user_filter(user).count()
         return model.objects.all().count()
