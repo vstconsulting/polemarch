@@ -6,7 +6,6 @@ import re
 import six
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.db.models import Q
 
 from rest_framework import serializers
 from rest_framework import exceptions
@@ -14,7 +13,6 @@ from rest_framework.exceptions import PermissionDenied
 
 from ...main import models
 from ..base import Response
-from ...main.models import ACLPermission
 
 
 # NOTE: we can freely remove that because according to real behaviour all our
@@ -245,13 +243,7 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
 
     def _get_objects(self, model, objs_id):
         user = self.context['request'].user
-        qs = model.objects.all()
-        if not user.is_staff:
-            # FIXME: groups not counted. Probably test miss that.
-            his_permissions = ACLPermission.objects.filter(user=user,
-                                                           role="MASTER")
-            qs = qs.filter(Q(owner=user) |
-                           Q(permissions__in=his_permissions))
+        qs = model.objects.all().user_filter(user)
         return list(qs.filter(id__in=objs_id))
 
     def get_operation(self, method, data, attr):
