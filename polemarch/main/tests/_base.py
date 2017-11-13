@@ -10,6 +10,7 @@ from django.db import transaction
 from django.test import TestCase
 from django.conf import settings
 from django.contrib.auth.models import User
+from polemarch.main import models
 
 
 class BaseTestCase(TestCase):
@@ -25,6 +26,14 @@ class BaseTestCase(TestCase):
         file_path += "/" + name
         with open(file_path, 'r') as inventory_file:
             return inventory_file.read()
+
+    def get_model_filter(self, model, **kwargs):
+        if isinstance(model, (six.text_type, six.string_types)):
+            model = getattr(models, model)
+        return model.objects.filter(**kwargs)
+
+    def get_count(self, model, **kwargs):
+        return self.get_model_filter(model, **kwargs).count()
 
     def change_identity(self, is_super_user=False):
         old_user = self.user

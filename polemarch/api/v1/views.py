@@ -279,3 +279,26 @@ class AnsibleViewSet(base.ListNonModelViewSet):
             request.query_params.get("filter", "")
         )
         return base.Response(_mods, 200).resp
+
+
+class StatisticViewSet(base.ListNonModelViewSet):
+    base_name = "stats"
+
+    def _get_count_by_user(self, model):
+        user = self.request.user
+        filter_models = (serializers.User, serializers.models.UserGroup)
+        if model not in filter_models:
+            return model.objects.all().user_filter(user).count()
+        return model.objects.all().count()
+
+    def list(self, request, *args, **kwargs):
+        # pylint: disable=unused-argument
+        stats = dict(
+            projects=self._get_count_by_user(serializers.models.Project),
+            inventories=self._get_count_by_user(serializers.models.Inventory),
+            groups=self._get_count_by_user(serializers.models.Group),
+            hosts=self._get_count_by_user(serializers.models.Host),
+            teams=self._get_count_by_user(serializers.models.UserGroup),
+            users=self._get_count_by_user(serializers.User),
+        )
+        return base.Response(stats, 200).resp

@@ -251,15 +251,12 @@ class APITestCase(ApiUsersTestCase,
         super(APITestCase, self).setUp()
 
     def test_api_versions_list(self):
-        client = self._login()
-        result = self.result(client.get, "/api/")
+        result = self.get_result("get", "/api/")
         self.assertEqual(len(result), 1)
         self.assertTrue(result.get('v1', False))
-        self._logout(client)
 
     def test_api_v1_list(self):
-        client = self._login()
-        result = self.result(client.get, "/api/v1/")
+        result = self.get_result('get', "/api/v1/")
         self.assertTrue(result.get('users', False))
         self.assertTrue(result.get('hosts', False))
         self.assertTrue(result.get('groups', False))
@@ -272,8 +269,18 @@ class APITestCase(ApiUsersTestCase,
         self.assertTrue(result.get('token', False))
 
     def test_api_router(self):
-        client = self._login()
-        result = self.result(client.get, "/api/?format=json")
+        result = self.get_result('get', "/api/?format=json")
         url = result['v1'].replace("http://testserver", "")
-        response = client.get(url)
-        self.assertRCode(response)
+        self.get_result('get', url)
+
+    def test_statistic(self):
+        url = '/api/v1/stats/'
+        result = self.get_result('get', url)
+        # Check objects counters
+        self.assertEqual(result['projects'], self.get_count('Project'))
+        self.assertEqual(result['inventories'], self.get_count('Inventory'))
+        self.assertEqual(result['groups'], self.get_count('Group'))
+        self.assertEqual(result['hosts'], self.get_count('Host'))
+        self.assertEqual(result['teams'], self.get_count('UserGroup'))
+        self.assertEqual(result['users'], self.get_count(User))
+        # TODO: Make stats about history
