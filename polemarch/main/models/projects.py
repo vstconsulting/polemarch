@@ -34,12 +34,12 @@ class Project(AbstractModel):
     task_handlers = objects._queryset_class.task_handlers
     repository    = models.CharField(max_length=2*1024)
     status        = models.CharField(max_length=32, default="NEW")
-    inventories   = models.ManyToManyField(hosts_models.Inventory,
-                                           blank=True, null=True)
+    inventories   = ManyToManyFieldACL(hosts_models.Inventory,
+                                       blank=True, null=True)
     hosts         = ManyToManyFieldACL(hosts_models.Host,
                                        blank=True, null=True)
-    groups        = models.ManyToManyField(hosts_models.Group,
-                                           blank=True, null=True)
+    groups        = ManyToManyFieldACL(hosts_models.Group,
+                                       blank=True, null=True)
 
     class Meta:
         default_related_name = "projects"

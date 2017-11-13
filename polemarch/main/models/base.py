@@ -64,3 +64,17 @@ class ManyToManyFieldACL(models.ManyToManyField, AccessExtendsFieldMixin):
 
 class ForeignKeyACL(models.ForeignKey, AccessExtendsFieldMixin):
     pass
+
+
+class ReverseAccessExtendsFieldMixin(object):
+    reverse_access_to_related = True
+
+
+class ManyToManyFieldACLReverse(models.ManyToManyField,
+                                ReverseAccessExtendsFieldMixin):
+    pass
+
+
+class ForeignKeyACLReverse(models.ForeignKey,
+                           ReverseAccessExtendsFieldMixin):
+    pass
