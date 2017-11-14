@@ -1,6 +1,8 @@
+from datetime import timedelta
 from django.conf import settings
 from django.test import Client
 from django.contrib.auth.hashers import make_password
+from django.utils.timezone import now
 
 from ..utils import redirect_stdany
 from ._base import BaseTestCase, User, json
@@ -14,7 +16,7 @@ from .tasks import (ApiTasksTestCase,
                     ApiHistoryTestCase)
 from .ansible import ApiAnsibleTestCase
 from .repo_backends import RepoBackendsTestCase
-from ..models import UserGroup
+from ..models import UserGroup, History
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -273,9 +275,66 @@ class APITestCase(ApiUsersTestCase,
         url = result['v1'].replace("http://testserver", "")
         self.get_result('get', url)
 
+    def _generate_history(self, days_ago, count, status="OK"):
+        default_kwargs = dict(
+            project=self.ph, mode="task.yml", raw_inventory="inventory",
+            raw_stdout="text", inventory=self.history_inventory,
+            initiator=self.user.id
+        )
+        start_time = now() - timedelta(days=days_ago, hours=1)
+        stop_time = now() - timedelta(days=days_ago)
+        for i in range(count):
+            History.objects.create(start_time=start_time, stop_time=stop_time,
+                                   status=status, **default_kwargs)
+
+    def _prepare_statisic(self):
+        History.objects.all().delete()
+        self._generate_history(1, 10, 'OK')
+        self._generate_history(1, 3, 'ERROR')
+        self._generate_history(1, 2, 'STOP')
+        self._generate_history(2, 2, 'OK')
+        self._generate_history(2, 2, 'ERROR')
+        self._generate_history(2, 2, 'STOP')
+        self._generate_history(35, 5, 'OK')
+        self._generate_history(37, 11, 'ERROR')
+        self._generate_history(41, 8, 'ERROR')
+        return {
+            'day': [
+                {'day': 41, 'status': 'ERROR', 'sum': 8},
+                {'day': 37, 'status': 'ERROR', 'sum': 11},
+                {'day': 35, 'status': 'OK', 'sum': 5},
+                {'day': 2, 'status': 'ERROR', 'sum': 2},
+                {'day': 2, 'status': 'OK', 'sum': 2},
+                {'day': 2, 'status': 'STOP', 'sum': 2},
+                {'day': 2, 'status': 'ERROR', 'sum': 3},
+                {'day': 1, 'status': 'OK', 'sum': 10},
+                {'day': 1, 'status': 'STOP', 'sum': 2}],
+            'year': [
+                {'year': 0, 'status': 'ERROR', 'sum': 24},
+                {'year': 0, 'status': 'OK', 'sum': 17},
+                {'year': 0, 'status': 'STOP', 'sum': 4}],
+            'month': [
+                {'status': 'ERROR', 'month': 1, 'sum': 19},
+                {'status': 'OK', 'month': 1, 'sum': 5},
+                {'status': 'ERROR', 'month': 0, 'sum': 5},
+                {'status': 'OK', 'month': 0, 'sum': 12},
+                {'status': 'STOP', 'month': 0, 'sum': 4}]
+        }
+
+    def _check_stats_history(self, items, data):
+        count = 0
+        self.assertEqual(len(items), len(data))
+        for day in items:
+            self.assertEqual(day['status'], data[count]['status'])
+            self.assertEqual(day['sum'], data[count]['sum'])
+            count += 1
+
     def test_statistic(self):
         url = '/api/v1/stats/'
-        result = self.get_result('get', url)
+        self.maxDiff = None
+        # Prepare history data
+        data = self._prepare_statisic()
+        result = self.get_result('get', url+"?last=365")
         # Check objects counters
         self.assertEqual(result['projects'], self.get_count('Project'))
         self.assertEqual(result['inventories'], self.get_count('Inventory'))
@@ -283,4 +342,7 @@ class APITestCase(ApiUsersTestCase,
         self.assertEqual(result['hosts'], self.get_count('Host'))
         self.assertEqual(result['teams'], self.get_count('UserGroup'))
         self.assertEqual(result['users'], self.get_count(User))
-        # TODO: Make stats about history
+        # Check history counts
+        self._check_stats_history(data['day'], result['jobs']['day'])
+        self._check_stats_history(data['month'], result['jobs']['month'])
+        self._check_stats_history(data['year'], result['jobs']['year'])

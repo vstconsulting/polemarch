@@ -1,5 +1,5 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
-
+from collections import OrderedDict
 from django.db import transaction
 from django.http import HttpResponse
 from rest_framework import exceptions as excepts, views as rest_views
@@ -291,9 +291,13 @@ class StatisticViewSet(base.ListNonModelViewSet):
             return model.objects.all().user_filter(user).count()
         return model.objects.all().count()
 
+    def _get_history_stats(self, request):
+        qs = serializers.models.History.objects.user_filter(self.request.user)
+        return qs.stats(int(request.query_params.get("last", "14")))
+
     def list(self, request, *args, **kwargs):
         # pylint: disable=unused-argument
-        stats = dict(
+        stats = OrderedDict(
             projects=self._get_count_by_user(serializers.models.Project),
             inventories=self._get_count_by_user(serializers.models.Inventory),
             groups=self._get_count_by_user(serializers.models.Group),
@@ -301,4 +305,5 @@ class StatisticViewSet(base.ListNonModelViewSet):
             teams=self._get_count_by_user(serializers.models.UserGroup),
             users=self._get_count_by_user(serializers.User),
         )
+        stats['jobs'] = self._get_history_stats(request)
         return base.Response(stats, 200).resp
