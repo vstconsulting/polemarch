@@ -299,26 +299,29 @@ class APITestCase(ApiUsersTestCase,
         self._generate_history(37, 11, 'ERROR')
         self._generate_history(41, 8, 'ERROR')
         return {
-            'day': [
-                {'day': 41, 'status': 'ERROR', 'sum': 8},
-                {'day': 37, 'status': 'ERROR', 'sum': 11},
-                {'day': 35, 'status': 'OK', 'sum': 5},
-                {'day': 2, 'status': 'ERROR', 'sum': 2},
-                {'day': 2, 'status': 'OK', 'sum': 2},
-                {'day': 2, 'status': 'STOP', 'sum': 2},
-                {'day': 2, 'status': 'ERROR', 'sum': 3},
-                {'day': 1, 'status': 'OK', 'sum': 10},
-                {'day': 1, 'status': 'STOP', 'sum': 2}],
             'year': [
-                {'year': 0, 'status': 'ERROR', 'sum': 24},
-                {'year': 0, 'status': 'OK', 'sum': 17},
-                {'year': 0, 'status': 'STOP', 'sum': 4}],
+                {'sum': 24, 'all': 45, 'status': 'ERROR'},
+                {'sum': 17, 'all': 45, 'status': 'OK'},
+                {'sum': 4, 'all': 45, 'status': 'STOP'}
+            ],
             'month': [
-                {'status': 'ERROR', 'month': 1, 'sum': 19},
-                {'status': 'OK', 'month': 1, 'sum': 5},
-                {'status': 'ERROR', 'month': 0, 'sum': 5},
-                {'status': 'OK', 'month': 0, 'sum': 12},
-                {'status': 'STOP', 'month': 0, 'sum': 4}]
+                {'sum': 19, 'all': 24, 'status': 'ERROR'},
+                {'sum': 5, 'all': 24, 'status': 'OK'},
+                {'sum': 5, 'all': 21, 'status': 'ERROR'},
+                {'sum': 12, 'all': 21, 'status': 'OK'},
+                {'sum': 4, 'all': 21, 'status': 'STOP'}
+            ],
+            'day': [
+                {'sum': 8, 'all': 8, 'status': 'ERROR'},
+                {'sum': 11, 'all': 11, 'status': 'ERROR'},
+                {'sum': 5, 'all': 5, 'status': 'OK'},
+                {'sum': 2, 'all': 6, 'status': 'ERROR'},
+                {'sum': 2, 'all': 6, 'status': 'OK'},
+                {'sum': 2, 'all': 6, 'status': 'STOP'},
+                {'sum': 3, 'all': 15, 'status': 'ERROR'},
+                {'sum': 10, 'all': 15, 'status': 'OK'},
+                {'sum': 2, 'all': 15, 'status': 'STOP'}
+            ]
         }
 
     def _check_stats_history(self, items, data):
@@ -327,6 +330,7 @@ class APITestCase(ApiUsersTestCase,
         for day in items:
             self.assertEqual(day['status'], data[count]['status'])
             self.assertEqual(day['sum'], data[count]['sum'])
+            self.assertEqual(day['all'], data[count]['all'])
             count += 1
 
     def test_statistic(self):
