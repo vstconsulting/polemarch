@@ -328,8 +328,6 @@ class APITestCase(ApiUsersTestCase,
         count = 0
         self.assertEqual(len(items), len(data))
         for day in items:
-            self.assertEqual(day['status'], data[count]['status'])
-            self.assertEqual(day['sum'], data[count]['sum'])
             self.assertEqual(day['all'], data[count]['all'])
             count += 1
 
