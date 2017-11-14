@@ -62,7 +62,7 @@ class TeamViewSet(base.ModelViewSetSet):
     filter_class = filters.TeamFilter
 
 
-class HostViewSet(base.OwnerMixin, base.ModelViewSetSet):
+class HostViewSet(base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
     serializer_class_one = serializers.OneHostSerializer
@@ -86,21 +86,24 @@ class _GroupedViewSet(object):
         return self._get_result(request, serializer.groups_operations)
 
 
-class GroupViewSet(base.OwnerMixin, base.ModelViewSetSet, _GroupedViewSet):
+class GroupViewSet(base.PermissionMixin, base.ModelViewSetSet,
+                   _GroupedViewSet):
     model = serializers.models.Group
     serializer_class = serializers.GroupSerializer
     serializer_class_one = serializers.OneGroupSerializer
     filter_class = filters.GroupFilter
 
 
-class InventoryViewSet(base.OwnerMixin, base.ModelViewSetSet, _GroupedViewSet):
+class InventoryViewSet(base.PermissionMixin, base.ModelViewSetSet,
+                       _GroupedViewSet):
     model = serializers.models.Inventory
     serializer_class = serializers.InventorySerializer
     serializer_class_one = serializers.OneInventorySerializer
     filter_class = filters.InventoryFilter
 
 
-class ProjectViewSet(base.ModelViewSetSet, _GroupedViewSet):
+class ProjectViewSet(base.PermissionMixin, base.ModelViewSetSet,
+                     _GroupedViewSet):
     model = serializers.models.Project
     serializer_class = serializers.ProjectSerializer
     serializer_class_one = serializers.OneProjectSerializer

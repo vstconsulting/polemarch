@@ -96,12 +96,6 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
         serializer = serializer_class(queryset, many=True, **kwargs)
         return RestResponse(serializer.data)
 
-    @detail_route(methods=["post", "put", "delete", "get"])
-    def permissions(self, request, pk=None):
-        # pylint: disable=unused-argument
-        serializer = self.get_serializer(self.get_object())
-        return serializer.permissions(request).resp
-
     @list_route(methods=["post"])
     def filter(self, request):
         queryset = self.filter_queryset(self.get_queryset())
@@ -115,7 +109,7 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
         )
 
 
-class OwnerMixin(object):
+class PermissionMixin(object):
     def get_extra_queryset(self):
         return self.queryset.user_filter(self.request.user)
 
@@ -124,6 +118,12 @@ class OwnerMixin(object):
         # pylint: disable=unused-argument
         serializer = self.get_serializer(self.get_object())
         return serializer.owner(request).resp
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def permissions(self, request, pk=None):
+        # pylint: disable=unused-argument
+        serializer = self.get_serializer(self.get_object())
+        return serializer.permissions(request).resp
 
 
 class ReadOnlyModelViewSet(GenericViewSet,
