@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 import uuid
 from collections import OrderedDict
+from datetime import timedelta
 
 import json
 
@@ -14,6 +15,8 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.db.models import functions as dbfunc, Count
+from django.utils.timezone import now
 
 from ..utils import AnsibleArgumentsReference
 from . import Inventory
@@ -206,6 +209,36 @@ class HistoryQuerySet(BQuerySet):
         if raw_stdout:
             history.raw_stdout = raw_stdout
         return history
+
+    def _get_history_stats_by(self, qs, grouped_by='day'):
+        sum_by_date, values = {}, []
+        qs = qs.values(grouped_by, 'status').annotate(sum=Count('id'))
+        for hist_stat in qs.order_by(grouped_by):
+            sum_by_date[hist_stat[grouped_by]] = (
+                sum_by_date.get(hist_stat[grouped_by], 0) + hist_stat['sum']
+            )
+        for hist_stat in qs.order_by(grouped_by):
+            hist_stat.update({'all': sum_by_date[hist_stat[grouped_by]]})
+            values.append(hist_stat)
+        return values
+
+    def stats(self, last):
+        qs = self.filter(start_time__gte=now()-timedelta(days=last))
+        qs = qs.annotate(
+            day=dbfunc.TruncDay('start_time'),
+            month=dbfunc.TruncMonth('start_time'),
+            year=dbfunc.TruncYear('start_time'),
+        )
+        return OrderedDict(
+            day=self._get_history_stats_by(qs, 'day'),
+            month=self._get_history_stats_by(qs, 'month'),
+            year=self._get_history_stats_by(qs, 'year')
+        )
+
+    def user_filter(self, user, only_leads=False):
+        # pylint: disable=unused-argument
+        # TODO: this should be change
+        return self
 
 
 class History(BModel):
