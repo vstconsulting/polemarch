@@ -96,7 +96,7 @@
 				STATE_JS = 11,
 				cache = {},
                                 countUid = 0,
-                                
+                                 
 				regExpEscape = function (str) {
 					return String(str).replace(escapeExp, '\\$1');
 				},
@@ -360,7 +360,7 @@
                                                 return data;
                                         } else {
                                                 console.error('Failed to load template', file)
-                                                return '';
+                                                throw 'Failed to load template ' + file 
                                         }
 				},
 				loadSync = function (file) {
@@ -451,14 +451,6 @@
                                 data = {}
                             }
 
-                            if(this.record)
-                            {
-                                this.testrecord.push({
-                                    template:template,
-                                    data:data
-                                })
-                            }
-
                             var tpl = new Template(template, data);
                             var html = tpl.renderSync();
                             if(html == undefined)
@@ -469,54 +461,16 @@
 			};
 			this.render = this.renderSync
 
+			this.isTplExists = function(name){ 
+                            return options.root[name] !== undefined
+                        }
                         /**
                          * При вставке этого html в дом дерево будет выполнена функция func
                          * @param {type} html
                          * @param {type} func
                          * @returns {unresolved}
                          */
-			this.onInsert = onInsert
-                        
-                        // Начинает сохранение данных о отрисовываемых шаблонов
-			this.startRecoding = function ()
-                        {
-                            this.record = true;
-                            this.testrecord = []
-                        }
-
-                        // Возвращяет данные о отрисованых шаблонах
-			this.getRecoding = function ()
-                        {
-                            return this.testrecord
-                        }
-
-                        // Заканчивает сохранение данных о отрисовываемых шаблонов
-			this.stopRecoding = function ()
-                        {
-                            this.record = false;
-                        }
-
-                        // Берёт результат записи данных из getRecoding и прогоняет рендер ещё раз
-                        // Если возникнут ошибки то выведет их вконсоль
-                        // Удобно использовать для автоматизации проверки валидности шаблонов и передаваемых в них данных.
-			this.testRecoding = function (record)
-                        {
-                            var tmp = this.record;
-                            this.record = false;
-
-                            for(var i in record)
-                            {
-                                console.log(i, record[i].template);
-                                var res = this.renderSync(record[i].template, record[i].data)
-                                if(!res)
-                                {
-                                    console.error(i, record[i].template, record[i].data);
-                                }
-
-                            }
-                            this.record = tmp;
-                        }
-
+			this.onInsert = onInsert 
 			this.configure(newOptions);
 		};
 

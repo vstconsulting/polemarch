@@ -170,11 +170,35 @@
     <section class="col-lg-12">
         <div class="box box-info">
             <div class="box-header with-border">
-                <%- opt.title2 %><br>
+                <%- opt.title2 %><br>  
+                <div class="pull-right box-tools">
+                    <button type="button" 
+                        class="btn btn-info btn-sm" 
+                        data-toggle="tooltip" 
+                        title="" 
+                        data-original-title="Import screen"
+                        onclick="jsonEditor.model.form['<%- opt.prefix %>'].showImportForm = !jsonEditor.model.form['<%- opt.prefix %>'].showImportForm;"
+                        >
+                        <i class="fa fa-expand"></i>
+                    </button>
+                </div>
             </div>
             <div class="box-body">
-    <% } %>
-                <div class="row">
+    <% } %> 
+                <div class="row <%- jsonEditor.model.form[opt.prefix].justNotClass('showImportForm', 'hide') %>">
+                    <div class="form-group col-lg-12">
+                        <label class="col-lg-12 control-label">
+                            Import vars 
+                        </label>
+                        <div class="input-group col-sm-12 col-lg-12 col-xs-12"  >
+                            <textarea placeholder="Enter value"  id="new_json_vars<%- opt.prefix %>"  class="form-control"  style="resize:vertical;min-height: 100px; height: 200px;"></textarea>
+                            <div class="help-block">
+                                This form accept variables in format `variableName=variable value` or in format `variableName:variable value` 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row <%- jsonEditor.model.form[opt.prefix].justClass('showImportForm', 'hide') %>">
                     <div class="form-group col-lg-12">
                         <label class=" col-sm-2 col-lg-2 control-label">
                             Name 
@@ -209,7 +233,7 @@
                 </div>
 
 
-                <div class="row">
+                <div class="row <%- jsonEditor.model.form[opt.prefix].justClass('showImportForm', 'hide') %>">
                     <div class="form-group col-lg-12">
                         <label class="col-sm-2 col-lg-2 control-label">
                             Value
@@ -221,9 +245,14 @@
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row <%- jsonEditor.model.form[opt.prefix].justClass('showImportForm', 'hide') %>">
                     <div class="form-group col-lg-1">
                         <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>', '<%- opt.prefix %>');" >Add varible</span>
+                    </div>
+                </div>
+                <div class="row <%- jsonEditor.model.form[opt.prefix].justNotClass('showImportForm', 'hide') %>">
+                    <div class="form-group col-lg-1">
+                        <span class="btn btn-primary" onclick="jsonEditor.jsonEditorImportVars('<%- optionsblock %>', '<%- opt.prefix %>');" >Add varibles</span>
                     </div>
                 </div>
     <% if(!opt.noBox){ %>

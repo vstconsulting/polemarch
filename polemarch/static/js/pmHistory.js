@@ -38,7 +38,7 @@ pmHistory.showSearchResults = function(holder, menuInfo, data)
     })
 }
 
-pmPeriodicTasks.search = function(query, options)
+pmHistory.search = function(query, options)
 { 
     if(options.inventory_id)
     {
@@ -619,3 +619,61 @@ pmHistory.loadLines = function(item_id, opt)
 
     return def.promise();
 }
+
+ tabSignal.connect("polemarch.start", function()
+ {
+    // history
+    spajs.addMenu({
+        id:"history", 
+        urlregexp:[/^history$/, /^history\/search\/?$/, /^history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showUpdatedList(holder, menuInfo, data);}, 
+        onClose:function(){return pmHistory.stopUpdates();},
+    })
+    
+    spajs.addMenu({
+        id:"history-search", 
+        urlregexp:[/^history\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResults(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"history-item", 
+        urlregexp:[/^history\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItem(holder, menuInfo, data);},
+        onClose:function(){return pmHistory.stopUpdates();}
+    })
+    
+    spajs.addMenu({
+        id:"history-item-in-project", 
+        urlregexp:[/^project\/([0-9]+)\/history\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInProjects(holder, menuInfo, data);},
+        onClose:function(){return pmHistory.stopUpdates();}
+    })
+    
+    spajs.addMenu({
+        id:"project-history",  
+        urlregexp:[/^project\/([0-9]+)\/history$/, /^project\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){
+            return pmHistory.showUpdatedList(holder, menuInfo, data, "showListInProjects", function(menuInfo, data)
+            {
+                var offset = 0
+                var limit = pmHistory.pageSize;
+                if(data.reg && data.reg[2] > 0)
+                {
+                    offset = pmHistory.pageSize*(data.reg[2] - 1);
+                }
+                var project_id = data.reg[1];
+
+                return pmHistory.sendSearchQuery({project:project_id}, limit, offset)
+            });
+        }, 
+        onClose:function(){return pmHistory.stopUpdates();}, 
+    })
+
+    spajs.addMenu({
+        id:"project-history-search", 
+        urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInProjects(holder, menuInfo, data);}
+    })
+    
+ })

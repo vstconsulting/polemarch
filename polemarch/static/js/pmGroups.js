@@ -217,6 +217,10 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
                 pmGroups.model.items[item_id].groups = []
                 for(var i in groups_ids)
                 {
+                    if(!pmGroups.model.items[groups_ids[i]])
+                    {
+                        continue;
+                    }
                     pmGroups.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
                 }
             }
@@ -252,6 +256,10 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
                 pmGroups.model.items[item_id].hosts = []
                 for(var i in hosts_ids)
                 {
+                    if(!pmHosts.model.items[hosts_ids[i]])
+                    {
+                        continue;
+                    }
                     pmGroups.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
                 }
             }
@@ -371,7 +379,7 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
  * Показывает форму со списком всех групп.
  * @return $.Deferred
  */
-pmGroups.showAddSubGroupsForm = function(item_id, holder)
+pmGroups.showAddSubGroupsForm = function(item_id)
 {
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
@@ -386,7 +394,7 @@ pmGroups.showAddSubGroupsForm = function(item_id, holder)
  * Показывает форму со списком всех хостов.
  * @return $.Deferred
  */
-pmGroups.showAddSubHostsForm = function(item_id, holder)
+pmGroups.showAddSubHostsForm = function(item_id)
 {
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
@@ -506,120 +514,8 @@ pmGroups.groupsAutocompleteTemplate = function(inventory_id, value, prefix)
                     var value = $(item).attr('data-value');
                     $("#groups_autocomplete_filed"+prefix).val(value);
                 },
-                source: function(original_term, response)
-                { 
-                    var addTermToMatches = false
-                    var term = original_term
-                    var baseTerm = ""
-                    if(original_term.indexOf(':') >= 0)
-                    {
-                        addTermToMatches = true
-                        term = original_term.replace(/^(.*):([^:]*)$/gim, "$2")
-                        baseTerm = original_term.replace(/^(.*):([^:]*)$/gim, "$1:")
-                    }
-                    
-                    if(term[0] == '!')
-                    {
-                        term = term.substring(1)
-                        baseTerm = baseTerm + "!"
-                    }
-                    
-                    var arrUsedItems = original_term.toLowerCase().replace(/!/gmi, "").split(/:/g)
-                    
-                    term = term.toLowerCase();
-
-                    var matches = []
-                    var matchesAll = []
-
-                    for(var i in pmInventories.model.items[inventory_id].groups)
-                    {
-                        var val = pmInventories.model.items[inventory_id].groups[i]
-                        
-                        if($.inArray(val.name.toLowerCase(), arrUsedItems) != -1)
-                        {
-                            continue;
-                        }
-                        
-                        var text = val.name
-                        if(addTermToMatches)
-                        {
-                            text = baseTerm+text
-                        }
-                        
-                        if(val.name.toLowerCase().indexOf(term) == 0 )
-                        {
-                            matches.push({
-                                value:text,
-                                isHost:false,
-                                name:val.name,
-                            })
-                        }
-                        
-                        matchesAll.push({
-                            value:text,
-                            isHost:false,
-                            name:val.name,
-                        })
-                    }
-
-                    for(var i in pmInventories.model.items[inventory_id].hosts)
-                    {
-                        var val = pmInventories.model.items[inventory_id].hosts[i]
-                        if($.inArray(val.name.toLowerCase(), arrUsedItems) != -1)
-                        {
-                            continue;
-                        }
-                        
-                        if(val.name.indexOf(":") != -1)
-                        {
-                            continue;
-                        }
-                        
-                        var text = val.name
-                        if(addTermToMatches)
-                        {
-                            text = baseTerm+text
-                        }
-                        
-                        if(val.name.toLowerCase().indexOf(term) == 0 )
-                        {
-                            matches.push({
-                                value:text,
-                                isHost:true,
-                                name:val.name,
-                            })
-                        }
-                        
-                        matchesAll.push({
-                            value:text,
-                            isHost:true,
-                            name:val.name,
-                        })
-                    }
-                    
-                    if(!addTermToMatches && "All".toLowerCase().indexOf(term) != -1 )
-                    {
-                        matches.push({
-                            value:"all",
-                            isHost:false,
-                            name:"all",
-                        })
-                        
-                        matchesAll.push({
-                            value:"all",
-                            isHost:false,
-                            name:"all",
-                        })
-                    }
-
-                    if(matches.length > 1 || addTermToMatches)
-                    {
-                        response(matches);
-                    }
-                    else
-                    {
-                        response(matchesAll)
-                    }
+                source: function(original_term, response){
+                    pmGroups.groupsAutocompleteMatcher(original_term, response, inventory_id)
                 }
             });
         })
@@ -627,3 +523,148 @@ pmGroups.groupsAutocompleteTemplate = function(inventory_id, value, prefix)
      
     return spajs.just.render('groups_autocomplete_filed', {selectedInventory:inventory_id, value:value, prefix:prefix})
 }
+
+pmGroups.groupsAutocompleteMatcher = function(original_term, response, inventory_id)
+{ 
+    var addTermToMatches = false
+    var term = original_term
+    var baseTerm = ""
+    if(original_term.indexOf(':') >= 0)
+    {
+        addTermToMatches = true
+        term = original_term.replace(/^(.*):([^:]*)$/gim, "$2")
+        baseTerm = original_term.replace(/^(.*):([^:]*)$/gim, "$1:")
+    }
+
+    if(term[0] == '!')
+    {
+        term = term.substring(1)
+        baseTerm = baseTerm + "!"
+    }
+
+    var arrUsedItems = original_term.toLowerCase().replace(/!/gmi, "").split(/:/g)
+
+    term = term.toLowerCase();
+
+    var matches = []
+    var matchesAll = []
+
+    for(var i in pmInventories.model.items[inventory_id].groups)
+    {
+        var val = pmInventories.model.items[inventory_id].groups[i]
+
+        if($.inArray(val.name.toLowerCase(), arrUsedItems) != -1)
+        {
+            continue;
+        }
+
+        var text = val.name
+        if(addTermToMatches)
+        {
+            text = baseTerm+text
+        }
+
+        if(val.name.toLowerCase().indexOf(term) == 0 )
+        {
+            matches.push({
+                value:text,
+                isHost:false,
+                name:val.name,
+            })
+        }
+
+        matchesAll.push({
+            value:text,
+            isHost:false,
+            name:val.name,
+        })
+    }
+
+    for(var i in pmInventories.model.items[inventory_id].hosts)
+    {
+        var val = pmInventories.model.items[inventory_id].hosts[i]
+        if($.inArray(val.name.toLowerCase(), arrUsedItems) != -1)
+        {
+            continue;
+        }
+
+        if(val.name.indexOf(":") != -1)
+        {
+            continue;
+        }
+
+        var text = val.name
+        if(addTermToMatches)
+        {
+            text = baseTerm+text
+        }
+
+        if(val.name.toLowerCase().indexOf(term) == 0 )
+        {
+            matches.push({
+                value:text,
+                isHost:true,
+                name:val.name,
+            })
+        }
+
+        matchesAll.push({
+            value:text,
+            isHost:true,
+            name:val.name,
+        })
+    }
+
+    if(!addTermToMatches && "All".toLowerCase().indexOf(term) != -1 )
+    {
+        matches.push({
+            value:"all",
+            isHost:false,
+            name:"all",
+        })
+
+        matchesAll.push({
+            value:"all",
+            isHost:false,
+            name:"all",
+        })
+    }
+
+    if(matches.length > 1 || addTermToMatches)
+    {
+        response(matches);
+    }
+    else
+    {
+        response(matchesAll)
+    }
+}
+
+tabSignal.connect("polemarch.start", function()
+{ 
+    // groups
+    spajs.addMenu({
+        id:"groups", 
+        urlregexp:[/^groups$/, /^group$/, /^groups\/search\/?$/, /^groups\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmGroups.showList(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"groups-search", 
+        urlregexp:[/^groups\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmGroups.showSearchResults(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"group", 
+        urlregexp:[/^group\/([0-9]+)$/, /^groups\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmGroups.showItem(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"newGroup", 
+        urlregexp:[/^new-group$/, /^([A-z0-9_]+)\/([0-9]+)\/new-group$/],
+        onOpen:function(holder, menuInfo, data){return pmGroups.showNewItemPage(holder, menuInfo, data);}
+    })
+     
+})

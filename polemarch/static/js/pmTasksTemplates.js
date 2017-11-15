@@ -274,3 +274,32 @@ pmTasksTemplates.updateItem = function(item_id)
         }
     });
 }
+
+tabSignal.connect("polemarch.start", function()
+{ 
+    // Tasks Templates
+    spajs.addMenu({
+        id:"tasks", 
+        urlregexp:[/^templates$/, /^templates\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showList(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"tasks-search", 
+        urlregexp:[/^templates\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showSearchResults(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"Task-item", 
+        urlregexp:[/^template\/Task\/([0-9]+)$/, /^templates\/Task\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showItem(holder, menuInfo, data);}, 
+    })
+    
+    spajs.addMenu({
+        id:"task-new", 
+        urlregexp:[/^template\/new-task$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showNewItemPage(holder, menuInfo, data);}
+    })
+     
+})

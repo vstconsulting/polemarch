@@ -1215,3 +1215,44 @@ pmInventories.validateGroupName = function(name)
     return false;
 }
 
+
+ tabSignal.connect("polemarch.start", function()
+ {
+    // inventories
+    spajs.addMenu({
+        id:"inventories", 
+        urlregexp:[/^inventories$/, /^inventory$/, /^inventories\/search\/?$/, /^inventories\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showList(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"inventories-import", 
+        urlregexp:[/^inventories\/import$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showImportPage(holder, menuInfo, data);}
+    })
+
+    
+    spajs.addMenu({
+        id:"inventories-search", 
+        urlregexp:[/^inventories\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showSearchResults(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"inventory", 
+        urlregexp:[/^inventory\/([0-9]+)$/, /^inventories\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showItem(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"inventory-history", 
+        urlregexp:[/^inventory\/([0-9]+)\/history$/, /^inventory\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showListInInventory(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"newInventory", 
+        urlregexp:[/^new-inventory$/, /^([A-z0-9_]+)\/([0-9]+)\/new-inventory$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showNewItemPage(holder, menuInfo, data);}
+    }) 
+ })

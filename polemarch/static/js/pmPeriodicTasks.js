@@ -104,8 +104,13 @@ pmPeriodicTasks.deleteItem = function(item_id, force)
         var project_id = pmPeriodicTasks.model.items[item_id].project;
         $.when(thisObj.deleteItemQuery(item_id)).done(function(data)
         {
-            def.resolve()
-            spajs.open({ menuId: "project/"+project_id+"/periodic-tasks"})
+            $.when(spajs.open({ menuId: "project/"+project_id+"/periodic-tasks"})).done(function()
+            {
+                def.resolve() 
+            }).fail(function(e){
+                def.reject();
+                polemarch.showErrors(e.responseJSON)
+            })
         }).fail(function(e){
             def.reject();
             polemarch.showErrors(e.responseJSON)
@@ -604,3 +609,32 @@ pmPeriodicTasks.updateItem = function(item_id)
         }
     });
 }
+
+tabSignal.connect("polemarch.start", function()
+{ 
+    // tasks
+    spajs.addMenu({
+        id:"PeriodicTasks", 
+        urlregexp:[/^project\/([0-9]+)\/periodic-tasks$/, /^project\/([0-9]+)\/periodic-task$/, /^project\/([0-9]+)\/periodic-tasks\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showList(holder, menuInfo, data);} 
+    })
+    
+    spajs.addMenu({
+        id:"PeriodicTasks-search", 
+        urlregexp:[/^project\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResults(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"PeriodicTask", 
+        urlregexp:[/^project\/([0-9]+)\/periodic-task\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showItem(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"newPeriodicTask", 
+        urlregexp:[/^project\/([0-9]+)\/new-periodic-tasks$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showNewItemPage(holder, menuInfo, data);}
+    })
+     
+})

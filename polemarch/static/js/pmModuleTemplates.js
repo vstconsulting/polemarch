@@ -195,3 +195,19 @@ pmModuleTemplates.updateItem = function(item_id)
         }
     });
 }
+
+tabSignal.connect("polemarch.start", function()
+{ 
+    spajs.addMenu({
+        id:"Module-item", 
+        urlregexp:[/^template\/Module\/([0-9]+)$/, /^templates\/Module\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmModuleTemplates.showItem(holder, menuInfo, data);}, 
+    })
+    
+    spajs.addMenu({
+        id:"module-new", 
+        urlregexp:[/^template\/new-module$/],
+        onOpen:function(holder, menuInfo, data){return pmModuleTemplates.showNewItemPage(holder, menuInfo, data);}
+    })
+    
+})
