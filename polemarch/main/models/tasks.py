@@ -43,9 +43,17 @@ class Task(BModel):
         return str(self.name)  # nocv
 
 
+class PeriodicTaskQuerySet(BQuerySet):
+    use_for_related_fields = True
+
+    def user_filter(self, user, only_leads=False):
+        # pylint: disable=unused-argument
+        return self.filter(project__in=Project.objects.all().user_filter(user))
+
+
 # noinspection PyTypeChecker
 class PeriodicTask(AbstractModel):
-    objects     = BManager.from_queryset(AbstractVarsQuerySet)()
+    objects     = PeriodicTaskQuerySet.as_manager()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
                                     related_query_name="periodic_tasks",
                                     blank=True, null=True)
@@ -118,6 +126,12 @@ class PeriodicTask(AbstractModel):
             self.mode, self.inventory.id, sync=True,
             save_result=self.save_result, **self.vars
         )
+
+    def editable_by(self, user):
+        return self.project.editable_by(user)
+
+    def viewable_by(self, user):
+        return self.project.viewable_by(user)
 
 
 class Template(ACLModel):

@@ -146,6 +146,9 @@ class PeriodicTaskViewSet(base.ModelViewSetSet):
     serializer_class_one = serializers.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
 
+    def get_extra_queryset(self):
+        return self.queryset.user_filter(self.request.user)
+
 
 class HistoryViewSet(base.HistoryModelViewSet):
     model = serializers.models.History
