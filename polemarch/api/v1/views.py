@@ -295,7 +295,8 @@ class StatisticViewSet(base.ListNonModelViewSet):
         return model.objects.all().count()
 
     def _get_history_stats(self, request):
-        qs = serializers.models.History.objects.user_filter(self.request.user)
+        qs = serializers.models.History.objects.all()
+        qs = qs.user_filter(self.request.user)
         return qs.stats(int(request.query_params.get("last", "14")))
 
     def list(self, request, *args, **kwargs):
