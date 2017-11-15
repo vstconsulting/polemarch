@@ -153,6 +153,9 @@ class HistoryViewSet(base.HistoryModelViewSet):
     serializer_class_one = serializers.OneHistorySerializer
     filter_class = filters.HistoryFilter
 
+    def get_extra_queryset(self):
+        return self.queryset.user_filter(self.request.user)
+
     @detail_route(methods=["get"])
     def raw(self, request, *args, **kwargs):
         result = self.get_serializer(self.get_object()).get_raw(request)

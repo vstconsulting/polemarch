@@ -237,8 +237,16 @@ class HistoryQuerySet(BQuerySet):
 
     def user_filter(self, user, only_leads=False):
         # pylint: disable=unused-argument
-        # TODO: this should be change
-        return self
+        prj_viewable = Project.objects.all().user_filter(user)
+        inv_viewable = Inventory.objects.all().user_filter(user)
+        inv_editable = inv_viewable.filter(permissions__role="EDITOR")
+        prj_editable = prj_viewable.filter(permissions__role="EDITOR")
+        return self.filter(
+            Q(project__in=prj_editable) |
+            Q(inventory__in=inv_editable) |
+            Q(initiator=user.id, initiator_type="users") |
+            Q(project__in=prj_viewable, inventory__in=inv_viewable)
+        )
 
 
 class History(BModel):
@@ -321,6 +329,17 @@ class History(BModel):
     def write_line(self, value, number):  # nocv
         self.raw_history_line.create(
             history=self, line_number=number, line=value
+        )
+
+    def editable_by(self, user):
+        return self.inventory.editable_by(user)
+
+    def viewable_by(self, user):
+        return (
+            self.project.editable_by(user) or
+            self.inventory.editable_by(user) or
+            (self.initiator == user.id and self.initiator_type == "users") or
+            (self.project.viewable_by(user) & self.inventory.viewable_by(user))
         )
 
 
