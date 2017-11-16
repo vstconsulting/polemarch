@@ -21,7 +21,7 @@ from django.utils.timezone import now
 from ..utils import AnsibleArgumentsReference
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
-from .base import BModel, BManager, BQuerySet, models
+from .base import BModel, BQuerySet, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project
 from .acl import ACLModel
@@ -43,7 +43,7 @@ class Task(BModel):
         return str(self.name)  # nocv
 
 
-class PeriodicTaskQuerySet(BQuerySet):
+class PeriodicTaskQuerySet(AbstractVarsQuerySet):
     use_for_related_fields = True
 
     def user_filter(self, user, only_leads=False):
