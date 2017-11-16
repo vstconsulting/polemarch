@@ -273,7 +273,7 @@
                 <div class="box-body">
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
+                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="" >
                                 <% for(var i in pmGroups.model.itemslist.results){ %>
                                     <% if(item_id != pmGroups.model.itemslist.results[i].id ){ %>
                                         <option
@@ -310,7 +310,7 @@
                 <div class="box-body">
                     <div class="row">
                         <div class="form-group col-lg-12">
-                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="Select a State" >
+                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="" >
                                 <% for(var i in pmHosts.model.itemslist.results){ %>
                                     <option
                                         value="<%- pmHosts.model.itemslist.results[i].id %>"
