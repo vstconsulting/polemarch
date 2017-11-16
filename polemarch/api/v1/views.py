@@ -179,7 +179,7 @@ class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
         return base.Response(objs, 200).resp
 
 
-class TemplateViewSet(base.ModelViewSetSet):
+class TemplateViewSet(base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Template
     serializer_class = serializers.TemplateSerializer
     serializer_class_one = serializers.OneTemplateSerializer
