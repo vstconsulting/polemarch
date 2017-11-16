@@ -29,8 +29,16 @@ from .acl import ACLModel
 logger = logging.getLogger("polemarch")
 
 
+class TaskFilterQuerySet(BQuerySet):
+    use_for_related_fields = True
+
+    def user_filter(self, user):
+        return self.filter(project__in=Project.objects.all().user_filter(user))
+
+
 # Block of real models
 class Task(BModel):
+    objects     = TaskFilterQuerySet.as_manager()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
                                     related_query_name="tasks")
     name        = models.CharField(max_length=256, default=uuid.uuid1)
@@ -42,13 +50,12 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)  # nocv
 
+    def viewable_by(self, user):
+        return self.project.viewable_by(user)
 
-class PeriodicTaskQuerySet(AbstractVarsQuerySet):
-    use_for_related_fields = True
 
-    def user_filter(self, user, only_leads=False):
-        # pylint: disable=unused-argument
-        return self.filter(project__in=Project.objects.all().user_filter(user))
+class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
+    pass
 
 
 # noinspection PyTypeChecker
@@ -249,8 +256,7 @@ class HistoryQuerySet(BQuerySet):
             year=self._get_history_stats_by(qs, 'year')
         )
 
-    def user_filter(self, user, only_leads=False):
-        # pylint: disable=unused-argument
+    def user_filter(self, user):
         prj_viewable = Project.objects.all().user_filter(user)
         inv_viewable = Inventory.objects.all().user_filter(user)
         inv_editable = inv_viewable.filter(permissions__role="EDITOR")

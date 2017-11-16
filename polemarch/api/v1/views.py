@@ -133,31 +133,25 @@ class ProjectViewSet(base.PermissionMixin, base.ModelViewSetSet,
         return serializer.execute_module(request).resp
 
 
-class TaskViewSet(base.ReadOnlyModelViewSet):
+class TaskViewSet(base.LimitedPermissionMixin, base.ReadOnlyModelViewSet):
     model = serializers.models.Task
     serializer_class = serializers.TaskSerializer
     serializer_class_one = serializers.OneTaskSerializer
     filter_class = filters.TaskFilter
 
 
-class PeriodicTaskViewSet(base.ModelViewSetSet):
+class PeriodicTaskViewSet(base.LimitedPermissionMixin, base.ModelViewSetSet):
     model = serializers.models.PeriodicTask
     serializer_class = serializers.PeriodictaskSerializer
     serializer_class_one = serializers.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
 
-    def get_extra_queryset(self):
-        return self.queryset.user_filter(self.request.user)
 
-
-class HistoryViewSet(base.HistoryModelViewSet):
+class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
     model = serializers.models.History
     serializer_class = serializers.HistorySerializer
     serializer_class_one = serializers.OneHistorySerializer
     filter_class = filters.HistoryFilter
-
-    def get_extra_queryset(self):
-        return self.queryset.user_filter(self.request.user)
 
     @detail_route(methods=["get"])
     def raw(self, request, *args, **kwargs):
