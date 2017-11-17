@@ -61,140 +61,179 @@ pmGroups.copyItem = function(item_id)
 }
 
 
-/**
- * @param {string} parent_type
- * @param {integer} parent_item
- * @return $.Deferred
- */
-pmGroups.addItem = function(parent_type, parent_item)
-{
-    var def = new $.Deferred();
-    var data = {}
-
-    data.name = $("#new_group_name").val()
-    data.children = $("#new_group_children").hasClass('selected')
-    data.vars = jsonEditor.jsonEditorGetValues()
-
-    if(!data.name)
-    {
-        $.notify("Empty value in field name", "error");
-        def.reject()
-        return def.promise();
-    }
-
-    if(/[^A-z0-9_.\-]/.test(data.name))
-    {
-        $.notify("Invalid value in field name it mast be as [^A-z0-9_.\-]", "error");
-        def.reject()
-        return def.promise();
-    }
-
-    spajs.ajax.Call({
-        url: "/api/v1/groups/",
-        type: "POST",
-        contentType:'application/json',
-        data: JSON.stringify(data),
-                success: function(data)
+pmGroups.model.page_list = {
+    title: "Groups",
+    short_title: "Groups",
+    fileds:[
         {
-            //console.log("group add", data);
-            $.notify("Group created", "success");
-
-            if(parent_item)
+            title:'Name',
+            name:'name',
+        },
+    ],
+    actions:[
+        {
+            class:'btn btn-danger',
+            function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+'));'},
+            title:'Delete',
+            link:function(){ return '#'}
+        },
+        {
+            class:'btn btn-default',
+            function:function(item){ return '';},
+            title:function(item)
             {
-                if(parent_type == 'group')
+                if(item.children)
                 {
-                    $.when(pmGroups.addSubGroups(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"group/"+parent_item})).always(function(){
-                            def.resolve()
-                        })
-                    })
+                    return 'Create sub group'
                 }
-                else if(parent_type == 'inventory')
+
+                return 'Create sub host'
+            },
+            link:function(item)
+            {
+                if(item.children)
                 {
-                    $.when(pmInventories.addSubGroups(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"inventory/"+parent_item})).always(function(){
-                            def.resolve()
-                        })
-                    })
+                    return '/?group/'+item.id+'/new-group'
                 }
-                else if(parent_type == 'project')
-                {
-                    $.when(pmProjects.addSubGroups(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"project/"+parent_item})).always(function(){
-                            def.resolve()
-                        })
-                    })
-                }
-                else
-                {
-                    console.error("Не известный parent_type", parent_type)
-                    $.when(spajs.open({ menuId:"group/"+data.id})).always(function(){
+
+                return '/?group/'+item.id+'/new-host'
+            },
+        },
+    ]
+}
+
+pmGroups.validator = function(value)
+{
+    if(value && !/[^A-z0-9_.\-]/.test(value))
+    {
+        return true;
+    }
+    $.notify("Invalid value in field name it mast be as [^A-z0-9_.\-]", "error"); 
+    return false;
+}
+pmGroups.fast_validator = function(value)
+{
+    return /[^A-z0-9_.\-]/.test(value)
+}
+    
+pmGroups.model.page_new = {
+    title: "New group",
+    short_title: "New group",
+    fileds:[
+        [
+            {
+                filed: new filedsLib.filed.text(),
+                title:'Name',
+                name:'name',
+                placeholder:'Enter group name',
+                validator:pmGroups.validator,
+                fast_validator:pmGroups.fast_validator
+            },
+            {
+                filed: new filedsLib.filed.boolean(),
+                title:'Children',
+                name:'children',
+                help:'If turn, then allow adding sub groups to group'
+            },
+        ]
+    ],
+    sections:[
+        function(section){
+            return jsonEditor.editor({}, {block:this.model.name});
+        }
+    ],
+    onBeforeSave:function(data)
+    {
+        data.vars = jsonEditor.jsonEditorGetValues()
+        return data;
+    },
+    onCreate:function(data, status, xhr, callOpt)
+    { 
+        var def = new $.Deferred();
+        $.notify("Group created", "success");
+        
+        if(callOpt.parent_item)
+        {
+            if(callOpt.parent_type == 'group')
+            {
+                $.when(pmGroups.addSubGroups(callOpt.parent_item, [data.id])).always(function(){
+                    $.when(spajs.open({ menuId:"group/"+callOpt.parent_item})).always(function(){
                         def.resolve()
                     })
-                }
+                })
+            }
+            else if(callOpt.parent_type == 'inventory')
+            {
+                $.when(pmInventories.addSubGroups(callOpt.parent_item, [data.id])).always(function(){
+                    $.when(spajs.open({ menuId:"inventory/"+callOpt.parent_item})).always(function(){
+                        def.resolve()
+                    })
+                })
+            }
+            else if(callOpt.parent_type == 'project')
+            {
+                $.when(pmProjects.addSubGroups(callOpt.parent_item, [data.id])).always(function(){
+                    $.when(spajs.open({ menuId:"project/"+callOpt.parent_item})).always(function(){
+                        def.resolve()
+                    })
+                })
             }
             else
             {
+                console.error("Не известный parent_type", callOpt.parent_type)
                 $.when(spajs.open({ menuId:"group/"+data.id})).always(function(){
                     def.resolve()
                 })
             }
-        },
-        error:function(e)
-        {
-            def.reject()
-            polemarch.showErrors(e.responseJSON)
         }
-    });
-
-    return def.promise();
-}
-
-/**
- * @return $.Deferred
- */
-pmGroups.updateItem = function(item_id)
-{
-    var data = {}
-
-    data.name = $("#group_"+item_id+"_name").val()
-    //data.children = $("#group_"+item_id+"_children").hasClass('selected')
-    data.vars = jsonEditor.jsonEditorGetValues()
-
-    if(!data.name)
-    {
-        console.warn("Invalid value in field name")
-        $.notify("Invalid value in field name", "error");
-        return;
-    }
-
-    if(/[^A-z0-9_.\-]/.test(data.name))
-    {
-        $.notify("Invalid value in field name it mast be as [^A-z0-9_.\-]", "error");
-        def.reject()
+        else
+        {
+            $.when(spajs.open({ menuId:"group/"+data.id})).always(function(){
+                def.resolve()
+            })
+        }
         return def.promise();
     }
-
-    var thisObj = this;
-    return spajs.ajax.Call({
-        url: "/api/v1/groups/"+item_id+"/",
-        type: "PATCH",
-        contentType:'application/json',
-        data:JSON.stringify(data),
-                success: function(data)
-        {
-            thisObj.model.items[item_id] = data
-            //console.log("group update", data);
-            $.notify("Save", "success");
-        },
-        error:function(e)
-        {
-            console.warn("group "+item_id+" update error - " + JSON.stringify(e));
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
 }
 
+pmGroups.model.page_item = {
+    sections:[
+        function(section, item_id){
+            return jsonEditor.editor(this.model.items[item_id].vars, {block:this.model.name});
+        },
+        function(section, item_id){
+            return spajs.just.render("groups_sub_items", {item_id:item_id}) 
+        }
+    ],
+    title: function(item_id){
+        return "Group "+pmGroups.model.items[item_id].justText('name')
+    },
+    short_title: function(item_id){
+        return "Group "+pmGroups.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
+    },
+    fileds:[
+        [
+            {
+                filed: new filedsLib.filed.text(),
+                title:'Name',
+                name:'name',
+                placeholder:'Enter group name',
+                validator:pmGroups.validator,
+                fast_validator:pmGroups.fast_validator
+            },
+        ]
+    ],
+    onUpdate:function(result)
+    {
+        return true;
+    },
+    onBeforeSave:function(data, item_id)
+    {
+        data.vars = jsonEditor.jsonEditorGetValues() 
+        return data;
+    },
+}
+  
 /**
  * @return $.Deferred
  */
@@ -451,7 +490,7 @@ pmGroups.hasGroups = function(item_id, group_id)
 
 /**
  * Значение поля автокоплита для строки групп
- * @see https://ansible-tips-and-tricks.readthedocs.io/en/latest/ansible/commands/#limit-to-one-or-more-hosts 
+ * @see https://ansible-tips-and-tricks.readthedocs.io/en/latest/ansible/commands/#limit-to-one-or-more-hosts
  * @param {string} prefix
  * @returns {string} Значение поля автокоплита для строки групп
  */
@@ -461,7 +500,7 @@ pmGroups.getGroupsAutocompleteValue = function(prefix)
     {
         prefix = "prefix"
     }
-    return $('#groups_autocomplete_filed'+prefix).val() 
+    return $('#groups_autocomplete_filed'+prefix).val()
 }
 
 /**
@@ -505,7 +544,7 @@ pmGroups.groupsAutocompleteTemplate = function(inventory_id, value, prefix)
                     {
                         text += ' <i style="color:#ccc;">(Group)</i>'
                     }
-                    
+
                     return '<div class="autocomplete-suggestion" data-value="' + item.value + '" >' + text + '</div>';
                 },
                 onSelect: function(event, term, item)
@@ -520,12 +559,12 @@ pmGroups.groupsAutocompleteTemplate = function(inventory_id, value, prefix)
             });
         })
     }
-     
+
     return spajs.just.render('groups_autocomplete_filed', {selectedInventory:inventory_id, value:value, prefix:prefix})
 }
 
 pmGroups.groupsAutocompleteMatcher = function(original_term, response, inventory_id)
-{ 
+{
     var addTermToMatches = false
     var term = original_term
     var baseTerm = ""
@@ -641,30 +680,30 @@ pmGroups.groupsAutocompleteMatcher = function(original_term, response, inventory
 }
 
 tabSignal.connect("polemarch.start", function()
-{ 
+{
     // groups
     spajs.addMenu({
-        id:"groups", 
+        id:"groups",
         urlregexp:[/^groups$/, /^group$/, /^groups\/search\/?$/, /^groups\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showList(holder, menuInfo, data);}
     })
-    
+
     spajs.addMenu({
-        id:"groups-search", 
+        id:"groups-search",
         urlregexp:[/^groups\/search\/([A-z0-9 %\-.:,=]+)$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showSearchResults(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
-        id:"group", 
+        id:"group",
         urlregexp:[/^group\/([0-9]+)$/, /^groups\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showItem(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
-        id:"newGroup", 
+        id:"newGroup",
         urlregexp:[/^new-group$/, /^([A-z0-9_]+)\/([0-9]+)\/new-group$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showNewItemPage(holder, menuInfo, data);}
     })
-     
+
 })

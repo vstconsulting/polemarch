@@ -77,9 +77,6 @@ pmUsers.fileds = [
                 filed: new filedsLib.filed.boolean(), 
                 title:'Is active',
                 name:'is_active', 
-                help:'',
-                validator:function(value){ return value != '' && value},
-                fast_validator:function(value){ return value != '' && value}
             }
         ]
     ]

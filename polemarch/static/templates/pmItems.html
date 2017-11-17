@@ -123,7 +123,13 @@
                                                     <% for(var j in pmObj.model.page_list.actions){ %>
                                                         <li>
                                                             <a href="<%- pmObj.model.page_list.actions[j].link.apply(pmObj, [pmObj.model.itemslist.results[i]]) %>"
-                                                                onclick="<%- pmObj.model.page_list.actions[j].function.apply(pmObj, [pmObj.model.itemslist.results[i]]) %> return false;" ><%- pmObj.model.page_list.actions[j].title %></a>
+                                                                onclick="<%- pmObj.model.page_list.actions[j].function.apply(pmObj, [pmObj.model.itemslist.results[i]]) %> return false;" >
+                                                                    <% if(typeof pmObj.model.page_list.actions[j].title == 'function'){ %>
+                                                                        <%= pmObj.model.page_list.actions[j].title.apply(pmObj, [pmObj.model.itemslist.results[i]]) %>
+                                                                    <% }else{ %>
+                                                                        <%- pmObj.model.page_list.actions[j].title %>
+                                                                    <% } %>
+                                                            </a>
                                                         </li>
                                                     <% } %>
                                                 </ul>
@@ -196,7 +202,7 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="spajs.showLoader(<%- pmObj.model.className %>.addItem()); return false;" class="btn btn-primary" >Create</button>
+        <button type="button" onclick="spajs.showLoader(<%- pmObj.model.className %>.addItem('<%- parent_type %>', <%- parent_item %>)); return false;" class="btn btn-primary" >Create</button>
         <br>
         <br>
         <div class="row">

@@ -13,7 +13,7 @@
                 <%= pmObj.model.items[item_id].justAttr(filed.name, 'value') %>
             <% } %>
         >
-        <div class="help-block"><%- filed.help %></div>
+        <div class="help-block"><%- filed.help || '' %></div>
     </div>
 </script>
 
@@ -30,7 +30,7 @@
                 <%= pmObj.model.items[item_id].justAttr(filed.name, 'value') %>
             <% } %>
         >
-        <div class="help-block"><%- filed.help %></div>
+        <div class="help-block"><%- filed.help || '' %></div>
     </div>
 </script>
 
@@ -50,6 +50,6 @@
             <div class="ico-off fa  fa-toggle-off"></div>
             <div class="boolean-title" >Boolean value</div>
         </div>
-        <div class="help-block"><%- filed.help %></div>
+        <div class="help-block"><%- filed.help || '' %></div>
     </div> 
 </script>

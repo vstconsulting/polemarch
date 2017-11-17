@@ -357,8 +357,7 @@ pmItems.showNewItemPage = function(holder, menuInfo, data)
         tpl = 'items_new_page'
     }
 
-    var text = spajs.just.render(tpl, {parent_item:data.reg[2], parent_type:data.reg[1], pmObj:this})
-    console.log(text)
+    var text = spajs.just.render(tpl, {parent_item:data.reg[2], parent_type:data.reg[1], pmObj:this}) 
     $(holder).insertTpl(text)
 
     def.resolve()
@@ -804,7 +803,7 @@ pmItems.exportSelecedToFile = function(){
  * Добавление сущности
  * @return $.Deferred
  */
-pmItems.addItem = function()
+pmItems.addItem = function(parent_type, parent_item)
 {
     var def = new $.Deferred();
     var data = {}
@@ -841,8 +840,19 @@ pmItems.addItem = function()
         contentType:'application/json',
         data: JSON.stringify(data),
         success: function()
-        {
-            $.when(thisObj.model.page_new.onCreate.apply(thisObj, arguments)).always(function(){
+        { 
+            var agrs = []
+            for(var i =0; i<arguments.length; i++)
+            {
+                agrs.push(arguments[i])
+            }
+            
+            agrs.push({
+                parent_type:parent_type,
+                parent_item:parent_item
+            })
+            
+            $.when(thisObj.model.page_new.onCreate.apply(thisObj, agrs)).always(function(){
                 def.resolve()
             })
         },

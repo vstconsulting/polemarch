@@ -65,3 +65,7 @@ filedsLib.filed.password.type = 'password'
  */
 filedsLib.filed.boolean = inheritance(filedsLib.filed.simpleText)
 filedsLib.filed.boolean.type = 'boolean'
+
+filedsLib.filed.boolean.getValue = function(pmObj, filed){
+    return $("#filed_"+filed.name).hasClass('selected');
+}

@@ -465,7 +465,7 @@ window.qunitTestsArray.push(function()
         $("#filed_email").val("test2@user.ru");
         $("#filed_first_name").val("test");
         $("#filed_last_name").val("user");
-
+       
         // Отправка формы с данными пользователя
         $.when(pmUsers.addItem()).done(function()
         {
@@ -492,7 +492,7 @@ window.qunitTestsArray.push(function()
         $("#filed_email").val("test2@user.ru");
         $("#filed_first_name").val("test2-"+t);
         $("#filed_last_name").val("user2-"+t);
-
+ 
         $.when(pmUsers.updateItem(userId)).done(function()
         {
             assert.ok(false, 'Успешно update add Item, а не должно было');
@@ -506,7 +506,7 @@ window.qunitTestsArray.push(function()
     syncQUnit.addTest('Изменение пользователя', function ( assert )
     {
         var done = assert.async();
-
+ 
         // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
         // с адресом http://192.168.0.12:8080/?user-5
         userId = /user\/([0-9]+)/.exec(window.location.href)[1]
@@ -541,7 +541,7 @@ window.qunitTestsArray.push(function()
     }); 
     
     syncQUnit.addTest('Копирование пользователя', function ( assert )
-    {
+    { 
         var done = assert.async();
 
         $.when(pmUsers.copyAndEdit(userId)).done(function()
@@ -830,7 +830,7 @@ window.qunitTestsArray.push(function()
         var done = assert.async();
 
         // Заполнение формы с данными группы
-        $("#new_group_name").val("test-group-"+t);
+        $("#filed_name").val("test-group-"+t);
 
         $("#new_json_nameprefix").val("test1");
         $("#new_json_valueprefix").val("val1");
@@ -840,7 +840,7 @@ window.qunitTestsArray.push(function()
         $("#new_json_valueprefix").val("val2");
         jsonEditor.jsonEditorAddVar();
 
-        $("#new_group_children").addClass('selected');
+        $("#filed_children").addClass('selected');
 
         // Отправка формы с данными группы
         $.when(pmGroups.addItem()).done(function()
@@ -862,7 +862,7 @@ window.qunitTestsArray.push(function()
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
 
-        $("#group_"+itemId+"_name").val("test2-group-"+t);
+        $("#filed_name").val("test2-group-"+t);
 
         $("#new_json_nameprefix").val("test3");
         $("#new_json_valueprefix").val("val3");
@@ -984,7 +984,7 @@ window.qunitTestsArray.push(function()
         var done = assert.async();
 
         // Заполнение формы с данными группы
-        $("#new_group_name").val("test-sub-group-"+t);
+        $("#filed_name").val("test-sub-group-"+t);
 
         $("#new_json_nameprefix").val("test1");
         $("#new_json_valueprefix").val("val1");
@@ -1128,7 +1128,7 @@ window.qunitTestsArray.push(function()
         var done = assert.async();
 
         // Заполнение формы с данными группы
-        $("#new_group_name").val("test-group-"+t);
+        $("#filed_name").val("test-group-"+t);
 
         $("#new_json_nameprefix").val("test3");
         $("#new_json_valueprefix").val("val3");
