@@ -24,6 +24,10 @@ def polemarch_exception_handler(exc, context):
         data = {'detail': six.text_type(msg)}
         return Response(data, status=status.HTTP_404_NOT_FOUND)
 
+    elif isinstance(exc, PermissionError):
+        return Response({"detail": str(exc)},
+                        status=status.HTTP_403_FORBIDDEN)
+
     elif isinstance(exc, mexcs.DataNotReady):
         return Response({"detail": exc.msg},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
