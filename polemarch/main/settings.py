@@ -396,6 +396,15 @@ ACL = {
     }
 }
 
+HOOKS = {
+    "HTTP": {
+        "BACKEND": 'polemarch.main.hooks.http.Backend'
+    },
+    "SCRIPT": {
+        "BACKEND": 'polemarch.main.hooks.script.Backend'
+    },
+}
+
 
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
@@ -404,4 +413,4 @@ if "test" in sys.argv:
     }
     PROJECTS_DIR = '/tmp/polemarch_projects' + str(PY_VER)
     os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
-
+    EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
