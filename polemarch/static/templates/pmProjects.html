@@ -170,6 +170,11 @@
         <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-clock-o" aria-hidden="true"></i> Periodic tasks</a>
         <a href="<%- polemarch.opt.host %>/?project/<%- item_id %>/history" onclick="return spajs.openURL(this.href);" class="hidden-sm hidden-xs btn btn-info" ><i class="fa fa-history" aria-hidden="true"></i> History</a>
 
+        <span class="btn btn-default textfile" style="margin-left: 10px;" >
+            <input type="file" class="input-file"  onchange="spajs.showLoader(pmTasksTemplates.importFromFile(event, <%- item_id %>));"  >
+            <span class="glyphicon glyphicon-file"></span> Import templates
+        </span>
+
 
         <button type="button" onclick="spajs.showLoader(pmProjects.deleteItem(<%- item_id %>)); return false;" class="hidden-sm hidden-xs btn btn-danger danger-right" > 
             <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove project</span>

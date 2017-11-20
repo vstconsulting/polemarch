@@ -49,11 +49,6 @@
         <a href="<%- polemarch.opt.host %>/?template/new-task" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >Create task template</a>
         <a href="<%- polemarch.opt.host %>/?template/new-module" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >Create module template</a>
 
-        <span class="btn btn-default textfile" style="margin-left: 10px;" >
-            <input type="file" class="input-file"  onchange="spajs.showLoader(pmTasksTemplates.importFromFile(event));"  >
-            <span class="glyphicon glyphicon-file"></span> Import template
-        </span>
-
         <br>
         <br>
         <div class="row">
@@ -204,8 +199,7 @@
                                 class="form-control select2"
                                 id="projects-autocomplete"
                                 data-placeholder="Select project"
-                                style="width:100%" >
-                                    <option <% if(!pmTasksTemplates.model.items[item_id].data.project){ %> selected <% } %> value="0" >Not set</option>
+                                style="width:100%" > 
                                     <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
                                             <% if(pmTasksTemplates.model.items[item_id].data.project == pmProjects.model.itemslist.results[i].id){ %>  selected  <% } %>
@@ -293,8 +287,7 @@
                                 class="form-control select2"
                                 id="projects-autocomplete"
                                 data-placeholder="Select project"
-                                style="width:100%" >
-                                    <option selected value="0" >Not set</option>
+                                style="width:100%" > 
                                     <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
                                             value="<%- pmProjects.model.itemslist.results[i].id %>"

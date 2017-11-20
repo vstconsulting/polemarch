@@ -825,7 +825,7 @@ pmItems.addItem = function(parent_type, parent_item)
     
     if(this.model.page_new.onBeforeSave)
     {
-        data = this.model.page_item.onBeforeSave.apply(this, [data]);
+        data = this.model.page_new.onBeforeSave.apply(this, [data]);
         if(data === undefined)
         {
             def.reject()

@@ -117,7 +117,7 @@ pmTemplates.exportToFile = function(item_ids)
     return def.promise();
 }
 
-pmTemplates.importFromFile = function(files_event)
+pmTemplates.importFromFile = function(files_event, project_id)
 {  
     var def = new $.Deferred(); 
     this.model.files = files_event
@@ -143,6 +143,7 @@ pmTemplates.importFromFile = function(files_event)
                 for(var i in filedata.data)
                 {
                     var val = filedata.data[i]
+                    val.data.data.project = project_id
                     val.type = "add"
                     bulkdata.push(val)
                 }

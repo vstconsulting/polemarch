@@ -863,99 +863,159 @@ pmInventories.copyItem = function(item_id)
     return def.promise();
 }
 
-/**
- * @return $.Deferred
- */
-pmInventories.addItem = function(parent_type, parent_item)
-{
-    var def = new $.Deferred();
-    var data = {}
-
-    data.name = $("#new_inventory_name").val()
-    data.vars = jsonEditor.jsonEditorGetValues()
-
-    if(!data.name)
-    {
-        $.notify("Invalid value in field name", "error");
-        def.reject()
-        return def.promise();
-    }
-
-    var thisObj = this;
-    spajs.ajax.Call({
-        url: "/api/v1/inventories/",
-        type: "POST",
-        contentType:'application/json',
-        data: JSON.stringify(data),
-                success: function(data)
+pmInventories.model.page_list = {
+    title: "Inventories",
+    short_title: "Inventories",
+    fileds:[
         {
-            $.notify("inventory created", "success");
+            title:'Name',
+            name:'name',
+        },
+    ],
+    actions:[
+        {
+            class:'btn btn-danger',
+            function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+'));  return false;'},
+            title:'Delete',
+            link:function(){ return '#'}
+        },
+        {
+            class:'btn btn-default',
+            function:function(item){ return '';},
+            title:'Create sub group',
+            link:function(item)
+            { 
+                return '/?inventory/'+item.id+'/new-group' 
+            },
+        },
+        {
+            class:'btn btn-default',
+            function:function(item){ return '';},
+            title:'Create sub host',
+            link:function(item)
+            { 
+                return '/?inventory/'+item.id+'/new-host' 
+            },
+        }
+    ]
+}
 
-            if(parent_item)
+pmInventories.model.page_new = {
+    title: "New inventory",
+    short_title: "New inventory",
+    fileds:[
+        [
             {
-                if(parent_type == 'project')
-                {
-                    $.when(pmProjects.addSubInventories(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"project/"+parent_item})).always(function(){
-                            def.resolve()
-                        })
+                filed: new filedsLib.filed.text(),
+                title:'Name',
+                name:'name',
+                placeholder:'Enter inventory name',
+                validator:function(value){ return value != '' && value},
+                fast_validator:function(value){ return value != '' && value}
+            }, 
+        ]
+    ],
+    sections:[
+        function(section){
+            return jsonEditor.editor({}, {block:this.model.name});
+        }
+    ],
+    onBeforeSave:function(data)
+    {
+        data.vars = jsonEditor.jsonEditorGetValues()
+        return data;
+    },
+    onCreate:function(data, status, xhr, callOpt)
+    { 
+        var def = new $.Deferred();
+        $.notify("Inventory created", "success");
+        
+        if(callOpt.parent_item)
+        {
+            if(callOpt.parent_type == 'project')
+            {
+                $.when(pmProjects.addSubInventories(callOpt.parent_item, [data.id])).always(function(){
+                    $.when(spajs.open({ menuId:"project/"+callOpt.parent_item})).always(function(){
+                        def.resolve()
                     })
-                }
-            }
-            else
-            {
-                $.when(spajs.open({ menuId: thisObj.model.page_name + "/"+data.id})).always(function(){
-                    def.resolve()
                 })
             }
-
-        },
-        error:function(e)
-        {
-            def.reject()
-            polemarch.showErrors(e.responseJSON)
         }
-    });
-
-    return def.promise();
-}
-
-/**
- * @return $.Deferred
- */
-pmInventories.updateItem = function(item_id)
-{
-    var data = {}
-
-    data.name = $("#inventory_"+item_id+"_name").val()
-    data.vars = jsonEditor.jsonEditorGetValues()
-
-    if(!data.name)
-    {
-        console.warn("Invalid value in field name")
-        $.notify("Invalid value in field name", "error");
-        return;
+        else
+        {
+            $.when(spajs.open({ menuId: this.model.page_name + "/"+data.id})).always(function(){
+                def.resolve()
+            })
+        }
+        return def.promise();
     }
-
-    var thisObj = this;
-    return spajs.ajax.Call({
-        url: "/api/v1/inventories/"+item_id+"/",
-        type: "PATCH",
-        contentType:'application/json',
-        data:JSON.stringify(data),
-                success: function(data)
-        {
-            thisObj.model.items[item_id] = data
-            $.notify("Save", "success");
-        },
-        error:function(e)
-        {
-            console.warn("inventory "+item_id+" update error - " + JSON.stringify(e));
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
 }
-
+   
+pmInventories.model.page_item = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
+            title:'Save', 
+            link:function(){ return '#'}, 
+        },
+        {
+            class:'btn btn-primary',
+            function:function(item_id){ return 'return spajs.openURL(this.href);'},
+            title:'History',
+            link:function(item_id){ return polemarch.opt.host + '/?inventory/' + item_id + '/history'},
+        },
+        {
+            class:'btn btn-default copy-btn',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-duplicate" ></span>',
+            link:function(){ return '#'},
+            help:'Copy'
+        },
+        {
+            class:'btn btn-danger danger-right',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
+            link:function(){ return '#'}, 
+        },
+    ],
+    sections:[
+        function(section, item_id){
+            return jsonEditor.editor(this.model.items[item_id].vars, {block:this.model.name});
+        },
+        function(section, item_id){
+            return spajs.just.render("inventories_sub_items", {item_id:item_id}) 
+        }
+    ],
+    title: function(item_id){
+        return "Inventory "+this.model.items[item_id].justText('name')
+    },
+    short_title: function(item_id){
+        return "Inventory "+this.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
+    },
+    fileds:[
+        [
+            {
+                filed: new filedsLib.filed.text(),
+                title:'Name',
+                name:'name',
+                placeholder:'Enter inventory name',
+                validator:function(value){ return value != '' && value},
+                fast_validator:function(value){ return value != '' && value}
+            }, 
+        ]
+    ],
+    onUpdate:function(result)
+    {
+        return true;
+    },
+    onBeforeSave:function(data, item_id)
+    {
+        data.vars = jsonEditor.jsonEditorGetValues() 
+        return data;
+    },
+}
+   
 /**
  * Показывает форму со списком всех групп.
  * @return $.Deferred

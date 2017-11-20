@@ -17,7 +17,7 @@ pmUsers.model.page_list = {
     actions:[
         {
             class:'btn btn-danger',
-            function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+'));'},
+            function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+')); return false;'},
             title:'Delete',
             link:function(){ return '#'}
         }
@@ -98,6 +98,27 @@ pmUsers.model.page_new = {
 }
  
 pmUsers.model.page_item = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
+            title:'Save', 
+            link:function(){ return '#'}, 
+        }, 
+        {
+            class:'btn btn-default copy-btn',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-duplicate" ></span>',
+            link:function(){ return '#'},
+            help:'Copy'
+        },
+        {
+            class:'btn btn-danger danger-right',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
+            link:function(){ return '#'}, 
+        },
+    ],
     title: function(item_id){ 
         return "User "+pmUsers.model.items[item_id].justText('username')
     },

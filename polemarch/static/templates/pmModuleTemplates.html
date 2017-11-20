@@ -48,8 +48,7 @@
 
                             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Project</label>
-                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
-                                    <option selected value="0" >Not set</option>
+                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" > 
                                     <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
                                             <% if(pmProjects.model.itemslist.results[i].id == pmModuleTemplates.model.items[item_id].data.project ){ %>selected<% } %>
@@ -141,8 +140,7 @@
 
                             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Project</label>
-                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" >
-                                    <option selected value="0" >Not set</option>
+                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" > 
                                     <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option 
                                             value="<%- pmProjects.model.itemslist.results[i].id %>"
