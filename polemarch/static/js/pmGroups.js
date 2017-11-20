@@ -62,6 +62,14 @@ pmGroups.copyItem = function(item_id)
 
 
 pmGroups.model.page_list = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"}); return false;"},
+            title:'Create', 
+            link:function(){ return '/?new-'+this.model.page_name}, 
+        }, 
+    ],
     title: "Groups",
     short_title: "Groups",
     fileds:[

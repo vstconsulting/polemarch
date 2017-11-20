@@ -6,6 +6,14 @@ pmUsers.model.page_name = "user"
 pmUsers.model.className = "pmUsers"
 
 pmUsers.model.page_list = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"}); return false;"},
+            title:'Create', 
+            link:function(){ return '/?new-'+this.model.page_name}, 
+        }, 
+    ],
     title: "Users",
     short_title: "Users",
     fileds:[

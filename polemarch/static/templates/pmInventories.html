@@ -153,150 +153,99 @@
     <% } %>
 <% } %>  
 </script>
-
-<!-- Страница inventory -->
-<script type="text/x-just" data-just="inventories_page-old">
-    <section class="content-header">
-        <h1>
-            <a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
-                <span class="glyphicon glyphicon-arrow-left"></span>
-            </a>
-
-            <span class="h1-header" ><%= pmInventories.model.items[item_id].justText('name') %></span>
-
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?inventories"  onclick="return spajs.openURL(this.href);" >Inventories</a></li>
-            <li class="active"><%- pmInventories.model.items[item_id].name.slice(0, 20) %></li>
-        </ol>
-    </section>
-
-    <section class="content">
-        <button type="button" onclick="spajs.showLoader(pmInventories.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save inventory</button>
-        <a href="<%- polemarch.opt.host %>/?inventory/<%- item_id %>/history" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >History</a>
-        <button type="button" onclick="spajs.showLoader(pmInventories.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy inventory" ><span class="glyphicon glyphicon-duplicate" ></span></button>
-        <button type="button" onclick="spajs.showLoader(pmInventories.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
-            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove inventory</span>
-        </button>
-        <br>
-        <br>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        Inventory<br>
-                        <div class="box-tools pull-right">
-
-                        </div>
-                    </div>
-                    <div class="box-body">
-
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Name</label>
-                                <input type="text"  placeholder="Enter inventory name"  id="inventory_<%- pmInventories.model.items[item_id].id %>_name" value="<%- pmInventories.model.items[item_id].name %>"  class="form-control" maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <%= jsonEditor.editor(pmInventories.model.items[item_id].vars, {block:'inventories'}) %>
-        </div>
-
-        
-    </section>
-</script>
  
-<script type="text/x-just" data-just="inventories_sub_items">
-    <div class="row">
-        <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    Sub items<br>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-                    </div>
+<script type="text/x-just" data-just="inventories_btn_openImportPageAndImportFiles">
+<span class="btn btn-default textfile" style="margin-left: 10px;" >
+    <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
+    <span class="glyphicon glyphicon-file"></span> Import from file
+</span>
+</script> 
+<script type="text/x-just" data-just="inventories_sub_items"> 
+    <section class="col-lg-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                Sub items<br>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
                 </div>
-                <div class="box-body">
-                    <div class="row">
-                        <~ pmInventories.model.items[item_id].groups >
-                            <% console.log("inventories", item_id, pmInventories.model.items[item_id].groups) %>
-                            <% for(var i in pmInventories.model.items[item_id].groups){ %>
-                                <% console.log("inventory", pmInventories.model.items[item_id].groups[i]) %>
-                                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                    <label class="control-label" >Group</label>
-                                    <a href="<%- polemarch.opt.host %>/?group/<%- pmInventories.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
-                                        <%- pmInventories.model.items[item_id].groups[i].name %>
-                                    </a>
-                                </div>
-                            <% } %>
-                        <~>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <~ pmInventories.model.items[item_id].groups >
+                        <% console.log("inventories", item_id, pmInventories.model.items[item_id].groups) %>
+                        <% for(var i in pmInventories.model.items[item_id].groups){ %>
+                            <% console.log("inventory", pmInventories.model.items[item_id].groups[i]) %>
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Group</label>
+                                <a href="<%- polemarch.opt.host %>/?group/<%- pmInventories.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                    <%- pmInventories.model.items[item_id].groups[i].name %>
+                                </a>
+                            </div>
+                        <% } %>
+                    <~>
 
-                        <~ pmInventories.model.items[item_id].hosts >
-                            <% for(var i in pmInventories.model.items[item_id].hosts){ %>
-                                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                    <label class="control-label" >Host</label> 
-                                    <a href="<%- polemarch.opt.host %>/?host/<%- pmInventories.model.items[item_id].hosts[i].id %>" onclick="return spajs.openURL(this.href);" >
-                                        <%- pmInventories.model.items[item_id].hosts[i].name %>
-                                    </a>
-                                </div>
-                            <% } %>
-                        <~>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-lg-12">
+                    <~ pmInventories.model.items[item_id].hosts >
+                        <% for(var i in pmInventories.model.items[item_id].hosts){ %>
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                <label class="control-label" >Host</label> 
+                                <a href="<%- polemarch.opt.host %>/?host/<%- pmInventories.model.items[item_id].hosts[i].id %>" onclick="return spajs.openURL(this.href);" >
+                                    <%- pmInventories.model.items[item_id].hosts[i].name %>
+                                </a>
+                            </div>
+                        <% } %>
+                    <~>
+                </div>
+                <div class="row">
+                    <div class="form-group col-lg-12">
 
-                                <button
-                                        type="button"
-                                        onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
-                                        class="btn btn-primary hidden-xs"
-                                        >Edit existings groups</button>
+                            <button
+                                    type="button"
+                                    onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
+                                    class="btn btn-primary hidden-xs"
+                                    >Edit existings groups</button>
 
-                                <button type="button"
-                                        onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;"
-                                        class="btn btn-primary hidden-xs"
-                                        >Create new group</button>
+                            <button type="button"
+                                    onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;"
+                                    class="btn btn-primary hidden-xs"
+                                    >Create new group</button>
 
-                                <div style="margin-top:10px;" class="hidden-xs hidden-md hidden-lg"></div>
+                            <div style="margin-top:10px;" class="hidden-xs hidden-md hidden-lg"></div>
 
-                                <button type="button"
-                                        onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
-                                        class="btn btn-primary hidden-xs"
-                                        >Edit existings hosts</button>
+                            <button type="button"
+                                    onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
+                                    class="btn btn-primary hidden-xs"
+                                    >Edit existings hosts</button>
 
-                                <button type="button"
-                                        onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;"
-                                        class="btn btn-primary hidden-xs"
-                                        >Create new host</button>
+                            <button type="button"
+                                    onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;"
+                                    class="btn btn-primary hidden-xs"
+                                    >Create new host</button>
 
-                                <button
-                                        type="button"
-                                        onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
-                                        class="btn btn-primary btn-block visible-xs"
-                                        >Edit existings groups</button>
+                            <button
+                                    type="button"
+                                    onclick="spajs.showLoader(pmInventories.showAddSubGroupsForm(<%- item_id %>)); return false;"
+                                    class="btn btn-primary btn-block visible-xs"
+                                    >Edit existings groups</button>
 
-                                <button type="button"
-                                        onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;"
-                                        class="btn btn-primary btn-block visible-xs"
-                                        >Create new group</button>
+                            <button type="button"
+                                    onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-group'}); return false;"
+                                    class="btn btn-primary btn-block visible-xs"
+                                    >Create new group</button>
 
-                                <button type="button"
-                                        onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
-                                        class="btn btn-primary btn-block visible-xs"
-                                        >Edit existings hosts</button>
+                            <button type="button"
+                                    onclick="spajs.showLoader(pmInventories.showAddSubHostsForm(<%- item_id %>)); return false;"
+                                    class="btn btn-primary btn-block visible-xs"
+                                    >Edit existings hosts</button>
 
-                                <button type="button"
-                                        onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;"
-                                        class="btn btn-primary btn-block visible-xs"
-                                        >Create new host</button>
-                        </div>
+                            <button type="button"
+                                    onclick="spajs.open({ menuId:'inventory/<%- item_id %>/new-host'}); return false;"
+                                    class="btn btn-primary btn-block visible-xs"
+                                    >Create new host</button>
                     </div>
                 </div>
             </div>
-        </section>
-    </div>
+        </div>
+    </section> 
 </script>
 
 <!-- Добавление списка подгрупп к inventory -->

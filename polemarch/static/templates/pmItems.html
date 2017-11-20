@@ -64,8 +64,30 @@
     </section>
 
 
-    <section class="content">
-        <a class="btn btn-primary"  href="/?new-<%- pmObj.model.page_name %>" onclick="spajs.open({ menuId:'new-<%- pmObj.model.page_name %>'}); return false;">Create</a>
+    <section class="content"> 
+        <% if(pmObj.model.page_list.buttons){ %>
+            <% for(var i in  pmObj.model.page_list.buttons){ %>
+                <% if(pmObj.model.page_list.buttons[i].tpl){ %>
+                    <%= pmObj.model.page_list.buttons[i].tpl.apply(pmObj, []) %>
+                <% }else{ %> 
+                    <a 
+                        class="<% if(typeof pmObj.model.page_list.buttons[i].title == 'function'){ %>
+                                    <%- pmObj.model.page_list.buttons[i].class.apply(pmObj, []) %>
+                               <% }else{ %>
+                                    <%- pmObj.model.page_list.buttons[i].class %>
+                               <% } %>"
+                        href="<%- pmObj.model.page_list.buttons[i].link.apply(pmObj, []) %>"
+                        title="<%- pmObj.model.page_list.buttons[i].help %>"
+                        onclick="<%- pmObj.model.page_list.buttons[i].function.apply(pmObj, []) %>" >
+                            <% if(typeof pmObj.model.page_list.buttons[i].title == 'function'){ %>
+                                <%= pmObj.model.page_list.buttons[i].title.apply(pmObj, []) %>
+                            <% }else{ %>
+                                <%= pmObj.model.page_list.buttons[i].title %>
+                            <% } %>
+                    </a>
+                <% } %>
+            <% } %>
+        <% } %>
         <br>
         <br>
         <div class="row">
@@ -206,6 +228,29 @@
 
     <section class="content">
         <button type="button" onclick="spajs.showLoader(<%- pmObj.model.className %>.addItem('<%- parent_type %>', <%- parent_item %>)); return false;" class="btn btn-primary" >Create</button>
+        <% if(pmObj.model.page_new.buttons){ %>
+            <% for(var i in  pmObj.model.page_new.buttons){ %>
+                <% if(pmObj.model.page_new.buttons[i].tpl){ %>
+                    <%= pmObj.model.page_new.buttons[i].tpl.apply(pmObj) %>
+                <% }else{ %> 
+                    <a 
+                        class="<% if(typeof pmObj.model.page_new.buttons[i].title == 'function'){ %>
+                                    <%- pmObj.model.page_new.buttons[i].class.apply(pmObj, []) %>
+                               <% }else{ %>
+                                    <%- pmObj.model.page_new.buttons[i].class %>
+                               <% } %>"
+                        href="<%- pmObj.model.page_new.buttons[i].link.apply(pmObj, [item_id]) %>"
+                        title="<%- pmObj.model.page_new.buttons[i].help %>"
+                        onclick="<%- pmObj.model.page_new.buttons[i].function.apply(pmObj, []) %>" >
+                            <% if(typeof pmObj.model.page_new.buttons[i].title == 'function'){ %>
+                                <%= pmObj.model.page_new.buttons[i].title.apply(pmObj, []) %>
+                            <% }else{ %>
+                                <%= pmObj.model.page_new.buttons[i].title %>
+                            <% } %>
+                    </a>
+                <% } %>
+            <% } %>
+        <% } %>
         <br>
         <br>
         <div class="row">
@@ -251,28 +296,34 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%= pmObj.model.page_item.short_title.apply(pmObj, [item_id]) %></a></li>
+            <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%= pmObj.model.page_item.page_list %></a></li>
             <li class="active"><%= pmObj.model.page_item.short_title.apply(pmObj, [item_id]) %></li>
         </ol>
     </section>
 
     <section class="content">
-        <% for(var i in  pmObj.model.page_item.buttons){ %>
-            <a 
-                class="<% if(typeof pmObj.model.page_item.buttons[i].title == 'function'){ %>
-                            <%- pmObj.model.page_item.buttons[i].class.apply(pmObj, [item_id]) %>
-                       <% }else{ %>
-                            <%- pmObj.model.page_item.buttons[i].class %>
-                       <% } %>"
-                href="<%- pmObj.model.page_item.buttons[i].link.apply(pmObj, [item_id]) %>"
-                title="<%- pmObj.model.page_item.buttons[i].help %>"
-                onclick="<%- pmObj.model.page_item.buttons[i].function.apply(pmObj, [item_id]) %>" >
-                    <% if(typeof pmObj.model.page_item.buttons[i].title == 'function'){ %>
-                        <%= pmObj.model.page_item.buttons[i].title.apply(pmObj, [item_id]) %>
-                    <% }else{ %>
-                        <%= pmObj.model.page_item.buttons[i].title %>
-                    <% } %>
-            </a>
+        <% if(pmObj.model.page_item.buttons){ %>
+            <% for(var i in  pmObj.model.page_item.buttons){ %>
+                <% if(pmObj.model.page_item.buttons[i].tpl){ %>
+                    <%= pmObj.model.page_item.buttons[i].tpl.apply(pmObj, [item_id]) %>
+                <% }else{ %> 
+                    <a 
+                        class="<% if(typeof pmObj.model.page_item.buttons[i].title == 'function'){ %>
+                                    <%- pmObj.model.page_item.buttons[i].class.apply(pmObj, [item_id]) %>
+                               <% }else{ %>
+                                    <%- pmObj.model.page_item.buttons[i].class %>
+                               <% } %>"
+                        href="<%- pmObj.model.page_item.buttons[i].link.apply(pmObj, [item_id]) %>"
+                        title="<%- pmObj.model.page_item.buttons[i].help %>"
+                        onclick="<%- pmObj.model.page_item.buttons[i].function.apply(pmObj, [item_id]) %>" >
+                            <% if(typeof pmObj.model.page_item.buttons[i].title == 'function'){ %>
+                                <%= pmObj.model.page_item.buttons[i].title.apply(pmObj, [item_id]) %>
+                            <% }else{ %>
+                                <%= pmObj.model.page_item.buttons[i].title %>
+                            <% } %>
+                    </a>
+                <% } %>
+            <% } %>
         <% } %>
         <br>
         <br>

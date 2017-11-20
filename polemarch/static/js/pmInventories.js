@@ -863,9 +863,25 @@ pmInventories.copyItem = function(item_id)
     return def.promise();
 }
 
+
+
+
 pmInventories.model.page_list = {
     title: "Inventories",
     short_title: "Inventories",
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"}); return false;"},
+            title:'Create', 
+            link:function(){ return '/?new-'+this.model.page_name}, 
+        },
+        {
+            tpl:function(){
+                return spajs.just.render('inventories_btn_openImportPageAndImportFiles', {})
+            },
+        },
+    ],
     fileds:[
         {
             title:'Name',

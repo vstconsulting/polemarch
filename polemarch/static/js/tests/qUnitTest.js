@@ -1257,7 +1257,7 @@ window.qunitTestsArray.push(function()
         var done = assert.async();
 
         // Заполнение формы с данными inventory
-        $("#new_inventory_name").val("test-inventory-"+t);
+        $("#filed_name").val("test-inventory-"+t);
 
         $("#new_json_nameprefix").val("test1");
         $("#new_json_valueprefix").val("val1");
@@ -1288,7 +1288,7 @@ window.qunitTestsArray.push(function()
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
 
-        $("#inventory_"+itemId+"_name").val("test2-inventory-"+t);
+        $("#filed_name").val("test2-inventory-"+t);
 
         $("#new_json_nameprefix").val("test3");
         $("#new_json_valueprefix").val("val3");
@@ -2065,7 +2065,7 @@ window.qunitTestsArray.push(function()
         var done = assert.async();
 
         // Заполнение формы с данными inventory
-        $("#new_inventory_name").val("test-inventory-"+t);
+        $("#filed_name").val("test-inventory-"+t);
 
         $("#new_json_name").val("test1");
         $("#new_json_value").val("val1");
@@ -2112,7 +2112,7 @@ window.qunitTestsArray.push(function()
         var done = assert.async();
 
         // Заполнение формы с данными inventory
-        $("#new_inventory_name").val("test-inventory-"+t);
+        $("#filed_name").val("test-inventory-"+t);
 
         jsonEditor.__devAddVar("test1", "test1", "inventory")  
         jsonEditor.__devAddVar("test2", "test2", "inventory")  

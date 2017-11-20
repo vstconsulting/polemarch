@@ -6,6 +6,14 @@ pmHosts.model.page_name = "host"
 pmHosts.model.className = "pmHosts"
 
 pmHosts.model.page_list = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"}); return false;"},
+            title:'Create', 
+            link:function(){ return '/?new-'+this.model.page_name}, 
+        }, 
+    ],
     title: "Hosts",
     short_title: "Hosts",
     fileds:[
