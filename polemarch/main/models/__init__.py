@@ -15,6 +15,7 @@ from .hosts import Host, Group, Inventory
 from .projects import Project
 from .users import UserGroup, ACLPermission
 from .tasks import Task, PeriodicTask, History, HistoryLines, Template
+from .hooks import Hook
 from ..validators import RegexValidator
 from ..exceptions import UnknownTypeException
 from ..utils import raise_context, AnsibleArgumentsReference
