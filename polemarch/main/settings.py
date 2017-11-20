@@ -382,6 +382,7 @@ ACL = {
         "ACLPermissionSubclass": "polemarch.main.models.acl_models.ACLPermissionSubclass",
         "ACLGroupSubclass": "polemarch.main.models.acl_models.ACLGroupSubclass",
         "ACLQuerySet": "polemarch.main.models.acl_models.ACLQuerySet",
+        "ACLInventoriesQuerySet": "polemarch.main.models.acl_models.ACLInventoriesQuerySet",
     }
 }
 

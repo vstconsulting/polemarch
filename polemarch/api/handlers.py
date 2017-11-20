@@ -2,6 +2,7 @@ import logging
 import sys
 import traceback
 import six
+from django.core.exceptions import PermissionDenied
 
 from django.http import Http404
 from django.core import exceptions as djexcs
@@ -24,7 +25,7 @@ def polemarch_exception_handler(exc, context):
         data = {'detail': six.text_type(msg)}
         return Response(data, status=status.HTTP_404_NOT_FOUND)
 
-    elif isinstance(exc, PermissionError):
+    elif isinstance(exc, PermissionDenied):
         return Response({"detail": str(exc)},
                         status=status.HTTP_403_FORBIDDEN)
 
