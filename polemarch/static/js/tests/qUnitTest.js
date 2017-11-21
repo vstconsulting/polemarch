@@ -1698,7 +1698,7 @@ window.qunitTestsArray.push(function()
         var done = assert.async();
 
         // Заполнение формы с данными project
-        $("#new_project_name").val("test-project-"+t);
+        $("#filed_name").val("test-project-"+t);
         $("#new_project_repository").val("git://test-project-"+t);
 
         $("#new_json_nameprefix").val("test1");
