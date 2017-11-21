@@ -260,6 +260,17 @@ class HistoryLinesSerializer(SignalSerializer):
                   "line",)
 
 
+class HookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Hook
+        fields = (
+            'id',
+            'name',
+            'type',
+            'recipients'
+        )
+
+
 class VariableSerializer(SignalSerializer):
     class Meta:
         model = models.Variable
