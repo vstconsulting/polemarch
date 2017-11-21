@@ -12,6 +12,7 @@ from rest_framework import serializers
 from rest_framework import exceptions
 from rest_framework.exceptions import PermissionDenied
 
+from ...main.models import Inventory
 from ...main import models
 from ..base import Response
 
@@ -628,13 +629,15 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
 
     def _execution(self, kind, request):
         data = dict(request.data)
-        inventory_id = int(data.pop("inventory"))
+        inventory = Inventory.objects.get(id=int(data.pop("inventory")))
+        if not inventory.viewable_by(request.user):
+            raise PermissionDenied("You don't have permission to inventory.")
         target = str(data.pop(kind))
         action = getattr(self.instance, "execute_ansible_{}".format(kind))
         history_id = action(
-            target, inventory_id, initiator=request.user.id, **data
+            target, inventory, initiator=request.user.id, **data
         )
-        rdata = dict(detail="Started at inventory {}.".format(inventory_id),
+        rdata = dict(detail="Started at inventory {}.".format(inventory.id),
                      history_id=history_id)
         return Response(rdata, 201)
 

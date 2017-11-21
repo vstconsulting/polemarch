@@ -5,7 +5,7 @@ import logging
 
 from django.db import transaction
 from django.db.models import Q
-from polemarch.main.models.acl import ACLInventoriesQuerySet
+from .acl import ACLInventoriesQuerySet
 
 from .base import BManager, models
 from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse

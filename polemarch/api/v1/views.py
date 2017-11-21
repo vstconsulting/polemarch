@@ -55,7 +55,7 @@ class UserViewSet(base.ModelViewSetSet):
         return base.Response(serializer.data, 200).resp
 
 
-class TeamViewSet(base.ModelViewSetSet):
+class TeamViewSet(base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.UserGroup
     serializer_class = serializers.TeamSerializer
     serializer_class_one = serializers.OneTeamSerializer

@@ -77,10 +77,9 @@ class Project(AbstractModel):
         )
         return History.objects.create(status="DELAY", **history_kwargs), extra
 
-    def _prepare_kw(self, kind, mod_name, inventory_id, **extra):
+    def _prepare_kw(self, kind, mod_name, inventory, **extra):
         if not mod_name:
             raise PMException("Empty playbook/module name.")
-        inventory = hosts_models.Inventory.objects.get(id=inventory_id)
         history, extra = self._get_history(kind, mod_name, inventory, **extra)
         kwargs = dict(
             target=mod_name, inventory=inventory, history=history, project=self
@@ -134,11 +133,11 @@ class Project(AbstractModel):
             task_class.delay(**kwargs)
         return history.id if history is not None else history
 
-    def execute_ansible_playbook(self, playbook, inventory_id, **extra):
-        return self._execute("PLAYBOOK", playbook, inventory_id, **extra)
+    def execute_ansible_playbook(self, playbook, inventory, **extra):
+        return self._execute("PLAYBOOK", playbook, inventory, **extra)
 
-    def execute_ansible_module(self, module, inventory_id, **extra):
-        return self._execute("MODULE", module, inventory_id, **extra)
+    def execute_ansible_module(self, module, inventory, **extra):
+        return self._execute("MODULE", module, inventory, **extra)
 
     def set_status(self, status):
         self.status = status

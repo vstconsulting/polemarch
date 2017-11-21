@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
-from polemarch.main.models.base import ForeignKeyACL
+from .base import ForeignKeyACL
 
 from ..utils import AnsibleArgumentsReference
 from . import Inventory
@@ -125,13 +125,13 @@ class PeriodicTask(AbstractModel):
 
     def run_ansible_module(self):
         self.project.execute_ansible_module(
-            self.mode, self.inventory.id, sync=True,
+            self.mode, self.inventory, sync=True,
             save_result=self.save_result, **self.vars
         )
 
     def run_ansible_playbook(self):
         self.project.execute_ansible_playbook(
-            self.mode, self.inventory.id, sync=True,
+            self.mode, self.inventory, sync=True,
             save_result=self.save_result, **self.vars
         )
 
