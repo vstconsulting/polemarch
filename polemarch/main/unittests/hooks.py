@@ -1,15 +1,30 @@
+import os
 import json
 try:
     from mock import patch
 except ImportError:  # nocv
     from unittest.mock import patch
 from django.test import TestCase
+from django.core.validators import ValidationError
 from requests import Response
 from polemarch.main.models import Hook
-from polemarch.main.utils import tmp_file_context
+from polemarch.main.utils import tmp_file_context, raise_context
 
 
 class HooksTestCase(TestCase):
+    def setUp(self):
+        super(HooksTestCase, self).setUp()
+        self.scripts = ['/tmp/test.sh', '/tmp/send.sh']
+        for script in self.scripts:
+            with open(script, 'w') as file:
+                file.write("test")
+
+    def tearDown(self):
+        super(HooksTestCase, self).tearDown()
+        for script in self.scripts:
+            with raise_context():
+                os.remove(script)
+
     def check_output_run(self, check_data, *args, **kwargs):
         # pylint: disable=unused-argument
         self.assertEqual(check_data[0], self.recipients[self.count])
@@ -26,6 +41,10 @@ class HooksTestCase(TestCase):
 
     def test_script(self):
         self.recipients = ['test.sh', 'send.sh']
+        with self.assertRaises(ValidationError):
+            Hook.objects.create(
+                type='SCRIPT', recipients="some.sh"
+            )
         hook = Hook.objects.create(
             type='SCRIPT', recipients=" | ".join(self.recipients)
         )

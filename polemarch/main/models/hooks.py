@@ -32,6 +32,10 @@ class Hook(BModel):
 
     when_types = ['on_execution', 'after_execution']
 
+    @property
+    def reps(self):
+        return self.recipients.split(' | ')
+
     def run(self, when='on_execution', **kwargs):
         return (
             self.handlers.handle(self.type, self, when, **kwargs)

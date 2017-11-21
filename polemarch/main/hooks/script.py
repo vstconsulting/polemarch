@@ -8,9 +8,15 @@ class Backend(BaseHook):
 
     def _execute(self, script, when, file):
         try:
-            return check_output([script, when, file.name])
+            return check_output(
+                [script, when, file.name], cwd=self.conf['HOOKS_DIR']
+            )
         except BaseException as err:
             return str(err)
+
+    def setup(self, **kwargs):
+        super(Backend, self).setup(**kwargs)
+        self.conf['HOOKS_DIR'] = self.get_settings('HOOKS_DIR', '/tmp/')
 
     def send(self, message, when):
         super(Backend, self).send(message, when)

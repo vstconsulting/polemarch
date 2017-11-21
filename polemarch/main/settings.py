@@ -405,6 +405,7 @@ HOOKS = {
     },
 }
 
+HOOKS_DIR = config.get("main", "hooks_dir", fallback="/tmp")
 
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
