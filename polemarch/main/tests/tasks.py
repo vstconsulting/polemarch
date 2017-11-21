@@ -350,6 +350,52 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                         "/api/v1/history/{}/cancel/".format(history['id']),
                         200)
 
+    @patch('polemarch.main.hooks.http.Backend._execute')
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_hook_task(self, subprocess_function, execute_method):
+        result = self.get_result('get', "/api/v1/hooks/types/")
+        self.assertIn('HTTP', result['types'])
+        self.assertIn('SCRIPT', result['types'])
+        self.assertIn('on_execution', result['when'])
+        self.assertIn('after_execution', result['when'])
+        inv, _ = self.create_inventory()
+        hook_url = 'http://ex.com'
+        hook_data = dict(
+            name="test", type='HTTP', recipients=hook_url, when='on_execution'
+        )
+        self.post_result("/api/v1/hooks/", data=json.dumps(hook_data))
+        self.post_result("/api/v1/hooks/", data=json.dumps(hook_data))
+        self.sended = False
+        self.count = 0
+        playbook = "first.yml"
+
+        def side_effect(url, when, message):
+            self.assertEqual(url, hook_url)
+            self.assertEqual(when, 'on_execution')
+            json.dumps(message)
+            self.assertEqual(message['execution_type'], "PLAYBOOK")
+            self.assertEqual(message['target']['name'], playbook)
+            self.assertEqual(
+                message['target']['inventory']['id'], inv
+            )
+            self.assertEqual(
+                message['target']['project']['id'], self.task_proj.id
+            )
+            self.sended = True
+            self.count += 1
+            if self.count == 1:
+                raise Exception("Test exception")
+            return '200 OK: {"result": "ok"}'
+
+        execute_method.side_effect = side_effect
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory=inv, playbook=playbook, sync=1))
+        )
+        self.assertTrue(self.sended, "Raised on sending.")
+        self.assertEquals(execute_method.call_count, 2)
+        self.assertEquals(subprocess_function.call_count, 1)
+
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):

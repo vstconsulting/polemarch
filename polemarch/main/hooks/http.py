@@ -1,11 +1,10 @@
-import json
 import requests
 from .base import BaseHook
 
 
 class Backend(BaseHook):
     def _execute(self, url, when, message):
-        data = dict(type=when, payload=json.loads(message))
+        data = dict(type=when, payload=message)
         try:
             response = requests.post(url, data=data)
             return "{} {}: {}".format(

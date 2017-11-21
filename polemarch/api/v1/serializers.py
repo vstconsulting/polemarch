@@ -216,6 +216,17 @@ class OneHistorySerializer(serializers.ModelSerializer):
         return self.instance.facts
 
 
+class HookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Hook
+        fields = (
+            'id',
+            'name',
+            'type',
+            'recipients'
+        )
+
+
 class HistoryLinesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.HistoryLines

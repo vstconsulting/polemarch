@@ -1,4 +1,3 @@
-import json
 from django.conf import settings
 
 
@@ -20,4 +19,4 @@ class BaseHook(object):
         self.when = when
 
     def on_execution(self, **kwargs):
-        return self.send(json.dumps(kwargs), when='on_execution')
+        return self.send(kwargs, when='on_execution')

@@ -190,6 +190,21 @@ class TemplateViewSet(base.PermissionMixin, base.ModelViewSetSet):
         return base.Response(self.model.template_fields, 200).resp
 
 
+class HookViewSet(base.ModelViewSetSet):
+    model = serializers.models.Hook
+    serializer_class = serializers.HookSerializer
+    filter_class = filters.HookFilter
+    permission_classes = (StaffPermission,)
+
+    @list_route(['get'])
+    def types(self, request):
+        data = dict(
+            types=self.model.handlers.list(),
+            when=self.model.when_types
+        )
+        return base.Response(data, 200).resp
+
+
 class BulkViewSet(rest_views.APIView):
     permission_classes = (StaffPermission,)
     serializer_classes = serializers

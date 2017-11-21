@@ -12,6 +12,7 @@ from .vars import AbstractModel, AbstractVarsQuerySet, BManager, models
 from ..exceptions import PMException
 from ..utils import ModelHandlers
 from .base import ManyToManyFieldACL
+from ..tasks import SendHook
 
 
 logger = logging.getLogger("polemarch")
@@ -87,6 +88,38 @@ class Project(AbstractModel):
         kwargs.update(extra)
         return kwargs
 
+    def _send_hook(self, when, kind, kwargs):
+        msg = dict(execution_type=kind)
+        inventory = dict(
+            id=kwargs['inventory'].id,
+            name=kwargs['inventory'].name,
+        )
+        project = dict(
+            id=kwargs['project'].id,
+            name=kwargs['project'].name,
+            type=kwargs['project'].type,
+            repository=kwargs['project'].repository,
+        )
+        msg['target'] = dict(
+            name=kwargs['target'], inventory=inventory, project=project
+        )
+        if kwargs['history'] is not None:
+            msg['history'] = dict(
+                id=kwargs['history'].id,
+                start_time=kwargs['history'].start_time.isoformat(),
+            )
+            if when == "after_execution":
+                msg['history']['stop_time'] = (
+                    kwargs['history'].stop_time.isoformat()
+                )
+            msg['history']['initiator'] = dict(
+                initiator_type=kwargs['history'].initiator_type,
+                initiator_id=kwargs['history'].initiator,
+            )
+        else:
+            msg['history'] = None
+        SendHook.delay(when, **msg)
+
     def _execute(self, kind, *args, **extra):
         task_class = self.task_handlers.backend(kind)
         sync = extra.pop("sync", False)
@@ -94,7 +127,9 @@ class Project(AbstractModel):
         kwargs = self._prepare_kw(kind, *args, **extra)
         history = kwargs['history']
         if sync:
+            self._send_hook('on_execution', kind, kwargs)
             task_class(**kwargs)
+            self._send_hook('after_execution', kind, kwargs)
         else:
             task_class.delay(**kwargs)
         return history.id if history is not None else history
