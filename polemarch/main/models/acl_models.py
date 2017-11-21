@@ -28,6 +28,10 @@ class ACLQuerySet(BQuerySet):
         return self
 
 
+class ACLInventoriesQuerySet(ACLQuerySet):
+    pass
+
+
 class ACLPermissionSubclass(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               default=first_staff_user,

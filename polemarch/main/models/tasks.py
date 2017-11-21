@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
+from polemarch.main.models.base import ForeignKeyACL
 
 from ..utils import AnsibleArgumentsReference
 from . import Inventory
@@ -147,9 +148,9 @@ class Template(ACLModel):
     template_data = models.TextField(default="")
     inventory     = models.CharField(max_length=128,
                                      default=None, blank=True, null=True)
-    project       = models.ForeignKey(Project,
-                                      on_delete=models.SET_NULL,
-                                      default=None, blank=True, null=True)
+    project       = ForeignKeyACL(Project,
+                                  on_delete=models.SET_NULL,
+                                  default=None, blank=True, null=True)
 
     class Meta:
         index_together = [
