@@ -123,6 +123,7 @@ pmProjects.model.page_new = {
             },
         ]
     ],
+    sections:[],
     onBeforeSave:function(data)
     {
         data.repository = $("#new_project_repository").val()
@@ -213,6 +214,7 @@ pmProjects.model.page_item = {
             link:function(){ return '#'},
         },
     ],
+    sections:[],
     title: function(item_id){
         return "Project "+this.model.items[item_id].justText('name')
     },
@@ -225,8 +227,7 @@ pmProjects.model.page_item = {
                 filed: new filedsLib.filed.text(),
                 title:'Name',
                 name:'name',
-                placeholder:'Enter host or range name',
-                help:'Host or range name',
+                placeholder:'Enter project name', 
                 validator:function(value){ return value != '' && value},
                 fast_validator:function(value){ return value != '' && value}
             },
