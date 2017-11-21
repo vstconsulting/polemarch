@@ -1,6 +1,6 @@
 # pylint: disable=unused-argument,no-member
 from __future__ import absolute_import
-
+import os
 import json
 
 import django_celery_beat
@@ -15,6 +15,7 @@ from .hosts import Host, Group, Inventory
 from .projects import Project
 from .users import UserGroup, ACLPermission
 from .tasks import Task, PeriodicTask, History, HistoryLines, Template
+from .hooks import Hook
 from ..validators import RegexValidator
 from ..exceptions import UnknownTypeException
 from ..utils import raise_context, AnsibleArgumentsReference
@@ -147,3 +148,16 @@ def delete_from_beat(instance, **kwargs):
         if others.count() == 1:
             CrontabSchedule.objects.get(id=crontab_id).delete()
     celery_tasks.delete()
+
+
+@receiver(signals.pre_save, sender=Hook)
+def check_hook_script_path(instance, **kwargs):
+    if instance.type != "SCRIPT":
+        return
+    errors = {}
+    hooks_dir = getattr(settings, "HOOKS_DIR", '/tmp/')
+    for rep in instance.reps:
+        if '../' in rep or rep not in os.listdir(hooks_dir):
+            errors["recipients"] = "Recipients must be in hooks dir."
+    if errors:
+        raise ValidationError(errors)

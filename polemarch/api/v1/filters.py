@@ -50,6 +50,16 @@ class TemplateFilter(_BaseFilter):
         )
 
 
+class HookFilter(_BaseFilter):
+    class Meta:
+        model = models.Hook
+        fields = (
+            'id',
+            'name',
+            'type',
+        )
+
+
 class UserFilter(filters.FilterSet):
     class Meta:
         model = User
