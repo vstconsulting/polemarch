@@ -52,12 +52,12 @@ class HooksTestCase(TestCase):
             self.count = 0
             cmd.side_effect = self.check_output_run
             self.assertEqual(hook.run(test="test"), "Ok\nOk")
-            self.assertEquals(cmd.call_count, 2)
+            self.assertEqual(cmd.call_count, 2)
             hook.run('on_error', test="test")
-            self.assertEquals(cmd.call_count, 2)
+            self.assertEqual(cmd.call_count, 2)
             cmd.side_effect = self.check_output_error
             self.assertEqual(hook.run(test="test"), "Err\nErr")
-            self.assertEquals(cmd.call_count, 4)
+            self.assertEqual(cmd.call_count, 4)
 
     def check_output_run_http(self, method, url, data, **kwargs):
         # pylint: disable=protected-access, unused-argument
@@ -82,9 +82,9 @@ class HooksTestCase(TestCase):
             result = hook.run(test="test")
             for res in result.split("\n"):
                 self.assertEqual(res, '200 ok: { "result" : "ok" }')
-            self.assertEquals(cmd.call_count, 2)
+            self.assertEqual(cmd.call_count, 2)
             hook.run('on_error', test="test")
-            self.assertEquals(cmd.call_count, 2)
+            self.assertEqual(cmd.call_count, 2)
             cmd.side_effect = self.check_output_error
             self.assertEqual(hook.run(test="test"), "Err\nErr")
-            self.assertEquals(cmd.call_count, 4)
+            self.assertEqual(cmd.call_count, 4)
