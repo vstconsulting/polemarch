@@ -28,16 +28,12 @@ class ACLQuerySet(BQuerySet):
         return self
 
 
-class ACLInventoriesQuerySet(ACLQuerySet):
-    pass
-
-
 class ACLPermissionSubclass(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               default=first_staff_user,
                               related_name="polemarch_%(class)s_set")
-    permissions = models.ManyToManyField("main.ACLPermission",
-                                         blank=True, null=True)
+    acl = models.ManyToManyField("main.ACLPermission",
+                                 blank=True, null=True)
 
     class Meta:
         abstract = True

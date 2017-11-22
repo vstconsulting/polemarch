@@ -19,3 +19,6 @@ ACLQuerySet = import_class(
 ACLInventoriesQuerySet = import_class(
     settings.ACL['DEFAULT_ACL_CLASSES']["ACLInventoriesQuerySet"]
 )
+ACLUserGroupsQuerySet = import_class(
+    settings.ACL['DEFAULT_ACL_CLASSES']["ACLUserGroupsQuerySet"]
+)

@@ -138,7 +138,7 @@ class Group(AbstractModel):
         return get_render("models/group", data), keys
 
 
-class InventoriesQuerySet(ACLInventoriesQuerySet, AbstractVarsQuerySet):
+class InventoriesQuerySet(AbstractVarsQuerySet, ACLInventoriesQuerySet):
     pass
 
 

@@ -260,8 +260,8 @@ class HistoryQuerySet(BQuerySet):
     def user_filter(self, user):
         prj_viewable = Project.objects.all().user_filter(user)
         inv_viewable = Inventory.objects.all().user_filter(user)
-        inv_editable = inv_viewable.filter(permissions__role="EDITOR")
-        prj_editable = prj_viewable.filter(permissions__role="EDITOR")
+        inv_editable = inv_viewable.filter(acl__role="EDITOR")
+        prj_editable = prj_viewable.filter(acl__role="EDITOR")
         return self.filter(
             Q(project__in=prj_editable) |
             Q(inventory__in=inv_editable) |

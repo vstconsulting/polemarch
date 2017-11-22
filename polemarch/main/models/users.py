@@ -16,8 +16,8 @@ class ACLPermission(acl.ACLPermissionAbstract):
     role = models.CharField(max_length=10)
 
 
-class UserGroup(BaseGroup, acl.ACLPermissionSubclass, acl.ACLGroupSubclass):
-    objects = acl.ACLQuerySet.as_manager()
+class UserGroup(BaseGroup, acl.ACLGroupSubclass, acl.ACLPermissionSubclass):
+    objects = acl.ACLUserGroupsQuerySet.as_manager()
     parent = models.OneToOneField(BaseGroup, parent_link=True)
     users = BaseGroup.user_set
 
