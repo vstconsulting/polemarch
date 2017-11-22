@@ -9,7 +9,7 @@
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
-ignore=CVS,migrations,tests,settings.py,settings_production.py
+ignore=CVS,migrations,unittests,tests,settings.py,settings_production.py
 
 # Add files or directories matching the regex patterns to the blacklist. The
 # regex matches against base names, not paths.
