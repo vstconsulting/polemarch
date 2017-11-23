@@ -1,10 +1,4 @@
 
-function inheritance(obj)
-{
-    var item = jQuery.extend(true, {}, obj)
-    return item
-}
-
 function pmItems()
 {
 
@@ -16,10 +10,14 @@ pmItems.model.selectedItems = {};
 
 pmItems.model.itemslist = []
 pmItems.model.items = {}
+pmItems.model.items_permissions = {}
 pmItems.model.name = "based"
 pmItems.model.page_name = "based"
 pmItems.model.selectedCount = 0;
-pmItems.model.className = "pmItems"
+pmItems.model.className = "pmItems" 
+
+pmItems.filed = {}
+
 
 pmItems.toggleSelect = function(item_id, mode)
 {
@@ -172,7 +170,13 @@ pmItems.showList = function(holder, menuInfo, data)
 
     return $.when(this.loadItems(limit, offset)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:""}))
+        var tpl = thisObj.model.name+'_list'
+        if(!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_list'
+        }
+        
+        $(holder).insertTpl(spajs.just.render(tpl, {query:"", pmObj:thisObj}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -232,7 +236,13 @@ pmItems.showSearchResults = function(holder, menuInfo, data)
     var thisObj = this;
     return $.when(this.sendSearchQuery(this.searchStringToObject(decodeURIComponent(data.reg[1])))).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
+        var tpl = thisObj.model.name+'_list'
+        if(!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_list'
+        }
+        
+        $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(data.reg[1]), pmObj:thisObj}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -324,7 +334,13 @@ pmItems.showItem = function(holder, menuInfo, data)
 
     return $.when(this.loadItem(data.reg[1])).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:data.reg[1], project_id:0}))
+        var tpl = thisObj.model.name+'_page'
+        if(!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_page'
+        }
+        
+        $(holder).insertTpl(spajs.just.render(tpl, {item_id:data.reg[1], project_id:0, pmObj:thisObj}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -335,7 +351,13 @@ pmItems.showNewItemPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
 
-    var text = spajs.just.render(this.model.name+'_new_page', {parent_item:data.reg[2], parent_type:data.reg[1]})
+    var tpl = this.model.name+'_new_page'
+    if(!spajs.just.isTplExists(tpl))
+    {
+        tpl = 'items_new_page'
+    }
+
+    var text = spajs.just.render(tpl, {parent_item:data.reg[2], parent_type:data.reg[1], pmObj:this})
     console.log(text)
     $(holder).insertTpl(text)
 
@@ -558,17 +580,29 @@ pmItems.loadItem = function(item_id)
  */
 pmItems.deleteItem = function(item_id, force)
 {
+    var def = new $.Deferred();
     if(!force && !confirm("Are you sure?"))
     {
-        return;
+        def.reject();
+        return def.promise()
     }
+    
     var thisObj = this;
-    return $.when(this.deleteItemQuery(item_id)).done(function(data){
-        //console.log("deleteItem", data);
-        spajs.open({ menuId:thisObj.model.name})
+    $.when(this.deleteItemQuery(item_id)).done(function(data)
+    {
+        $.when(spajs.open({ menuId:thisObj.model.name})).done(function()
+        {
+            def.resolve() 
+        }).fail(function(e){
+            def.reject();
+            polemarch.showErrors(e.responseJSON)
+        }) 
     }).fail(function(e){
+        def.reject();
         polemarch.showErrors(e.responseJSON)
-    }).promise()
+    })
+            
+    return def.promise()
 }
 
 pmItems.multiOperationsOnEachRow = function(elements, operation)
@@ -765,3 +799,127 @@ pmItems.exportSelecedToFile = function(){
 
     return this.exportToFile(item_ids)
 }
+
+/**
+ * Добавление сущности
+ * @return $.Deferred
+ */
+pmItems.addItem = function()
+{
+    var def = new $.Deferred();
+    var data = {}
+    
+    for(var i in this.model.page_new.fileds)
+    {
+        for(var j in this.model.page_new.fileds[i])
+        {
+            var val = this.model.page_new.fileds[i][j];
+            
+            data[val.name] = val.filed.getValue(this, val)
+            if(val.validator !== undefined && !val.validator.apply(this, [data[val.name]]))
+            {
+                def.reject()
+                return def.promise();
+            }
+        }
+    }
+    
+    if(this.model.page_new.onBeforeSave)
+    {
+        data = this.model.page_item.onBeforeSave.apply(this, [data]);
+        if(data === undefined)
+        {
+            def.reject()
+            return def.promise();
+        }
+    }
+    
+    var thisObj = this;
+    spajs.ajax.Call({
+        url: "/api/v1/"+this.model.name+"/",
+        type: "POST",
+        contentType:'application/json',
+        data: JSON.stringify(data),
+        success: function()
+        {
+            $.when(thisObj.model.page_new.onCreate.apply(thisObj, arguments)).always(function(){
+                def.resolve()
+            })
+        },
+        error:function(e)
+        {
+            def.reject()
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+
+    return def.promise();
+}
+
+pmItems.updateItem = function(item_id)
+{
+    var def = new $.Deferred();
+    var data = {}
+    
+    for(var i in this.model.page_item.fileds)
+    {
+        for(var j in this.model.page_item.fileds[i])
+        {
+            var val = this.model.page_item.fileds[i][j];
+            
+            data[val.name] = val.filed.getValue(this, val)
+            if(val.validator !== undefined && !val.validator.apply(this, [data[val.name]]))
+            {
+                def.reject()
+                return def.promise();
+            }
+        }
+    }
+    
+    if(this.model.page_item.onBeforeSave)
+    {
+        data = this.model.page_item.onBeforeSave.apply(this, [data, item_id]);
+        if(data === undefined)
+        {
+            def.reject()
+            return def.promise();
+        }
+    }
+    
+    var thisObj = this;
+    spajs.ajax.Call({
+        url: "/api/v1/"+this.model.name+"/"+item_id+"/",
+        type: "PATCH",
+        contentType:'application/json',
+        data: JSON.stringify(data),
+        success: function(data)
+        {
+            thisObj.model.items[item_id] = data
+            $.when(thisObj.model.page_item.onUpdate.apply(thisObj, arguments)).always(function(){
+                def.resolve()
+            })
+        },
+        error:function(e)
+        {
+            def.reject()
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+
+    return def.promise(); 
+}
+
+ pmItems.getFiledByName = function(fileds, name)
+ {
+    for(var i in fileds)
+    {
+        for(var j in fileds[i])
+        {
+            if(fileds[i][j].name == name)
+            {
+                return fileds[i][j]  
+            }
+        }
+    }
+    debugger;
+ }

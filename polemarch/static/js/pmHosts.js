@@ -5,6 +5,109 @@ pmHosts.model.name = "hosts"
 pmHosts.model.page_name = "host"
 pmHosts.model.className = "pmHosts"
 
+pmHosts.model.page_list = {
+    title: "Hosts",
+    short_title: "Hosts",
+    fileds:[
+        {
+            title:'Name',
+            name:'name',
+        },
+        {
+            title:'Type',
+            name:'type',
+            style:function(item){ return 'style="width: 70px"'},
+            class:function(item){ return 'class="hidden-xs"'}, 
+        }
+    ],
+    actions:[
+        {
+            class:'btn btn-danger',
+            function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+'));'},
+            title:'Delete',
+            link:function(){ return '#'}
+        }
+    ]
+}
+  
+  
+pmHosts.fileds = [
+    [
+        {
+            filed: new filedsLib.filed.text(), 
+            title:'Name',
+            name:'name',
+            placeholder:'Enter host or range name',
+            help:'Host or range name',
+            validator:function(value){ return this.validateRangeName(value) || this.validateHostName(value)},       
+            fast_validator:function(value){ return this.validateRangeName(value) || this.validateHostName(value)}   
+        },
+    ]
+]
+
+pmHosts.model.page_new = {
+    title: "New host",
+    short_title: "New host",
+    fileds:pmHosts.fileds,
+    sections:[
+        function(section){
+            return jsonEditor.editor({}, {block:this.model.name});
+        }
+    ],
+    onBeforeSave:function(data)
+    { 
+        data.vars = jsonEditor.jsonEditorGetValues()
+        return data;
+    },
+    onCreate:function(result)
+    { 
+        var def = new $.Deferred();
+        $.notify("Host created", "success");
+        $.when(spajs.open({ menuId:pmHosts.model.page_name+"/"+result.id})).always(function(){
+            def.resolve()
+        })
+        
+        return def.promise();
+    }
+}
+ 
+pmHosts.model.page_item = {
+    sections:[
+        function(section, item_id){ 
+            return jsonEditor.editor(this.model.items[item_id].vars, {block:this.model.name});
+        }
+    ],
+    title: function(item_id){ 
+        return "Host "+pmHosts.model.items[item_id].justText('name')
+    },
+    short_title: function(item_id){ 
+        return "Host "+pmHosts.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
+    },
+    fileds:pmHosts.fileds,
+    onUpdate:function(result)
+    { 
+        return true;
+    },
+    onBeforeSave:function(data, item_id)
+    { 
+        data.vars = jsonEditor.jsonEditorGetValues()
+        if(this.validateHostName(data.name))
+        {
+            data.type = 'HOST'
+        }
+        else if(this.validateRangeName(data.name))
+        { 
+            data.type = 'RANGE'
+        }
+        else
+        {
+            $.notify("Error in host or range name", "error"); 
+            return undefined;
+        }
+        return data;
+    },
+}
+ 
 pmHosts.copyItem = function(item_id)
 {
     var def = new $.Deferred();
@@ -37,137 +140,7 @@ pmHosts.copyItem = function(item_id)
 
     return def.promise();
 } 
-
-/**
- * @return $.Deferred
- */
-pmHosts.addItem = function(parent_type, parent_item)
-{
-    var def = new $.Deferred();
-
-    var data = {}
-
-    data.name = $("#new_host_name").val()
-    data.type = $("#new_host_type").val()
-    data.vars = jsonEditor.jsonEditorGetValues()
-
-    if(data.type == "HOST"  && (!data.name || !this.validateHostName(data.name)))
-    {
-        $.notify("Invalid value in field name", "error");
-        return;
-    }
-    else if(data.type == "RANGE"  && (!data.name || !this.validateRangeName(data.name)))
-    {
-        $.notify("Invalid value in field name", "error");
-        return;
-    }
-
-    spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/",
-        type: "POST",
-        contentType:'application/json',
-        data: JSON.stringify(data),
-                success: function(data)
-        { 
-            $.notify("Host created", "success");
-
-            if(parent_item)
-            {
-                if(parent_type == 'group')
-                {
-                    $.when(pmGroups.addSubHosts(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"group/"+parent_item})).always(function(){
-                            def.resolve()
-                        })
-                    })
-                }
-                else if(parent_type == 'inventory')
-                {
-                    $.when(pmInventories.addSubHosts(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"inventory/"+parent_item})).always(function(){
-                            def.resolve()
-                        })
-                    })
-                }
-                else if(parent_type == 'project')
-                {
-                    $.when(pmProjects.addSubHosts(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"project/"+parent_item})).always(function(){
-                            def.resolve()
-                        })
-                    })
-                }
-                else
-                {
-                    console.error("Не известный parent_type", parent_type)
-                    $.when(spajs.open({ menuId:"host/"+data.id})).always(function(){
-                        def.resolve()
-                    })
-                }
-            }
-            else
-            {
-                $.when(spajs.open({ menuId:"host/"+data.id})).always(function(){
-                    def.resolve()
-                })
-            }
-
-        },
-        error:function(e)
-        {
-            polemarch.showErrors(e.responseJSON)
-            def.reject()
-        }
-    });
-    return def.promise();
-}
-
-/**
- * @return $.Deferred
- */
-pmHosts.updateItem = function(item_id)
-{
-    var data = {}
-
-    data.name = $("#host_"+item_id+"_name").val()
-    data.type = $("#host_"+item_id+"_type").val()
-    data.vars = jsonEditor.jsonEditorGetValues()
-
-    // @todo Добавить валидацию диапазонов "127.0.1.[5:6]" и 127.0.1.1, 127.0.1.2
-    if(data.type == 'HOST')
-    {
-        if(!data.name || !this.validateHostName(data.name) )
-        {
-            $.notify("Invalid value in field name", "error");
-            return;
-        }
-    }
-    else
-    {  
-        if(!data.name || !this.validateRangeName(data.name) )
-        {
-            $.notify("Invalid value in field name", "error");
-            return;
-        }
-    }
-
-    var thisObj = this;
-    return spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/"+item_id+"/",
-        type: "PATCH",
-        contentType:'application/json',
-        data:JSON.stringify(data),
-        success: function(data)
-        { 
-            thisObj.model.items[item_id] = data
-            $.notify("Save", "success");
-        },
-        error:function(e)
-        {
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
-}
+ 
 
 /*
  * 
@@ -188,3 +161,31 @@ setTimeout(function(){
 }, i*400);
 }
  */ 
+
+ tabSignal.connect("polemarch.start", function()
+ {
+    // hosts
+    spajs.addMenu({
+        id:"hosts", 
+        urlregexp:[/^hosts$/, /^host$/, /^hosts\/search\/?$/, /^hosts\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHosts.showList(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"hosts-search", 
+        urlregexp:[/^hosts\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHosts.showSearchResults(holder, menuInfo, data);}
+    })
+     
+    spajs.addMenu({
+        id:"host", 
+        urlregexp:[/^host\/([0-9]+)$/, /^hosts\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHosts.showItem(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"newHost", 
+        urlregexp:[/^new-host$/, /^([A-z0-9_]+)\/([0-9]+)\/new-host$/],
+        onOpen:function(holder, menuInfo, data){return pmHosts.showNewItemPage(holder, menuInfo, data);}
+    }) 
+ })

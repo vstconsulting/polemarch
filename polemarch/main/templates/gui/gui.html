@@ -6,14 +6,14 @@
     <script defer src="{% static 'js/libs/c3/c3.min.js' %}"></script> 
 
     <script defer src="{% static 'js/libs/autocomplete.js' %}"></script> 
-    <script defer src="{% static 'plugins/select2/select2.min.js' %}"></script> 
+    <script defer src="{% static 'plugins/select2/select2.full.min.js' %}"></script>
     <script defer src="{% static 'js/libs/touchwipe.js' %}"></script>  
 
     <script defer src="{% static 'js/libs/tabSignal.js' %}"></script> 
     <script defer src="{% static 'js/libs/just.js' %}"></script> 
     <script defer src="{% static 'js/libs/just-watch.js' %}"></script> 
     <script defer src="{% static 'js/libs/moment.min.js' %}"></script>
-    <script defer src="{% static 'js/libs/markdown.js' %}"></script>
+    <!--<script defer src="{% static 'js/libs/markdown.js' %}"></script>-->
     <script defer src="{% static 'js/libs/jquery.scrollTo.min.js' %}"></script> 
     <script defer src="{% static 'js/libs/spa.js' %}"></script>
     <script defer src="{% static 'js/libs/ansi_up.js' %}"></script>
@@ -22,9 +22,10 @@
     <script defer src="{% static 'js/polemarch.js' %}"></script>
     <script defer src="{% static 'js/jsonEditor.js' %}"></script> 
     <script defer src="{% static 'js/crontabEditor.js' %}"></script>
+    <script defer src="{% static 'js/filedsLib.js' %}"></script>  
     <script defer src="{% static 'js/pmItems.js' %}"></script>
-    <script defer src="{% static 'js/pmUsers.js' %}"></script>
     <script defer src="{% static 'js/pmHosts.js' %}"></script>
+    <script defer src="{% static 'js/pmUsers.js' %}"></script>
     <script defer src="{% static 'js/pmGroups.js' %}"></script>
     <script defer src="{% static 'js/pmInventories.js' %}"></script>
     <script defer src="{% static 'js/pmProjects.js' %}"></script>
@@ -35,8 +36,8 @@
     <script defer src="{% static 'js/pmTasksTemplates.js' %}"></script>
     <script defer src="{% static 'js/pmModuleTemplates.js' %}"></script> 
     <script defer src="{% static 'js/pmAnsibleModule.js' %}"></script>
-    <script defer src="{% static 'js/pmDashboard.js' %}"></script>  
     <script defer src="{% static 'js/moduleArgsEditor.js' %}"></script>
+    <script defer src="{% static 'js/pmDashboard.js' %}"></script>  
 {% endblock %}
 
 {% block script %}
@@ -46,6 +47,7 @@
         var templates = [
             'templates/jsonEditor',
             'templates/crontabEditor',
+            'templates/filedsLib',
             'templates/pmItems',
             'templates/pmDashboard',
             'templates/pmGroups',

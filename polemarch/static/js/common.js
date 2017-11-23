@@ -83,3 +83,21 @@ function trim(s)
     return '';
 }
 
+
+function inheritance(obj, constructor)
+{  
+    var object = undefined;
+    var item = function()
+    {
+        if(constructor)
+        {
+            return constructor.apply(jQuery.extend(true, item, object), arguments);
+        }
+        
+        return jQuery.extend(true, item, object);
+    }
+      
+    object = jQuery.extend(true, item, obj)
+     
+    return object
+}

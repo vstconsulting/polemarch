@@ -1,12 +1,10 @@
 from collections import namedtuple
 import six
-from django.contrib.auth.models import User
-from django.db.models import Q
 from django.db.models.query import QuerySet
 from rest_framework import viewsets, views as rest_views
-from rest_framework.reverse import reverse
-from rest_framework.response import Response as RestResponse
 from rest_framework.decorators import detail_route, list_route
+from rest_framework.response import Response as RestResponse
+from rest_framework.reverse import reverse
 
 
 _ResponseClass = namedtuple("ResponseData", [
@@ -49,18 +47,8 @@ class QuerySetMixin(rest_views.APIView):
             queryset = queryset.all()
         return queryset
 
-    def get_user_aval_related(self, related):
-        return self.request.user.related_objects.values_list(related,
-                                                             flat=True)
-
-    def get_user_aval_projects(self):
-        return self.get_user_aval_related("projects")
-
-    def _get_extra_queryset(self):
-        return self.queryset.filter(
-            Q(related_objects__user=self.request.user) |
-            Q(related_objects__projects__in=self.get_user_aval_projects())
-        ).distinct()
+    def get_extra_queryset(self):
+        return self.queryset
 
     def get_queryset(self):
         if self.queryset is None:
@@ -70,8 +58,8 @@ class QuerySetMixin(rest_views.APIView):
                 % self.__class__.__name__
             )
             self.queryset = self.model.objects.all()
-        if not self.request.user.is_staff and self.queryset.model != User:
-            self.queryset = self._get_extra_queryset()
+        if self.kwargs.get("pk", None) is None:
+            self.queryset = self.get_extra_queryset()
         return self._base_get_queryset()
 
 
@@ -108,12 +96,6 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
         serializer = serializer_class(queryset, many=True, **kwargs)
         return RestResponse(serializer.data)
 
-    @detail_route(methods=["post", "put", "delete", "get"])
-    def permissions(self, request, pk=None):
-        # pylint: disable=unused-argument
-        serializer = self.get_serializer(self.get_object())
-        return serializer.permissions(request).resp
-
     @list_route(methods=["post"])
     def filter(self, request):
         queryset = self.filter_queryset(self.get_queryset())
@@ -125,6 +107,25 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
             serializer_class=self.get_serializer_class(),
             context=self.get_serializer_context()
         )
+
+
+class LimitedPermissionMixin(object):
+    def get_extra_queryset(self):
+        return self.queryset.user_filter(self.request.user)
+
+
+class PermissionMixin(LimitedPermissionMixin):  # nocv
+    @detail_route(methods=["put", "get"])
+    def owner(self, request, pk=None):
+        # pylint: disable=unused-argument
+        serializer = self.get_serializer(self.get_object())
+        return serializer.owner(request).resp
+
+    @detail_route(methods=["post", "put", "delete", "get"])
+    def permissions(self, request, pk=None):
+        # pylint: disable=unused-argument
+        serializer = self.get_serializer(self.get_object())
+        return serializer.permissions(request).resp
 
 
 class ReadOnlyModelViewSet(GenericViewSet,

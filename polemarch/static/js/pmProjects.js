@@ -40,6 +40,10 @@ pmProjects.openNewItemPage = function(holder, menuInfo, data)
     return def.promise();
 }
 
+/**
+ * Берёт данные со страницы  "run playbook options"  ( /?project/1/playbook/run ) для проекта и запускает выполнение Playbook
+ * @returns {$.Deferred}
+ */
 pmProjects.executePlaybook = function(project_id)
 { 
     var data_vars = jsonEditor.jsonEditorGetValues();
@@ -47,13 +51,17 @@ pmProjects.executePlaybook = function(project_id)
     return pmTasks.execute(project_id, $('#inventories-autocomplete').val(), $('#playbook-autocomplete').val(), data_vars);
 }
 
+/**
+ * Строит страницу "run playbook options"  ( /?project/1/playbook/run ) для проекта
+ * @returns {$.Deferred}
+ */
 pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
     var thisObj = this;
     var project_id = data.reg[1]
     $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
-    {
+    { 
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:project_id, query:project_id}))
 
         $("#inventories-autocomplete").select2({ width: '100%' });
@@ -225,7 +233,7 @@ pmProjects.updateItem = function(item_id)
 /**
  * Показывает форму со списком всех групп.
  * @return $.Deferred
- */
+ * /
 pmProjects.showAddSubInventoriesForm = function(item_id, holder)
 {
     return $.when(pmInventories.loadAllItems()).done(function(){
@@ -235,27 +243,12 @@ pmProjects.showAddSubInventoriesForm = function(item_id, holder)
     }).fail(function(){
 
     }).promise()
-}
+} // */
 
 /**
  * Показывает форму со списком всех групп.
  * @return $.Deferred
- */
-pmProjects.showAddSubInventoriesForm = function(item_id, holder)
-{
-    return $.when(pmInventories.loadAllItems()).done(function(){
-        $("#add_existing_item_to_project").remove()
-        $(".content").appendTpl(spajs.just.render('add_existing_inventories_to_project', {item_id:item_id}))
-        $("#polemarch-model-items-select").select2({ width: '100%' });
-    }).fail(function(){
-
-    }).promise()
-}
-
-/**
- * Показывает форму со списком всех групп.
- * @return $.Deferred
- */
+ * /
 pmProjects.showAddSubGroupsForm = function(item_id, holder)
 {
     return $.when(pmGroups.loadAllItems()).done(function(){
@@ -265,12 +258,12 @@ pmProjects.showAddSubGroupsForm = function(item_id, holder)
     }).fail(function(){
 
     }).promise()
-}
+} // */
 
 /**
  * Показывает форму со списком всех хостов.
  * @return $.Deferred
- */
+ * /
 pmProjects.showAddSubHostsForm = function(item_id, holder)
 {
     return $.when(pmHosts.loadAllItems()).done(function(){
@@ -280,14 +273,14 @@ pmProjects.showAddSubHostsForm = function(item_id, holder)
     }).fail(function(){
 
     }).promise()
-}
+} // */
 
 /**
  * Проверяет принадлежит ли host_id к группе item_id
  * @param {Integer} item_id
  * @param {Integer} host_id
  * @returns {Boolean}
- */
+ * /
 pmProjects.hasHosts = function(item_id, host_id)
 {
     if(pmProjects.model.items[item_id])
@@ -301,14 +294,14 @@ pmProjects.hasHosts = function(item_id, host_id)
         }
     }
     return false;
-}
+} // */
 
 /**
  * Проверяет принадлежит ли host_id к группе item_id
  * @param {Integer} item_id
  * @param {Integer} host_id
  * @returns {Boolean}
- */
+ * /
 pmProjects.hasGroups = function(item_id, group_id)
 {
     if(pmProjects.model.items[item_id])
@@ -322,14 +315,14 @@ pmProjects.hasGroups = function(item_id, group_id)
         }
     }
     return false;
-}
+} // */
 
 /**
  * Проверяет принадлежит ли Inventory_id к группе item_id
  * @param {Integer} item_id
  * @param {Integer} inventory_id
  * @returns {Boolean}
- */
+ * /
 pmProjects.hasInventories = function(item_id, inventory_id)
 {
     if(pmProjects.model.items[item_id])
@@ -343,12 +336,12 @@ pmProjects.hasInventories = function(item_id, inventory_id)
         }
     }
     return false;
-}
+} // */
 
 
 /**
  * @return $.Deferred
- */
+ * /
 pmProjects.setSubInventories = function(item_id, inventories_ids)
 {
     if(!inventories_ids)
@@ -379,11 +372,11 @@ pmProjects.setSubInventories = function(item_id, inventories_ids)
             polemarch.showErrors(e.responseJSON)
         }
     });
-}
+} // */
 
 /**
  * @return $.Deferred
- */
+ * /
 pmProjects.setSubGroups = function(item_id, groups_ids)
 {
     if(!groups_ids)
@@ -414,11 +407,11 @@ pmProjects.setSubGroups = function(item_id, groups_ids)
             polemarch.showErrors(e.responseJSON)
         }
     });
-}
+} // */
 
 /**
  * @return $.Deferred
- */
+ * /
 pmProjects.setSubHosts = function(item_id, hosts_ids)
 {
     if(!hosts_ids)
@@ -448,11 +441,11 @@ pmProjects.setSubHosts = function(item_id, hosts_ids)
             polemarch.showErrors(e.responseJSON)
         }
     });
-}
+} // */
 
 /**
  * @return $.Deferred
- */
+ * /
 pmProjects.addSubInventories = function(item_id, inventories_ids)
 {
     if(!inventories_ids)
@@ -493,11 +486,11 @@ pmProjects.addSubInventories = function(item_id, inventories_ids)
         }
     });
     return def.promise();
-}
+} // */
 
 /**
  * @return $.Deferred
- */
+ * /
 pmProjects.addSubGroups = function(item_id, groups_ids)
 {
     if(!groups_ids)
@@ -538,11 +531,11 @@ pmProjects.addSubGroups = function(item_id, groups_ids)
         }
     });
     return def.promise();
-}
+} // */
 
 /**
  * @return $.Deferred
- */
+ * /
 pmProjects.addSubHosts = function(item_id, hosts_ids)
 {
     if(!hosts_ids)
@@ -582,7 +575,7 @@ pmProjects.addSubHosts = function(item_id, hosts_ids)
         }
     });
     return def.promise();
-}
+} // */
 
 /**
  * @return $.Deferred
@@ -593,7 +586,7 @@ pmProjects.syncRepo = function(item_id)
         url: "/api/v1/projects/"+item_id+"/sync/",
         type: "POST",
         contentType:'application/json',
-                success: function(data)
+        success: function(data)
         {
             $.notify("Send sync query", "success");
         },
@@ -614,7 +607,7 @@ pmProjects.supportedRepos = function()
         url: "/api/v1/projects/supported-repos/",
         type: "GET",
         contentType:'application/json',
-                success: function(data)
+        success: function(data)
         {
             pmProjects.model.supportedRepos = data;
             pmProjects.model.repository_type = data[0]
@@ -630,3 +623,44 @@ pmProjects.supportedRepos = function()
         }
     });
 }
+
+tabSignal.connect("polemarch.start", function()
+{ 
+    // projects
+    spajs.addMenu({
+        id:"projects", 
+        urlregexp:[/^projects$/, /^projects\/search\/?$/, /^project$/, /^projects\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmProjects.showUpdatedList(holder, menuInfo, data);},
+        onClose:function(){return pmProjects.stopUpdates();},
+    })
+ 
+    spajs.addMenu({
+        id:"projects-search", 
+        urlregexp:[/^projects\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmProjects.showSearchResults(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"project", 
+        urlregexp:[/^project\/([0-9]+)$/, /^projects\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmProjects.openItem(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"newProject", 
+        urlregexp:[/^new-project$/],
+        onOpen:function(holder, menuInfo, data){return pmProjects.openNewItemPage(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"project-run-playbook", 
+        urlregexp:[/^project\/([0-9]+)\/playbook\/run$/],
+        onOpen:function(holder, menuInfo, data){return pmProjects.openRunPlaybookPage(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"project-ansible-module-run", 
+        urlregexp:[/^project\/([0-9]+)\/ansible-module\/run$/],
+        onOpen:function(holder, menuInfo, data){return pmAnsibleModule.showInProject(holder, menuInfo, data);}
+    })
+})

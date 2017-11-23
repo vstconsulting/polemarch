@@ -21,6 +21,12 @@
             var server_status_types = '{{server_status_types|safe}}';
 
             {% if user.is_authenticated %}
+                var my_user_id = '{{user.id}}' 
+            {% else %}
+                var my_user_id = undefined
+            {% endif %}
+             
+            {% if user.is_authenticated %}
                 var is_authenticated = true
             {% else %}
                 var is_authenticated = false

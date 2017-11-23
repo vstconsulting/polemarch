@@ -82,10 +82,13 @@ extensions_dict = dict((
     (exten, [exten.replace(".", "/")+ext]) for exten in ext_list
 ))
 
-ext_modules = list(Extension(m, f) for m, f in extensions_dict.items())
+if 'develop' in sys.argv:
+    ext_modules = []
+else:
+    ext_modules = list(Extension(m, f) for m, f in extensions_dict.items())
 
-if use_cython and has_cython:
-    ext_modules = cythonize(ext_modules)
+    if use_cython and has_cython:
+        ext_modules = cythonize(ext_modules)
 
 
 class PostInstallCommand(install):
@@ -144,18 +147,13 @@ setup(
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 1.8',
-        'Framework :: Django :: 1.9',
-        'Framework :: Django :: 1.10',
         'Framework :: Django :: 1.11',
         'Operating System :: OS Independent',
         'Programming Language :: Cython',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Topic :: Internet :: WWW/HTTP',

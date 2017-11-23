@@ -1,19 +1,16 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
-from functools import reduce
-
-import operator
+from collections import OrderedDict
 from django.db import transaction
-from django.db.models import Q
 from django.http import HttpResponse
 from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
 
-from ...main import utils
-from .. import base
-from ..permissions import SuperUserPermission, StaffPermission
 from . import filters
 from . import serializers
+from .. import base
+from ..permissions import SuperUserPermission, StaffPermission
+from ...main import utils
 
 
 class TokenView(token_views.ObtainAuthToken):
@@ -58,7 +55,14 @@ class UserViewSet(base.ModelViewSetSet):
         return base.Response(serializer.data, 200).resp
 
 
-class HostViewSet(base.ModelViewSetSet):
+class TeamViewSet(base.PermissionMixin, base.ModelViewSetSet):
+    model = serializers.models.UserGroup
+    serializer_class = serializers.TeamSerializer
+    serializer_class_one = serializers.OneTeamSerializer
+    filter_class = filters.TeamFilter
+
+
+class HostViewSet(base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
     serializer_class_one = serializers.OneHostSerializer
@@ -82,21 +86,24 @@ class _GroupedViewSet(object):
         return self._get_result(request, serializer.groups_operations)
 
 
-class GroupViewSet(base.ModelViewSetSet, _GroupedViewSet):
+class GroupViewSet(base.PermissionMixin, base.ModelViewSetSet,
+                   _GroupedViewSet):
     model = serializers.models.Group
     serializer_class = serializers.GroupSerializer
     serializer_class_one = serializers.OneGroupSerializer
     filter_class = filters.GroupFilter
 
 
-class InventoryViewSet(base.ModelViewSetSet, _GroupedViewSet):
+class InventoryViewSet(base.PermissionMixin, base.ModelViewSetSet,
+                       _GroupedViewSet):
     model = serializers.models.Inventory
     serializer_class = serializers.InventorySerializer
     serializer_class_one = serializers.OneInventorySerializer
     filter_class = filters.InventoryFilter
 
 
-class ProjectViewSet(base.ModelViewSetSet, _GroupedViewSet):
+class ProjectViewSet(base.PermissionMixin, base.ModelViewSetSet,
+                     _GroupedViewSet):
     model = serializers.models.Project
     serializer_class = serializers.ProjectSerializer
     serializer_class_one = serializers.OneProjectSerializer
@@ -126,31 +133,25 @@ class ProjectViewSet(base.ModelViewSetSet, _GroupedViewSet):
         return serializer.execute_module(request).resp
 
 
-class TaskViewSet(base.ReadOnlyModelViewSet):
+class TaskViewSet(base.LimitedPermissionMixin, base.ReadOnlyModelViewSet):
     model = serializers.models.Task
     serializer_class = serializers.TaskSerializer
     serializer_class_one = serializers.OneTaskSerializer
     filter_class = filters.TaskFilter
 
 
-class PeriodicTaskViewSet(base.ModelViewSetSet):
+class PeriodicTaskViewSet(base.LimitedPermissionMixin, base.ModelViewSetSet):
     model = serializers.models.PeriodicTask
     serializer_class = serializers.PeriodictaskSerializer
     serializer_class_one = serializers.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
 
 
-class HistoryViewSet(base.HistoryModelViewSet):
+class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
     model = serializers.models.History
     serializer_class = serializers.HistorySerializer
     serializer_class_one = serializers.OneHistorySerializer
     filter_class = filters.HistoryFilter
-
-    def _get_extra_queryset(self):
-        return self.queryset.filter(
-            Q(initiator=self.request.user.id, initiator_type="users") |
-            Q(project__in=self.get_user_aval_projects())
-        ).distinct()
 
     @detail_route(methods=["get"])
     def raw(self, request, *args, **kwargs):
@@ -178,41 +179,30 @@ class HistoryViewSet(base.HistoryModelViewSet):
         return base.Response(objs, 200).resp
 
 
-class TemplateViewSet(base.ModelViewSetSet):
+class TemplateViewSet(base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Template
     serializer_class = serializers.TemplateSerializer
     serializer_class_one = serializers.OneTemplateSerializer
     filter_class = filters.TemplateFilter
 
-    def __get_extra_project_qs(self, qs):
-        query_projects = [
-            Q(template_data__contains='"project": {}'.format(i))
-            for i in self.get_user_aval_projects()
-            if i is not None
-        ]
-        query_projects.append(~Q(template_data__contains='"project":'))
-        return qs.filter(reduce(operator.or_, query_projects))
-
-    def __get_extra_inventories_qs(self, qs):
-        query_inventories = [
-            Q(template_data__contains='"inventory": {}'.format(i))
-            for i in self.get_user_aval_related("inventories")
-            if i is not None
-        ]
-        query_inventories.append(~Q(template_data__contains='"inventory":'))
-        return qs.filter(reduce(operator.or_, query_inventories))
-
-    def _get_extra_queryset(self):
-        base_qs = self.queryset
-        qs_projects = self.__get_extra_project_qs(base_qs)
-        qs_invs = self.__get_extra_inventories_qs(qs_projects)
-        query_usered = Q(related_objects__user=self.request.user)
-        qs_usered = base_qs.filter(query_usered)
-        return (qs_invs | qs_usered).distinct()
-
     @list_route(methods=["get"], url_path="supported-kinds")
     def supported_kinds(self, request):
         return base.Response(self.model.template_fields, 200).resp
+
+
+class HookViewSet(base.ModelViewSetSet):
+    model = serializers.models.Hook
+    serializer_class = serializers.HookSerializer
+    filter_class = filters.HookFilter
+    permission_classes = (StaffPermission,)
+
+    @list_route(['get'])
+    def types(self, request):
+        data = dict(
+            types=self.model.handlers.list(),
+            when=self.model.when_types
+        )
+        return base.Response(data, 200).resp
 
 
 class BulkViewSet(rest_views.APIView):
@@ -307,3 +297,32 @@ class AnsibleViewSet(base.ListNonModelViewSet):
             request.query_params.get("filter", "")
         )
         return base.Response(_mods, 200).resp
+
+
+class StatisticViewSet(base.ListNonModelViewSet):
+    base_name = "stats"
+
+    def _get_count_by_user(self, model):
+        user = self.request.user
+        filter_models = (serializers.User,)
+        if model not in filter_models:
+            return model.objects.all().user_filter(user).count()
+        return model.objects.all().count()
+
+    def _get_history_stats(self, request):
+        qs = serializers.models.History.objects.all()
+        qs = qs.user_filter(self.request.user)
+        return qs.stats(int(request.query_params.get("last", "14")))
+
+    def list(self, request, *args, **kwargs):
+        # pylint: disable=unused-argument
+        stats = OrderedDict(
+            projects=self._get_count_by_user(serializers.models.Project),
+            inventories=self._get_count_by_user(serializers.models.Inventory),
+            groups=self._get_count_by_user(serializers.models.Group),
+            hosts=self._get_count_by_user(serializers.models.Host),
+            teams=self._get_count_by_user(serializers.models.UserGroup),
+            users=self._get_count_by_user(serializers.User),
+        )
+        stats['jobs'] = self._get_history_stats(request)
+        return base.Response(stats, 200).resp

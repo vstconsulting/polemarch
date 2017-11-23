@@ -45,6 +45,18 @@ class TemplateFilter(_BaseFilter):
             'id',
             'name',
             'kind',
+            'project',
+            'inventory'
+        )
+
+
+class HookFilter(_BaseFilter):
+    class Meta:
+        model = models.Hook
+        fields = (
+            'id',
+            'name',
+            'type',
         )
 
 
@@ -161,4 +173,13 @@ class HistoryLinesFilter(filters.FilterSet):
         model = models.HistoryLines
         fields = (
             'line_number',
+        )
+
+
+class TeamFilter(_BaseFilter):
+    class Meta:
+        model = models.UserGroup
+        fields = (
+            'id',
+            "name"
         )

@@ -780,8 +780,13 @@ Object.defineProperty(Object.prototype, "justClassName", {
             }])
     }
 });
-
-// Проставляет атрибут (односторонний биндинг от модели в дом элементы)
+ 
+/**
+ * Проставляет атрибут (односторонний биндинг от модели в дом элементы)
+ * @example <%= pmUsers.model.items[item_id].justAttr('username', 'value') %>
+ * @param {String} name имя свойства объекта
+ * @param {String} name имя атрибута html тега 
+ */
 Object.defineProperty(Object.prototype, "justAttr", {
     enumerable: false
   , configurable: true

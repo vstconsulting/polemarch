@@ -17,6 +17,48 @@ pmDashboard.model.count = {
     history:'-',
 }
 
+/**
+ * Двумерный массив с описанием списка отображаемых виджетов в каждой строке
+ * 
+ * @example  
+ * [
+ *  [{
+        name:'pmwTemplatesCounter',  // Имя класса виджета
+        opt:{},                      // Опции для виджета
+    }]
+   ]
+ *
+ * @type Array
+ */
+pmDashboard.model.widgets = [
+    [
+        {
+            name:'pmwTemplatesCounter', 
+            opt:{}, 
+        },
+        {
+            name:'pmwProjectsCounter', 
+            opt:{}, 
+        },
+        {
+            name:'pmwInventoriesCounter', 
+            opt:{}, 
+        },
+        {
+            name:'pmwHostsCounter', 
+            opt:{}, 
+        },
+        {
+            name:'pmwGroupsCounter', 
+            opt:{}, 
+        },
+        {
+            name:'pmwUsersCounter', 
+            opt:{}, 
+        }, /**/
+    ],
+]
+
 pmDashboard.stopUpdates = function()
 {
     clearTimeout(this.model.updateTimeoutId)
@@ -25,30 +67,7 @@ pmDashboard.stopUpdates = function()
 
 pmDashboard.updateData = function()
 {
-    var thisObj = this 
-    $.when(pmProjects.loadItems(1)).done(function(){
-        thisObj.model.count.projects = pmProjects.model.itemslist.count;
-    })
-
-    $.when(pmInventories.loadItems(1)).done(function(){
-        thisObj.model.count.inventories = pmInventories.model.itemslist.count;
-    })
-
-    $.when(pmHosts.loadItems(1)).done(function(){
-        thisObj.model.count.hosts = pmHosts.model.itemslist.count;
-    })
-
-    $.when(pmGroups.loadItems(1)).done(function(){
-        thisObj.model.count.groups = pmGroups.model.itemslist.count;
-    })
-
-    $.when(pmUsers.loadItems(1)).done(function(){
-        thisObj.model.count.users = pmUsers.model.itemslist.count;
-    })
-
-    $.when(pmTemplates.loadItems(1)).done(function(){
-        thisObj.model.count.templates = pmTemplates.model.itemslist.count;
-    }) 
+    var thisObj = this  
     
     var startTime = moment().subtract(14, 'days').format("YYYY-MM-DD")+"T00:00:00.000000Z"
     $.when(pmHistory.sendSearchQuery({start_time__gt:startTime})).done(function()
@@ -110,7 +129,21 @@ pmDashboard.updateData = function()
 
 pmDashboard.open  = function(holder, menuInfo, data)
 {
+    
     var thisObj = this 
+    
+    // Инициализация всех виджетов на странице
+    for(var i in pmDashboard.model.widgets)
+    {  
+        for(var j in pmDashboard.model.widgets[i])
+        {
+            if(pmDashboard.model.widgets[i][j].widget === undefined)
+            {
+                pmDashboard.model.widgets[i][j].widget = new window[pmDashboard.model.widgets[i][j]['name']](pmDashboard.model.widgets[i][j].opt);
+            }
+        }
+    }
+    
     this.updateData()
     $(holder).insertTpl(spajs.just.render('dashboard_page', {})) 
     
@@ -138,3 +171,95 @@ pmDashboard.open  = function(holder, menuInfo, data)
         }
     });
 }
+
+tabSignal.connect("polemarch.start", function()
+{ 
+    spajs.addMenu({
+        id:"home", 
+        urlregexp:[/^(home|)$/],
+        onOpen:function(holder, menuInfo, data){return pmDashboard.open(holder, menuInfo, data);},
+        onClose:function(){return pmDashboard.stopUpdates();},
+    })
+      
+})
+
+/**
+ * Базовый класс виджета
+ * @type Object
+ */
+pmDashboardWidget = {
+    id:'',
+    model:{
+        test:1
+    },
+    render:function(){
+        
+    },
+    init:function(opt){
+        mergeDeep(this.model, opt)
+    }
+}
+
+/**
+ * Базовый класс виджета показывающего количество элементов
+ * @type Object
+ */
+var pmwItemsCounter = inheritance(pmDashboardWidget)
+
+pmwItemsCounter.model.count = '-'
+pmwItemsCounter.model.countObject = 'pmItems'
+pmwItemsCounter.render = function()
+{ 
+    var thisObj = this;
+    var html = spajs.just.render('pmwItemsCounter', {model:this.model})
+    return window.JUST.onInsert(html, function()
+    { 
+        $.when(window[thisObj.model.countObject].loadItems(1)).done(function()
+        {
+            thisObj.model.count = window[thisObj.model.countObject].model.itemslist.count;
+        })  
+    })
+} 
+ 
+/**
+ * Класс виджета показывающий количество хостов
+ * @type Object
+ */
+var pmwHostsCounter = inheritance(pmwItemsCounter)
+pmwHostsCounter.model.countObject = 'pmHosts'
+  
+/**
+ * Класс виджета показывающий количество шаблонов
+ * @type Object
+ */
+var pmwTemplatesCounter = inheritance(pmwItemsCounter)
+pmwTemplatesCounter.model.countObject = 'pmTemplates'
+  
+/**
+ * Класс виджета показывающий количество групп
+ * @type Object
+ */
+var pmwGroupsCounter = inheritance(pmwItemsCounter)
+pmwGroupsCounter.model.countObject = 'pmGroups'
+  
+/**
+ * Класс виджета показывающий количество проектов
+ * @type Object
+ */
+var pmwProjectsCounter = inheritance(pmwItemsCounter)
+pmwProjectsCounter.model.countObject = 'pmProjects'
+  
+/**
+ * Класс виджета показывающий количество инвенториев
+ * @type Object
+ */
+var pmwInventoriesCounter = inheritance(pmwItemsCounter)
+pmwInventoriesCounter.model.countObject = 'pmInventories'
+  
+/**
+ * Класс виджета показывающий количество пользователей
+ * @type Object
+ */
+var pmwUsersCounter = inheritance(pmwItemsCounter)
+pmwUsersCounter.model.countObject = 'pmUsers'
+   

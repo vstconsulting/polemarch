@@ -3,47 +3,31 @@ from __future__ import unicode_literals
 
 import logging
 
+from django.contrib.auth.models import Group as BaseGroup
 from django.contrib.auth.models import User as BaseUser
+from .base import models
+from . import acl
 
-from .base import models, BModel
-from .projects import Project
-from .tasks import Task, PeriodicTask, History, Template
-from . import hosts as hosts_models
 
 logger = logging.getLogger("polemarch")
-def_rel_name = 'related_objects'
 
 
-class TypesPermissions(BModel):
-    user           = models.ForeignKey(BaseUser,
-                                       related_query_name=def_rel_name)
-    projects       = models.ManyToManyField(Project,
-                                            related_query_name=def_rel_name,
-                                            blank=True, null=True)
-    inventories    = models.ManyToManyField(hosts_models.Inventory,
-                                            related_query_name=def_rel_name,
-                                            blank=True, null=True)
-    hosts          = models.ManyToManyField(hosts_models.Host,
-                                            related_query_name=def_rel_name,
-                                            blank=True, null=True)
-    groups         = models.ManyToManyField(hosts_models.Group,
-                                            related_query_name=def_rel_name,
-                                            blank=True, null=True)
-    tasks          = models.ManyToManyField(Task,
-                                            related_query_name=def_rel_name,
-                                            blank=True, null=True)
-    periodic_tasks = models.ManyToManyField(PeriodicTask,
-                                            related_query_name=def_rel_name,
-                                            blank=True, null=True)
-    history        = models.ManyToManyField(History,
-                                            related_query_name=def_rel_name,
-                                            blank=True, null=True)
-    template       = models.ManyToManyField(Template,
-                                            related_query_name=def_rel_name,
-                                            blank=True, null=True)
+class ACLPermission(acl.ACLPermissionAbstract):
+    role = models.CharField(max_length=10)
 
-    class Meta:
-        default_related_name = "related_objects"
+
+class UserGroup(BaseGroup, acl.ACLGroupSubclass, acl.ACLPermissionSubclass):
+    objects = acl.ACLUserGroupsQuerySet.as_manager()
+    parent = models.OneToOneField(BaseGroup, parent_link=True)
+    users = BaseGroup.user_set
 
     def __unicode__(self):
-        return str(self.user)  # pragma: no cover
+        return super(UserGroup, self).__unicode__()
+
+    @property
+    def users_list(self):
+        return list(self.users.values_list("id", flat=True))
+
+    @users_list.setter
+    def users_list(self, value):
+        self.users.set(BaseUser.objects.filter(id__in=value))

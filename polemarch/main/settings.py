@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 import sys
 
-from configparser import ConfigParser, NoSectionError
+from configparser import ConfigParser, NoSectionError, NoOptionError
 
 from . import __file__ as file
 from .. import __version__ as polemarch_version
@@ -160,6 +160,17 @@ DATABASES = {
     'default': __DB_SETTINGS
 }
 
+# E-Mail settings
+# https://docs.djangoproject.com/en/1.10/ref/settings/#email-host
+try:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_PORT = config.getint("mail", "port", fallback=25)
+    EMAIL_HOST_USER = config.get("mail", "user", fallback="")
+    EMAIL_HOST_PASSWORD = config.get("mail", "password", fallback="")
+    EMAIL_USE_TLS = config.getboolean("mail", "tls", fallback=False)
+    EMAIL_HOST = config.get("mail", "host")
+except (NoSectionError, NoOptionError):
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
@@ -375,9 +386,34 @@ TASKS_HANDLERS = {
     },
 }
 
+ACL = {
+    "DEFAULT_ACL_CLASSES": {
+        "ACLPermissionAbstract": "polemarch.main.models.acl_models.ACLPermissionAbstract",
+        "ACLModel": "polemarch.main.models.acl_models.ACLModel",
+        "ACLPermissionSubclass": "polemarch.main.models.acl_models.ACLPermissionSubclass",
+        "ACLGroupSubclass": "polemarch.main.models.acl_models.ACLGroupSubclass",
+        "ACLQuerySet": "polemarch.main.models.acl_models.ACLQuerySet",
+        "ACLInventoriesQuerySet": "django.db.models.query.QuerySet",
+        "ACLUserGroupsQuerySet": "polemarch.main.models.acl_models.ACLQuerySet",
+    }
+}
+
+HOOKS = {
+    "HTTP": {
+        "BACKEND": 'polemarch.main.hooks.http.Backend'
+    },
+    "SCRIPT": {
+        "BACKEND": 'polemarch.main.hooks.script.Backend'
+    },
+}
+
+HOOKS_DIR = config.get("main", "hooks_dir", fallback="/tmp")
 
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     REPO_BACKENDS["TEST"] = {
         "BACKEND": "polemarch.main.tests.repo_backends.Test",
     }
+    PROJECTS_DIR = '/tmp/polemarch_projects' + str(PY_VER)
+    os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
+    EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
