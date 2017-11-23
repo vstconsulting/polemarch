@@ -38,16 +38,16 @@ class ACLPermissionSubclass(models.Model):
     class Meta:
         abstract = True
 
-    def set_owner(self, user):
+    def set_owner(self, user):  # nocv
         pass
 
-    def owned_by(self, user):
+    def owned_by(self, user):  # nocv
         return True
 
-    def manageable_by(self, user):
+    def manageable_by(self, user):  # nocv
         return True
 
-    def editable_by(self, user):
+    def editable_by(self, user):  # nocv
         return True
 
     def viewable_by(self, user):

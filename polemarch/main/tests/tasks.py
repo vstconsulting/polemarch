@@ -5,6 +5,7 @@ from datetime import timedelta
 
 import subprocess
 from django.utils.timezone import now
+from django.core.validators import ValidationError
 
 try:
     from mock import patch
@@ -393,7 +394,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             data=json.dumps(dict(inventory=inv, playbook=playbook, sync=1))
         )
         self.assertTrue(self.sended, "Raised on sending.")
-        self.assertEquals(execute_method.call_count, 2)
+        self.assertEquals(execute_method.call_count, 4)
         self.assertEquals(subprocess_function.call_count, 1)
 
 
@@ -624,6 +625,9 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertTrue(isinstance(job_template.data, dict))
         with self.assertRaises(ValueError):
             job_template.data = object()
+
+        with self.assertRaises(ValidationError):
+            Template.objects.create(**tmplt_data)
 
     def test_templates(self):
         url = "/api/v1/templates/"

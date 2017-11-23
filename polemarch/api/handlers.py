@@ -1,12 +1,9 @@
 import logging
 import sys
 import traceback
-import six
 from django.core.exceptions import PermissionDenied
 
-from django.http import Http404
 from django.core import exceptions as djexcs
-from django.utils.translation import ugettext_lazy as _
 from rest_framework import exceptions, status, views
 from rest_framework.response import Response
 
@@ -20,12 +17,7 @@ def polemarch_exception_handler(exc, context):
     logger.info(traceback.format_exc())
     default_exc = (exceptions.APIException, djexcs.PermissionDenied)
 
-    if isinstance(exc, Http404):
-        msg = _('Not found or not allowed to view.')
-        data = {'detail': six.text_type(msg)}
-        return Response(data, status=status.HTTP_404_NOT_FOUND)
-
-    elif isinstance(exc, PermissionDenied):
+    if isinstance(exc, PermissionDenied):  # pragma: no cover
         return Response({"detail": str(exc)},
                         status=status.HTTP_403_FORBIDDEN)
 

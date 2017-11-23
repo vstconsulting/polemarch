@@ -118,20 +118,8 @@ class PeriodicTask(AbstractModel):
         return float(self.schedule)
 
     def execute(self):
-        if self.kind == "PLAYBOOK":
-            self.run_ansible_playbook()
-        elif self.kind == "MODULE":
-            self.run_ansible_module()
-
-    def run_ansible_module(self):
-        self.project.execute_ansible_module(
-            self.mode, self.inventory, sync=True,
-            save_result=self.save_result, **self.vars
-        )
-
-    def run_ansible_playbook(self):
-        self.project.execute_ansible_playbook(
-            self.mode, self.inventory, sync=True,
+        self.project.execute(
+            self.kind, self.mode, self.inventory, sync=True,
             save_result=self.save_result, **self.vars
         )
 

@@ -104,12 +104,12 @@ class _WithPermissionsSerializer(_SignalSerializer):
     def current_user(self):
         return self.context['request'].user
 
-    def __get_all_permission_serializer(self):
+    def __get_all_permission_serializer(self):  # noce
         return PermissionsSerializer(
             self.instance.acl.all(), many=True
         )
 
-    def __permission_set(self, data, remove_old=True):
+    def __permission_set(self, data, remove_old=True):  # noce
         for permission_args in data:
             if remove_old:
                 self.instance.acl.extend().filter(
@@ -119,9 +119,9 @@ class _WithPermissionsSerializer(_SignalSerializer):
             self.instance.acl.create(**permission_args)
 
     @transaction.atomic
-    def permissions(self, request):
-        if request.method != "GET" and \
-                not self.instance.manageable_by(self.current_user()):
+    def permissions(self, request):  # noce
+        user = self.current_user()
+        if request.method != "GET" and not self.instance.manageable_by(user):
             raise PermissionDenied(self.perms_msg)
         if request.method == "DELETE":
             self.instance.acl.filter_by_data(request.data).delete()
@@ -132,15 +132,17 @@ class _WithPermissionsSerializer(_SignalSerializer):
             self.__permission_set(request.data, False)
         return Response(self.__get_all_permission_serializer().data, 200)
 
-    def owner(self, request):
+    def _change_owner(self, request):  # noce
+        if not self.instance.owned_by(self.current_user()):
+            raise PermissionDenied(self.perms_msg)
+        self.instance.set_owner(User.objects.get(pk=request.data))
+        return Response("Owner changed", 200)
+
+    def owner(self, request):  # noce
         if request.method == "GET":
             return Response(self.instance.owner.id, 200)
         elif request.method == "PUT":
-            if not self.instance.owned_by(self.current_user()):
-                raise PermissionDenied(self.perms_msg)
-            user = User.objects.get(pk=request.data)
-            self.instance.set_owner(user)
-            return Response("Owner changed", 200)
+            return self._change_owner(request)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -381,8 +383,9 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
     def update(self, instance, validated_data):
         if "children" in validated_data:
             raise exceptions.ValidationError("Children not allowed to update.")
-        return self._do_with_vars("update", instance,
-                                  validated_data=validated_data)
+        return self._do_with_vars(
+            "update", instance, validated_data=validated_data
+        )
 
 
 class HostSerializer(_WithVariablesSerializer):
@@ -638,12 +641,11 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     def _execution(self, kind, request):
         data = dict(request.data)
         inventory = Inventory.objects.get(id=int(data.pop("inventory")))
-        if not inventory.viewable_by(request.user):
+        if not inventory.viewable_by(request.user):  # nocv
             raise PermissionDenied("You don't have permission to inventory.")
-        target = str(data.pop(kind))
-        action = getattr(self.instance, "execute_ansible_{}".format(kind))
-        history_id = action(
-            target, inventory, initiator=request.user.id, **data
+        history_id = self.instance.execute(
+            kind, str(data.pop(kind)), inventory,
+            initiator=request.user.id, **data
         )
         rdata = dict(detail="Started at inventory {}.".format(inventory.id),
                      history_id=history_id)

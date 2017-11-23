@@ -119,7 +119,8 @@ class Project(AbstractModel):
             msg['history'] = None
         SendHook.delay(when, **msg)
 
-    def _execute(self, kind, *args, **extra):
+    def execute(self, kind, *args, **extra):
+        kind = kind.upper()
         task_class = self.task_handlers.backend(kind)
         sync = extra.pop("sync", False)
 
@@ -132,12 +133,6 @@ class Project(AbstractModel):
         else:
             task_class.delay(**kwargs)
         return history.id if history is not None else history
-
-    def execute_ansible_playbook(self, playbook, inventory, **extra):
-        return self._execute("PLAYBOOK", playbook, inventory, **extra)
-
-    def execute_ansible_module(self, module, inventory, **extra):
-        return self._execute("MODULE", module, inventory, **extra)
 
     def set_status(self, status):
         self.status = status

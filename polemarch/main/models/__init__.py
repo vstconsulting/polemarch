@@ -86,7 +86,7 @@ def validate_template_keys(instance, **kwargs):
 @receiver(signals.pre_save, sender=Template)
 def validate_template_executes(instance, **kwargs):
     if instance.kind in ["Host", "Group"]:
-        return
+        return  # nocv
     errors = {}
     if "inventory" not in instance.data.keys():
         errors["inventory"] = "Inventory have to set."
@@ -99,7 +99,7 @@ def validate_template_executes(instance, **kwargs):
 @receiver(signals.pre_save, sender=Template)
 def validate_template_args(instance, **kwargs):
     if instance.kind in ["Host", "Group"]:
-        return
+        return  # nocv
     command = "playbook"
     ansible_args = dict(instance.data['vars'])
     if instance.kind == "Module":

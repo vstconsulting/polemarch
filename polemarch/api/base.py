@@ -114,7 +114,7 @@ class LimitedPermissionMixin(object):
         return self.queryset.user_filter(self.request.user)
 
 
-class PermissionMixin(LimitedPermissionMixin):
+class PermissionMixin(LimitedPermissionMixin):  # nocv
     @detail_route(methods=["put", "get"])
     def owner(self, request, pk=None):
         # pylint: disable=unused-argument

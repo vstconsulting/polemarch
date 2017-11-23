@@ -20,3 +20,6 @@ class BaseHook(object):
 
     def on_execution(self, **kwargs):
         return self.send(kwargs, when='on_execution')
+
+    def after_execution(self, **kwargs):
+        return self.send(kwargs, when='after_execution')
