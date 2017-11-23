@@ -371,7 +371,7 @@ pmPeriodicTasks.model.page_item = {
         }
     ],
     title: function(item_id){
-        return "Task template "+this.model.items[item_id].justText('name')
+        return "Periodic task "+this.model.items[item_id].justText('name')
     },
     short_title: function(item_id){
         return this.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
