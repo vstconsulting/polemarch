@@ -22,6 +22,7 @@ router_v1.register(r'templates', v1.TemplateViewSet)
 router_v1.register(r'history', v1.HistoryViewSet)
 router_v1.register(r'ansible', v1.AnsibleViewSet)
 router_v1.register(r'stats', v1.StatisticViewSet)
+router_v1.register(r'hooks', v1.HookViewSet)
 router_v1.register_view(r'token', v1.TokenView)
 router_v1.register_view(r'_bulk', v1.BulkViewSet)
 

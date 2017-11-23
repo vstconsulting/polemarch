@@ -4,6 +4,7 @@ import json
 
 import re
 import six
+from django import dispatch
 from django.contrib.auth.models import User
 from django.db import transaction
 
@@ -11,6 +12,7 @@ from rest_framework import serializers
 from rest_framework import exceptions
 from rest_framework.exceptions import PermissionDenied
 
+from ...main.models import Inventory
 from ...main import models
 from ..base import Response
 
@@ -52,7 +54,97 @@ class DictField(serializers.CharField):
         )
 
 
+api_pre_save = dispatch.Signal(providing_args=["instance", "user"])
+api_post_save = dispatch.Signal(providing_args=["instance", "user"])
+
+
+def with_signals(func):
+    '''
+    Decorator for send api_pre_save and api_post_save signals from serializers.
+    '''
+    def func_wrapper(*args, **kwargs):
+        user = args[0].context['request'].user
+        with transaction.atomic():
+            instance = func(*args, **kwargs)
+            api_pre_save.send(
+                sender=instance.__class__, instance=instance, user=user
+            )
+        with transaction.atomic():
+            api_post_save.send(
+                sender=instance.__class__, instance=instance, user=user
+            )
+        return instance
+
+    return func_wrapper
+
+
 # Serializers
+class _SignalSerializer(serializers.ModelSerializer):
+    @with_signals
+    def create(self, validated_data):
+        return super(_SignalSerializer, self).create(validated_data)
+
+    @with_signals
+    def update(self, instance, validated_data):
+        return super(_SignalSerializer, self).update(instance, validated_data)
+
+
+class _WithPermissionsSerializer(_SignalSerializer):
+    perms_msg = "You do not have permission to perform this action."
+
+    def _get_objects(self, model, objs_id):
+        user = self.context['request'].user
+        qs = model.objects.all().user_filter(user)
+        return list(qs.filter(id__in=objs_id))
+
+    def create(self, validated_data):
+        validated_data["owner"] = self.current_user()
+        return super(_WithPermissionsSerializer, self).create(validated_data)
+
+    def current_user(self):
+        return self.context['request'].user
+
+    def __get_all_permission_serializer(self):  # noce
+        return PermissionsSerializer(
+            self.instance.acl.all(), many=True
+        )
+
+    def __permission_set(self, data, remove_old=True):  # noce
+        for permission_args in data:
+            if remove_old:
+                self.instance.acl.extend().filter(
+                    member=permission_args['member'],
+                    member_type=permission_args['member_type']
+                ).delete()
+            self.instance.acl.create(**permission_args)
+
+    @transaction.atomic
+    def permissions(self, request):  # noce
+        user = self.current_user()
+        if request.method != "GET" and not self.instance.manageable_by(user):
+            raise PermissionDenied(self.perms_msg)
+        if request.method == "DELETE":
+            self.instance.acl.filter_by_data(request.data).delete()
+        elif request.method == "POST":
+            self.__permission_set(request.data)
+        elif request.method == "PUT":
+            self.instance.acl.clear()
+            self.__permission_set(request.data, False)
+        return Response(self.__get_all_permission_serializer().data, 200)
+
+    def _change_owner(self, request):  # noce
+        if not self.instance.owned_by(self.current_user()):
+            raise PermissionDenied(self.perms_msg)
+        self.instance.set_owner(User.objects.get(pk=request.data))
+        return Response("Owner changed", 200)
+
+    def owner(self, request):  # noce
+        if request.method == "GET":
+            return Response(self.instance.owner.id, 200)
+        elif request.method == "PUT":
+            return self._change_owner(request)
+
+
 class UserSerializer(serializers.ModelSerializer):
 
     class UserExist(exceptions.ValidationError):
@@ -67,6 +159,7 @@ class UserSerializer(serializers.ModelSerializer):
                   'url',)
         read_only_fields = ('is_superuser',)
 
+    @with_signals
     def create(self, data):
         if not self.context['request'].user.is_staff:
             raise exceptions.PermissionDenied
@@ -90,6 +183,7 @@ class UserSerializer(serializers.ModelSerializer):
                 pass
         return super(UserSerializer, self).is_valid(raise_exception)
 
+    @with_signals
     def update(self, instance, validated_data):
         if not self.context['request'].user.is_staff and \
                         instance.id != self.context['request'].user.id:
@@ -114,7 +208,7 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
-class TeamSerializer(serializers.ModelSerializer):
+class TeamSerializer(_WithPermissionsSerializer):
     users_list = DictField(required=False, write_only=True)
 
     class Meta:
@@ -138,6 +232,7 @@ class OneTeamSerializer(TeamSerializer):
             "name",
             "users",
             "users_list",
+            "owner",
             'url',
         )
 
@@ -163,7 +258,7 @@ class OneUserSerializer(UserSerializer):
                             'date_joined',)
 
 
-class HistorySerializer(serializers.ModelSerializer):
+class HistorySerializer(_SignalSerializer):
     class Meta:
         model = models.History
         fields = ("id",
@@ -179,7 +274,7 @@ class HistorySerializer(serializers.ModelSerializer):
                   "url")
 
 
-class OneHistorySerializer(serializers.ModelSerializer):
+class OneHistorySerializer(_SignalSerializer):
     raw_stdout = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -216,14 +311,25 @@ class OneHistorySerializer(serializers.ModelSerializer):
         return self.instance.facts
 
 
-class HistoryLinesSerializer(serializers.ModelSerializer):
+class HistoryLinesSerializer(_SignalSerializer):
     class Meta:
         model = models.HistoryLines
         fields = ("line_number",
                   "line",)
 
 
-class VariableSerializer(serializers.ModelSerializer):
+class HookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Hook
+        fields = (
+            'id',
+            'name',
+            'type',
+            'recipients'
+        )
+
+
+class VariableSerializer(_SignalSerializer):
     class Meta:
         model = models.Variable
         fields = ('key',
@@ -234,19 +340,14 @@ class VariableSerializer(serializers.ModelSerializer):
         return {instance.key: instance.value}  # nocv
 
 
-class _WithVariablesSerializer(serializers.ModelSerializer):
+class _WithVariablesSerializer(_WithPermissionsSerializer):
     operations = dict(DELETE="remove",
                       POST="add",
                       PUT="set",
                       GET="all")
-    perms_msg = "You do not have permission to perform this action."
-
-    def _get_objects(self, model, objs_id):
-        user = self.context['request'].user
-        qs = model.objects.all().user_filter(user)
-        return list(qs.filter(id__in=objs_id))
 
     def get_operation(self, method, data, attr):
+        # FIXME: details about every failed object
         tp = getattr(self.instance, attr)
         obj_list = self._get_objects(tp.model, data)
         return self._operate(method, data, attr, obj_list)
@@ -259,8 +360,6 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def _do_with_vars(self, method_name, *args, **kwargs):
-        if method_name == "create":
-            kwargs['validated_data']["owner"] = self.current_user()
         method = getattr(super(_WithVariablesSerializer, self), method_name)
         instance = method(*args, **kwargs)
         return instance
@@ -270,10 +369,7 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         action = self.operations[method]
         tp = getattr(self.instance, attr)
         if action == "all":
-            if attr == "permissions":
-                answer = tp.values_list("user__id", flat=True)
-            else:
-                answer = tp.values_list("id", flat=True)
+            answer = tp.values_list("id", flat=True)
             return Response(answer, status=200)
         elif action == "set":
             getattr(tp, "clear")()
@@ -284,47 +380,12 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return self._do_with_vars("create", validated_data=validated_data)
 
-    def current_user(self):
-        return self.context['request'].user
-
     def update(self, instance, validated_data):
         if "children" in validated_data:
             raise exceptions.ValidationError("Children not allowed to update.")
-        return self._do_with_vars("update", instance,
-                                  validated_data=validated_data)
-
-    def __get_all_permission_serializer(self):
-        return PermissionsSerializer(
-            self.instance.permissions.all(), many=True
+        return self._do_with_vars(
+            "update", instance, validated_data=validated_data
         )
-
-    def __permission_set(self, data):
-        for permission_args in data:
-            self.instance.permissions.create(**permission_args)
-
-    @transaction.atomic
-    def permissions(self, request):
-        if request.method != "GET" and \
-                not self.instance.manageable_by(self.current_user()):
-            raise PermissionDenied(self.perms_msg)
-        if request.method == "DELETE":
-            self.instance.permissions.filter_by_data(request.data).delete()
-        elif request.method == "POST":
-            self.__permission_set(request.data)
-        elif request.method == "PUT":
-            self.instance.permissions.clear()
-            self.__permission_set(request.data)
-        return Response(self.__get_all_permission_serializer().data, 200)
-
-    def owner(self, request):
-        if request.method == "GET":
-            return Response(self.instance.owner.id, 200)
-        elif request.method == "PUT":
-            if not self.instance.owned_by(self.current_user()):
-                raise PermissionDenied(self.perms_msg)
-            user = User.objects.get(pk=request.data)
-            self.instance.set_owner(user)
-            return Response("Owner changed", 200)
 
 
 class HostSerializer(_WithVariablesSerializer):
@@ -579,13 +640,14 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
 
     def _execution(self, kind, request):
         data = dict(request.data)
-        inventory_id = int(data.pop("inventory"))
-        target = str(data.pop(kind))
-        action = getattr(self.instance, "execute_ansible_{}".format(kind))
-        history_id = action(
-            target, inventory_id, initiator=request.user.id, **data
+        inventory = Inventory.objects.get(id=int(data.pop("inventory")))
+        if not inventory.viewable_by(request.user):  # nocv
+            raise PermissionDenied("You don't have permission to inventory.")
+        history_id = self.instance.execute(
+            kind, str(data.pop(kind)), inventory,
+            initiator=request.user.id, **data
         )
-        rdata = dict(detail="Started at inventory {}.".format(inventory_id),
+        rdata = dict(detail="Started at inventory {}.".format(inventory.id),
                      history_id=history_id)
         return Response(rdata, 201)
 
@@ -596,7 +658,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         return self._execution("module", request)
 
 
-class PermissionsSerializer(serializers.ModelSerializer):
+class PermissionsSerializer(_SignalSerializer):
     member = serializers.IntegerField()
     member_type = serializers.CharField()
 

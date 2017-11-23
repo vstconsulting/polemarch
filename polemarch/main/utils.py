@@ -445,21 +445,26 @@ class assertRaises(object):
         :param verbose: -- logging
         :type verbose: bool
         '''
+        self._kwargs = dict(**kwargs)
         self._verbose = kwargs.pop("verbose", False)
+        self._exclude = kwargs.pop("exclude", False)
         self._excepts = tuple(args)
 
     def __enter__(self):
         return self  # pragma: no cover
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        return exc_type is not None and not issubclass(exc_type, self._excepts)
+        return exc_type is not None and (
+            (not self._exclude and not issubclass(exc_type, self._excepts)) or
+            (self._exclude and issubclass(exc_type, self._excepts))
+        )
 
 
 # noinspection PyUnreachableCode
 class raise_context(assertRaises):
 
     def execute(self, func, *args, **kwargs):
-        with self.__class__(self._excepts, verbose=self._verbose):
+        with self.__class__(self._excepts, **self._kwargs):
             return func(*args, **kwargs)
         return sys.exc_info()
 

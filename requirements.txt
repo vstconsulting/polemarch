@@ -19,6 +19,9 @@ uWSGI==2.0.15
 # Repo types
 gitpython==2.1.7
 
+# Hooks
+requests==2.18.4
+
 # additional DB and cache connectors
 PyMySQL
 python-memcached

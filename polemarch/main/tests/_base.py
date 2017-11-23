@@ -10,7 +10,7 @@ from django.db import transaction
 from django.test import TestCase
 from django.conf import settings
 from django.contrib.auth.models import User
-from polemarch.main import models
+from ...main import models
 
 
 class BaseTestCase(TestCase):

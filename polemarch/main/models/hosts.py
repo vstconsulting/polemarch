@@ -5,6 +5,7 @@ import logging
 
 from django.db import transaction
 from django.db.models import Q
+from .acl import ACLInventoriesQuerySet
 
 from .base import BManager, models
 from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
@@ -137,8 +138,12 @@ class Group(AbstractModel):
         return get_render("models/group", data), keys
 
 
+class InventoriesQuerySet(AbstractVarsQuerySet, ACLInventoriesQuerySet):
+    pass
+
+
 class Inventory(AbstractModel):
-    objects     = BManager.from_queryset(AbstractVarsQuerySet)()
+    objects     = InventoriesQuerySet.as_manager()
     hosts       = ManyToManyFieldACL(Host)
     groups      = ManyToManyFieldACL(Group)
 

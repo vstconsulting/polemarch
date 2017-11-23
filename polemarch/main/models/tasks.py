@@ -17,20 +17,29 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
+from .base import ForeignKeyACL
 
 from ..utils import AnsibleArgumentsReference
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
-from .base import BModel, BManager, BQuerySet, models
+from .base import BModel, BQuerySet, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project
-from .acl import ACLModel
+from .acl import ACLModel, ACLHistoryQuerySet
 
 logger = logging.getLogger("polemarch")
 
 
+class TaskFilterQuerySet(BQuerySet):
+    use_for_related_fields = True
+
+    def user_filter(self, user):
+        return self.filter(project__in=Project.objects.all().user_filter(user))
+
+
 # Block of real models
 class Task(BModel):
+    objects     = TaskFilterQuerySet.as_manager()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
                                     related_query_name="tasks")
     name        = models.CharField(max_length=256, default=uuid.uuid1)
@@ -42,13 +51,19 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)  # nocv
 
+    def viewable_by(self, user):
+        return self.project.viewable_by(user)
+
+
+class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
+    pass
+
 
 # noinspection PyTypeChecker
 class PeriodicTask(AbstractModel):
-    objects     = BManager.from_queryset(AbstractVarsQuerySet)()
+    objects     = PeriodicTaskQuerySet.as_manager()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
-                                    related_query_name="periodic_tasks",
-                                    blank=True, null=True)
+                                    related_query_name="periodic_tasks")
     mode        = models.CharField(max_length=256)
     kind        = models.CharField(max_length=50, default="PLAYBOOK")
     inventory   = models.ForeignKey(Inventory, on_delete=models.CASCADE,
@@ -102,22 +117,16 @@ class PeriodicTask(AbstractModel):
         return float(self.schedule)
 
     def execute(self):
-        if self.kind == "PLAYBOOK":
-            self.run_ansible_playbook()
-        elif self.kind == "MODULE":
-            self.run_ansible_module()
-
-    def run_ansible_module(self):
-        self.project.execute_ansible_module(
-            self.mode, self.inventory.id, sync=True,
+        self.project.execute(
+            self.kind, self.mode, self.inventory, sync=True,
             save_result=self.save_result, **self.vars
         )
 
-    def run_ansible_playbook(self):
-        self.project.execute_ansible_playbook(
-            self.mode, self.inventory.id, sync=True,
-            save_result=self.save_result, **self.vars
-        )
+    def editable_by(self, user):
+        return self.project.editable_by(user)
+
+    def viewable_by(self, user):
+        return self.project.viewable_by(user)
 
 
 class Template(ACLModel):
@@ -126,9 +135,9 @@ class Template(ACLModel):
     template_data = models.TextField(default="")
     inventory     = models.CharField(max_length=128,
                                      default=None, blank=True, null=True)
-    project       = models.ForeignKey(Project,
-                                      on_delete=models.SET_NULL,
-                                      default=None, blank=True, null=True)
+    project       = ForeignKeyACL(Project,
+                                  on_delete=models.SET_NULL,
+                                  default=None, blank=True, null=True)
 
     class Meta:
         index_together = [
@@ -200,7 +209,7 @@ class Template(ACLModel):
         self.project = None  # nocv
 
 
-class HistoryQuerySet(BQuerySet):
+class HistoryQuerySet(ACLHistoryQuerySet):
     use_for_related_fields = True
 
     def create(self, **kwargs):
@@ -234,11 +243,6 @@ class HistoryQuerySet(BQuerySet):
             month=self._get_history_stats_by(qs, 'month'),
             year=self._get_history_stats_by(qs, 'year')
         )
-
-    def user_filter(self, user, only_leads=False):
-        # pylint: disable=unused-argument
-        # TODO: this should be change
-        return self
 
 
 class History(BModel):
@@ -321,6 +325,17 @@ class History(BModel):
     def write_line(self, value, number):  # nocv
         self.raw_history_line.create(
             history=self, line_number=number, line=value
+        )
+
+    def editable_by(self, user):
+        return self.inventory.editable_by(user)
+
+    def viewable_by(self, user):
+        return (
+            self.project.editable_by(user) or
+            self.inventory.editable_by(user) or
+            (self.initiator == user.id and self.initiator_type == "users") or
+            (self.project.viewable_by(user) & self.inventory.viewable_by(user))
         )
 
 

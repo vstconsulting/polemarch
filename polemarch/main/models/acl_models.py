@@ -28,26 +28,30 @@ class ACLQuerySet(BQuerySet):
         return self
 
 
+class ACLHistoryQuerySet(ACLQuerySet):
+    use_for_related_fields = True
+
+
 class ACLPermissionSubclass(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               default=first_staff_user,
                               related_name="polemarch_%(class)s_set")
-    permissions = models.ManyToManyField("main.ACLPermission",
-                                         blank=True, null=True)
+    acl = models.ManyToManyField("main.ACLPermission",
+                                 blank=True, null=True)
 
     class Meta:
         abstract = True
 
-    def set_owner(self, user):
+    def set_owner(self, user):  # nocv
         pass
 
-    def owned_by(self, user):
+    def owned_by(self, user):  # nocv
         return True
 
-    def manageable_by(self, user):
+    def manageable_by(self, user):  # nocv
         return True
 
-    def editable_by(self, user):
+    def editable_by(self, user):  # nocv
         return True
 
     def viewable_by(self, user):

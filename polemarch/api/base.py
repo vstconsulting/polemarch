@@ -109,10 +109,12 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
         )
 
 
-class PermissionMixin(object):
+class LimitedPermissionMixin(object):
     def get_extra_queryset(self):
         return self.queryset.user_filter(self.request.user)
 
+
+class PermissionMixin(LimitedPermissionMixin):  # nocv
     @detail_route(methods=["put", "get"])
     def owner(self, request, pk=None):
         # pylint: disable=unused-argument

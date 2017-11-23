@@ -5,6 +5,7 @@ from datetime import timedelta
 
 import subprocess
 from django.utils.timezone import now
+from django.core.validators import ValidationError
 
 try:
     from mock import patch
@@ -350,6 +351,52 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                         "/api/v1/history/{}/cancel/".format(history['id']),
                         200)
 
+    @patch('polemarch.main.hooks.http.Backend._execute')
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_hook_task(self, subprocess_function, execute_method):
+        result = self.get_result('get', "/api/v1/hooks/types/")
+        self.assertIn('HTTP', result['types'])
+        self.assertIn('SCRIPT', result['types'])
+        self.assertIn('on_execution', result['when'])
+        self.assertIn('after_execution', result['when'])
+        inv, _ = self.create_inventory()
+        hook_url = 'http://ex.com'
+        hook_data = dict(
+            name="test", type='HTTP', recipients=hook_url, when='on_execution'
+        )
+        self.post_result("/api/v1/hooks/", data=json.dumps(hook_data))
+        self.post_result("/api/v1/hooks/", data=json.dumps(hook_data))
+        self.sended = False
+        self.count = 0
+        playbook = "first.yml"
+
+        def side_effect(url, when, message):
+            self.assertEqual(url, hook_url)
+            self.assertEqual(when, 'on_execution')
+            json.dumps(message)
+            self.assertEqual(message['execution_type'], "PLAYBOOK")
+            self.assertEqual(message['target']['name'], playbook)
+            self.assertEqual(
+                message['target']['inventory']['id'], inv
+            )
+            self.assertEqual(
+                message['target']['project']['id'], self.task_proj.id
+            )
+            self.sended = True
+            self.count += 1
+            if self.count == 1:
+                raise Exception("Test exception")
+            return '200 OK: {"result": "ok"}'
+
+        execute_method.side_effect = side_effect
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory=inv, playbook=playbook, sync=1))
+        )
+        self.assertTrue(self.sended, "Raised on sending.")
+        self.assertEquals(execute_method.call_count, 4)
+        self.assertEquals(subprocess_function.call_count, 1)
+
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
@@ -360,20 +407,20 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                      vars=dict(repo_type="TEST"))]
         self.periodic_project_id = self.mass_create("/api/v1/projects/", data,
                                                     "name", "repository")[0]
-        project = Project.objects.get(id=self.periodic_project_id)
+        self.project = Project.objects.get(id=self.periodic_project_id)
         self.inventory = Inventory.objects.create()
 
         self.ptask1 = PeriodicTask.objects.create(mode="p1.yml",
                                                   name="test",
                                                   schedule="10",
                                                   type="INTERVAL",
-                                                  project=project,
+                                                  project=self.project,
                                                   inventory=self.inventory)
         self.ptask2 = PeriodicTask.objects.create(mode="p2.yml",
                                                   name="test",
                                                   schedule="10",
                                                   type="INTERVAL",
-                                                  project=project,
+                                                  project=self.project,
                                                   inventory=self.inventory)
 
     def test_create_delete_periodic_task(self):
@@ -428,9 +475,11 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                        schedule="10",
                        kind="MODULE",
                        type="INTERVAL",
-                       inventory=self.inventory)
+                       inventory=self.inventory,
+                       project=self.project)
         ptask = PeriodicTask.objects.create(**details)
         details['inventory'] = self.inventory.id
+        details['project'] = self.project.id
         url = "/api/v1/periodic-tasks/"
         self.details_test(url + "{}/".format(ptask.id), **details)
         variables = {"args": "ls -la", "group": "all"}
@@ -578,6 +627,9 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertTrue(isinstance(job_template.data, dict))
         with self.assertRaises(ValueError):
             job_template.data = object()
+
+        with self.assertRaises(ValidationError):
+            Template.objects.create(**tmplt_data)
 
     def test_templates(self):
         url = "/api/v1/templates/"
