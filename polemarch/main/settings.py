@@ -394,6 +394,7 @@ ACL = {
         "ACLGroupSubclass": "polemarch.main.models.acl_models.ACLGroupSubclass",
         "ACLQuerySet": "polemarch.main.models.acl_models.ACLQuerySet",
         "ACLInventoriesQuerySet": "django.db.models.query.QuerySet",
+        "ACLHistoryQuerySet": "polemarch.main.models.acl_models.ACLHistoryQuerySet",
         "ACLUserGroupsQuerySet": "polemarch.main.models.acl_models.ACLQuerySet",
     }
 }

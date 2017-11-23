@@ -25,7 +25,7 @@ from ..exceptions import DataNotReady, NotApplicable
 from .base import BModel, BQuerySet, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project
-from .acl import ACLModel
+from .acl import ACLModel, ACLHistoryQuerySet
 
 logger = logging.getLogger("polemarch")
 
@@ -210,7 +210,7 @@ class Template(ACLModel):
         self.project = None  # nocv
 
 
-class HistoryQuerySet(BQuerySet):
+class HistoryQuerySet(ACLHistoryQuerySet):
     use_for_related_fields = True
 
     def create(self, **kwargs):
@@ -243,18 +243,6 @@ class HistoryQuerySet(BQuerySet):
             day=self._get_history_stats_by(qs, 'day'),
             month=self._get_history_stats_by(qs, 'month'),
             year=self._get_history_stats_by(qs, 'year')
-        )
-
-    def user_filter(self, user):
-        prj_viewable = Project.objects.all().user_filter(user)
-        inv_viewable = Inventory.objects.all().user_filter(user)
-        inv_editable = inv_viewable.filter(acl__role="EDITOR")
-        prj_editable = prj_viewable.filter(acl__role="EDITOR")
-        return self.filter(
-            Q(project__in=prj_editable) |
-            Q(inventory__in=inv_editable) |
-            Q(initiator=user.id, initiator_type="users") |
-            Q(project__in=prj_viewable, inventory__in=inv_viewable)
         )
 
 
