@@ -872,7 +872,7 @@ pmInventories.model.page_list = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"}); return false;"},
+            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"'}); return false;"},
             title:'Create', 
             link:function(){ return '/?new-'+this.model.page_name}, 
         },
@@ -1038,6 +1038,11 @@ pmInventories.model.page_item = {
  */
 pmInventories.showAddSubGroupsForm = function(item_id, holder)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.showAddSubGroupsForm with item_id = `" + item_id + "`"
+    }
+    
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
@@ -1053,6 +1058,11 @@ pmInventories.showAddSubGroupsForm = function(item_id, holder)
  */
 pmInventories.showAddSubHostsForm = function(item_id, holder)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.showAddSubHostsForm with item_id = `" + item_id + "`"
+    }
+    
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_inventory', {item_id:item_id}))
@@ -1070,6 +1080,11 @@ pmInventories.showAddSubHostsForm = function(item_id, holder)
  */
 pmInventories.hasHosts = function(item_id, host_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.hasHosts with item_id = `" + item_id + "`"
+    }
+    
     if(pmInventories.model.items[item_id])
     {
         for(var i in pmInventories.model.items[item_id].hosts)
@@ -1091,6 +1106,11 @@ pmInventories.hasHosts = function(item_id, host_id)
  */
 pmInventories.hasGroups = function(item_id, group_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.hasGroups with item_id = `" + item_id + "`"
+    }
+    
     if(pmInventories.model.items[item_id])
     {
         for(var i in pmInventories.model.items[item_id].groups)
@@ -1110,6 +1130,11 @@ pmInventories.hasGroups = function(item_id, group_id)
  */
 pmInventories.setSubGroups = function(item_id, groups_ids)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.setSubGroups with item_id = `" + item_id + "`"
+    }
+    
     if(!groups_ids)
     {
         groups_ids = []
@@ -1148,6 +1173,12 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
     {
         hosts_ids = []
     }
+    
+    if(!item_id)
+    {
+        throw "Error in pmInventories.setSubHosts with item_id = `" + item_id + "`"
+    }
+    
 
     return spajs.ajax.Call({
         url: "/api/v1/inventories/"+item_id+"/hosts/",
@@ -1178,6 +1209,11 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
  */
 pmInventories.addSubGroups = function(item_id, groups_ids)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.addSubGroups with item_id = `" + item_id + "`"
+    }
+    
     if(!groups_ids)
     {
         groups_ids = []
@@ -1229,6 +1265,11 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
  */
 pmInventories.addSubHosts = function(item_id, hosts_ids)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.addSubHosts with item_id = `" + item_id + "`"
+    }
+    
     var def = new $.Deferred();
     if(!hosts_ids || hosts_ids.length == 0)
     {  

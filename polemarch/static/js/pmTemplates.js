@@ -42,7 +42,13 @@ pmTemplates.showSearchResults = function(holder, menuInfo, data)
     search['kind'] = thisObj.model.kind
     return $.when(this.sendSearchQuery(search)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:query}))
+        var tpl = thisObj.model.name+'_list'
+        if(!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_list'
+        }
+
+        $(holder).insertTpl(spajs.just.render(tpl, {query:query, pmObj:thisObj, opt:{}}))
     }).fail(function()
     {
         $.notify("", "error");

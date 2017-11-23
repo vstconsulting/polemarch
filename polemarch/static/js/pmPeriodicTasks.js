@@ -11,7 +11,7 @@ pmPeriodicTasks.copyAndEdit = function(item_id)
     var def = new $.Deferred();
     var thisObj = this;
     return $.when(this.copyItem(item_id)).done(function(newItemId)
-    {
+    { 
         $.when(spajs.open({ menuId:"project/"+thisObj.model.items[item_id].project+"/"+thisObj.model.page_name + "/"+newItemId})).done(function(){
             $.notify("Item was duplicate", "success");
             def.resolve()
@@ -323,6 +323,155 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
     }).promise();
 }
 
+/**
+ * Для ввода пароля
+ * @type Object
+ */
+pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime = inheritance(filedsLib.filed.simpleText)
+pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime.type = 'selectInventoryKindPlaybookGroupModuleAndTime'
+pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime.getValue = function(pmObj, filed){
+    return '';
+}
+
+
+pmPeriodicTasks.model.page_item = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(item_id, opt){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+', '+opt.project_id+'));  return false;'},
+            title:'Save',
+            link:function(){ return '#'},
+        },
+        {
+            class:'btn btn-warning',
+            function:function(item_id, opt){ 
+                return "spajs.showLoader(pmPeriodicTasks.execute("+opt.project_id+", "+item_id+")); return false;"
+            },
+            title:'Execute',
+            link:function(){ return '#'},
+            help:'Execute'
+        }, 
+        {
+            class:'btn btn-default copy-btn',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-duplicate" ></span>',
+            link:function(){ return '#'},
+            help:'Copy'
+        },
+        {
+            class:'btn btn-danger danger-right',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
+            link:function(){ return '#'}, 
+        },
+    ],
+    sections:[
+        function(section, item_id){ 
+            return jsonEditor.editor(pmPeriodicTasks.model.items[item_id].vars, {prefix: "PLAYBOOK", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'});
+        }
+    ],
+    title: function(item_id){
+        return "Task template "+this.model.items[item_id].justText('name')
+    },
+    short_title: function(item_id){
+        return this.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
+    },
+    fileds:[
+        [
+            {
+                filed: new filedsLib.filed.text(),
+                title:'Name',
+                name:'name',
+                placeholder:'Enter template name', 
+                validator:function(value){ return value != '' && value},
+                fast_validator:function(value){ return value != '' && value}
+            },
+            {
+                filed: new filedsLib.filed.boolean(),
+                title:'Save in history',
+                name:'save_result',
+                help:'Save result of task in history',  
+            },
+        ],[
+            {
+                filed: new pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime(),
+                name:'project',
+            }, 
+        ]
+    ],
+    onUpdate:function(result)
+    { 
+        return true;
+    },
+    onBeforeSave:function(data, item_id, opt)
+    {
+        
+        if(!opt || !opt.project_id)
+        {
+            throw "Error in pmPeriodicTasks.onBeforeSave with opt.project_id is null"
+        }
+
+        data.project = opt.project_id
+
+        data.type = $("#periodic-tasks_"+item_id+"_type").val()
+        data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
+        data.name = $("#periodic-tasks_"+item_id+"_name").val()
+
+        data.kind = $("#periodic-tasks_"+item_id+"_kind").val()
+
+        data.save_result = $("#periodic-tasks_"+item_id+"_save_result").hasClass('selected')
+
+        if(!data.inventory)
+        {
+            $.notify("Invalid field `inventory` ", "error"); 
+            return false;
+        }
+
+
+        if(data.kind == "MODULE")
+        {
+            data.mode = moduleArgsEditor.getSelectedModuleName()
+            if(!data.mode)
+            {
+                $.notify("Module name is empty", "error");
+                return false;
+            }
+        }
+        else
+        {
+            data.mode = $("#periodic-tasks_"+item_id+"_playbook").val()
+            if(!data.mode)
+            {
+                $.notify("Playbook name is empty", "error");
+                return false;
+            }
+        }
+
+        if(data.type == "CRONTAB")
+        {
+            data.schedule = crontabEditor.getCronString()
+        }
+        else
+        {
+            data.schedule = $("#periodic-tasks_"+item_id+"_schedule_INTERVAL").val()
+            if(!data.schedule)
+            {
+                $.notify("Invalid field `Interval schedule` ", "error"); 
+                return;
+            }
+        }
+
+        data.vars = jsonEditor.jsonEditorGetValues(data.kind)
+
+        if(data.kind == "MODULE")
+        {
+            data.vars.group = pmGroups.getGroupsAutocompleteValue()
+            data.vars.args =  moduleArgsEditor.getModuleArgs();
+        }
+        return data;
+    },
+}
+
 pmPeriodicTasks.showItem = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
@@ -332,7 +481,13 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
 
     $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:project_id}))
+        var tpl = thisObj.model.name+'_page'
+        if(!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_page'
+        }
+        
+        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{project_id:project_id}}))
         pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory)
         
         $('#periodic-tasks_'+item_id+'_inventory').select2({ width: '100%' });
@@ -386,6 +541,11 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
  */
 pmPeriodicTasks.addItem = function(project_id)
 {
+    if(!project_id)
+    {
+        throw "Error in pmPeriodicTasks.addItem with project_id = `" + project_id + "`"
+    }
+    
     var def = new $.Deferred();
 
     var data = {}
@@ -515,101 +675,7 @@ pmPeriodicTasks.loadItem = function(item_id)
         }
     });
 }
-
-/**
- * @param {integer} item_id идентификатор PeriodicTask
- * @return $.Deferred
- */
-pmPeriodicTasks.updateItem = function(item_id)
-{
-    var def = new $.Deferred();
-
-    var data = {}
-    
-    data.type = $("#periodic-tasks_"+item_id+"_type").val()
-    data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
-    data.name = $("#periodic-tasks_"+item_id+"_name").val()
-
-    data.kind = $("#periodic-tasks_"+item_id+"_kind").val()
-
-    data.save_result = $("#periodic-tasks_"+item_id+"_save_result").hasClass('selected')
-    
-    if(!data.name)
-    {
-        $.notify("Invalid field `name` ", "error");
-        def.reject();
-        return;
-    }
-    
-    if(!data.inventory)
-    {
-        $.notify("Invalid field `inventory` ", "error");
-        def.reject();
-        return;
-    }
-    
-    
-    if(data.kind == "MODULE")
-    {
-        data.mode = moduleArgsEditor.getSelectedModuleName()
-        if(!data.mode)
-        {
-            $.notify("Module name is empty", "error");
-            def.reject();
-            return def.promise();
-        }
-    }
-    else
-    {
-        data.mode = $("#periodic-tasks_"+item_id+"_playbook").val()
-        if(!data.mode)
-        {
-            $.notify("Playbook name is empty", "error");
-            def.reject();
-            return def.promise();
-        }
-    }
-
-    if(data.type == "CRONTAB")
-    {
-        data.schedule = crontabEditor.getCronString()
-    }
-    else
-    {
-        data.schedule = $("#periodic-tasks_"+item_id+"_schedule_INTERVAL").val()
-        if(!data.schedule)
-        {
-            $.notify("Invalid field `Interval schedule` ", "error");
-            def.reject();
-            return;
-        }
-    }
-
-    data.vars = jsonEditor.jsonEditorGetValues(data.kind)
-    
-    if(data.kind == "MODULE")
-    {
-        data.vars.group = pmGroups.getGroupsAutocompleteValue()
-        data.vars.args =  moduleArgsEditor.getModuleArgs();
-    }
-    var thisObj = this;
-    return spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/"+item_id+"/",
-        type: "PATCH",
-        contentType:'application/json',
-        data:JSON.stringify(data),
-                success: function(data)
-        {
-            thisObj.model.items[item_id] = data
-            $.notify("Save", "success");
-        },
-        error:function(e)
-        {
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
-}
-
+  
 tabSignal.connect("polemarch.start", function()
 { 
     // tasks

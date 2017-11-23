@@ -9,7 +9,7 @@ pmHosts.model.page_list = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"}); return false;"},
+            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"'}); return false;"},
             title:'Create', 
             link:function(){ return '/?new-'+this.model.page_name}, 
         }, 

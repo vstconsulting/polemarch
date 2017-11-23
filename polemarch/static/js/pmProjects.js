@@ -20,8 +20,7 @@ jsonEditor.options[pmProjects.model.name]['repo_password'] = {
  */
 pmProjects.filed.selectRepositoryType = inheritance(filedsLib.filed.simpleText)
 pmProjects.filed.selectRepositoryType.type = 'selectRepositoryType'
-
-filedsLib.filed.simpleText.getValue = function(pmObj, filed){
+pmProjects.filed.selectRepositoryType.getValue = function(pmObj, filed){
     return '';
 }
 
@@ -30,7 +29,7 @@ pmProjects.model.page_list = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"}); return false;"},
+            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"'}); return false;"},
             title:'Create',
             link:function(){ return '/?new-'+this.model.page_name},
         },
@@ -48,10 +47,10 @@ pmProjects.model.page_list = {
             style:function(item){ return 'style="width: 110px"'},
             class:function(item)
             {
-                if(!item)
+                if(!item || !item.id)
                 {
                     return 'class="hidden-xs hidden-sm"';
-                }
+                } 
 
                 return 'class="hidden-xs hidden-sm project-status '
                     + this.model.items[item.id].justClassName('status', function(v){ return "project-status-"+v})+'"'

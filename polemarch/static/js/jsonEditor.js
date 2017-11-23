@@ -488,7 +488,15 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
     var opt = {
         prefix:prefix
     }
-
+ 
+    if(optionsblock 
+        && jsonEditor.options[optionsblock] 
+        && jsonEditor.options[optionsblock][name]
+        && jsonEditor.options[optionsblock][name].type == 'boolean')
+    {
+        value = "";
+    }
+    
     jsonEditor.model.data[prefix][name] = value
     $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:opt}))
     $("#jsonEditorVarListHolder"+prefix).show()

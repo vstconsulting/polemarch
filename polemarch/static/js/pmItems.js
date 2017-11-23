@@ -176,7 +176,7 @@ pmItems.showList = function(holder, menuInfo, data)
             tpl = 'items_list'
         }
         
-        $(holder).insertTpl(spajs.just.render(tpl, {query:"", pmObj:thisObj}))
+        $(holder).insertTpl(spajs.just.render(tpl, {query:"", pmObj:thisObj, opt:{}}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -242,7 +242,7 @@ pmItems.showSearchResults = function(holder, menuInfo, data)
             tpl = 'items_list'
         }
         
-        $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(data.reg[1]), pmObj:thisObj}))
+        $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(data.reg[1]), pmObj:thisObj, opt:{}}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -340,7 +340,7 @@ pmItems.showItem = function(holder, menuInfo, data)
             tpl = 'items_page'
         }
         
-        $(holder).insertTpl(spajs.just.render(tpl, {item_id:data.reg[1], project_id:0, pmObj:thisObj}))
+        $(holder).insertTpl(spajs.just.render(tpl, {item_id:data.reg[1], pmObj:thisObj, opt:{}}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -357,7 +357,7 @@ pmItems.showNewItemPage = function(holder, menuInfo, data)
         tpl = 'items_new_page'
     }
 
-    var text = spajs.just.render(tpl, {parent_item:data.reg[2], parent_type:data.reg[1], pmObj:this}) 
+    var text = spajs.just.render(tpl, {parent_item:data.reg[2], parent_type:data.reg[1], pmObj:this, opt:{}}) 
     $(holder).insertTpl(text)
 
     def.resolve()
@@ -543,6 +543,11 @@ pmItems.loadItemsByIds = function(ids)
  */
 pmItems.loadItem = function(item_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmItems.loadItem with item_id = `" + item_id + "`"
+    }
+    
     var def = new $.Deferred();
     var thisObj = this;
     
@@ -803,7 +808,7 @@ pmItems.exportSelecedToFile = function(){
  * Добавление сущности
  * @return $.Deferred
  */
-pmItems.addItem = function(parent_type, parent_item)
+pmItems.addItem = function(parent_type, parent_item, opt)
 {
     var def = new $.Deferred();
     var data = {}
@@ -825,7 +830,7 @@ pmItems.addItem = function(parent_type, parent_item)
     
     if(this.model.page_new.onBeforeSave)
     {
-        data = this.model.page_new.onBeforeSave.apply(this, [data]);
+        data = this.model.page_new.onBeforeSave.apply(this, [data, opt]);
         if(data === undefined)
         {
             def.reject()
@@ -866,7 +871,7 @@ pmItems.addItem = function(parent_type, parent_item)
     return def.promise();
 }
 
-pmItems.updateItem = function(item_id)
+pmItems.updateItem = function(item_id, opt)
 {
     var def = new $.Deferred();
     var data = {}
@@ -888,7 +893,7 @@ pmItems.updateItem = function(item_id)
     
     if(this.model.page_item.onBeforeSave)
     {
-        data = this.model.page_item.onBeforeSave.apply(this, [data, item_id]);
+        data = this.model.page_item.onBeforeSave.apply(this, [data, item_id, opt]);
         if(data === undefined)
         {
             def.reject()

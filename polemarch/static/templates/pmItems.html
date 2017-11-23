@@ -68,19 +68,19 @@
         <% if(pmObj.model.page_list.buttons){ %>
             <% for(var i in  pmObj.model.page_list.buttons){ %>
                 <% if(pmObj.model.page_list.buttons[i].tpl){ %>
-                    <%= pmObj.model.page_list.buttons[i].tpl.apply(pmObj, []) %>
+                    <%= pmObj.model.page_list.buttons[i].tpl.apply(pmObj, [opt]) %>
                 <% }else{ %> 
                     <a 
                         class="<% if(typeof pmObj.model.page_list.buttons[i].title == 'function'){ %>
-                                    <%- pmObj.model.page_list.buttons[i].class.apply(pmObj, []) %>
+                                    <%- pmObj.model.page_list.buttons[i].class.apply(pmObj, [opt]) %>
                                <% }else{ %>
                                     <%- pmObj.model.page_list.buttons[i].class %>
                                <% } %>"
-                        href="<%- pmObj.model.page_list.buttons[i].link.apply(pmObj, []) %>"
+                        href="<%- pmObj.model.page_list.buttons[i].link.apply(pmObj, [opt]) %>"
                         title="<%- pmObj.model.page_list.buttons[i].help || '' %>"
-                        onclick="<%- pmObj.model.page_list.buttons[i].function.apply(pmObj, []) %>" >
+                        onclick="<%- pmObj.model.page_list.buttons[i].function.apply(pmObj, [opt]) %>" >
                             <% if(typeof pmObj.model.page_list.buttons[i].title == 'function'){ %>
-                                <%= pmObj.model.page_list.buttons[i].title.apply(pmObj, []) %>
+                                <%= pmObj.model.page_list.buttons[i].title.apply(pmObj, [opt]) %>
                             <% }else{ %>
                                 <%= pmObj.model.page_list.buttons[i].title %>
                             <% } %>
@@ -112,8 +112,8 @@
                                     </th>
                                     <% for(var j in pmObj.model.page_list.fileds){ %>
                                         <th 
-                                            <% if(pmObj.model.page_list.fileds[j].style){ %><%= pmObj.model.page_list.fileds[j].style.apply(pmObj,[]) %><% } %> 
-                                            <% if(pmObj.model.page_list.fileds[j].class){ %><%= pmObj.model.page_list.fileds[j].class.apply(pmObj,[]) %><% } %>  >
+                                            <% if(pmObj.model.page_list.fileds[j].style){ %><%= pmObj.model.page_list.fileds[j].style.apply(pmObj,[opt]) %><% } %> 
+                                            <% if(pmObj.model.page_list.fileds[j].class){ %><%= pmObj.model.page_list.fileds[j].class.apply(pmObj,[opt]) %><% } %>  >
                                                 <%- pmObj.model.page_list.fileds[j].title %>
                                         </th> 
                                     <% } %>
@@ -129,14 +129,14 @@
                                         </td>
                                         <% for(var j in pmObj.model.page_list.fileds){ %>
                                             <td
-                                                <% if(pmObj.model.page_list.fileds[j].style){ %><%= pmObj.model.page_list.fileds[j].style.apply(pmObj, [pmObj.model.itemslist.results[i]]) %><% } %>
-                                                <% if(pmObj.model.page_list.fileds[j].class){ %><%= pmObj.model.page_list.fileds[j].class.apply(pmObj, [pmObj.model.itemslist.results[i]]) %><% } %>
+                                                <% if(pmObj.model.page_list.fileds[j].style){ %><%= pmObj.model.page_list.fileds[j].style.apply(pmObj, [pmObj.model.itemslist.results[i], opt]) %><% } %>
+                                                <% if(pmObj.model.page_list.fileds[j].class){ %><%= pmObj.model.page_list.fileds[j].class.apply(pmObj, [pmObj.model.itemslist.results[i], opt]) %><% } %>
                                             >
                                                 <% if(!pmObj.model.page_list.fileds[j].value){ %>
                                                     <a href="/?<%- pmObj.model.page_name %>/<%- pmObj.model.itemslist.results[i].id %>" class="item-name"
                                                         onclick="return spajs.openURL(this.href);" ><%- pmObj.model.itemslist.results[i][pmObj.model.page_list.fileds[j].name] %></a>
                                                 <% }else{ %>
-                                                    <%= pmObj.model.page_list.fileds[j].value.apply(pmObj, [pmObj.model.itemslist.results[i], pmObj.model.page_list.fileds[j].name]) %>
+                                                    <%= pmObj.model.page_list.fileds[j].value.apply(pmObj, [pmObj.model.itemslist.results[i], pmObj.model.page_list.fileds[j].name, opt]) %>
                                                 <% } %>
                                             </td>
                                         <% } %> 
@@ -152,10 +152,10 @@
                                                             <li role="separator" class="divider"></li>
                                                         <% }else{ %>
                                                             <li>
-                                                                <a href="<%- pmObj.model.page_list.actions[j].link.apply(pmObj, [pmObj.model.itemslist.results[i]]) %>"
-                                                                    onclick="<%- pmObj.model.page_list.actions[j].function.apply(pmObj, [pmObj.model.itemslist.results[i]]) %>" >
+                                                                <a href="<%- pmObj.model.page_list.actions[j].link.apply(pmObj, [pmObj.model.itemslist.results[i], opt]) %>"
+                                                                    onclick="<%- pmObj.model.page_list.actions[j].function.apply(pmObj, [pmObj.model.itemslist.results[i], opt]) %>" >
                                                                         <% if(typeof pmObj.model.page_list.actions[j].title == 'function'){ %>
-                                                                            <%= pmObj.model.page_list.actions[j].title.apply(pmObj, [pmObj.model.itemslist.results[i]]) %>
+                                                                            <%= pmObj.model.page_list.actions[j].title.apply(pmObj, [pmObj.model.itemslist.results[i], opt]) %>
                                                                         <% }else{ %>
                                                                             <%- pmObj.model.page_list.actions[j].title %>
                                                                         <% } %>
@@ -239,19 +239,19 @@
         <% if(pmObj.model.page_new.buttons){ %>
             <% for(var i in  pmObj.model.page_new.buttons){ %>
                 <% if(pmObj.model.page_new.buttons[i].tpl){ %>
-                    <%= pmObj.model.page_new.buttons[i].tpl.apply(pmObj) %>
+                    <%= pmObj.model.page_new.buttons[i].tpl.apply(pmObj, [opt]) %>
                 <% }else{ %> 
                     <a 
                         class="<% if(typeof pmObj.model.page_new.buttons[i].title == 'function'){ %>
-                                    <%- pmObj.model.page_new.buttons[i].class.apply(pmObj, []) %>
+                                    <%- pmObj.model.page_new.buttons[i].class.apply(pmObj, [opt]) %>
                                <% }else{ %>
                                     <%- pmObj.model.page_new.buttons[i].class %>
                                <% } %>"
-                        href="<%- pmObj.model.page_new.buttons[i].link.apply(pmObj, [item_id]) %>"
+                        href="<%- pmObj.model.page_new.buttons[i].link.apply(pmObj, [opt]) %>"
                         title="<%- pmObj.model.page_new.buttons[i].help || '' %>"
-                        onclick="<%- pmObj.model.page_new.buttons[i].function.apply(pmObj, []) %>" >
+                        onclick="<%- pmObj.model.page_new.buttons[i].function.apply(pmObj, [opt]) %>" >
                             <% if(typeof pmObj.model.page_new.buttons[i].title == 'function'){ %>
-                                <%= pmObj.model.page_new.buttons[i].title.apply(pmObj, []) %>
+                                <%= pmObj.model.page_new.buttons[i].title.apply(pmObj, [opt]) %>
                             <% }else{ %>
                                 <%= pmObj.model.page_new.buttons[i].title %>
                             <% } %>
@@ -280,7 +280,7 @@
             </section>
             <% if(pmObj.model.page_new.sections){ %>
                 <% for(var i in pmObj.model.page_new.sections){ %>
-                    <%= pmObj.model.page_new.sections[i].apply(pmObj, [pmObj.model.page_new.sections[i]]) %>
+                    <%= pmObj.model.page_new.sections[i].apply(pmObj, [pmObj.model.page_new.sections[i], opt]) %>
                 <% } %>
             <% } %>
         </div>
@@ -299,13 +299,13 @@
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
-            <span class="h1-header" ><%= pmObj.model.page_item.title.apply(pmObj, [item_id]) %></span>
+            <span class="h1-header" ><%= pmObj.model.page_item.title.apply(pmObj, [item_id, opt]) %></span>
 
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%= pmObj.model.page_item.page_list %></a></li>
-            <li class="active"><%= pmObj.model.page_item.short_title.apply(pmObj, [item_id]) %></li>
+            <li class="active"><%= pmObj.model.page_item.short_title.apply(pmObj, [item_id, opt]) %></li>
         </ol>
     </section>
 
@@ -313,19 +313,19 @@
         <% if(pmObj.model.page_item.buttons){ %>
             <% for(var i in  pmObj.model.page_item.buttons){ %>
                 <% if(pmObj.model.page_item.buttons[i].tpl){ %>
-                    <%= pmObj.model.page_item.buttons[i].tpl.apply(pmObj, [item_id]) %>
+                    <%= pmObj.model.page_item.buttons[i].tpl.apply(pmObj, [item_id, opt]) %>
                 <% }else{ %> 
                     <a 
                         class="<% if(typeof pmObj.model.page_item.buttons[i].title == 'function'){ %>
-                                    <%- pmObj.model.page_item.buttons[i].class.apply(pmObj, [item_id]) %>
+                                    <%- pmObj.model.page_item.buttons[i].class.apply(pmObj, [item_id, opt]) %>
                                <% }else{ %>
                                     <%- pmObj.model.page_item.buttons[i].class %>
                                <% } %>"
-                        href="<%- pmObj.model.page_item.buttons[i].link.apply(pmObj, [item_id]) %>"
+                        href="<%- pmObj.model.page_item.buttons[i].link.apply(pmObj, [item_id, opt]) %>"
                         title="<%- pmObj.model.page_item.buttons[i].help || '' %>"
-                        onclick="<%- pmObj.model.page_item.buttons[i].function.apply(pmObj, [item_id]) %>" >
+                        onclick="<%- pmObj.model.page_item.buttons[i].function.apply(pmObj, [item_id, opt]) %>" >
                             <% if(typeof pmObj.model.page_item.buttons[i].title == 'function'){ %>
-                                <%= pmObj.model.page_item.buttons[i].title.apply(pmObj, [item_id]) %>
+                                <%= pmObj.model.page_item.buttons[i].title.apply(pmObj, [item_id, opt]) %>
                             <% }else{ %>
                                 <%= pmObj.model.page_item.buttons[i].title %>
                             <% } %>
@@ -339,7 +339,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        <%= pmObj.model.page_item.short_title.apply(pmObj, [item_id]) %><br>
+                        <%= pmObj.model.page_item.short_title.apply(pmObj, [item_id, opt]) %><br>
                         <div class="box-tools pull-right">
                         </div>
                     </div>
@@ -347,7 +347,7 @@
                         <% for(var i in pmObj.model.page_item.fileds){ %>
                             <div class="row">
                                 <% for(var j in pmObj.model.page_item.fileds[i]){ var filed = pmObj.model.page_item.fileds[i][j]; %>
-                                        <%= filed.filed.render(pmObj, filed, item_id) %>
+                                        <%= filed.filed.render(pmObj, filed, item_id, opt) %>
                                 <% } %>
                             </div>
                         <% } %>  
@@ -356,7 +356,7 @@
             </section>
             <% if(pmObj.model.page_item.sections){ %>
                 <% for(var i in pmObj.model.page_item.sections){ %>
-                    <%= pmObj.model.page_item.sections[i].apply(pmObj, [pmObj.model.page_item.sections[i], item_id]) %>
+                    <%= pmObj.model.page_item.sections[i].apply(pmObj, [pmObj.model.page_item.sections[i], item_id, opt]) %>
                 <% } %>
             <% } %>
         </div>

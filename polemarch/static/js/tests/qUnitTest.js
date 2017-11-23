@@ -825,7 +825,7 @@ window.qunitTestsArray.push(function()
     t = t.getTime()
 
     syncQUnit.addTest('Сохранение группы', function ( assert )
-    {
+    { 
         // Предполагается что мы от прошлого теста попали на страницу создания группы
         var done = assert.async();
 
@@ -841,7 +841,6 @@ window.qunitTestsArray.push(function()
         jsonEditor.jsonEditorAddVar();
 
         $("#filed_children").addClass('selected');
-
         // Отправка формы с данными группы
         $.when(pmGroups.addItem()).done(function()
         {
@@ -2204,7 +2203,7 @@ window.qunitTestsArray.push(function()
 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
         var inventoryId = $("#new_periodic-tasks_inventory option")[2].value
-
+        
         $.when(pmPeriodicTasks.selectInventory(inventoryId)).done(function()
         {
             $("#new_periodic-tasks_inventory").val(inventoryId)
@@ -2226,7 +2225,7 @@ window.qunitTestsArray.push(function()
     });
     
     syncQUnit.addTest('Изменение не валидного periodic task', function ( assert )
-    {
+    { 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
         var taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
         // Предполагается что мы от прошлого теста попали на страницу создания inventory
@@ -2238,8 +2237,9 @@ window.qunitTestsArray.push(function()
         jsonEditor.__devAddVar("test1", "test1", "periodic_playbook", "PLAYBOOK") 
   
         // Отправка формы с данными inventory
-        $.when(pmPeriodicTasks.updateItem(taskId)).done(function()
+        $.when(pmPeriodicTasks.updateItem(taskId, {project_id:itemId})).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно update Periodic Task, а не должно было');
             render(done)
         }).fail(function()
@@ -2250,7 +2250,7 @@ window.qunitTestsArray.push(function()
     });
 
     syncQUnit.addTest('Изменение periodic task', function ( assert )
-    {
+    { 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
         var taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
         // Предполагается что мы от прошлого теста попали на страницу создания inventory
@@ -2266,12 +2266,13 @@ window.qunitTestsArray.push(function()
         jsonEditor.jsonEditorAddVar('periodic_playbook', 'PLAYBOOK');
  
         // Отправка формы с данными inventory
-        $.when(pmPeriodicTasks.updateItem(taskId)).done(function()
+        $.when(pmPeriodicTasks.updateItem(taskId, {project_id:itemId})).done(function()
         {
             assert.ok(true, 'Успешно update Periodic Task');
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при update Periodic Task');
             render(done)
         })
@@ -2491,8 +2492,9 @@ window.qunitTestsArray.push(function()
         // Предполагается что мы от прошлого теста попали на страницу редактирования project
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
-
         $("#playbook-autocomplete").val("test2-playbook-"+t);
+        $("#projects-autocomplete").val($("#projects-autocomplete option")[0].value).trigger('change.select2');
+        $("#inventories-autocomplete").val($("#inventories-autocomplete option")[0].value).trigger('change.select2');
 
         jsonEditor.jsonEditorRmVar("syntax-check22");
         $("#new_json_nameprefix").val("new-vault-password-file");
@@ -2505,6 +2507,7 @@ window.qunitTestsArray.push(function()
             assert.ok(true, 'Успешно update add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -2523,6 +2526,7 @@ window.qunitTestsArray.push(function()
             assert.ok(true, 'Успешно copyAndEdit add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
             render(done)
         })
@@ -2542,6 +2546,7 @@ window.qunitTestsArray.push(function()
             assert.ok(true, 'Успешно delete add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -2557,6 +2562,7 @@ window.qunitTestsArray.push(function()
             assert.ok(true, 'Успешно delete Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при delete Item');
             render(done)
         })
@@ -2578,6 +2584,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню templates');
             render(done)
         })
@@ -2594,6 +2601,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-project');
             render(done)
         })
@@ -2615,6 +2623,7 @@ window.qunitTestsArray.push(function()
         // Отправка формы с данными project
         $.when(pmModuleTemplates.addItem()).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно template add Item, а не должно было');
             render(done)
         }).fail(function()
@@ -2644,6 +2653,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при template add Item');
             render(done)
         })
@@ -2663,6 +2673,7 @@ window.qunitTestsArray.push(function()
 
         $.when(pmModuleTemplates.updateItem(itemId)).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно update add Item, а не должно было');
             render(done)
         }).fail(function(){
@@ -2690,6 +2701,7 @@ window.qunitTestsArray.push(function()
             assert.ok(true, 'Успешно update add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -2706,6 +2718,7 @@ window.qunitTestsArray.push(function()
             assert.ok(true, 'Успешно copyAndEdit add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
             render(done)
         })
@@ -2740,6 +2753,7 @@ window.qunitTestsArray.push(function()
             assert.ok(true, 'Успешно delete add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -2755,6 +2769,7 @@ window.qunitTestsArray.push(function()
             assert.ok(true, 'Успешно delete Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при delete Item');
             render(done)
         })
@@ -2779,6 +2794,7 @@ window.qunitTestsArray.push(function()
             }, 5000) 
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню pmDashboard');
             render(done)
         })
@@ -2802,6 +2818,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню search/projects');
             render(done)
         })
@@ -2817,6 +2834,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню search/templates');
             render(done)
         })
@@ -2832,6 +2850,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню search/hosts');
             render(done)
         })
@@ -2847,6 +2866,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню search/groups');
             render(done)
         })
@@ -2862,6 +2882,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню search/history');
             render(done)
         })
@@ -2877,6 +2898,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню search/inventories');
             render(done)
         })
@@ -2892,6 +2914,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню search/users');
             render(done)
         })
@@ -2914,6 +2937,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню history');
             render(done)
         })
@@ -2935,6 +2959,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии страницы '+pmHistory.model.itemslist.results[0].id+' history');
             render(done)
         })
@@ -2946,6 +2971,7 @@ window.qunitTestsArray.push(function()
 
         $.when(pmHistory.cancelTask(99999)).done(function()
         {
+            debugger;
             assert.ok(false, 'cancelTask выполнилось');
             render(done)
         }).fail(function()

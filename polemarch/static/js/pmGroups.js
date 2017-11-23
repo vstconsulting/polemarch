@@ -65,7 +65,7 @@ pmGroups.model.page_list = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"}); return false;"},
+            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"'}); return false;"},
             title:'Create', 
             link:function(){ return '/?new-'+this.model.page_name}, 
         }, 
@@ -268,6 +268,11 @@ pmGroups.model.page_item = {
  */
 pmGroups.setSubGroups = function(item_id, groups_ids)
 {
+    if(!item_id)
+    {
+        throw "Error in pmGroups.setSubGroups with item_id = `" + item_id + "`"
+    }
+    
     if(!groups_ids)
     {
         groups_ids = []
@@ -307,6 +312,11 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
  */
 pmGroups.setSubHosts = function(item_id, hosts_ids)
 {
+    if(!item_id)
+    {
+        throw "Error in pmGroups.setSubHosts with item_id = `" + item_id + "`"
+    }
+    
     if(!hosts_ids)
     {
         hosts_ids = []
@@ -346,6 +356,11 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
  */
 pmGroups.addSubGroups = function(item_id, groups_ids)
 {
+    if(!item_id)
+    {
+        throw "Error in pmGroups.addSubGroups with item_id = `" + item_id + "`"
+    }
+    
     if(!groups_ids)
     {
         groups_ids = []
@@ -397,6 +412,11 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
  */
 pmGroups.addSubHosts = function(item_id, hosts_ids)
 {
+    if(!item_id)
+    {
+        throw "Error in pmGroups.addSubHosts with item_id = `" + item_id + "`"
+    }
+    
     if(!hosts_ids)
     {
         hosts_ids = []
@@ -449,6 +469,11 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
  */
 pmGroups.showAddSubGroupsForm = function(item_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmGroups.showAddSubGroupsForm with item_id = `" + item_id + "`"
+    }
+    
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_group', {item_id:item_id}))
@@ -464,6 +489,11 @@ pmGroups.showAddSubGroupsForm = function(item_id)
  */
 pmGroups.showAddSubHostsForm = function(item_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmGroups.showAddSubHostsForm with item_id = `" + item_id + "`"
+    }
+    
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_group', {item_id:item_id}))
@@ -481,6 +511,11 @@ pmGroups.showAddSubHostsForm = function(item_id)
  */
 pmGroups.hasHosts = function(item_id, host_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmGroups.hasHosts with item_id = `" + item_id + "`"
+    }
+    
     if(pmGroups.model.items[item_id])
     {
         for(var i in pmGroups.model.items[item_id].hosts)
@@ -502,6 +537,11 @@ pmGroups.hasHosts = function(item_id, host_id)
  */
 pmGroups.hasGroups = function(item_id, group_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmGroups.hasGroups with item_id = `" + item_id + "`"
+    }
+    
     if(pmGroups.model.items[item_id])
     {
         for(var i in pmGroups.model.items[item_id].groups)
