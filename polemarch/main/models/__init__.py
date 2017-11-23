@@ -142,11 +142,18 @@ def save_to_beat(instance, **kwargs):
 def delete_from_beat(instance, **kwargs):
     manager = django_celery_beat.models.PeriodicTask.objects
     celery_tasks = manager.filter(name=str(instance.id))
-    if instance.type == "CRONTAB" and celery_tasks.count() > 0:
-        crontab_id = celery_tasks[0].crontab_id
-        others = manager.filter(crontab_id=crontab_id)
-        if others.count() == 1:
-            CrontabSchedule.objects.get(id=crontab_id).delete()
+    for task in celery_tasks:
+        qs_dict = {
+            'crontab_id': CrontabSchedule.objects.all(),
+            'interval_id': IntervalSchedule.objects.all(),
+        }
+        for field in ['crontab_id', 'interval_id']:
+            pk = getattr(task, field)
+            if pk is None:
+                continue
+            others = manager.filter(**{field: pk}).exclude(pk=task.id)
+            if not others.exists():
+                qs_dict[field].get(id=pk).delete()
     celery_tasks.delete()
 
 

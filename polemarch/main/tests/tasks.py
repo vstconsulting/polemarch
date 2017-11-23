@@ -406,20 +406,20 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                      vars=dict(repo_type="TEST"))]
         self.periodic_project_id = self.mass_create("/api/v1/projects/", data,
                                                     "name", "repository")[0]
-        project = Project.objects.get(id=self.periodic_project_id)
+        self.project = Project.objects.get(id=self.periodic_project_id)
         self.inventory = Inventory.objects.create()
 
         self.ptask1 = PeriodicTask.objects.create(mode="p1.yml",
                                                   name="test",
                                                   schedule="10",
                                                   type="INTERVAL",
-                                                  project=project,
+                                                  project=self.project,
                                                   inventory=self.inventory)
         self.ptask2 = PeriodicTask.objects.create(mode="p2.yml",
                                                   name="test",
                                                   schedule="10",
                                                   type="INTERVAL",
-                                                  project=project,
+                                                  project=self.project,
                                                   inventory=self.inventory)
 
     def test_create_delete_periodic_task(self):
@@ -474,9 +474,11 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                        schedule="10",
                        kind="MODULE",
                        type="INTERVAL",
-                       inventory=self.inventory)
+                       inventory=self.inventory,
+                       project=self.project)
         ptask = PeriodicTask.objects.create(**details)
         details['inventory'] = self.inventory.id
+        details['project'] = self.project.id
         url = "/api/v1/periodic-tasks/"
         self.details_test(url + "{}/".format(ptask.id), **details)
         variables = {"args": "ls -la", "group": "all"}
