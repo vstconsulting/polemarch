@@ -70,6 +70,7 @@ class Project(AbstractModel):
 
     def _get_history(self, kind, mod_name, inventory, **extra):
         initiator = extra.pop("initiator", 0)
+        initiator_type = extra.pop("initiator_type", "users")
         save_result = extra.pop("save_result", True)
         command = kind.lower()
         ansible_args = dict(extra)
@@ -80,7 +81,8 @@ class Project(AbstractModel):
         history_kwargs = dict(
             mode=mod_name, start_time=timezone.now(),
             inventory=inventory, project=self,
-            kind=kind, raw_stdout="", initiator=initiator
+            kind=kind, raw_stdout="",
+            initiator=initiator, initiator_type=initiator_type
         )
         return History.objects.create(status="DELAY", **history_kwargs), extra
 

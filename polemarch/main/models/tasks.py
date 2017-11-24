@@ -118,8 +118,10 @@ class PeriodicTask(AbstractModel):
 
     def execute(self):
         self.project.execute(
-            self.kind, self.mode, self.inventory, sync=True,
-            save_result=self.save_result, **self.vars
+            self.kind, self.mode, self.inventory,
+            sync=True, save_result=self.save_result,
+            initiator=self.id, initiator_type="scheduler",
+            **self.vars
         )
 
     def editable_by(self, user):
