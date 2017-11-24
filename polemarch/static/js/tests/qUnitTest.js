@@ -211,8 +211,7 @@ function render(name, callback)
     var def = new $.Deferred();
     var time = 4
 
-    setTimeout(function(name){
-        console.log("render " + name)
+    setTimeout(function(name){ 
         setTimeout(function(){
 
             if(callback)
@@ -277,9 +276,7 @@ function injectQunit()
                 "Skipped": details.skipped,
                 "Runtime": details.runtime
             };
-
-            console.log( JSON.stringify( result, null, 2 ) );
-
+ 
             if(!syncQUnit.nextTest())
             {
                 saveReport()

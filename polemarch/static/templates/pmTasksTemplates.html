@@ -139,8 +139,7 @@
                         <div class="row">
                             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Inventory</label>
-                                <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
-                                    <option selected value="0" >Not set</option>
+                                <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" > 
                                     <% for(var i in pmInventories.model.itemslist.results){ %>
                                         <option
                                             value="<%- pmInventories.model.itemslist.results[i].id %>"
