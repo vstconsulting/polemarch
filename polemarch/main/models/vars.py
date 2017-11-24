@@ -67,6 +67,10 @@ class AbstractModel(ACLModel):
                           for k, v in self.vars.items()])
         return "{} {}".format(self.name, _vars)
 
+    def get_hook_data(self, when):
+        # pylint: disable=unused-argument
+        return OrderedDict(id=self.id, name=self.name)
+
     @transaction.atomic()
     def set_vars(self, variables):
         self.variables.all().delete()

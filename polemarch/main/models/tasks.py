@@ -280,9 +280,32 @@ class History(BModel):
              "start_time", "stop_time", "initiator", "initiator_type"]
         ]
 
+    def get_hook_data(self, when):
+        data = OrderedDict()
+        data['id'] = self.id
+        data['start_time'] = self.start_time.isoformat()
+        if when == "after_execution":
+            data['stop_time'] = self.stop_time.isoformat()
+        data["initiator"] = dict(
+            initiator_type=self.initiator_type,
+            initiator_id=self.initiator,
+        )
+        if self.initiator_type == "users":
+            data["initiator"]['name'] = getattr(
+                self.initiator_object, 'username', None
+            )
+        elif self.initiator_type == "scheduler":
+            data["initiator"]['name'] = self.initiator_object.name
+        return data
+
     @property
     def initiator_object(self):
-        return User.objects.get(id=self.initiator)
+        if self.initiator_type == "users" and self.initiator:
+            return User.objects.get(id=self.initiator)
+        elif self.initiator_type == "scheduler" and self.initiator:
+            return PeriodicTask.objects.get(id=self.initiator)
+        else:
+            return None
 
     @property
     def facts(self):

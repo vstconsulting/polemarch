@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import logging
+from collections import OrderedDict
 
 from django.conf import settings
 from django.utils import timezone
@@ -48,6 +49,12 @@ class Project(AbstractModel):
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
 
+    def get_hook_data(self, when):
+        data = super(Project, self).get_hook_data(when)
+        data['type'] = self.type
+        data['repository'] = self.repository
+        return data
+
     @property
     def path(self):
         return "{}/{}".format(PROJECTS_DIR, self.id)
@@ -88,36 +95,17 @@ class Project(AbstractModel):
         return kwargs
 
     def _send_hook(self, when, kind, kwargs):
-        msg = dict(execution_type=kind)
-        inventory = dict(
-            id=kwargs['inventory'].id,
-            name=kwargs['inventory'].name,
-        )
-        project = dict(
-            id=kwargs['project'].id,
-            name=kwargs['project'].name,
-            type=kwargs['project'].type,
-            repository=kwargs['project'].repository,
-        )
-        msg['target'] = dict(
-            name=kwargs['target'], inventory=inventory, project=project
+        msg = OrderedDict(execution_type=kind, when=when)
+        msg['target'] = OrderedDict(
+            name=kwargs['target'],
+            inventory=kwargs['inventory'].get_hook_data(when),
+            project=kwargs['project'].get_hook_data(when)
         )
         if kwargs['history'] is not None:
-            msg['history'] = dict(
-                id=kwargs['history'].id,
-                start_time=kwargs['history'].start_time.isoformat(),
-            )
-            if when == "after_execution":
-                msg['history']['stop_time'] = (
-                    kwargs['history'].stop_time.isoformat()
-                )
-            msg['history']['initiator'] = dict(
-                initiator_type=kwargs['history'].initiator_type,
-                initiator_id=kwargs['history'].initiator,
-            )
+            msg['history'] = kwargs['history'].get_hook_data(when)
         else:
             msg['history'] = None
-        SendHook.delay(when, **msg)
+        SendHook.delay(when, msg)
 
     def execute(self, kind, *args, **extra):
         kind = kind.upper()

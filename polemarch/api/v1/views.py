@@ -200,7 +200,7 @@ class HookViewSet(base.ModelViewSetSet):
     def types(self, request):
         data = dict(
             types=self.model.handlers.list(),
-            when=self.model.when_types
+            when=self.model.handlers.when_types
         )
         return base.Response(data, 200).resp
 

@@ -5,9 +5,17 @@ from ..utils import ModelHandlers, raise_context
 
 
 class HookHandlers(ModelHandlers):
+    when_types = ['on_execution', 'after_execution']
+
+    def get_handler(self, obj):
+        return self[obj.type](obj, self.when_types, **self.opts(obj.type))
+
     @raise_context(AttributeError, exclude=True)
-    def handle(self, name, obj, when, **kwargs):
-        return getattr(self.get_object(name, obj), when)(**kwargs)
+    def handle(self, obj, when, message):
+        return getattr(self.get_handler(obj), when)(message)
+
+    def validate(self, obj):
+        return self.get_handler(obj).validate()
 
 
 class HooksQuerySet(BQuerySet):
@@ -16,10 +24,10 @@ class HooksQuerySet(BQuerySet):
     def when(self, when):
         return self.filter(models.Q(when=when) | models.Q(when=None))
 
-    def execute(self, when, **kwargs):
+    def execute(self, when, message):
         for hook in self.when(when):
             with raise_context():
-                hook.run(when, **kwargs)
+                hook.run(when, message)
 
 
 class Hook(BModel):
@@ -30,14 +38,12 @@ class Hook(BModel):
     when       = models.CharField(max_length=32, null=True, default=None)
     recipients = models.TextField()
 
-    when_types = ['on_execution', 'after_execution']
-
     @property
     def reps(self):
         return self.recipients.split(' | ')
 
-    def run(self, when='on_execution', **kwargs):
+    def run(self, when='on_execution', message=None):
         return (
-            self.handlers.handle(self.type, self, when, **kwargs)
+            self.handlers.handle(self, when, message)
             if self.when is None or self.when == when else ''
         )
