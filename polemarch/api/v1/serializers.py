@@ -13,7 +13,7 @@ from rest_framework import exceptions
 from rest_framework.exceptions import PermissionDenied
 
 from ...main.models import Inventory
-from ...main import models
+from ...main import models, exceptions as main_exceptions
 from ..base import Response
 
 
@@ -224,6 +224,7 @@ class TeamSerializer(_WithPermissionsSerializer):
 class OneTeamSerializer(TeamSerializer):
     users = UserSerializer(many=True, required=False)
     users_list = DictField(required=False)
+    owner = UserSerializer(read_only=True)
 
     class Meta:
         model = models.UserGroup
@@ -455,9 +456,15 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
                   'vars',
                   'url',)
 
+    @transaction.atomic
+    def permissions(self, request):  # noce
+        raise main_exceptions.NotApplicable("See project permissions.")
+
+    def owner(self, request):  # noce
+        raise main_exceptions.NotApplicable("See project owner.")
+
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
-    owner = UserSerializer(read_only=True)
     vars = DictField(required=False)
 
     class Meta:
@@ -471,7 +478,6 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'project',
                   'inventory',
                   'save_result',
-                  'owner',
                   'vars',
                   'url',)
 
@@ -491,6 +497,7 @@ class TemplateSerializer(_WithVariablesSerializer):
 
 class OneTemplateSerializer(TemplateSerializer):
     data = DictField(required=True)
+    owner = UserSerializer(read_only=True)
 
     class Meta:
         model = models.Template
@@ -498,6 +505,7 @@ class OneTemplateSerializer(TemplateSerializer):
             'id',
             'name',
             'kind',
+            'owner',
             'data',
         )
 ###################################
