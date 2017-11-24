@@ -56,12 +56,6 @@ class Task(BModel):
 
 
 class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
-    def __get_inventory(self, inventory):
-        try:
-            return Inventory.objects.get(pk=int(inventory))
-        except ValueError:
-            return inventory
-
     @transaction.atomic()
     def create(self, **kwargs):
         kw = dict(**kwargs)
@@ -113,6 +107,16 @@ class PeriodicTask(AbstractModel):
     @property
     def inventory(self):
         return self._inventory or self.inventory_file
+
+    @inventory.setter
+    def inventory(self, inventory):
+        if isinstance(inventory, Inventory):
+            self._inventory = inventory
+        elif isinstance(inventory, (six.string_types, six.text_type)):
+            try:
+                self._inventory = Inventory.objects.get(pk=int(inventory))
+            except ValueError:
+                self.inventory_file = inventory
 
     @property
     def crontab_kwargs(self):
