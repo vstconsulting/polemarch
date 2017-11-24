@@ -10,6 +10,11 @@ pmTemplates.model.className = "pmTemplates"
 
 pmTemplates.copyAndEdit = function(item_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmTemplates.copyAndEdit with item_id = `" + item_id + "`"
+    }
+    
     var def = new $.Deferred();
     var thisObj = this;
     return $.when(this.copyItem(item_id)).done(function(newItemId)

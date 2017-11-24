@@ -60,6 +60,10 @@ pmModuleTemplates.filed.selectProjectInventoryGroupAndModule.render = function(p
 }
 
 
+pmModuleTemplates.model.page_list = {
+    short_title: 'Module template',
+}
+
 pmModuleTemplates.model.page_item = {
     buttons:[
         {

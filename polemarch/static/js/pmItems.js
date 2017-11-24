@@ -584,6 +584,11 @@ pmItems.loadItem = function(item_id)
  */
 pmItems.deleteItem = function(item_id, force)
 {
+    if(!item_id)
+    {
+        throw "Error in pmItems.deleteItem with item_id = `" + item_id + "`"
+    }
+    
     var def = new $.Deferred();
     if(!force && !confirm("Are you sure?"))
     {

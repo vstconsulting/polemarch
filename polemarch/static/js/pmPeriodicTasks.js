@@ -8,6 +8,11 @@ pmPeriodicTasks.model.className = "pmPeriodicTasks"
 
 pmPeriodicTasks.copyAndEdit = function(item_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmPeriodicTasks.copyAndEdit with item_id = `" + item_id + "`"
+    }
+    
     var def = new $.Deferred();
     var thisObj = this;
     return $.when(this.copyItem(item_id)).done(function(newItemId)
@@ -29,6 +34,11 @@ pmPeriodicTasks.copyAndEdit = function(item_id)
    
 pmPeriodicTasks.copyItem = function(item_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmPeriodicTasks.copyItem with item_id = `" + item_id + "`"
+    }
+    
     var def = new $.Deferred();
     var thisObj = this;
 
@@ -92,6 +102,11 @@ pmPeriodicTasks.selectInventory = function(inventory_id)
 
 pmPeriodicTasks.deleteItem = function(item_id, force)
 {
+    if(!item_id)
+    {
+        throw "Error in pmPeriodicTasks.deleteItem with item_id = `" + item_id + "`"
+    }
+    
     if(!force && !confirm("Are you sure?"))
     {
         return;
@@ -332,7 +347,10 @@ pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime.type = 'sele
 pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime.getValue = function(pmObj, filed){
     return '';
 }
-
+ 
+pmPeriodicTasks.model.page_list = {
+    short_title: 'Periodic tasks',
+}
 
 pmPeriodicTasks.model.page_item = {
     buttons:[

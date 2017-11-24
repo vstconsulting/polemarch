@@ -1783,52 +1783,7 @@ window.qunitTestsArray.push(function()
             render(done)
         })
     });
-/*
-    syncQUnit.addTest('Проверка добавления невалидных подгрупп к project', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmProjects.addSubGroups(itemId, [999999])).done(function()
-        {
-            assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
-            render(done)
-        }).fail(function()
-        {
-            assert.ok(true, 'Проверка добавления невалидных подгрупп успешна');
-            render(done)
-        })
-    })
-
-    syncQUnit.addTest('Проверка добавления невалидных хостов к project', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmProjects.addSubHosts(itemId, [999999])).done(function()
-        {
-            assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
-            render(done)
-        }).fail(function()
-        {
-            assert.ok(true, 'Проверка добавления невалидных хостов успешна');
-            render(done)
-        })
-    })
-
-    syncQUnit.addTest('Проверка добавления невалидных inventory к project', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmProjects.addSubInventories(itemId, [999999])).done(function()
-        {
-            assert.ok(false, 'Ошибка при добавлении inventory 999999 вроде бы нет');
-            render(done)
-        }).fail(function()
-        {
-            assert.ok(true, 'Проверка добавления невалидных inventory успешна');
-            render(done)
-        })
-    })
-*/
+    
     syncQUnit.addTest('Страница Run playbook', function ( assert )
     {
         var done = assert.async();

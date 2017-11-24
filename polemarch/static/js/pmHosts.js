@@ -67,14 +67,52 @@ pmHosts.model.page_new = {
         data.vars = jsonEditor.jsonEditorGetValues()
         return data;
     },
-    onCreate:function(result)
-    { 
+    onCreate:function(result, status, xhr, callOpt)
+    {   
         var def = new $.Deferred();
         $.notify("Host created", "success");
-        $.when(spajs.open({ menuId:pmHosts.model.page_name+"/"+result.id})).always(function(){
-            def.resolve()
-        })
-        
+
+        if(callOpt.parent_item)
+        {
+            if(callOpt.parent_type == 'group')
+            {
+                $.when(pmGroups.addSubHosts(callOpt.parent_item, [result.id])).always(function(){
+                    $.when(spajs.open({ menuId:"group/"+callOpt.parent_item})).always(function(){
+                        def.resolve()
+                    })
+                })
+            }
+            else if(callOpt.parent_type == 'inventory')
+            {
+                $.when(pmInventories.addSubHosts(callOpt.parent_item, [result.id])).always(function(){
+                    $.when(spajs.open({ menuId:"inventory/"+callOpt.parent_item})).always(function(){
+                        def.resolve()
+                    })
+                })
+            }
+            else if(parent_type == 'project')
+            {
+                $.when(pmProjects.addSubHosts(callOpt.parent_item, [result.id])).always(function(){
+                    $.when(spajs.open({ menuId:"project/"+callOpt.parent_item})).always(function(){
+                        def.resolve()
+                    })
+                })
+            }
+            else
+            {
+                console.error("Не известный parent_type", callOpt.parent_type)
+                $.when(spajs.open({ menuId:"host/"+result.id})).always(function(){
+                    def.resolve()
+                })
+            }
+        }
+        else
+        {
+            $.when(spajs.open({ menuId:"host/"+result.id})).always(function(){
+                def.resolve()
+            })
+        }
+  
         return def.promise();
     }
 }
