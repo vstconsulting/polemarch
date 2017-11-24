@@ -90,7 +90,7 @@ pmHosts.model.page_new = {
                     })
                 })
             }
-            else if(parent_type == 'project')
+            else if(callOpt.parent_type == 'project')
             {
                 $.when(pmProjects.addSubHosts(callOpt.parent_item, [result.id])).always(function(){
                     $.when(spajs.open({ menuId:"project/"+callOpt.parent_item})).always(function(){
