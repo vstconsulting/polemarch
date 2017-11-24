@@ -2598,6 +2598,9 @@ window.qunitTestsArray.push(function()
         $("#new_json_valueprefix").val("syntax-check");
         jsonEditor.jsonEditorAddVar();
         
+        $("#inventories-autocomplete").val($("#inventories-autocomplete option")[0].value).trigger('change.select2');
+        
+        
         // Заполнение формы с данными project
         $("#Templates-name").val("test-template-"+t);
 
