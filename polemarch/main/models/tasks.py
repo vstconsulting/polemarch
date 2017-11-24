@@ -56,21 +56,43 @@ class Task(BModel):
 
 
 class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
-    pass
+    def __get_inventory(self, inventory):
+        try:
+            return Inventory.objects.get(pk=int(inventory))
+        except ValueError:
+            return inventory
+
+    @transaction.atomic()
+    def create(self, **kwargs):
+        kw = dict(**kwargs)
+        inventory = kw.pop('inventory', None)
+        if isinstance(inventory, Inventory):
+            kw['_inventory'] = inventory
+        elif isinstance(inventory, (six.string_types, six.text_type)):
+            try:
+                kw['_inventory'] = Inventory.objects.get(pk=int(inventory))
+            except ValueError:
+                kw['inventory_file'] = inventory
+        obj = super(PeriodicTaskQuerySet, self).create(**kw)
+        obj.project.check_path(obj.inventory)
+        return obj
 
 
 # noinspection PyTypeChecker
 class PeriodicTask(AbstractModel):
     objects     = PeriodicTaskQuerySet.as_manager()
-    project     = models.ForeignKey(Project, on_delete=models.CASCADE,
-                                    related_query_name="periodic_tasks")
-    mode        = models.CharField(max_length=256)
-    kind        = models.CharField(max_length=50, default="PLAYBOOK")
-    inventory   = models.ForeignKey(Inventory, on_delete=models.CASCADE,
-                                    related_query_name="periodic_tasks")
-    schedule    = models.CharField(max_length=4*1024)
-    type        = models.CharField(max_length=10)
-    save_result = models.BooleanField(default=True)
+    project        = models.ForeignKey(Project, on_delete=models.CASCADE,
+                                       related_query_name="periodic_tasks")
+    mode           = models.CharField(max_length=256)
+    kind           = models.CharField(max_length=50, default="PLAYBOOK")
+    _inventory     = models.ForeignKey(Inventory, on_delete=models.CASCADE,
+                                       related_query_name="periodic_tasks",
+                                       db_column="inventory",
+                                       null=True, blank=True)
+    inventory_file = models.CharField(max_length=2*1024, null=True, blank=True)
+    schedule       = models.CharField(max_length=4*1024)
+    type           = models.CharField(max_length=10)
+    save_result    = models.BooleanField(default=True)
 
     kinds = ["PLAYBOOK", "MODULE"]
     types = ["CRONTAB", "INTERVAL"]
@@ -87,6 +109,10 @@ class PeriodicTask(AbstractModel):
     time_types_list = [
         'minute', 'hour', 'day_of_month', 'month_of_year', "day_of_week"
     ]
+
+    @property
+    def inventory(self):
+        return self._inventory or self.inventory_file
 
     @property
     def crontab_kwargs(self):

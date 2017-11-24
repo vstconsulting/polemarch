@@ -1,11 +1,14 @@
 # pylint: disable=protected-access,no-member,unused-argument
 from __future__ import unicode_literals
 
+import os
 import logging
 from collections import OrderedDict
 
+import six
 from django.conf import settings
 from django.utils import timezone
+from django.core.validators import ValidationError
 
 from .. import utils
 from . import hosts as hosts_models
@@ -84,9 +87,21 @@ class Project(AbstractModel):
             kind=kind, raw_stdout="",
             initiator=initiator, initiator_type=initiator_type
         )
+        if isinstance(inventory, (six.string_types, six.text_type)):
+            history_kwargs['inventory'] = None
         return History.objects.create(status="DELAY", **history_kwargs), extra
 
+    def check_path(self, inventory):
+        if not isinstance(inventory, (six.string_types, six.text_type)):
+            return
+        path = "{}/{}".format(self.path, inventory)
+        path = os.path.abspath(os.path.expanduser(path))
+        if self.path not in path:
+            errors = dict(inventory="Inventory should be in project dir.")
+            raise ValidationError(errors)
+
     def _prepare_kw(self, kind, mod_name, inventory, **extra):
+        self.check_path(inventory)
         if not mod_name:
             raise PMException("Empty playbook/module name.")
         history, extra = self._get_history(kind, mod_name, inventory, **extra)
@@ -98,9 +113,12 @@ class Project(AbstractModel):
 
     def _send_hook(self, when, kind, kwargs):
         msg = OrderedDict(execution_type=kind, when=when)
+        inventory = kwargs['inventory']
+        if isinstance(inventory, hosts_models.Inventory):
+            inventory = inventory.get_hook_data(when)
         msg['target'] = OrderedDict(
             name=kwargs['target'],
-            inventory=kwargs['inventory'].get_hook_data(when),
+            inventory=inventory,
             project=kwargs['project'].get_hook_data(when)
         )
         if kwargs['history'] is not None:

@@ -151,7 +151,7 @@ class Inventory(AbstractModel):
         default_related_name = "inventories"
 
     def __unicode__(self):
-        return str(self.name)  # pragma: no cover
+        return str(self.id)  # pragma: no cover
 
     @property
     def groups_list(self):
