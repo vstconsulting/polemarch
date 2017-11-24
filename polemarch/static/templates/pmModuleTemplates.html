@@ -112,7 +112,6 @@
                                     style="width:100%"
                                     onchange="pmModuleTemplates.selectInventory(this.value);"
                                 >
-                                    <option selected value="0" >Not set</option>
                                     <% for(var i in pmInventories.model.itemslist.results){ %>
                                         <option
                                             value="<%- pmInventories.model.itemslist.results[i].id %>"
