@@ -173,8 +173,7 @@
                 <div class="row">
                     <~ pmInventories.model.items[item_id].groups >
                         <% console.log("inventories", item_id, pmInventories.model.items[item_id].groups) %>
-                        <% for(var i in pmInventories.model.items[item_id].groups){ %>
-                            <% console.log("inventory", pmInventories.model.items[item_id].groups[i]) %>
+                        <% for(var i in pmInventories.model.items[item_id].groups){ %> 
                             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Group</label>
                                 <a href="<%- polemarch.opt.host %>/?group/<%- pmInventories.model.items[item_id].groups[i].id %>" onclick="return spajs.openURL(this.href);" >
