@@ -63,8 +63,7 @@ class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
 class PeriodicTask(AbstractModel):
     objects     = PeriodicTaskQuerySet.as_manager()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
-                                    related_query_name="periodic_tasks",
-                                    blank=True, null=True)
+                                    related_query_name="periodic_tasks")
     mode        = models.CharField(max_length=256)
     kind        = models.CharField(max_length=50, default="PLAYBOOK")
     inventory   = models.ForeignKey(Inventory, on_delete=models.CASCADE,
