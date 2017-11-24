@@ -356,7 +356,7 @@ pmPeriodicTasks.model.page_item = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(item_id, opt){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+', '+opt.project_id+'));  return false;'},
+            function:function(item_id, opt){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+', {project_id:'+opt.project_id+'}));  return false;'},
             title:'Save',
             link:function(){ return '#'},
         },

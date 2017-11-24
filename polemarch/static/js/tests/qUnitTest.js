@@ -382,6 +382,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню users');
             render(done)
         })
@@ -398,6 +399,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-user');
             render(done)
         })
@@ -421,6 +423,7 @@ window.qunitTestsArray.push(function()
         // Отправка формы с данными пользователя
         $.when(pmUsers.addItem()).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно user add Item, а не должно было');
             render(done)
         }).fail(function()
@@ -445,6 +448,7 @@ window.qunitTestsArray.push(function()
         // Отправка формы с данными пользователя
         $.when(pmUsers.addItem()).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно user add Item, а не должно было');
             render(done)
         }).fail(function()
@@ -473,6 +477,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при user add Item');
             render(done)
         })
@@ -495,6 +500,7 @@ window.qunitTestsArray.push(function()
  
         $.when(pmUsers.updateItem(userId)).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно update add Item, а не должно было');
             render(done)
         }).fail(function(){
@@ -521,7 +527,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно update add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -532,6 +540,7 @@ window.qunitTestsArray.push(function()
         var done = assert.async(); 
         $.when(pmUsers.copyAndEdit(999999)).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно copyAndEdit add Item, а не должно было');
             render(done)
         }).fail(function(){
@@ -548,7 +557,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно copyAndEdit add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
             render(done)
         })
@@ -561,6 +572,7 @@ window.qunitTestsArray.push(function()
         // Удаление пользователя.
         $.when(pmUsers.deleteItem(999999, true)).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно copyAndEdit add Item, а не должно было');
             render(done)
         }).fail(function(){
@@ -582,7 +594,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -597,7 +611,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -620,6 +636,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню hosts');
             render(done)
         })
@@ -635,6 +652,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню hosts');
             render(done)
         })
@@ -651,6 +669,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-host');
             render(done)
         })
@@ -683,6 +702,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при user add Item');
             render(done)
         })
@@ -708,7 +728,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно update add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -722,7 +744,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно copyAndEdit add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
             render(done)
         })
@@ -741,7 +765,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -756,7 +782,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -800,6 +828,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню groups');
             render(done)
         })
@@ -816,6 +845,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-group');
             render(done)
         })
@@ -848,6 +878,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при group add Item');
             render(done)
         })
@@ -872,7 +903,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно update add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -893,7 +926,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно setSubGroups');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при setSubGroups'); // На сервере такой группы наверное нет
             render(done)
         })
@@ -912,6 +947,7 @@ window.qunitTestsArray.push(function()
 
         $.when(pmGroups.setSubHosts(itemId, [99999999999])).done(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при setSubHosts');
             render(done)
         }).fail(function(){
@@ -932,7 +968,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно showAddSubGroupsForm');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при showAddSubGroupsForm');
             render(done)
         })
@@ -950,7 +988,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно showAddSubHostsForm');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при showAddSubHostsForm');
             render(done)
         })
@@ -971,6 +1011,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню создания подгруппы new-group');
             render(done)
         })
@@ -1002,6 +1043,7 @@ window.qunitTestsArray.push(function()
             var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
             if(master_group_itemId != itemId)
             {
+                debugger;
                 assert.ok(false, 'Ошибка при добавлении подгруппы ' + master_group_itemId +"!="+ itemId);
                 render(done)
             }
@@ -1013,6 +1055,7 @@ window.qunitTestsArray.push(function()
 
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при group sub add Item');
             render(done)
         })
@@ -1024,6 +1067,7 @@ window.qunitTestsArray.push(function()
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
         $.when(pmGroups.addSubGroups(itemId, [999999])).done(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
             render(done)
         }).fail(function()
@@ -1039,6 +1083,7 @@ window.qunitTestsArray.push(function()
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
         $.when(pmGroups.addSubHosts(itemId, [999999])).done(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
             render(done)
         }).fail(function()
@@ -1059,7 +1104,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно copyAndEdit Item '+itemId);
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit Item '+itemId);
             render(done)
         })
@@ -1078,7 +1125,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -1093,7 +1142,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -1113,6 +1164,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-group');
             render(done)
         })
@@ -1225,6 +1277,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню inventories');
             render(done)
         })
@@ -1241,6 +1294,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-inventory');
             render(done)
         })
@@ -1274,6 +1328,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при inventory add Item');
             render(done)
         })
@@ -1297,7 +1352,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно update add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -1309,6 +1366,7 @@ window.qunitTestsArray.push(function()
         var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
         $.when(pmInventories.addSubGroups(itemId, [999999])).done(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
             render(done)
         }).fail(function()
@@ -1324,6 +1382,7 @@ window.qunitTestsArray.push(function()
         var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
         $.when(pmInventories.addSubHosts(itemId, [999999])).done(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
             render(done)
         }).fail(function()
@@ -1345,7 +1404,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно copyAndEdit add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
             render(done)
         })
@@ -1374,7 +1435,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -1389,6 +1452,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Страница не открылась');
             render(done)
         })
@@ -1404,7 +1468,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно delete Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete Item');
             render(done)
         })
@@ -1504,6 +1570,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню inventories/import');
             render(done)
         })
@@ -1539,6 +1606,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
 
             $.when(pmInventories.importInventory(inventory)).done(function()
             {
+                debugger;
                 assert.ok(false, 'Успешно импортирован не валидный инвенторий (а это не правильно)');
                 render(done)
             }).fail(function()
@@ -1548,6 +1616,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню inventories/import');
             render(done)
         }) 
@@ -1577,6 +1646,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             render(done)
         }).fail(function()
         { 
+            debugger;
             assert.ok(false, 'Ошибка в импорте инвентория');
             render(done)
         })
@@ -1595,6 +1665,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
         $("#inventory_name").val("inventory") 
         $.when(pmInventories.importInventory(inventory)).done(function()
         { 
+            debugger;
             assert.ok(false, 'Успешно импортирован инвенторий а должна быть ошибка');
             render(done)
         }).fail(function()
@@ -1667,6 +1738,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню projects');
             render(done)
         })
@@ -1683,6 +1755,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-project');
             render(done)
         })
@@ -1716,6 +1789,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при project add Item');
             render(done)
         })
@@ -1742,7 +1816,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно update add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        { 
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -1759,7 +1835,9 @@ window.qunitTestsArray.push(function()
         {
             assert.ok(true, 'Успешно syncRepo');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при syncRepo');
             render(done)
         })
@@ -1776,6 +1854,7 @@ window.qunitTestsArray.push(function()
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1] 
         $.when(pmProjects.executePlaybook(itemId)).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно executePlaybook');
             render(done)
         }).fail(function(){
@@ -1794,6 +1873,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Страница не открылась');
             render(done)
         })
@@ -1809,6 +1889,7 @@ window.qunitTestsArray.push(function()
         // Отправка формы с данными project
         $.when(pmTasks.execute(itemId, 99999, "main.yml")).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно Execute ansible module, а не должно было');
             render(done)
         }).fail(function()
@@ -1832,6 +1913,7 @@ window.qunitTestsArray.push(function()
         // Отправка формы с данными project
         $.when(pmTasks.execute(itemId, $('#inventories-autocomplete').val(), "main.yml")).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно Execute ansible module, а не должно было');
             render(done)
         }).fail(function()
@@ -1860,6 +1942,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка Execute ansible module, а не должно было');
             render(done)
         }) 
@@ -1876,6 +1959,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Страница не открылась');
             render(done)
         })
@@ -1900,6 +1984,7 @@ window.qunitTestsArray.push(function()
             // Отправка формы с данными project
             $.when(pmAnsibleModule.execute(itemId, 99999, "All", $('#module-autocomplete').val())).done(function()
             {
+                debugger;
                 assert.ok(false, 'Успешно Execute ansible module, а не должно было');
                 render(done)
             }).fail(function()
@@ -1909,6 +1994,7 @@ window.qunitTestsArray.push(function()
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при selectInventory');
         })
     });
@@ -1934,6 +2020,7 @@ window.qunitTestsArray.push(function()
             // Отправка формы с данными project
             $.when(pmAnsibleModule.execute(itemId, $('#inventories-autocomplete').val(), "All", $('#module-autocomplete').val())).done(function()
             {
+                debugger;
                 assert.ok(false, 'Успешно Execute ansible module, а не должно было');
                 render(done)
             }).fail(function()
@@ -1943,6 +2030,7 @@ window.qunitTestsArray.push(function()
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при selectInventory');
         })
     });
@@ -1970,11 +2058,13 @@ window.qunitTestsArray.push(function()
                 render(done)
             }).fail(function()
             {
+                debugger;
                 assert.ok(false, 'Ошибка Execute ansible module, а не должно было');
                 render(done)
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при selectInventory');
         })
     });
@@ -1988,6 +2078,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Страница не открылась');
             render(done)
         })
@@ -2005,6 +2096,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-inventory');
             render(done)
         })
@@ -2038,6 +2130,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при inventory add Item');
             render(done)
         })
@@ -2054,6 +2147,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-inventory');
             render(done)
         })
@@ -2080,6 +2174,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при inventory add Item');
             render(done)
         })
@@ -2095,6 +2190,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Страница не открылась');
             render(done)
         })
@@ -2125,6 +2221,7 @@ window.qunitTestsArray.push(function()
             // Отправка формы с данными project
             $.when(pmPeriodicTasks.addItem(itemId)).done(function()
             {
+                debugger;
                 assert.ok(false, 'Успешно project add pmPeriodicTasks, а не должно было');
                 render(done)
             }).fail(function()
@@ -2134,6 +2231,7 @@ window.qunitTestsArray.push(function()
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при selectInventory');
         })
     });
@@ -2170,11 +2268,13 @@ window.qunitTestsArray.push(function()
                 render(done)
             }).fail(function()
             {
+                debugger;
                 assert.ok(false, 'Ошибка при project add pmPeriodicTasks');
                 render(done)
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при selectInventory');
         })
     });

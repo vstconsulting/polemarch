@@ -36,9 +36,9 @@ filedsLib.filed.simpleText.type = "text";
  * Функция для рендера текстового поля
  * @type Object
  */
-filedsLib.filed.simpleText.render = function(pmObj, filed, item_id){
+filedsLib.filed.simpleText.render = function(pmObj, filed, item_id, opt){
 
-    return spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id})
+    return spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id, opt:opt})
 }
 
 filedsLib.filed.simpleText.getValue = function(pmObj, filed){
