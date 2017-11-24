@@ -289,7 +289,7 @@ function injectQunit()
 
         for(var i in window.qunitTestsArray)
         {
-            window.qunitTestsArray[i].call()
+            window.qunitTestsArray[i].test.call()
         }
         syncQUnit.nextTest()
 
@@ -331,7 +331,9 @@ syncQUnit.nextTest = function(name, test)
 /**
  * qunitAddTests_trim
  */
-window.qunitTestsArray.push(function()
+window.qunitTestsArray.push({
+    step:100,
+    test:function()
 {
     syncQUnit.addTest('trim', function ( assert ) {
         var done = assert.async();
@@ -365,12 +367,14 @@ window.qunitTestsArray.push(function()
         }
         render(done);
     }); 
-})
+}})
 
 /**
  * Тестирование users
  */
-window.qunitTestsArray.push(function()
+window.qunitTestsArray.push({
+    step:200,
+    test:function()
 {
     syncQUnit.addTest('Открытие списка пользователей', function ( assert )
     {
@@ -618,13 +622,15 @@ window.qunitTestsArray.push(function()
             render(done)
         })
     });
-})
+}})
 
 
 /**
  * Тестирование hosts
  */
-window.qunitTestsArray.push(function()
+window.qunitTestsArray.push({
+    step:300,
+    test:function()
 {
     syncQUnit.addTest('Открытие списка хостов', function ( assert )
     {
@@ -789,13 +795,15 @@ window.qunitTestsArray.push(function()
             render(done)
         })
     });
-})
+}})
 
 
 /**
  * Тестирование groups
  */
-window.qunitTestsArray.push(function()
+window.qunitTestsArray.push({
+    step:400,
+    test:function()
 {
     syncQUnit.addTest('Проверка функции validateHostName', function ( assert ) {
         var done = assert.async();
@@ -1259,13 +1267,15 @@ window.qunitTestsArray.push(function()
     
     
     
-})
+}})
 
 
 /**
  * Тестирование inventories
  */
-window.qunitTestsArray.push(function()
+window.qunitTestsArray.push({
+    step:500,
+    test:function()
 {
     syncQUnit.addTest('Список инвенториев', function ( assert )
     {
@@ -1721,12 +1731,14 @@ c2libGVfYmVjb21lPXRydWU="
         assert.ok(res, 'Сравнение инвентория 2 распарсенного и оригинального');
         render(done)
     }); 
-})
+}})
 
 /**
  * Тестирование projects
  */
-window.qunitTestsArray.push(function()
+window.qunitTestsArray.push({
+    step:600,
+    test:function()
 {
     syncQUnit.addTest('Список проектов', function ( assert )
     {
@@ -2433,12 +2445,14 @@ window.qunitTestsArray.push(function()
             render(done)
         })
     });
-})
+}})
 
 /**
  * Тестирование шаблонов
  */
-window.qunitTestsArray.push(function()
+window.qunitTestsArray.push({
+    step:700,
+    test:function()
 {
     syncQUnit.addTest('Список шаблонов', function ( assert )
     {
@@ -2450,6 +2464,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню templates');
             render(done)
         })
@@ -2466,6 +2481,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-project');
             render(done)
         })
@@ -2487,6 +2503,7 @@ window.qunitTestsArray.push(function()
         // Отправка формы с данными project
         $.when(pmTasksTemplates.addItem()).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно template add Item, а не должно было');
             render(done)
         }).fail(function()
@@ -2512,6 +2529,7 @@ window.qunitTestsArray.push(function()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при template add Item');
             render(done)
         })
@@ -2531,6 +2549,7 @@ window.qunitTestsArray.push(function()
             
         $.when(pmTasksTemplates.updateItem(itemId)).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно template update Item, а не должно было');
             render(done)
         }).fail(function()
@@ -2622,12 +2641,14 @@ window.qunitTestsArray.push(function()
             render(done)
         })
     });
-})
+}})
 
 /**
  * Тестирование шаблонов модулей
  */
-window.qunitTestsArray.push(function()
+window.qunitTestsArray.push({
+    step:800,
+    test:function()
 {
     syncQUnit.addTest('Список шаблонов', function ( assert )
     {
@@ -2832,12 +2853,14 @@ window.qunitTestsArray.push(function()
             render(done)
         })
     });
-})
+}})
  
 /**
  * Тестирование pmDashboard
  */
-window.qunitTestsArray.push(function()
+window.qunitTestsArray.push({
+    step:900,
+    test:function()
 {
     
     syncQUnit.addTest('Страница dashboard', function ( assert )
@@ -2858,12 +2881,14 @@ window.qunitTestsArray.push(function()
         })
     });
 
-})
+}})
 
 /**
  * Тестирование поиска
  */
-window.qunitTestsArray.push(function()
+window.qunitTestsArray.push({
+    step:1000,
+    test:function()
 {
     
     syncQUnit.addTest('Поиск projects', function ( assert )
@@ -2977,13 +3002,15 @@ window.qunitTestsArray.push(function()
             render(done)
         })
     });
-})
+}})
 
 
 /**
  * Тестирование history
  */
-window.qunitTestsArray.push(function()
+window.qunitTestsArray.push({
+    step:1100,
+    test:function()
 {
     syncQUnit.addTest('Страница history', function ( assert )
     {
@@ -3038,5 +3065,5 @@ window.qunitTestsArray.push(function()
             render(done)
         })
     }); 
-})
+}})
 
