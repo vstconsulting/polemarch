@@ -37,7 +37,6 @@ filedsLib.filed.simpleText.type = "text";
  * @type Object
  */
 filedsLib.filed.simpleText.render = function(pmObj, filed, item_id, opt){
-
     return spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id, opt:opt})
 }
 

@@ -55,18 +55,11 @@
             </select> 
         </div>
         
-        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-            <label class="control-label" >Inventory</label> 
-            <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" > 
-                <% for(var i in pmInventories.model.itemslist.results){ %>
-                    <option
-                        <% if(pmTasksTemplates.model.items[item_id].data.inventory == pmInventories.model.itemslist.results[i].id){ %>  selected  <% } %>
-                        value="<%- pmInventories.model.itemslist.results[i].id %>"
-                        ><%- pmInventories.model.itemslist.results[i].name %></option>
-                <% } %>
-            </select> 
-        </div>
-
+        <%= pmTasksTemplates.inventoriesAutocompletefiled.render(pmTasksTemplates, {
+            name:'inventory',
+            title:'Inventory'
+        }, item_id, {}) %>
+ 
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
             <label class="control-label" >Playbook</label>
             <input type="text"
@@ -137,17 +130,12 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Inventory</label>
-                                <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" > 
-                                    <% for(var i in pmInventories.model.itemslist.results){ %>
-                                        <option
-                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
-                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
-                                    <% } %>
-                                </select>
-                            </div>
-
+                         
+                            <%= pmTasksTemplates.inventoriesAutocompletefiled.render(pmInventories, {
+                                name:'inventory',
+                                title:'Inventory'
+                            }, null, {}) %>
+                            
                             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Playbook</label>
                                 <input type="text"

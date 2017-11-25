@@ -1333,6 +1333,41 @@ pmInventories.validateGroupName = function(name)
 }
 
 
+
+
+/**
+ * Для ввода списка идентификаторов пользователей (как в pmTeams.model.page_item...users_list)
+ * @type Object
+ */
+pmInventories.filed.inventoriesAutocomplete = inheritance(filedsLib.filed.simpleText)
+pmInventories.filed.inventoriesAutocomplete.type = 'inventoriesAutocomplete' 
+pmInventories.filed.inventoriesAutocomplete.getValue = function(pmObj, filed)
+{
+    var inventory = $("#inventories-autocomplete").val()
+    if($("#inventory-source").val() != 'db')
+    {
+        inventory =  $("#inventories-file").val()
+    }
+
+    
+    return inventory;
+}
+
+/**
+ * Функция для рендера поля
+ * @type Object
+ */
+pmInventories.filed.inventoriesAutocomplete.render = function(pmObj, filed, item_id)
+{
+    var html = spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id, filedObj:this}) 
+    return spajs.just.onInsert(html, function()
+    {
+        // @FixMe требует чтоб были загружены все инвентории pmInventories.loadAllItems()
+        $("#inventories-autocomplete").select2({ width: '100%' });
+    });
+}
+ 
+
  tabSignal.connect("polemarch.start", function()
  {
     // inventories

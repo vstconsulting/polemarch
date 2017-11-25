@@ -25,6 +25,9 @@ pmProjects.filed.selectRepositoryType.getValue = function(pmObj, filed){
 }
 
 
+pmProjects.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete() 
+
+
 pmProjects.model.page_list = {
     buttons:[
         {
@@ -318,7 +321,7 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:project_id, query:project_id}))
 
-        $("#inventories-autocomplete").select2({ width: '100%' });
+        //$("#inventories-autocomplete").select2({ width: '100%' });
 
         new autoComplete({
             selector: '#playbook-autocomplete',

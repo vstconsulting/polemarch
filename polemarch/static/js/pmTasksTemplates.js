@@ -135,7 +135,7 @@ pmTasksTemplates.model.page_item = {
         {
             class:'btn btn-warning',
             function:function(item_id){ 
-                return "spajs.showLoader(pmTasks.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), $('#playbook-autocomplete').val(), jsonEditor.jsonEditorGetValues())); return false;"
+                return "spajs.showLoader(pmTasks.execute($('#projects-autocomplete').val(), pmTasksTemplates.inventoriesAutocompletefiled.getValue(), $('#playbook-autocomplete').val(), jsonEditor.jsonEditorGetValues())); return false;"
             },
             title:'Execute',
             link:function(){ return '#'},
@@ -176,6 +176,7 @@ pmTasksTemplates.model.page_item = {
                 validator:function(value){ return value != '' && value},
                 fast_validator:function(value){ return value != '' && value}
             },
+            // @todo дорефакторить поля ввода
         ],[
             {
                 filed: new pmTasksTemplates.filed.selectProjectInventoryAndPlaybook(),
@@ -190,8 +191,9 @@ pmTasksTemplates.model.page_item = {
     onBeforeSave:function(data, item_id)
     {
         data.kind = this.model.kind
+         
         data.data = {
-            inventory:$("#inventories-autocomplete").val()/1,
+            inventory:pmTasksTemplates.inventoriesAutocompletefiled.getValue(),
             vars:jsonEditor.jsonEditorGetValues()
         }
 
@@ -202,6 +204,7 @@ pmTasksTemplates.model.page_item = {
     },
 }
 
+pmTasksTemplates.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete() 
 pmTasksTemplates.showWidget = function(holder, kind)
 {
     var thisObj = this;
@@ -345,20 +348,24 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
  
 /**
  * @return $.Deferred
+ * @todo дорефакторить форму создания Task template
  */
 pmTasksTemplates.addItem = function()
 {
     var def = new $.Deferred();
     var data = {}
 
+    var inventory = pmTasksTemplates.inventoriesAutocompletefiled.getValue()
+    
     data.name = $("#Templates-name").val()
     data.kind = this.model.kind
     data.data = {
         playbook:$("#playbook-autocomplete").val(),
-        inventory:$("#inventories-autocomplete").val(),
+        inventory:inventory,
         project:$("#projects-autocomplete").val(),
         vars:jsonEditor.jsonEditorGetValues()
     }
+    
 
     if(!data.name)
     {

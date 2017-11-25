@@ -28,7 +28,7 @@
         } 
  
         var __JUST_onInsertFunctions = {}
-
+ 
         /**
          * При вставке этого html в дом дерево будет выполнена функция func
          * @param {type} html
@@ -617,3 +617,12 @@ function JustEscapeHtml(text) {
   }
   return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
+
+justCall_mapArr = []
+function justCall(obj)
+{
+    var index = justCall_mapArr.length
+    justCall_mapArr.push(obj) 
+    return 'justCall_mapArr['+index+']'
+}
+
