@@ -13,14 +13,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
+        migrations.RenameField(
             model_name='periodictask',
-            name='inventory',
-        ),
-        migrations.AddField(
-            model_name='periodictask',
-            name='_inventory',
-            field=models.ForeignKey(blank=True, db_column='inventory', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='periodic_tasks', related_query_name='periodic_tasks', to='main.Inventory'),
+            old_name='inventory',
+            new_name='_inventory',
         ),
         migrations.AddField(
             model_name='periodictask',
