@@ -1336,7 +1336,7 @@ pmInventories.validateGroupName = function(name)
 
 
 /**
- * Для ввода списка идентификаторов пользователей (как в pmTeams.model.page_item...users_list)
+ * Для ввода инвентория
  * @type Object
  */
 pmInventories.filed.inventoriesAutocomplete = inheritance(filedsLib.filed.simpleText)
@@ -1358,12 +1358,21 @@ pmInventories.filed.inventoriesAutocomplete.getValue = function(pmObj, filed)
  * @type Object
  */
 pmInventories.filed.inventoriesAutocomplete.render = function(pmObj, filed, item_id)
-{
+{ 
     var html = spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id, filedObj:this}) 
     return spajs.just.onInsert(html, function()
     {
         // @FixMe требует чтоб были загружены все инвентории pmInventories.loadAllItems()
         $("#inventories-autocomplete").select2({ width: '100%' });
+         
+        if(filed.onchange && item_id)
+        {
+            filed.onchange({value:filed.getFiledValue.apply(pmObj, [item_id])})
+        }
+        else if(filed.onchange)
+        {
+            filed.onchange({value:pmInventories.model.itemslist.results[0].id})
+        }
     });
 }
  

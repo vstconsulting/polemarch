@@ -6,6 +6,9 @@ pmPeriodicTasks.model.name = "periodic-tasks"
 pmPeriodicTasks.model.selectedInventory = 0;
 pmPeriodicTasks.model.className = "pmPeriodicTasks"
 
+pmPeriodicTasks.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete() 
+
+
 pmPeriodicTasks.copyAndEdit = function(item_id)
 {
     if(!item_id)
@@ -79,7 +82,7 @@ pmPeriodicTasks.copyItem = function(item_id)
 
 
 pmPeriodicTasks.selectInventory = function(inventory_id)
-{
+{ 
     var def = new $.Deferred();
     var thisObj = this;
     inventory_id = inventory_id/1
@@ -141,17 +144,17 @@ pmPeriodicTasks.deleteItem = function(item_id, force)
 pmPeriodicTasks.execute = function(project_id, item_id)
 {
     var def = new $.Deferred();
-
+   
     var kind_type = $("#periodic-tasks_"+item_id+"_kind").val();
 
     var data = jsonEditor.jsonEditorGetValues(kind_type);
-    data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
+    data.inventory = pmPeriodicTasks.inventoriesAutocompletefiled.getValue() 
 
     var kind = 'execute-playbook'
     if(kind_type == 'MODULE')
     {
         kind = 'execute-module'
-        data.module = $("#periodic-tasks_"+item_id+"_module").val()
+        data.module = $("#module-autocomplete").val()
         if(!data.module)
         {
             $.notify("Module name is empty", "error");
@@ -391,6 +394,9 @@ pmPeriodicTasks.model.page_item = {
     title: function(item_id){
         return "Periodic task "+this.model.items[item_id].justText('name')
     },
+    back_link: function(item_id, opt){ 
+        return  polemarch.opt.host + "/?project/" + opt.project_id + "/" + this.model.name;
+    },
     short_title: function(item_id){
         return this.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
     },
@@ -422,8 +428,7 @@ pmPeriodicTasks.model.page_item = {
         return true;
     },
     onBeforeSave:function(data, item_id, opt)
-    {
-        
+    { 
         if(!opt || !opt.project_id)
         {
             throw "Error in pmPeriodicTasks.onBeforeSave with opt.project_id is null"
@@ -432,13 +437,10 @@ pmPeriodicTasks.model.page_item = {
         data.project = opt.project_id
 
         data.type = $("#periodic-tasks_"+item_id+"_type").val()
-        data.inventory = $("#periodic-tasks_"+item_id+"_inventory").val()
-        data.name = $("#periodic-tasks_"+item_id+"_name").val()
+        data.inventory = pmPeriodicTasks.inventoriesAutocompletefiled.getValue() 
 
         data.kind = $("#periodic-tasks_"+item_id+"_kind").val()
-
-        data.save_result = $("#periodic-tasks_"+item_id+"_save_result").hasClass('selected')
-
+ 
         if(!data.inventory)
         {
             $.notify("Invalid field `inventory` ", "error"); 
@@ -572,7 +574,7 @@ pmPeriodicTasks.addItem = function(project_id)
 
     data.name = $("#new_periodic-tasks_name").val()
     data.type = $("#new_periodic-tasks_type").val()
-    data.inventory = $("#new_periodic-tasks_inventory").val() 
+    data.inventory = pmPeriodicTasks.inventoriesAutocompletefiled.getValue()
 
     if(!data.name)
     {

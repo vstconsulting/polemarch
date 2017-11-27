@@ -106,7 +106,7 @@
                         <table class="table table-bordered multiple-select">
                             <tbody>
                                 <tr>
-                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmObj.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); <%- pmObj.model.className %>.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
                                         <div class="ico-on fa fa-toggle-on"></div>
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
@@ -123,7 +123,7 @@
                                     <tr
                                         class="item-row item-<%- pmObj.model.itemslist.results[i].id %>  <%- pmObj.model.selectedItems.justClass(pmObj.model.itemslist.results[i].id, 'selected') %>"
                                         data-id="<%- pmObj.model.itemslist.results[i].id %>" >
-                                        <td class=""  onclick="pmObj.toggleSelect(<%- pmObj.model.itemslist.results[i].id %>); return false;">
+                                        <td class=""  onclick="<%- pmObj.model.className %>.toggleSelect(<%- pmObj.model.itemslist.results[i].id %>); return false;">
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
@@ -180,10 +180,10 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a href="#"
-                                        onclick="pmObj.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
+                                        onclick="<%- pmObj.model.className %>.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
                                 </li> 
                                 <li>
-                                    <a href="#" onclick="pmObj.deleteSelected(); return false;" >Delete all selected elements</a>
+                                    <a href="#" onclick="<%- pmObj.model.className %>.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
                             </ul>
                         </div>
@@ -196,10 +196,10 @@
                                 </button>
                                 <ul class="dropdown-menu">  
                                     <li>
-                                        <a href="#" onclick="spajs.showLoader(pmObj.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                        <a href="#" onclick="spajs.showLoader(<%- pmObj.model.className %>.toggleSelectEachItem(true)); return false;" >Select all</a>
                                     </li>
                                     <li class=" <%- pmObj.model.justNotClass('selectedCount', 'hide') %>" >
-                                        <a href="#" onclick="spajs.showLoader(pmObj.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                        <a href="#" onclick="spajs.showLoader(<%- pmObj.model.className %>.toggleSelectEachItem(false)); return false;" >Unselect all</a>
                                     </li>
                                 </ul>
                             </div>
@@ -295,7 +295,8 @@
     <!-- items_page -->
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+            <a href="<% if(pmObj.model.page_item.back_link){ %><%- pmObj.model.page_item.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- pmObj.model.name %><% } %>" 
+                onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 

@@ -57,7 +57,10 @@
         
         <%= pmTasksTemplates.inventoriesAutocompletefiled.render(pmTasksTemplates, {
             name:'inventory',
-            title:'Inventory'
+            title:'Inventory',
+            getFiledValue:function(item_id){ 
+                return this.model.items[item_id].data.inventory;
+            },
         }, item_id, {}) %>
  
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
@@ -133,7 +136,10 @@
                          
                             <%= pmTasksTemplates.inventoriesAutocompletefiled.render(pmInventories, {
                                 name:'inventory',
-                                title:'Inventory'
+                                title:'Inventory',
+                                getFiledValue:function(item_id){ 
+                                    return this.model.items[item_id].data.inventory;
+                                },
                             }, null, {}) %>
                             
                             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">

@@ -135,9 +135,12 @@
                     <div class="box-body">
                         <div class="row">
 
-                            <%= pmProjects.inventoriesAutocompletefiled.render(pmTasksTemplates, {
+                            <%= pmProjects.inventoriesAutocompletefiled.render(pmProjects, {
                                 name:'inventory',
                                 title:'Inventory',
+                                getFiledValue:function(item_id){ 
+                                    return this.model.items[item_id].data.inventory;
+                                },
                                 onchange:function(event){ 
                                     console.log(event)
                                     if(/[^0-9]/mg.test(event.value))

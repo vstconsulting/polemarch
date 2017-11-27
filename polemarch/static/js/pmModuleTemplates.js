@@ -9,6 +9,8 @@ pmModuleTemplates.model.className = "pmModuleTemplates"
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmModuleTemplates.model.kind = "Module"
 
+pmModuleTemplates.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete() 
+
 pmTemplates.model.kindObjects[pmModuleTemplates.model.kind] = pmModuleTemplates
  
 pmModuleTemplates.execute = function(item_id)
@@ -75,7 +77,7 @@ pmModuleTemplates.model.page_item = {
         {
             class:'btn btn-warning',
             function:function(item_id){ 
-                return "spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), pmGroups.getGroupsAutocompleteValue(), $('#module-autocomplete').val(), $('#module-args-string').val(), jsonEditor.jsonEditorGetValues())); return false;"
+                return "spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), pmModuleTemplates.inventoriesAutocompletefiled.getValue(), pmGroups.getGroupsAutocompleteValue(), $('#module-autocomplete').val(), $('#module-args-string').val(), jsonEditor.jsonEditorGetValues())); return false;"
             },
             title:'Execute',
             link:function(){ return '#'},
@@ -119,7 +121,7 @@ pmModuleTemplates.model.page_item = {
         ],[
             {
                 filed: new pmModuleTemplates.filed.selectProjectInventoryGroupAndModule(),
-                name:'project',
+                name:'inventory',
             }, 
         ]
     ],
@@ -132,7 +134,7 @@ pmModuleTemplates.model.page_item = {
         data.kind = this.model.kind
         data.data = {
             module:moduleArgsEditor.getSelectedModuleName(),
-            inventory:$("#inventories-autocomplete").val(),
+            inventory:pmModuleTemplates.inventoriesAutocompletefiled.getValue(),
             project:$("#projects-autocomplete").val(),
             group:pmGroups.getGroupsAutocompleteValue(),
             args:moduleArgsEditor.getModuleArgs(),
@@ -225,7 +227,7 @@ pmModuleTemplates.addItem = function()
     data.kind = this.model.kind
     data.data = {
         module:moduleArgsEditor.getSelectedModuleName(),
-        inventory:$("#inventories-autocomplete").val(),
+        inventory:pmModuleTemplates.inventoriesAutocompletefiled.getValue(),
         project:$("#projects-autocomplete").val(),
         group:pmGroups.getGroupsAutocompleteValue(),
         args:moduleArgsEditor.getModuleArgs(),
