@@ -2428,10 +2428,10 @@ project you must have access to project itself.
 Currently we support such permission levels:
 
 * EXECUTOR - cun see object in objects list, view details and execute (in
-case of object is executable like Template, Inventory or something).
+  case of object is executable like Template, Inventory or something).
 * EDITOR - same as above + right to edit.
 * MASTER - same as above + can work with permissions list for this object
-(add/delete other users and groups).
+  (add/delete other users and groups).
 * OWNER - same as above + ability to change owner.
 
 **Warning**: if you granting somebody EXECUTOR permission to object, he also

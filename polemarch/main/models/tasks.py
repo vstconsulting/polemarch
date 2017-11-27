@@ -81,7 +81,6 @@ class PeriodicTask(AbstractModel):
     kind           = models.CharField(max_length=50, default="PLAYBOOK")
     _inventory     = models.ForeignKey(Inventory, on_delete=models.CASCADE,
                                        related_query_name="periodic_tasks",
-                                       db_column="inventory",
                                        null=True, blank=True)
     inventory_file = models.CharField(max_length=2*1024, null=True, blank=True)
     schedule       = models.CharField(max_length=4*1024)
