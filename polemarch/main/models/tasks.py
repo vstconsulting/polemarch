@@ -117,6 +117,7 @@ class PeriodicTask(AbstractModel):
                 self._inventory = Inventory.objects.get(pk=int(inventory))
             except ValueError:
                 self.inventory_file = inventory
+                self.project.check_path(self.inventory_file)
 
     @property
     def crontab_kwargs(self):
