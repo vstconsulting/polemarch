@@ -109,7 +109,15 @@ class _WithPermissionsSerializer(_SignalSerializer):
             self.instance.acl.all(), many=True
         )
 
+    def __duplicates_check(self, data):
+        without_role = [
+            frozenset({e['member'], e['member_type']}) for e in data
+        ]
+        if len(without_role) != len(list(set(without_role))):
+            raise ValueError("There is duplicates in your permissions set.")
+
     def __permission_set(self, data, remove_old=True):  # noce
+        self.__duplicates_check(data)
         for permission_args in data:
             if remove_old:
                 self.instance.acl.extend().filter(

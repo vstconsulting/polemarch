@@ -406,9 +406,8 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         def side_effect(call_args, *args, **kwargs):
             # check inventory
             inventory_path = call_args[3]
-            # FIXME: WTF with settings???
             expected = "{}/{}/{}".format(
-                settings['PROJECTS_DIR'], self.task_proj.id, "inventory"
+                settings.PROJECTS_DIR, self.task_proj.id, "inventory"
             )
             self.assertEqual(inventory_path, expected)
 
