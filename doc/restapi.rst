@@ -2416,18 +2416,18 @@ ACL system (Polemarch+ only)
 ----------------------------
 
 Because Polemarch supports multiple users it have access rights for every kind
-of objects. Most kinds of objects (:ref:`hosts`, :ref:`groups`,
-:ref:`inventory`, :ref:`projects`, :ref:`templates`
-if to be precise) have owner and set of permissions associated to every
-instance of such kind. However other objects (:ref:`history`,
-:ref:`periodictasks`, :ref:`tasks` if to be precise) have dependant role to
-listed above, so they does not have their own permission, but permissions of
+of objects. Most kinds of objects (if to be precise: :ref:`hosts`,
+:ref:`groups`, :ref:`inventory`, :ref:`projects`, :ref:`templates`
+) have owner and set of permissions associated to every
+instance of such kind. However other objects (if to be precise: :ref:`history`,
+:ref:`periodictasks`, :ref:`tasks`) have dependant role from objects
+listed above, so they does not have their own permissions, but permissions of
 parent objects is applicable to them. For example to see PeriodicTasks of
 project you must have access to project itself.
 
 Currently we support such permission levels:
 
-* EXECUTOR - cun see object in objects list, view details and execute (in
+* EXECUTOR - can see object in objects list, view details and execute (in
   case of object is executable like Template, Inventory or something).
 * EDITOR - same as above + right to edit.
 * MASTER - same as above + can work with permissions list for this object
@@ -2439,8 +2439,15 @@ automatically get EXECUTOR rights to all other objects, which required to use
 this one. Example: if you give User1 EDITOR right to Inventory1, he also got
 EXECUTOR to all hosts and groups, which currently listed in Inventory1.
 
-Permissions applicable objects have such methods to control their ownership
-and permissions information:
+Also there is two types of users: regular and superuser. Regular users have
+access only to objects, where they listed in permissions. Superusers have
+access to all objects in system. See :ref:`users` for detailed information
+about user management api.
+
+Polemarch+ have such methods to control ownership and permissions information:
+
+.. |permission_json_fields| replace:: **Permission JSON Object:** json fields
+    same as in :http:post:`/api/v1/{object_kind}/{id}/permissions/`.
 
 .. http:get:: /api/v1/{object_kind}/{id}/permissions/
 
@@ -2466,9 +2473,7 @@ and permissions information:
            }
         ]
 
-   :>json array permissions: list of actual object permission after operation.
-    **Permission JSON Object:** response json fields same as in :http:get:`/api/v1/periodic-tasks/{id}/`.
-
+   :>json array permissions: list of permissions. |permission_json_fields|
 
 .. http:post:: /api/v1/{object_kind}/{id}/permissions/
 
@@ -2476,11 +2481,10 @@ and permissions information:
 
    :arg object_kind: |perm_kind_def|
    :arg id: Id of object.
-   :reqjsonarr permissions: permission to apply. Every permission have
-    fields listed below.
-   :<json number member: id of user or group for which role should applies.
-   :<json string role: either `EXECUTOR`, `EDITOR` or `MASTER`.
-   :<json string member_type: either `user` or `team` (how to interpret id)
+   :<jsonarr number member: id of user or group for which role should applies.
+   :<jsonarr string role: either ``EXECUTOR``, ``EDITOR`` or ``MASTER``.
+   :<jsonarr string member_type: either ``user`` or ``team`` (how to interpret
+    id)
 
    Example request:
 
@@ -2520,7 +2524,56 @@ and permissions information:
            }
         ]
 
-   :>json array permissions: list of actual object permission after operation.
+   :>json array permissions: list of actual object permissions after operation.
+    Every permission is same object as in request, so you can look request
+    fields explanation for details.
+
+.. http:put:: /api/v1/{object_kind}/{id}/permissions/
+
+   Replace permissions to object with provided.
+
+   :arg object_kind: |perm_kind_def|
+   :arg id: Id of object.
+   :<json array permissions: new permissions list. |permission_json_fields|
+
+   .. sourcecode:: http
+
+      PUT /api/v1/hosts/123/permissions/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+        [
+           {
+              "member":1,
+              "role":"EDITOR",
+              "member_type":"user"
+           },
+           {
+              "member":2,
+              "role":"MASTER",
+              "member_type":"user"
+           }
+        ]
+
+   Results:
+
+   .. sourcecode:: js
+
+        [
+           {
+              "member":1,
+              "role":"EDITOR",
+              "member_type":"user"
+           },
+           {
+              "member":2,
+              "role":"MASTER",
+              "member_type":"user"
+           }
+        ]
+
+   :>json array permissions: list of actual object permissions after operation.
+    |permission_json_fields|
 
 .. http:delete:: /api/v1/{object_kind}/{id}/permissions/
 
@@ -2529,7 +2582,8 @@ and permissions information:
 
    :arg object_kind: |perm_kind_def|
    :arg id: Id of object.
-   :reqjsonarr Ids: Ids of users to remove access for them.
+   :<json array permissions: which permissions remove. You can use `PUT` with
+    empty list if you want to remove all permissions. |permission_json_fields|
 
    Example request:
 
@@ -2539,12 +2593,62 @@ and permissions information:
       Host: example.com
       Accept: application/json, text/javascript
 
-      [12, 13]
+        [
+           {
+              "member":1,
+              "role":"EDITOR",
+              "member_type":"user"
+           },
+           {
+              "member":2,
+              "role":"MASTER",
+              "member_type":"user"
+           }
+        ]
 
-Also there is two types of users: regular and superuser. Regular users have
-access only to objects, where they listed in permissions. Superusers have
-access to all objects in system. See :ref:`users` for detailed information
-about user management api.
+   .. sourcecode:: js
+
+        []
+
+   :>json array permissions: list of actual object permissions after operation.
+    |permission_json_fields|
+
+.. http:put:: /api/v1/{object_kind}/{id}/owner/
+
+   Change owner of object.
+
+   :arg object_kind: |perm_kind_def|
+   :arg id: Id of object.
+   :jsonparam number id: id of user.
+
+   .. sourcecode:: http
+
+      PUT /api/v1/hosts/123/owner/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+        2
+
+   Results:
+
+   .. sourcecode:: js
+
+        Owner changed
+
+.. http:get:: /api/v1/{object_kind}/{id}/owner/
+
+   Get owner of object.
+
+   :arg object_kind: |perm_kind_def|
+   :arg id: Id of object.
+
+   Results:
+
+   .. sourcecode:: js
+
+        2
+
+   :>json number id: id of owner.
 
 .. |perm_kind_def| replace:: Kind of objects to perform operation. It can be
    any present objects type in system: ``hosts``, ``groups``,
