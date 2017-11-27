@@ -1,10 +1,14 @@
 # pylint: disable=protected-access,no-member,unused-argument
 from __future__ import unicode_literals
 
+import os
 import logging
+from collections import OrderedDict
 
+import six
 from django.conf import settings
 from django.utils import timezone
+from django.core.validators import ValidationError
 
 from .. import utils
 from . import hosts as hosts_models
@@ -48,6 +52,12 @@ class Project(AbstractModel):
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
 
+    def get_hook_data(self, when):
+        data = super(Project, self).get_hook_data(when)
+        data['type'] = self.type
+        data['repository'] = self.repository
+        return data
+
     @property
     def path(self):
         return "{}/{}".format(PROJECTS_DIR, self.id)
@@ -63,6 +73,7 @@ class Project(AbstractModel):
 
     def _get_history(self, kind, mod_name, inventory, **extra):
         initiator = extra.pop("initiator", 0)
+        initiator_type = extra.pop("initiator_type", "users")
         save_result = extra.pop("save_result", True)
         command = kind.lower()
         ansible_args = dict(extra)
@@ -73,11 +84,24 @@ class Project(AbstractModel):
         history_kwargs = dict(
             mode=mod_name, start_time=timezone.now(),
             inventory=inventory, project=self,
-            kind=kind, raw_stdout="", initiator=initiator
+            kind=kind, raw_stdout="",
+            initiator=initiator, initiator_type=initiator_type
         )
+        if isinstance(inventory, (six.string_types, six.text_type)):
+            history_kwargs['inventory'] = None
         return History.objects.create(status="DELAY", **history_kwargs), extra
 
+    def check_path(self, inventory):
+        if not isinstance(inventory, (six.string_types, six.text_type)):
+            return
+        path = "{}/{}".format(self.path, inventory)
+        path = os.path.abspath(os.path.expanduser(path))
+        if self.path not in path:
+            errors = dict(inventory="Inventory should be in project dir.")
+            raise ValidationError(errors)
+
     def _prepare_kw(self, kind, mod_name, inventory, **extra):
+        self.check_path(inventory)
         if not mod_name:
             raise PMException("Empty playbook/module name.")
         history, extra = self._get_history(kind, mod_name, inventory, **extra)
@@ -88,36 +112,20 @@ class Project(AbstractModel):
         return kwargs
 
     def _send_hook(self, when, kind, kwargs):
-        msg = dict(execution_type=kind)
-        inventory = dict(
-            id=kwargs['inventory'].id,
-            name=kwargs['inventory'].name,
-        )
-        project = dict(
-            id=kwargs['project'].id,
-            name=kwargs['project'].name,
-            type=kwargs['project'].type,
-            repository=kwargs['project'].repository,
-        )
-        msg['target'] = dict(
-            name=kwargs['target'], inventory=inventory, project=project
+        msg = OrderedDict(execution_type=kind, when=when)
+        inventory = kwargs['inventory']
+        if isinstance(inventory, hosts_models.Inventory):
+            inventory = inventory.get_hook_data(when)
+        msg['target'] = OrderedDict(
+            name=kwargs['target'],
+            inventory=inventory,
+            project=kwargs['project'].get_hook_data(when)
         )
         if kwargs['history'] is not None:
-            msg['history'] = dict(
-                id=kwargs['history'].id,
-                start_time=kwargs['history'].start_time.isoformat(),
-            )
-            if when == "after_execution":
-                msg['history']['stop_time'] = (
-                    kwargs['history'].stop_time.isoformat()
-                )
-            msg['history']['initiator'] = dict(
-                initiator_type=kwargs['history'].initiator_type,
-                initiator_id=kwargs['history'].initiator,
-            )
+            msg['history'] = kwargs['history'].get_hook_data(when)
         else:
             msg['history'] = None
-        SendHook.delay(when, **msg)
+        SendHook.delay(when, msg)
 
     def execute(self, kind, *args, **extra):
         kind = kind.upper()

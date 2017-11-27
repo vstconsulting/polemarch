@@ -158,13 +158,7 @@ def delete_from_beat(instance, **kwargs):
 
 
 @receiver(signals.pre_save, sender=Hook)
-def check_hook_script_path(instance, **kwargs):
-    if instance.type != "SCRIPT":
-        return
-    errors = {}
-    hooks_dir = getattr(settings, "HOOKS_DIR", '/tmp/')
-    for rep in instance.reps:
-        if '../' in rep or rep not in os.listdir(hooks_dir):
-            errors["recipients"] = "Recipients must be in hooks dir."
+def check_hook(instance, **kwargs):
+    errors = instance.handlers.validate(instance)
     if errors:
         raise ValidationError(errors)

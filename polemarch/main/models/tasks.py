@@ -56,21 +56,37 @@ class Task(BModel):
 
 
 class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
-    pass
+    @transaction.atomic()
+    def create(self, **kwargs):
+        kw = dict(**kwargs)
+        inventory = kw.pop('inventory', None)
+        if isinstance(inventory, Inventory):
+            kw['_inventory'] = inventory
+        elif isinstance(inventory, (six.string_types, six.text_type)):
+            try:
+                kw['_inventory'] = Inventory.objects.get(pk=int(inventory))
+            except ValueError:
+                kw['inventory_file'] = inventory
+        obj = super(PeriodicTaskQuerySet, self).create(**kw)
+        obj.project.check_path(obj.inventory)
+        return obj
 
 
 # noinspection PyTypeChecker
 class PeriodicTask(AbstractModel):
     objects     = PeriodicTaskQuerySet.as_manager()
-    project     = models.ForeignKey(Project, on_delete=models.CASCADE,
-                                    related_query_name="periodic_tasks")
-    mode        = models.CharField(max_length=256)
-    kind        = models.CharField(max_length=50, default="PLAYBOOK")
-    inventory   = models.ForeignKey(Inventory, on_delete=models.CASCADE,
-                                    related_query_name="periodic_tasks")
-    schedule    = models.CharField(max_length=4*1024)
-    type        = models.CharField(max_length=10)
-    save_result = models.BooleanField(default=True)
+    project        = models.ForeignKey(Project, on_delete=models.CASCADE,
+                                       related_query_name="periodic_tasks")
+    mode           = models.CharField(max_length=256)
+    kind           = models.CharField(max_length=50, default="PLAYBOOK")
+    _inventory     = models.ForeignKey(Inventory, on_delete=models.CASCADE,
+                                       related_query_name="periodic_tasks",
+                                       db_column="inventory",
+                                       null=True, blank=True)
+    inventory_file = models.CharField(max_length=2*1024, null=True, blank=True)
+    schedule       = models.CharField(max_length=4*1024)
+    type           = models.CharField(max_length=10)
+    save_result    = models.BooleanField(default=True)
 
     kinds = ["PLAYBOOK", "MODULE"]
     types = ["CRONTAB", "INTERVAL"]
@@ -87,6 +103,20 @@ class PeriodicTask(AbstractModel):
     time_types_list = [
         'minute', 'hour', 'day_of_month', 'month_of_year', "day_of_week"
     ]
+
+    @property
+    def inventory(self):
+        return self._inventory or self.inventory_file
+
+    @inventory.setter
+    def inventory(self, inventory):
+        if isinstance(inventory, Inventory):
+            self._inventory = inventory
+        elif isinstance(inventory, (six.string_types, six.text_type)):
+            try:
+                self._inventory = Inventory.objects.get(pk=int(inventory))
+            except ValueError:
+                self.inventory_file = inventory
 
     @property
     def crontab_kwargs(self):
@@ -118,8 +148,10 @@ class PeriodicTask(AbstractModel):
 
     def execute(self):
         self.project.execute(
-            self.kind, self.mode, self.inventory, sync=True,
-            save_result=self.save_result, **self.vars
+            self.kind, self.mode, self.inventory,
+            sync=True, save_result=self.save_result,
+            initiator=self.id, initiator_type="scheduler",
+            **self.vars
         )
 
     def editable_by(self, user):
@@ -279,9 +311,32 @@ class History(BModel):
              "start_time", "stop_time", "initiator", "initiator_type"]
         ]
 
+    def get_hook_data(self, when):
+        data = OrderedDict()
+        data['id'] = self.id
+        data['start_time'] = self.start_time.isoformat()
+        if when == "after_execution":
+            data['stop_time'] = self.stop_time.isoformat()
+        data["initiator"] = dict(
+            initiator_type=self.initiator_type,
+            initiator_id=self.initiator,
+        )
+        if self.initiator_type == "users":
+            data["initiator"]['name'] = getattr(
+                self.initiator_object, 'username', None
+            )
+        elif self.initiator_type == "scheduler":
+            data["initiator"]['name'] = self.initiator_object.name
+        return data
+
     @property
     def initiator_object(self):
-        return User.objects.get(id=self.initiator)
+        if self.initiator_type == "users" and self.initiator:
+            return User.objects.get(id=self.initiator)
+        elif self.initiator_type == "scheduler" and self.initiator:
+            return PeriodicTask.objects.get(id=self.initiator)
+        else:
+            return None
 
     @property
     def facts(self):

@@ -43,7 +43,7 @@ class HooksTestCase(TestCase):
         self.recipients = ['test.sh', 'send.sh']
         with self.assertRaises(ValidationError):
             Hook.objects.create(
-                type='SCRIPT', recipients="some.sh"
+                type='SCRIPT', recipients="some.sh", when="error_on"
             )
         hook = Hook.objects.create(
             type='SCRIPT', recipients=" | ".join(self.recipients)
@@ -51,12 +51,12 @@ class HooksTestCase(TestCase):
         with patch('subprocess.check_output') as cmd:
             self.count = 0
             cmd.side_effect = self.check_output_run
-            self.assertEqual(hook.run(test="test"), "Ok\nOk")
+            self.assertEqual(hook.run(message=dict(test="test")), "Ok\nOk")
             self.assertEqual(cmd.call_count, 2)
-            hook.run('on_error', test="test")
+            hook.run('on_error', message=dict(test="test"))
             self.assertEqual(cmd.call_count, 2)
             cmd.side_effect = self.check_output_error
-            self.assertEqual(hook.run(test="test"), "Err\nErr")
+            self.assertEqual(hook.run(message=dict(test="test")), "Err\nErr")
             self.assertEqual(cmd.call_count, 4)
 
     def check_output_run_http(self, method, url, data, **kwargs):
@@ -79,12 +79,12 @@ class HooksTestCase(TestCase):
         with patch('requests.api.request') as cmd:
             self.count = 0
             cmd.side_effect = self.check_output_run_http
-            result = hook.run(test="test")
+            result = hook.run(message=dict(test="test"))
             for res in result.split("\n"):
                 self.assertEqual(res, '200 ok: { "result" : "ok" }')
             self.assertEqual(cmd.call_count, 2)
-            hook.run('on_error', test="test")
+            hook.run('on_error', message=dict(test="test"))
             self.assertEqual(cmd.call_count, 2)
             cmd.side_effect = self.check_output_error
-            self.assertEqual(hook.run(test="test"), "Err\nErr")
+            self.assertEqual(hook.run(message=dict(test="test")), "Err\nErr")
             self.assertEqual(cmd.call_count, 4)

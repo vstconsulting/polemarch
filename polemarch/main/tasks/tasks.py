@@ -71,9 +71,10 @@ class ExecuteAnsibleModule(_ExecuteAnsible):
 
 @task(app, ignore_result=True, bind=True)
 class SendHook(BaseTask):
-    def __init__(self, app, when, *args, **kwargs):
+    def __init__(self, app, when, message, *args, **kwargs):
         super(self.__class__, self).__init__(app, *args, **kwargs)
         self.when = when
+        self.message = message
 
     def run(self):
-        Hook.objects.execute(self.when, **self.kwargs)
+        Hook.objects.execute(self.when, self.message)

@@ -116,7 +116,7 @@ class BaseTestCase(TestCase):
         request = getattr(client, rtype)
         code = code or self.std_codes.get(rtype, 200)
         if kwargs.get("data", False):
-            if isinstance(kwargs["data"], six.string_types):
+            if isinstance(kwargs["data"], (six.string_types, six.text_type)):
                 kwargs["content_type"] = "application/json"
         result = self.result(request, url, code=code, *args, **kwargs)
         self._logout(client)

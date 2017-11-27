@@ -1,9 +1,12 @@
 import json
+
 import re
 
 from datetime import timedelta
 
 import subprocess
+
+from django.conf import settings
 from django.utils.timezone import now
 from django.core.validators import ValidationError
 
@@ -397,6 +400,40 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEquals(execute_method.call_count, 4)
         self.assertEquals(subprocess_function.call_count, 1)
 
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_execute_inventory_file(self, subprocess_function):
+
+        def side_effect(call_args, *args, **kwargs):
+            # check inventory
+            inventory_path = call_args[3]
+            # FIXME: WTF with settings???
+            expected = "{}/{}/{}".format(
+                settings['PROJECTS_DIR'], self.task_proj.id, "inventory"
+            )
+            self.assertEqual(inventory_path, expected)
+
+        subprocess_function.side_effect = side_effect
+        with open("{}/12".format(self.task_proj.path), 'w') as file:
+            file.write("burda")
+        with open("{}/inventory".format(self.task_proj.path), 'w') as file:
+            file.write("burda")
+        self.post_result(
+            "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory="./12", module="ping", group="all"))
+        )
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory="inventory", playbook="first.yml"))
+        )
+        # fail with outside access
+        self.post_result(
+            "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory="../inventory",
+                                 module="ping", group="all")),
+            code=400
+        )
+        self.assertEquals(subprocess_function.call_count, 2)
+
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
@@ -478,15 +515,15 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                        inventory=self.inventory,
                        project=self.project)
         ptask = PeriodicTask.objects.create(**details)
-        details['inventory'] = self.inventory.id
+        details['inventory'] = str(self.inventory.id)
         details['project'] = self.project.id
         url = "/api/v1/periodic-tasks/"
         self.details_test(url + "{}/".format(ptask.id), **details)
         variables = {"args": "ls -la", "group": "all"}
         data = [dict(mode="shell", schedule="10", type="INTERVAL",
                      project=self.periodic_project_id,
-                     kind="MODULE",
-                     inventory=self.inventory.id, name="one", vars=variables),
+                     kind="MODULE", name="one", vars=variables,
+                     inventory=str(self.inventory.id)),
                 dict(mode="shell",
                      schedule="* */2 1-15 * sun,fri",
                      kind="MODULE",
@@ -571,6 +608,30 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         ScheduledTask(id)
         self.assertEquals(subprocess_function.call_count, 1)
         self.assertCount(History.objects.all(), count)
+
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_periodictask_inventory_file(self, subprocess_function):
+        url = "/api/v1/periodic-tasks/"
+        # module
+        with open("{}/inventory".format(self.project.path), 'w') as file:
+            file.write("burda")
+        data = dict(mode="shell", schedule="10", type="INTERVAL",
+                    project=self.periodic_project_id,
+                    kind="MODULE",
+                    inventory="inventory", name="one",
+                    vars={"args": "ls -la", "group": "all"})
+        id = self.get_result("post", url, 201, data=json.dumps(data))['id']
+        ScheduledTask.delay(id)
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        inventory_path = call_args[3]
+        expected = "{}/{}/{}".format(
+            settings.PROJECTS_DIR, self.periodic_project_id, "inventory"
+        )
+        self.assertEquals(inventory_path, expected)
+        # can't save with "../"
+        data['inventory'] = "../inventory"
+        self.get_result("post", url, 400, data=json.dumps(data))
 
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):

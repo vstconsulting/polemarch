@@ -2,10 +2,11 @@
 from __future__ import unicode_literals
 
 import sys
-from os.path import dirname
 import logging
+from os.path import dirname
 from collections import namedtuple
 
+import six
 from django.utils import timezone
 from ...main.utils import (tmp_file, CmdExecutor,
                            KVExchanger, CalledProcessError)
@@ -87,13 +88,34 @@ class AnsibleCommand(object):
         "other": "ERROR"
     }
 
-    class Inventory(PolemarchInventory):
+    class Inventory(object):
+        def __init__(self, inventory, cwd="/tmp"):
+            self.cwd = cwd
+            self.__file = None
+            if isinstance(inventory, (six.string_types, six.text_type)):
+                self.raw, self.keys = self.get_from_file(inventory)
+            else:
+                self.raw, self.keys = inventory.get_inventory()
+
+        def get_from_file(self, inventory):
+            self.__file = "{}/{}".format(self.cwd, inventory)
+            with open(self.__file, 'r') as file:
+                return file.read(), []
+
         @property
         def file(self):
-            self.__file = getattr(self, "__file", tmp_file(self.raw))
+            self.__file = self.__file or tmp_file(self.raw)
             return self.__file
 
+        @property
+        def file_name(self):
+            # pylint: disable=no-member
+            if isinstance(self.file, (six.string_types, six.text_type)):
+                return self.file
+            return self.file.name
+
         def close(self):
+            # pylint: disable=no-member
             for key_file in self.keys:
                 key_file.close()
             self.__file.close()
@@ -129,9 +151,10 @@ class AnsibleCommand(object):
         return dirname(sys.executable) + "/" + self.command_type
 
     def prepare(self, target, inventory, history, project):
+        project.check_path(inventory)
         self.target, self.project = target, project
         self.history = history if history else DummyHistory()
-        self.inventory_object = self.Inventory(*inventory.get_inventory())
+        self.inventory_object = self.Inventory(inventory, cwd=self.workdir)
         self.history.raw_inventory = self.inventory_object.raw
         self.history.status = "RUN"
         self.history.save()
@@ -139,7 +162,7 @@ class AnsibleCommand(object):
 
     def get_args(self, target, extra_args):
         return [self.path_to_ansible, target,
-                '-i', self.inventory_object.file.name, '-v'] + extra_args
+                '-i', self.inventory_object.file_name, '-v'] + extra_args
 
     def error_handler(self, exception):
         default_code = self.status_codes["other"]

@@ -17,7 +17,7 @@ class Response(_ResponseClass):
     def _asdict(self):
         data = super(Response, self)._asdict()
         data["status"] = data.get("status", 200)
-        if isinstance(data["data"], six.string_types):
+        if isinstance(data["data"], (six.string_types, six.text_type)):
             data["data"] = dict(detail=self.data)
         return data
 

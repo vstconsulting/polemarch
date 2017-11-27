@@ -441,6 +441,7 @@ class OneTaskSerializer(TaskSerializer):
 class PeriodictaskSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
     schedule = serializers.CharField(allow_blank=True)
+    inventory = serializers.CharField()
 
     class Meta:
         model = models.PeriodicTask
@@ -648,14 +649,20 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
 
     def _execution(self, kind, request):
         data = dict(request.data)
-        inventory = Inventory.objects.get(id=int(data.pop("inventory")))
-        if not inventory.viewable_by(request.user):  # nocv
-            raise PermissionDenied("You don't have permission to inventory.")
+        inventory = data.pop("inventory")
+        try:
+            inventory = Inventory.objects.get(id=int(inventory))
+            if not inventory.viewable_by(request.user):  # nocv
+                raise PermissionDenied(
+                    "You don't have permission to inventory."
+                )
+        except ValueError:
+            pass
         history_id = self.instance.execute(
             kind, str(data.pop(kind)), inventory,
             initiator=request.user.id, **data
         )
-        rdata = dict(detail="Started at inventory {}.".format(inventory.id),
+        rdata = dict(detail="Started at inventory {}.".format(inventory),
                      history_id=history_id)
         return Response(rdata, 201)
 
