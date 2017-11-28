@@ -134,6 +134,13 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
+                            <div class="form-group col-lg-4">
+                                <label class="control-label" >Playbook</label>
+                                <input type="text"
+                                        class="playbook-autocomplete form-control"
+                                        id="playbook-autocomplete"
+                                        value="">
+                            </div>
 
                             <%= pmProjects.inventoriesAutocompletefiled.render(pmProjects, {
                                 name:'inventory',
@@ -172,14 +179,6 @@
                                 </select>
                             </div>-->
                             
-                            <div class="form-group col-lg-4">
-                                <label class="control-label" >Playbook</label>
-                                <input type="text"
-                                        class="playbook-autocomplete form-control"
-                                        id="playbook-autocomplete"
-                                        value="">
-                            </div>
-                             
                             <~ pmProjects.model.selectedInventory>
                                 <%= pmGroups.groupsAutocompleteTemplate(pmProjects.model.selectedInventory) %>
                             <~>
