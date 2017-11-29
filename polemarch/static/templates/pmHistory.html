@@ -64,13 +64,13 @@
                                             </td>
 
                                             <td class="hidden-xs hidden-sm">
-                                                <% if(val.initiator > 0  && val.initiator_type == 'users'){ %>
+                                                <% if(val.initiator > 0  && val.initiator_type == 'users' && pmUsers.model.items[val.initiator]){ %>
                                                     <a href="<%- polemarch.opt.host %>/?<%- val.initiator_type %>/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                        <%= pmUsers.model.items[pmHistory.model.items[val.id].initiator].justText('username') %> 
+                                                        <%= pmUsers.model.items[val.initiator].justText('username') %> 
                                                     </a>
-                                                <% }else if(val.initiator > 0  && val.initiator_type == 'scheduler'){ %>
+                                                <% }else if(val.initiator > 0  && val.initiator_type == 'scheduler' && pmPeriodicTasks.model.items[val.initiator]){ %>
                                                     <a href="<%- polemarch.opt.host %>/?project/<%- pmHistory.model.items[val.id].project %>/periodic-task/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                        <%= pmPeriodicTasks.model.items[pmHistory.model.items[val.id].initiator].justText('name') %> 
+                                                        <%= pmPeriodicTasks.model.items[val.initiator].justText('name') %> 
                                                     </a>
                                                 <% }else{ %>
                                                     <%- pmHistory.model.items[item_id].initiator_type %>
@@ -193,13 +193,13 @@
                                                 <%= pmHistory.model.items[val.id].justText('status') %>
                                             </td>
                                             <td class="hidden-xs hidden-sm">
-                                                <% if(val.initiator > 0  && val.initiator_type == 'users'){ %>
+                                                <% if(val.initiator > 0  && val.initiator_type == 'users' && pmUsers.model.items[val.initiator]){ %>
                                                     <a href="<%- polemarch.opt.host %>/?<%- val.initiator_type %>/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                        <%= pmUsers.model.items[pmHistory.model.items[val.id].initiator].justText('username') %> 
+                                                        <%= pmUsers.model.items[val.initiator].justText('username') %> 
                                                     </a>
-                                                <% }else if(val.initiator > 0  && val.initiator_type == 'scheduler'){ %>
+                                                <% }else if(val.initiator > 0  && val.initiator_type == 'scheduler' && pmPeriodicTasks.model.items[val.initiator]){ %>
                                                     <a href="<%- polemarch.opt.host %>/?project/<%- pmHistory.model.items[val.id].project %>/periodic-task/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                        <%= pmPeriodicTasks.model.items[pmHistory.model.items[val.id].initiator].justText('name') %> 
+                                                        <%= pmPeriodicTasks.model.items[val.initiator].justText('name') %> 
                                                     </a>
                                                 <% }else{ %>
                                                     <%- pmHistory.model.items[item_id].initiator_type %>
@@ -326,13 +326,13 @@
                                             <%= pmHistory.model.items[val.id].justText('status') %>
                                         </td>
                                         <td class="hidden-xs hidden-sm">
-                                            <% if(val.initiator > 0  && val.initiator_type == 'users'){ %>
+                                            <% if(val.initiator > 0  && val.initiator_type == 'users' && pmUsers.model.items[val.initiator]){ %>
                                                 <a href="<%- polemarch.opt.host %>/?<%- val.initiator_type %>/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                    <%= pmUsers.model.items[pmHistory.model.items[val.id].initiator].justText('username') %> 
+                                                    <%= pmUsers.model.items[val.initiator].justText('username') %> 
                                                 </a>
-                                            <% }else if(val.initiator > 0  && val.initiator_type == 'scheduler'){ %>
+                                            <% }else if(val.initiator > 0  && val.initiator_type == 'scheduler' && pmPeriodicTasks.model.items[val.initiator]){ %>
                                                 <a href="<%- polemarch.opt.host %>/?<%- val.initiator_type %>/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                    <%= pmPeriodicTasks.model.items[pmHistory.model.items[val.id].initiator].justText('name') %> 
+                                                    <%= pmPeriodicTasks.model.items[val.initiator].justText('name') %> 
                                                 </a>
                                             <% }else{ %>
                                                 <%- pmHistory.model.items[item_id].initiator_type %>
@@ -471,13 +471,13 @@
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
-                                        <% if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'users' ){ %>
+                                        <% if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'users' && pmUsers.model.items[pmHistory.model.items[item_id].initiator]){ %>
                                             <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
                                                 <%= pmUsers.model.items[pmHistory.model.items[item_id].initiator].justText('username') %> 
                                             </a>
-                                        <% }else if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'scheduler'){ %>
+                                        <% }else if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'scheduler' && pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator]){ %>
                                             <a href="<%- polemarch.opt.host %>/?project/<%- pmHistory.model.items[item_id].project %>/periodic-task/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                <%= pmPeriodicTasks.model.items[pmHistory.model.items[pmHistory.model.items[item_id].id].initiator].justText('name') %> 
+                                                <%= pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator].justText('name') %> 
                                             </a>
                                         <% }else{ %>
                                             From <%- pmHistory.model.items[item_id].initiator_type %>
@@ -624,13 +624,13 @@
                                         class="form-control disabled"
                                         disabled=""
                                         maxlength="255">
-                                        <% if(pmHistory.model.items[item_id].initiator > 0 && pmHistory.model.items[item_id].initiator_type == 'users'){ %>
+                                        <% if(pmHistory.model.items[item_id].initiator > 0 && pmHistory.model.items[item_id].initiator_type == 'users' && pmUsers.model.items[pmHistory.model.items[item_id].initiator]){ %>
                                             <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
                                                 <%= pmUsers.model.items[pmHistory.model.items[item_id].initiator].justText('username') %> 
                                             </a>
-                                        <% }else if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'scheduler'){ %>
+                                        <% }else if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'scheduler' && pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator]){ %>
                                             <a href="<%- polemarch.opt.host %>/?project/<%- pmHistory.model.items[item_id].project %>/periodic-task/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                <%= pmPeriodicTasks.model.items[pmHistory.model.items[pmHistory.model.items[item_id].id].initiator].justText('name') %> 
+                                                <%= pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator].justText('name') %> 
                                             </a>
                                         <% }else{ %>
                                             From <%- pmHistory.model.items[item_id].initiator_type %>

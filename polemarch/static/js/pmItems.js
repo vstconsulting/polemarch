@@ -528,7 +528,7 @@ pmItems.searchItems = function(query, attrName, limit, offset)
 
 pmItems.loadItemsByIds = function(ids)
 { 
-    var q = {id_in:ids} 
+    var q = {id:ids} 
     for(var i in ids)
     { 
         if(this.model.items[ids[i]] === undefined)

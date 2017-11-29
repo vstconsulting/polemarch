@@ -237,7 +237,7 @@ pmHistory.loadItem = function(item_id)
         contentType:'application/json',
         data: "",
         success: function(data)
-        { 
+        {    
             if(!thisObj.model.items[item_id])
             {
                 thisObj.model.items[item_id] = {}
@@ -262,12 +262,9 @@ pmHistory.loadItem = function(item_id)
  
             pmHistory.model.items.justWatch(item_id);
 
-            $.when(pmProjects.loadItem(data.project), promise).done(function(){
+            $.when(pmProjects.loadItem(data.project), promise).always(function(){
                 def.resolve(data)
-            }).fail(function(){
-                def.reject()
             })
-
         },
         error:function(e)
         {
@@ -323,16 +320,16 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
                  
                 thisObj.model.items[val.id] = val
 
-                if(val.project && !pmProjects.model.items[val.project] && projects.indexOf(val.project) == -1)
+                if(val.project && !pmProjects.model.items[val.project] && $.inArray(val.project, projects) == -1)
                 {
                     projects.push(val.project)
                 }
 
-                if(val.initiator > 0 && val.initiator_type == 'users')
+                if(val.initiator > 0 && val.initiator_type == 'users' && $.inArray(val.initiator, usersIds) == -1)
                 {
                     usersIds.push(val.initiator);
                 }
-                else if(val.initiator > 0 && val.initiator_type == 'scheduler')
+                else if(val.initiator > 0 && val.initiator_type == 'scheduler' && $.inArray(val.initiator, periodicTasks) == -1)
                 {
                     periodicTasks.push(val.initiator);
                 }
@@ -359,8 +356,6 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
 
             $.when(users_promise, projects_promise, periodicTasks_promise).done(function(){
                 def.resolve(data)
-            }).fail(function(){
-                def.reject()
             })
         },
         error:function(e)
@@ -413,25 +408,25 @@ pmHistory.loadItems = function(limit, offset)
             for(var i in data.results)
             {
                 var val = data.results[i]
-                 
+                  
                 thisObj.model.items.justWatch(val.id);
                 thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
 
-                if(val.project && !pmProjects.model.items[val.project] && projects.indexOf(val.project) == -1)
+                if(val.project && !pmProjects.model.items[val.project] && $.inArray(val.project, projects) == -1)
                 {
                     projects.push(val.project)
                 }
 
-                if(val.initiator > 0 && val.initiator_type == 'users')
+                if(val.initiator > 0 && val.initiator_type == 'users' && $.inArray(val.initiator, usersIds) == -1)
                 {
                     usersIds.push(val.initiator);
                 }
-                else if(val.initiator > 0 && val.initiator_type == 'scheduler')
+                else if(val.initiator > 0 && val.initiator_type == 'scheduler' && $.inArray(val.initiator, periodicTasks) == -1)
                 {
                     periodicTasks.push(val.initiator);
                 }
-            }
-
+            } 
+            
             var users_promise = undefined;
             var projects_promise = undefined;
             var periodicTasks_promise = undefined;
@@ -451,11 +446,9 @@ pmHistory.loadItems = function(limit, offset)
                 projects_promise = pmProjects.sendSearchQuery({id:projects.join(',')})
             }
 
-            $.when(users_promise, projects_promise, periodicTasks_promise).done(function(){
+            $.when(users_promise, projects_promise, periodicTasks_promise).always(function(){
                 def.resolve(data)
-            }).fail(function(){
-                def.reject()
-            })
+            }) 
         },
         error:function(e)
         {
