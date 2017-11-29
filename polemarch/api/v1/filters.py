@@ -61,6 +61,11 @@ class HookFilter(_BaseFilter):
 
 
 class UserFilter(filters.FilterSet):
+    id        = CharFilter(method=extra_filter)
+    id__not   = CharFilter(method=extra_filter)
+    username__not = CharFilter(method=name_filter)
+    username      = CharFilter(method=name_filter)
+
     class Meta:
         model = User
         fields = ('id',
