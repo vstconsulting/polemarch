@@ -1371,7 +1371,14 @@ pmInventories.filed.inventoriesAutocomplete.render = function(pmObj, filed, item
         }
         else if(filed.onchange)
         {
-            filed.onchange({value:pmInventories.model.itemslist.results[0].id})
+            if(pmInventories.model.itemslist.results[0])
+            {
+                filed.onchange({value:pmInventories.model.itemslist.results[0].id})
+            }
+            else
+            {
+                filed.onchange({value:""})
+            }
         }
     });
 }
