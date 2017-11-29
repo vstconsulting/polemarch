@@ -1347,6 +1347,10 @@ pmInventories.filed.inventoriesAutocomplete.getValue = function(pmObj, filed)
     if($("#inventory-source").val() != 'db')
     {
         inventory =  $("#inventories-file").val()
+        if(!/^\.\//.test(inventory))
+        {
+            inventory = trim("./"+inventory)
+        }
     }
 
     

@@ -18,7 +18,7 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute(<%- item_id %>, $('#inventories-autocomplete').val(), pmGroups.getGroupsAutocompleteValue(), $('#module-autocomplete').val())); return false;" class="btn btn-warning" >Execute</button>
+        <button type="button" onclick="spajs.showLoader(pmAnsibleModule.execute(<%- item_id %>, pmModuleTemplates.inventoriesAutocompletefiled.getValue(), pmGroups.getGroupsAutocompleteValue(), $('#module-autocomplete').val())); return false;" class="btn btn-warning" >Execute</button>
 
         <br>
         <br>
@@ -30,25 +30,26 @@
                     </div>
                     <div class="box-body">
 
-                        <div class="row">
-                            <div class="form-group col-lg-4">
-                                <label class="control-label" >Inventory</label>
-                                <select
-                                    class="form-control select2"
-                                    id="inventories-autocomplete"
-                                    data-placeholder="Select inventory"
-                                    style="width:100%"
-                                    onchange="pmModuleTemplates.selectInventory(this.value);"
-                                >
-                                    <option selected value="0" >Not set</option>
-                                    <% for(var i in pmInventories.model.itemslist.results){ %>
-                                        <option
-                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
-                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
-                                    <% } %>
-                                </select>
-                            </div>
-
+                        <div class="row"> 
+                            <%= pmModuleTemplates.inventoriesAutocompletefiled.render(pmModuleTemplates, {
+                                name:'inventory',
+                                title:'Inventory',
+                                getFiledValue:function(item_id){ 
+                                    return this.model.items[item_id].data.inventory;
+                                },
+                                onchange:function(event){ 
+                                    console.log("onchange", event) 
+                                    if(/[^0-9]/mg.test(event.value))
+                                    {
+                                        pmModuleTemplates.selectInventory()
+                                    }
+                                    else
+                                    {
+                                        pmModuleTemplates.selectInventory(event.value)
+                                    }
+                                }
+                            }, null, {}) %>
+                            
                             <~ pmModuleTemplates.model.selectedInventory> 
                                 <%= pmGroups.groupsAutocompleteTemplate(pmModuleTemplates.model.selectedInventory) %> 
                             <~>

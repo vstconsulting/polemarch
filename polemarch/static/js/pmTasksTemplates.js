@@ -236,7 +236,7 @@ pmTasksTemplates.execute = function(item_id)
     $.when(this.loadItem(item_id)).done(function()
     {
         var val = thisObj.model.items[item_id]
-        $.when(pmTasks.execute(val.data.project, val.data.inventory/1, val.data.playbook, val.data.vars)).done(function()
+        $.when(pmTasks.execute(val.data.project, val.data.inventory, val.data.playbook, val.data.vars)).done(function()
         {
             def.resolve();
         }).fail(function()
