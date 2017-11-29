@@ -328,10 +328,15 @@ function _init() {
 
         //Enable sidebar push menu
         if ($(window).width() > (screenSizes.sm - 1)) {
-          if ($("body").hasClass('sidebar-collapse')) {
+          if ($("body").hasClass('sidebar-collapse')) 
+          {
             $("body").removeClass('sidebar-collapse').trigger('expanded.pushMenu');
-          } else {
+            pmLocalSettings.set('hideMenu', false);
+          }
+          else 
+          {
             $("body").addClass('sidebar-collapse').trigger('collapsed.pushMenu');
+            pmLocalSettings.set('hideMenu', true);
           }
         }
         //Handle sidebar push menu for small screens

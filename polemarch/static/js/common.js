@@ -101,3 +101,33 @@ function inheritance(obj, constructor)
      
     return object
 }
+
+var pmLocalSettings = {
+    __settings:{},
+    get:function(name){
+        return this.__settings[name];
+    },
+    set:function(name, value){
+        this.__settings[name] = value;
+        window.localStorage['pmLocalSettings'] = JSON.stringify(this.__settings)
+    }
+}
+ 
+
+if(window.localStorage['pmLocalSettings'])
+{
+    try{
+        pmLocalSettings.__settings = window.localStorage['pmLocalSettings'];
+        pmLocalSettings.__settings = JSON.parse(pmLocalSettings.__settings)
+        
+    }catch (e)
+    {
+        
+    }
+}
+
+
+if(pmLocalSettings.get('hideMenu'))
+{
+    $("body").addClass('sidebar-collapse')
+}
