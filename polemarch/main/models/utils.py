@@ -118,7 +118,8 @@ class AnsibleCommand(object):
             # pylint: disable=no-member
             for key_file in self.keys:
                 key_file.close()
-            self.__file.close()
+            if not isinstance(self.file, (six.string_types, six.text_type)):
+                self.__file.close()
 
     def __init__(self, *args, **kwargs):
         self.args = args

@@ -2412,6 +2412,207 @@ Users
 .. |patch_reminder| replace:: All parameters except id are optional, so you can
    specify only needed to update. Only name for example.
 
+Teams (Polemarch+ only)
+-----------------------
+
+Teams is groups of users to which you can collectively assign rights to objects
+in ACL system.
+
+.. http:get:: /api/v1/teams/{id}/
+
+   Get details about one team.
+
+   :arg id: id of team.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/teams/1/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "id": 1,
+        "name": "myteam",
+        "users": [
+            {
+                "id": 1,
+                "username": "admin",
+                "is_active": true,
+                "is_staff": true,
+                "url": "http://localhost:8000/api/v1/users/1/"
+            }
+        ],
+        "users_list": [
+            1
+        ],
+        "owner": {
+            "id": 1,
+            "username": "admin",
+            "is_active": true,
+            "is_staff": true,
+            "url": "http://localhost:8000/api/v1/users/1/"
+        },
+        "url": "http://localhost:8000/api/v1/teams/1/"
+    }
+
+   :>json number id: id of team.
+   :>json string name: name of team.
+   :>json array users: array of users in team. See :ref:`users` for fields
+    explanation.
+   :>json array users_list: ids of users in team.
+   :>json object owner: owner of team. See :ref:`users` for fields explanation.
+   :>json string url: url to this specific team.
+
+.. |team_details_ref| replace:: **Response JSON Object:** response json fields
+   same as in :http:get:`/api/v1/teams/{id}/`.
+
+.. http:get:: /api/v1/teams/
+
+   List of teams. |pagination_def|
+
+   :query id: id of team if we want to filter by it.
+   :query name: name of team if we want to filter by it.
+   :query id__not: id of team, which we want to filter out.
+   :query name__not: name of team, which we want to filter out.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/teams/?name__not=outsiders HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "count": 1,
+        "next": null,
+        "previous": null,
+        "results": [
+            {
+                "id": 1,
+                "name": "myteam",
+                "url": "http://localhost:8000/api/v1/teams/1/"
+            }
+        ]
+    }
+
+   |team_details_ref|
+
+.. http:delete:: /api/v1/teams/{id}/
+
+   Delete team.
+
+   :arg id: id of team.
+
+.. http:post:: /api/v1/teams/
+
+   Create team.
+
+   :<json string name: name of new team.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/teams/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+         "name":"another_team"
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "id": 2,
+        "name": "another_team",
+        "users": [],
+        "users_list": [],
+        "owner": {
+            "id": 1,
+            "username": "admin",
+            "is_active": true,
+            "is_staff": true,
+            "url": "http://localhost:8000/api/v1/users/1/"
+        },
+        "url": "http://localhost:8000/api/v1/teams/2/"
+    }
+
+   |team_details_ref|
+
+.. http:patch:: /api/v1/groups/{id}/
+
+   Update team. |patch_reminder|
+
+   :arg id: id of team.
+   :<json string name: name of new team.
+   :<json array users_list: list of users to put in team.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      PATCH /api/v1/teams/2/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+         "name":"another_team",
+         "users_list": [1, 2]
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "id": 2,
+        "name": "another_team",
+        "users": [
+            {
+                "id": 1,
+                "username": "admin",
+                "is_active": true,
+                "is_staff": true,
+                "url": "http://localhost:8000/api/v1/users/1/"
+            },
+            {
+                "id": 2,
+                "username": "max",
+                "is_active": true,
+                "is_staff": true,
+                "url": "http://localhost:8000/api/v1/users/2/"
+            }
+        ],
+        "users_list": [
+            1,
+            2
+        ],
+        "owner": {
+            "id": 1,
+            "username": "admin",
+            "is_active": true,
+            "is_staff": true,
+            "url": "http://localhost:8000/api/v1/users/1/"
+        },
+        "url": "http://localhost:8000/api/v1/teams/2/"
+    }
+
+   |team_details_ref|
+
 ACL system (Polemarch+ only)
 ----------------------------
 
@@ -2431,7 +2632,7 @@ Currently we support such permission levels:
   case of object is executable like Template, Inventory or something).
 * EDITOR - same as above + right to edit.
 * MASTER - same as above + can work with permissions list for this object
-  (add/delete other users and groups).
+  (add/delete other users and teams).
 * OWNER - same as above + ability to change owner.
 
 **Warning**: if you granting somebody EXECUTOR permission to object, he also
@@ -2481,7 +2682,7 @@ Polemarch+ have such methods to control ownership and permissions information:
 
    :arg object_kind: |perm_kind_def|
    :arg id: Id of object.
-   :<jsonarr number member: id of user or group for which role should applies.
+   :<jsonarr number member: id of user or team for which role should applies.
    :<jsonarr string role: either ``EXECUTOR``, ``EDITOR`` or ``MASTER``.
    :<jsonarr string member_type: either ``user`` or ``team`` (how to interpret
     id)

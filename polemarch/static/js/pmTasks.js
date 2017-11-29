@@ -26,13 +26,6 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
         return def.promise();
     }
 
-    if(!(inventory/1))
-    {
-        $.notify("Invalid field `inventory` ", "error");
-        def.reject();
-        return def.promise();
-    }
-
     if(data_vars == undefined)
     {
         data_vars = jsonEditor.jsonEditorGetValues();
