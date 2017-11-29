@@ -56,20 +56,7 @@ class Task(BModel):
 
 
 class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
-    @transaction.atomic()
-    def create(self, **kwargs):
-        kw = dict(**kwargs)
-        inventory = kw.pop('inventory', None)
-        if isinstance(inventory, Inventory):
-            kw['_inventory'] = inventory
-        elif isinstance(inventory, (six.string_types, six.text_type)):
-            try:
-                kw['_inventory'] = Inventory.objects.get(pk=int(inventory))
-            except ValueError:
-                kw['inventory_file'] = inventory
-        obj = super(PeriodicTaskQuerySet, self).create(**kw)
-        obj.project.check_path(obj.inventory)
-        return obj
+    use_for_related_fields = True
 
 
 # noinspection PyTypeChecker
@@ -114,9 +101,9 @@ class PeriodicTask(AbstractModel):
         elif isinstance(inventory, (six.string_types, six.text_type)):
             try:
                 self._inventory = Inventory.objects.get(pk=int(inventory))
-            except ValueError:
+            except (ValueError, Inventory.DoesNotExist):
+                self.project.check_path(inventory)
                 self.inventory_file = inventory
-                self.project.check_path(self.inventory)
 
     @property
     def crontab_kwargs(self):
