@@ -65,9 +65,25 @@ pmDashboard.stopUpdates = function()
     this.model.updateTimeoutId = undefined;
 }
 
+tabSignal.connect('pmLocalSettings.hideMenu', function(){
+   
+    setTimeout(function(){ 
+         
+        if(spajs.currentOpenMenu && spajs.currentOpenMenu.id == 'home')
+        { 
+            pmDashboard.updateData()
+        }
+    }, 200)
+})
+
 pmDashboard.updateData = function()
 {
     var thisObj = this  
+    if(this.model.updateTimeoutId)
+    {
+        clearTimeout(this.model.updateTimeoutId)
+        this.model.updateTimeoutId = undefined
+    }
     
     var startTime = moment().subtract(14, 'days').format("YYYY-MM-DD")+"T00:00:00.000000Z"
     $.when(pmHistory.sendSearchQuery({start_time__gt:startTime})).done(function()

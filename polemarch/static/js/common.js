@@ -110,6 +110,7 @@ var pmLocalSettings = {
     set:function(name, value){
         this.__settings[name] = value;
         window.localStorage['pmLocalSettings'] = JSON.stringify(this.__settings)
+        tabSignal.emit('pmLocalSettings.'+name, {type:'set', name:name, value:value})
     }
 }
  
