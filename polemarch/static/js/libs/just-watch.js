@@ -171,7 +171,8 @@ var justReactive = {
         var res = Object.getOwnPropertyDescriptor(obj, prop);
         if(!res)
         {
-            obj[prop] = newval;
+            // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
+            obj[prop] = mergeDeep(undefined, newval);
             obj.justWatch(prop);
             return;
         }
@@ -180,14 +181,16 @@ var justReactive = {
         {
             if(obj[prop] !== newval)
             {
-                obj[prop] = newval;
+                // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
+                obj[prop] = mergeDeep(undefined, newval);
             }
             return;
         }
 
         if(typeof obj[prop] != "object" || obj[prop] == null)
         {
-            obj[prop] = newval;
+            // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
+            obj[prop] = mergeDeep(undefined, newval);
             obj.justWatch(prop);
             return;
         }
@@ -196,6 +199,7 @@ var justReactive = {
         {
             if(newval.length < obj[prop].length)
             {
+                // Если новый массив короче старого то укоротим старый чтоб у них была одинаковая длинна
                 console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
                 Array.prototype.splice.apply(obj[prop], [newval.length, obj[prop].length - newval.length]); 
             }
@@ -212,14 +216,15 @@ var justReactive = {
                 }
                 else
                 {
-                    obj[prop][i] = newval[i];
+                    // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
+                    obj[prop][i] = mergeDeep(undefined, newval[i]);
                     obj[prop].justWatch(i);
                 }
             }
             return;
         }
 
-
+        // Свойство существует и оно не массив. Поэтому надо выполнить рекурсивное объединение объектов 
         var v1arr = {}
         for(var i in obj[prop])
         {
@@ -240,7 +245,8 @@ var justReactive = {
             }
             else
             {
-                obj[prop][i] = newval[i];
+                // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
+                obj[prop][i] = mergeDeep(undefined, newval[i]);
                 obj[prop].justWatch(i);
             }
         }
