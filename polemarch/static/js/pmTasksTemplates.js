@@ -72,7 +72,7 @@ pmTasksTemplates.filed.selectProjectInventoryAndPlaybook.render = function(pmObj
     })
 }
 
-
+   // <a href="#" onclick="pmTasksTemplates.exportSelecedToFile(); return false;" >Export all selected templates</a>
 
 pmTasksTemplates.model.page_list = {
     buttons:[
@@ -173,7 +173,9 @@ pmTasksTemplates.model.page_item = {
                 title:'Name',
                 name:'name',
                 placeholder:'Enter template name', 
-                validator:function(value){ return value != '' && value},
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Name')
+                },
                 fast_validator:function(value){ return value != '' && value}
             },
             // @todo дорефакторить поля ввода

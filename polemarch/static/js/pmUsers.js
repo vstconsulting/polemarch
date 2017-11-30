@@ -40,7 +40,9 @@ pmUsers.fileds = [
                 name:'username',
                 placeholder:'Enter user name',
                 help:'',
-                validator:function(value){ return value != '' && value},
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Name')
+                },
                 fast_validator:function(value){ return value != '' && value}
             },
             {
@@ -49,7 +51,9 @@ pmUsers.fileds = [
                 name:'password',
                 placeholder:'Enter user password',
                 help:'',
-                validator:function(value){ return value != '' && value},
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Password')
+                },
                 fast_validator:function(value){ return value != '' && value}
             },
         ],[
@@ -59,7 +63,9 @@ pmUsers.fileds = [
                 name:'email',
                 placeholder:'Enter user email',
                 help:'',
-                validator:function(value){ return value != '' && value},
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Email')
+                },
                 fast_validator:function(value){ return value != '' && value}
             },
             {
@@ -68,7 +74,9 @@ pmUsers.fileds = [
                 name:'first_name',
                 placeholder:'Enter user first name',
                 help:'',
-                validator:function(value){ return value != '' && value},
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'First name')
+                },
                 fast_validator:function(value){ return value != '' && value}
             },
         ],[
@@ -78,7 +86,9 @@ pmUsers.fileds = [
                 name:'last_name',
                 placeholder:'Enter user last name',
                 help:'',
-                validator:function(value){ return value != '' && value},
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Last name')
+                },
                 fast_validator:function(value){ return value != '' && value}
             },
             {

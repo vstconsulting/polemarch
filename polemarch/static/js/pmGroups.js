@@ -119,6 +119,7 @@ pmGroups.validator = function(value)
     $.notify("Invalid value in field name it mast be as [^A-z0-9_.\-]", "error"); 
     return false;
 }
+
 pmGroups.fast_validator = function(value)
 {
     return /[^A-z0-9_.\-]/.test(value)
@@ -620,9 +621,19 @@ pmGroups.groupsAutocompleteTemplate = function(inventory_id, value, prefix)
                 {
                     //console.log('onSelect', term, item);
                     var value = $(item).attr('data-value');
-                    $("#groups_autocomplete_filed"+prefix).val(value);
+                    $("#groups_autocomplete_filed"+prefix).val(value); 
+                    $("#groups_autocomplete_filed"+prefix).attr({'data-hide':'hide'}); 
+                    
                 },
-                source: function(original_term, response){
+                source: function(original_term, response)
+                {
+                    var isHide = $("#groups_autocomplete_filed"+prefix).attr('data-hide')
+                    if(isHide == "hide")
+                    {
+                       $("#groups_autocomplete_filed"+prefix).attr({'data-hide':'show'})
+                        return;
+                    } 
+                    
                     pmGroups.groupsAutocompleteMatcher(original_term, response, inventory_id)
                 }
             });
