@@ -89,6 +89,15 @@ pmTasksTemplates.model.page_list = {
             link:function(){ return '/?template/new-module'},
         },
     ],
+    actionsOnSelected:[ 
+        {},
+        {
+            class:'btn btn-primary',
+            function:function(){ return "pmTasksTemplates.exportSelecedToFile(); return false;"},
+            title:'Export all selected templates',
+            link:function(){ return '#'},
+        },
+    ],
     title: "Templates",
     short_title: "Templates",
     fileds:[
