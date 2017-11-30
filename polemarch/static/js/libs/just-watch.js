@@ -110,6 +110,16 @@ $.fn.prependTpl = function(tplText)
     return this;
 };
 
+function mergeCopyM(o, obj){
+    
+    if(typeof obj == "object")
+    {
+        return $.extend(true, {}, obj)
+    }
+    
+    return obj
+}
+
 
 var justReactive = {
 
@@ -172,7 +182,7 @@ var justReactive = {
         if(!res)
         {
             // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-            obj[prop] = mergeDeep(undefined, newval);
+            obj[prop] = mergeCopyM(undefined, newval);
             obj.justWatch(prop);
             return;
         }
@@ -182,7 +192,7 @@ var justReactive = {
             if(obj[prop] !== newval)
             {
                 // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                obj[prop] = mergeDeep(undefined, newval);
+                obj[prop] = mergeCopyM(undefined, newval);
             }
             return;
         }
@@ -190,7 +200,7 @@ var justReactive = {
         if(typeof obj[prop] != "object" || obj[prop] == null)
         {
             // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-            obj[prop] = mergeDeep(undefined, newval);
+            obj[prop] = mergeCopyM(undefined, newval);
             obj.justWatch(prop);
             return;
         }
@@ -217,7 +227,7 @@ var justReactive = {
                 else
                 {
                     // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                    obj[prop][i] = mergeDeep(undefined, newval[i]);
+                    obj[prop][i] = mergeCopyM(undefined, newval[i]);
                     obj[prop].justWatch(i);
                 }
             }
@@ -246,7 +256,7 @@ var justReactive = {
             else
             {
                 // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                obj[prop][i] = mergeDeep(undefined, newval[i]);
+                obj[prop][i] = mergeCopyM(undefined, newval[i]);
                 obj[prop].justWatch(i);
             }
         }
