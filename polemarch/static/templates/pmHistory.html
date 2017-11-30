@@ -50,7 +50,7 @@
                                             </td>
                                             <td>
                                                 <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
-                                                        onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].mode %></a>
+                                                        onclick="return spajs.openURL(this.href);" ><%- val.id + " - " + val.mode %></a>
                                             </td>
                                             <td class="hidden-xs hidden-sm">
                                                 <% if(pmProjects.model.items[val.project]){ %>
