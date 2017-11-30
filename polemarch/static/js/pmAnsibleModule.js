@@ -74,7 +74,7 @@ pmAnsibleModule.fastCommandWidget_RunBtn = function()
 {
     return pmAnsibleModule.execute(
                 $('#projects-autocomplete').val(),
-                $('#inventories-autocomplete').val(),
+                pmModuleTemplates.inventoriesAutocompletefiled.getValue(),
                 pmGroups.getGroupsAutocompleteValue(),
                 'shell',
                 moduleArgsEditor.getModuleArgs(),
