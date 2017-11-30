@@ -47,7 +47,10 @@ pmHosts.fileds = [
             name:'name',
             placeholder:'Enter host or range name',
             help:'Host or range name',
-            validator:function(value){ return this.validateRangeName(value) || this.validateHostName(value)},       
+            validator:function(value)
+            {
+                return filedsLib.validator.notEmpty('name', value)
+            },       
             fast_validator:function(value){ return this.validateRangeName(value) || this.validateHostName(value)}   
         },
     ]

@@ -185,6 +185,22 @@
                                 <li>
                                     <a href="#" onclick="<%- pmObj.model.className %>.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
+                                <% for(var j in pmObj.model.page_list.actionsOnSelected){ %> 
+                                    <% if(!pmObj.model.page_list.actionsOnSelected[j].title){ %>
+                                        <li role="separator" class="divider"></li>
+                                    <% }else{ %>
+                                        <li>
+                                            <a href="<%- pmObj.model.page_list.actionsOnSelected[j].link.apply(pmObj, [pmObj.model.itemslist.results[i], opt]) %>"
+                                                onclick="<%- pmObj.model.page_list.actionsOnSelected[j].function.apply(pmObj, [pmObj.model.itemslist.results[i], opt]) %>" >
+                                                    <% if(typeof pmObj.model.page_list.actionsOnSelected[j].title == 'function'){ %>
+                                                        <%= pmObj.model.page_list.actionsOnSelected[j].title.apply(pmObj, [pmObj.model.itemslist.results[i], opt]) %>
+                                                    <% }else{ %>
+                                                        <%- pmObj.model.page_list.actionsOnSelected[j].title %>
+                                                    <% } %>
+                                            </a>
+                                        </li>
+                                    <% } %>
+                                <% } %>
                             </ul>
                         </div>
                         

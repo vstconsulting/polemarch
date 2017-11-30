@@ -116,7 +116,9 @@ pmProjects.model.page_new = {
                 name:'name',
                 placeholder:'Project name',
                 help:'',
-                validator:function(value){ return value != '' && value},
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Name')
+                },
                 fast_validator:function(value){ return value != '' && value}
             },
             {
@@ -230,7 +232,9 @@ pmProjects.model.page_item = {
                 title:'Name',
                 name:'name',
                 placeholder:'Enter project name', 
-                validator:function(value){ return value != '' && value},
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Name')
+                },
                 fast_validator:function(value){ return value != '' && value}
             },
             {
@@ -317,7 +321,7 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
     var def = new $.Deferred();
     var thisObj = this;
     var project_id = data.reg[1]
-    $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
+    $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function(results)
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_run_playbook', {item_id:project_id, query:project_id}))
 
@@ -344,14 +348,15 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
                 term = term.toLowerCase();
 
                 var matches = []
-                for(var i in pmTasks.model.items)
+                for(var i in results[0].results)
                 {
-                    var val = pmTasks.model.items[i]
-                    if(val.name.toLowerCase().indexOf(term) != -1 && val.project == project_id)
+                    var val = pmTasks.model.itemslist.results[i]
+                    if(val.name.toLowerCase().indexOf(term) != -1 && val.project == project_id && val.name.toLowerCase() != term)
                     {
                         matches.push(val)
                     }
                 }
+                
                 if(matches.length)
                 {
                     response(matches);
