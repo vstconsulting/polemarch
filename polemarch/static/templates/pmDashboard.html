@@ -5,12 +5,12 @@
         <div class="small-box bg-aqua">
             <div class="inner">
                 <h3><%= model.justText('count') %></h3>
-                <p><%- model.countObject %></p>
+                <p style="text-transform: capitalize"><%- model.countObject.model.name %></p>
             </div>
             <div class="icon hidden-xs" style="top: 0px;">
                 <i class="glyphicon glyphicon-cog"></i>
             </div>
-            <a href="<%- polemarch.opt.host %>/?<%- model.countObject %>" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <a href="<%- polemarch.opt.host %>/?<%- model.countObject.model.page_name %>" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
         </div>
     </div>
 </script>

@@ -40,7 +40,7 @@
             class="form-control"
             maxlength="255"
             value="<%- opt.query %>"
-            onkeyup="if(event.keyCode == 13) spajs.showLoader(<%- opt.className %>.search(this.value), <%- opt.className %>.model.searchAdditionalData);"
+            onkeyup="if(event.keyCode == 13) spajs.showLoader(<%- opt.className %>.search($('#search-query-input').val(), <%- opt.className %>.model.searchAdditionalData));"
         >
         <div class="input-group-addon" onclick="spajs.showLoader(<%- opt.className %>.search($('#search-query-input').val(), <%- opt.className %>.model.searchAdditionalData));">
             <span class="glyphicon glyphicon-search" ></span>

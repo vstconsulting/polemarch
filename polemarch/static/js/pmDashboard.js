@@ -100,7 +100,7 @@ pmDashboard.updateData = function()
             time+=(3600*24*1000) 
         }
         
-        for(var i = 0; i< pmHistory.model.itemslist.results.length; i++)
+        for(var i in pmHistory.model.itemslist.results)
         {
             var val = pmHistory.model.itemslist.results[i]
             var time = new Date(val.start_time)
@@ -223,16 +223,16 @@ pmDashboardWidget = {
 var pmwItemsCounter = inheritance(pmDashboardWidget)
 
 pmwItemsCounter.model.count = '-'
-pmwItemsCounter.model.countObject = 'pmItems'
+pmwItemsCounter.model.countObject = pmItems
 pmwItemsCounter.render = function()
 { 
     var thisObj = this;
     var html = spajs.just.render('pmwItemsCounter', {model:this.model})
     return window.JUST.onInsert(html, function()
     { 
-        $.when(window[thisObj.model.countObject].loadItems(1)).done(function()
+        $.when(thisObj.model.countObject.loadItems(1)).done(function()
         {
-            thisObj.model.count = window[thisObj.model.countObject].model.itemslist.count;
+            thisObj.model.count = thisObj.model.countObject.model.itemslist.count;
         })  
     })
 } 
@@ -242,40 +242,40 @@ pmwItemsCounter.render = function()
  * @type Object
  */
 var pmwHostsCounter = inheritance(pmwItemsCounter)
-pmwHostsCounter.model.countObject = 'pmHosts'
+pmwHostsCounter.model.countObject = pmHosts
   
 /**
  * Класс виджета показывающий количество шаблонов
  * @type Object
  */
 var pmwTemplatesCounter = inheritance(pmwItemsCounter)
-pmwTemplatesCounter.model.countObject = 'pmTemplates'
+pmwTemplatesCounter.model.countObject = pmTemplates
   
 /**
  * Класс виджета показывающий количество групп
  * @type Object
  */
 var pmwGroupsCounter = inheritance(pmwItemsCounter)
-pmwGroupsCounter.model.countObject = 'pmGroups'
+pmwGroupsCounter.model.countObject = pmGroups
   
 /**
  * Класс виджета показывающий количество проектов
  * @type Object
  */
 var pmwProjectsCounter = inheritance(pmwItemsCounter)
-pmwProjectsCounter.model.countObject = 'pmProjects'
+pmwProjectsCounter.model.countObject = pmProjects
   
 /**
  * Класс виджета показывающий количество инвенториев
  * @type Object
  */
 var pmwInventoriesCounter = inheritance(pmwItemsCounter)
-pmwInventoriesCounter.model.countObject = 'pmInventories'
+pmwInventoriesCounter.model.countObject = pmInventories
   
 /**
  * Класс виджета показывающий количество пользователей
  * @type Object
  */
 var pmwUsersCounter = inheritance(pmwItemsCounter)
-pmwUsersCounter.model.countObject = 'pmUsers'
+pmwUsersCounter.model.countObject = pmUsers
    
