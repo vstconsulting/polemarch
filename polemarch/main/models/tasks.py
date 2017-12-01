@@ -370,6 +370,8 @@ class History(BModel):
         )
 
     def editable_by(self, user):
+        if self.inventory is None:
+            return self.project.editable_by(user)
         return self.inventory.editable_by(user)
 
     def viewable_by(self, user):
