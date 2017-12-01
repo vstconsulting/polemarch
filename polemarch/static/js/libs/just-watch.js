@@ -112,6 +112,11 @@ $.fn.prependTpl = function(tplText)
 
 function mergeCopyM(o, obj){
     
+    if(Array.isArray(obj))
+    {
+        return obj.slice()
+    }
+    
     if(typeof obj == "object")
     {
         return $.extend(true, {}, obj)

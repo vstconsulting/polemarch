@@ -1,5 +1,6 @@
 
 var filedsLib = {}
+filedsLib.validator = {}
 
 filedsLib.returnString = function(str){
     return function(){
@@ -23,7 +24,6 @@ filedsLib.getFunctionValue = function(obj)
  * @type Object
  */
 filedsLib.filed = function(){}
-
 
 /**
  * Для вывода текстового поля
@@ -67,4 +67,16 @@ filedsLib.filed.boolean.type = 'boolean'
 
 filedsLib.filed.boolean.getValue = function(pmObj, filed){
     return $("#filed_"+filed.name).hasClass('selected');
+}
+
+
+filedsLib.validator.notEmpty = function(value, name)
+{
+    if(value != '' && value)
+    { 
+        return true;
+    }
+    
+    $.notify("Invalid value in field `"+name+"` it mast be not empty", "error"); 
+    return false; 
 }

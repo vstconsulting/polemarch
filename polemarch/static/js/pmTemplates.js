@@ -6,6 +6,7 @@ pmTemplates.model.name = "templates"
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmTemplates.model.kind = "Task,Module"
+pmTemplates.model.page_name = "templates"
 pmTemplates.model.className = "pmTemplates"
 
 pmTemplates.copyAndEdit = function(item_id)
@@ -38,27 +39,6 @@ pmTemplates.copyAndEdit = function(item_id)
 // Содержит соответсвия разных kind к объектами с ними работающими.
 pmTemplates.model.kindObjects = {}
 
-pmTemplates.showSearchResults = function(holder, menuInfo, data)
-{
-    var thisObj = this;
-    var query = decodeURIComponent(data.reg[1])
-
-    var search = this.searchStringToObject(query)
-    search['kind'] = thisObj.model.kind
-    return $.when(this.sendSearchQuery(search)).done(function()
-    {
-        var tpl = thisObj.model.name+'_list'
-        if(!spajs.just.isTplExists(tpl))
-        {
-            tpl = 'items_list'
-        }
-
-        $(holder).insertTpl(spajs.just.render(tpl, {query:query, pmObj:thisObj, opt:{}}))
-    }).fail(function()
-    {
-        $.notify("", "error");
-    })
-}
  
 pmTemplates.exportToFile = function(item_ids)
 {

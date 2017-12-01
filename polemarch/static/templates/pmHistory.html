@@ -50,7 +50,7 @@
                                             </td>
                                             <td>
                                                 <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
-                                                        onclick="return spajs.openURL(this.href);" ><%- val.id + " - " + val.mode %></a>
+                                                        onclick="return spajs.openURL(this.href);" ><%- val.mode %></a>
                                             </td>
                                             <td class="hidden-xs hidden-sm">
                                                 <% if(pmProjects.model.items[val.project]){ %>
@@ -73,7 +73,7 @@
                                                         <%= pmPeriodicTasks.model.items[val.initiator].justText('name') %> 
                                                     </a>
                                                 <% }else{ %>
-                                                    <%- pmHistory.model.items[item_id].initiator_type %>
+                                                    scheduler
                                                 <% } %>
                                             </td>
 
@@ -202,7 +202,7 @@
                                                         <%= pmPeriodicTasks.model.items[val.initiator].justText('name') %> 
                                                     </a>
                                                 <% }else{ %>
-                                                    <%- pmHistory.model.items[item_id].initiator_type %>
+                                                    scheduler
                                                 <% } %>
                                             </td>
 
@@ -335,7 +335,7 @@
                                                     <%= pmPeriodicTasks.model.items[val.initiator].justText('name') %> 
                                                 </a>
                                             <% }else{ %>
-                                                <%- pmHistory.model.items[item_id].initiator_type %>
+                                                scheduler
                                             <% } %>
                                         </td>
 
@@ -480,7 +480,7 @@
                                                 <%= pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator].justText('name') %> 
                                             </a>
                                         <% }else{ %>
-                                            From <%- pmHistory.model.items[item_id].initiator_type %>
+                                            From scheduler
                                         <% } %>
                                 </div>
                                 <div class="help-block"></div>
@@ -633,7 +633,7 @@
                                                 <%= pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator].justText('name') %> 
                                             </a>
                                         <% }else{ %>
-                                            From <%- pmHistory.model.items[item_id].initiator_type %>
+                                            From scheduler
                                         <% } %>
                                 </div>
                                 <div class="help-block"></div>

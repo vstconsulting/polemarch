@@ -234,15 +234,16 @@
             </div>
         </div>
 
-        <div class="form-group col-lg-12 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
-            <label class="control-label" >Schedule `CRONTAB`</label>
-            <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>
-                <%= crontabEditor.editor({string:pmPeriodicTasks.model.items[item_id].schedule}) %>
-            <% }else{ %>
-                <%= crontabEditor.editor({string:''}) %>
-            <% } %>
-            <div class="help-block" id=""></div>
-        </div>  
+            <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12  <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
+                <label class="control-label" >Schedule `CRONTAB`</label>
+                <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>
+                    <%= crontabEditor.editor({string:pmPeriodicTasks.model.items[item_id].schedule}) %>
+                <% }else{ %>
+                    <%= crontabEditor.editor({string:''}) %>
+                <% } %>
+                <div class="help-block" id=""></div>
+            </div>
+
     <% }else{ %>
         <!-- Не задан item_id -->
     <% } %>
@@ -396,14 +397,14 @@
                                     <span class="input-group-addon" id="basic-addon2">sec</span>
                                 </div>
                                 <div class="help-block" id="interval-schedule-help"></div>
-                            </div>
-
-                            <div class="form-group col-lg-12 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
-                                <label class="control-label" >Schedule `CRONTAB`</label>
-                                <%= crontabEditor.editor({string:''}) %>
-                                <div class="help-block" id=""></div>
                             </div> 
                         </div>
+
+                        <div class="form-group col-lg-12 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
+                            <label class="control-label" >Schedule `CRONTAB`</label>
+                            <%= crontabEditor.editor({string:''}) %>
+                            <div class="help-block" id=""></div>
+                        </div> 
                     </div>
                 </div> 
                 <div class="row <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
