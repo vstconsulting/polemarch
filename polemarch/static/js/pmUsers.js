@@ -32,7 +32,12 @@ pmUsers.model.page_list = {
     ]
 }
   
-pmUsers.fileds = [
+// pmUsers.fileds = 
+    
+pmUsers.model.page_new = {
+    title: "New user",
+    short_title: "New user",
+    fileds:[
         [
             {
                 filed: new filedsLib.filed.text(), 
@@ -63,10 +68,6 @@ pmUsers.fileds = [
                 name:'email',
                 placeholder:'Enter user email',
                 help:'',
-                validator:function(value){
-                    return filedsLib.validator.notEmpty(value, 'Email')
-                },
-                fast_validator:function(value){ return value != '' && value}
             },
             {
                 filed: new filedsLib.filed.text(), 
@@ -74,10 +75,6 @@ pmUsers.fileds = [
                 name:'first_name',
                 placeholder:'Enter user first name',
                 help:'',
-                validator:function(value){
-                    return filedsLib.validator.notEmpty(value, 'First name')
-                },
-                fast_validator:function(value){ return value != '' && value}
             },
         ],[
             {
@@ -86,10 +83,6 @@ pmUsers.fileds = [
                 name:'last_name',
                 placeholder:'Enter user last name',
                 help:'',
-                validator:function(value){
-                    return filedsLib.validator.notEmpty(value, 'Last name')
-                },
-                fast_validator:function(value){ return value != '' && value}
             },
             {
                 filed: new filedsLib.filed.boolean(), 
@@ -97,12 +90,7 @@ pmUsers.fileds = [
                 name:'is_active', 
             }
         ]
-    ]
-    
-pmUsers.model.page_new = {
-    title: "New user",
-    short_title: "New user",
-    fileds:pmUsers.fileds,
+    ],
     onCreate:function(result)
     { 
         var def = new $.Deferred();
@@ -143,11 +131,69 @@ pmUsers.model.page_item = {
     short_title: function(item_id){ 
         return "User "+pmUsers.model.items[item_id].justText('username', function(v){return v.slice(0, 20)})
     },
-    fileds:pmUsers.fileds,
+    fileds:[
+        [
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'User name',
+                name:'username',
+                placeholder:'Enter user name',
+                help:'',
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Name')
+                },
+                fast_validator:function(value){ return value != '' && value}
+            },
+            {
+                filed: new filedsLib.filed.password(), 
+                title:'Password',
+                name:'password',
+                placeholder:'Enter user password',
+                help:'', 
+            },
+        ],[
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'Email',
+                name:'email',
+                placeholder:'Enter user email',
+                help:'',
+            },
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'First name',
+                name:'first_name',
+                placeholder:'Enter user first name',
+                help:'',
+            },
+        ],[
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'Last name',
+                name:'last_name',
+                placeholder:'Enter user last name',
+                help:'',
+            },
+            {
+                filed: new filedsLib.filed.boolean(), 
+                title:'Is active',
+                name:'is_active', 
+            }
+        ]
+    ],
     onUpdate:function(result)
     { 
         return true;
-    }
+    },
+    onBeforeSave:function(data, item_id)
+    { 
+        if(!data.password)
+        {
+            delete data.password  
+        }
+
+        return data;
+    },
 }
  
    

@@ -836,7 +836,7 @@ pmItems.addItem = function(parent_type, parent_item, opt)
     if(this.model.page_new.onBeforeSave)
     {
         data = this.model.page_new.onBeforeSave.apply(this, [data, opt]);
-        if(data === undefined)
+        if(data == undefined || data == false)
         {
             def.reject()
             return def.promise();
@@ -899,7 +899,7 @@ pmItems.updateItem = function(item_id, opt)
     if(this.model.page_item.onBeforeSave)
     {
         data = this.model.page_item.onBeforeSave.apply(this, [data, item_id, opt]);
-        if(data === undefined)
+        if(data == undefined || data == false)
         {
             def.reject()
             return def.promise();
