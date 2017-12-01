@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 import uuid
 from collections import OrderedDict
+from datetime import timedelta
 
 import json
 
@@ -14,19 +15,31 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.db.models import functions as dbfunc, Count
+from django.utils.timezone import now
+from .base import ForeignKeyACL
 
 from ..utils import AnsibleArgumentsReference
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
-from .base import BModel, BManager, BQuerySet, models
+from .base import BModel, BQuerySet, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project
+from .acl import ACLModel, ACLHistoryQuerySet
 
 logger = logging.getLogger("polemarch")
 
 
+class TaskFilterQuerySet(BQuerySet):
+    use_for_related_fields = True
+
+    def user_filter(self, user):
+        return self.filter(project__in=Project.objects.all().user_filter(user))
+
+
 # Block of real models
 class Task(BModel):
+    objects     = TaskFilterQuerySet.as_manager()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
                                     related_query_name="tasks")
     name        = models.CharField(max_length=256, default=uuid.uuid1)
@@ -38,20 +51,28 @@ class Task(BModel):
     def __unicode__(self):
         return str(self.name)  # nocv
 
+    def viewable_by(self, user):
+        return self.project.viewable_by(user)
+
+
+class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
+    use_for_related_fields = True
+
 
 # noinspection PyTypeChecker
 class PeriodicTask(AbstractModel):
-    objects     = BManager.from_queryset(AbstractVarsQuerySet)()
-    project     = models.ForeignKey(Project, on_delete=models.CASCADE,
-                                    related_query_name="periodic_tasks",
-                                    blank=True, null=True)
-    mode        = models.CharField(max_length=256)
-    kind        = models.CharField(max_length=50, default="PLAYBOOK")
-    inventory   = models.ForeignKey(Inventory, on_delete=models.CASCADE,
-                                    related_query_name="periodic_tasks")
-    schedule    = models.CharField(max_length=4*1024)
-    type        = models.CharField(max_length=10)
-    save_result = models.BooleanField(default=True)
+    objects     = PeriodicTaskQuerySet.as_manager()
+    project        = models.ForeignKey(Project, on_delete=models.CASCADE,
+                                       related_query_name="periodic_tasks")
+    mode           = models.CharField(max_length=256)
+    kind           = models.CharField(max_length=50, default="PLAYBOOK")
+    _inventory     = models.ForeignKey(Inventory, on_delete=models.CASCADE,
+                                       related_query_name="periodic_tasks",
+                                       null=True, blank=True)
+    inventory_file = models.CharField(max_length=2*1024, null=True, blank=True)
+    schedule       = models.CharField(max_length=4*1024)
+    type           = models.CharField(max_length=10)
+    save_result    = models.BooleanField(default=True)
 
     kinds = ["PLAYBOOK", "MODULE"]
     types = ["CRONTAB", "INTERVAL"]
@@ -68,6 +89,21 @@ class PeriodicTask(AbstractModel):
     time_types_list = [
         'minute', 'hour', 'day_of_month', 'month_of_year', "day_of_week"
     ]
+
+    @property
+    def inventory(self):
+        return self._inventory or self.inventory_file
+
+    @inventory.setter
+    def inventory(self, inventory):
+        if isinstance(inventory, Inventory):
+            self._inventory = inventory
+        elif isinstance(inventory, (six.string_types, six.text_type)):
+            try:
+                self._inventory = Inventory.objects.get(pk=int(inventory))
+            except (ValueError, Inventory.DoesNotExist):
+                self.project.check_path(inventory)
+                self.inventory_file = inventory
 
     @property
     def crontab_kwargs(self):
@@ -98,32 +134,33 @@ class PeriodicTask(AbstractModel):
         return float(self.schedule)
 
     def execute(self):
-        if self.kind == "PLAYBOOK":
-            self.run_ansible_playbook()
-        elif self.kind == "MODULE":
-            self.run_ansible_module()
-
-    def run_ansible_module(self):
-        self.project.execute_ansible_module(
-            self.mode, self.inventory.id, sync=True,
-            save_result=self.save_result, **self.vars
+        self.project.execute(
+            self.kind, self.mode, self.inventory,
+            sync=True, save_result=self.save_result,
+            initiator=self.id, initiator_type="scheduler",
+            **self.vars
         )
 
-    def run_ansible_playbook(self):
-        self.project.execute_ansible_playbook(
-            self.mode, self.inventory.id, sync=True,
-            save_result=self.save_result, **self.vars
-        )
+    def editable_by(self, user):
+        return self.project.editable_by(user)
+
+    def viewable_by(self, user):
+        return self.project.viewable_by(user)
 
 
-class Template(BModel):
+class Template(ACLModel):
     name          = models.CharField(max_length=512)
     kind          = models.CharField(max_length=32)
     template_data = models.TextField(default="")
+    inventory     = models.CharField(max_length=128,
+                                     default=None, blank=True, null=True)
+    project       = ForeignKeyACL(Project,
+                                  on_delete=models.SET_NULL,
+                                  default=None, blank=True, null=True)
 
     class Meta:
         index_together = [
-            ["id", "name", "kind"]
+            ["id", "name", "kind", "inventory", "project"]
         ]
 
     template_fields = {}
@@ -135,25 +172,63 @@ class Template(BModel):
     template_fields["Host"] = ["name", "vars"]
     template_fields["Group"] = template_fields["Host"] + ["children"]
 
+    def get_data(self):
+        data = json.loads(self.template_data)
+        if "project" in self.template_fields[self.kind] and self.project:
+            data['project'] = self.project.id
+        if "inventory" in self.template_fields[self.kind] and self.inventory:
+            try:
+                data['inventory'] = int(self.inventory)
+            except ValueError:
+                data['inventory'] = self.inventory
+        return data
+
+    def _convert_to_data(self, value):
+        if isinstance(value, (six.string_types, six.text_type)):
+            return json.loads(value)
+        elif isinstance(value, (dict, OrderedDict, list)):
+            return value
+        else:
+            raise ValueError("Unknown data type set.")
+
+    def set_data(self, value):
+        data = self._convert_to_data(value)
+        project_id = data.pop('project', None)
+        inventory_id = data.pop('inventory', None)
+        if "project" in self.template_fields[self.kind]:
+            self.project = (
+                Project.objects.get(pk=project_id) if project_id
+                else project_id
+            )
+        if "inventory" in self.template_fields[self.kind]:
+            try:
+                self.inventory = Inventory.objects.get(pk=int(inventory_id)).id
+            except (ValueError, TypeError, Inventory.DoesNotExist):
+                self.inventory = inventory_id
+        self.template_data = json.dumps(data)
+
+    def __setattr__(self, key, value):
+        if key == "data":
+            self.set_data(value)
+        else:
+            super(Template, self).__setattr__(key, value)
+
     @property
     def data(self):
-        return json.loads(self.template_data)
+        return self.get_data()
 
     @data.setter
     def data(self, value):
-        if isinstance(value, (six.string_types, six.text_type)):
-            self.template_data = json.dumps(json.loads(value))
-        elif isinstance(value, (dict, OrderedDict, list)):
-            self.template_data = json.dumps(value)
-        else:
-            raise ValueError("Unknown data type set.")
+        return self.set_data(value)
 
     @data.deleter
     def data(self):
         self.template_data = ""  # nocv
+        self.inventory = None  # nocv
+        self.project = None  # nocv
 
 
-class HistoryQuerySet(BQuerySet):
+class HistoryQuerySet(ACLHistoryQuerySet):
     use_for_related_fields = True
 
     def create(self, **kwargs):
@@ -162,6 +237,31 @@ class HistoryQuerySet(BQuerySet):
         if raw_stdout:
             history.raw_stdout = raw_stdout
         return history
+
+    def _get_history_stats_by(self, qs, grouped_by='day'):
+        sum_by_date, values = {}, []
+        qs = qs.values(grouped_by, 'status').annotate(sum=Count('id'))
+        for hist_stat in qs.order_by(grouped_by):
+            sum_by_date[hist_stat[grouped_by]] = (
+                sum_by_date.get(hist_stat[grouped_by], 0) + hist_stat['sum']
+            )
+        for hist_stat in qs.order_by(grouped_by):
+            hist_stat.update({'all': sum_by_date[hist_stat[grouped_by]]})
+            values.append(hist_stat)
+        return values
+
+    def stats(self, last):
+        qs = self.filter(start_time__gte=now()-timedelta(days=last))
+        qs = qs.annotate(
+            day=dbfunc.TruncDay('start_time'),
+            month=dbfunc.TruncMonth('start_time'),
+            year=dbfunc.TruncYear('start_time'),
+        )
+        return OrderedDict(
+            day=self._get_history_stats_by(qs, 'day'),
+            month=self._get_history_stats_by(qs, 'month'),
+            year=self._get_history_stats_by(qs, 'year')
+        )
 
 
 class History(BModel):
@@ -198,9 +298,32 @@ class History(BModel):
              "start_time", "stop_time", "initiator", "initiator_type"]
         ]
 
+    def get_hook_data(self, when):
+        data = OrderedDict()
+        data['id'] = self.id
+        data['start_time'] = self.start_time.isoformat()
+        if when == "after_execution":
+            data['stop_time'] = self.stop_time.isoformat()
+        data["initiator"] = dict(
+            initiator_type=self.initiator_type,
+            initiator_id=self.initiator,
+        )
+        if self.initiator_type == "users":
+            data["initiator"]['name'] = getattr(
+                self.initiator_object, 'username', None
+            )
+        elif self.initiator_type == "scheduler":
+            data["initiator"]['name'] = self.initiator_object.name
+        return data
+
     @property
     def initiator_object(self):
-        return User.objects.get(id=self.initiator)
+        if self.initiator_type == "users" and self.initiator:
+            return User.objects.get(id=self.initiator)
+        elif self.initiator_type == "scheduler" and self.initiator:
+            return PeriodicTask.objects.get(id=self.initiator)
+        else:
+            return None
 
     @property
     def facts(self):
@@ -244,6 +367,19 @@ class History(BModel):
     def write_line(self, value, number):  # nocv
         self.raw_history_line.create(
             history=self, line_number=number, line=value
+        )
+
+    def editable_by(self, user):
+        if self.inventory is None:
+            return self.project.editable_by(user)
+        return self.inventory.editable_by(user)
+
+    def viewable_by(self, user):
+        return (
+            self.project.editable_by(user) or
+            self.inventory.editable_by(user) or
+            (self.initiator == user.id and self.initiator_type == "users") or
+            (self.project.viewable_by(user) & self.inventory.viewable_by(user))
         )
 
 

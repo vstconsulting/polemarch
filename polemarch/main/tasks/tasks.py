@@ -5,6 +5,7 @@ from ...wapp import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
 from ..models.utils import AnsibleModule, AnsiblePlaybook
+from ..models.hooks import Hook
 
 logger = logging.getLogger("polemarch")
 
@@ -66,3 +67,14 @@ class ExecuteAnsiblePlaybook(_ExecuteAnsible):
 @task(app, ignore_result=True, bind=True)
 class ExecuteAnsibleModule(_ExecuteAnsible):
     ansible_class = AnsibleModule
+
+
+@task(app, ignore_result=True, bind=True)
+class SendHook(BaseTask):
+    def __init__(self, app, when, message, *args, **kwargs):
+        super(self.__class__, self).__init__(app, *args, **kwargs)
+        self.when = when
+        self.message = message
+
+    def run(self):
+        Hook.objects.execute(self.when, self.message)

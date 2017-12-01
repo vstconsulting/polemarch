@@ -103,8 +103,8 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
     def test_bulk_periodictasks(self):
         models.PeriodicTask.objects.all().delete()
         data = dict(name="periodic-task", project=self.prj1.id,
-                    type="INTERVAL", schedule="10", inventory=self.inv2.id,
-                    mode="ok.yml")
+                    type="INTERVAL", schedule="10",
+                    inventory=str(self.inv2.id), mode="ok.yml")
         new = dict(name="new-periodic-task")
         self.abstract_test_bulk(
             data, new, "/api/v1/periodic-tasks/", "periodictask"
@@ -117,6 +117,8 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
             kind="Task",
             data=dict(
                 playbook="test.yml",
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
                 vars=dict(
                     connection="paramiko",
                     tags="update",

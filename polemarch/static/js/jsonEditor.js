@@ -8,6 +8,7 @@ jsonEditor.model.isLoaded_cli_reference = false;
 jsonEditor.model.isLoading_cli_reference = false;
 
 jsonEditor.options = {};
+jsonEditor.model.form = {}
 
 jsonEditor.options['item'] = {}
 
@@ -195,9 +196,12 @@ jsonEditor.editor = function(json, opt)
     {
         opt.prefix = 'prefix'
     }
-    
+
     opt.prefix = opt.prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
     jsonEditor.model.data[opt.prefix] = json;
+    jsonEditor.model.form[opt.prefix] = {
+        showImportForm:false
+    };
 
     return spajs.just.render('jsonEditor', {data:json, optionsblock:opt.block, opt:opt})
 }
@@ -225,7 +229,7 @@ jsonEditor.jsonEditorGetValues = function(prefix)
     {
         return {}
     }
-    
+
     return jsonEditor.model.data[prefix];
 
     /*var data = {}
@@ -292,10 +296,141 @@ jsonEditor.__devAddVar = function(name, value, optionsblock, prefix)
     jsonEditor.model.data[prefix][name] = value
     $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:{prefix:prefix}}))
     $("#jsonEditorVarListHolder"+prefix).show()
-    
+
     tabSignal.emit(prefix+".jsonEditorUpdate",{name:name, value:value, prefix:prefix})
     tabSignal.emit("jsonEditorUpdate",{name:name, value:value, prefix:prefix})
 }
+
+/**
+ * Делает импорт переменных из формата инвентория
+ */
+jsonEditor.jsonEditorImportVars = function(optionsblock, prefix)
+{
+    if(!prefix)
+    {
+        prefix = "prefix"
+    }
+    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+
+    if(!optionsblock)
+    {
+        optionsblock = 'base'
+    }
+
+    var varsText = $('#new_json_vars'+prefix).val()
+    var vars = varsText.split(/\n/gm)
+    var varsresult = {}
+
+    for(var i in vars)
+    {
+        if(/^[\s \t]*$/.test(vars[i]))
+        {
+            continue;
+        }
+
+        var res = jsonEditor.parseMonoVarsLine(i, vars[i])
+        if(res !== false)
+        {
+
+            if($("#json_"+res.name.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")+"_value"+prefix).length)
+            {
+                $.notify("Var `"+res.name+"` already exists", "error");
+                continue;
+            }
+
+            if(/^-[A-z0-9]$/.test(res.name))
+            {
+                for(var i in jsonEditor.options[optionsblock])
+                {
+                    if("-"+jsonEditor.options[optionsblock][i].alias == res.name)
+                    {
+                        val.name = i
+                        break;
+                    }
+                }
+            }
+
+            if(optionsblock && jsonEditor.options[optionsblock] && jsonEditor.options[optionsblock][res.name])
+            {
+                var optInfo = jsonEditor.options[optionsblock][res.name]
+                if(optInfo.type == 'error')
+                {
+                    $.notify("Adding this variable will be the mistake", "error");
+                    continue;
+                }
+            }
+
+            varsText = varsText.replace(vars[i], "")
+            varsresult[res.name] = res.value
+        }
+    }
+    $('#new_json_vars'+prefix).val(varsText)
+
+    console.log(varsresult)
+
+    var opt = {
+        prefix:prefix
+    }
+
+    for(var i in varsresult)
+    {
+        var val = varsresult[i]
+
+        jsonEditor.model.data[prefix][i] = val
+        $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:i, value:val, optionsblock:optionsblock, opt:opt}))
+        $("#jsonEditorVarListHolder"+prefix).show()
+
+        tabSignal.emit(prefix+".jsonEditorUpdate",{name:i, value:val, prefix:prefix})
+        tabSignal.emit("jsonEditorUpdate",{name:i, value:val, prefix:prefix})
+    }
+}
+
+/**
+ * Парсит данные для импорта переменных из формата инвентория
+ *
+ *
+ * Параметры из секции *:vars
+ * Строка где после первого `=` всё остальное значение.
+ */
+jsonEditor.parseMonoVarsLine = function(index, line)
+{
+    var vars = {}
+    var param = /^([^=]+)="(.*)"$/.exec(line)
+
+    if(param)
+    {
+        vars.name = param[1]
+        vars.value = param[2]
+    }
+    else
+    {
+        param = /^([^=]+)=(.*)$/.exec(line)
+        if(param)
+        {
+            vars.name = param[1]
+            vars.value = param[2]
+        }
+        else
+        {
+            param = /^([^:]+):(.*)$/.exec(line)
+            if(param)
+            {
+                vars.name = param[1]
+                vars.value = param[2]
+            }
+            else
+            {
+                return false;
+                //throw "Error in line "+index+" invalid varibles string ("+line+")"
+            }
+        }
+    }
+    vars.name = trim(vars.name)
+    vars.value = trim(vars.value)
+
+    return vars;
+}
+
 
 jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
 {
@@ -319,7 +454,7 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
         return;
     }
 
-    if($("#json_"+name+"_value"+prefix).length)
+    if($("#json_"+name.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")+"_value"+prefix).length)
     {
         $.notify("This var already exists", "error");
         return;
@@ -353,11 +488,19 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
     var opt = {
         prefix:prefix
     }
-
+ 
+    if(optionsblock 
+        && jsonEditor.options[optionsblock] 
+        && jsonEditor.options[optionsblock][name]
+        && jsonEditor.options[optionsblock][name].type == 'boolean')
+    {
+        value = "";
+    }
+    
     jsonEditor.model.data[prefix][name] = value
     $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:opt}))
     $("#jsonEditorVarListHolder"+prefix).show()
-    
+
     tabSignal.emit(prefix+".jsonEditorUpdate",{name:name, value:value, prefix:prefix})
     tabSignal.emit("jsonEditorUpdate",{name:name, value:value, prefix:prefix})
 }
@@ -403,10 +546,30 @@ jsonEditor.initAutoComplete = function(optionsblock, prefix)
             }
             if(matches.length)
             {
-                response(matches);
+                response(matches.sort(jsonEditor.sortFunction));
             }
         }
     });
+}
+
+jsonEditor.sortFunction = function(a, b)
+{
+    a = a.value
+    b = b.value
+    for(var i in a)
+    {
+        if(b.length <= i)
+        {
+            return 1;
+        }
+
+        if(a.charCodeAt(i) != b.charCodeAt(i))
+        {
+            return a.charCodeAt(i) - b.charCodeAt(i)
+        }
+    }
+
+    return 0;
 }
 
 jsonEditor.initForm = function(optionsblock, prefix)

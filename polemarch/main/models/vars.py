@@ -14,7 +14,8 @@ from django.contrib.contenttypes.fields import (GenericForeignKey,
                                                 GenericRelation)
 
 from ..utils import tmp_file
-from .base import BModel, BManager, BQuerySet, models
+from .base import BModel, BManager, models
+from .acl import ACLModel, ACLQuerySet
 
 
 logger = logging.getLogger("polemarch")
@@ -31,7 +32,7 @@ class Variable(BModel):
         return "{}={}".format(self.key, self.value)
 
 
-class AbstractVarsQuerySet(BQuerySet):
+class AbstractVarsQuerySet(ACLQuerySet):
     use_for_related_fields = True
 
     @transaction.atomic
@@ -51,7 +52,7 @@ class AbstractVarsQuerySet(BQuerySet):
         return qs
 
 
-class AbstractModel(BModel):
+class AbstractModel(ACLModel):
     objects     = BManager.from_queryset(AbstractVarsQuerySet)
     name        = models.CharField(max_length=512,
                                    default=uuid.uuid1)
@@ -65,6 +66,10 @@ class AbstractModel(BModel):
         _vars = " ".join(["{}={}".format(k, v)
                           for k, v in self.vars.items()])
         return "{} {}".format(self.name, _vars)
+
+    def get_hook_data(self, when):
+        # pylint: disable=unused-argument
+        return OrderedDict(id=self.id, name=self.name)
 
     @transaction.atomic()
     def set_vars(self, variables):

@@ -4,14 +4,16 @@ import json
 
 import re
 import six
+from django import dispatch
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.db.models import Q
 
 from rest_framework import serializers
 from rest_framework import exceptions
+from rest_framework.exceptions import PermissionDenied
 
-from ...main import models
+from ...main.models import Inventory
+from ...main import models, exceptions as main_exceptions
 from ..base import Response
 
 
@@ -35,15 +37,122 @@ class ModelRelatedField(serializers.PrimaryKeyRelatedField):
 
 class DictField(serializers.CharField):
     def to_internal_value(self, data):
-        tstr = isinstance(data, (six.string_types, six.text_type))
-        tdict = isinstance(data, dict)
-        return data if tdict or tstr else self.fail("Unknown type.")
+        return (
+            data
+            if (
+                isinstance(data, (six.string_types, six.text_type)) or
+                isinstance(data, (dict, list))
+            )
+            else self.fail("Unknown type.")
+        )
 
     def to_representation(self, value):
-        return json.loads(value) if not isinstance(value, dict) else value
+        return (
+            json.loads(value)
+            if not isinstance(value, (dict, list))
+            else value
+        )
+
+
+api_pre_save = dispatch.Signal(providing_args=["instance", "user"])
+api_post_save = dispatch.Signal(providing_args=["instance", "user"])
+
+
+def with_signals(func):
+    '''
+    Decorator for send api_pre_save and api_post_save signals from serializers.
+    '''
+    def func_wrapper(*args, **kwargs):
+        user = args[0].context['request'].user
+        with transaction.atomic():
+            instance = func(*args, **kwargs)
+            api_pre_save.send(
+                sender=instance.__class__, instance=instance, user=user
+            )
+        with transaction.atomic():
+            api_post_save.send(
+                sender=instance.__class__, instance=instance, user=user
+            )
+        return instance
+
+    return func_wrapper
 
 
 # Serializers
+class _SignalSerializer(serializers.ModelSerializer):
+    @with_signals
+    def create(self, validated_data):
+        return super(_SignalSerializer, self).create(validated_data)
+
+    @with_signals
+    def update(self, instance, validated_data):
+        return super(_SignalSerializer, self).update(instance, validated_data)
+
+
+class _WithPermissionsSerializer(_SignalSerializer):
+    perms_msg = "You do not have permission to perform this action."
+
+    def _get_objects(self, model, objs_id):
+        user = self.context['request'].user
+        qs = model.objects.all().user_filter(user)
+        return list(qs.filter(id__in=objs_id))
+
+    def create(self, validated_data):
+        validated_data["owner"] = self.current_user()
+        return super(_WithPermissionsSerializer, self).create(validated_data)
+
+    def current_user(self):
+        return self.context['request'].user
+
+    def __get_all_permission_serializer(self):  # noce
+        return PermissionsSerializer(
+            self.instance.acl.all(), many=True
+        )
+
+    def __duplicates_check(self, data):
+        without_role = [
+            frozenset({e['member'], e['member_type']}) for e in data
+        ]
+        if len(without_role) != len(list(set(without_role))):
+            raise ValueError("There is duplicates in your permissions set.")
+
+    def __permission_set(self, data, remove_old=True):  # noce
+        self.__duplicates_check(data)
+        for permission_args in data:
+            if remove_old:
+                self.instance.acl.extend().filter(
+                    member=permission_args['member'],
+                    member_type=permission_args['member_type']
+                ).delete()
+            self.instance.acl.create(**permission_args)
+
+    @transaction.atomic
+    def permissions(self, request):  # noce
+        user = self.current_user()
+        if request.method != "GET" and not self.instance.manageable_by(user):
+            raise PermissionDenied(self.perms_msg)
+        if request.method == "DELETE":
+            self.instance.acl.filter_by_data(request.data).delete()
+        elif request.method == "POST":
+            self.__permission_set(request.data)
+        elif request.method == "PUT":
+            self.instance.acl.clear()
+            self.__permission_set(request.data, False)
+        return Response(self.__get_all_permission_serializer().data, 200)
+
+    def _change_owner(self, request):  # noce
+        if not self.instance.owned_by(self.current_user()):
+            raise PermissionDenied(self.perms_msg)
+        self.instance.set_owner(User.objects.get(pk=request.data))
+        return Response("Owner changed", 200)
+
+    def owner(self, request):  # noce
+        if request.method == "GET":
+            return Response(self.instance.owner.id, 200)
+        elif request.method == "PUT":
+            return self._change_owner(request)
+
+
 class UserSerializer(serializers.ModelSerializer):
 
     class UserExist(exceptions.ValidationError):
@@ -58,6 +167,7 @@ class UserSerializer(serializers.ModelSerializer):
                   'url',)
         read_only_fields = ('is_superuser',)
 
+    @with_signals
     def create(self, data):
         if not self.context['request'].user.is_staff:
             raise exceptions.PermissionDenied
@@ -70,7 +180,6 @@ class UserSerializer(serializers.ModelSerializer):
         if not raw_passwd == "True":
             user.set_password(creditals['password'])
             user.save()
-        user.related_objects.get_or_create()
         return user
 
     def is_valid(self, raise_exception=False):
@@ -82,6 +191,7 @@ class UserSerializer(serializers.ModelSerializer):
                 pass
         return super(UserSerializer, self).is_valid(raise_exception)
 
+    @with_signals
     def update(self, instance, validated_data):
         if not self.context['request'].user.is_staff and \
                         instance.id != self.context['request'].user.id:
@@ -106,7 +216,38 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
+class TeamSerializer(_WithPermissionsSerializer):
+    users_list = DictField(required=False, write_only=True)
+
+    class Meta:
+        model = models.UserGroup
+        fields = (
+            'id',
+            "name",
+            "users_list",
+            'url',
+        )
+
+
+class OneTeamSerializer(TeamSerializer):
+    users = UserSerializer(many=True, required=False)
+    users_list = DictField(required=False)
+    owner = UserSerializer(read_only=True)
+
+    class Meta:
+        model = models.UserGroup
+        fields = (
+            'id',
+            "name",
+            "users",
+            "users_list",
+            "owner",
+            'url',
+        )
+
+
 class OneUserSerializer(UserSerializer):
+    groups = TeamSerializer(read_only=True, many=True)
     raw_password = serializers.HiddenField(default=False, initial=False)
 
     class Meta:
@@ -120,12 +261,13 @@ class OneUserSerializer(UserSerializer):
                   'first_name',
                   'last_name',
                   'email',
+                  'groups',
                   'url',)
         read_only_fields = ('is_superuser',
                             'date_joined',)
 
 
-class HistorySerializer(serializers.ModelSerializer):
+class HistorySerializer(_SignalSerializer):
     class Meta:
         model = models.History
         fields = ("id",
@@ -141,7 +283,7 @@ class HistorySerializer(serializers.ModelSerializer):
                   "url")
 
 
-class OneHistorySerializer(serializers.ModelSerializer):
+class OneHistorySerializer(_SignalSerializer):
     raw_stdout = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -178,14 +320,25 @@ class OneHistorySerializer(serializers.ModelSerializer):
         return self.instance.facts
 
 
-class HistoryLinesSerializer(serializers.ModelSerializer):
+class HistoryLinesSerializer(_SignalSerializer):
     class Meta:
         model = models.HistoryLines
         fields = ("line_number",
                   "line",)
 
 
-class VariableSerializer(serializers.ModelSerializer):
+class HookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Hook
+        fields = (
+            'id',
+            'name',
+            'type',
+            'recipients'
+        )
+
+
+class VariableSerializer(_SignalSerializer):
     class Meta:
         model = models.Variable
         fields = ('key',
@@ -196,24 +349,14 @@ class VariableSerializer(serializers.ModelSerializer):
         return {instance.key: instance.value}  # nocv
 
 
-class _WithVariablesSerializer(serializers.ModelSerializer):
+class _WithVariablesSerializer(_WithPermissionsSerializer):
     operations = dict(DELETE="remove",
                       POST="add",
                       PUT="set",
                       GET="all")
 
-    def _get_objects(self, model, objs_id):
-        user = self.context['request'].user
-        qs = model.objects.all()
-        if not user.is_staff:
-            projs = user.related_objects.values_list('projects', flat=True)
-            qs = qs.filter(
-                Q(related_objects__user=user) |
-                Q(related_objects__projects__in=projs)
-            )
-        return list(qs.filter(id__in=objs_id))
-
     def get_operation(self, method, data, attr):
+        # FIXME: details about every failed object
         tp = getattr(self.instance, attr)
         obj_list = self._get_objects(tp.model, data)
         return self._operate(method, data, attr, obj_list)
@@ -228,11 +371,6 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
     def _do_with_vars(self, method_name, *args, **kwargs):
         method = getattr(super(_WithVariablesSerializer, self), method_name)
         instance = method(*args, **kwargs)
-        if method.__name__ == "create":
-            user = self.context['request'].user
-            instance.related_objects.add(
-                models.TypesPermissions.objects.get_or_create(user=user)[0]
-            )
         return instance
 
     @transaction.atomic()
@@ -240,13 +378,9 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
         action = self.operations[method]
         tp = getattr(self.instance, attr)
         if action == "all":
-            if attr == "related_objects":
-                answer = tp.values_list("user__id", flat=True)
-            else:
-                answer = tp.values_list("id", flat=True)
+            answer = tp.values_list("id", flat=True)
             return Response(answer, status=200)
         elif action == "set":
-            # Because django<=1.9 does not support .set()
             getattr(tp, "clear")()
             action = "add"
         getattr(tp, action)(*obj_list)
@@ -258,13 +392,9 @@ class _WithVariablesSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if "children" in validated_data:
             raise exceptions.ValidationError("Children not allowed to update.")
-        return self._do_with_vars("update", instance,
-                                  validated_data=validated_data)
-
-    def permissions(self, request):
-        pms = models.TypesPermissions.objects.filter(user__id__in=request.data)
-        return self._operate(request.method, request.data,
-                             "related_objects", pms)
+        return self._do_with_vars(
+            "update", instance, validated_data=validated_data
+        )
 
 
 class HostSerializer(_WithVariablesSerializer):
@@ -280,6 +410,7 @@ class HostSerializer(_WithVariablesSerializer):
 
 
 class OneHostSerializer(HostSerializer):
+    owner = UserSerializer(read_only=True)
     vars = DictField(required=False)
 
     class Meta:
@@ -288,6 +419,7 @@ class OneHostSerializer(HostSerializer):
                   'name',
                   'type',
                   'vars',
+                  'owner',
                   'url',)
 
 
@@ -317,6 +449,7 @@ class OneTaskSerializer(TaskSerializer):
 class PeriodictaskSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
     schedule = serializers.CharField(allow_blank=True)
+    inventory = serializers.CharField()
 
     class Meta:
         model = models.PeriodicTask
@@ -331,6 +464,13 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
                   'save_result',
                   'vars',
                   'url',)
+
+    @transaction.atomic
+    def permissions(self, request):  # noce
+        raise main_exceptions.NotApplicable("See project permissions.")
+
+    def owner(self, request):  # noce
+        raise main_exceptions.NotApplicable("See project owner.")
 
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
@@ -366,6 +506,7 @@ class TemplateSerializer(_WithVariablesSerializer):
 
 class OneTemplateSerializer(TemplateSerializer):
     data = DictField(required=True)
+    owner = UserSerializer(read_only=True)
 
     class Meta:
         model = models.Template
@@ -373,6 +514,7 @@ class OneTemplateSerializer(TemplateSerializer):
             'id',
             'name',
             'kind',
+            'owner',
             'data',
         )
 ###################################
@@ -407,6 +549,7 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
     vars   = DictField(required=False)
     hosts  = HostSerializer(read_only=True, many=True)
     groups = GroupSerializer(read_only=True, many=True)
+    owner = UserSerializer(read_only=True)
 
     class Meta:
         model = models.Group
@@ -416,6 +559,7 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
                   "groups",
                   'vars',
                   'children',
+                  'owner',
                   'url',)
 
     class ValidationException(exceptions.ValidationError):
@@ -448,6 +592,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     all_hosts  = HostSerializer(read_only=True, many=True)
     hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
     groups = GroupSerializer(read_only=True, many=True, source="groups_list")
+    owner = UserSerializer(read_only=True)
 
     class Meta:
         model = models.Inventory
@@ -457,6 +602,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
                   'all_hosts',
                   "groups",
                   'vars',
+                  'owner',
                   'url',)
 
 
@@ -485,6 +631,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     hosts       = HostSerializer(read_only=True, many=True)
     groups      = GroupSerializer(read_only=True, many=True)
     inventories = InventorySerializer(read_only=True, many=True)
+    owner = UserSerializer(read_only=True)
 
     class Meta:
         model = models.Project
@@ -496,6 +643,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   "groups",
                   'inventories',
                   'vars',
+                  'owner',
                   'url',)
 
     def inventories_operations(self, method, data):
@@ -509,13 +657,20 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
 
     def _execution(self, kind, request):
         data = dict(request.data)
-        inventory_id = int(data.pop("inventory"))
-        target = str(data.pop(kind))
-        action = getattr(self.instance, "execute_ansible_{}".format(kind))
-        history_id = action(
-            target, inventory_id, initiator=request.user.id, **data
+        inventory = data.pop("inventory")
+        try:
+            inventory = Inventory.objects.get(id=int(inventory))
+            if not inventory.viewable_by(request.user):  # nocv
+                raise PermissionDenied(
+                    "You don't have permission to inventory."
+                )
+        except ValueError:
+            pass
+        history_id = self.instance.execute(
+            kind, str(data.pop(kind)), inventory,
+            initiator=request.user.id, **data
         )
-        rdata = dict(detail="Started at inventory {}.".format(inventory_id),
+        rdata = dict(detail="Started at inventory {}.".format(inventory),
                      history_id=history_id)
         return Response(rdata, 201)
 
@@ -524,3 +679,14 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
 
     def execute_module(self, request):
         return self._execution("module", request)
+
+
+class PermissionsSerializer(_SignalSerializer):
+    member = serializers.IntegerField()
+    member_type = serializers.CharField()
+
+    class Meta:
+        model = models.ACLPermission
+        fields = ("member",
+                  "role",
+                  "member_type")

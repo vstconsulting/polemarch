@@ -328,10 +328,15 @@ function _init() {
 
         //Enable sidebar push menu
         if ($(window).width() > (screenSizes.sm - 1)) {
-          if ($("body").hasClass('sidebar-collapse')) {
+          if ($("body").hasClass('sidebar-collapse')) 
+          {
             $("body").removeClass('sidebar-collapse').trigger('expanded.pushMenu');
-          } else {
+            pmLocalSettings.set('hideMenu', false);
+          }
+          else 
+          {
             $("body").addClass('sidebar-collapse').trigger('collapsed.pushMenu');
+            pmLocalSettings.set('hideMenu', true);
           }
         }
         //Handle sidebar push menu for small screens
@@ -716,57 +721,4 @@ function _init() {
   };
 
 })(jQuery);
-
-/*
- * TODO LIST CUSTOM PLUGIN
- * -----------------------
- * This plugin depends on iCheck plugin for checkbox and radio inputs
- *
- * @type plugin
- * @usage $("#todo-widget").todolist( options );
- */
-(function ($) {
-
-  'use strict';
-
-  $.fn.todolist = function (options) {
-    // Render options
-    var settings = $.extend({
-      //When the user checks the input
-      onCheck: function (ele) {
-        return ele;
-      },
-      //When the user unchecks the input
-      onUncheck: function (ele) {
-        return ele;
-      }
-    }, options);
-
-    return this.each(function () {
-
-      if (typeof $.fn.iCheck != 'undefined') {
-        $('input', this).on('ifChecked', function () {
-          var ele = $(this).parents("li").first();
-          ele.toggleClass("done");
-          settings.onCheck.call(ele);
-        });
-
-        $('input', this).on('ifUnchecked', function () {
-          var ele = $(this).parents("li").first();
-          ele.toggleClass("done");
-          settings.onUncheck.call(ele);
-        });
-      } else {
-        $('input', this).on('change', function () {
-          var ele = $(this).parents("li").first();
-          ele.toggleClass("done");
-          if ($('input', ele).is(":checked")) {
-            settings.onCheck.call(ele);
-          } else {
-            settings.onUncheck.call(ele);
-          }
-        });
-      }
-    });
-  };
-}(jQuery));
+ 

@@ -43,61 +43,6 @@ objects of any kind result will look like:
      at first).
    :>json array results: array of objects at current page.
 
-Access rights
--------------
-
-Because Polemarch supports multiple users it have access rights for every kind
-of objects. Access rights system is pretty simple. You either have full access
-or no access to object. By default creator of object is only person who have
-access to it. But you can manage of access rights for any object (of course if
-you have access to it) by using this methods:
-
-.. http:post:: /api/v1/{object_kind}/{id}/permissions/
-
-   Add access to object for users, who listed in json array in body of request.
-
-   :arg object_kind: |perm_kind_def|
-   :arg id: Id of object.
-   :reqjsonarr Ids: Ids of users to grant access for them.
-
-   Example request:
-
-   .. sourcecode:: http
-
-      POST /api/v1/hosts/123/permissions/ HTTP/1.1
-      Host: example.com
-      Accept: application/json, text/javascript
-
-      [12, 13]
-
-.. http:delete:: /api/v1/{object_kind}/{id}/permissions/
-
-   Remove access to object for users, who listed in json array in body of
-   request.
-
-   :arg object_kind: |perm_kind_def|
-   :arg id: Id of object.
-   :reqjsonarr Ids: Ids of users to remove access for them.
-
-   Example request:
-
-   .. sourcecode:: http
-
-      DELETE /api/v1/hosts/123/permissions/ HTTP/1.1
-      Host: example.com
-      Accept: application/json, text/javascript
-
-      [12, 13]
-
-Also there is two types of users: regular and superuser. Regular users have
-access only to objects, where they listed in permissions. Superusers have
-access to all objects in system. See :ref:`users` for detailed information
-about user management api.
-
-.. |perm_kind_def| replace:: Kind of objects to perform operation. It can be
-   any present objects type in system: ``hosts``, ``groups``,
-   ``inventories``, ``projects``, ``periodic-tasks``.
-
 .. _hosts:
 
 Hosts
@@ -1130,6 +1075,8 @@ Projects
            "history_id": 87
         }
 
+.. _tasks:
+
 Tasks
 -----
 
@@ -1200,6 +1147,8 @@ Tasks
               }
            ]
         }
+
+.. _periodictasks:
 
 Periodic tasks
 --------------
@@ -1434,6 +1383,8 @@ Periodic tasks
 
    |ptask_details_ref|
 
+.. _templates:
+
 Templates
 ---------
 
@@ -1489,7 +1440,10 @@ Templates
    :query id: id of project if we want to filter by it.
    :query id__not: id of project, which we want to filter out.
    :query name: filter by name.
+   :query name__not: filter by name, which we want to filter out.
    :query kind: filter by ``kind``.
+   :query project: filter by ``project``.
+   :query inventory: filter by ``inventory``.
 
    Example request:
 
@@ -1651,6 +1605,8 @@ Templates
                 "children"
             ]
         }
+
+.. _history:
 
 History records
 ---------------
@@ -2455,3 +2411,482 @@ Users
 
 .. |patch_reminder| replace:: All parameters except id are optional, so you can
    specify only needed to update. Only name for example.
+
+Teams (Polemarch+ only)
+-----------------------
+
+Teams is groups of users to which you can collectively assign rights to objects
+in ACL system.
+
+.. http:get:: /api/v1/teams/{id}/
+
+   Get details about one team.
+
+   :arg id: id of team.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/teams/1/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "id": 1,
+        "name": "myteam",
+        "users": [
+            {
+                "id": 1,
+                "username": "admin",
+                "is_active": true,
+                "is_staff": true,
+                "url": "http://localhost:8000/api/v1/users/1/"
+            }
+        ],
+        "users_list": [
+            1
+        ],
+        "owner": {
+            "id": 1,
+            "username": "admin",
+            "is_active": true,
+            "is_staff": true,
+            "url": "http://localhost:8000/api/v1/users/1/"
+        },
+        "url": "http://localhost:8000/api/v1/teams/1/"
+    }
+
+   :>json number id: id of team.
+   :>json string name: name of team.
+   :>json array users: array of users in team. See :ref:`users` for fields
+    explanation.
+   :>json array users_list: ids of users in team.
+   :>json object owner: owner of team. See :ref:`users` for fields explanation.
+   :>json string url: url to this specific team.
+
+.. |team_details_ref| replace:: **Response JSON Object:** response json fields
+   same as in :http:get:`/api/v1/teams/{id}/`.
+
+.. http:get:: /api/v1/teams/
+
+   List of teams. |pagination_def|
+
+   :query id: id of team if we want to filter by it.
+   :query name: name of team if we want to filter by it.
+   :query id__not: id of team, which we want to filter out.
+   :query name__not: name of team, which we want to filter out.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/teams/?name__not=outsiders HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "count": 1,
+        "next": null,
+        "previous": null,
+        "results": [
+            {
+                "id": 1,
+                "name": "myteam",
+                "url": "http://localhost:8000/api/v1/teams/1/"
+            }
+        ]
+    }
+
+   |team_details_ref|
+
+.. http:delete:: /api/v1/teams/{id}/
+
+   Delete team.
+
+   :arg id: id of team.
+
+.. http:post:: /api/v1/teams/
+
+   Create team.
+
+   :<json string name: name of new team.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/teams/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+         "name":"another_team"
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "id": 2,
+        "name": "another_team",
+        "users": [],
+        "users_list": [],
+        "owner": {
+            "id": 1,
+            "username": "admin",
+            "is_active": true,
+            "is_staff": true,
+            "url": "http://localhost:8000/api/v1/users/1/"
+        },
+        "url": "http://localhost:8000/api/v1/teams/2/"
+    }
+
+   |team_details_ref|
+
+.. http:patch:: /api/v1/groups/{id}/
+
+   Update team. |patch_reminder|
+
+   :arg id: id of team.
+   :<json string name: name of new team.
+   :<json array users_list: list of users to put in team.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      PATCH /api/v1/teams/2/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+         "name":"another_team",
+         "users_list": [1, 2]
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "id": 2,
+        "name": "another_team",
+        "users": [
+            {
+                "id": 1,
+                "username": "admin",
+                "is_active": true,
+                "is_staff": true,
+                "url": "http://localhost:8000/api/v1/users/1/"
+            },
+            {
+                "id": 2,
+                "username": "max",
+                "is_active": true,
+                "is_staff": true,
+                "url": "http://localhost:8000/api/v1/users/2/"
+            }
+        ],
+        "users_list": [
+            1,
+            2
+        ],
+        "owner": {
+            "id": 1,
+            "username": "admin",
+            "is_active": true,
+            "is_staff": true,
+            "url": "http://localhost:8000/api/v1/users/1/"
+        },
+        "url": "http://localhost:8000/api/v1/teams/2/"
+    }
+
+   |team_details_ref|
+
+ACL system (Polemarch+ only)
+----------------------------
+
+Because Polemarch supports multiple users it have access rights for every kind
+of objects. Most kinds of objects (if to be precise: :ref:`hosts`,
+:ref:`groups`, :ref:`inventory`, :ref:`projects`, :ref:`templates`
+) have owner and set of permissions associated to every
+instance of such kind. However other objects (if to be precise: :ref:`history`,
+:ref:`periodictasks`, :ref:`tasks`) have dependant role from objects
+listed above, so they does not have their own permissions, but permissions of
+parent objects is applicable to them. For example to see PeriodicTasks of
+project you must have access to project itself.
+
+Currently we support such permission levels:
+
+* EXECUTOR - can see object in objects list, view details and execute (in
+  case of object is executable like Template, Inventory or something).
+* EDITOR - same as above + right to edit.
+* MASTER - same as above + can work with permissions list for this object
+  (add/delete other users and teams).
+* OWNER - same as above + ability to change owner.
+
+**Warning**: if you granting somebody EXECUTOR permission to object, he also
+automatically get EXECUTOR rights to all other objects, which required to use
+this one. Example: if you give User1 EDITOR right to Inventory1, he also got
+EXECUTOR to all hosts and groups, which currently listed in Inventory1.
+
+Also there is two types of users: regular and superuser. Regular users have
+access only to objects, where they listed in permissions. Superusers have
+access to all objects in system. See :ref:`users` for detailed information
+about user management api.
+
+Polemarch+ have such methods to control ownership and permissions information:
+
+.. |permission_json_fields| replace:: **Permission JSON Object:** json fields
+    same as in :http:post:`/api/v1/{object_kind}/{id}/permissions/`.
+
+.. http:get:: /api/v1/{object_kind}/{id}/permissions/
+
+   Get permissions to object.
+
+   :arg object_kind: |perm_kind_def|
+   :arg id: Id of object.
+
+   Results:
+
+   .. sourcecode:: js
+
+        [
+           {
+              "member":1,
+              "role":"EDITOR",
+              "member_type":"user"
+           },
+           {
+              "member":2,
+              "role":"MASTER",
+              "member_type":"user"
+           }
+        ]
+
+   :>json array permissions: list of permissions. |permission_json_fields|
+
+.. http:post:: /api/v1/{object_kind}/{id}/permissions/
+
+   Add those permissions to object.
+
+   :arg object_kind: |perm_kind_def|
+   :arg id: Id of object.
+   :<jsonarr number member: id of user or team for which role should applies.
+   :<jsonarr string role: either ``EXECUTOR``, ``EDITOR`` or ``MASTER``.
+   :<jsonarr string member_type: either ``user`` or ``team`` (how to interpret
+    id)
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/hosts/123/permissions/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+        [
+           {
+              "member":1,
+              "role":"EDITOR",
+              "member_type":"user"
+           },
+           {
+              "member":2,
+              "role":"MASTER",
+              "member_type":"user"
+           }
+        ]
+
+   Results:
+
+   .. sourcecode:: js
+
+        [
+           {
+              "member":1,
+              "role":"EDITOR",
+              "member_type":"user"
+           },
+           {
+              "member":2,
+              "role":"MASTER",
+              "member_type":"user"
+           }
+        ]
+
+   :>json array permissions: list of actual object permissions after operation.
+    Every permission is same object as in request, so you can look request
+    fields explanation for details.
+
+.. http:put:: /api/v1/{object_kind}/{id}/permissions/
+
+   Replace permissions to object with provided.
+
+   :arg object_kind: |perm_kind_def|
+   :arg id: Id of object.
+   :<json array permissions: new permissions list. |permission_json_fields|
+
+   .. sourcecode:: http
+
+      PUT /api/v1/hosts/123/permissions/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+        [
+           {
+              "member":1,
+              "role":"EDITOR",
+              "member_type":"user"
+           },
+           {
+              "member":2,
+              "role":"MASTER",
+              "member_type":"user"
+           }
+        ]
+
+   Results:
+
+   .. sourcecode:: js
+
+        [
+           {
+              "member":1,
+              "role":"EDITOR",
+              "member_type":"user"
+           },
+           {
+              "member":2,
+              "role":"MASTER",
+              "member_type":"user"
+           }
+        ]
+
+   :>json array permissions: list of actual object permissions after operation.
+    |permission_json_fields|
+
+.. http:delete:: /api/v1/{object_kind}/{id}/permissions/
+
+   Remove access to object for users, who listed in json array in body of
+   request.
+
+   :arg object_kind: |perm_kind_def|
+   :arg id: Id of object.
+   :<json array permissions: which permissions remove. You can use `PUT` with
+    empty list if you want to remove all permissions. |permission_json_fields|
+
+   Example request:
+
+   .. sourcecode:: http
+
+      DELETE /api/v1/hosts/123/permissions/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+        [
+           {
+              "member":1,
+              "role":"EDITOR",
+              "member_type":"user"
+           },
+           {
+              "member":2,
+              "role":"MASTER",
+              "member_type":"user"
+           }
+        ]
+
+   .. sourcecode:: js
+
+        []
+
+   :>json array permissions: list of actual object permissions after operation.
+    |permission_json_fields|
+
+.. http:put:: /api/v1/{object_kind}/{id}/owner/
+
+   Change owner of object.
+
+   :arg object_kind: |perm_kind_def|
+   :arg id: Id of object.
+   :jsonparam number id: id of user.
+
+   .. sourcecode:: http
+
+      PUT /api/v1/hosts/123/owner/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+        2
+
+   Results:
+
+   .. sourcecode:: js
+
+        Owner changed
+
+.. http:get:: /api/v1/{object_kind}/{id}/owner/
+
+   Get owner of object.
+
+   :arg object_kind: |perm_kind_def|
+   :arg id: Id of object.
+
+   Results:
+
+   .. sourcecode:: js
+
+        2
+
+   :>json number id: id of owner.
+
+.. |perm_kind_def| replace:: Kind of objects to perform operation. It can be
+   any present objects type in system: ``hosts``, ``groups``,
+   ``inventories``, ``projects``, ``templates``.
+
+License (Polemarch+ only)
+-------------------------
+
+.. http:get:: /api/v1/license/
+
+   Get details about your license.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/license/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+            "expiry": null,
+            "users": 5,
+            "organization": "VST Consulting",
+            "contacts": "sergey.k@vstconsulting.net",
+            "hosts": null
+        }
+
+   :>json string expiry: date, when license will be (or was) expired. If `null`
+     license is endless.
+   :>json number users: number of users available with this license. If `null`
+     - unlimited.
+   :>json string organization: to whom this license is provided.
+   :>json string contacts: contatc information of license owner.
+   :>json number hosts: number of hosts available with this license. If `null`
+     - unlimited.

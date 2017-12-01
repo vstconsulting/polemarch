@@ -1,10 +1,14 @@
 import json
+
 import re
 
 from datetime import timedelta
 
 import subprocess
+
+from django.conf import settings
 from django.utils.timezone import now
+from django.core.validators import ValidationError
 
 try:
     from mock import patch
@@ -37,8 +41,10 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         url = "/api/v1/tasks/"
         self.list_test(url, Task.objects.all().count())
 
-    correct_simple_inventory = "127.0.1.1 ansible_user=centos " +\
-                               "ansible_ssh_private_key_file="
+    correct_simple_inventory = (
+        "127.0.1.1 ansible_user=centos "
+        "ansible_ssh_private_key_file="
+    )
 
     def create_inventory(self):
         inventory_data = dict(name="Inv1", vars={})
@@ -348,6 +354,85 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                         "/api/v1/history/{}/cancel/".format(history['id']),
                         200)
 
+    @patch('polemarch.main.hooks.http.Backend._execute')
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_hook_task(self, subprocess_function, execute_method):
+        result = self.get_result('get', "/api/v1/hooks/types/")
+        self.assertIn('HTTP', result['types'])
+        self.assertIn('SCRIPT', result['types'])
+        self.assertIn('on_execution', result['when'])
+        self.assertIn('after_execution', result['when'])
+        inv, _ = self.create_inventory()
+        hook_url = 'http://ex.com'
+        hook_data = dict(
+            name="test", type='HTTP', recipients=hook_url, when='on_execution'
+        )
+        self.post_result("/api/v1/hooks/", data=json.dumps(hook_data))
+        self.post_result("/api/v1/hooks/", data=json.dumps(hook_data))
+        self.sended = False
+        self.count = 0
+        playbook = "first.yml"
+
+        def side_effect(url, when, message):
+            self.assertEqual(url, hook_url)
+            self.assertEqual(when, 'on_execution')
+            json.dumps(message)
+            self.assertEqual(message['execution_type'], "PLAYBOOK")
+            self.assertEqual(message['target']['name'], playbook)
+            self.assertEqual(
+                message['target']['inventory']['id'], inv
+            )
+            self.assertEqual(
+                message['target']['project']['id'], self.task_proj.id
+            )
+            self.sended = True
+            self.count += 1
+            if self.count == 1:
+                raise Exception("Test exception")
+            return '200 OK: {"result": "ok"}'
+
+        execute_method.side_effect = side_effect
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory=inv, playbook=playbook, sync=1))
+        )
+        self.assertTrue(self.sended, "Raised on sending.")
+        self.assertEquals(execute_method.call_count, 4)
+        self.assertEquals(subprocess_function.call_count, 1)
+
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_execute_inventory_file(self, subprocess_function):
+
+        def side_effect(call_args, *args, **kwargs):
+            # check inventory
+            inventory_path = call_args[3]
+            expected = "{}/{}/{}".format(
+                settings.PROJECTS_DIR, self.task_proj.id, "inventory"
+            )
+            self.assertEqual(inventory_path, expected)
+
+        subprocess_function.side_effect = side_effect
+        with open("{}/12".format(self.task_proj.path), 'w') as file:
+            file.write("burda")
+        with open("{}/inventory".format(self.task_proj.path), 'w') as file:
+            file.write("burda")
+        self.post_result(
+            "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory="./12", module="ping", group="all"))
+        )
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory="inventory", playbook="first.yml"))
+        )
+        # fail with outside access
+        self.post_result(
+            "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory="../inventory",
+                                 module="ping", group="all")),
+            code=400
+        )
+        self.assertEquals(subprocess_function.call_count, 2)
+
 
 class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
@@ -358,20 +443,20 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                      vars=dict(repo_type="TEST"))]
         self.periodic_project_id = self.mass_create("/api/v1/projects/", data,
                                                     "name", "repository")[0]
-        project = Project.objects.get(id=self.periodic_project_id)
+        self.project = Project.objects.get(id=self.periodic_project_id)
         self.inventory = Inventory.objects.create()
 
         self.ptask1 = PeriodicTask.objects.create(mode="p1.yml",
                                                   name="test",
                                                   schedule="10",
                                                   type="INTERVAL",
-                                                  project=project,
+                                                  project=self.project,
                                                   inventory=self.inventory)
         self.ptask2 = PeriodicTask.objects.create(mode="p2.yml",
                                                   name="test",
                                                   schedule="10",
                                                   type="INTERVAL",
-                                                  project=project,
+                                                  project=self.project,
                                                   inventory=self.inventory)
 
     def test_create_delete_periodic_task(self):
@@ -426,16 +511,18 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                        schedule="10",
                        kind="MODULE",
                        type="INTERVAL",
-                       inventory=self.inventory)
+                       inventory=self.inventory,
+                       project=self.project)
         ptask = PeriodicTask.objects.create(**details)
-        details['inventory'] = self.inventory.id
+        details['inventory'] = str(self.inventory.id)
+        details['project'] = self.project.id
         url = "/api/v1/periodic-tasks/"
         self.details_test(url + "{}/".format(ptask.id), **details)
         variables = {"args": "ls -la", "group": "all"}
         data = [dict(mode="shell", schedule="10", type="INTERVAL",
                      project=self.periodic_project_id,
-                     kind="MODULE",
-                     inventory=self.inventory.id, name="one", vars=variables),
+                     kind="MODULE", name="one", vars=variables,
+                     inventory=str(self.inventory.id)),
                 dict(mode="shell",
                      schedule="* */2 1-15 * sun,fri",
                      kind="MODULE",
@@ -521,6 +608,30 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEquals(subprocess_function.call_count, 1)
         self.assertCount(History.objects.all(), count)
 
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_periodictask_inventory_file(self, subprocess_function):
+        url = "/api/v1/periodic-tasks/"
+        # module
+        with open("{}/inventory".format(self.project.path), 'w') as file:
+            file.write("burda")
+        data = dict(mode="shell", schedule="10", type="INTERVAL",
+                    project=self.periodic_project_id,
+                    kind="MODULE",
+                    inventory="inventory", name="one",
+                    vars={"args": "ls -la", "group": "all"})
+        id = self.get_result("post", url, 201, data=json.dumps(data))['id']
+        ScheduledTask.delay(id)
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        inventory_path = call_args[3]
+        expected = "{}/{}/{}".format(
+            settings.PROJECTS_DIR, self.periodic_project_id, "inventory"
+        )
+        self.assertEquals(inventory_path, expected)
+        # can't save with "../"
+        data['inventory'] = "../inventory"
+        self.get_result("post", url, 400, data=json.dumps(data))
+
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
@@ -537,6 +648,8 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             kind="Task",
             data=dict(
                 playbook="test.yml",
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
                 vars=dict(
                     connection="paramiko",
                     tags="update",
@@ -544,16 +657,28 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             )
         )
         self.job_template = Template.objects.create(**self.tmplt_data)
+        # Ugly hack for fix some errors
+        self.tmplt_data.update(dict(
+            name=self.job_template.name,
+            kind=self.job_template.kind,
+            data=self.job_template.data
+        ))
 
     def test_string_template_data(self):
         tmplt_data = dict(
             name="test_tmplt",
             kind="Task",
-            data=dict(vars={})
+            data=dict(
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
+                vars=dict()
+            )
         )
         job_template = Template.objects.create(**tmplt_data)
         job_template.data = json.dumps(dict(
                 playbook="test.yml",
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
                 vars=dict(
                     connection="paramiko",
                     tags="update",
@@ -562,6 +687,9 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertTrue(isinstance(job_template.data, dict))
         with self.assertRaises(ValueError):
             job_template.data = object()
+
+        with self.assertRaises(ValidationError):
+            Template.objects.create(**tmplt_data)
 
     def test_templates(self):
         url = "/api/v1/templates/"
@@ -601,7 +729,7 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                 mode="ping",
                 type="INTERVAL",
                 name="somename",
-                project=2222332221,
+                project=self.pr_tmplt.id,
                 kind="MODULE",
                 inventory=222233222,
                 schedule="12",
@@ -611,6 +739,11 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             )
         )
         ptask_template = Template.objects.create(**ptask_template_data)
+        ptask_template_data.update(dict(
+            name=ptask_template.name,
+            kind=ptask_template.kind,
+            data=ptask_template.data
+        ))
         self.details_test(url + "{}/".format(ptask_template.id),
                           **ptask_template_data)
 
@@ -620,6 +753,7 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             data=dict(
                 module="shell",
                 group="all",
+                project=self.pr_tmplt.id,
                 inventory=222233222,
                 args="ls -la",
                 vars=dict(
@@ -629,6 +763,11 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             )
         )
         module_template = Template.objects.create(**module_template_data)
+        module_template_data.update(dict(
+            name=module_template.name,
+            kind=module_template.kind,
+            data=module_template.data
+        ))
         self.details_test(url + "{}/".format(module_template.id),
                           **module_template_data)
         # test validation
@@ -639,6 +778,20 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.make_test(url, self.tmplt_data, update_func)
         self.make_test(url, module_template_data, update_func, "group")
         self.make_test(url, ptask_template_data, update_func, "group")
+
+        # Filters
+        # by Project
+        search_url = "{}?project={}".format(url, self.pr_tmplt.id)
+        real_count = Template.objects.filter(project=self.pr_tmplt).count()
+        res = self.get_result("get", search_url)
+        self.assertEqual(res["count"], real_count, [res, real_count])
+        # by Inventory
+        search_url = "{}?inventory={}".format(url, self.history_inventory.id)
+        real_count = Template.objects.filter(
+            inventory=str(self.history_inventory.id)
+        ).count()
+        res = self.get_result("get", search_url)
+        self.assertEqual(res["count"], real_count, [res, real_count])
 
 
 class ApiHistoryTestCase(_ApiGHBaseTestCase):
@@ -730,9 +883,6 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         self.assertEqual(line_number, 3, result)
 
         self.get_result("delete", url + "{}/".format(self.histories[0].id))
-
-        self.change_identity()
-        self.list_test(url, 0)
 
     def test_history_raw_output(self):
         raw_stdout = "[0;35mdeprecate" \

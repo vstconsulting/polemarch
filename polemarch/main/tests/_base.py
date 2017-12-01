@@ -10,6 +10,7 @@ from django.db import transaction
 from django.test import TestCase
 from django.conf import settings
 from django.contrib.auth.models import User
+from ...main import models
 
 
 class BaseTestCase(TestCase):
@@ -26,13 +27,24 @@ class BaseTestCase(TestCase):
         with open(file_path, 'r') as inventory_file:
             return inventory_file.read()
 
+    def get_model_filter(self, model, **kwargs):
+        if isinstance(model, (six.text_type, six.string_types)):
+            model = getattr(models, model)
+        return model.objects.filter(**kwargs)
+
+    def get_count(self, model, **kwargs):
+        return self.get_model_filter(model, **kwargs).count()
+
     def change_identity(self, is_super_user=False):
         old_user = self.user
         self.user = self._create_user(is_super_user)
         return old_user
 
+    def random_name(self, length=8):
+        return ''.join(random.sample(string.ascii_lowercase, length))
+
     def _create_user(self, is_super_user=True):
-        username = ''.join(random.sample(string.ascii_lowercase, 8))
+        username = self.random_name()
         email = username + '@gmail.com'
         password = username.upper()
         if is_super_user:
@@ -43,7 +55,6 @@ class BaseTestCase(TestCase):
             user = User.objects.create_user(username=username,
                                             password=password,
                                             email=email)
-        user.related_objects.get_or_create()
         user.data = {'username': username, 'password': password}
         return user
 
@@ -105,7 +116,7 @@ class BaseTestCase(TestCase):
         request = getattr(client, rtype)
         code = code or self.std_codes.get(rtype, 200)
         if kwargs.get("data", False):
-            if isinstance(kwargs["data"], six.string_types):
+            if isinstance(kwargs["data"], (six.string_types, six.text_type)):
                 kwargs["content_type"] = "application/json"
         result = self.result(request, url, code=code, *args, **kwargs)
         self._logout(client)

@@ -11,66 +11,28 @@ pmTasksTemplates.model.className = "pmTasksTemplates"
 pmTasksTemplates.model.kind = "Task"
 pmTemplates.model.kindObjects[pmTasksTemplates.model.kind] = pmTasksTemplates
 
-pmTasksTemplates.showWidget = function(holder, kind)
-{
-    var thisObj = this;
-    var offset = 0
-    var limit = this.pageSize;
-    return $.when(this.sendSearchQuery({kind:kind}, limit, offset)).done(function()
-    {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind}))
-    }).fail(function()
-    {
-        $.notify("", "error");
-    }).promise()
+/**
+ * Для ввода пароля
+ * @type Object
+ */
+pmTasksTemplates.filed.selectProjectInventoryAndPlaybook = inheritance(filedsLib.filed.simpleText)
+pmTasksTemplates.filed.selectProjectInventoryAndPlaybook.type = 'selectProjectInventoryAndPlaybook'
+pmTasksTemplates.filed.selectProjectInventoryAndPlaybook.getValue = function(pmObj, filed){
+    return '';
 }
 
-pmTasksTemplates.showTaskWidget = function(holder)
-{
-    return pmTasksTemplates.showWidget(holder, "Task")
-}
 
-pmTasksTemplates.showModuleWidget = function(holder)
-{
-    return pmTasksTemplates.showWidget(holder, "Module")
-}
-
-pmTasksTemplates.execute = function(item_id)
-{
-    var thisObj = this;
-    var def = new $.Deferred();
-    $.when(this.loadItem(item_id)).done(function()
-    {
-        var val = thisObj.model.items[item_id]
-        $.when(pmTasks.execute(val.data.project, val.data.inventory/1, val.data.playbook, val.data.vars)).done(function()
-        {
-            def.resolve();
-        }).fail(function()
-        {
-            def.reject();
-        })
-
-    }).fail(function()
-    {
-        def.reject();
-    })
-
-    return def.promise()
-}
-
-pmTasksTemplates.showItem = function(holder, menuInfo, data)
-{
-    var def = new $.Deferred();
-    var thisObj = this;
-    var item_id = data.reg[1]
-    $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
-    {
-        thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
-
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id}))
+/**
+ * Функция для рендера текстового поля
+ * @type Object
+ */
+pmTasksTemplates.filed.selectProjectInventoryAndPlaybook.render = function(pmObj, filed, item_id){ 
+    var html = spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id})
+    return spajs.just.onInsert(html, function()
+    { 
         $("#inventories-autocomplete").select2({ width: '100%' });
-        //$("#projects-autocomplete").select2({ width: '100%' });
-
+        $("#projects-autocomplete").select2({ width: '100%' });
+ 
         new autoComplete({
             selector: '#playbook-autocomplete',
             minChars: 0,
@@ -107,6 +69,217 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
             }
         });
 
+    })
+}
+
+   // <a href="#" onclick="pmTasksTemplates.exportSelecedToFile(); return false;" >Export all selected templates</a>
+
+pmTasksTemplates.model.page_list = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(){ return "spajs.open({ menuId:'template/new-task'}); return false;"},
+            title:'Create task template',
+            link:function(){ return '/?template/new-task'},
+        },
+        {
+            class:'btn btn-primary',
+            function:function(){ return "spajs.open({ menuId:'template/new-module'}); return false;"},
+            title:'Create module template',
+            link:function(){ return '/?template/new-module'},
+        },
+    ],
+    actionsOnSelected:[ 
+        {},
+        {
+            class:'btn btn-primary',
+            function:function(){ return "pmTasksTemplates.exportSelecedToFile(); return false;"},
+            title:'Export all selected templates',
+            link:function(){ return '#'},
+        },
+    ],
+    title: "Templates",
+    short_title: "Templates",
+    fileds:[
+        {
+            title:'Name',
+            name:'name',
+            value:function(item)
+            { 
+                return '<a href="/?'+this.model.page_name+'/'+item.kind+'/'+item.id+'" class="item-name" onclick="return spajs.openURL(this.href);" >'+item.name+'</a>'; 
+            }
+        },
+        {
+            title:'Kind',
+            name:'kind',
+            style:function(item){ return 'style="width: 110px"'},
+            class:function(item)
+            { 
+                return 'class="hidden-xs hidden-sm"'; 
+            },
+            value:function(item)
+            { 
+                return item.kind; 
+            }
+        }
+    ],
+    actions:[
+        {
+            class:'btn btn-warning',
+            function:function(item){ return "spajs.showLoader(pmTemplates.model.kindObjects['"+item.kind+"'].execute("+item.id+")); return false;"},
+            title:'Execute',
+            link:function(){ return '#'}
+        }, 
+    ]
+}
+
+pmTasksTemplates.model.page_item = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
+            title:'Save',
+            link:function(){ return '#'},
+        },
+        {
+            class:'btn btn-warning',
+            function:function(item_id){ 
+                return "spajs.showLoader(pmTasks.execute($('#projects-autocomplete').val(), pmTasksTemplates.inventoriesAutocompletefiled.getValue(), $('#playbook-autocomplete').val(), jsonEditor.jsonEditorGetValues())); return false;"
+            },
+            title:'Execute',
+            link:function(){ return '#'},
+            help:'Execute'
+        }, 
+        {
+            class:'btn btn-default copy-btn',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-duplicate" ></span>',
+            link:function(){ return '#'},
+            help:'Copy'
+        },
+        {
+            class:'btn btn-danger danger-right',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
+            link:function(){ return '#'}, 
+        },
+    ],
+    sections:[
+        function(section, item_id){ 
+            return jsonEditor.editor(pmTasksTemplates.model.items[item_id].data.vars, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true});
+        }
+    ],
+    title: function(item_id){
+        return "Task template "+this.model.items[item_id].justText('name')
+    },
+    short_title: function(item_id){
+        return this.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
+    },
+    fileds:[
+        [
+            {
+                filed: new filedsLib.filed.text(),
+                title:'Name',
+                name:'name',
+                placeholder:'Enter template name', 
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Name')
+                },
+                fast_validator:function(value){ return value != '' && value}
+            },
+            // @todo дорефакторить поля ввода
+        ],[
+            {
+                filed: new pmTasksTemplates.filed.selectProjectInventoryAndPlaybook(),
+                name:'project',
+            }, 
+        ]
+    ],
+    onUpdate:function(result)
+    { 
+        return true;
+    },
+    onBeforeSave:function(data, item_id)
+    {
+        data.kind = this.model.kind
+         
+        data.data = {
+            inventory:pmTasksTemplates.inventoriesAutocompletefiled.getValue(),
+            vars:jsonEditor.jsonEditorGetValues()
+        }
+
+        data.data.playbook = $("#playbook-autocomplete").val()
+        data.data.project = $("#projects-autocomplete").val()/1
+
+        return data;
+    },
+}
+
+pmTasksTemplates.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete() 
+pmTasksTemplates.showWidget = function(holder, kind)
+{
+    var thisObj = this;
+    var offset = 0
+    var limit = this.pageSize;
+    return $.when(this.sendSearchQuery({kind:kind}, limit, offset)).done(function()
+    {
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind}))
+    }).fail(function()
+    {
+        $.notify("", "error");
+    }).promise()
+}
+
+pmTasksTemplates.showTaskWidget = function(holder)
+{
+    return pmTasksTemplates.showWidget(holder, "Task")
+}
+
+pmTasksTemplates.showModuleWidget = function(holder)
+{
+    return pmTasksTemplates.showWidget(holder, "Module")
+}
+
+pmTasksTemplates.execute = function(item_id)
+{
+    var thisObj = this;
+    var def = new $.Deferred();
+    $.when(this.loadItem(item_id)).done(function()
+    {
+        var val = thisObj.model.items[item_id]
+        $.when(pmTasks.execute(val.data.project, val.data.inventory, val.data.playbook, val.data.vars)).done(function()
+        {
+            def.resolve();
+        }).fail(function()
+        {
+            def.reject();
+        })
+
+    }).fail(function()
+    {
+        def.reject();
+    })
+
+    return def.promise()
+}
+
+pmTasksTemplates.showItem = function(holder, menuInfo, data)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    var item_id = data.reg[1]
+    $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
+    {
+        thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
+
+        var tpl = thisObj.model.name+'_page'
+        if(!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_page'
+        }
+        
+        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
+        
         def.resolve();
     }).fail(function()
     {
@@ -183,23 +356,27 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
 
     return def.promise()
 }
-
+ 
 /**
  * @return $.Deferred
+ * @todo дорефакторить форму создания Task template
  */
 pmTasksTemplates.addItem = function()
 {
     var def = new $.Deferred();
     var data = {}
 
+    var inventory = pmTasksTemplates.inventoriesAutocompletefiled.getValue()
+    
     data.name = $("#Templates-name").val()
     data.kind = this.model.kind
     data.data = {
         playbook:$("#playbook-autocomplete").val(),
-        inventory:$("#inventories-autocomplete").val(),
+        inventory:inventory,
         project:$("#projects-autocomplete").val(),
         vars:jsonEditor.jsonEditorGetValues()
     }
+    
 
     if(!data.name)
     {
@@ -231,46 +408,33 @@ pmTasksTemplates.addItem = function()
 
     return def.promise();
 }
+ 
 
-/**
- * @return $.Deferred
- */
-pmTasksTemplates.updateItem = function(item_id)
-{
-    var data = {}
-
-    data.name = $("#Templates-name").val()
-    data.kind = this.model.kind
-    data.data = {
-        inventory:$("#inventories-autocomplete").val()/1,
-        vars:jsonEditor.jsonEditorGetValues()
-    }
-
-    data.data.playbook = $("#playbook-autocomplete").val()
-    data.data.project = $("#projects-autocomplete").val()/1
-
-    if(!data.name)
-    {
-        console.warn("Invalid value in field name")
-        $.notify("Invalid value in field name", "error");
-        return;
-    }
-
-    var thisObj = this;
-    return spajs.ajax.Call({
-        url: "/api/v1/templates/"+item_id+"/",
-        type: "PATCH",
-        contentType:'application/json',
-        data:JSON.stringify(data),
-                success: function(data)
-        {
-            thisObj.model.items[item_id] = data
-            $.notify("Save", "success");
-        },
-        error:function(e)
-        {
-            console.warn("project "+item_id+" update error - " + JSON.stringify(e));
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
-}
+tabSignal.connect("polemarch.start", function()
+{ 
+    // Tasks Templates
+    spajs.addMenu({
+        id:"tasks", 
+        urlregexp:[/^templates$/, /^templates\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showList(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"tasks-search", 
+        urlregexp:[/^templates\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showSearchResults(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"Task-item", 
+        urlregexp:[/^template\/Task\/([0-9]+)$/, /^templates\/Task\/([0-9]+)$/], 
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showItem(holder, menuInfo, data);}, 
+    })
+    
+    spajs.addMenu({
+        id:"task-new", 
+        urlregexp:[/^template\/new-task$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showNewItemPage(holder, menuInfo, data);}
+    })
+     
+})

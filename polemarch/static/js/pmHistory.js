@@ -27,8 +27,8 @@ pmHistory.cancelTask = function(item_id)
 pmHistory.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
-    
-    var search = this.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')  
+
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')
     return $.when(this.sendSearchQuery(search)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
@@ -38,8 +38,8 @@ pmHistory.showSearchResults = function(holder, menuInfo, data)
     })
 }
 
-pmPeriodicTasks.search = function(query, options)
-{ 
+pmHistory.search = function(query, options)
+{
     if(options.inventory_id)
     {
         if(this.isEmptySearchQuery(query))
@@ -62,10 +62,10 @@ pmPeriodicTasks.search = function(query, options)
     {
         return spajs.open({ menuId:this.model.name, reopen:true});
     }
-    
+
     return spajs.open({ menuId:this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
 }
- 
+
 
 pmHistory.showListInProjects = function(holder, menuInfo, data)
 {
@@ -101,7 +101,7 @@ pmHistory.showListInInventory = function(holder, menuInfo, data)
 
     return $.when(this.sendSearchQuery({inventory:inventory_id}, limit, offset), pmInventories.loadItem(inventory_id)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id})) 
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -112,10 +112,10 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
 {
     var thisObj = this;
     var project_id = data.reg[1];
-    
+
     var search = this.searchStringToObject(decodeURIComponent(data.reg[2]), 'mode')
     search['project'] = project_id
-     
+
     return $.when(this.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
@@ -134,6 +134,10 @@ pmHistory.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[1];
     return $.when(this.loadItem(item_id)).done(function()
     {
+        if(pmHistory.model.items[item_id].initiator > 0 )
+        {
+            pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
+        }
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
@@ -150,6 +154,10 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
     var item_id = data.reg[2];
     return $.when(this.loadItem(item_id), pmProjects.loadItem(project_id)).done(function()
     {
+        if(pmHistory.model.items[item_id].initiator > 0 )
+        {
+            pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
+        }
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
@@ -228,11 +236,8 @@ pmHistory.loadItem = function(item_id)
         type: "GET",
         contentType:'application/json',
         data: "",
-                success: function(data)
-        {
-            data.test = Math.random();
-
-
+        success: function(data)
+        {    
             if(!thisObj.model.items[item_id])
             {
                 thisObj.model.items[item_id] = {}
@@ -243,20 +248,23 @@ pmHistory.loadItem = function(item_id)
                 thisObj.model.items[item_id][i] = data[i]
             }
 
+            var promise = undefined; 
+            
+            if(data.initiator_type == 'scheduler')
+            {
+                promise = pmPeriodicTasks.loadItemsByIds([data.initiator])
+            }
+
+            if(data.initiator_type == 'users')
+            {
+                promise = pmUsers.loadItemsByIds([data.initiator])
+            }
+ 
             pmHistory.model.items.justWatch(item_id);
 
-            if(data.project && !pmProjects.model.items[data.project])
-            {
-                $.when(pmProjects.loadItem(data.project)).done(function(){
-                    def.resolve()
-                }).fail(function(){
-                    def.reject()
-                })
-            }
-            else
-            {
-                def.resolve()
-            }
+            $.when(pmProjects.loadItem(data.project), promise).always(function(){
+                def.resolve(data)
+            })
         },
         error:function(e)
         {
@@ -303,29 +311,52 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
             //thisObj.model.items = {}
 
             var projects = [];
+            var usersIds = [];
+            var periodicTasks = [];
+
             for(var i in data.results)
             {
                 var val = data.results[i]
+                 
                 thisObj.model.items[val.id] = val
 
-                if(val.project && !pmProjects.model.items[val.project] && projects.indexOf(val.project) == -1)
+                if(val.project && !pmProjects.model.items[val.project] && $.inArray(val.project, projects) == -1)
                 {
                     projects.push(val.project)
                 }
+
+                if(val.initiator > 0 && val.initiator_type == 'users' && $.inArray(val.initiator, usersIds) == -1)
+                {
+                    usersIds.push(val.initiator);
+                }
+                else if(val.initiator > 0 && val.initiator_type == 'scheduler' && $.inArray(val.initiator, periodicTasks) == -1)
+                {
+                    periodicTasks.push(val.initiator);
+                }
             }
 
-            if(projects.length > 0)
+            var users_promise = undefined;
+            var projects_promise = undefined;
+            var periodicTasks_promise = undefined;
+
+            if(periodicTasks.length)
             {
-                $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
-                    def.resolve()
-                }).fail(function(){
-                    def.reject()
-                })
+                periodicTasks_promise = pmPeriodicTasks.loadItemsByIds(periodicTasks)
             }
-            else
+
+            if(usersIds.length)
             {
-                def.resolve()
+                users_promise = pmUsers.loadItemsByIds(usersIds)
             }
+
+            if(projects.length)
+            {
+                projects_promise = pmProjects.sendSearchQuery({id:projects.join(',')})
+            }
+
+            $.when(users_promise, projects_promise, periodicTasks_promise).done(function(){
+                def.resolve(data)
+            })
         },
         error:function(e)
         {
@@ -362,7 +393,8 @@ pmHistory.loadItems = function(limit, offset)
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
                 success: function(data)
-        {
+        { 
+
             //console.log("update Items", data)
             data.limit = limit
             data.offset = offset
@@ -370,30 +402,53 @@ pmHistory.loadItems = function(limit, offset)
             //thisObj.model.items = {}
 
             var projects = [];
+            var usersIds = [];
+            var periodicTasks = [];
+
             for(var i in data.results)
             {
                 var val = data.results[i]
+                  
                 thisObj.model.items.justWatch(val.id);
                 thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
 
-                if(val.project && !pmProjects.model.items[val.project] && projects.indexOf(val.project) == -1)
+                if(val.project && !pmProjects.model.items[val.project] && $.inArray(val.project, projects) == -1)
                 {
                     projects.push(val.project)
                 }
+
+                if(val.initiator > 0 && val.initiator_type == 'users' && $.inArray(val.initiator, usersIds) == -1)
+                {
+                    usersIds.push(val.initiator);
+                }
+                else if(val.initiator > 0 && val.initiator_type == 'scheduler' && $.inArray(val.initiator, periodicTasks) == -1)
+                {
+                    periodicTasks.push(val.initiator);
+                }
+            } 
+            
+            var users_promise = undefined;
+            var projects_promise = undefined;
+            var periodicTasks_promise = undefined;
+
+            if(periodicTasks.length)
+            {
+                periodicTasks_promise = pmPeriodicTasks.loadItemsByIds(periodicTasks)
+            }
+
+            if(usersIds.length)
+            {
+                users_promise = pmUsers.loadItemsByIds(usersIds)
             }
 
             if(projects.length)
             {
-                $.when(pmProjects.sendSearchQuery({id:projects.join(',')})).done(function(){
-                    def.resolve()
-                }).fail(function(){
-                    def.reject()
-                })
+                projects_promise = pmProjects.sendSearchQuery({id:projects.join(',')})
             }
-            else
-            {
-                def.resolve()
-            }
+
+            $.when(users_promise, projects_promise, periodicTasks_promise).always(function(){
+                def.resolve(data)
+            }) 
         },
         error:function(e)
         {
@@ -418,7 +473,7 @@ pmHistory.stopUpdates = function()
 /**
  * Подсветка синтаксиса
  * @link https://habrahabr.ru/post/43030/
- * 
+ *
  * @param {String} code
  * @returns {String}
  */
@@ -587,3 +642,61 @@ pmHistory.loadLines = function(item_id, opt)
 
     return def.promise();
 }
+
+ tabSignal.connect("polemarch.start", function()
+ {
+    // history
+    spajs.addMenu({
+        id:"history",
+        urlregexp:[/^history$/, /^history\/search\/?$/, /^history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showUpdatedList(holder, menuInfo, data);},
+        onClose:function(){return pmHistory.stopUpdates();},
+    })
+
+    spajs.addMenu({
+        id:"history-search",
+        urlregexp:[/^history\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResults(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"history-item",
+        urlregexp:[/^history\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItem(holder, menuInfo, data);},
+        onClose:function(){return pmHistory.stopUpdates();}
+    })
+
+    spajs.addMenu({
+        id:"history-item-in-project",
+        urlregexp:[/^project\/([0-9]+)\/history\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInProjects(holder, menuInfo, data);},
+        onClose:function(){return pmHistory.stopUpdates();}
+    })
+
+    spajs.addMenu({
+        id:"project-history",
+        urlregexp:[/^project\/([0-9]+)\/history$/, /^project\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){
+            return pmHistory.showUpdatedList(holder, menuInfo, data, "showListInProjects", function(menuInfo, data)
+            {
+                var offset = 0
+                var limit = pmHistory.pageSize;
+                if(data.reg && data.reg[2] > 0)
+                {
+                    offset = pmHistory.pageSize*(data.reg[2] - 1);
+                }
+                var project_id = data.reg[1];
+
+                return pmHistory.sendSearchQuery({project:project_id}, limit, offset)
+            });
+        },
+        onClose:function(){return pmHistory.stopUpdates();},
+    })
+
+    spajs.addMenu({
+        id:"project-history-search",
+        urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInProjects(holder, menuInfo, data);}
+    })
+
+ })

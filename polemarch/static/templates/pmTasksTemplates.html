@@ -33,219 +33,49 @@
     </section>
 </script>
 
-<!-- Список templates_list -->
-<script type="text/x-just" data-just="templates_list">
-    <section class="content-header">
-        <h1>
-            Templates
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Templates</li>
-        </ol>
-    </section>
 
-    <section class="content">
-        <a href="<%- polemarch.opt.host %>/?template/new-task" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >Create task template</a>
-        <a href="<%- polemarch.opt.host %>/?template/new-module" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >Create module template</a>
-
-        <span class="btn btn-default textfile" style="margin-left: 10px;" >
-            <input type="file" class="input-file"  onchange="spajs.showLoader(pmTasksTemplates.importFromFile(event));"  >
-            <span class="glyphicon glyphicon-file"></span> Import template
-        </span>
-
-        <br>
-        <br>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        Templates
-                        <%= pmTasksTemplates.searchFiled({query:query}) %>  
-                        <% if(pmTasksTemplates.getTotalPages(pmTasksTemplates.model.itemslist)){ %>
-                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
-                                <%= pmTasksTemplates.paginationHtml(pmTasksTemplates.model.itemslist) %>
-                            </div>
-                        <% } %>
-
-                    </div>
-                    <div class="box-body">
-                        <table class="table table-bordered multiple-select">
-                            <tbody>
-                                <tr>
-                                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); pmTasksTemplates.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
-                                        <div class="ico-on fa fa-toggle-on"></div>
-                                        <div class="ico-off fa  fa-toggle-off"></div>
-                                    </th>
-                                    <th class="hidden-xs hidden-sm">Name</th>
-                                    <th style="width: 105px;">Kind</th>
-                                    <th style="width: 105px;" >Actions</th>
-                                </tr>
-                                <% for(var i in pmTasksTemplates.model.itemslist.results){  val = pmTasksTemplates.model.itemslist.results[i]; %>
-                                    <tr
-                                        class="item-row item-<%- val.id %>  <%- pmTasksTemplates.model.selectedItems.justClass(val.id, 'selected') %>"
-                                        data-id="<%- val.id %>" >
-                                        <td onclick="pmTasksTemplates.toggleSelect(<%- val.id %>); return false;">
-                                            <div class="ico-on fa fa-toggle-on"></div>
-                                            <div class="ico-off fa  fa-toggle-off"></div>
-                                        </td>
-                                        <td>
-                                            <a href="/?template/<%- val.kind %>/<%- val.id %>" class="item-name"
-                                                    onclick="return spajs.openURL(this.href);" ><%- val.name %></a>
-                                        </td>
-                                        <td>
-                                            <%- val.kind %>
-                                        </td>
-                                        <td>
-                                            <a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- val.kind %>'].execute(<%- val.id %>)); return false;">Execute</a>
-                                        </td>
-                                    </tr>
-                                <% } %>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="box-footer clearfix">
-                        <div class="btn-group <%- pmTasksTemplates.model.justNotClass('selectedCount', 'hide') %>" role="group">
-                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Actions on <%= pmTasksTemplates.model.justText('selectedCount') %> items
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a href="#" onclick="pmTasksTemplates.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
-                                </li>
-                                <li>
-                                    <a href="#" onclick="pmTasksTemplates.deleteSelected(); return false;" >Delete all selected elements</a>
-                                </li>
-                                <li role="separator" class="divider"></li>
-                                <li>
-                                    <a href="#" onclick="pmTasksTemplates.exportSelecedToFile(); return false;" >Export all selected templates</a>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <% if(!query){ %>
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Select
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="#" onclick="spajs.showLoader(pmTasksTemplates.toggleSelectEachItem(true)); return false;" >Select all</a>
-                                    </li>
-                                    <li class=" <%- pmTasksTemplates.model.justNotClass('selectedCount', 'hide') %>" >
-                                        <a href="#" onclick="spajs.showLoader(pmTasksTemplates.toggleSelectEachItem(false)); return false;" >Unselect all</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        <% } %>
-                        <% if(pmTasksTemplates.getTotalPages(pmTasksTemplates.model.itemslist)){ %>
-                                <%= pmTasksTemplates.paginationHtml(pmTasksTemplates.model.itemslist) %>
-                        <% } %>
-                    </div>
-                </div>
-            </section>
+<!-- Шаблон полей  Project Inventory и Playbook  -->
+<script type="text/x-just" data-just="filed_type_selectProjectInventoryAndPlaybook"> 
+    <% if(item_id){ %> 
+        
+        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+            <label class="control-label" >Project</label> 
+            <select
+            onchange="pmTasksTemplates.selectProject(this.value);"
+            class="form-control select2"
+            id="projects-autocomplete"
+            data-placeholder="Select project"
+            style="width:100%" > 
+                <% for(var i in pmProjects.model.itemslist.results){ %>
+                    <option
+                        <% if(pmTasksTemplates.model.items[item_id].data.project == pmProjects.model.itemslist.results[i].id){ %>  selected  <% } %>
+                        value="<%- pmProjects.model.itemslist.results[i].id %>"
+                        ><%- pmProjects.model.itemslist.results[i].name %></option>
+                <% } %>
+            </select> 
         </div>
-    </section>
+        
+        <%= pmTasksTemplates.inventoriesAutocompletefiled.render(pmTasksTemplates, {
+            name:'inventory',
+            title:'Inventory',
+            getFiledValue:function(item_id){ 
+                return this.model.items[item_id].data.inventory;
+            },
+        }, item_id, {}) %>
+ 
+        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+            <label class="control-label" >Playbook</label>
+            <input type="text"
+                    class="playbook-autocomplete form-control"
+                    id="playbook-autocomplete"
+                    value="<% if(pmTasksTemplates.model.items[item_id].data.playbook){ %><%- pmTasksTemplates.model.items[item_id].data.playbook %><% } %>">
+        </div>
+    <% }else{ %>
+        <!-- Не задан item_id -->
+    <% } %>
 </script>
 
-<script type="text/x-just" data-just="templates_page">
-    <section class="content-header">
-        <h1>
-            <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
-                <span class="glyphicon glyphicon-arrow-left"></span>
-            </a>
-            <span class="h1-header" >Template `<%= pmTasksTemplates.model.items[item_id].justText('name') %>` run playbook options</span>
 
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
-            <li class="active"><%- pmTasksTemplates.model.items[item_id].name.slice(0, 20) %></li>
-        </ol>
-    </section>
-
-    <section class="content">
-        <button type="button" onclick="spajs.showLoader(pmTasksTemplates.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save</button>
-        <button type="button" onclick="spajs.showLoader(pmTasks.execute($('#projects-autocomplete').val(), $('#inventories-autocomplete').val(), $('#playbook-autocomplete').val(), jsonEditor.jsonEditorGetValues())); return false;"
-               class="btn btn-warning" >Execute</button>
-
-        <button type="button" onclick="spajs.showLoader(pmTasksTemplates.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy template" ><span class="glyphicon glyphicon-duplicate" ></span></button>
-
-        <button type="button" onclick="spajs.showLoader(pmTasksTemplates.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
-            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove template</span>
-        </button>
-        <br>
-        <br>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        Run playbook
-                    </div>
-                    <div class="box-body">
-
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Template name</label>
-                                <input type="text"
-                                        placeholder="Enter name"
-                                        id="Templates-name"
-                                        value="<%- pmTasksTemplates.model.items[item_id].name %>"
-                                        class="form-control"
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Project</label>
-                                <select
-                                onchange="pmTasksTemplates.selectProject(this.value);"
-                                class="form-control select2"
-                                id="projects-autocomplete"
-                                data-placeholder="Select project"
-                                style="width:100%" >
-                                    <option <% if(!pmTasksTemplates.model.items[item_id].data.project){ %> selected <% } %> value="0" >Not set</option>
-                                    <% for(var i in pmProjects.model.itemslist.results){ %>
-                                        <option
-                                            <% if(pmTasksTemplates.model.items[item_id].data.project == pmProjects.model.itemslist.results[i].id){ %>  selected  <% } %>
-                                            value="<%- pmProjects.model.itemslist.results[i].id %>"
-                                            ><%- pmProjects.model.itemslist.results[i].name %></option>
-                                    <% } %>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Inventory</label>
-                                <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
-                                    <option <% if(!pmTasksTemplates.model.items[item_id].data.inventory){ %> selected <% } %> value="0" >Not set</option>
-                                    <% for(var i in pmInventories.model.itemslist.results){ %>
-                                        <option
-                                            <% if(pmTasksTemplates.model.items[item_id].data.inventory == pmInventories.model.itemslist.results[i].id){ %>  selected  <% } %>
-                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
-                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
-                                    <% } %>
-                                </select>
-                            </div>
-
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Playbook</label>
-                                <input type="text"
-                                        class="playbook-autocomplete form-control"
-                                        id="playbook-autocomplete"
-                                        value="<% if(pmTasksTemplates.model.items[item_id].data.playbook){ %><%- pmTasksTemplates.model.items[item_id].data.playbook %><% } %>">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="row">
-            <%= jsonEditor.editor(pmTasksTemplates.model.items[item_id].data.vars, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
-        </div>
-    </section>
-</script>
 
 <script type="text/x-just" data-just="templates_new_page">
 <section class="content-header">
@@ -293,8 +123,7 @@
                                 class="form-control select2"
                                 id="projects-autocomplete"
                                 data-placeholder="Select project"
-                                style="width:100%" >
-                                    <option selected value="0" >Not set</option>
+                                style="width:100%" > 
                                     <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
                                             value="<%- pmProjects.model.itemslist.results[i].id %>"
@@ -304,18 +133,15 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Inventory</label>
-                                <select class="form-control select2" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%" >
-                                    <option selected value="0" >Not set</option>
-                                    <% for(var i in pmInventories.model.itemslist.results){ %>
-                                        <option
-                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
-                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
-                                    <% } %>
-                                </select>
-                            </div>
-
+                         
+                            <%= pmTasksTemplates.inventoriesAutocompletefiled.render(pmTasksTemplates, {
+                                name:'inventory',
+                                title:'Inventory',
+                                getFiledValue:function(item_id){ 
+                                    return this.model.items[item_id].data.inventory;
+                                },
+                            }, null, {}) %>
+                            
                             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Playbook</label>
                                 <input type="text"

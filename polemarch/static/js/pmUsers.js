@@ -1,10 +1,202 @@
- 
-var pmUsers = inheritance(pmItems)  
- 
+
+var pmUsers = inheritance(pmItems)
+
 pmUsers.model.name = "users"
 pmUsers.model.page_name = "user"
 pmUsers.model.className = "pmUsers"
+
+pmUsers.model.page_list = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"'}); return false;"},
+            title:'Create', 
+            link:function(){ return '/?new-'+this.model.page_name}, 
+        }, 
+    ],
+    title: "Users",
+    short_title: "Users",
+    fileds:[
+        {
+            title:'Name',
+            name:'username',
+        }
+    ],
+    actions:[
+        {
+            class:'btn btn-danger',
+            function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+')); return false;'},
+            title:'Delete',
+            link:function(){ return '#'}
+        }
+    ]
+}
   
+// pmUsers.fileds = 
+    
+pmUsers.model.page_new = {
+    title: "New user",
+    short_title: "New user",
+    fileds:[
+        [
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'User name',
+                name:'username',
+                placeholder:'Enter user name',
+                help:'',
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Name')
+                },
+                fast_validator:function(value){ return value != '' && value}
+            },
+            {
+                filed: new filedsLib.filed.password(), 
+                title:'Password',
+                name:'password',
+                placeholder:'Enter user password',
+                help:'',
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Password')
+                },
+                fast_validator:function(value){ return value != '' && value}
+            },
+        ],[
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'Email',
+                name:'email',
+                placeholder:'Enter user email',
+                help:'',
+            },
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'First name',
+                name:'first_name',
+                placeholder:'Enter user first name',
+                help:'',
+            },
+        ],[
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'Last name',
+                name:'last_name',
+                placeholder:'Enter user last name',
+                help:'',
+            },
+            {
+                filed: new filedsLib.filed.boolean(), 
+                title:'Is active',
+                name:'is_active', 
+            }
+        ]
+    ],
+    onCreate:function(result)
+    { 
+        var def = new $.Deferred();
+        $.notify("User created", "success");
+        $.when(spajs.open({ menuId:pmUsers.model.page_name+"/"+result.id})).always(function(){
+            def.resolve()
+        })
+        
+        return def.promise();
+    }
+}
+ 
+pmUsers.model.page_item = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
+            title:'Save', 
+            link:function(){ return '#'}, 
+        }, 
+        {
+            class:'btn btn-default copy-btn',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-duplicate" ></span>',
+            link:function(){ return '#'},
+            help:'Copy'
+        },
+        {
+            class:'btn btn-danger danger-right',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
+            link:function(){ return '#'}, 
+        },
+    ],
+    title: function(item_id){ 
+        return "User "+pmUsers.model.items[item_id].justText('username')
+    },
+    short_title: function(item_id){ 
+        return "User "+pmUsers.model.items[item_id].justText('username', function(v){return v.slice(0, 20)})
+    },
+    fileds:[
+        [
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'User name',
+                name:'username',
+                placeholder:'Enter user name',
+                help:'',
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Name')
+                },
+                fast_validator:function(value){ return value != '' && value}
+            },
+            {
+                filed: new filedsLib.filed.password(), 
+                title:'Password',
+                name:'password',
+                placeholder:'Enter user password',
+                help:'', 
+            },
+        ],[
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'Email',
+                name:'email',
+                placeholder:'Enter user email',
+                help:'',
+            },
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'First name',
+                name:'first_name',
+                placeholder:'Enter user first name',
+                help:'',
+            },
+        ],[
+            {
+                filed: new filedsLib.filed.text(), 
+                title:'Last name',
+                name:'last_name',
+                placeholder:'Enter user last name',
+                help:'',
+            },
+            {
+                filed: new filedsLib.filed.boolean(), 
+                title:'Is active',
+                name:'is_active', 
+            }
+        ]
+    ],
+    onUpdate:function(result)
+    { 
+        return true;
+    },
+    onBeforeSave:function(data, item_id)
+    { 
+        if(!data.password)
+        {
+            delete data.password  
+        }
+
+        return data;
+    },
+}
+ 
+   
 pmUsers.copyItem = function(item_id)
 {
     var def = new $.Deferred();
@@ -37,102 +229,33 @@ pmUsers.copyItem = function(item_id)
 
 
     return def.promise();
-} 
-
-/** 
- * @return $.Deferred
- */
-pmUsers.addItem = function()
-{
-    var def = new $.Deferred();
-    var data = {}
-
-    data.email = $("#new_user_email").val()
-    data.first_name = $("#new_user_first_name").val()
-    data.last_name = $("#new_user_last_name").val()
-    data.username = $("#new_user_username").val()
-    data.is_active = $("#new_user_is_active").hasClass('selected') 
-    data.is_staff = true // $("#new_user_is_staff").val()
-    data.password = $("#new_user_password").val()
-
-    if(!data.username)
-    {
-        $.notify("Invalid value in field name", "error");
-        def.reject()
-        return def.promise();
-    }
-
-    if(!data.password)
-    {
-        $.notify("Invalid value in field password", "error");
-        def.reject()
-        return def.promise();
-    }
- 
-    spajs.ajax.Call({
-        url: "/api/v1/users/",
-        type: "POST",
-        contentType:'application/json',
-        data: JSON.stringify(data),
-                success: function(data)
-        { 
-            $.notify("User created", "success");
-            $.when(spajs.open({ menuId:"user/"+data.id})).always(function(){
-                def.resolve()
-            })
-        },
-        error:function(e)
-        {
-            def.reject()
-            polemarch.showErrors(e.responseJSON)
-        }
-    }); 
-    
-    return def.promise();
 }
+   
+ tabSignal.connect("polemarch.start", function()
+ {
+    // users
+    spajs.addMenu({
+        id:"users",
+        urlregexp:[/^users$/, /^user$/, /^users\/search\/?$/, /^users\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmUsers.showList(holder, menuInfo, data);}
+    })
 
-/** 
- * @return $.Deferred
- */
-pmUsers.updateItem = function(item_id)
-{
-    var data = {}
+    spajs.addMenu({
+        id:"users-search",
+        urlregexp:[/^users\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmUsers.showSearchResults(holder, menuInfo, data);}
+    })
 
-    data.email = $("#user_"+item_id+"_email").val()
-    data.first_name = $("#user_"+item_id+"_first_name").val()
-    data.last_name = $("#user_"+item_id+"_last_name").val()
-    data.username = $("#user_"+item_id+"_username").val()
-    data.is_active = $("#user_"+item_id+"_is_active").hasClass('selected') 
-    data.is_staff = true // $("#user_"+item_id+"_is_staff").val()
+    spajs.addMenu({
+        id:"user",
+        urlregexp:[/^user\/([0-9]+)$/, /^users\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmUsers.showItem(holder, menuInfo, data);}
+    })
 
-    if(!data.username)
-    {
-        console.warn("Invalid value in field name")
-        $.notify("Invalid value in field name", "error");
-        return;
-    }
+    spajs.addMenu({
+        id:"newuser",
+        urlregexp:[/^new-user$/],
+        onOpen:function(holder, menuInfo, data){return pmUsers.showNewItemPage(holder, menuInfo, data);}
+    })
 
-    if($("#user_"+item_id+"_password").val())
-    {
-        data.password = $("#user_"+item_id+"_password").val()
-    }
-
-    var thisObj = this;
-    return spajs.ajax.Call({
-        url: "/api/v1/users/"+item_id+"/",
-        type: "PATCH",
-        contentType:'application/json',
-        data:JSON.stringify(data),
-                success: function(data)
-        { 
-            thisObj.model.items[item_id] = data
-            $.notify("Save", "success");
-        },
-        error:function(e)
-        {
-            console.warn("user "+item_id+" update error - " + JSON.stringify(e)); 
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
-}
- 
+ })

@@ -6,10 +6,16 @@ pmTemplates.model.name = "templates"
 
 // Поддерживаемые kind /api/v1/templates/supported-kinds/
 pmTemplates.model.kind = "Task,Module"
+pmTemplates.model.page_name = "templates"
 pmTemplates.model.className = "pmTemplates"
 
 pmTemplates.copyAndEdit = function(item_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmTemplates.copyAndEdit with item_id = `" + item_id + "`"
+    }
+    
     var def = new $.Deferred();
     var thisObj = this;
     return $.when(this.copyItem(item_id)).done(function(newItemId)
@@ -33,21 +39,6 @@ pmTemplates.copyAndEdit = function(item_id)
 // Содержит соответсвия разных kind к объектами с ними работающими.
 pmTemplates.model.kindObjects = {}
 
-pmTemplates.showSearchResults = function(holder, menuInfo, data)
-{
-    var thisObj = this;
-    var query = decodeURIComponent(data.reg[1])
-
-    var search = this.searchStringToObject(query)
-    search['kind'] = thisObj.model.kind
-    return $.when(this.sendSearchQuery(search)).done(function()
-    {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:query}))
-    }).fail(function()
-    {
-        $.notify("", "error");
-    })
-}
  
 pmTemplates.exportToFile = function(item_ids)
 {
@@ -117,7 +108,7 @@ pmTemplates.exportToFile = function(item_ids)
     return def.promise();
 }
 
-pmTemplates.importFromFile = function(files_event)
+pmTemplates.importFromFile = function(files_event, project_id)
 {  
     var def = new $.Deferred(); 
     this.model.files = files_event
@@ -143,6 +134,7 @@ pmTemplates.importFromFile = function(files_event)
                 for(var i in filedata.data)
                 {
                     var val = filedata.data[i]
+                    val.data.data.project = project_id
                     val.type = "add"
                     bulkdata.push(val)
                 }

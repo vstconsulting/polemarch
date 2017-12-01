@@ -1,6 +1,6 @@
 # pylint: disable=unused-argument,no-member
 from __future__ import absolute_import
-
+import os
 import json
 
 import django_celery_beat
@@ -13,8 +13,9 @@ from django.conf import settings
 from .vars import Variable
 from .hosts import Host, Group, Inventory
 from .projects import Project
-from .users import TypesPermissions
+from .users import UserGroup, ACLPermission
 from .tasks import Task, PeriodicTask, History, HistoryLines, Template
+from .hooks import Hook
 from ..validators import RegexValidator
 from ..exceptions import UnknownTypeException
 from ..utils import raise_context, AnsibleArgumentsReference
@@ -69,7 +70,7 @@ def validate_type(instance, **kwargs):
 
 
 @receiver(signals.pre_save, sender=Template)
-def validate_template(instance, **kwargs):
+def validate_template_keys(instance, **kwargs):
     if instance.kind not in instance.template_fields.keys():
         raise UnknownTypeException(instance.kind)
     errors = {}
@@ -80,6 +81,25 @@ def validate_template(instance, **kwargs):
             )
     if errors:
         raise ValidationError(errors)
+
+
+@receiver(signals.pre_save, sender=Template)
+def validate_template_executes(instance, **kwargs):
+    if instance.kind in ["Host", "Group"]:
+        return  # nocv
+    errors = {}
+    if "inventory" not in instance.data.keys():
+        errors["inventory"] = "Inventory have to set."
+    if "project" not in instance.data.keys():
+        errors["project"] = "Project have to set."
+    if errors:
+        raise ValidationError(errors)
+
+
+@receiver(signals.pre_save, sender=Template)
+def validate_template_args(instance, **kwargs):
+    if instance.kind in ["Host", "Group"]:
+        return  # nocv
     command = "playbook"
     ansible_args = dict(instance.data['vars'])
     if instance.kind == "Module":
@@ -122,9 +142,23 @@ def save_to_beat(instance, **kwargs):
 def delete_from_beat(instance, **kwargs):
     manager = django_celery_beat.models.PeriodicTask.objects
     celery_tasks = manager.filter(name=str(instance.id))
-    if instance.type == "CRONTAB" and celery_tasks.count() > 0:
-        crontab_id = celery_tasks[0].crontab_id
-        others = manager.filter(crontab_id=crontab_id)
-        if others.count() == 1:
-            CrontabSchedule.objects.get(id=crontab_id).delete()
+    for task in celery_tasks:
+        qs_dict = {
+            'crontab_id': CrontabSchedule.objects.all(),
+            'interval_id': IntervalSchedule.objects.all(),
+        }
+        for field in ['crontab_id', 'interval_id']:
+            pk = getattr(task, field)
+            if pk is None:
+                continue
+            others = manager.filter(**{field: pk}).exclude(pk=task.id)
+            if not others.exists():
+                qs_dict[field].get(id=pk).delete()
     celery_tasks.delete()
+
+
+@receiver(signals.pre_save, sender=Hook)
+def check_hook(instance, **kwargs):
+    errors = instance.handlers.validate(instance)
+    if errors:
+        raise ValidationError(errors)

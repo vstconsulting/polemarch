@@ -110,6 +110,21 @@ $.fn.prependTpl = function(tplText)
     return this;
 };
 
+function mergeCopyM(o, obj){
+    
+    if(Array.isArray(obj))
+    {
+        return obj.slice()
+    }
+    
+    if(typeof obj == "object")
+    {
+        return $.extend(true, {}, obj)
+    }
+    
+    return obj
+}
+
 
 var justReactive = {
 
@@ -118,9 +133,14 @@ var justReactive = {
      */
     justStrip:function(html)
     {
-       var tmp = document.createElement("DIV");
-       tmp.innerHTML = html;
-       return tmp.textContent || tmp.innerText || "";
+        if(typeof html != "string")
+        {
+            return "";
+        }
+            
+        var tmp = document.createElement("DIV");
+        tmp.innerHTML = html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return tmp.textContent || tmp.innerText || "";
     },
 
     addMethod:function(setter, prop, method)
@@ -166,7 +186,8 @@ var justReactive = {
         var res = Object.getOwnPropertyDescriptor(obj, prop);
         if(!res)
         {
-            obj[prop] = newval;
+            // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
+            obj[prop] = mergeCopyM(undefined, newval);
             obj.justWatch(prop);
             return;
         }
@@ -175,14 +196,16 @@ var justReactive = {
         {
             if(obj[prop] !== newval)
             {
-                obj[prop] = newval;
+                // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
+                obj[prop] = mergeCopyM(undefined, newval);
             }
             return;
         }
 
         if(typeof obj[prop] != "object" || obj[prop] == null)
         {
-            obj[prop] = newval;
+            // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
+            obj[prop] = mergeCopyM(undefined, newval);
             obj.justWatch(prop);
             return;
         }
@@ -191,6 +214,7 @@ var justReactive = {
         {
             if(newval.length < obj[prop].length)
             {
+                // Если новый массив короче старого то укоротим старый чтоб у них была одинаковая длинна
                 console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
                 Array.prototype.splice.apply(obj[prop], [newval.length, obj[prop].length - newval.length]); 
             }
@@ -207,14 +231,15 @@ var justReactive = {
                 }
                 else
                 {
-                    obj[prop][i] = newval[i];
+                    // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
+                    obj[prop][i] = mergeCopyM(undefined, newval[i]);
                     obj[prop].justWatch(i);
                 }
             }
             return;
         }
 
-
+        // Свойство существует и оно не массив. Поэтому надо выполнить рекурсивное объединение объектов 
         var v1arr = {}
         for(var i in obj[prop])
         {
@@ -235,7 +260,8 @@ var justReactive = {
             }
             else
             {
-                obj[prop][i] = newval[i];
+                // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
+                obj[prop][i] = mergeCopyM(undefined, newval[i]);
                 obj[prop].justWatch(i);
             }
         }
@@ -533,7 +559,7 @@ var justReactive = {
                 });
 
                 if(Array.isArray(newval.val))
-                { 
+                {
                     Object.defineProperty(this[opt.prop], 'splice', {
                             enumerable: false
                           , configurable: true
@@ -630,8 +656,8 @@ var justReactive = {
         {
             var val = opt.callBack(this[opt.prop], opt.customData)
             if(val)
-            {
-                return " data-just-watch-"+id+" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/\"/g, "\\\"") +"\"";
+            { 
+                return " data-just-watch-"+id+" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/"/g, '&quot;') +"\"";
             }
             else
             {
@@ -644,8 +670,8 @@ var justReactive = {
             console.log("bindAttr", opt.prop, val);
             var html = ""
             if(val)
-            {
-                html = " data-just-watch-"+id+"=\"true\" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/\"/g, "\\\"") +"\"";
+            { 
+                html = " data-just-watch-"+id+"=\"true\" "+opt.attrName+"=\""+ justReactive.justStrip(val).replace(/"/g, '&quot;') +"\"";
             }
             else
             {
@@ -775,8 +801,13 @@ Object.defineProperty(Object.prototype, "justClassName", {
             }])
     }
 });
-
-// Проставляет атрибут (односторонний биндинг от модели в дом элементы)
+ 
+/**
+ * Проставляет атрибут (односторонний биндинг от модели в дом элементы)
+ * @example <%= pmUsers.model.items[item_id].justAttr('username', 'value') %>
+ * @param {String} name имя свойства объекта
+ * @param {String} name имя атрибута html тега 
+ */
 Object.defineProperty(Object.prototype, "justAttr", {
     enumerable: false
   , configurable: true

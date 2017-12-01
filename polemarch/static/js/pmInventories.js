@@ -12,7 +12,7 @@ pmInventories.model.className = "pmInventories"
 pmInventories.parseMonoVarsLine = function(index, line)
 {
     var vars = {}
-    var param = /^([^=]+)=(.*)$/.exec(line)
+    var param = /^([^=]+)="(.*)"$/.exec(line)
 
     if(param)
     {
@@ -20,17 +20,25 @@ pmInventories.parseMonoVarsLine = function(index, line)
     }
     else
     {
-        throw "Error in line "+index+" invalid varibles string ("+line+")"
+        param = /^([^=]+)=(.*)$/.exec(line)
+        if(param)
+        {
+            vars[param[1]] = param[2]
+        }
+        else
+        {
+            throw "Error in line "+index+" invalid varibles string ("+line+")"
+        }
     }
     return vars;
 }
-
+ 
 /**
  * Параметры хоста
  * Строка где может быть несколько параметров ключ=значение через пробел
  */
 pmInventories.parseVarsLine = function(index, line)
-{
+{ 
     var vars = {}
     do{
         if(line.length == 0)
@@ -38,37 +46,37 @@ pmInventories.parseVarsLine = function(index, line)
             break;
         }
 
-        var params = /^([^=]+)=["'](.*?)["'] [^=]+=/.exec(line)
+        var params = /^([^=]+)=["'](.*?)["'] +[^=]+=/.exec(line)
         if(params)
         {
-            params[1] = trim(params[1])
-            vars[params[1]] = params[2]
+            params[1] = trim(params[1]) 
+            vars[params[1]] = stripslashes(params[2])
             line = trim(line.slice(params[1].length + params[2].length + 3))
             continue;
         }
 
-        params = /^([^=]+)=["'](.*?)["']$/.exec(line)
+        params = /^([^=]+)=([^ ]*) +[^=]+=/.exec(line)
         if(params)
         {
-            params[1] = trim(params[1])
-            vars[params[1]] = params[2]
-            break;
-        }
-
-        params = /^([^=]+)=(.*?) [^=]+=/.exec(line)
-        if(params)
-        {
-            params[1] = trim(params[1])
-            vars[params[1]] = params[2]
+            params[1] = trim(params[1]) 
+            vars[params[1]] = stripslashes(params[2])
             line = trim(line.slice(params[1].length + params[2].length + 1))
             continue;
         }
 
-        params = /^([^=]+)=(.*?)$/.exec(line)
+        params = /^([^=]+)=["'](.*?)["'] *$/.exec(line)
         if(params)
         {
-            params[1] = trim(params[1])
-            vars[params[1]] = params[2]
+            params[1] = trim(params[1]) 
+            vars[params[1]] = stripslashes(params[2])
+            break;
+        }
+
+        params = /^([^=]+)=([^ ]*) *$/.exec(line)
+        if(params)
+        {
+            params[1] = trim(params[1]) 
+            vars[params[1]] = stripslashes(params[2])
             line = trim(line.slice(params[1].length + params[2].length + 1))
             continue;
         }
@@ -223,7 +231,7 @@ pmInventories.parseFromText = function(text)
 
     for(var i in lines)
     {
-        var line = lines[i]
+        var line = lines[i].replace(/^ */g, "") 
         
         if(/^\s*[#;]\s+inventory name: (.*)/ig.test(line))
         {
@@ -408,28 +416,41 @@ pmInventories.importInventoriesAndOpen = function(inventory)
     }).promise()
 }
 
+pmInventories.showGroupVarsModal = function(opt)
+{
+    return jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "group"+opt.name)
+}
+
+pmInventories.showHostVarsModal = function(opt)
+{ 
+    return jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+opt.name)
+}
+
+pmInventories.showInventoryVarsModal = function(opt)
+{ 
+    return jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "inventory")
+}
+
 pmInventories.importInventory = function(inventory)
 { 
-    var def2 = new $.Deferred(); 
-    var vars = jsonEditor.jsonEditorGetValues('inventory') 
-    if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+    var def2 = new $.Deferred();  
+    if(inventory.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(inventory.vars.ansible_ssh_private_key_file))
     {
         // <!--Вставка файла -->
-        $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-        jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "inventory")
+        $.notify("Error in field ansible_ssh_private_key_file invalid value", "error"); 
+        pmInventories.showInventoryVarsModal();
         def2.reject()
         return def2.promise();
     }
 
     for(var i in inventory.hosts)
     {
-        var val = inventory.hosts[i]
-        var vars = jsonEditor.jsonEditorGetValues('host'+val.name)
-        if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+        var val = inventory.hosts[i] 
+        if(val.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(val.vars.ansible_ssh_private_key_file))
         {
             // <!--Вставка файла -->
             $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-            jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+val.name)
+            pmInventories.showHostVarsModal({group:'all', name:val.name});
             def2.reject()
             return def2.promise();
         }
@@ -437,26 +458,24 @@ pmInventories.importInventory = function(inventory)
 
     for(var i in inventory.groups)
     {
-        var val = inventory.groups[i]
-        var vars = jsonEditor.jsonEditorGetValues('group'+i)
-        if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+        var val = inventory.groups[i] 
+        if(val.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(val.vars.ansible_ssh_private_key_file))
         {
             // <!--Вставка файла -->
             $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-            jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "group"+i)
+            pmInventories.showGroupVarsModal({name:i}); 
             def2.reject()
             return def2.promise();
         }
 
         for(var j in val.hosts)
         {
-            var hval = val.hosts[j]
-            var vars = jsonEditor.jsonEditorGetValues('host'+hval.name)
-            if(vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(vars.ansible_ssh_private_key_file))
+            var hval = val.hosts[j] 
+            if(hval.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(hval.vars.ansible_ssh_private_key_file))
             {
                 // <!--Вставка файла -->
-                $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-                jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+hval.name)
+                $.notify("Error in field ansible_ssh_private_key_file invalid value", "error"); 
+                pmInventories.showHostVarsModal({group:i, name:hval.name});
                 def2.reject()
                 return def2.promise();
             }
@@ -479,7 +498,7 @@ pmInventories.importInventory = function(inventory)
 
     var inventoryObject = {
         name:inventory.name,
-        vars:jsonEditor.jsonEditorGetValues('inventory')
+        vars:inventory.vars
     }
     
     var deleteBulk = []
@@ -502,7 +521,7 @@ pmInventories.importInventory = function(inventory)
                 data:{
                     name:i,
                     children:val.children,
-                    vars:jsonEditor.jsonEditorGetValues('group'+i)
+                    vars:val.vars
                 }
             })
 
@@ -515,7 +534,7 @@ pmInventories.importInventory = function(inventory)
                     data:{
                         name:hval.name,
                         type:hval.type,
-                        vars:jsonEditor.jsonEditorGetValues('host'+hval.name)
+                        vars:hval.vars
                     }
                 })
             }
@@ -532,7 +551,7 @@ pmInventories.importInventory = function(inventory)
                 data:{
                     name:val.name,
                     type:val.type,
-                    vars:jsonEditor.jsonEditorGetValues('host'+val.name)
+                    vars:val.vars
                 }
             })
         }
@@ -844,105 +863,190 @@ pmInventories.copyItem = function(item_id)
     return def.promise();
 }
 
-/**
- * @return $.Deferred
- */
-pmInventories.addItem = function(parent_type, parent_item)
-{
-    var def = new $.Deferred();
-    var data = {}
 
-    data.name = $("#new_inventory_name").val()
-    data.vars = jsonEditor.jsonEditorGetValues()
 
-    if(!data.name)
-    {
-        $.notify("Invalid value in field name", "error");
-        def.reject()
-        return def.promise();
-    }
 
-    var thisObj = this;
-    spajs.ajax.Call({
-        url: "/api/v1/inventories/",
-        type: "POST",
-        contentType:'application/json',
-        data: JSON.stringify(data),
-                success: function(data)
+pmInventories.model.page_list = {
+    title: "Inventories",
+    short_title: "Inventories",
+    buttons:[
         {
-            $.notify("inventory created", "success");
+            class:'btn btn-primary',
+            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"'}); return false;"},
+            title:'Create', 
+            link:function(){ return '/?new-'+this.model.page_name}, 
+        },
+        {
+            tpl:function(){
+                return spajs.just.render('inventories_btn_openImportPageAndImportFiles', {})
+            },
+        },
+    ],
+    fileds:[
+        {
+            title:'Name',
+            name:'name',
+        },
+    ],
+    actions:[
+        {
+            class:'btn btn-danger',
+            function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+'));  return false;'},
+            title:'Delete',
+            link:function(){ return '#'}
+        },
+        {
+            class:'btn btn-default',
+            function:function(item){ return '';},
+            title:'Create sub group',
+            link:function(item)
+            { 
+                return '/?inventory/'+item.id+'/new-group' 
+            },
+        },
+        {
+            class:'btn btn-default',
+            function:function(item){ return '';},
+            title:'Create sub host',
+            link:function(item)
+            { 
+                return '/?inventory/'+item.id+'/new-host' 
+            },
+        }
+    ]
+}
 
-            if(parent_item)
+pmInventories.model.page_new = {
+    title: "New inventory",
+    short_title: "New inventory",
+    fileds:[
+        [
             {
-                if(parent_type == 'project')
-                {
-                    $.when(pmProjects.addSubInventories(parent_item, [data.id])).always(function(){
-                        $.when(spajs.open({ menuId:"project/"+parent_item})).always(function(){
-                            def.resolve()
-                        })
+                filed: new filedsLib.filed.text(),
+                title:'Name',
+                name:'name',
+                placeholder:'Enter inventory name',
+                validator:function(value){ 
+                    return filedsLib.validator.notEmpty(value, 'Name')
+                },
+                fast_validator:function(value){ return value != '' && value}
+            }, 
+        ]
+    ],
+    sections:[
+        function(section){
+            return jsonEditor.editor({}, {block:this.model.name});
+        }
+    ],
+    onBeforeSave:function(data)
+    {
+        data.vars = jsonEditor.jsonEditorGetValues()
+        return data;
+    },
+    onCreate:function(data, status, xhr, callOpt)
+    { 
+        var def = new $.Deferred();
+        $.notify("Inventory created", "success");
+        
+        if(callOpt.parent_item)
+        {
+            if(callOpt.parent_type == 'project')
+            {
+                $.when(pmProjects.addSubInventories(callOpt.parent_item, [data.id])).always(function(){
+                    $.when(spajs.open({ menuId:"project/"+callOpt.parent_item})).always(function(){
+                        def.resolve()
                     })
-                }
-            }
-            else
-            {
-                $.when(spajs.open({ menuId: thisObj.model.page_name + "/"+data.id})).always(function(){
-                    def.resolve()
                 })
             }
-
-        },
-        error:function(e)
-        {
-            def.reject()
-            polemarch.showErrors(e.responseJSON)
         }
-    });
-
-    return def.promise();
-}
-
-/**
- * @return $.Deferred
- */
-pmInventories.updateItem = function(item_id)
-{
-    var data = {}
-
-    data.name = $("#inventory_"+item_id+"_name").val()
-    data.vars = jsonEditor.jsonEditorGetValues()
-
-    if(!data.name)
-    {
-        console.warn("Invalid value in field name")
-        $.notify("Invalid value in field name", "error");
-        return;
+        else
+        {
+            $.when(spajs.open({ menuId: this.model.page_name + "/"+data.id})).always(function(){
+                def.resolve()
+            })
+        }
+        return def.promise();
     }
-
-    var thisObj = this;
-    return spajs.ajax.Call({
-        url: "/api/v1/inventories/"+item_id+"/",
-        type: "PATCH",
-        contentType:'application/json',
-        data:JSON.stringify(data),
-                success: function(data)
-        {
-            thisObj.model.items[item_id] = data
-            $.notify("Save", "success");
-        },
-        error:function(e)
-        {
-            console.warn("inventory "+item_id+" update error - " + JSON.stringify(e));
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
 }
-
+   
+pmInventories.model.page_item = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
+            title:'Save', 
+            link:function(){ return '#'}, 
+        },
+        {
+            class:'btn btn-primary',
+            function:function(item_id){ return 'return spajs.openURL(this.href);'},
+            title:'History',
+            link:function(item_id){ return polemarch.opt.host + '/?inventory/' + item_id + '/history'},
+        },
+        {
+            class:'btn btn-default copy-btn',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-duplicate" ></span>',
+            link:function(){ return '#'},
+            help:'Copy'
+        },
+        {
+            class:'btn btn-danger danger-right',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
+            link:function(){ return '#'}, 
+        },
+    ],
+    sections:[
+        function(section, item_id){
+            return jsonEditor.editor(this.model.items[item_id].vars, {block:this.model.name});
+        },
+        function(section, item_id){
+            return spajs.just.render("inventories_sub_items", {item_id:item_id}) 
+        }
+    ],
+    title: function(item_id){
+        return "Inventory "+this.model.items[item_id].justText('name')
+    },
+    short_title: function(item_id){
+        return "Inventory "+this.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
+    },
+    fileds:[
+        [
+            {
+                filed: new filedsLib.filed.text(),
+                title:'Name',
+                name:'name',
+                placeholder:'Enter inventory name',
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Name')
+                },
+                fast_validator:function(value){ return value != '' && value}
+            }, 
+        ]
+    ],
+    onUpdate:function(result)
+    {
+        return true;
+    },
+    onBeforeSave:function(data, item_id)
+    {
+        data.vars = jsonEditor.jsonEditorGetValues() 
+        return data;
+    },
+}
+   
 /**
  * Показывает форму со списком всех групп.
  * @return $.Deferred
  */
 pmInventories.showAddSubGroupsForm = function(item_id, holder)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.showAddSubGroupsForm with item_id = `" + item_id + "`"
+    }
+    
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
@@ -958,6 +1062,11 @@ pmInventories.showAddSubGroupsForm = function(item_id, holder)
  */
 pmInventories.showAddSubHostsForm = function(item_id, holder)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.showAddSubHostsForm with item_id = `" + item_id + "`"
+    }
+    
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_inventory', {item_id:item_id}))
@@ -975,6 +1084,11 @@ pmInventories.showAddSubHostsForm = function(item_id, holder)
  */
 pmInventories.hasHosts = function(item_id, host_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.hasHosts with item_id = `" + item_id + "`"
+    }
+    
     if(pmInventories.model.items[item_id])
     {
         for(var i in pmInventories.model.items[item_id].hosts)
@@ -996,6 +1110,11 @@ pmInventories.hasHosts = function(item_id, host_id)
  */
 pmInventories.hasGroups = function(item_id, group_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.hasGroups with item_id = `" + item_id + "`"
+    }
+    
     if(pmInventories.model.items[item_id])
     {
         for(var i in pmInventories.model.items[item_id].groups)
@@ -1015,6 +1134,11 @@ pmInventories.hasGroups = function(item_id, group_id)
  */
 pmInventories.setSubGroups = function(item_id, groups_ids)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.setSubGroups with item_id = `" + item_id + "`"
+    }
+    
     if(!groups_ids)
     {
         groups_ids = []
@@ -1053,6 +1177,12 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
     {
         hosts_ids = []
     }
+    
+    if(!item_id)
+    {
+        throw "Error in pmInventories.setSubHosts with item_id = `" + item_id + "`"
+    }
+    
 
     return spajs.ajax.Call({
         url: "/api/v1/inventories/"+item_id+"/hosts/",
@@ -1083,6 +1213,11 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
  */
 pmInventories.addSubGroups = function(item_id, groups_ids)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.addSubGroups with item_id = `" + item_id + "`"
+    }
+    
     if(!groups_ids)
     {
         groups_ids = []
@@ -1134,6 +1269,11 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
  */
 pmInventories.addSubHosts = function(item_id, hosts_ids)
 {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.addSubHosts with item_id = `" + item_id + "`"
+    }
+    
     var def = new $.Deferred();
     if(!hosts_ids || hosts_ids.length == 0)
     {  
@@ -1180,3 +1320,115 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
     });
     return def.promise();
 }
+
+pmInventories.validateGroupName = function(name)
+{
+    if(!name)
+    {
+        return false;
+    }
+ 
+    if(/^[a-zA-Z0-9\-\._]*$/.test(name.toLowerCase()))
+    {
+        return true;
+    } 
+    
+    return false;
+}
+
+
+
+
+/**
+ * Для ввода инвентория
+ * @type Object
+ */
+pmInventories.filed.inventoriesAutocomplete = inheritance(filedsLib.filed.simpleText)
+pmInventories.filed.inventoriesAutocomplete.type = 'inventoriesAutocomplete' 
+pmInventories.filed.inventoriesAutocomplete.getValue = function(pmObj, filed)
+{
+    var inventory = $("#inventories-autocomplete").val()
+    if($("#inventory-source").val() != 'db')
+    {
+        inventory =  $("#inventories-file").val()
+        if(!/^\.\//.test(inventory))
+        {
+            inventory = trim("./"+inventory)
+        }
+    }
+
+    
+    return inventory;
+}
+
+/**
+ * Функция для рендера поля
+ * @type Object
+ */
+pmInventories.filed.inventoriesAutocomplete.render = function(pmObj, filed, item_id)
+{ 
+    var html = spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id, filedObj:this}) 
+    return spajs.just.onInsert(html, function()
+    {
+        // @FixMe требует чтоб были загружены все инвентории pmInventories.loadAllItems()
+        $("#inventories-autocomplete").select2({ width: '100%' });
+         
+        if(filed.onchange && item_id)
+        {
+            filed.onchange({value:filed.getFiledValue.apply(pmObj, [item_id])})
+        }
+        else if(filed.onchange)
+        {
+            if(pmInventories.model.itemslist.results[0])
+            {
+                filed.onchange({value:pmInventories.model.itemslist.results[0].id})
+            }
+            else
+            {
+                filed.onchange({value:""})
+            }
+        }
+    });
+}
+ 
+
+ tabSignal.connect("polemarch.start", function()
+ {
+    // inventories
+    spajs.addMenu({
+        id:"inventories", 
+        urlregexp:[/^inventories$/, /^inventory$/, /^inventories\/search\/?$/, /^inventories\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showList(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"inventories-import", 
+        urlregexp:[/^inventories\/import$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showImportPage(holder, menuInfo, data);}
+    })
+
+    
+    spajs.addMenu({
+        id:"inventories-search", 
+        urlregexp:[/^inventories\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showSearchResults(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"inventory", 
+        urlregexp:[/^inventory\/([0-9]+)$/, /^inventories\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showItem(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"inventory-history", 
+        urlregexp:[/^inventory\/([0-9]+)\/history$/, /^inventory\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showListInInventory(holder, menuInfo, data);}
+    })
+    
+    spajs.addMenu({
+        id:"newInventory", 
+        urlregexp:[/^new-inventory$/, /^([A-z0-9_]+)\/([0-9]+)\/new-inventory$/],
+        onOpen:function(holder, menuInfo, data){return pmInventories.showNewItemPage(holder, menuInfo, data);}
+    }) 
+ })

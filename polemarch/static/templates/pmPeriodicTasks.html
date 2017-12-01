@@ -25,7 +25,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Periodic tasks 
+                        <div style="float:left;">Periodic tasks</div>
                         <%= pmPeriodicTasks.searchFiled({query:query, project_id:project_id}) %>  
                         <% if(pmPeriodicTasks.getTotalPages(pmPeriodicTasks.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
@@ -139,227 +139,117 @@
     </section>
 </script>
 
+ 
+<!-- Шаблон полей  Project Inventory и Playbook  -->
+<script type="text/x-just" data-just="filed_type_selectInventoryKindPlaybookGroupModuleAndTime"> 
+    <% if(item_id){ %>  
+        
+        <%= pmPeriodicTasks.inventoriesAutocompletefiled.render(pmPeriodicTasks, {
+            name:'inventory',
+            title:'Inventory',
+            getFiledValue:function(item_id){ 
+                return pmPeriodicTasks.model.items[item_id].inventory;
+            },
+            onchange:function(event){ 
+                console.log("onchange", event) 
+                if(/[^0-9]/mg.test(event.value))
+                {
+                    pmPeriodicTasks.selectInventory()
+                }
+                else
+                {
+                    pmPeriodicTasks.selectInventory(event.value)
+                }
+            }
+        }, item_id, {}) %> 
 
-<!-- Страница periodic-task -->
-<script type="text/x-just" data-just="periodic-tasks_page">
-    <section class="content-header">
-        <h1>
-            <a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
-                <span class="glyphicon glyphicon-arrow-left"></span>
-            </a>
-            <span class="h1-header" ><%= pmPeriodicTasks.model.items[item_id].justText('name') %></span>
+        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+            <label class="control-label" >Kind</label>
+            <select class="form-control"
+                    id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_kind"
+                    data-placeholder="Select kind"
+                    onchange="pmPeriodicTasks.model.items[<%- item_id %>].kind = this.value;"
+                    style="width:100%" >
+                <option value="PLAYBOOK" <% if(pmPeriodicTasks.model.items[item_id].kind == 'PLAYBOOK'){ %>selected<% } %> >Playbook</option>
+                <option value="MODULE" <% if(pmPeriodicTasks.model.items[item_id].kind == 'MODULE'){ %>selected<% } %> >Module</option>
+            </select>
+            <div class="help-block"></div>
+        </div> 
 
-        </h1>
-        <ol class="breadcrumb"> 
-            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>" onclick="return spajs.openURL(this.href);" ><%- pmProjects.model.items[project_id].name.slice(0, 20) %></a></li>
-            <li><a href="<%- polemarch.opt.host %>/?project/<%- project_id %>/periodic-tasks" onclick="return spajs.openURL(this.href);" >Periodic tasks</a></li>
-            <li class="active"><%- pmPeriodicTasks.model.items[item_id].mode.slice(0, 20) %></li>
-        </ol>
-    </section>
+        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
+            <label class="control-label" >Playbook</label>
+            <input type="text"
+                    placeholder="Enter playbook name"
+                    id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_playbook"
+                    value="<%- pmPeriodicTasks.model.items[item_id].mode %>"
+                    class="form-control"
+                    maxlength="255">
+            <div class="help-block"></div>
+        </div> 
 
-    <section class="content">
-        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.updateItem(<%- item_id %>)); return false;" class="btn btn-primary" >Save task</button>
-        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.execute(<%- project_id %>, <%- item_id %>)); return false;" class="btn btn-warning" >Execute now</button>
-        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.copyAndEdit(<%- item_id %>)); return false;" class="btn btn-default copy-btn" title="Copy template" ><span class="glyphicon glyphicon-duplicate" ></span></button>
-
-        <button type="button" onclick="spajs.showLoader(pmPeriodicTasks.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
-            <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove task</span>
-        </button>  
-        <br>
-        <br> 
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        Periodic task<br>
-                        <div class="box-tools pull-right">
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-
-                        </div>
-                    </div>
-                    <div class="box-body">
-
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Name</label>
-                                <input type="text"
-                                        placeholder="Enter name"
-                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_name"
-                                        value="<%- pmPeriodicTasks.model.items[item_id].name %>"
-                                        class="form-control"
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-                             
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
-                                <label class="control-label" >Save in history</label>
-                                <div class="form-control <% if(pmPeriodicTasks.model.items[item_id].save_result){ %>selected<% } %>"
-                                        onclick="$(this).toggleClass('selected');"
-                                        onselectstart="return false"
-                                        onmousedown="return false"
-                                        style="cursor: pointer;"
-                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_save_result"  >
-                                    <div class="ico-on fa fa-toggle-on"></div>
-                                    <div class="ico-off fa  fa-toggle-off"></div>
-                                    <div class="boolean-title" >Boolean value</div>
-                                </div>
-                                <div class="help-block">Save result of task in history</div>
-                            </div>
-                            
-                        </div>
-
-                        <div class="row">
-                            <div class="form-group col-lg-4">
-                                <label class="control-label" >Inventory</label>
-
-                                <select class="form-control select2"
-                                        onchange="pmPeriodicTasks.selectInventory(this.value);"
-                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_inventory"
-                                        data-placeholder="Select inventory"
-                                        style="width:100%" >
-                                    <% for(var i in pmInventories.model.items){ %>
-                                        <option
-                                            value="<%- pmInventories.model.items[i].id %>"
-                                            <% if(pmPeriodicTasks.model.items[item_id].inventory == pmInventories.model.items[i].id){ %>selected<% } %>
-                                            ><%- pmInventories.model.items[i].name %></option>
-                                    <% } %>
-                                </select>
-                                <div class="help-block"></div>
-                            </div>
-                            
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Kind</label>
-                                <select class="form-control"
-                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_kind"
-                                        data-placeholder="Select kind"
-                                        onchange="pmPeriodicTasks.model.items[<%- item_id %>].kind = this.value;"
-                                        style="width:100%" >
-                                    <option value="PLAYBOOK" <% if(pmPeriodicTasks.model.items[item_id].kind == 'PLAYBOOK'){ %>selected<% } %> >Playbook</option>
-                                    <option value="MODULE" <% if(pmPeriodicTasks.model.items[item_id].kind == 'MODULE'){ %>selected<% } %> >Module</option>
-                                </select>
-                                <div class="help-block"></div>
-                            </div>
-                            
-                        </div> 
-
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
-                                <label class="control-label" >Playbook</label>
-                                <input type="text"
-                                        placeholder="Enter playbook name"
-                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_playbook"
-                                        value="<%- pmPeriodicTasks.model.items[item_id].mode %>"
-                                        class="form-control"
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-                        </div>
-
-                        <div class="row <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %> ">
-                            <~ pmPeriodicTasks.model.selectedInventory>
-                                <%= pmGroups.groupsAutocompleteTemplate(pmPeriodicTasks.model.selectedInventory, pmPeriodicTasks.model.items[item_id].group) %>
-                            <~>
-                        </div>
-                         
-                        <div class="<%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
-                            <%= moduleArgsEditor.moduleFileds({
-                                    module:{value:pmPeriodicTasks.model.items[item_id].mode },
-                                    args:{value:pmPeriodicTasks.model.items[item_id].args }
-                                }) 
-                            %> 
-                        </div>
-                        
-                        <div class="row">
-
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Type</label>
-                                <select
-                                        onchange="pmPeriodicTasks.model.items[<%- item_id %>].type = this.value;"
-                                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_type"
-                                        class="form-control"
-                                        maxlength="255">
-                                        <option value="INTERVAL" <% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %>selected<% } %> >Interval schedule</option>
-                                        <option value="CRONTAB" <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>selected<% } %> >Cron style schedule</option>
-                                </select>
-                                <div class="help-block"></div>
-                            </div>
-
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'INTERVAL' }) %> ">
-                                <label class="control-label" >Interval schedule</label>
-                                <div class="input-group">
-                                    <input type="text"
-                                            placeholder="Enter time interval in seconds"
-                                            id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_schedule_INTERVAL"
-                                            value="<% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %><%- pmPeriodicTasks.model.items[item_id].schedule %><% } %>"
-                                            class="form-control"
-                                            maxlength="255"
-                                            onkeyup="this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+(.)/g, '$1'); $('#interval-schedule-help').html('~ '+Math.floor(this.value/3600*100)/100+'h')"
-                                        >
-                                    <span class="input-group-addon" id="basic-addon2">sec</span>
-                                </div>
-                                <div class="help-block" id="interval-schedule-help">
-                                    <% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %>
-                                            ~<%- Math.floor(pmPeriodicTasks.model.items[item_id].schedule/3600*100)/100  %>h
-                                    <% } %>
-                                </div>
-                            </div>
-
-                            <div class="form-group col-lg-12 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
-                                <label class="control-label" >Schedule `CRONTAB`</label>
-                                <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>
-                                    <%= crontabEditor.editor({string:pmPeriodicTasks.model.items[item_id].schedule}) %>
-                                <% }else{ %>
-                                    <%= crontabEditor.editor({string:''}) %>
-                                <% } %>
-                                <div class="help-block" id=""></div>
-                            </div>
-
-                            <!--
-                            // m h dom mon dow
-                            Параметр	Допустимый интервал
-                            минуты	0-59
-                            часы	0-23
-                            день месяца	1-31
-                            месяц	1-12
-                            день недели	0-7 (0-Вс,1-Пн,2-Вт,3-Ср,4-Чт,5-Пт,6-Сб,7-Вс) (sun mon tue wed thu fri sat)
-                            
-                            * — любая цифра;
-                            целое число;
-                            целые числа через запятую — задание дискретного множества значений, например 1,2,5;
-                            два целых числа, разделенные дефисом, соответствующие диапазону значений, например 3-6.
-
-                            # Выполнять задание в 18 часов 7 минут 13 мая если это пятница
-                            7 18 13 5 5
-
-                            # Выполнять задание раз в час в 0 минут
-                            0 */1 * * *
-
-                            # Выполнять задание каждые семь часов в 0 минут
-                            0 5-7 * * *
-
-                            # Выполнять задание по воскресеньям в 10 час 30 минут
-                            30 5,10 * * 0
-
-                            -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
-                    <%= jsonEditor.editor(pmPeriodicTasks.model.items[item_id].vars, {prefix: "PLAYBOOK", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'}) %>
-                </div>
-                
-                <div class="row <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
-                    <%= jsonEditor.editor(pmPeriodicTasks.model.items[item_id].vars, {prefix: "MODULE", block:'periodic_module', title1:'Arguments', title2:'Adding new argument'}) %>
-                </div>
-                
-            </section>
+        <div class="<%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %> ">
+            <~ pmPeriodicTasks.model.selectedInventory>
+                <%= pmGroups.groupsAutocompleteTemplate(pmPeriodicTasks.model.selectedInventory, pmPeriodicTasks.model.items[item_id].group) %>
+            <~>
         </div>
-    </section>
+
+        <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
+            <%= moduleArgsEditor.moduleFileds({
+                    module:{value:pmPeriodicTasks.model.items[item_id].mode },
+                    args:{value:pmPeriodicTasks.model.items[item_id].args }
+                }) 
+            %> 
+        </div>
+
+        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+            <label class="control-label" >Type</label>
+            <select
+                    onchange="pmPeriodicTasks.model.items[<%- item_id %>].type = this.value;"
+                    id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_type"
+                    class="form-control"
+                    maxlength="255">
+                    <option value="INTERVAL" <% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %>selected<% } %> >Interval schedule</option>
+                    <option value="CRONTAB" <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>selected<% } %> >Cron style schedule</option>
+            </select>
+            <div class="help-block"></div>
+        </div>
+
+        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'INTERVAL' }) %> ">
+            <label class="control-label" >Interval schedule</label>
+            <div class="input-group">
+                <input type="text"
+                        placeholder="Enter time interval in seconds"
+                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_schedule_INTERVAL"
+                        value="<% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %><%- pmPeriodicTasks.model.items[item_id].schedule %><% } %>"
+                        class="form-control"
+                        maxlength="255"
+                        onkeyup="this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+(.)/g, '$1'); $('#interval-schedule-help').html('~ '+Math.floor(this.value/3600*100)/100+'h')"
+                    >
+                <span class="input-group-addon" id="basic-addon2">sec</span>
+            </div>
+            <div class="help-block" id="interval-schedule-help">
+                <% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %>
+                        ~<%- Math.floor(pmPeriodicTasks.model.items[item_id].schedule/3600*100)/100  %>h
+                <% } %>
+            </div>
+        </div>
+
+            <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12  <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
+                <label class="control-label" >Schedule `CRONTAB`</label>
+                <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>
+                    <%= crontabEditor.editor({string:pmPeriodicTasks.model.items[item_id].schedule}) %>
+                <% }else{ %>
+                    <%= crontabEditor.editor({string:''}) %>
+                <% } %>
+                <div class="help-block" id=""></div>
+            </div>
+
+    <% }else{ %>
+        <!-- Не задан item_id -->
+    <% } %>
 </script>
 
+  
 <!-- Страница создания periodic-task -->
 <script type="text/x-just" data-just="periodic-tasks_new_page">
     <section class="content-header">
@@ -420,6 +310,29 @@
 
                         <div class="row">
                            
+                            <%= pmPeriodicTasks.inventoriesAutocompletefiled.render(pmPeriodicTasks, {
+                                name:'inventory',
+                                title:'Inventory',
+                                getFiledValue:function(item_id){ 
+                                    return this.model.items[item_id].data.inventory;
+                                },
+                                onchange:function(event){ 
+                                    console.log("onchange", event) 
+                                    if(/[^0-9]/mg.test(event.value))
+                                    {
+                                        pmPeriodicTasks.selectInventory()
+                                    }
+                                    else
+                                    {
+                                        pmPeriodicTasks.selectInventory(event.value)
+                                    }
+                                }
+                            }, null, {}) %> 
+                        </div>
+ 
+                        
+                        <div class="row">
+                        
                             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Kind</label>
                                 <select class="form-control"
@@ -433,29 +346,6 @@
                                 <div class="help-block"></div>
                             </div>
                             
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Inventory</label>
-
-                                <select class="form-control select2"
-                                        onchange="pmPeriodicTasks.selectInventory(this.value);"
-                                        id="new_periodic-tasks_inventory"
-                                        data-placeholder="Select inventory"
-                                        style="width:100%" >
-                                        <option disabled selected>Not set</option>
-                                    <% for(var i in pmInventories.model.itemslist.results){ %>
-                                        <option
-                                            value="<%- pmInventories.model.itemslist.results[i].id %>"
-                                            ><%- pmInventories.model.itemslist.results[i].name %></option>
-                                    <% } %>
-                                </select>
-                                <div class="help-block"></div>
-                            </div> 
-
-                        </div>
- 
-                        
-                        <div class="row">
-                        
                             <div class="<%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
                                 <~ pmPeriodicTasks.model.selectedInventory>
                                     <%= pmGroups.groupsAutocompleteTemplate(pmPeriodicTasks.model.selectedInventory) %>
@@ -507,41 +397,14 @@
                                     <span class="input-group-addon" id="basic-addon2">sec</span>
                                 </div>
                                 <div class="help-block" id="interval-schedule-help"></div>
-                            </div>
-
-                            <div class="form-group col-lg-12 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
-                                <label class="control-label" >Schedule `CRONTAB`</label>
-                                <%= crontabEditor.editor({string:''}) %>
-                                <div class="help-block" id=""></div>
-                            </div>
-                            <!--
-                            // m h dom mon dow
-                            Параметр	Допустимый интервал
-                            минуты	0-59
-                            часы	0-23
-                            день месяца	1-31
-                            месяц	1-12
-                            день недели	0-7 (0-Вс,1-Пн,2-Вт,3-Ср,4-Чт,5-Пт,6-Сб,7-Вс)
-
-                            * — любая цифра;
-                            целое число;
-                            целые числа через запятую — задание дискретного множества значений, например 1,2,5;
-                            два целых числа, разделенные дефисом, соответствующие диапазону значений, например 3-6.
-
-                            # Выполнять задание в 18 часов 7 минут 13 мая если это пятница
-                            7 18 13 5 5
-
-                            # Выполнять задание раз в час в 0 минут
-                            0 */1 * * *
-
-                            # Выполнять задание каждые семь часов в 0 минут
-                            0 5-7 * * *
-
-                            # Выполнять задание по воскресеньям в 10 час 30 минут
-                            30 5,10 * * 0
-
-                            -->
+                            </div> 
                         </div>
+
+                        <div class="form-group col-lg-12 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
+                            <label class="control-label" >Schedule `CRONTAB`</label>
+                            <%= crontabEditor.editor({string:''}) %>
+                            <div class="help-block" id=""></div>
+                        </div> 
                     </div>
                 </div> 
                 <div class="row <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">

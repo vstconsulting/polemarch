@@ -5,8 +5,10 @@ import logging
 
 from django.db import transaction
 from django.db.models import Q
+from .acl import ACLInventoriesQuerySet
 
 from .base import BManager, models
+from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
 from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex
 from ..utils import get_render
@@ -108,9 +110,9 @@ class GroupQuerySet(AbstractVarsQuerySet):
 class Group(AbstractModel):
     CiclicDependencyError = CiclicDependencyError
     objects     = BManager.from_queryset(GroupQuerySet)()
-    hosts       = models.ManyToManyField(Host, related_query_name="groups")
-    parents     = models.ManyToManyField('Group', blank=True, null=True,
-                                         related_query_name="childrens")
+    hosts       = ManyToManyFieldACL(Host, related_query_name="groups")
+    parents     = ManyToManyFieldACLReverse('Group', blank=True, null=True,
+                                            related_query_name="childrens")
     children    = models.BooleanField(default=False)
 
     class Meta:
@@ -136,16 +138,20 @@ class Group(AbstractModel):
         return get_render("models/group", data), keys
 
 
+class InventoriesQuerySet(AbstractVarsQuerySet, ACLInventoriesQuerySet):
+    pass
+
+
 class Inventory(AbstractModel):
-    objects     = BManager.from_queryset(AbstractVarsQuerySet)()
-    hosts       = models.ManyToManyField(Host)
-    groups      = models.ManyToManyField(Group)
+    objects     = InventoriesQuerySet.as_manager()
+    hosts       = ManyToManyFieldACL(Host)
+    groups      = ManyToManyFieldACL(Group)
 
     class Meta:
         default_related_name = "inventories"
 
     def __unicode__(self):
-        return str(self.name)  # pragma: no cover
+        return str(self.id)  # pragma: no cover
 
     @property
     def groups_list(self):

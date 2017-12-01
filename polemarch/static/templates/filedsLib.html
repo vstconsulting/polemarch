@@ -1,0 +1,55 @@
+
+
+<!-- Шаблон текстового поля -->
+<script type="text/x-just" data-just="filed_type_text">
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label" ><%- filed.title %></label>
+        <input 
+            type="text" 
+            class="form-control" 
+            placeholder="<%- filed.placeholder %>" 
+            id="filed_<%- filed.name %>"
+            <% if(item_id){ %>
+                <%= pmObj.model.items[item_id].justAttr(filed.name, 'value') %>
+            <% } %>
+        >
+        <div class="help-block"><%- filed.help || '' %></div>
+    </div>
+</script>
+
+<!-- Шаблон текстового поля -->
+<script type="text/x-just" data-just="filed_type_password">
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label" ><%- filed.title %></label>
+        <input 
+            type="password" 
+            class="form-control" 
+            placeholder="<%- filed.placeholder %>" 
+            id="filed_<%- filed.name %>"
+            <% if(item_id && false){ %>
+                <%= pmObj.model.items[item_id].justAttr(filed.name, 'value') %>
+            <% } %>
+        >
+        <div class="help-block"><%- filed.help || '' %></div>
+    </div>
+</script>
+
+<!-- Шаблон boolean поля -->
+<script type="text/x-just" data-just="filed_type_boolean">
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
+        <label class="control-label" ><%- filed.title %></label>
+        <div class="form-control <% if(item_id){ %>
+                                    <%= pmObj.model.items[item_id].justClass(filed.name, 'selected') %>
+                                 <% } %>"
+                onclick="$(this).toggleClass('selected');"
+                onselectstart="return false"
+                onmousedown="return false"
+                style="cursor: pointer;"
+                id="filed_<%- filed.name %>">
+            <div class="ico-on fa fa-toggle-on"></div>
+            <div class="ico-off fa  fa-toggle-off"></div>
+            <div class="boolean-title" >Boolean value</div>
+        </div>
+        <div class="help-block"><%- filed.help || '' %></div>
+    </div> 
+</script>

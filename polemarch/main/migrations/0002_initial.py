@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(max_length=20, primary_key=True, serialize=False)),
                 ('group', models.BooleanField(default=False)),
                 ('name', models.CharField(max_length=100, unique=True)),
-                ('data', models.CharField(max_length=2*1024*1024)),
+                ('data', models.TextField()),
                 ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='main.Task')),
             ],
             options={

@@ -74,7 +74,7 @@ pmAnsibleModule.fastCommandWidget_RunBtn = function()
 {
     return pmAnsibleModule.execute(
                 $('#projects-autocomplete').val(),
-                $('#inventories-autocomplete').val(),
+                pmModuleTemplates.inventoriesAutocompletefiled.getValue(),
                 pmGroups.getGroupsAutocompleteValue(),
                 'shell',
                 moduleArgsEditor.getModuleArgs(),
@@ -99,14 +99,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
         def.reject();
         return def.promise();
     }
-
-    if(!(inventory_id/1))
-    {
-        $.notify("Invalid field `inventory` ", "error");
-        def.reject();
-        return def.promise();
-    }
-
+ 
     if(!(project_id/1))
     {
         $.notify("Invalid field `project` ", "error");
@@ -133,7 +126,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
         data = jsonEditor.jsonEditorGetValues();
     }
 
-    data.inventory = inventory_id/1
+    data.inventory = inventory_id
     data.module = module
     data.group = group
     data.args = data_args

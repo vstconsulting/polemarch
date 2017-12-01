@@ -211,8 +211,7 @@ function render(name, callback)
     var def = new $.Deferred();
     var time = 4
 
-    setTimeout(function(name){
-        console.log("render " + name)
+    setTimeout(function(name){ 
         setTimeout(function(){
 
             if(callback)
@@ -234,6 +233,11 @@ function saveReport()
     console.log("saveReport")
 }
 
+/**
+ * В этом массиве должны быть qunit тесты для приложения
+ */ 
+window.qunitTestsArray = []
+ 
 /**
  * Вставляет Qunit и запускает выполнение тестов.
  */
@@ -272,9 +276,7 @@ function injectQunit()
                 "Skipped": details.skipped,
                 "Runtime": details.runtime
             };
-
-            console.log( JSON.stringify( result, null, 2 ) );
-
+ 
             if(!syncQUnit.nextTest())
             {
                 saveReport()
@@ -282,7 +284,10 @@ function injectQunit()
             }
         })
 
-        qunitAddTests()
+        for(var i in window.qunitTestsArray)
+        {
+            window.qunitTestsArray[i].test.call()
+        }
         syncQUnit.nextTest()
 
     }, 500)
@@ -321,9 +326,11 @@ syncQUnit.nextTest = function(name, test)
 ///////////////////////////////////////////////
 
 /**
- * В этой функции должны быть qunit тесты для приложения
+ * qunitAddTests_trim
  */
-function qunitAddTests()
+window.qunitTestsArray.push({
+    step:100,
+    test:function()
 {
     syncQUnit.addTest('trim', function ( assert ) {
         var done = assert.async();
@@ -338,21 +345,33 @@ function qunitAddTests()
         assert.equal(trim('    x   y  '), 'x   y', 'Табы и пробелы внутри строки не трогаем');
 
         render(done);
-    });
-
-    qunitAddTests_users()
-    qunitAddTests_hosts()
-    qunitAddTests_groups()
-    qunitAddTests_inventories()
-    qunitAddTests_projects()
-    qunitAddTests_templates_task()
-    qunitAddTests_templates_modules()
-}
+    }); 
+    
+    syncQUnit.addTest('trim', function ( assert ) {
+        var done = assert.async();
+        
+        var stringArr = [
+            "abc",
+            "A \" A",
+            "A ' \\ \\\\ \t \\ \ g \" ' \' ",
+            '"',
+            'a"b\' g \" \t \ \\ \\\ c', 
+            ' \' \\ " \t \r  \b \e \c \d \n' ,
+        ];
+        for(var i in stringArr)
+        {
+            assert.equal(stripslashes(addslashes(stringArr[i])), stringArr[i], "i:"+stringArr[i]); 
+        }
+        render(done);
+    }); 
+}})
 
 /**
  * Тестирование users
  */
-function qunitAddTests_users()
+window.qunitTestsArray.push({
+    step:200,
+    test:function()
 {
     syncQUnit.addTest('Открытие списка пользователей', function ( assert )
     {
@@ -364,6 +383,7 @@ function qunitAddTests_users()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню users');
             render(done)
         })
@@ -380,6 +400,7 @@ function qunitAddTests_users()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-user');
             render(done)
         })
@@ -394,15 +415,16 @@ function qunitAddTests_users()
         var done = assert.async();
 
         // Заполнение формы с данными пользователя
-        $("#new_user_username").val("admin");
-        $("#new_user_password").val("admin");
-        $("#new_user_email").val("admin");
-        $("#new_user_first_name").val("admin");
-        $("#new_user_last_name").val("admin");
+        $("#filed_username").val("admin");
+        $("#filed_password").val("admin");
+        $("#filed_email").val("admin");
+        $("#filed_first_name").val("admin");
+        $("#filed_last_name").val("admin");
 
         // Отправка формы с данными пользователя
         $.when(pmUsers.addItem()).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно user add Item, а не должно было');
             render(done)
         }).fail(function()
@@ -418,15 +440,16 @@ function qunitAddTests_users()
         var done = assert.async();
 
         // Заполнение формы с данными пользователя
-        $("#new_user_username").val("admin"+t);
-        $("#new_user_password").val("admin");
-        $("#new_user_email").val("admin");
-        $("#new_user_first_name").val("admin");
-        $("#new_user_last_name").val("admin");
+        $("#filed_username").val("admin"+t);
+        $("#filed_password").val("admin");
+        $("#filed_email").val("admin");
+        $("#filed_first_name").val("admin");
+        $("#filed_last_name").val("admin");
 
         // Отправка формы с данными пользователя
         $.when(pmUsers.addItem()).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно user add Item, а не должно было');
             render(done)
         }).fail(function()
@@ -442,12 +465,12 @@ function qunitAddTests_users()
         var done = assert.async();
 
         // Заполнение формы с данными пользователя
-        $("#new_user_username").val("test-user-"+t);
-        $("#new_user_password").val("test-user-"+t);
-        $("#new_user_email").val("test2@user.ru");
-        $("#new_user_first_name").val("test");
-        $("#new_user_last_name").val("user");
-
+        $("#filed_username").val("test-user-"+t);
+        $("#filed_password").val("test-user-"+t);
+        $("#filed_email").val("test2@user.ru");
+        $("#filed_first_name").val("test");
+        $("#filed_last_name").val("user");
+       
         // Отправка формы с данными пользователя
         $.when(pmUsers.addItem()).done(function()
         {
@@ -455,6 +478,7 @@ function qunitAddTests_users()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при user add Item');
             render(done)
         })
@@ -469,14 +493,15 @@ function qunitAddTests_users()
         // с адресом http://192.168.0.12:8080/?user-5
         userId = /user\/([0-9]+)/.exec(window.location.href)[1]
 
-        $("#user_"+userId+"_username").val("admin");
-        $("#user_"+userId+"_password").val("test2-user-"+t);
-        $("#user_"+userId+"_email").val("test2@user.ru");
-        $("#user_"+userId+"_first_name").val("test2-"+t);
-        $("#user_"+userId+"_last_name").val("user2-"+t);
-
+        $("#filed_username").val("admin");
+        $("#filed_password").val("test2-user-"+t);
+        $("#filed_email").val("test2@user.ru");
+        $("#filed_first_name").val("test2-"+t);
+        $("#filed_last_name").val("user2-"+t);
+ 
         $.when(pmUsers.updateItem(userId)).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно update add Item, а не должно было');
             render(done)
         }).fail(function(){
@@ -488,22 +513,24 @@ function qunitAddTests_users()
     syncQUnit.addTest('Изменение пользователя', function ( assert )
     {
         var done = assert.async();
-
+ 
         // Предполагается что мы от прошлого теста попали на страницу редактирования пользователя
         // с адресом http://192.168.0.12:8080/?user-5
         userId = /user\/([0-9]+)/.exec(window.location.href)[1]
 
-        $("#user_"+userId+"_username").val("test2-user-"+t);
-        $("#user_"+userId+"_password").val("test2-user-"+t);
-        $("#user_"+userId+"_email").val("test2@user.ru");
-        $("#user_"+userId+"_first_name").val("test2-"+t);
-        $("#user_"+userId+"_last_name").val("user2-"+t);
+        $("#filed_username").val("test2-user-"+t);
+        $("#filed_password").val("test2-user-"+t);
+        $("#filed_email").val("test2@user.ru");
+        $("#filed_first_name").val("test2-"+t);
+        $("#filed_last_name").val("user2-"+t);
 
         $.when(pmUsers.updateItem(userId)).done(function()
         {
             assert.ok(true, 'Успешно update add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -514,6 +541,7 @@ function qunitAddTests_users()
         var done = assert.async(); 
         $.when(pmUsers.copyAndEdit(999999)).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно copyAndEdit add Item, а не должно было');
             render(done)
         }).fail(function(){
@@ -523,14 +551,16 @@ function qunitAddTests_users()
     }); 
     
     syncQUnit.addTest('Копирование пользователя', function ( assert )
-    {
+    { 
         var done = assert.async();
 
         $.when(pmUsers.copyAndEdit(userId)).done(function()
         {
             assert.ok(true, 'Успешно copyAndEdit add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
             render(done)
         })
@@ -543,6 +573,7 @@ function qunitAddTests_users()
         // Удаление пользователя.
         $.when(pmUsers.deleteItem(999999, true)).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно copyAndEdit add Item, а не должно было');
             render(done)
         }).fail(function(){
@@ -564,7 +595,9 @@ function qunitAddTests_users()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -579,18 +612,22 @@ function qunitAddTests_users()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
     });
-}
+}})
 
 
 /**
  * Тестирование hosts
  */
-function qunitAddTests_hosts()
+window.qunitTestsArray.push({
+    step:300,
+    test:function()
 {
     syncQUnit.addTest('Открытие списка хостов', function ( assert )
     {
@@ -602,6 +639,7 @@ function qunitAddTests_hosts()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню hosts');
             render(done)
         })
@@ -617,6 +655,7 @@ function qunitAddTests_hosts()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню hosts');
             render(done)
         })
@@ -633,6 +672,7 @@ function qunitAddTests_hosts()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-host');
             render(done)
         })
@@ -647,8 +687,7 @@ function qunitAddTests_hosts()
         var done = assert.async();
 
         // Заполнение формы с данными хоста
-        $("#new_host_name").val("test-host-"+t);
-        $("#new_host_type").val("HOST");
+        $("#filed_name").val("test-host-"+t); 
 
         $("#new_json_nameprefix").val("test1");
         $("#new_json_valueprefix").val("val1");
@@ -666,6 +705,7 @@ function qunitAddTests_hosts()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при user add Item');
             render(done)
         })
@@ -680,7 +720,7 @@ function qunitAddTests_hosts()
         // с адресом http://192.168.0.12:8080/?host-5
         itemId = /host\/([0-9]+)/.exec(window.location.href)[1]
 
-        $("#host_"+itemId+"_name").val("test2-hosts-"+t);
+        $("#filed_name").val("test2-hosts-"+t);
 
         $("#new_json_nameprefix").val("test3");
         $("#new_json_valueprefix").val("val3");
@@ -691,7 +731,9 @@ function qunitAddTests_hosts()
         {
             assert.ok(true, 'Успешно update add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -705,7 +747,9 @@ function qunitAddTests_hosts()
         {
             assert.ok(true, 'Успешно copyAndEdit add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
             render(done)
         })
@@ -724,7 +768,9 @@ function qunitAddTests_hosts()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -739,18 +785,22 @@ function qunitAddTests_hosts()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
     });
-}
+}})
 
 
 /**
  * Тестирование groups
  */
-function qunitAddTests_groups()
+window.qunitTestsArray.push({
+    step:400,
+    test:function()
 {
     syncQUnit.addTest('Проверка функции validateHostName', function ( assert ) {
         var done = assert.async();
@@ -783,6 +833,7 @@ function qunitAddTests_groups()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню groups');
             render(done)
         })
@@ -799,6 +850,7 @@ function qunitAddTests_groups()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-group');
             render(done)
         })
@@ -808,12 +860,12 @@ function qunitAddTests_groups()
     t = t.getTime()
 
     syncQUnit.addTest('Сохранение группы', function ( assert )
-    {
+    { 
         // Предполагается что мы от прошлого теста попали на страницу создания группы
         var done = assert.async();
 
         // Заполнение формы с данными группы
-        $("#new_group_name").val("test-group-"+t);
+        $("#filed_name").val("test-group-"+t);
 
         $("#new_json_nameprefix").val("test1");
         $("#new_json_valueprefix").val("val1");
@@ -823,8 +875,7 @@ function qunitAddTests_groups()
         $("#new_json_valueprefix").val("val2");
         jsonEditor.jsonEditorAddVar();
 
-        $("#new_group_children").addClass('selected');
-
+        $("#filed_children").addClass('selected');
         // Отправка формы с данными группы
         $.when(pmGroups.addItem()).done(function()
         {
@@ -832,6 +883,7 @@ function qunitAddTests_groups()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при group add Item');
             render(done)
         })
@@ -845,7 +897,7 @@ function qunitAddTests_groups()
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
 
-        $("#group_"+itemId+"_name").val("test2-group-"+t);
+        $("#filed_name").val("test2-group-"+t);
 
         $("#new_json_nameprefix").val("test3");
         $("#new_json_valueprefix").val("val3");
@@ -856,12 +908,99 @@ function qunitAddTests_groups()
         {
             assert.ok(true, 'Успешно update add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
     });
 
+    syncQUnit.addTest('Обновление группы setSubGroups', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+
+         
+        assert.ok(!pmGroups.hasGroups(itemId, 99999999999), 'pmGroups.hasGroups() вернула не тот результат'); 
+
+        $.when(pmGroups.setSubGroups(itemId, [99999999999])).done(function()
+        {
+            assert.ok(true, 'Успешно setSubGroups');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при setSubGroups'); // На сервере такой группы наверное нет
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Обновление группы setSubHosts', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+
+          
+        assert.ok(!pmGroups.hasHosts(itemId, 99999999999), 'pmGroups.hasHosts() вернула не тот результат');
+
+        $.when(pmGroups.setSubHosts(itemId, [99999999999])).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при setSubHosts');
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Успешно setSubHosts'); // Group is children.
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('pmGroups.showAddSubGroupsForm', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+ 
+        $.when(pmGroups.showAddSubGroupsForm(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно showAddSubGroupsForm');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при showAddSubGroupsForm');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('pmGroups.showAddSubHostsForm', function ( assert )
+    {
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+ 
+        $.when(pmGroups.showAddSubHostsForm(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно showAddSubHostsForm');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при showAddSubHostsForm');
+            render(done)
+        })
+    });
+    
     syncQUnit.addTest('Открытие страницы создания подгруппы', function ( assert )
     {
         var done = assert.async();
@@ -877,19 +1016,20 @@ function qunitAddTests_groups()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню создания подгруппы new-group');
             render(done)
         })
     });
 
-    var itemId = undefined
+    var itemId = undefined 
     syncQUnit.addTest('Сохранение подгруппы', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания группы
         var done = assert.async();
 
         // Заполнение формы с данными группы
-        $("#new_group_name").val("test-sub-group-"+t);
+        $("#filed_name").val("test-sub-group-"+t);
 
         $("#new_json_nameprefix").val("test1");
         $("#new_json_valueprefix").val("val1");
@@ -898,16 +1038,17 @@ function qunitAddTests_groups()
         $("#new_json_nameprefix").val("test2");
         $("#new_json_valueprefix").val("val2");
         jsonEditor.jsonEditorAddVar();
-
+        
         var master_group_itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
         itemId = master_group_itemId
-
+        
         // Отправка формы с данными группы
         $.when(pmGroups.addItem('group', master_group_itemId)).done(function()
         {
             var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
             if(master_group_itemId != itemId)
             {
+                debugger;
                 assert.ok(false, 'Ошибка при добавлении подгруппы ' + master_group_itemId +"!="+ itemId);
                 render(done)
             }
@@ -919,6 +1060,7 @@ function qunitAddTests_groups()
 
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при group sub add Item');
             render(done)
         })
@@ -930,6 +1072,7 @@ function qunitAddTests_groups()
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
         $.when(pmGroups.addSubGroups(itemId, [999999])).done(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
             render(done)
         }).fail(function()
@@ -945,6 +1088,7 @@ function qunitAddTests_groups()
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
         $.when(pmGroups.addSubHosts(itemId, [999999])).done(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
             render(done)
         }).fail(function()
@@ -965,7 +1109,9 @@ function qunitAddTests_groups()
         {
             assert.ok(true, 'Успешно copyAndEdit Item '+itemId);
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit Item '+itemId);
             render(done)
         })
@@ -984,7 +1130,9 @@ function qunitAddTests_groups()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -999,18 +1147,132 @@ function qunitAddTests_groups()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
     });
-}
+    
+    
+    
+    
+    syncQUnit.addTest('Страница создания группы не children', function ( assert )
+    {
+        var done = assert.async();
+
+        // Открытие пункта меню new-host
+        $.when(spajs.open({ menuId:"new-group"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-group');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню new-group');
+            render(done)
+        })
+    });
+
+    var t = new Date();
+    t = t.getTime()
+
+    syncQUnit.addTest('Сохранение группы не children', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания группы
+        var done = assert.async();
+
+        // Заполнение формы с данными группы
+        $("#filed_name").val("test-group-"+t);
+
+        $("#new_json_nameprefix").val("test3");
+        $("#new_json_valueprefix").val("val3");
+        jsonEditor.jsonEditorAddVar();
+
+        $("#new_json_nameprefix").val("test4");
+        $("#new_json_valueprefix").val("val4");
+        jsonEditor.jsonEditorAddVar();
+ 
+        // Отправка формы с данными группы
+        $.when(pmGroups.addItem()).done(function()
+        {
+            assert.ok(true, 'Успешно group add Item');
+            render(done)
+        }).fail(function()
+        { 
+            debugger;
+            assert.ok(false, 'Ошибка при group add Item');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Обновление группы не children', function ( assert )
+    { 
+        var done = assert.async();
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+
+         
+        assert.ok(!pmGroups.hasGroups(itemId, 99999999999), 'pmGroups.hasGroups() вернула не тот результат'); 
+
+        $.when(pmGroups.setSubGroups(itemId, [99999999999])).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при setSubGroups'); // На сервере такой группы наверное нет
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Успешно setSubGroups'); // Group is children.
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Обновление группы не children', function ( assert )
+    { 
+        var done = assert.async();  
+        assert.ok(!pmGroups.hasHosts(itemId, 99999999999), 'pmGroups.hasHosts() вернула не тот результат');
+
+        $.when(pmGroups.setSubHosts(itemId, [99999999999])).done(function()
+        {
+            assert.ok(true, 'Успешно setSubHosts'); // Group is children.
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при setSubHosts');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление группы не children', function ( assert )
+    {
+        var done = assert.async();
+
+        // Удаление группы.
+        $.when(pmGroups.deleteItem(itemId, true)).done(function()
+        {
+            assert.ok(true, 'Успешно delete add Item');
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при delete add Item');
+            render(done)
+        })
+    });
+    
+    
+    
+    
+}})
 
 
 /**
  * Тестирование inventories
  */
-function qunitAddTests_inventories()
+window.qunitTestsArray.push({
+    step:500,
+    test:function()
 {
     syncQUnit.addTest('Список инвенториев', function ( assert )
     {
@@ -1022,6 +1284,7 @@ function qunitAddTests_inventories()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню inventories');
             render(done)
         })
@@ -1038,11 +1301,13 @@ function qunitAddTests_inventories()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-inventory');
             render(done)
         })
     });
 
+   
     var t = new Date();
     t = t.getTime()
 
@@ -1052,7 +1317,7 @@ function qunitAddTests_inventories()
         var done = assert.async();
 
         // Заполнение формы с данными inventory
-        $("#new_inventory_name").val("test-inventory-"+t);
+        $("#filed_name").val("test-inventory-"+t);
 
         $("#new_json_nameprefix").val("test1");
         $("#new_json_valueprefix").val("val1");
@@ -1070,6 +1335,7 @@ function qunitAddTests_inventories()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при inventory add Item');
             render(done)
         })
@@ -1083,7 +1349,7 @@ function qunitAddTests_inventories()
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
 
-        $("#inventory_"+itemId+"_name").val("test2-inventory-"+t);
+        $("#filed_name").val("test2-inventory-"+t);
 
         $("#new_json_nameprefix").val("test3");
         $("#new_json_valueprefix").val("val3");
@@ -1093,7 +1359,9 @@ function qunitAddTests_inventories()
         {
             assert.ok(true, 'Успешно update add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -1105,6 +1373,7 @@ function qunitAddTests_inventories()
         var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
         $.when(pmInventories.addSubGroups(itemId, [999999])).done(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
             render(done)
         }).fail(function()
@@ -1120,6 +1389,7 @@ function qunitAddTests_inventories()
         var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
         $.when(pmInventories.addSubHosts(itemId, [999999])).done(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
             render(done)
         }).fail(function()
@@ -1130,7 +1400,7 @@ function qunitAddTests_inventories()
     })
 
     var itemId = undefined
-    syncQUnit.addTest('Копирование группы', function ( assert )
+    syncQUnit.addTest('Копирование Inventory', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу редактирования группы
         // с адресом http://192.168.0.12:8080/?group-5
@@ -1141,13 +1411,26 @@ function qunitAddTests_inventories()
         {
             assert.ok(true, 'Успешно copyAndEdit add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
             render(done)
         })
     });
 
-    syncQUnit.addTest('Удаление копии группы', function ( assert )
+    syncQUnit.addTest('Проверка функции автокомплита для групп', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+        
+        pmGroups.groupsAutocompleteMatcher("A", function(res){
+            assert.ok(true, 'Успешно'); 
+        }, itemId) 
+    });
+    
+    syncQUnit.addTest('Удаление копии Inventory', function ( assert )
     {
         var done = assert.async();
 
@@ -1155,17 +1438,34 @@ function qunitAddTests_inventories()
         // с адресом http://192.168.0.12:8080/?user-5
         var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
 
-        // Удаление пользователя.
         $.when(pmInventories.deleteItem(itemId, true)).done(function()
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
     });
 
+    syncQUnit.addTest('Страница списка inventory History', function ( assert )
+    {
+        var done = assert.async(); 
+        $.when(spajs.open({ menuId:'inventory/'+itemId+'/history'})).done(function()
+        {
+            assert.ok(true, 'Страница открылась');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Страница не открылась');
+            render(done)
+        })
+    })
+    
+    
     syncQUnit.addTest('Удаление inventory', function ( assert )
     {
         var done = assert.async();
@@ -1175,7 +1475,9 @@ function qunitAddTests_inventories()
         {
             assert.ok(true, 'Успешно delete Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete Item');
             render(done)
         })
@@ -1214,7 +1516,7 @@ N0PTEwLjIwLjAuOAo="
 124.3.4.[44:55]
 124.3.5.[1:250] ansible_host=10.20.0.2 ansible_user=root ansible_ssh_pass=eadgbe ansible_ssh_private_key_file=/root/f.txt
 124.3.5.[1:251] ansible_host="10.20.0.2" ansible_user='root' ansible_ssh_pass=eadgbe
-124.3.5.[1:252] ansible_host="10.20.0.12" ansible_user='r"o\'ot' ansible_ssh_pass=eadgbe
+124.3.5.[1:252] ansible_host="10.20.0.12" ansible_user="r\"o\'ot" ansible_ssh_pass=eadgbe
 
 # Global vars
 [all:vars]
@@ -1275,237 +1577,13 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню inventories/import');
             render(done)
         })
     });
 
-    var etalon = {
-        "hosts": [
-          {
-            "name": "1.2.3.[1:255]",
-            "type": "RANGE",
-            "vars": {
-
-            }
-          },
-          {
-            "name": "124.3.4.[44:55]",
-            "type": "RANGE",
-            "vars": {
-
-            }
-          },
-          {
-            "name": "124.3.5.[1:250]",
-            "type": "RANGE",
-            "vars": {
-              "ansible_host": "10.20.0.2",
-              "ansible_user": "root",
-              "ansible_ssh_pass": "eadgbe",
-              "ansible_ssh_private_key_file": "/root/f.txt" 
-            }
-          },
-          {
-            "name": "124.3.5.[1:251]",
-            "type": "RANGE",
-            "vars": {
-              "ansible_host": "10.20.0.2",
-              "ansible_user": "root",
-              "ansible_ssh_pass": "eadgbe"
-            }
-          },
-          {
-            "name": "124.3.5.[1:252]",
-            "type": "RANGE",
-            "vars": {
-              "ansible_host": "10.20.0.12",
-              "ansible_user": "r\"o\\'ot",
-              "ansible_ssh_pass": "eadgbe"
-            }
-          }
-        ],
-        "groups": {
-          "git": {
-            "vars": {
-
-            },
-            "groups": [
-              "ci",
-              "git-servers"
-            ],
-            "hosts": [
-
-            ],
-            "children": true
-          },
-          "cloud": {
-            "vars": {
-
-            },
-            "groups": [
-              "git",
-              "services",
-              "test"
-            ],
-            "hosts": [
-
-            ],
-            "children": true
-          },
-          "test": {
-            "vars": {
-              "ansible_ssh_private_key_file": "/root/f.txt"
-            },
-            "groups": [
-
-            ],
-            "hosts": [
-              {
-                "name": "test.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_user": "centos"
-                }
-              },
-              {
-                "name": "test2.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "172.16.1.26"
-                }
-              }
-            ]
-          },
-          "ci": {
-            "vars": {
-
-            },
-            "groups": [
-
-            ],
-            "hosts": [
-              {
-                "name": "git-ci-1",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "172.16.1.13",
-                  "ansible_ssh_private_key_file": "/root/f.txt"
-                }
-              },
-              {
-                "name": "git-ci-2",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "172.16.1.14"
-                }
-              }
-            ]
-          },
-          "git-servers": {
-            "vars": {
-
-            },
-            "groups": [
-
-            ],
-            "hosts": [
-              {
-                "name": "git.vst.lan",
-                "type": "HOST",
-                "vars": {
-
-                }
-              }
-            ]
-          },
-          "services": {
-            "vars": {
-
-            },
-            "groups": [
-
-            ],
-            "hosts": [
-              {
-                "name": "chat.vstconsulting.net",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "172.16.1.16"
-                }
-              },
-              {
-                "name": "pipc.vst.lan",
-                "type": "HOST",
-                "vars": {
-
-                }
-              },
-              {
-                "name": "redmine.vst.lan",
-                "type": "HOST",
-                "vars": {
-
-                }
-              }
-            ]
-          },
-          "openstack": {
-            "vars": {
-
-            },
-            "groups": [
-
-            ],
-            "hosts": [
-              {
-                "name": "fuel.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "10.20.0.2",
-                  "ansible_user": "root",
-                  "ansible_ssh_pass": "eadgbe"
-                }
-              },
-              {
-                "name": "os-compute-1.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "10.20.0.9"
-                }
-              },
-              {
-                "name": "os-compute-2.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "10.20.0.13",
-                  "ansible_ssh_private_key_file": "/root/f.txt"
-                }
-              },
-              {
-                "name": "os-controller-1.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "10.20.0.6"
-                }
-              },
-              {
-                "name": "os-controller-2.vst.lan",
-                "type": "HOST",
-                "vars": {
-                  "ansible_host": "10.20.0.8"
-                }
-              }
-            ]
-          }
-        },
-        "vars": {
-          "ansible_user": "grey",
-          "ansible_ssh_private_key_file": "/root/f.txt",
-          "ansible_ssh_extra_args": "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-        },
-        name : "inventory",
-    }
+    var etalon = {"hosts":[{"name":"1.2.3.[1:255]","type":"RANGE","vars":{}},{"name":"124.3.4.[44:55]","type":"RANGE","vars":{}},{"name":"124.3.5.[1:250]","type":"RANGE","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"124.3.5.[1:251]","type":"RANGE","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"124.3.5.[1:252]","type":"RANGE","vars":{"ansible_host":"10.20.0.12","ansible_user":"r\"o\'ot","ansible_ssh_pass":"eadgbe"}}],"groups":{"git":{"vars":{},"groups":["ci","git-servers"],"hosts":[],"children":true,"dataLevel":{"level":2,"parents":["all","cloud","git"]}},"ci":{"vars":{},"groups":[],"hosts":[{"name":"git-ci-1","type":"HOST","vars":{"ansible_host":"172.16.1.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"git-ci-2","type":"HOST","vars":{"ansible_host":"172.16.1.14"}}],"dataLevel":{"level":3,"parents":["all","cloud","git","ci"]}},"git-servers":{"vars":{},"groups":[],"hosts":[{"name":"git.vst.lan","type":"HOST","vars":{}}],"dataLevel":{"level":3,"parents":["all","cloud","git","git-servers"]}},"cloud":{"vars":{},"groups":["git","services","test"],"hosts":[],"children":true,"dataLevel":{"level":1,"parents":["all","cloud"]}},"services":{"vars":{},"groups":[],"hosts":[{"name":"chat.vstconsulting.net","type":"HOST","vars":{"ansible_host":"172.16.1.16"}},{"name":"pipc.vst.lan","type":"HOST","vars":{}},{"name":"redmine.vst.lan","type":"HOST","vars":{}}],"dataLevel":{"level":2,"parents":["all","cloud","services"]}},"test":{"vars":{"ansible_ssh_private_key_file":"/root/f.txt"},"groups":[],"hosts":[{"name":"test.vst.lan","type":"HOST","vars":{"ansible_user":"centos"}},{"name":"test2.vst.lan","type":"HOST","vars":{"ansible_host":"172.16.1.26"}}],"dataLevel":{"level":2,"parents":["all","cloud","test"]}},"openstack":{"vars":{},"groups":[],"hosts":[{"name":"fuel.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"os-compute-1.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.9"}},{"name":"os-compute-2.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"os-controller-1.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.6"}},{"name":"os-controller-2.vst.lan","type":"HOST","vars":{"ansible_host":"10.20.0.8"}}],"dataLevel":{"level":1,"parents":["all","openstack"]}}},"vars":{"ansible_user":"grey","ansible_ssh_private_key_file":"/root/f.txt","ansible_ssh_extra_args":"-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"},"name":"inventory"}
     var inventory = undefined;
 
     syncQUnit.addTest('Парсинг inventory', function ( assert )
@@ -1518,7 +1596,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             inventory:inventory,
             text:pmInventoriesText
         }
-
+  
         var res = deepEqual(etalon, inventory)   
         assert.ok(res, 'Сравнение инвентория распарсенного и оригинального');
         render(done)
@@ -1535,6 +1613,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
 
             $.when(pmInventories.importInventory(inventory)).done(function()
             {
+                debugger;
                 assert.ok(false, 'Успешно импортирован не валидный инвенторий (а это не правильно)');
                 render(done)
             }).fail(function()
@@ -1544,6 +1623,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню inventories/import');
             render(done)
         }) 
@@ -1551,24 +1631,20 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
 
     syncQUnit.addTest('Импорт валидного inventory', function ( assert )
     {  
-        jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', 'inventory') 
+        delete inventory.vars.ansible_ssh_private_key_file
         for(var i in inventory.hosts)
-        {
-            var val = inventory.hosts[i]
-            jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', 'host'+val.name) 
+        { 
+            delete inventory.hosts[i].vars.ansible_ssh_private_key_file 
         }
         for(var i in inventory.groups)
         {
-            var val = inventory.groups[i]
-            jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', "group"+i) 
-            
-            for(var j in val.hosts)
+            delete inventory.groups[i].vars.ansible_ssh_private_key_file   
+            for(var j in inventory.groups[i].hosts)
             {
-                var hval = val.hosts[j]
-                jsonEditor.jsonEditorRmVar('ansible_ssh_private_key_file', "host"+hval.name) 
+                delete inventory.groups[i].hosts[j].vars.ansible_ssh_private_key_file   
             }
         }
-          
+         
         var done = assert.async();
         $("#inventory_name").val("inventory")
         $.when(pmInventories.importInventory(inventory)).done(function()
@@ -1577,6 +1653,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
             render(done)
         }).fail(function()
         { 
+            debugger;
             assert.ok(false, 'Ошибка в импорте инвентория');
             render(done)
         })
@@ -1595,6 +1672,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
         $("#inventory_name").val("inventory") 
         $.when(pmInventories.importInventory(inventory)).done(function()
         { 
+            debugger;
             assert.ok(false, 'Успешно импортирован инвенторий а должна быть ошибка');
             render(done)
         }).fail(function()
@@ -1614,57 +1692,50 @@ G9zCmFuc2libGVfc3NoX3ByaXZhdGVfa2V5X2ZpbGU9L2hvbWUvY2VwcmV1L2RlZmF1bHQucGVtCmFu\
 c2libGVfYmVjb21lPXRydWU="
         inventoryText = Base64.decode(inventoryText)
         
-        var inventory = pmInventories.parseFromText(inventoryText)
+        inventory = pmInventories.parseFromText(inventoryText)
         var etalon = {
-            "hosts": [],
-            "groups": {
-              "servers": {
-                "vars": {
-                  "ansible_user": "centos",
-                  "ansible_ssh_private_key_file": "/home/cepreu/default.pem",
-                  "ansible_become": "true"
+            "hosts":[],
+            "groups":{
+                "servers":{
+                    "vars":{"ansible_user":"centos","ansible_ssh_private_key_file":"/home/cepreu/default.pem","ansible_become":"true"},
+                    "groups":["usual","unusual"],
+                    "hosts":[],
+                    "children":true,
+                    "dataLevel":{"level":1,"parents":["all","servers"]}
                 },
-                "groups": [
-                  "usual",
-                  "unusual"
-                ],
-                "hosts": [],
-                "children": true
-              },
-              "usual": {
-                "vars": {},
-                "groups": [],
-                "hosts": [
-                  {
-                    "name": "172.16.1.[30:31]",
-                    "type": "RANGE",
-                    "vars": {
-
-                    }
-                  }
-                ]
-              },
-              "unusual": {
-                "vars": {},
-                "groups": [],
-                "hosts": []
-              }
+                "usual":{
+                    "vars":{},
+                    "groups":[],
+                    "hosts":[
+                        {"name":"172.16.1.[30:31]","type":"RANGE","vars":{}}
+                    ],
+                    "dataLevel":{"level":2,"parents":["all","servers","usual"]}
+                },
+                "unusual":{
+                    "vars":{},
+                    "groups":[],
+                    "hosts":[],
+                    "dataLevel":{"level":2,"parents":["all","servers","unusual"]}
+                }
             },
-            "vars": {},
-            name:"inventory"
-          }
+            "vars":{},
+            "name":"inventory"
+        }
+        
         inventory.name = "inventory"
-      
+       
         var res = deepEqual(etalon, inventory)
         assert.ok(res, 'Сравнение инвентория 2 распарсенного и оригинального');
         render(done)
     }); 
-}
+}})
 
 /**
  * Тестирование projects
  */
-function qunitAddTests_projects()
+window.qunitTestsArray.push({
+    step:600,
+    test:function()
 {
     syncQUnit.addTest('Список проектов', function ( assert )
     {
@@ -1676,6 +1747,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню projects');
             render(done)
         })
@@ -1692,6 +1764,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-project');
             render(done)
         })
@@ -1706,7 +1779,7 @@ function qunitAddTests_projects()
         var done = assert.async();
 
         // Заполнение формы с данными project
-        $("#new_project_name").val("test-project-"+t);
+        $("#filed_name").val("test-project-"+t);
         $("#new_project_repository").val("git://test-project-"+t);
 
         $("#new_json_nameprefix").val("test1");
@@ -1725,6 +1798,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при project add Item');
             render(done)
         })
@@ -1751,58 +1825,53 @@ function qunitAddTests_projects()
         {
             assert.ok(true, 'Успешно update add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        { 
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
     });
-
-/*
-    syncQUnit.addTest('Проверка добавления невалидных подгрупп к project', function ( assert )
+    
+    syncQUnit.addTest('pmProjects.syncRepo', function ( assert )
     {
         var done = assert.async();
-        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmProjects.addSubGroups(itemId, [999999])).done(function()
+
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1] 
+        $.when(pmProjects.syncRepo(itemId)).done(function()
         {
-            assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
+            assert.ok(true, 'Успешно syncRepo');
             render(done)
         }).fail(function()
         {
-            assert.ok(true, 'Проверка добавления невалидных подгрупп успешна');
+            debugger;
+            assert.ok(false, 'Ошибка при syncRepo');
             render(done)
         })
-    })
-
-    syncQUnit.addTest('Проверка добавления невалидных хостов к project', function ( assert )
-    {
+    });
+    
+    syncQUnit.addTest('pmProjects.executePlaybook', function ( assert )
+    { 
         var done = assert.async();
-        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmProjects.addSubHosts(itemId, [999999])).done(function()
+        $('#inventories-autocomplete').val('')
+        $('#playbook-autocomplete').val('')
+        
+        // Предполагается что мы от прошлого теста попали на страницу редактирования project
+        // с адресом http://192.168.0.12:8080/?group-5
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1] 
+        $.when(pmProjects.executePlaybook(itemId)).done(function()
         {
-            assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
+            debugger;
+            assert.ok(false, 'Успешно executePlaybook');
             render(done)
-        }).fail(function()
-        {
-            assert.ok(true, 'Проверка добавления невалидных хостов успешна');
-            render(done)
-        })
-    })
-
-    syncQUnit.addTest('Проверка добавления невалидных inventory к project', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmProjects.addSubInventories(itemId, [999999])).done(function()
-        {
-            assert.ok(false, 'Ошибка при добавлении inventory 999999 вроде бы нет');
-            render(done)
-        }).fail(function()
-        {
-            assert.ok(true, 'Проверка добавления невалидных inventory успешна');
+        }).fail(function(){
+            assert.ok(true, 'Ошибка при executePlaybook');
             render(done)
         })
-    })
-*/
+    });
+    
     syncQUnit.addTest('Страница Run playbook', function ( assert )
     {
         var done = assert.async();
@@ -1813,6 +1882,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Страница не открылась');
             render(done)
         })
@@ -1828,6 +1898,7 @@ function qunitAddTests_projects()
         // Отправка формы с данными project
         $.when(pmTasks.execute(itemId, 99999, "main.yml")).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно Execute ansible module, а не должно было');
             render(done)
         }).fail(function()
@@ -1851,6 +1922,7 @@ function qunitAddTests_projects()
         // Отправка формы с данными project
         $.when(pmTasks.execute(itemId, $('#inventories-autocomplete').val(), "main.yml")).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно Execute ansible module, а не должно было');
             render(done)
         }).fail(function()
@@ -1879,6 +1951,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка Execute ansible module, а не должно было');
             render(done)
         }) 
@@ -1895,6 +1968,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Страница не открылась');
             render(done)
         })
@@ -1915,10 +1989,11 @@ function qunitAddTests_projects()
 
         $.when(pmModuleTemplates.selectInventory(inventoryId)).done(function()
         { 
-            $('#inventories-autocomplete').val(inventoryId)
+            pmAnsibleModule.selectInventory(inventoryId)
             // Отправка формы с данными project
             $.when(pmAnsibleModule.execute(itemId, 99999, "All", $('#module-autocomplete').val())).done(function()
             {
+                debugger;
                 assert.ok(false, 'Успешно Execute ansible module, а не должно было');
                 render(done)
             }).fail(function()
@@ -1928,6 +2003,7 @@ function qunitAddTests_projects()
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при selectInventory');
         })
     });
@@ -1953,6 +2029,7 @@ function qunitAddTests_projects()
             // Отправка формы с данными project
             $.when(pmAnsibleModule.execute(itemId, $('#inventories-autocomplete').val(), "All", $('#module-autocomplete').val())).done(function()
             {
+                debugger;
                 assert.ok(false, 'Успешно Execute ansible module, а не должно было');
                 render(done)
             }).fail(function()
@@ -1962,6 +2039,7 @@ function qunitAddTests_projects()
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при selectInventory');
         })
     });
@@ -1989,11 +2067,13 @@ function qunitAddTests_projects()
                 render(done)
             }).fail(function()
             {
+                debugger;
                 assert.ok(false, 'Ошибка Execute ansible module, а не должно было');
                 render(done)
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при selectInventory');
         })
     });
@@ -2007,6 +2087,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Страница не открылась');
             render(done)
         })
@@ -2024,6 +2105,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-inventory');
             render(done)
         })
@@ -2038,7 +2120,7 @@ function qunitAddTests_projects()
         var done = assert.async();
 
         // Заполнение формы с данными inventory
-        $("#new_inventory_name").val("test-inventory-"+t);
+        $("#filed_name").val("test-inventory-"+t);
 
         $("#new_json_name").val("test1");
         $("#new_json_value").val("val1");
@@ -2057,6 +2139,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при inventory add Item');
             render(done)
         })
@@ -2073,6 +2156,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-inventory');
             render(done)
         })
@@ -2085,7 +2169,7 @@ function qunitAddTests_projects()
         var done = assert.async();
 
         // Заполнение формы с данными inventory
-        $("#new_inventory_name").val("test-inventory-"+t);
+        $("#filed_name").val("test-inventory-"+t);
 
         jsonEditor.__devAddVar("test1", "test1", "inventory")  
         jsonEditor.__devAddVar("test2", "test2", "inventory")  
@@ -2099,6 +2183,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при inventory add Item');
             render(done)
         })
@@ -2114,6 +2199,7 @@ function qunitAddTests_projects()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Страница не открылась');
             render(done)
         })
@@ -2122,6 +2208,7 @@ function qunitAddTests_projects()
 
     syncQUnit.addTest('Создание не валидного periodic task', function ( assert )
     {
+        debugger;
         // Предполагается что мы от прошлого теста попали на страницу создания project
         var done = assert.async();
 
@@ -2135,15 +2222,16 @@ function qunitAddTests_projects()
  
 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        var inventoryId = $("#new_periodic-tasks_inventory option")[2].value
+        var inventoryId = $("#inventories-autocomplete option")[2].value
 
         $.when(pmPeriodicTasks.selectInventory(inventoryId)).done(function()
         {
-            $("#new_periodic-tasks_inventory").val(inventoryId)
+            $("#inventories-autocomplete").val(inventoryId)
 
             // Отправка формы с данными project
             $.when(pmPeriodicTasks.addItem(itemId)).done(function()
             {
+                debugger;
                 assert.ok(false, 'Успешно project add pmPeriodicTasks, а не должно было');
                 render(done)
             }).fail(function()
@@ -2153,6 +2241,7 @@ function qunitAddTests_projects()
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при selectInventory');
         })
     });
@@ -2176,11 +2265,11 @@ function qunitAddTests_projects()
  
 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        var inventoryId = $("#new_periodic-tasks_inventory option")[2].value
-
+        var inventoryId = $("#inventories-autocomplete option")[2].value
+        
         $.when(pmPeriodicTasks.selectInventory(inventoryId)).done(function()
         {
-            $("#new_periodic-tasks_inventory").val(inventoryId)
+            $("#inventories-autocomplete").val(inventoryId)
 
             // Отправка формы с данными project
             $.when(pmPeriodicTasks.addItem(itemId)).done(function()
@@ -2189,17 +2278,19 @@ function qunitAddTests_projects()
                 render(done)
             }).fail(function()
             {
+                debugger;
                 assert.ok(false, 'Ошибка при project add pmPeriodicTasks');
                 render(done)
             })
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при selectInventory');
         })
     });
     
     syncQUnit.addTest('Изменение не валидного periodic task', function ( assert )
-    {
+    { 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
         var taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
         // Предполагается что мы от прошлого теста попали на страницу создания inventory
@@ -2211,8 +2302,9 @@ function qunitAddTests_projects()
         jsonEditor.__devAddVar("test1", "test1", "periodic_playbook", "PLAYBOOK") 
   
         // Отправка формы с данными inventory
-        $.when(pmPeriodicTasks.updateItem(taskId)).done(function()
+        $.when(pmPeriodicTasks.updateItem(taskId, {project_id:itemId})).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно update Periodic Task, а не должно было');
             render(done)
         }).fail(function()
@@ -2223,7 +2315,7 @@ function qunitAddTests_projects()
     });
 
     syncQUnit.addTest('Изменение periodic task', function ( assert )
-    {
+    { 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
         var taskId = /periodic-task\/([0-9]+)/.exec(window.location.href)[1]
         // Предполагается что мы от прошлого теста попали на страницу создания inventory
@@ -2239,12 +2331,13 @@ function qunitAddTests_projects()
         jsonEditor.jsonEditorAddVar('periodic_playbook', 'PLAYBOOK');
  
         // Отправка формы с данными inventory
-        $.when(pmPeriodicTasks.updateItem(taskId)).done(function()
+        $.when(pmPeriodicTasks.updateItem(taskId, {project_id:itemId})).done(function()
         {
             assert.ok(true, 'Успешно update Periodic Task');
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при update Periodic Task');
             render(done)
         })
@@ -2317,6 +2410,21 @@ function qunitAddTests_projects()
         })
     })
 
+    syncQUnit.addTest('Страница списка History', function ( assert )
+    {
+        var done = assert.async();
+        var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+        $.when(spajs.open({ menuId:'project/'+itemId+'/history'})).done(function()
+        {
+            assert.ok(true, 'Страница открылась');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(false, 'Страница не открылась');
+            render(done)
+        })
+    })
+    
     syncQUnit.addTest('Удаление проекта', function ( assert )
     {
         var done = assert.async();
@@ -2335,10 +2443,15 @@ function qunitAddTests_projects()
             render(done)
         })
     });
-}
+}})
 
-function qunitAddTests_templates_task(){
-
+/**
+ * Тестирование шаблонов
+ */
+window.qunitTestsArray.push({
+    step:700,
+    test:function()
+{
     syncQUnit.addTest('Список шаблонов', function ( assert )
     {
         var done = assert.async();
@@ -2349,6 +2462,7 @@ function qunitAddTests_templates_task(){
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню templates');
             render(done)
         })
@@ -2365,6 +2479,7 @@ function qunitAddTests_templates_task(){
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-project');
             render(done)
         })
@@ -2386,6 +2501,7 @@ function qunitAddTests_templates_task(){
         // Отправка формы с данными project
         $.when(pmTasksTemplates.addItem()).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно template add Item, а не должно было');
             render(done)
         }).fail(function()
@@ -2411,6 +2527,7 @@ function qunitAddTests_templates_task(){
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при template add Item');
             render(done)
         })
@@ -2430,6 +2547,7 @@ function qunitAddTests_templates_task(){
             
         $.when(pmTasksTemplates.updateItem(itemId)).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно template update Item, а не должно было');
             render(done)
         }).fail(function()
@@ -2446,8 +2564,9 @@ function qunitAddTests_templates_task(){
         // Предполагается что мы от прошлого теста попали на страницу редактирования project
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1]
-
         $("#playbook-autocomplete").val("test2-playbook-"+t);
+        $("#projects-autocomplete").val($("#projects-autocomplete option")[0].value).trigger('change.select2');
+        $("#inventories-autocomplete").val($("#inventories-autocomplete option")[0].value).trigger('change.select2');
 
         jsonEditor.jsonEditorRmVar("syntax-check22");
         $("#new_json_nameprefix").val("new-vault-password-file");
@@ -2460,6 +2579,7 @@ function qunitAddTests_templates_task(){
             assert.ok(true, 'Успешно update add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -2478,6 +2598,7 @@ function qunitAddTests_templates_task(){
             assert.ok(true, 'Успешно copyAndEdit add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
             render(done)
         })
@@ -2497,6 +2618,7 @@ function qunitAddTests_templates_task(){
             assert.ok(true, 'Успешно delete add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -2512,14 +2634,20 @@ function qunitAddTests_templates_task(){
             assert.ok(true, 'Успешно delete Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при delete Item');
             render(done)
         })
     });
-}
+}})
 
-function qunitAddTests_templates_modules(){
-
+/**
+ * Тестирование шаблонов модулей
+ */
+window.qunitTestsArray.push({
+    step:800,
+    test:function()
+{
     syncQUnit.addTest('Список шаблонов', function ( assert )
     {
         var done = assert.async();
@@ -2530,6 +2658,7 @@ function qunitAddTests_templates_modules(){
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню templates');
             render(done)
         })
@@ -2546,6 +2675,7 @@ function qunitAddTests_templates_modules(){
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню new-project');
             render(done)
         })
@@ -2567,6 +2697,7 @@ function qunitAddTests_templates_modules(){
         // Отправка формы с данными project
         $.when(pmModuleTemplates.addItem()).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно template add Item, а не должно было');
             render(done)
         }).fail(function()
@@ -2586,6 +2717,9 @@ function qunitAddTests_templates_modules(){
         $("#new_json_valueprefix").val("syntax-check");
         jsonEditor.jsonEditorAddVar();
         
+        $("#inventories-autocomplete").val($("#inventories-autocomplete option")[0].value).trigger('change.select2');
+        
+        
         // Заполнение формы с данными project
         $("#Templates-name").val("test-template-"+t);
 
@@ -2596,6 +2730,7 @@ function qunitAddTests_templates_modules(){
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при template add Item');
             render(done)
         })
@@ -2615,6 +2750,7 @@ function qunitAddTests_templates_modules(){
 
         $.when(pmModuleTemplates.updateItem(itemId)).done(function()
         {
+            debugger;
             assert.ok(false, 'Успешно update add Item, а не должно было');
             render(done)
         }).fail(function(){
@@ -2626,9 +2762,7 @@ function qunitAddTests_templates_modules(){
     syncQUnit.addTest('Изменение шаблона модуля', function ( assert )
     {
         var done = assert.async();
-
-        // Предполагается что мы от прошлого теста попали на страницу редактирования project
-        // с адресом http://192.168.0.12:8080/?group-5
+ 
         var itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
         
         jsonEditor.jsonEditorRmVar("new-vault-password-file2")
@@ -2644,6 +2778,7 @@ function qunitAddTests_templates_modules(){
             assert.ok(true, 'Успешно update add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при update add Item');
             render(done)
         })
@@ -2651,9 +2786,7 @@ function qunitAddTests_templates_modules(){
 
     var itemId = undefined
     syncQUnit.addTest('Копирование template Module', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
-        // с адресом http://192.168.0.12:8080/?group-5
+    { 
         itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
 
         var done = assert.async();
@@ -2662,11 +2795,27 @@ function qunitAddTests_templates_modules(){
             assert.ok(true, 'Успешно copyAndEdit add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
             render(done)
         })
     });
-
+/*
+    syncQUnit.addTest('Выполнение template Module', function ( assert )
+    { 
+        var itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
+        debugger;
+        var done = assert.async();
+        $.when(pmModuleTemplates.execute(itemId)).done(function()
+        {
+            assert.ok(true, 'Успешно pmModuleTemplates.execute');
+            render(done)
+        }).fail(function(){
+            assert.ok(false, 'Ошибка при pmModuleTemplates.execute');
+            render(done)
+        })
+    });*/
+    
     syncQUnit.addTest('Удаление копии template Module', function ( assert )
     {
         var done = assert.async();
@@ -2681,6 +2830,7 @@ function qunitAddTests_templates_modules(){
             assert.ok(true, 'Успешно delete add Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
             render(done)
         })
@@ -2696,14 +2846,169 @@ function qunitAddTests_templates_modules(){
             assert.ok(true, 'Успешно delete Item');
             render(done)
         }).fail(function(){
+            debugger;
             assert.ok(false, 'Ошибка при delete Item');
             render(done)
         })
     });
-}
+}})
+ 
+/**
+ * Тестирование pmDashboard
+ */
+window.qunitTestsArray.push({
+    step:900,
+    test:function()
+{
+    
+    syncQUnit.addTest('Страница dashboard', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"home"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню pmDashboard');
+            setTimeout(function(){// Ждём завершения всех асинхронных запросов на странице
+                render(done) 
+            }, 5000) 
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню pmDashboard');
+            render(done)
+        })
+    });
+
+}})
+
+/**
+ * Тестирование поиска
+ */
+window.qunitTestsArray.push({
+    step:1000,
+    test:function()
+{
+    
+    syncQUnit.addTest('Поиск projects', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"projects/search/tar"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню search/projects');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню search/projects');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Поиск templates', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"templates/search/tar"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню search/templates');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню search/templates');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Поиск hosts', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"hosts/search/tar"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню search/hosts');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню search/hosts');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Поиск groups', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"groups/search/tar"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню search/groups');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню search/groups');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Поиск history', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"history/search/tar"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню search/history');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню search/history');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Поиск inventories', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"inventories/search/tar"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню search/inventories');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню search/inventories');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('Поиск users', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"users/search/admin"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню search/users');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню search/users');
+            render(done)
+        })
+    });
+}})
 
 
-function qunitAddTests_history()
+/**
+ * Тестирование history
+ */
+window.qunitTestsArray.push({
+    step:1100,
+    test:function()
 {
     syncQUnit.addTest('Страница history', function ( assert )
     {
@@ -2715,13 +3020,14 @@ function qunitAddTests_history()
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии меню history');
             render(done)
         })
     });
 
-    syncQUnit.addTest('Страница history', function ( assert )
-    {
+    syncQUnit.addTest('Страница history 2', function ( assert )
+    { 
         var done = assert.async();
 
         if(!pmHistory.model.itemslist.results.length)
@@ -2730,17 +3036,32 @@ function qunitAddTests_history()
             render(done)
         }
 
-        $.when(spajs.open({ menuId:"history/"+pmHistory.model.itemslist.results[0].id+"/"})).done(function()
+        $.when(spajs.open({ menuId:"history/"+pmHistory.model.itemslist.results[0].id})).done(function()
         {
             assert.ok(true, 'Успешно открыта страница history');
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Ошибка при открытиии страницы '+pmHistory.model.itemslist.results[0].id+' history');
             render(done)
         })
     });
 
-}
+    syncQUnit.addTest('cancelTask не существуещей таски', function ( assert )
+    {
+        var done = assert.async();
 
-injectQunit()
+        $.when(pmHistory.cancelTask(99999)).done(function()
+        {
+            debugger;
+            assert.ok(false, 'cancelTask выполнилось');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка cancelTask');
+            render(done)
+        })
+    }); 
+}})
+

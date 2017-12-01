@@ -1,6 +1,8 @@
+from datetime import timedelta
 from django.conf import settings
 from django.test import Client
 from django.contrib.auth.hashers import make_password
+from django.utils.timezone import now
 
 from ..utils import redirect_stdany
 from ._base import BaseTestCase, User, json
@@ -14,6 +16,7 @@ from .tasks import (ApiTasksTestCase,
                     ApiHistoryTestCase)
 from .ansible import ApiAnsibleTestCase
 from .repo_backends import RepoBackendsTestCase
+from ..models import UserGroup, History
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -204,6 +207,41 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertRCode(client.delete(url), 409)
         self._logout(client)
 
+    def test_api_groups(self):
+        url = '/api/v1/teams/'
+        range_groups = 10
+        for i in range(range_groups):
+            UserGroup.objects.create(name="test_group_{}".format(i))
+        self.list_test(url, range_groups)
+        ug = UserGroup.objects.all().last()
+        self.details_test(
+            url + "{}/".format(ug.id),
+            name=ug.name, id=ug.id
+        )
+        data = [
+            dict(name="test_group_{}".format(i))
+            for i in range(range_groups, range_groups+10)
+        ]
+        results_id = self.mass_create(url, data, "name")
+        for team_id in results_id:
+            self.get_result("delete", url + "{}/".format(team_id))
+        self.list_test(url, range_groups)
+        # Test users in groups
+        url_ug = "{}{}/".format(url, ug.id)
+        self.get_result("patch", url_ug, data=json.dumps({
+            "users_list": [self.user.id]
+        }))
+        result = self.get_result("get", url_ug)
+        self.assertCount(result["users"], 1)
+        self.assertEqual(result["users"][0]["id"], self.user.id)
+        self.assertEqual(result["users"][0]["username"], self.user.username)
+        self.assertIn(self.user.id, result["users_list"])
+        self.get_result("patch", url_ug, data=json.dumps({
+            "users_list": []
+        }))
+        result = self.get_result("get", url_ug)
+        self.assertCount(result["users"], 0)
+
 
 class APITestCase(ApiUsersTestCase,
                   ApiHostsTestCase, ApiGroupsTestCase,
@@ -215,15 +253,12 @@ class APITestCase(ApiUsersTestCase,
         super(APITestCase, self).setUp()
 
     def test_api_versions_list(self):
-        client = self._login()
-        result = self.result(client.get, "/api/")
+        result = self.get_result("get", "/api/")
         self.assertEqual(len(result), 1)
         self.assertTrue(result.get('v1', False))
-        self._logout(client)
 
     def test_api_v1_list(self):
-        client = self._login()
-        result = self.result(client.get, "/api/v1/")
+        result = self.get_result('get', "/api/v1/")
         self.assertTrue(result.get('users', False))
         self.assertTrue(result.get('hosts', False))
         self.assertTrue(result.get('groups', False))
@@ -236,8 +271,80 @@ class APITestCase(ApiUsersTestCase,
         self.assertTrue(result.get('token', False))
 
     def test_api_router(self):
-        client = self._login()
-        result = self.result(client.get, "/api/?format=json")
+        result = self.get_result('get', "/api/?format=json")
         url = result['v1'].replace("http://testserver", "")
-        response = client.get(url)
-        self.assertRCode(response)
+        self.get_result('get', url)
+
+    def _generate_history(self, days_ago, count, status="OK"):
+        default_kwargs = dict(
+            project=self.ph, mode="task.yml", raw_inventory="inventory",
+            raw_stdout="text", inventory=self.history_inventory,
+            initiator=self.user.id
+        )
+        start_time = now() - timedelta(days=days_ago, hours=1)
+        stop_time = now() - timedelta(days=days_ago)
+        for i in range(count):
+            History.objects.create(start_time=start_time, stop_time=stop_time,
+                                   status=status, **default_kwargs)
+
+    def _prepare_statisic(self):
+        History.objects.all().delete()
+        self._generate_history(1, 10, 'OK')
+        self._generate_history(1, 3, 'ERROR')
+        self._generate_history(1, 2, 'STOP')
+        self._generate_history(2, 2, 'OK')
+        self._generate_history(2, 2, 'ERROR')
+        self._generate_history(2, 2, 'STOP')
+        self._generate_history(35, 5, 'OK')
+        self._generate_history(37, 11, 'ERROR')
+        self._generate_history(41, 8, 'ERROR')
+        return {
+            'year': [
+                {'sum': 24, 'all': 45, 'status': 'ERROR'},
+                {'sum': 17, 'all': 45, 'status': 'OK'},
+                {'sum': 4, 'all': 45, 'status': 'STOP'}
+            ],
+            'month': [
+                {'sum': 19, 'all': 24, 'status': 'ERROR'},
+                {'sum': 5, 'all': 24, 'status': 'OK'},
+                {'sum': 5, 'all': 21, 'status': 'ERROR'},
+                {'sum': 12, 'all': 21, 'status': 'OK'},
+                {'sum': 4, 'all': 21, 'status': 'STOP'}
+            ],
+            'day': [
+                {'sum': 8, 'all': 8, 'status': 'ERROR'},
+                {'sum': 11, 'all': 11, 'status': 'ERROR'},
+                {'sum': 5, 'all': 5, 'status': 'OK'},
+                {'sum': 2, 'all': 6, 'status': 'ERROR'},
+                {'sum': 2, 'all': 6, 'status': 'OK'},
+                {'sum': 2, 'all': 6, 'status': 'STOP'},
+                {'sum': 3, 'all': 15, 'status': 'ERROR'},
+                {'sum': 10, 'all': 15, 'status': 'OK'},
+                {'sum': 2, 'all': 15, 'status': 'STOP'}
+            ]
+        }
+
+    def _check_stats_history(self, items, data):
+        count = 0
+        self.assertEqual(len(items), len(data))
+        for day in items:
+            self.assertEqual(day['all'], data[count]['all'])
+            count += 1
+
+    def test_statistic(self):
+        url = '/api/v1/stats/'
+        self.maxDiff = None
+        # Prepare history data
+        data = self._prepare_statisic()
+        result = self.get_result('get', url+"?last=365")
+        # Check objects counters
+        self.assertEqual(result['projects'], self.get_count('Project'))
+        self.assertEqual(result['inventories'], self.get_count('Inventory'))
+        self.assertEqual(result['groups'], self.get_count('Group'))
+        self.assertEqual(result['hosts'], self.get_count('Host'))
+        self.assertEqual(result['teams'], self.get_count('UserGroup'))
+        self.assertEqual(result['users'], self.get_count(User))
+        # Check history counts
+        self._check_stats_history(data['day'], result['jobs']['day'])
+        self._check_stats_history(data['month'], result['jobs']['month'])
+        self._check_stats_history(data['year'], result['jobs']['year'])

@@ -1,5 +1,4 @@
 from django.conf import settings
-from .. import __version__ as polemarch_version
 
 
 def settings_constants(request):
@@ -15,5 +14,5 @@ def project_args(request):
     host_url = request.build_absolute_uri('/')
     return {
         "host_url": host_url,
-        "polemarch_version": polemarch_version
+        "polemarch_version": getattr(settings, 'POLEMARCH_VERSION', False)
     }

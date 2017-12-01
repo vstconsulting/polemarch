@@ -1,10 +1,4 @@
 
-function inheritance(obj)
-{
-    var item = jQuery.extend(true, {}, obj)
-    return item
-}
-
 function pmItems()
 {
 
@@ -16,10 +10,14 @@ pmItems.model.selectedItems = {};
 
 pmItems.model.itemslist = []
 pmItems.model.items = {}
+pmItems.model.items_permissions = {}
 pmItems.model.name = "based"
 pmItems.model.page_name = "based"
 pmItems.model.selectedCount = 0;
-pmItems.model.className = "pmItems"
+pmItems.model.className = "pmItems" 
+
+pmItems.filed = {}
+
 
 pmItems.toggleSelect = function(item_id, mode)
 {
@@ -153,6 +151,13 @@ pmItems.validateRangeName = function(name)
 }
 
 
+/**
+ * Строит страницу со списком объектоа
+ * @param {type} holder
+ * @param {type} menuInfo
+ * @param {type} data
+ * @returns {$.Deferred}
+ */
 pmItems.showList = function(holder, menuInfo, data)
 {
     var thisObj = this;
@@ -165,13 +170,23 @@ pmItems.showList = function(holder, menuInfo, data)
 
     return $.when(this.loadItems(limit, offset)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:""}))
+        var tpl = thisObj.model.name+'_list'
+        if(!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_list'
+        }
+        
+        $(holder).insertTpl(spajs.just.render(tpl, {query:"", pmObj:thisObj, opt:{}}))
     }).fail(function()
     {
         $.notify("", "error");
     })
 }
 
+/** 
+ * @param {string} query 
+ * @returns {HTML} Шаблон формы поиска
+ */
 pmItems.searchFiled = function(options)
 {
     options.className = this.model.className;
@@ -179,6 +194,11 @@ pmItems.searchFiled = function(options)
     return spajs.just.render('searchFiled', {opt:options});
 }
 
+/**
+ * Выполняет переход на страницу с результатами поиска
+ * @param {string} query 
+ * @returns {$.Deferred}
+ */
 pmItems.search = function(query, options)
 {
     if(this.isEmptySearchQuery(query))
@@ -189,6 +209,11 @@ pmItems.search = function(query, options)
     return spajs.open({ menuId:this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
 }
 
+/**
+ * Если поисковый запрос пуст то вернёт true
+ * @param {type} query
+ * @returns {Boolean}
+ */
 pmItems.isEmptySearchQuery = function(query)
 {
     if(!query || !trim(query))
@@ -199,12 +224,25 @@ pmItems.isEmptySearchQuery = function(query)
     return false;
 }
 
+/**
+ * Строит страницу результатов поиска на основе урла страницы
+ * @param {type} holder
+ * @param {type} menuInfo
+ * @param {type} data
+ * @returns {$.Deferred}
+ */
 pmItems.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
     return $.when(this.sendSearchQuery(this.searchStringToObject(decodeURIComponent(data.reg[1])))).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
+        var tpl = thisObj.model.name+'_list'
+        if(!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_list'
+        }
+        
+        $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(data.reg[1]), pmObj:thisObj, opt:{}}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -296,7 +334,13 @@ pmItems.showItem = function(holder, menuInfo, data)
 
     return $.when(this.loadItem(data.reg[1])).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:data.reg[1], project_id:0}))
+        var tpl = thisObj.model.name+'_page'
+        if(!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_page'
+        }
+        
+        $(holder).insertTpl(spajs.just.render(tpl, {item_id:data.reg[1], pmObj:thisObj, opt:{}}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -307,8 +351,13 @@ pmItems.showNewItemPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
 
-    var text = spajs.just.render(this.model.name+'_new_page', {parent_item:data.reg[2], parent_type:data.reg[1]})
-    console.log(text)
+    var tpl = this.model.name+'_new_page'
+    if(!spajs.just.isTplExists(tpl))
+    {
+        tpl = 'items_new_page'
+    }
+
+    var text = spajs.just.render(tpl, {parent_item:data.reg[2], parent_type:data.reg[1], pmObj:this, opt:{}}) 
     $(holder).insertTpl(text)
 
     def.resolve()
@@ -410,15 +459,19 @@ pmItems.sendSearchQuery = function(query, limit, offset)
 {
     if(!limit)
     {
-        limit = 999;
+        limit = 999; 
     }
 
     if(!offset)
     {
-        offset = 0;
+        offset = 0; 
     }
 
     var q = [];
+    
+    q.push("limit="+encodeURIComponent(limit))
+    q.push("offset="+encodeURIComponent(offset))
+    
     for(var i in query)
     {
         if(Array.isArray(query[i]))
@@ -432,13 +485,13 @@ pmItems.sendSearchQuery = function(query, limit, offset)
         }
         q.push(encodeURIComponent(i)+"="+encodeURIComponent(query[i]))
     }
+    
 
     var thisObj = this;
     return spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/filter/",
-        type: "POST",
-        contentType:'application/json',
-        data: JSON.stringify({filter:query}), // "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
+        url: "/api/v1/"+this.model.name+"/?"+q.join("&"),
+        type: "GET",
+        contentType:'application/json', 
         success: function(data)
         {
             //console.log("update Items", data)
@@ -473,14 +526,36 @@ pmItems.searchItems = function(query, attrName, limit, offset)
     return this.sendSearchQuery(q, limit, offset);
 }
 
+pmItems.loadItemsByIds = function(ids)
+{ 
+    var q = {id:ids} 
+    for(var i in ids)
+    { 
+        if(this.model.items[ids[i]] === undefined)
+        {
+            this.model.items[ids[i]] = {}
+        } 
+    }
+    return this.sendSearchQuery(q);
+}
 /**
  * Обновляет поле модел this.model.items[item_id] и ложит туда пользователя
  */
 pmItems.loadItem = function(item_id)
 {
+    if(!item_id)
+    {
+        throw "Error in pmItems.loadItem with item_id = `" + item_id + "`"
+    }
+    
     var def = new $.Deferred();
     var thisObj = this;
-
+    
+    if(thisObj.model.items[item_id] === undefined)
+    {
+        thisObj.model.items[item_id] = {}
+    }
+  
     spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "GET",
@@ -509,17 +584,34 @@ pmItems.loadItem = function(item_id)
  */
 pmItems.deleteItem = function(item_id, force)
 {
+    if(!item_id)
+    {
+        throw "Error in pmItems.deleteItem with item_id = `" + item_id + "`"
+    }
+    
+    var def = new $.Deferred();
     if(!force && !confirm("Are you sure?"))
     {
-        return;
+        def.reject();
+        return def.promise()
     }
+    
     var thisObj = this;
-    return $.when(this.deleteItemQuery(item_id)).done(function(data){
-        //console.log("deleteItem", data);
-        spajs.open({ menuId:thisObj.model.name})
+    $.when(this.deleteItemQuery(item_id)).done(function(data)
+    {
+        $.when(spajs.open({ menuId:thisObj.model.name})).done(function()
+        {
+            def.resolve() 
+        }).fail(function(e){
+            def.reject();
+            polemarch.showErrors(e.responseJSON)
+        }) 
     }).fail(function(e){
+        def.reject();
         polemarch.showErrors(e.responseJSON)
-    }).promise()
+    })
+            
+    return def.promise()
 }
 
 pmItems.multiOperationsOnEachRow = function(elements, operation)
@@ -717,13 +809,137 @@ pmItems.exportSelecedToFile = function(){
     return this.exportToFile(item_ids)
 }
 
-
 /**
- * Тестовый тест, чтоб было видно что тесты вообще хоть как то работают.
+ * Добавление сущности
+ * @return $.Deferred
  */
-function trim(s)
+pmItems.addItem = function(parent_type, parent_item, opt)
 {
-    if(s) return s.replace(/^ */g, "").replace(/ *$/g, "")
-    return '';
+    var def = new $.Deferred();
+    var data = {}
+    
+    for(var i in this.model.page_new.fileds)
+    {
+        for(var j in this.model.page_new.fileds[i])
+        {
+            var val = this.model.page_new.fileds[i][j];
+            
+            data[val.name] = val.filed.getValue(this, val)
+            if(val.validator !== undefined && !val.validator.apply(this, [data[val.name]]))
+            {
+                def.reject()
+                return def.promise();
+            }
+        }
+    }
+    
+    if(this.model.page_new.onBeforeSave)
+    {
+        data = this.model.page_new.onBeforeSave.apply(this, [data, opt]);
+        if(data == undefined || data == false)
+        {
+            def.reject()
+            return def.promise();
+        }
+    }
+    
+    var thisObj = this;
+    spajs.ajax.Call({
+        url: "/api/v1/"+this.model.name+"/",
+        type: "POST",
+        contentType:'application/json',
+        data: JSON.stringify(data),
+        success: function()
+        { 
+            var agrs = []
+            for(var i =0; i<arguments.length; i++)
+            {
+                agrs.push(arguments[i])
+            }
+            
+            agrs.push({
+                parent_type:parent_type,
+                parent_item:parent_item
+            })
+            
+            $.when(thisObj.model.page_new.onCreate.apply(thisObj, agrs)).always(function(){
+                def.resolve()
+            })
+        },
+        error:function(e)
+        {
+            def.reject()
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+
+    return def.promise();
 }
 
+pmItems.updateItem = function(item_id, opt)
+{
+    var def = new $.Deferred();
+    var data = {}
+    
+    for(var i in this.model.page_item.fileds)
+    {
+        for(var j in this.model.page_item.fileds[i])
+        {
+            var val = this.model.page_item.fileds[i][j];
+            
+            data[val.name] = val.filed.getValue(this, val)
+            if(val.validator !== undefined && !val.validator.apply(this, [data[val.name]]))
+            {
+                def.reject()
+                return def.promise();
+            }
+        }
+    }
+    
+    if(this.model.page_item.onBeforeSave)
+    {
+        data = this.model.page_item.onBeforeSave.apply(this, [data, item_id, opt]);
+        if(data == undefined || data == false)
+        {
+            def.reject()
+            return def.promise();
+        }
+    }
+    
+    var thisObj = this;
+    spajs.ajax.Call({
+        url: "/api/v1/"+this.model.name+"/"+item_id+"/",
+        type: "PATCH",
+        contentType:'application/json',
+        data: JSON.stringify(data),
+        success: function(data)
+        {
+            thisObj.model.items[item_id] = data
+            $.when(thisObj.model.page_item.onUpdate.apply(thisObj, arguments)).always(function(){
+                def.resolve()
+            })
+        },
+        error:function(e)
+        {
+            def.reject()
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+
+    return def.promise(); 
+}
+
+ pmItems.getFiledByName = function(fileds, name)
+ {
+    for(var i in fileds)
+    {
+        for(var j in fileds[i])
+        {
+            if(fileds[i][j].name == name)
+            {
+                return fileds[i][j]  
+            }
+        }
+    }
+    debugger;
+ }
