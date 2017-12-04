@@ -112,7 +112,6 @@ class Compile(_sdist):
         return _sdist.run(self)
 
 
-name = 'polemarch'
 cmdclass = {
     'install': PostInstallCommand,
     'compile': Compile,
@@ -127,22 +126,15 @@ if has_sphinx:
                            './polemarch/doc/html/'])
 
 setup(
-    name=name,
+    name='polemarch',
     packages=find_packages(),
     ext_modules=ext_modules,
     include_package_data=True,
     scripts=['polemarchctl'],
     install_requires=[
-        "django>=1.11,<1.12",
+        "django>=1.11,<2.0",
     ] + REQUIRES,
     dependency_links=[
     ] + REQUIRES_git,
     cmdclass=cmdclass,
-    # command_options={
-    #     'build_sphinx': {
-    #         'project': ('setup.py', name),
-    #         'version': ('setup.py', version),
-    #         'release': ('setup.py', version),
-    #     }
-    # },
 )
