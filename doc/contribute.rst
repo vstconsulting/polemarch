@@ -4,10 +4,10 @@ How to participate
 If you found some bug in the codebase or documentation or want some
 improvement in project, you can easily do it myself. Here is how to proceed:
 
-1. Create (or find if already exist) an issue at
-   https://gitlab.com/vstconsulting/polemarch for problem you want to solve.
-   Maybe somebody is working on that or maybe during discussion will become
-   clear that is not a problem.
+1. Create (or find if already exist) an
+   `issue <https://gitlab.com/vstconsulting/polemarch/issues>`_
+   for problem you want to solve. Maybe somebody is working on that or maybe
+   during discussion will become clear that is not a problem.
 
 2. To investigate problem, you probably must be able to run cloned project.
    To do so install required dependencies. See

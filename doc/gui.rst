@@ -1,4 +1,4 @@
-GUI desription
+GUI workflow
 ==============
 
 Before you start

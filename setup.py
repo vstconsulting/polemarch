@@ -14,8 +14,6 @@ from setuptools.command.build_ext import build_ext as _build_ext
 from setuptools.command.sdist import sdist as _sdist
 from setuptools.extension import Extension
 
-import polemarch
-
 try:
     from Cython.Distutils import build_ext as _build_ext
     from Cython.Build import cythonize
@@ -110,15 +108,11 @@ class Compile(_sdist):
             files = self.__filter_files(files)
         _sdist.make_release_tree(self, base_dir, files)
 
+    def run(self):
+        return _sdist.run(self)
+
 
 name = 'polemarch'
-version = polemarch.__version__
-lic = 'AGPLv3+'
-description = ('Polemarch is ansible based service for orchestration '
-               'infrastructure.')
-author = 'VST Consulting'
-author_email = 'sergey.k@vstconsulting.net'
-
 cmdclass = {
     'install': PostInstallCommand,
     'compile': Compile,
@@ -134,44 +128,21 @@ if has_sphinx:
 
 setup(
     name=name,
-    version=version,
     packages=find_packages(),
     ext_modules=ext_modules,
     include_package_data=True,
-    license=lic,
-    description=description,
-    long_description=README,
-    author=author,
-    author_email=author_email,
-    url="https://gitlab.com/vstconsulting/polemarch",
-    classifiers=[
-        'Environment :: Web Environment',
-        'Framework :: Django',
-        'Framework :: Django :: 1.11',
-        'Operating System :: OS Independent',
-        'Programming Language :: Cython',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        'Topic :: Utilities',
-    ],
     scripts=['polemarchctl'],
     install_requires=[
-        "django>=1.8,<1.12",
+        "django>=1.11,<1.12",
     ] + REQUIRES,
     dependency_links=[
     ] + REQUIRES_git,
     cmdclass=cmdclass,
-    command_options={
-        'build_sphinx': {
-            'project': ('setup.py', name),
-            'version': ('setup.py', version),
-            'release': ('setup.py', version),
-        }
-    },
+    # command_options={
+    #     'build_sphinx': {
+    #         'project': ('setup.py', name),
+    #         'version': ('setup.py', version),
+    #         'release': ('setup.py', version),
+    #     }
+    # },
 )

@@ -153,9 +153,10 @@ Here you can change settings related to database system, which will Polemarch
 use. Polemarch supports all databases supported by ``django``. List of
 supported out of the box: SQLite (default choice), MySQL, Oracle, or
 PostgreSQL. Configuration details you can look at
-https://docs.djangoproject.com/en/1.10/ref/settings/#databases. If you run at
-Polemarch software at multiple nodes (clusterization), you should use some of
-client-server database (SQLite not suitable) shared for all nodes.
+`Django database documentation
+<https://docs.djangoproject.com/en/1.11/ref/settings/#databases>`_.
+If you run at Polemarch software at multiple nodes (clusterization), you should
+use some of client-server database (SQLite not suitable) shared for all nodes.
 
 .. _cache:
 
@@ -168,9 +169,10 @@ This section to store settings related to cache backend used by Polemarch.
 Based on Django Polemarch supports all cache backends that is supports.
 Currently is: filesystem, in-memory, memcached out of the box and many more by
 additional plugins.You can find details about cache configuration at
-https://docs.djangoproject.com/en/1.10/ref/settings/#caches. In clusterization
-scenario we advice to share cache between nodes to speedup their work using
-client-server cache realizations.
+`Django caches documentation
+<https://docs.djangoproject.com/en/1.11/ref/settings/#caches>`_.In
+clusterization scenario we advice to share cache between nodes to speedup their
+work using client-server cache realizations.
 
 .. _locks:
 
@@ -222,3 +224,5 @@ Section ``[uwsgi]``.
 Here placed settings related to web-server used by Polemarch in production
 (for deb and rpm packages by default). Most of them related to system paths
 (logging, PID-file and so on).
+More settings in `uWSGI docs
+<http://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_.
