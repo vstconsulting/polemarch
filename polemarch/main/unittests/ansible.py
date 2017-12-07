@@ -7,7 +7,7 @@ class AnsibleTestCase(TestCase):
     def test_rules(self):
         # pylint: disable=protected-access,
         reference = AnsibleArgumentsReference()
-        for rule in AnsibleArgumentsReference._GUI_TYPES_EXCEPTIONS:
+        for rule in AnsibleArgumentsReference._GUI_TYPES_CONVERSION_DIFFERENT:
             self.assertTrue(reference.is_exists(rule))
         self.assertTrue(not reference.is_exists("error_case"))
 

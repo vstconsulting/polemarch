@@ -336,6 +336,7 @@ class APITestCase(ApiUsersTestCase,
         self.maxDiff = None
         # Prepare history data
         data = self._prepare_statisic()
+        # self._prepare_statisic()
         result = self.get_result('get', url+"?last=365")
         # Check objects counters
         self.assertEqual(result['projects'], self.get_count('Project'))
@@ -346,5 +347,4 @@ class APITestCase(ApiUsersTestCase,
         self.assertEqual(result['users'], self.get_count(User))
         # Check history counts
         self._check_stats_history(data['day'], result['jobs']['day'])
-        self._check_stats_history(data['month'], result['jobs']['month'])
         self._check_stats_history(data['year'], result['jobs']['year'])

@@ -613,30 +613,53 @@ class BaseTask(object):
 
 
 class AnsibleArgumentsReference(object):
+    # Type conversion for GUI fields
     _GUI_TYPES_CONVERSION = {
         "string": "text",
         "int": "integer",
         None: "boolean",
         "choice": "text",
     }
-    _GUI_TYPES_EXCEPTIONS = {
+    # Types with different conversion to fields
+    _GUI_TYPES_CONVERSION_DIFFERENT = {
         "private-key": "keyfile",
         "key-file": "keyfile",
     }
-    _EXCLUDE_ARGS = ['verbose', 'inventory-file', 'module-name']
+    # Args for using in code, but hidden for users
     _HIDDEN_ARGS = ['group']
+    # Excluded args from user calls
+    _EXCLUDE_ARGS = [
+        # Excluded because we use this differently in code
+        'verbose', 'inventory-file', 'module-name',
+        # Excluded because now we could not send any to worker proccess
+        'ask-sudo-pass', 'ask-su-pass', 'ask-pass',
+        'ask-vault-pass', 'ask-become-pass',
+    ]
 
     def __init__(self):
         self.raw_dict = self._extract_from_cli()
 
+    @property
+    def clis(self):
+        '''
+        Ansible cli objects
+
+        :return: dict with cli objects
+        '''
+        return {
+            "module": AdHocCLI(args=["", "all"]),
+            "playbook": PlaybookCLI(args=["", "none.yml"])
+        }
+
     def _cli_to_gui_type(self, argument, type_name):
-        if argument in self._GUI_TYPES_EXCEPTIONS:
-            return self._GUI_TYPES_EXCEPTIONS[argument]
+        if argument in self._GUI_TYPES_CONVERSION_DIFFERENT:
+            return self._GUI_TYPES_CONVERSION_DIFFERENT[argument]
         if argument is not None and argument.endswith("-file"):
             return "textfile"
         return self._GUI_TYPES_CONVERSION[type_name]
 
     def is_exists(self, key):
+        # TODO: refactor for search only in one type of cli
         for _, args in self.raw_dict.items():
             if key in args:
                 return True
@@ -647,23 +670,29 @@ class AnsibleArgumentsReference(object):
         for arg, info in args.items():
             if arg in self._HIDDEN_ARGS:
                 continue
-            cmd_result[arg] = {}
-            cmd_result[arg]['help'] = info['help']
-            cmd_result[arg]['type'] = self._cli_to_gui_type(arg, info['type'])
-            cmd_result[arg]['shortopts'] = info['shortopts']
+            cmd_result[arg] = dict(
+                type=self._cli_to_gui_type(arg, info['type']),
+                shortopts=info['shortopts'], help=info['help']
+            )
         return cmd_result
+
+    def is_valid_value(self, command, argument, value):
+        mtype = self.raw_dict[command][argument]["type"]
+        if mtype == 'int':
+            int(value)
+        elif mtype is None and value not in [None, ""]:
+            raise AssertionError("This argument shouldn't have value")
+        return True
 
     def validate_args(self, command, args):
         try:
             for argument, value in args.items():
-                mtype = self.raw_dict[command][argument]["type"]
-                if mtype == 'int':
-                    int(value)
-                elif mtype is None and value not in [None, ""]:
-                    raise AssertionError("This argument shouldn't have value")
+                self.is_valid_value(command, argument, value)
         except (KeyError, ValueError, AssertionError) as e:
-            raise ValueError("Incorrect argument: {}. "
-                             "Problem: {}".format(argument, str(e)))
+            raise ValueError(
+                "Incorrect argument: {}. "
+                "Problem: {}".format(argument, str(e))
+            )
 
     def as_gui_dict(self, wanted=""):
         result = {}
@@ -672,29 +701,38 @@ class AnsibleArgumentsReference(object):
                 result[cmd] = self._as_gui_dict_command(args)
         return result
 
-    def _extract_from_cli(self):
+    def __parse_option(self, option):
         # pylint: disable=protected-access,
-        result = {}
-        clis = {
-            "module": AdHocCLI(args=["", "all"]),
-            "playbook": PlaybookCLI(args=["", "none.yml"])
+        cli_result = dict()
+        for name in option._long_opts:
+            name = name[2:]
+            if name in self._EXCLUDE_ARGS:
+                continue
+            shortopts = [opt[1:] for opt in option._short_opts]
+            cli_result[name] = dict(
+                type=option.type, help=option.help, shortopts=shortopts
+            )
+        return cli_result
+
+    def __parse_cli(self, cli):
+        # pylint: disable=protected-access,
+        cli.parse()
+        cli_result = {}
+        for option in cli.parser._get_all_options():
+            cli_result.update(self.__parse_option(option))
+        return cli_result
+
+    def _extract_from_cli(self):
+        '''
+        Format dict with args for API
+
+        :return: args for ansible cli
+        :rtype: dict
+        '''
+        # pylint: disable=protected-access,
+        result = {
+            name: self.__parse_cli(cli) for name, cli in self.clis.items()
         }
-        for cli_name in clis:
-            cli = clis[cli_name]
-            cli.parse()
-            cli_result = {}
-            for option in cli.parser._get_all_options():
-                for name in option._long_opts:
-                    name = name[2:]
-                    if name in self._EXCLUDE_ARGS:
-                        continue
-                    shortopts = []
-                    for opt in option._short_opts:
-                        shortopts.append(opt[1:])
-                    cli_result[name] = {"type": option.type,
-                                        "help": option.help,
-                                        "shortopts": shortopts}
-            result[cli_name] = cli_result
         result['module']['group'] = {"type": "string", "help": ""}
         result['periodic_playbook'] = result['playbook']
         result['periodic_module'] = result['module']
