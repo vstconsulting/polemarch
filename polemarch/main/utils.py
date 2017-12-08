@@ -20,7 +20,7 @@ except ImportError:  # nocv
 import six
 try:
     from yaml import CLoader as Loader, load
-except ImportError:
+except ImportError:  # nocv
     from yaml import Loader, load
 from django.conf import settings
 from django.core.cache import caches, InvalidCacheBackendError
