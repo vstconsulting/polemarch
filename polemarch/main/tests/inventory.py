@@ -179,6 +179,23 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         data2 = dict(name="127.1.0.1")
         self._check_update(url, data2, vars=data1["vars"], name=data2["name"])
 
+    def test_secret_host_vars(self):
+        url = "/api/v1/hosts/"
+        data = dict(
+            name="127.0.1.1", type="HOST", vars=dict(
+                ansible_ssh_pass="secret",
+                ansible_ssh_private_key_file="secret",
+                ansible_become_pass="secret",
+            )
+        )
+
+        host = self.post_result(url, data=json.dumps(data))
+        host_again = self.get_result("get", "{}{}/".format(url, host['id']))
+
+        for h in [host, host_again]:
+            for val in h['vars'].values():
+                self.assertEqual(val, "ENCRYPTED")
+
 
 class ApiGroupsTestCase(_ApiGHBaseTestCase):
     def setUp(self):

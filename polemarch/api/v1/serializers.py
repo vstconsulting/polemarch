@@ -301,6 +301,7 @@ class OneHistorySerializer(_SignalSerializer):
                   "raw_stdout",
                   "initiator",
                   "initiator_type",
+                  "execute_args",
                   "url")
 
     def get_raw(self, request):
@@ -347,6 +348,23 @@ class VariableSerializer(_SignalSerializer):
     def to_representation(self, instance):
         # we are not using that. This function here just in case.
         return {instance.key: instance.value}  # nocv
+
+
+class InvObjHideVarsMixin(object):
+    HIDDEN_VARS = [
+        'ansible_ssh_pass',
+        'ansible_ssh_private_key_file',
+        'ansible_become_pass',
+    ]
+
+
+class TaskObjHideVarsMixin(object):
+    HIDDEN_VARS = [
+        'key-file',
+        'private-key',
+        'vault-password-file',
+        'new-vault-password-file',
+    ]
 
 
 class _WithVariablesSerializer(_WithPermissionsSerializer):
@@ -396,8 +414,22 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
             "update", instance, validated_data=validated_data
         )
 
+    def get_vars(self, representation):
+        return representation.get('vars', None)
 
-class HostSerializer(_WithVariablesSerializer):
+    def to_representation(self, instance, hidden_vars=None):
+        rep = super(_WithVariablesSerializer, self).to_representation(instance)
+        hv = hidden_vars
+        hv = instance.HIDDEN_VARS if hv is None else hv
+        vars = self.get_vars(rep)
+        if vars is not None:
+            for mask_key in hv:
+                if mask_key in vars.keys():
+                    vars[mask_key] = "ENCRYPTED"
+        return rep
+
+
+class HostSerializer(_WithVariablesSerializer, InvObjHideVarsMixin):
     vars = DictField(required=False, write_only=True)
 
     class Meta:
@@ -432,6 +464,11 @@ class TaskSerializer(_WithVariablesSerializer):
                   'project',
                   'url',)
 
+    def to_representation(self, instance):
+        return super(TaskSerializer, self).to_representation(
+            instance, hidden_vars=[]
+        )
+
 
 class OneTaskSerializer(TaskSerializer):
     project = ModelRelatedField(read_only=True)
@@ -446,7 +483,7 @@ class OneTaskSerializer(TaskSerializer):
                   'url',)
 
 
-class PeriodictaskSerializer(_WithVariablesSerializer):
+class PeriodictaskSerializer(_WithVariablesSerializer, TaskObjHideVarsMixin):
     vars = DictField(required=False, write_only=True)
     schedule = serializers.CharField(allow_blank=True)
     inventory = serializers.CharField()
@@ -503,6 +540,22 @@ class TemplateSerializer(_WithVariablesSerializer):
             'data',
         )
 
+    def get_vars(self, representation):
+        try:
+            return representation['data']['vars']
+        except KeyError:
+            return None
+
+    def to_representation(self, instance):
+        if instance.kind in ["Task", "PeriodicTask", "Module"]:
+            return super(TemplateSerializer, self).to_representation(
+                instance, hidden_vars=models.PeriodicTask.HIDDEN_VARS
+            )
+        elif instance.kind in ["Host", "Group"]:
+            return super(TemplateSerializer, self).to_representation(
+                instance, hidden_vars=models.Inventory.HIDDEN_VARS
+            )
+
 
 class OneTemplateSerializer(TemplateSerializer):
     data = DictField(required=True)
@@ -533,7 +586,7 @@ class _InventoryOperations(_WithVariablesSerializer):
 
 ###################################
 
-class GroupSerializer(_WithVariablesSerializer):
+class GroupSerializer(_WithVariablesSerializer, InvObjHideVarsMixin):
     vars = DictField(required=False, write_only=True)
 
     class Meta:
@@ -576,7 +629,7 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
         return super(OneGroupSerializer, self).groups_operations(method, data)
 
 
-class InventorySerializer(_WithVariablesSerializer):
+class InventorySerializer(_WithVariablesSerializer, InvObjHideVarsMixin):
     vars = DictField(required=False, write_only=True)
 
     class Meta:

@@ -62,6 +62,12 @@ class AbstractModel(ACLModel):
     class Meta:
         abstract = True
 
+    HIDDEN_VARS = [
+        'ansible_ssh_pass',
+        'ansible_ssh_private_key_file',
+        'ansible_become_pass',
+    ]
+
     def __unicode__(self):  # pragma: no cover
         _vars = " ".join(["{}={}".format(k, v)
                           for k, v in self.vars.items()])
