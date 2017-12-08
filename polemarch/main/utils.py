@@ -25,6 +25,7 @@ except ImportError:
 from django.conf import settings
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
+from django.core.validators import ValidationError
 from django.template import loader
 from django.utils import translation
 from ansible import modules as ansible_modules, __version__ as ansible_version
@@ -658,13 +659,6 @@ class AnsibleArgumentsReference(object):
             return "textfile"
         return self._GUI_TYPES_CONVERSION[type_name]
 
-    def is_exists(self, key):
-        # TODO: refactor for search only in one type of cli
-        for _, args in self.raw_dict.items():
-            if key in args:
-                return True
-        return False
-
     def _as_gui_dict_command(self, args):
         cmd_result = {}
         for arg, info in args.items():
@@ -689,10 +683,10 @@ class AnsibleArgumentsReference(object):
             for argument, value in args.items():
                 self.is_valid_value(command, argument, value)
         except (KeyError, ValueError, AssertionError) as e:
-            raise ValueError(
-                "Incorrect argument: {}. "
-                "Problem: {}".format(argument, str(e))
-            )
+            raise ValidationError({
+                command: "Incorrect argument: {}.".format(str(e)),
+                'argument': argument
+            })
 
     def as_gui_dict(self, wanted=""):
         result = {}

@@ -195,5 +195,6 @@ class AnsibleArgsValidationTest(BaseTestCase):
             args = copy.deepcopy(required_args)
             update_func(args, {arg: val})
             result = self.get_result("post", url, 400, data=json.dumps(args))
-            self.assertIn("Incorrect argument", result["detail"])
-            self.assertIn(arg, result["detail"])
+            tp = "playbook" if "playbook" in result['detail'] else "module"
+            self.assertIn("Incorrect argument", result["detail"][tp][0])
+            self.assertIn(arg, result["detail"]['argument'][0])
