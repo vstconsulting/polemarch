@@ -350,23 +350,6 @@ class VariableSerializer(_SignalSerializer):
         return {instance.key: instance.value}  # nocv
 
 
-class InvObjHideVarsMixin(object):
-    HIDDEN_VARS = [
-        'ansible_ssh_pass',
-        'ansible_ssh_private_key_file',
-        'ansible_become_pass',
-    ]
-
-
-class TaskObjHideVarsMixin(object):
-    HIDDEN_VARS = [
-        'key-file',
-        'private-key',
-        'vault-password-file',
-        'new-vault-password-file',
-    ]
-
-
 class _WithVariablesSerializer(_WithPermissionsSerializer):
     operations = dict(DELETE="remove",
                       POST="add",
@@ -429,7 +412,7 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
         return rep
 
 
-class HostSerializer(_WithVariablesSerializer, InvObjHideVarsMixin):
+class HostSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
 
     class Meta:
@@ -483,7 +466,7 @@ class OneTaskSerializer(TaskSerializer):
                   'url',)
 
 
-class PeriodictaskSerializer(_WithVariablesSerializer, TaskObjHideVarsMixin):
+class PeriodictaskSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
     schedule = serializers.CharField(allow_blank=True)
     inventory = serializers.CharField()
@@ -586,7 +569,7 @@ class _InventoryOperations(_WithVariablesSerializer):
 
 ###################################
 
-class GroupSerializer(_WithVariablesSerializer, InvObjHideVarsMixin):
+class GroupSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
 
     class Meta:
@@ -629,7 +612,7 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
         return super(OneGroupSerializer, self).groups_operations(method, data)
 
 
-class InventorySerializer(_WithVariablesSerializer, InvObjHideVarsMixin):
+class InventorySerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
 
     class Meta:
