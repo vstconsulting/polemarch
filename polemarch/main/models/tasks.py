@@ -283,6 +283,7 @@ class History(BModel):
                                        related_query_name="history",
                                        blank=True, null=True, default=None)
     mode           = models.CharField(max_length=256)
+    revision       = models.CharField(max_length=256, blank=True, null=True)
     kind           = models.CharField(max_length=50, default="PLAYBOOK")
     start_time     = models.DateTimeField(default=timezone.now)
     stop_time      = models.DateTimeField(blank=True, null=True)

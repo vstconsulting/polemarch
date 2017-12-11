@@ -89,7 +89,7 @@ class Project(AbstractModel):
             mode=mod_name, start_time=timezone.now(),
             inventory=inventory, project=self,
             kind=kind, raw_stdout="", execute_args=extra,
-            initiator=initiator, initiator_type=initiator_type
+            initiator=initiator, initiator_type=initiator_type,
         )
         if isinstance(inventory, (six.string_types, six.text_type)):
             history_kwargs['inventory'] = None
@@ -159,3 +159,6 @@ class Project(AbstractModel):
 
     def sync(self, *args, **kwargs):
         return self.repo_class.get()
+
+    def revision(self):
+        return self.repo_class.revision()

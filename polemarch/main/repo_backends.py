@@ -74,6 +74,10 @@ class _Base(object):
         '''
         raise NotImplementedError
 
+    def get_revision(self, options):
+        # pylint: disable=unused-argument
+        return None
+
     def delete(self):
         if os.path.exists(self.path):
             if os.path.isfile(self.path):
@@ -92,6 +96,9 @@ class _Base(object):
 
     def check(self):
         pass  # nocv
+
+    def revision(self):
+        return self._operate(self.get_revision)
 
 
 class Git(_Base):
@@ -120,15 +127,23 @@ class Git(_Base):
                                    **self.options.get("CLONE_KWARGS", dict()))
         return repo, None
 
-    def make_update(self, env):
+    def _get_or_create_repo(self, env):
         try:
             repo = git.Repo(self.path)
         except git.NoSuchPathError:
             repo = self.make_clone(env)[0]
+        return repo
+
+    def make_update(self, env):
+        repo = self._get_or_create_repo(env)
         with repo.git.custom_environment(**env):
             kwargs = self.options.get("FETCH_KWARGS", dict())
             fetch_result = repo.remotes.origin.pull(**kwargs)
         return repo, fetch_result
+
+    def get_revision(self, env):
+        repo = self._get_or_create_repo(env)
+        return repo.head.object.hexsha
 
     def _with_password(self, tmp, env_vars):
         env_vars.update(self.env.get("PASSWORD", dict()))

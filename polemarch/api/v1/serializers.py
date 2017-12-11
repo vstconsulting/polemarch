@@ -302,6 +302,7 @@ class OneHistorySerializer(_SignalSerializer):
                   "initiator",
                   "initiator_type",
                   "execute_args",
+                  "revision",
                   "url")
 
     def get_raw(self, request):
