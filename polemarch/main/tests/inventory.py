@@ -190,11 +190,32 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         )
 
         host = self.post_result(url, data=json.dumps(data))
-        host_again = self.get_result("get", "{}{}/".format(url, host['id']))
+        single_url = "{}{}/".format(url, host['id'])
+        host_again = self.get_result("get", single_url)
 
         for h in [host, host_again]:
             for val in h['vars'].values():
-                self.assertEqual(val, "ENCRYPTED")
+                self.assertEqual(val, "[~~ENCRYPTED~~]")
+
+        data = dict(
+            name="127.0.1.1", type="HOST", vars=dict(
+                ansible_ssh_pass="[~~ENCRYPTED~~]",
+                ansible_ssh_private_key_file="[~~ENCRYPTED~~]",
+                ansible_become_pass="[~~ENCRYPTED~~]",
+                ansible_host='lopuhost'
+            )
+        )
+
+        host = self.get_result("patch", single_url, data=json.dumps(data))
+
+        for key, val in host['vars'].items():
+            if key != "ansible_host":
+                self.assertEqual(val, "[~~ENCRYPTED~~]")
+            else:
+                self.assertEqual(val, "lopuhost")
+
+        val = Host.objects.get(pk=host['id']).vars['ansible_become_pass']
+        self.assertEqual(val, "secret")
 
 
 class ApiGroupsTestCase(_ApiGHBaseTestCase):

@@ -79,8 +79,11 @@ class AbstractModel(ACLModel):
 
     @transaction.atomic()
     def set_vars(self, variables):
-        self.variables.all().delete()
-        for key, value in variables.items():
+        encr = "[~~ENCRYPTED~~]"
+        encrypted_vars = {k: v for k, v in variables.items() if v == encr}
+        other_vars = {k: v for k, v in variables.items() if v != encr}
+        self.variables.exclude(key__in=encrypted_vars.keys()).delete()
+        for key, value in other_vars.items():
             self.variables.create(key=key, value=value)
 
     def vars_string(self, variables, separator=" "):

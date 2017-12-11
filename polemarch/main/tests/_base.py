@@ -136,7 +136,11 @@ class BaseTestCase(TestCase):
             result = self.get_result("post", url, 201, data=json.dumps(dt))
             self.assertTrue(isinstance(result, dict))
             for field in fields:
-                self.assertEqual(result[field], data[counter][field])
+                s = "[~~ENCRYPTED~~]"
+                if field == "vars" and s in result['vars'].values():
+                    pass
+                else:
+                    self.assertEqual(result[field], data[counter][field])
             results_id.append(result["id"])
             counter += 1
         return results_id

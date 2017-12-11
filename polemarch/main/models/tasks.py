@@ -342,7 +342,7 @@ class History(BModel):
         data = {k: v for k, v in value.items() if k not in ['group']}
         for key in data.keys():
             if key in PeriodicTask.HIDDEN_VARS:
-                data[key] = "ENCRYPTED"
+                data[key] = "[~~ENCRYPTED~~]"
         self.json_args = json.dumps(data)
 
     @property

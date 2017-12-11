@@ -174,12 +174,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         hosts_data = [dict(name="127.0.1.1", type="HOST", vars={}),
                       dict(name="hostlocl", type="HOST",
                            vars={"ansible_user": "centos",
-                                 "ansible_ssh_private_key_file": "ENCRYPTED"}),
+                                 "ansible_ssh_private_key_file":
+                                     "mykey"}),
                       dict(name="127.0.1.[3:4]", type="RANGE", vars={}),
                       dict(name="127.0.1.[5:6]", type="RANGE", vars={})]
         groups_data = [dict(name="groups1",
                             vars={"ansible_user": "ubuntu",
-                                  "ansible_ssh_pass": "ENCRYPTED"},
+                                  "ansible_ssh_pass": "mypass"},
                             children=True),
                        dict(name="groups2", vars={}, children=True),
                        dict(name="groups3", vars={}, children=True),
@@ -651,7 +652,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
         for h in [host, host_again]:
             for val in h['vars'].values():
-                self.assertEqual(val, "ENCRYPTED")
+                self.assertEqual(val, "[~~ENCRYPTED~~]")
 
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):

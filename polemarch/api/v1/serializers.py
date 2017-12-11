@@ -408,7 +408,7 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
         if vars is not None:
             for mask_key in hv:
                 if mask_key in vars.keys():
-                    vars[mask_key] = "ENCRYPTED"
+                    vars[mask_key] = "[~~ENCRYPTED~~]"
         return rep
 
 
