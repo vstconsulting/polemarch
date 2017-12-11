@@ -78,7 +78,11 @@
                                <% } %>"
                         href="<%- pmObj.model.page_list.buttons[i].link.apply(pmObj, [opt]) %>"
                         title="<%- pmObj.model.page_list.buttons[i].help || '' %>"
-                        onclick="<%- pmObj.model.page_list.buttons[i].function.apply(pmObj, [opt]) %>" >
+                        onclick="<% if(typeof pmObj.model.page_list.buttons[i].onclick == 'function'){ %>
+                                <%- pmObj.model.className %>.model.page_list.buttons[<%- i %>].onclick.apply(<%- pmObj.model.className %>, [event])
+                            <% }else{ %>
+                                <%- pmObj.model.page_list.buttons[i].function.apply(pmObj, [opt]) %>
+                            <% } %>" >
                             <% if(typeof pmObj.model.page_list.buttons[i].title == 'function'){ %>
                                 <%= pmObj.model.page_list.buttons[i].title.apply(pmObj, [opt]) %>
                             <% }else{ %>
@@ -112,8 +116,8 @@
                                     </th>
                                     <% for(var j in pmObj.model.page_list.fileds){ %>
                                         <th 
-                                            <% if(pmObj.model.page_list.fileds[j].style){ %><%= pmObj.model.page_list.fileds[j].style.apply(pmObj,[opt]) %><% } %> 
-                                            <% if(pmObj.model.page_list.fileds[j].class){ %><%= pmObj.model.page_list.fileds[j].class.apply(pmObj,[opt]) %><% } %>  >
+                                            <% if(pmObj.model.page_list.fileds[j].style){ %><%= pmObj.model.page_list.fileds[j].style.apply(pmObj,[undefined, opt]) %><% } %> 
+                                            <% if(pmObj.model.page_list.fileds[j].class){ %><%= pmObj.model.page_list.fileds[j].class.apply(pmObj,[undefined, opt]) %><% } %>  >
                                                 <%- pmObj.model.page_list.fileds[j].title %>
                                         </th> 
                                     <% } %>

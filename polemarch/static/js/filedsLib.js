@@ -34,7 +34,10 @@ filedsLib.filed.simpleText.type = "text";
 
 /**
  * Функция для рендера текстового поля
- * @type Object
+ * @type Object Объект наследник от pmItem
+ * @type Object Объект c описанием поля
+ * @type Integer Идентификатор редактируемого элемента
+ * @type Object Дополнительные параметры
  */
 filedsLib.filed.simpleText.render = function(pmObj, filed, item_id, opt){
     return spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id, opt:opt})

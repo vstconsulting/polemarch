@@ -1365,9 +1365,9 @@ pmInventories.filed.inventoriesAutocomplete.getValue = function(pmObj, filed)
  * Функция для рендера поля
  * @type Object
  */
-pmInventories.filed.inventoriesAutocomplete.render = function(pmObj, filed, item_id)
+pmInventories.filed.inventoriesAutocomplete.render = function(pmObj, filed, item_id, opt)
 { 
-    var html = spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id, filedObj:this}) 
+    var html = spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id, filedObj:this, opt:opt}) 
     return spajs.just.onInsert(html, function()
     {
         // @FixMe требует чтоб были загружены все инвентории pmInventories.loadAllItems()

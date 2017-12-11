@@ -25,49 +25,90 @@ pmProjects.filed.selectRepositoryType.getValue = function(pmObj, filed){
 }
 
 
-pmProjects.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete() 
+pmProjects.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete()
 
-
+/**
+ * Описывает как формировать страницу списка элементов
+ * @type object
+ */
 pmProjects.model.page_list = {
+    // Массив для описания кнопок в верху страницы
     buttons:[
         {
-            class:'btn btn-primary',
-            function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"'}); return false;"},
-            title:'Create',
-            link:function(){ return '/?new-'+this.model.page_name},
+            class:'btn btn-primary',                                                                                // Класс
+            //function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"'}); return false;"},   // То что подставится в шаблон на onclick
+            onclick:function(){ spajs.open({ menuId:"new-"+this.model.page_name}); return false;},                  // Функция вызываемая на onclick
+            title:'Create',                                                                                         // Текст на кнопке
+            link:function(){ return '/?new-'+this.model.page_name},                                                 // То что попадёт в href
+            help:''                                                                                                 // Текст для поля подсказки title
         },
     ],
-    title: "Projects",
-    short_title: "Projects",
+    title: "Projects",          // Текст заголовка страницы
+    short_title: "Projects",    // Короткий текст заголовка страницы
+    // Описание полей в списке элементов
     fileds:[
         {
-            title:'Name',
-            name:'name',
+            title:'Name',   // Текст в заголовке
+            name:'name',    // Имя поля в объекте из которого надо взять значение
         },
         {
             title:'Status',
             name:'status',
-            style:function(item){ return 'style="width: 110px"'},
-            class:function(item)
+            /**
+             * Стиль элемента td в таблице
+             * @param {object} item объект для которого строится строка
+             * @param {object} opt объект доп параметров переданных в шаблон
+             * @returns {String} Стиль элемента td в таблице
+             */
+            style:function(item, opt){ return 'style="width: 110px"'},
+            /**
+             * Класс элемента td в таблице
+             * @param {object} item объект для которого строится строка
+             * @param {object} opt объект доп параметров переданных в шаблон
+             * @returns {String} Класс элемента td в таблице
+             */
+            class:function(item, opt)
             {
                 if(!item || !item.id)
                 {
                     return 'class="hidden-xs hidden-sm"';
-                } 
+                }
 
                 return 'class="hidden-xs hidden-sm project-status '
                     + this.model.items[item.id].justClassName('status', function(v){ return "project-status-"+v})+'"'
             },
-            value:function(item, filed){
-                return item.justText(filed)
+            /**
+             * Значение для ячейки в таблице
+             * @param {object} item объект для которого строится строка
+             * @param {String} filed_name имя поля
+             * @param {object} opt объект доп параметров переданных в шаблон
+             * @returns {String} Значение для ячейки в таблице
+             */
+            value:function(item, filed_name, opt){
+                return item.justText(filed_name)
             },
         }
     ],
+    // Список действий которые можно совершить из страницы просмотра списка
     actions:[
         {
-            class:'btn btn-default',
+            /**
+             * Функция для onclick
+             * @param {object} item объект для которого строится строка
+             * @param {object} opt объект доп параметров переданных в шаблон
+             * @returns {String} Функция для onclick
+             */
             function:function(item){ return 'spajs.showLoader('+this.model.className+'.syncRepo('+item.id+')); return false;'},
+            /**
+             * Текст заголовка кнопки
+             */
             title:'Sync',
+            /**
+             * Функция для href
+             * @param {object} item объект для которого строится строка
+             * @param {object} opt объект доп параметров переданных в шаблон
+             * @returns {String} Функция для href
+             */
             link:function(){ return '#'}
         },
         {
@@ -105,21 +146,33 @@ pmProjects.model.page_list = {
     ]
 }
 
+/**
+ * Описывает как формировать страницу создания элемента
+ * @type object
+ */
 pmProjects.model.page_new = {
-    title: "New project",
-    short_title: "New project",
+    title: "New project",               // Текст заголовка страницы
+    short_title: "New project",         // Короткий текст заголовка страницы   
+    /** 
+     * Содержит массив с массивами описаний полей в списке элементов
+     * Масиивы представляют собой блоки строк в которые вставляются поля ввода
+     * @type Array
+     */
     fileds:[
         [
+            /**
+             * Поле ввода
+             */
             {
-                filed: new filedsLib.filed.text(),
-                title:'Name',
-                name:'name',
-                placeholder:'Project name',
-                help:'',
-                validator:function(value){
-                    return filedsLib.validator.notEmpty(value, 'Name')
+                filed: new filedsLib.filed.text(),                              // Объект поля ввода
+                title:'Name',                                                   // Заголовок
+                name:'name',                                                    // Имя поля из которого брать значение
+                placeholder:'Project name',                                     // Подсказка
+                help:'',                                                        // Подсказка
+                validator:function(value){                                      // Функция валидации должна вернуть true или false+вывод сообщения об ошибке
+                    return filedsLib.validator.notEmpty(value, 'Name')          
                 },
-                fast_validator:function(value){ return value != '' && value}
+                fast_validator:function(value){ return value != '' && value}    // Функция быстрой валидации должна вернуть true или false
             },
             {
                 filed: new pmProjects.filed.selectRepositoryType(),
@@ -127,7 +180,22 @@ pmProjects.model.page_new = {
             },
         ]
     ],
-    sections:[],
+    /**
+     * Список дополнительных блоков которые надо вставить в страницу
+     * @type Array
+     */
+    sections:[
+        /** 
+         * @returns {String} Текст шаблона для вставки дополнительных блоков в страницу
+         */
+        // function(){ return ''}
+    ],
+    /**
+     * Функция вызываемая до сохранения объекта, должна вернуть объект 
+     * отправляемый на сохранение можно изменённый или вернуть false для того чтоб отменить сохранение.
+     * @param {object} data объект отправляемый на сохранение 
+     * @returns {object|boolean} 
+     */
     onBeforeSave:function(data)
     {
         data.repository = $("#new_project_repository").val()
@@ -151,6 +219,11 @@ pmProjects.model.page_new = {
 
         return data;
     },
+    /**
+     * Функция вызываемая после сохранения объекта
+     * @param {object} result
+     * @returns {function|boolean}
+     */
     onCreate:function(result)
     {
         var def = new $.Deferred();
@@ -163,10 +236,20 @@ pmProjects.model.page_new = {
     }
 }
 
+
+/**
+ * Описывает как формировать страницу редактирования элемента
+ * @type object
+ */
 pmProjects.model.page_item = {
+    // Массив для описания кнопок в верху страницы
     buttons:[
         {
             class:'btn btn-primary',
+            /** 
+             * @param {Integer} item_id Идентификатор редактируемого элемента
+             * @returns {String} То что подставится в шаблон на onclick
+             */
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
             title:'Save',
             link:function(){ return '#'},
@@ -219,9 +302,17 @@ pmProjects.model.page_item = {
         },
     ],
     sections:[],
+    /** 
+     * @param {Integer} item_id Идентификатор редактируемого элемента
+     * @returns {String} То что подставится в шаблон на title
+     */
     title: function(item_id){
         return "Project "+this.model.items[item_id].justText('name')
     },
+    /** 
+     * @param {Integer} item_id Идентификатор редактируемого элемента
+     * @returns {String} То что подставится в шаблон на short_title
+     */
     short_title: function(item_id){
         return "Project "+this.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
     },
@@ -231,7 +322,7 @@ pmProjects.model.page_item = {
                 filed: new filedsLib.filed.text(),
                 title:'Name',
                 name:'name',
-                placeholder:'Enter project name', 
+                placeholder:'Enter project name',
                 validator:function(value){
                     return filedsLib.validator.notEmpty(value, 'Name')
                 },
@@ -243,6 +334,11 @@ pmProjects.model.page_item = {
             },
         ]
     ],
+    /**
+     * Функция вызываемая после сохранения объекта
+     * @param {object} result
+     * @returns {function|boolean}
+     */
     onUpdate:function(result)
     {
         return true;
@@ -356,7 +452,7 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
                         matches.push(val)
                     }
                 }
-                
+
                 if(matches.length)
                 {
                     response(matches);
