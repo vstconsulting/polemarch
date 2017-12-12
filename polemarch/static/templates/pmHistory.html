@@ -17,6 +17,7 @@
                 <div class="box box-info">
                     <div class="box-header with-border">
                         <div style="float:left;">History</div>
+                        <% debugger %>
                         <%= pmHistory.searchFiled({query:query}) %>
                         <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
@@ -514,8 +515,7 @@
                             </div>
                             <div class="help-block"></div>
                         </div>
-
-                        <% pmHistory.model.items[item_id].execute_args = {limit:'all'} %>
+ 
                         <% if(pmHistory.model.items[item_id].execute_args){ %>
                             <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12"> 
                                 <label class="control-label" >Execute args</label>
