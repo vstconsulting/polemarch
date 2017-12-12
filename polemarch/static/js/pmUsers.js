@@ -31,9 +31,7 @@ pmUsers.model.page_list = {
         }
     ]
 }
-  
-// pmUsers.fileds = 
-    
+   
 pmUsers.model.page_new = {
     title: "New user",
     short_title: "New user",

@@ -133,13 +133,13 @@ var justReactive = {
      */
     justStrip:function(html)
     {
-        if(typeof html != "string")
+        if(typeof html != "string" && (!html || !html.toString) )
         {
             return "";
         }
             
         var tmp = document.createElement("DIV");
-        tmp.innerHTML = html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        tmp.innerHTML = html.toString().replace(/</g, '&lt;').replace(/>/g, '&gt;');
         return tmp.textContent || tmp.innerText || "";
     },
 
@@ -436,7 +436,14 @@ var justReactive = {
             }
         }
     },
-    defaultcallBack:function(val){ return val;},
+    defaultcallBack:function(val)
+    {
+        if(val && val.toString)
+        {
+            return val.toString();
+        }
+        return val;
+    },
     setValue:function (opt)
     {
         /*
