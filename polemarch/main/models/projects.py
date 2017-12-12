@@ -160,5 +160,6 @@ class Project(AbstractModel):
     def sync(self, *args, **kwargs):
         return self.repo_class.get()
 
+    @property
     def revision(self):
         return self.repo_class.revision()

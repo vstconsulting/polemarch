@@ -91,6 +91,11 @@ pmUsers.model.page_new = {
             }
         ]
     ],
+    onBeforeSave:function(data, item_id)
+    {
+        data.is_staff = true
+        return data;
+    },
     onCreate:function(result)
     { 
         var def = new $.Deferred();
@@ -191,6 +196,7 @@ pmUsers.model.page_item = {
         {
             delete data.password  
         }
+        data.is_staff = true
 
         return data;
     },

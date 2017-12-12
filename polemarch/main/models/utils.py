@@ -169,7 +169,7 @@ class AnsibleCommand(object):
         self.inventory_object = self.Inventory(inventory, cwd=self.workdir)
         self.history.raw_inventory = self.inventory_object.raw
         self.history.status = "RUN"
-        self.history.revision = project.revision()
+        self.history.revision = project.revision
         self.history.save()
         self.executor = Executor(self.history)
 

@@ -74,9 +74,9 @@ class _Base(object):
         '''
         raise NotImplementedError
 
-    def get_revision(self, options):
+    def get_revision(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        return None
+        return "NO VCS"
 
     def delete(self):
         if os.path.exists(self.path):
@@ -141,8 +141,9 @@ class Git(_Base):
             fetch_result = repo.remotes.origin.pull(**kwargs)
         return repo, fetch_result
 
-    def get_revision(self, env):
-        repo = self._get_or_create_repo(env)
+    def get_revision(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        repo = git.Repo(self.path)
         return repo.head.object.hexsha
 
     def _with_password(self, tmp, env_vars):
@@ -178,6 +179,12 @@ class Git(_Base):
     def get(self):
         return {res.ref.remote_head: self._fetch_map[res.flags]
                 for res in super(Git, self).get()[1]}
+
+    def revision(self):
+        try:
+            return self._operate(self.get_revision)
+        except git.GitError:
+            return "ERROR"
 
 
 class _ArchiveRepo(_Base):
