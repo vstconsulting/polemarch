@@ -538,3 +538,30 @@ table{
     min-width: 100%;
     width: 100%;
 }
+
+
+.history-mode.history-fullsize .history-LeftInfo{
+    width: 100%;
+}
+
+.history-mode.history-fullsize .history-RightInfo{
+    display: none;
+}
+
+.history-mode .history-LeftInfo .btn-history-resize .glyphicon-resize-full{
+    display: block;
+}
+
+.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .glyphicon-resize-full{
+    display: none;
+}
+
+
+
+.history-mode .history-LeftInfo .btn-history-resize .glyphicon-resize-small{
+    display: none;
+}
+
+.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .glyphicon-resize-small{
+    display: block;
+}
