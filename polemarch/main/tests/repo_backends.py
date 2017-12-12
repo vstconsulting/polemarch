@@ -56,6 +56,7 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         repo = git.Repo.init(repo_dir)
         repo.index.add(["main.yml"])
         repo.index.commit("no message")
+        revision = repo.head.object.hexsha
         # actual test
         data = dict(name="GitProject{}".format(sys.version_info[0]),
                     repository=repo_dir,
@@ -64,11 +65,13 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         prj_id = self.get_result("post", self.url, data=json.dumps(data))['id']
         self.projects_to_delete.append(prj_id)
         single_url = self.url + "{}/".format(prj_id)
-        self.assertEqual(self.get_result("get", single_url)['status'], "OK")
+        project = self.get_result("get", single_url)
+        self.assertEqual(project['status'], "OK")
         tasks_url = "/api/v1/tasks/?project={}".format(prj_id)
         tasks = self.get_result("get", tasks_url, 200)
         self.assertEquals(tasks["count"], 1)
         self.assertEquals(tasks["results"][0]["name"], "main")
+        self.assertEqual(project["revision"], revision)
 
         self.get_result("post", single_url+"sync/", 200)
         # delete test repository

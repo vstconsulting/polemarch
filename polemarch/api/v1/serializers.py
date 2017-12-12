@@ -302,6 +302,7 @@ class OneHistorySerializer(_SignalSerializer):
                   "initiator",
                   "initiator_type",
                   "execute_args",
+                  "revision",
                   "url")
 
     def get_raw(self, request):
@@ -680,6 +681,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'inventories',
                   'vars',
                   'owner',
+                  'revision',
                   'url',)
 
     def inventories_operations(self, method, data):
