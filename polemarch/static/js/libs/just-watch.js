@@ -589,6 +589,8 @@ var justReactive = {
                                 }
                                 
                                 newval.val = newObj
+                                newval.justWatch('val')
+                                
                                 justReactive.applyFunc(newval.val, newval)
                                 //setter.apply(this, [newObj]);
                                 return res;
