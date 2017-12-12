@@ -929,7 +929,7 @@ pmInventories.model.page_new = {
                 validator:function(value){ 
                     return filedsLib.validator.notEmpty(value, 'Name')
                 },
-                fast_validator:function(value){ return value != '' && value}
+                fast_validator:filedsLib.validator.notEmpty
             }, 
         ]
     ],

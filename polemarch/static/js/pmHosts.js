@@ -49,7 +49,13 @@ pmHosts.fileds = [
             help:'Host or range name',
             validator:function(value)
             {
-                return filedsLib.validator.notEmpty('name', value)
+                if(this.validateRangeName(value) || this.validateHostName(value))
+                {
+                    return true;
+                }
+                
+                $.notify("Invalid value in field `name` it mast be valid host or range name", "error"); 
+                return false;
             },       
             fast_validator:function(value){ return this.validateRangeName(value) || this.validateHostName(value)}   
         },
