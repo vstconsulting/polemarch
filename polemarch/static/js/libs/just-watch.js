@@ -567,6 +567,7 @@ var justReactive = {
 
                 if(Array.isArray(newval.val))
                 {
+                    var thisObj = this
                     Object.defineProperty(this[opt.prop], 'splice', {
                             enumerable: false
                           , configurable: true
@@ -588,10 +589,10 @@ var justReactive = {
                                     newObj[i] = newval.val[keys[i]]
                                 }
                                 
-                                newval.val = newObj
-                                newval.justWatch('val')
                                 
-                                justReactive.applyFunc(newval.val, newval)
+                                justReactive.megreFunc(newval, 'val', newObj)
+                                //newval.justWatch('val') 
+                                //justReactive.applyFunc(newval.val, newval)
                                 //setter.apply(this, [newObj]);
                                 return res;
                         }
