@@ -358,7 +358,6 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
                       GET="all")
 
     def get_operation(self, method, data, attr):
-        # FIXME: details about every failed object
         tp = getattr(self.instance, attr)
         obj_list = self._get_objects(tp.model, data)
         return self._operate(method, data, attr, obj_list)
@@ -367,6 +366,8 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
         data = dict(total=len(total))
         data["operated"] = len(found)
         data["not_found"] = data["total"] - data["operated"]
+        found_ids = [item.id for item in found]
+        data["failed_list"] = [i for i in total if i not in found_ids]
         return Response(data, status=code)
 
     @transaction.atomic

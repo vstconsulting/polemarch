@@ -14,6 +14,7 @@ from .tasks import (ApiTasksTestCase,
                     ApiPeriodicTasksTestCase,
                     ApiTemplateTestCase,
                     ApiHistoryTestCase)
+from .sublists import SublistsTestCase
 from .ansible import ApiAnsibleTestCase
 from .repo_backends import RepoBackendsTestCase
 from ..models import UserGroup, History
@@ -248,7 +249,7 @@ class APITestCase(ApiUsersTestCase,
                   ApiInventoriesTestCase, ApiProjectsTestCase,
                   ApiTasksTestCase, ApiPeriodicTasksTestCase,
                   ApiBulkTestCase, ApiTemplateTestCase, ApiHistoryTestCase,
-                  ApiAnsibleTestCase, RepoBackendsTestCase):
+                  ApiAnsibleTestCase, RepoBackendsTestCase, SublistsTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 
