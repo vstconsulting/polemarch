@@ -75,6 +75,7 @@ class PeriodicTask(AbstractModel):
     schedule       = models.CharField(max_length=4*1024)
     type           = models.CharField(max_length=10)
     save_result    = models.BooleanField(default=True)
+    enabled        = models.BooleanField(default=True)
 
     kinds = ["PLAYBOOK", "MODULE"]
     types = ["CRONTAB", "INTERVAL"]

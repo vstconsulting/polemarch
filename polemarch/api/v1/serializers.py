@@ -483,6 +483,7 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
                   'project',
                   'inventory',
                   'save_result',
+                  'enabled',
                   'vars',
                   'url',)
 
@@ -508,6 +509,7 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'project',
                   'inventory',
                   'save_result',
+                  'enabled',
                   'vars',
                   'url',)
 
