@@ -73,6 +73,20 @@ pmHosts.model.page_new = {
     ],
     onBeforeSave:function(data)
     { 
+        if(this.validateHostName(data.name))
+        {
+            data.type = 'HOST'
+        }
+        else if(this.validateRangeName(data.name))
+        { 
+            data.type = 'RANGE'
+        }
+        else
+        {
+            $.notify("Error in host or range name", "error"); 
+            return undefined;
+        }
+        
         data.vars = jsonEditor.jsonEditorGetValues()
         return data;
     },
