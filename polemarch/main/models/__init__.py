@@ -120,6 +120,8 @@ def save_to_beat(instance, **kwargs):
     task = settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"]
     manager = django_celery_beat.models.PeriodicTask.objects
     delete_from_beat(instance)
+    if not instance.enabled:
+        return
     if instance.type == "INTERVAL":
         units = IntervalSchedule.SECONDS
         secs = instance.get_schedule()
