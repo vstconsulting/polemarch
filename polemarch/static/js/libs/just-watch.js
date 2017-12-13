@@ -110,14 +110,14 @@ $.fn.prependTpl = function(tplText)
     return this;
 };
 
-function mergeCopyM(o, obj){
+function mergeCopyM(obj){
     
     if(Array.isArray(obj))
     {
         return obj.slice()
     }
     
-    if(typeof obj == "object")
+    if(typeof obj == "object" && obj != null)
     {
         return $.extend(true, {}, obj)
     }
@@ -187,7 +187,7 @@ var justReactive = {
         if(!res)
         {
             // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-            obj[prop] = mergeCopyM(undefined, newval);
+            obj[prop] = mergeCopyM(newval);
             obj.justWatch(prop);
             return;
         }
@@ -197,7 +197,7 @@ var justReactive = {
             if(obj[prop] !== newval)
             {
                 // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                obj[prop] = mergeCopyM(undefined, newval);
+                obj[prop] = mergeCopyM(newval);
             }
             return;
         }
@@ -205,7 +205,7 @@ var justReactive = {
         if(typeof obj[prop] != "object" || obj[prop] == null)
         {
             // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-            obj[prop] = mergeCopyM(undefined, newval);
+            obj[prop] = mergeCopyM(newval);
             obj.justWatch(prop);
             return;
         }
@@ -232,7 +232,7 @@ var justReactive = {
                 else
                 {
                     // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                    obj[prop][i] = mergeCopyM(undefined, newval[i]);
+                    obj[prop][i] = mergeCopyM(newval[i]);
                     obj[prop].justWatch(i);
                 }
             }
@@ -261,7 +261,7 @@ var justReactive = {
             else
             {
                 // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                obj[prop][i] = mergeCopyM(undefined, newval[i]);
+                obj[prop][i] = mergeCopyM(newval[i]);
                 obj[prop].justWatch(i);
             }
         }
