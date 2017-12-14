@@ -65,35 +65,39 @@
 
 
     <section class="content"> 
-        <% if(pmObj.model.page_list.buttons){ %>
-            <% for(var i in  pmObj.model.page_list.buttons){ %>
-                <% if(pmObj.model.page_list.buttons[i].tpl){ %>
-                    <%= pmObj.model.page_list.buttons[i].tpl.apply(pmObj, [opt]) %>
-                <% }else{ %> 
-                    <a 
-                        class="<% if(typeof pmObj.model.page_list.buttons[i].title == 'function'){ %>
-                                    <%- pmObj.model.page_list.buttons[i].class.apply(pmObj, [opt]) %>
-                               <% }else{ %>
-                                    <%- pmObj.model.page_list.buttons[i].class %>
-                               <% } %>"
-                        href="<%- pmObj.model.page_list.buttons[i].link.apply(pmObj, [opt]) %>"
-                        title="<%- pmObj.model.page_list.buttons[i].help || '' %>"
-                        onclick="<% if(typeof pmObj.model.page_list.buttons[i].onclick == 'function'){ %>
-                                <%- pmObj.model.className %>.model.page_list.buttons[<%- i %>].onclick.apply(<%- pmObj.model.className %>, [event])
-                            <% }else{ %>
-                                <%- pmObj.model.page_list.buttons[i].function.apply(pmObj, [opt]) %>
-                            <% } %>" >
-                            <% if(typeof pmObj.model.page_list.buttons[i].title == 'function'){ %>
-                                <%= pmObj.model.page_list.buttons[i].title.apply(pmObj, [opt]) %>
-                            <% }else{ %>
-                                <%= pmObj.model.page_list.buttons[i].title %>
-                            <% } %>
-                    </a>
+        <div class="row">
+            <div class="col-lg-12">
+                <% if(pmObj.model.page_list.buttons){ %>
+                    <% for(var i in  pmObj.model.page_list.buttons){ %>
+                        <% if(pmObj.model.page_list.buttons[i].tpl){ %>
+                            <%= pmObj.model.page_list.buttons[i].tpl.apply(pmObj, [opt]) %>
+                        <% }else{ %> 
+                            <a 
+                                class="top-line-btn <% if(typeof pmObj.model.page_list.buttons[i].title == 'function'){ %>
+                                            <%- pmObj.model.page_list.buttons[i].class.apply(pmObj, [opt]) %>
+                                       <% }else{ %>
+                                            <%- pmObj.model.page_list.buttons[i].class %>
+                                       <% } %>"
+                                href="<%- pmObj.model.page_list.buttons[i].link.apply(pmObj, [opt]) %>"
+                                title="<%- pmObj.model.page_list.buttons[i].help || '' %>"
+                                onclick="<% if(typeof pmObj.model.page_list.buttons[i].onclick == 'function'){ %>
+                                        <%- pmObj.model.className %>.model.page_list.buttons[<%- i %>].onclick.apply(<%- pmObj.model.className %>, [event])
+                                    <% }else{ %>
+                                        <%- pmObj.model.page_list.buttons[i].function.apply(pmObj, [opt]) %>
+                                    <% } %>" >
+                                    <% if(typeof pmObj.model.page_list.buttons[i].title == 'function'){ %>
+                                        <%= pmObj.model.page_list.buttons[i].title.apply(pmObj, [opt]) %>
+                                    <% }else{ %>
+                                        <%= pmObj.model.page_list.buttons[i].title %>
+                                    <% } %>
+                            </a>
+                        <% } %>
+                    <% } %>
                 <% } %>
-            <% } %>
-        <% } %>
+            </div>
+        </div>
         <br>
-        <br>
+         
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -255,31 +259,34 @@
     </section>
 
     <section class="content">
-        <button type="button" onclick="spajs.showLoader(<%- pmObj.model.className %>.addItem('<%- parent_type %>', <%- parent_item %>)); return false;" class="btn btn-primary" >Create</button>
-        <% if(pmObj.model.page_new.buttons){ %>
-            <% for(var i in  pmObj.model.page_new.buttons){ %>
-                <% if(pmObj.model.page_new.buttons[i].tpl){ %>
-                    <%= pmObj.model.page_new.buttons[i].tpl.apply(pmObj, [opt]) %>
-                <% }else{ %> 
-                    <a 
-                        class="<% if(typeof pmObj.model.page_new.buttons[i].title == 'function'){ %>
-                                    <%- pmObj.model.page_new.buttons[i].class.apply(pmObj, [opt]) %>
-                               <% }else{ %>
-                                    <%- pmObj.model.page_new.buttons[i].class %>
-                               <% } %>"
-                        href="<%- pmObj.model.page_new.buttons[i].link.apply(pmObj, [opt]) %>"
-                        title="<%- pmObj.model.page_new.buttons[i].help || '' %>"
-                        onclick="<%- pmObj.model.page_new.buttons[i].function.apply(pmObj, [opt]) %>" >
-                            <% if(typeof pmObj.model.page_new.buttons[i].title == 'function'){ %>
-                                <%= pmObj.model.page_new.buttons[i].title.apply(pmObj, [opt]) %>
-                            <% }else{ %>
-                                <%= pmObj.model.page_new.buttons[i].title %>
-                            <% } %>
-                    </a>
+        <div class="row">
+            <div class="col-lg-12">
+                <button type="button" onclick="spajs.showLoader(<%- pmObj.model.className %>.addItem('<%- parent_type %>', <%- parent_item %>)); return false;" class="btn btn-primary" >Create</button>
+                <% if(pmObj.model.page_new.buttons){ %>
+                    <% for(var i in  pmObj.model.page_new.buttons){ %>
+                        <% if(pmObj.model.page_new.buttons[i].tpl){ %>
+                            <%= pmObj.model.page_new.buttons[i].tpl.apply(pmObj, [opt]) %>
+                        <% }else{ %> 
+                            <a 
+                                class="top-line-btn <% if(typeof pmObj.model.page_new.buttons[i].title == 'function'){ %>
+                                            <%- pmObj.model.page_new.buttons[i].class.apply(pmObj, [opt]) %>
+                                       <% }else{ %>
+                                            <%- pmObj.model.page_new.buttons[i].class %>
+                                       <% } %>"
+                                href="<%- pmObj.model.page_new.buttons[i].link.apply(pmObj, [opt]) %>"
+                                title="<%- pmObj.model.page_new.buttons[i].help || '' %>"
+                                onclick="<%- pmObj.model.page_new.buttons[i].function.apply(pmObj, [opt]) %>" >
+                                    <% if(typeof pmObj.model.page_new.buttons[i].title == 'function'){ %>
+                                        <%= pmObj.model.page_new.buttons[i].title.apply(pmObj, [opt]) %>
+                                    <% }else{ %>
+                                        <%= pmObj.model.page_new.buttons[i].title %>
+                                    <% } %>
+                            </a>
+                        <% } %>
+                    <% } %>
                 <% } %>
-            <% } %>
-        <% } %>
-        <br>
+            </div>
+        </div>
         <br>
         <div class="row">
             <section class="col-lg-12">
@@ -331,31 +338,35 @@
     </section>
 
     <section class="content">
-        <% if(pmObj.model.page_item.buttons){ %>
-            <% for(var i in  pmObj.model.page_item.buttons){ %>
-                <% if(pmObj.model.page_item.buttons[i].tpl){ %>
-                    <%= pmObj.model.page_item.buttons[i].tpl.apply(pmObj, [item_id, opt]) %>
-                <% }else{ %> 
-                    <a 
-                        class="<% if(typeof pmObj.model.page_item.buttons[i].title == 'function'){ %>
-                                    <%- pmObj.model.page_item.buttons[i].class.apply(pmObj, [item_id, opt]) %>
-                               <% }else{ %>
-                                    <%- pmObj.model.page_item.buttons[i].class %>
-                               <% } %>"
-                        href="<%- pmObj.model.page_item.buttons[i].link.apply(pmObj, [item_id, opt]) %>"
-                        title="<%- pmObj.model.page_item.buttons[i].help || '' %>"
-                        onclick="<%- pmObj.model.page_item.buttons[i].function.apply(pmObj, [item_id, opt]) %>" >
-                            <% if(typeof pmObj.model.page_item.buttons[i].title == 'function'){ %>
-                                <%= pmObj.model.page_item.buttons[i].title.apply(pmObj, [item_id, opt]) %>
-                            <% }else{ %>
-                                <%= pmObj.model.page_item.buttons[i].title %>
-                            <% } %>
-                    </a>
+        <div class="row">
+            <div class="col-lg-12">
+                <% if(pmObj.model.page_item.buttons){ %>
+                    <% for(var i in  pmObj.model.page_item.buttons){ %>
+                        <% if(pmObj.model.page_item.buttons[i].tpl){ %>
+                            <%= pmObj.model.page_item.buttons[i].tpl.apply(pmObj, [item_id, opt]) %>
+                        <% }else{ %> 
+                            <a 
+                                class="top-line-btn <% if(typeof pmObj.model.page_item.buttons[i].title == 'function'){ %>
+                                            <%- pmObj.model.page_item.buttons[i].class.apply(pmObj, [item_id, opt]) %>
+                                       <% }else{ %>
+                                            <%- pmObj.model.page_item.buttons[i].class %>
+                                       <% } %>"
+                                href="<%- pmObj.model.page_item.buttons[i].link.apply(pmObj, [item_id, opt]) %>"
+                                title="<%- pmObj.model.page_item.buttons[i].help || '' %>"
+                                onclick="<%- pmObj.model.page_item.buttons[i].function.apply(pmObj, [item_id, opt]) %>" >
+                                    <% if(typeof pmObj.model.page_item.buttons[i].title == 'function'){ %>
+                                        <%= pmObj.model.page_item.buttons[i].title.apply(pmObj, [item_id, opt]) %>
+                                    <% }else{ %>
+                                        <%= pmObj.model.page_item.buttons[i].title %>
+                                    <% } %>
+                            </a>
+                        <% } %>
+                    <% } %>
                 <% } %>
-            <% } %>
-        <% } %>
+            </div>
+        </div>
         <br>
-        <br>
+        
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
