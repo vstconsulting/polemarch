@@ -14,44 +14,50 @@ pmGroups.copyItem = function(item_id)
         var data = thisObj.model.items[item_id];
         delete data.id;
         data.name = "copy-from-" + data.name
-        spajs.ajax.Call({
-            url: "/api/v1/"+thisObj.model.name+"/",
-            type: "POST",
-            contentType:'application/json',
-            data: JSON.stringify(data),
-                        success: function(newItem)
-            {
-                thisObj.model.items[newItem.id] = newItem
-
-                if(data.children)
+        $.when(encryptedCopyModal.replace(data)).done(function(data)
+        {
+            spajs.ajax.Call({
+                url: "/api/v1/"+thisObj.model.name+"/",
+                type: "POST",
+                contentType:'application/json',
+                data: JSON.stringify(data),
+                            success: function(newItem)
                 {
-                    var groups = []
-                    for(var i in data.groups)
-                    {
-                        groups.push(data.groups[i].id)
-                    }
-                    $.when(thisObj.setSubGroups(newItem.id, groups)).always(function(){
-                        def.resolve(newItem.id)
-                    })
-                }
-                else
-                {
-                    var hosts = []
-                    for(var i in data.hosts)
-                    {
-                        hosts.push(data.hosts[i].id)
-                    }
+                    thisObj.model.items[newItem.id] = newItem
 
-                    $.when(thisObj.setSubHosts(newItem.id, hosts)).always(function(){
-                        def.resolve(newItem.id)
-                    })
+                    if(data.children)
+                    {
+                        var groups = []
+                        for(var i in data.groups)
+                        {
+                            groups.push(data.groups[i].id)
+                        }
+                        $.when(thisObj.setSubGroups(newItem.id, groups)).always(function(){
+                            def.resolve(newItem.id)
+                        })
+                    }
+                    else
+                    {
+                        var hosts = []
+                        for(var i in data.hosts)
+                        {
+                            hosts.push(data.hosts[i].id)
+                        }
+
+                        $.when(thisObj.setSubHosts(newItem.id, hosts)).always(function(){
+                            def.resolve(newItem.id)
+                        })
+                    }
+                },
+                error:function(e)
+                {
+                    def.reject(e)
                 }
-            },
-            error:function(e)
-            {
-                def.reject(e)
-            }
-        });
+            });
+        }).fail(function(e)
+        {
+            def.reject(e)
+        }) 
     }).fail(function(e)
     {
         def.reject(e)

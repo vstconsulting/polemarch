@@ -211,21 +211,28 @@ pmUsers.copyItem = function(item_id)
         var data = thisObj.model.items[item_id];
         delete data.id;
         data.username = "copy-from-" + data.username
-        spajs.ajax.Call({
-            url: "/api/v1/"+thisObj.model.name+"/",
-            type: "POST",
-            contentType:'application/json',
-            data: JSON.stringify(data),
-                        success: function(data)
-            {
-                thisObj.model.items[data.id] = data
-                def.resolve(data.id)
-            },
-            error:function(e)
-            {
-                def.reject(e)
-            }
-        });
+        
+        $.when(encryptedCopyModal.replace(data)).done(function(data)
+        {
+            spajs.ajax.Call({
+                url: "/api/v1/"+thisObj.model.name+"/",
+                type: "POST",
+                contentType:'application/json',
+                data: JSON.stringify(data),
+                            success: function(data)
+                {
+                    thisObj.model.items[data.id] = data
+                    def.resolve(data.id)
+                },
+                error:function(e)
+                {
+                    def.reject(e)
+                }
+            });
+        }).fail(function(e)
+        {
+            def.reject(e)
+        }) 
     }).fail(function(e)
     {
         def.reject(e)
