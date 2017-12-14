@@ -565,3 +565,7 @@ table{
 .history-mode.history-fullsize .history-LeftInfo .btn-history-resize .glyphicon-resize-small{
     display: block;
 }
+
+.top-line-btn{
+    margin-bottom: 5px;
+}

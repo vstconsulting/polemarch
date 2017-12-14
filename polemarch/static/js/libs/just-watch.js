@@ -215,7 +215,7 @@ var justReactive = {
             if(newval.length < obj[prop].length)
             {
                 // Если новый массив короче старого то укоротим старый чтоб у них была одинаковая длинна
-                console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
+                //console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
                 Array.prototype.splice.apply(obj[prop], [newval.length, obj[prop].length - newval.length]); 
             }
 
@@ -677,7 +677,7 @@ var justReactive = {
         else if(opt.type == 'bindAttr')
         {
             var val = opt.callBack(this[opt.prop], opt.customData)
-            console.log("bindAttr", opt.prop, val);
+            //console.log("bindAttr", opt.prop, val);
             var html = ""
             if(val)
             { 
@@ -708,12 +708,12 @@ var justReactive = {
 
                 var observer = new MutationObserver(function(mutations)
                 {
-                    console.log("observer", mutations);
+                    //console.log("observer", mutations);
                     mutations.forEach(function(mutation)
                     {
                         if(mutation.type == "attributes" && mutation.attributeName == opt.attrName && thisObj[opt.prop] != mutation.target.getAttribute(opt.attrName))
                         {
-                            console.log("set new value");
+                            //console.log("set new value");
                             thisObj[opt.prop] = mutation.target.getAttribute(opt.attrName);
                             element.value = mutation.target.getAttribute(opt.attrName)
                         }
