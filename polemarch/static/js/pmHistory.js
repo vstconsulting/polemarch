@@ -63,7 +63,7 @@ pmHistory.search = function(query, options)
         return spajs.open({ menuId:this.model.name, reopen:true});
     }
 
-    return spajs.open({ menuId:this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+    return spajs.open({ menuId:this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
 }
 
 
