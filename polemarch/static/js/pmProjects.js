@@ -85,7 +85,7 @@ pmProjects.model.page_list = {
              * @returns {String} Значение для ячейки в таблице
              */
             value:function(item, filed_name, opt){
-                return item.justText(filed_name)
+                return this.model.items[item.id].justText(filed_name)
             },
         }
     ],
