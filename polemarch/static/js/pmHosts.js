@@ -206,15 +206,14 @@ pmHosts.copyItem = function(item_id)
     $.when(this.loadItem(item_id)).done(function()
     {
         var data = thisObj.model.items[item_id];
-        $.when(encryptedCopyModal.replace(data)).done(function(newdata)
+        $.when(encryptedCopyModal.replace(data)).done(function(data)
         {
-            debugger;
-            delete newdata.id;
+            delete data.id;
             spajs.ajax.Call({
                 url: "/api/v1/"+thisObj.model.name+"/",
                 type: "POST",
                 contentType:'application/json',
-                data: JSON.stringify(newdata),
+                data: JSON.stringify(data),
                             success: function(data)
                 {
                     thisObj.model.items[data.id] = data
