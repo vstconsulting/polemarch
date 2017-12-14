@@ -1,5 +1,6 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 from collections import OrderedDict
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.http import HttpResponse
 from rest_framework import exceptions as excepts, views as rest_views
@@ -206,7 +207,6 @@ class HookViewSet(base.ModelViewSetSet):
 
 
 class BulkViewSet(rest_views.APIView):
-    permission_classes = (StaffPermission,)
     serializer_classes = serializers
 
     _op_types = {
@@ -232,7 +232,10 @@ class BulkViewSet(rest_views.APIView):
     def get_object(self, item, pk):
         serializer_class = self.get_serializer_class(item)
         model = serializer_class.Meta.model
-        return model.objects.get(pk=pk)
+        obj = model.objects.get(pk=pk)
+        if not obj.editable_by(self.request.user):
+            raise PermissionDenied("You don't have permission to this object.")
+        return obj
 
     def perform_create(self, item, data):
         serializer = self.get_serializer(data=data, item=item)
