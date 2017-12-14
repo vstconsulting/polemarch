@@ -500,6 +500,8 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
     jsonEditor.model.data[prefix][name] = value
     $("#jsonEditorVarList"+prefix).appendTpl(spajs.just.render('jsonEditorLine', {name:name, value:value, optionsblock:optionsblock, opt:opt}))
     $("#jsonEditorVarListHolder"+prefix).show()
+    
+    $("#new_json_name"+prefix).trigger('change');
 
     tabSignal.emit(prefix+".jsonEditorUpdate",{name:name, value:value, prefix:prefix})
     tabSignal.emit("jsonEditorUpdate",{name:name, value:value, prefix:prefix})

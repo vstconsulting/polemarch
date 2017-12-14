@@ -31,9 +31,7 @@ pmUsers.model.page_list = {
         }
     ]
 }
-  
-// pmUsers.fileds = 
-    
+   
 pmUsers.model.page_new = {
     title: "New user",
     short_title: "New user",
@@ -91,6 +89,11 @@ pmUsers.model.page_new = {
             }
         ]
     ],
+    onBeforeSave:function(data, item_id)
+    {
+        data.is_staff = true
+        return data;
+    },
     onCreate:function(result)
     { 
         var def = new $.Deferred();
@@ -191,6 +194,7 @@ pmUsers.model.page_item = {
         {
             delete data.password  
         }
+        data.is_staff = true
 
         return data;
     },
@@ -207,21 +211,28 @@ pmUsers.copyItem = function(item_id)
         var data = thisObj.model.items[item_id];
         delete data.id;
         data.username = "copy-from-" + data.username
-        spajs.ajax.Call({
-            url: "/api/v1/"+thisObj.model.name+"/",
-            type: "POST",
-            contentType:'application/json',
-            data: JSON.stringify(data),
-                        success: function(data)
-            {
-                thisObj.model.items[data.id] = data
-                def.resolve(data.id)
-            },
-            error:function(e)
-            {
-                def.reject(e)
-            }
-        });
+        
+        $.when(encryptedCopyModal.replace(data)).done(function(data)
+        {
+            spajs.ajax.Call({
+                url: "/api/v1/"+thisObj.model.name+"/",
+                type: "POST",
+                contentType:'application/json',
+                data: JSON.stringify(data),
+                            success: function(data)
+                {
+                    thisObj.model.items[data.id] = data
+                    def.resolve(data.id)
+                },
+                error:function(e)
+                {
+                    def.reject(e)
+                }
+            });
+        }).fail(function(e)
+        {
+            def.reject(e)
+        }) 
     }).fail(function(e)
     {
         def.reject(e)

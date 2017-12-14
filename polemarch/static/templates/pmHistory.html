@@ -16,7 +16,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        <div style="float:left;">History</div>
+                        <div style="float:left;">History</div> 
                         <%= pmHistory.searchFiled({query:query}) %>
                         <% if(pmHistory.getTotalPages(pmHistory.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
@@ -391,6 +391,165 @@
 <script type="text/x-just" data-just="history_stdout_line"><span class="stdout-line <%- line.fatal %>" ><%= pmHistory.Syntax(line.text) %></span>
 </script>
 
+<script type="text/x-just" data-just="history_page_body"> 
+    <div class="row history-mode">
+        <section class="col-lg-8 history-LeftInfo"> 
+            <div class="box box-info collapsed-box">
+                <div class="box-header with-border collapsed-box">
+                    Inventory<br>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
+                            <i class="glyphicon glyphicon-resize-full"></i> 
+                            <i class="glyphicon glyphicon-resize-small"></i> 
+                        </button>
+
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="form-group col-lg-12"> 
+                            <pre
+                            id="raw_inventory-pre"
+                            style="overflow: auto; max-height: 600px;" ><%= pmHistory.model.items[item_id].justText('raw_inventory') %></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    stdout<br>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
+                            <i class="glyphicon glyphicon-resize-full"></i> 
+                            <i class="glyphicon glyphicon-resize-small"></i> 
+                        </button>
+
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <label class="control-label" >stdout
+                                (<a href="<%- pmHistory.model.items[item_id].url %>raw/"
+                                        target="_blank"
+                                        download="stdout-<%- pmHistory.model.items[item_id].mode %>-<%- pmHistory.model.items[item_id].start_time %>.log"
+                                        >Full raw stdout</a>)</label>
+                            <pre
+                                class="history-stdout"
+                                id="history-stdout"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </section>
+
+        <section class="col-lg-4 history-RightInfo">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Task<br>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" onclick="$('.history-mode').toggleClass('history-fullsize');" ><i class="glyphicon glyphicon-resize-small"></i> </button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                            <label class="control-label" >Status</label>
+                            <div
+                                    class="form-control disabled history-status <%- pmHistory.model.items[item_id].justClassName('status', function(v){ return "history-status-"+v}) %>"
+                                    disabled=""
+                                    maxlength="255">
+                                    <%= pmHistory.model.items[item_id].justText('status') %>
+                            </div>
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                            <label class="control-label" ><% if( pmHistory.model.items[item_id].kind != "MODULE"){ %>Playbook<% }else{ %>Module<% } %></label>
+                            <input type="text"
+                                    value="<%- pmHistory.model.items[item_id].mode %>"
+                                    class="form-control disabled"
+                                    disabled=""
+                                    maxlength="255">
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                            <label class="control-label" >Start time</label>
+                            <input type="text"
+                                    value="<%- moment(pmHistory.model.items[item_id].start_time).format('MM/DD/YYYY HH:mm:ss') %>"
+                                    class="form-control disabled"
+                                    disabled=""
+                                    maxlength="255">
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                            <label class="control-label" >Stop time</label>
+                            <div
+                                    class="form-control disabled"
+                                    disabled=""
+                                    maxlength="255">
+                                    <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return v ? moment(v).format('MM/DD/YYYY HH:mm:ss') : ''; }) %>
+                            </div>
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                            <label class="control-label" >Initiator</label>
+                            <div
+                                    class="form-control disabled"
+                                    disabled=""
+                                    maxlength="255">
+                                    <% if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'users' && pmUsers.model.items[pmHistory.model.items[item_id].initiator]){ %>
+                                        <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
+                                            <%= pmUsers.model.items[pmHistory.model.items[item_id].initiator].justText('username') %> 
+                                        </a>
+                                    <% }else if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'scheduler' && pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator]){ %>
+                                        <a href="<%- polemarch.opt.host %>/?project/<%- pmHistory.model.items[item_id].project %>/periodic-task/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
+                                            <%= pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator].justText('name') %> 
+                                        </a>
+                                    <% }else{ %>
+                                        From scheduler
+                                    <% } %>
+                            </div>
+                            <div class="help-block"></div>
+                        </div>
+                        
+                        <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                           <label class="control-label" >Revision</label>
+                           <div
+                                   class="form-control disabled"
+                                   disabled=""
+                                   maxlength="255">
+                                   <%= pmHistory.model.items[item_id].justText('revision') %>
+                           </div>
+                           <div class="help-block"></div>
+                       </div>
+                       
+                        <% if(pmHistory.model.items[item_id].execute_args){ %>
+                            <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12"> 
+                                <label class="control-label" >Execute args</label>
+                                <div> 
+                                    <% for(var i in pmHistory.model.items[item_id].execute_args){ var val = pmHistory.model.items[item_id].execute_args[i] %> 
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label"><%- i %></label> 
+                                            <div class="col-sm-10">
+                                                <input type="email" class="form-control disabled" disabled="" value="<%- val %>" >
+                                            </div>
+                                        </div>
+                                    <% } %> 
+                                </div>
+                            </div>
+                        <% } %>
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div> 
+</script>
+    
 <script type="text/x-just" data-just="history_page">
     <section class="content-header">
         <h1>
@@ -419,125 +578,8 @@
         <~>
         <br>
         <br>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        Task<br>
-                    </div>
-                    <div class="box-body">
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Status</label>
-                                <div
-                                        class="form-control disabled history-status <%- pmHistory.model.items[item_id].justClassName('status', function(v){ return "history-status-"+v}) %>"
-                                        disabled=""
-                                        maxlength="255">
-                                        <%= pmHistory.model.items[item_id].justText('status') %>
-                                </div>
-                                <div class="help-block"></div>
-                            </div>
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" ><% if( pmHistory.model.items[item_id].kind != "MODULE"){ %>Playbook<% }else{ %>Module<% } %></label>
-                                <input type="text"
-                                        value="<%- pmHistory.model.items[item_id].mode %>"
-                                        class="form-control disabled"
-                                        disabled=""
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Start time</label>
-                                <input type="text"
-                                        value="<%- moment(pmHistory.model.items[item_id].start_time).format('MM/DD/YYYY HH:mm:ss') %>"
-                                        class="form-control disabled"
-                                        disabled=""
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Stop time</label>
-                                <div
-                                        class="form-control disabled"
-                                        disabled=""
-                                        maxlength="255">
-                                        <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return v ? moment(v).format('MM/DD/YYYY HH:mm:ss') : ''; }) %>
-                                </div>
-                                <div class="help-block"></div>
-                            </div>
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Initiator</label>
-                                <div
-                                        class="form-control disabled"
-                                        disabled=""
-                                        maxlength="255">
-                                        <% if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'users' && pmUsers.model.items[pmHistory.model.items[item_id].initiator]){ %>
-                                            <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                <%= pmUsers.model.items[pmHistory.model.items[item_id].initiator].justText('username') %> 
-                                            </a>
-                                        <% }else if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'scheduler' && pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator]){ %>
-                                            <a href="<%- polemarch.opt.host %>/?project/<%- pmHistory.model.items[item_id].project %>/periodic-task/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                <%= pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator].justText('name') %> 
-                                            </a>
-                                        <% }else{ %>
-                                            From scheduler
-                                        <% } %>
-                                </div>
-                                <div class="help-block"></div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info collapsed-box">
-                    <div class="box-header with-border collapsed-box">
-                        Inventory<br>
-                        <div class="box-tools pull-right">
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
-                        </div>
-                    </div>
-                    <div class="box-body">
-                        <div class="row">
-                            <div class="form-group col-lg-12">
-                                <pre
-                                id="raw_inventory-pre"
-                                style="overflow: auto; max-height: 600px;" ><%= pmHistory.model.items[item_id].justText('raw_inventory') %></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        stdout<br>
-                        <div class="box-tools pull-right">
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-                        </div>
-                    </div>
-                    <div class="box-body">
-                        <div class="row">
-                            <div class="form-group col-lg-12">
-                                <label class="control-label" >stdout
-                                    (<a href="<%- pmHistory.model.items[item_id].url %>raw/"
-                                            target="_blank"
-                                            download="stdout-<%- pmHistory.model.items[item_id].mode %>-<%- pmHistory.model.items[item_id].start_time %>.log"
-                                            >Full raw stdout</a>)</label>
-                                <pre
-                                    class="history-stdout"
-                                    id="history-stdout"></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
+        <%= spajs.just.render('history_page_body', {item_id:item_id, project_id:project_id})  %>
+        
     </section>
 </script>
 
@@ -571,124 +613,7 @@
         <~>
         <br>
         <br>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        Task<br>
-                    </div>
-                    <div class="box-body">
-                        <div class="row">
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Status</label>
-                                <div
-                                        class="form-control disabled history-status <%- pmHistory.model.items[item_id].justClassName('status', function(v){ return "history-status-"+v}) %>"
-                                        disabled=""
-                                        maxlength="255">
-                                        <%= pmHistory.model.items[item_id].justText('status') %>
-                                </div>
-                                <div class="help-block"></div>
-                            </div>
-
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Playbook</label>
-                                <input type="text"
-                                        value="<%- pmHistory.model.items[item_id].mode %>"
-                                        class="form-control disabled"
-                                        disabled=""
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Start time</label>
-                                <input type="text"
-                                        value="<%- moment(pmHistory.model.items[item_id].start_time).format('MM/DD/YYYY HH:mm:ss') %>"
-                                        class="form-control disabled"
-                                        disabled=""
-                                        maxlength="255">
-                                <div class="help-block"></div>
-                            </div>
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Stop time</label>
-                                <div
-                                        class="form-control disabled"
-                                        disabled=""
-                                        maxlength="255">
-                                        <%= pmHistory.model.items[item_id].justText('stop_time', function(v){ return  v ? moment(v).format('MM/DD/YYYY HH:mm:ss') : '' }) %>
-                                </div>
-                                <div class="help-block"></div>
-                            </div>
-                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                <label class="control-label" >Initiator</label>
-                                <div
-                                        class="form-control disabled"
-                                        disabled=""
-                                        maxlength="255">
-                                        <% if(pmHistory.model.items[item_id].initiator > 0 && pmHistory.model.items[item_id].initiator_type == 'users' && pmUsers.model.items[pmHistory.model.items[item_id].initiator]){ %>
-                                            <a href="<%- polemarch.opt.host %>/?<%- pmHistory.model.items[item_id].initiator_type %>/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                <%= pmUsers.model.items[pmHistory.model.items[item_id].initiator].justText('username') %> 
-                                            </a>
-                                        <% }else if(pmHistory.model.items[item_id].initiator > 0  && pmHistory.model.items[item_id].initiator_type == 'scheduler' && pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator]){ %>
-                                            <a href="<%- polemarch.opt.host %>/?project/<%- pmHistory.model.items[item_id].project %>/periodic-task/<%- pmHistory.model.items[item_id].initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                <%= pmPeriodicTasks.model.items[pmHistory.model.items[item_id].initiator].justText('name') %> 
-                                            </a>
-                                        <% }else{ %>
-                                            From scheduler
-                                        <% } %>
-                                </div>
-                                <div class="help-block"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info collapsed-box">
-                    <div class="box-header with-border collapsed-box">
-                        Inventory<br>
-                        <div class="box-tools pull-right">
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
-                        </div>
-                    </div>
-                    <div class="box-body">
-                        <div class="row">
-                            <div class="form-group col-lg-12">
-                                <pre
-                                id="raw_inventory-pre"
-                                style="overflow: auto; max-height: 600px;" ><%= pmHistory.model.items[item_id].justText('raw_inventory') %></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        stdout<br>
-                        <div class="box-tools pull-right">
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-                        </div>
-                    </div>
-                    <div class="box-body">
-                        <div class="row">
-                            <div class="form-group col-lg-12">
-                                <label class="control-label" >stdout
-                                    (<a href="<%- pmHistory.model.items[item_id].url %>raw/"
-                                            target="_blank"
-                                            download="stdout-<%- pmHistory.model.items[item_id].mode %>-<%- pmHistory.model.items[item_id].start_time %>.log"
-                                            >Full raw stdout</a>)</label>
-                                <pre
-                                    class="history-stdout"
-                                    id="history-stdout"></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
+        
+        <%= spajs.just.render('history_page_body', {item_id:item_id, project_id:project_id})  %>
     </section>
 </script>

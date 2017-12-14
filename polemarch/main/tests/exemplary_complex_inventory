@@ -16,7 +16,7 @@ groups3
 
 [groups1:vars]
 ansible_user=ubuntu
-ansible_ssh_pass=pass
+ansible_ssh_pass=mypass
 
 [groups2:children]
 groups3

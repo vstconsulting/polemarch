@@ -49,7 +49,13 @@ pmHosts.fileds = [
             help:'Host or range name',
             validator:function(value)
             {
-                return filedsLib.validator.notEmpty('name', value)
+                if(this.validateRangeName(value) || this.validateHostName(value))
+                {
+                    return true;
+                }
+                
+                $.notify("Invalid value in field `name` it mast be valid host or range name", "error"); 
+                return false;
             },       
             fast_validator:function(value){ return this.validateRangeName(value) || this.validateHostName(value)}   
         },
@@ -67,6 +73,20 @@ pmHosts.model.page_new = {
     ],
     onBeforeSave:function(data)
     { 
+        if(this.validateHostName(data.name))
+        {
+            data.type = 'HOST'
+        }
+        else if(this.validateRangeName(data.name))
+        { 
+            data.type = 'RANGE'
+        }
+        else
+        {
+            $.notify("Error in host or range name", "error"); 
+            return undefined;
+        }
+        
         data.vars = jsonEditor.jsonEditorGetValues()
         return data;
     },
@@ -186,22 +206,29 @@ pmHosts.copyItem = function(item_id)
     $.when(this.loadItem(item_id)).done(function()
     {
         var data = thisObj.model.items[item_id];
-        delete data.id;
-        spajs.ajax.Call({
-            url: "/api/v1/"+thisObj.model.name+"/",
-            type: "POST",
-            contentType:'application/json',
-            data: JSON.stringify(data),
-                        success: function(data)
-            {
-                thisObj.model.items[data.id] = data
-                def.resolve(data.id)
-            },
-            error:function(e)
-            {
-                def.reject(e)
-            }
-        });
+        $.when(encryptedCopyModal.replace(data)).done(function(data)
+        {
+            delete data.id;
+            spajs.ajax.Call({
+                url: "/api/v1/"+thisObj.model.name+"/",
+                type: "POST",
+                contentType:'application/json',
+                data: JSON.stringify(data),
+                            success: function(data)
+                {
+                    thisObj.model.items[data.id] = data
+                    def.resolve(data.id)
+                },
+                error:function(e)
+                {
+                    def.reject(e)
+                }
+            });
+        }).fail(function(e)
+        {
+            def.reject(e)
+        })
+        
     }).fail(function(e)
     {
         def.reject(e)

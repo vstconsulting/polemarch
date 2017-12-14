@@ -1,4 +1,4 @@
-
+ 
 <!-- Поля ввода инвентория -->
 <script type="text/x-just" data-just="filed_type_inventoriesAutocomplete">  
     
@@ -24,11 +24,21 @@
             style="<% if(/[^0-9]/mg.test(filed.getFiledValue.apply(pmObj, [item_id]))){ %>display:none;<% } %>">
             <label class="control-label" >Inventory from project</label>
             <select class="form-control select2 inventory-source-value" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%"  onchange="if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:this.value})" >  
-                <% for(var i in pmInventories.model.itemslist.results){ %>
-                    <option
-                        <% if(filed.getFiledValue.apply(pmObj, [item_id]) == pmInventories.model.itemslist.results[i].id){ %>  selected  <% } %>
-                        value="<%- pmInventories.model.itemslist.results[i].id %>"
-                        ><%- pmInventories.model.itemslist.results[i].name %></option>
+                
+                <% if(!opt.project_id){ %>
+                    <% for(var i in pmInventories.model.itemslist.results){ var val = pmInventories.model.itemslist.results[i] %>
+                        <option
+                            <% if(filed.getFiledValue.apply(pmObj, [item_id]) == val.id){ %>  selected  <% } %>
+                            value="<%- val.id %>"
+                            ><%- val.name %></option>
+                    <% } %>
+                <% }else{ %>
+                    <% for(var i in pmProjects.model.items[opt.project_id].inventories){ var val = pmProjects.model.items[opt.project_id].inventories[i] %>
+                        <option
+                            <% if(filed.getFiledValue.apply(pmObj, [item_id]) == val.id){ %>  selected  <% } %>
+                            value="<%- val.id %>"
+                            ><%- val.name %></option>
+                    <% } %>
                 <% } %>
             </select> 
         </div> 
@@ -54,14 +64,22 @@
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 inventory-source-db inventory-source-type">
             <label class="control-label" >Inventory from project</label>
             <select class="form-control select2 inventory-source-value" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%"  onchange="if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:this.value})">  
-                <% for(var i in pmInventories.model.itemslist.results){ %>
-                    <option value="<%- pmInventories.model.itemslist.results[i].id %>"
-                        ><%- pmInventories.model.itemslist.results[i].name %></option>
+                <% if(!opt.project_id){ %>
+                    <% for(var i in pmInventories.model.itemslist.results){ var val = pmInventories.model.itemslist.results[i] %>
+                        <option value="<%- val.id %>"
+                            ><%- val.name %></option>
+                    <% } %>
+                <% }else{ %>
+                    <% for(var i in pmProjects.model.items[opt.project_id].inventories){ var val = pmProjects.model.items[opt.project_id].inventories[i] %>
+                        <option value="<%- val.id %>"
+                            ><%- val.name %></option>
+                    <% } %>
                 <% } %>
             </select> 
         </div>
     <% } %> 
 </script>
+
 
 <script type="text/x-just" data-just="inventories_import_page">
     <section class="content-header">

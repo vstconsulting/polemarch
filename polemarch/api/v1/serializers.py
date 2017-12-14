@@ -301,6 +301,8 @@ class OneHistorySerializer(_SignalSerializer):
                   "raw_stdout",
                   "initiator",
                   "initiator_type",
+                  "execute_args",
+                  "revision",
                   "url")
 
     def get_raw(self, request):
@@ -356,7 +358,6 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
                       GET="all")
 
     def get_operation(self, method, data, attr):
-        # FIXME: details about every failed object
         tp = getattr(self.instance, attr)
         obj_list = self._get_objects(tp.model, data)
         return self._operate(method, data, attr, obj_list)
@@ -365,6 +366,8 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
         data = dict(total=len(total))
         data["operated"] = len(found)
         data["not_found"] = data["total"] - data["operated"]
+        found_ids = [item.id for item in found]
+        data["failed_list"] = [i for i in total if i not in found_ids]
         return Response(data, status=code)
 
     @transaction.atomic
@@ -395,6 +398,20 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
         return self._do_with_vars(
             "update", instance, validated_data=validated_data
         )
+
+    def get_vars(self, representation):
+        return representation.get('vars', None)
+
+    def to_representation(self, instance, hidden_vars=None):
+        rep = super(_WithVariablesSerializer, self).to_representation(instance)
+        hv = hidden_vars
+        hv = instance.HIDDEN_VARS if hv is None else hv
+        vars = self.get_vars(rep)
+        if vars is not None:
+            for mask_key in hv:
+                if mask_key in vars.keys():
+                    vars[mask_key] = "[~~ENCRYPTED~~]"
+        return rep
 
 
 class HostSerializer(_WithVariablesSerializer):
@@ -432,6 +449,11 @@ class TaskSerializer(_WithVariablesSerializer):
                   'project',
                   'url',)
 
+    def to_representation(self, instance):
+        return super(TaskSerializer, self).to_representation(
+            instance, hidden_vars=[]
+        )
+
 
 class OneTaskSerializer(TaskSerializer):
     project = ModelRelatedField(read_only=True)
@@ -462,6 +484,7 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
                   'project',
                   'inventory',
                   'save_result',
+                  'enabled',
                   'vars',
                   'url',)
 
@@ -487,6 +510,7 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'project',
                   'inventory',
                   'save_result',
+                  'enabled',
                   'vars',
                   'url',)
 
@@ -502,6 +526,22 @@ class TemplateSerializer(_WithVariablesSerializer):
             'kind',
             'data',
         )
+
+    def get_vars(self, representation):
+        try:
+            return representation['data']['vars']
+        except KeyError:
+            return None
+
+    def to_representation(self, instance):
+        if instance.kind in ["Task", "PeriodicTask", "Module"]:
+            return super(TemplateSerializer, self).to_representation(
+                instance, hidden_vars=models.PeriodicTask.HIDDEN_VARS
+            )
+        elif instance.kind in ["Host", "Group"]:
+            return super(TemplateSerializer, self).to_representation(
+                instance, hidden_vars=models.Inventory.HIDDEN_VARS
+            )
 
 
 class OneTemplateSerializer(TemplateSerializer):
@@ -644,6 +684,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'inventories',
                   'vars',
                   'owner',
+                  'revision',
                   'url',)
 
     def inventories_operations(self, method, data):

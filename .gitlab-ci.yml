@@ -98,7 +98,7 @@ py27-django111-coverage:
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
-py34-django111-coverage:
+py36-django111-coverage:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
@@ -156,11 +156,10 @@ build_zip:
 
 py27-django111:
   <<: *tests_template
-py34-django111:
-  <<: *tests_template
 py35-django111:
   <<: *tests_template
-  image: onegreyonewhite/tox:ubuntu
+py36-django111:
+  <<: *tests_template
 
 
 pep8_checks:

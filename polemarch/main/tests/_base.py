@@ -136,7 +136,11 @@ class BaseTestCase(TestCase):
             result = self.get_result("post", url, 201, data=json.dumps(dt))
             self.assertTrue(isinstance(result, dict))
             for field in fields:
-                self.assertEqual(result[field], data[counter][field])
+                s = "[~~ENCRYPTED~~]"
+                if field == "vars" and s in result['vars'].values():
+                    pass
+                else:
+                    self.assertEqual(result[field], data[counter][field])
             results_id.append(result["id"])
             counter += 1
         return results_id
@@ -195,5 +199,6 @@ class AnsibleArgsValidationTest(BaseTestCase):
             args = copy.deepcopy(required_args)
             update_func(args, {arg: val})
             result = self.get_result("post", url, 400, data=json.dumps(args))
-            self.assertIn("Incorrect argument", result["detail"])
-            self.assertIn(arg, result["detail"])
+            tp = "playbook" if "playbook" in result['detail'] else "module"
+            self.assertIn("Incorrect argument", result["detail"][tp][0])
+            self.assertIn(arg, result["detail"]['argument'][0])

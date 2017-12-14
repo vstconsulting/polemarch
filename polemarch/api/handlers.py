@@ -30,10 +30,12 @@ def polemarch_exception_handler(exc, context):
                         status=status.HTTP_404_NOT_FOUND)
 
     elif isinstance(exc, djexcs.ValidationError):
-        errors = dict(exc).get('__all__', dict(exc)) if isinstance(exc, dict)\
-                                                     else str(exc)
-        if isinstance(errors, list):
-            errors = {'other_errors': errors}  # pragma: no cover
+        if hasattr(exc, 'error_dict'):
+            errors = dict(exc)
+        elif hasattr(exc, 'error_list'):
+            errors =  {'other_errors': list(exc)}
+        else:
+            errors = {'other_errors': str(exc)}
         return Response({"detail": errors},
                         status=status.HTTP_400_BAD_REQUEST)
 

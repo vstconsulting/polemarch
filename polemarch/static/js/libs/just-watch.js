@@ -110,14 +110,14 @@ $.fn.prependTpl = function(tplText)
     return this;
 };
 
-function mergeCopyM(o, obj){
+function mergeCopyM(obj){
     
     if(Array.isArray(obj))
     {
         return obj.slice()
     }
     
-    if(typeof obj == "object")
+    if(typeof obj == "object" && obj != null)
     {
         return $.extend(true, {}, obj)
     }
@@ -133,13 +133,13 @@ var justReactive = {
      */
     justStrip:function(html)
     {
-        if(typeof html != "string")
+        if(typeof html != "string" && (!html || !html.toString) )
         {
             return "";
         }
             
         var tmp = document.createElement("DIV");
-        tmp.innerHTML = html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        tmp.innerHTML = html.toString().replace(/</g, '&lt;').replace(/>/g, '&gt;');
         return tmp.textContent || tmp.innerText || "";
     },
 
@@ -187,7 +187,7 @@ var justReactive = {
         if(!res)
         {
             // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-            obj[prop] = mergeCopyM(undefined, newval);
+            obj[prop] = mergeCopyM(newval);
             obj.justWatch(prop);
             return;
         }
@@ -197,7 +197,7 @@ var justReactive = {
             if(obj[prop] !== newval)
             {
                 // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                obj[prop] = mergeCopyM(undefined, newval);
+                obj[prop] = mergeCopyM(newval);
             }
             return;
         }
@@ -205,7 +205,7 @@ var justReactive = {
         if(typeof obj[prop] != "object" || obj[prop] == null)
         {
             // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-            obj[prop] = mergeCopyM(undefined, newval);
+            obj[prop] = mergeCopyM(newval);
             obj.justWatch(prop);
             return;
         }
@@ -215,7 +215,7 @@ var justReactive = {
             if(newval.length < obj[prop].length)
             {
                 // Если новый массив короче старого то укоротим старый чтоб у них была одинаковая длинна
-                console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
+                //console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
                 Array.prototype.splice.apply(obj[prop], [newval.length, obj[prop].length - newval.length]); 
             }
 
@@ -232,7 +232,7 @@ var justReactive = {
                 else
                 {
                     // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                    obj[prop][i] = mergeCopyM(undefined, newval[i]);
+                    obj[prop][i] = mergeCopyM(newval[i]);
                     obj[prop].justWatch(i);
                 }
             }
@@ -261,7 +261,7 @@ var justReactive = {
             else
             {
                 // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                obj[prop][i] = mergeCopyM(undefined, newval[i]);
+                obj[prop][i] = mergeCopyM(newval[i]);
                 obj[prop].justWatch(i);
             }
         }
@@ -436,7 +436,14 @@ var justReactive = {
             }
         }
     },
-    defaultcallBack:function(val){ return val;},
+    defaultcallBack:function(val)
+    {
+        if(val && val.toString)
+        {
+            return val.toString();
+        }
+        return val;
+    },
     setValue:function (opt)
     {
         /*
@@ -560,6 +567,7 @@ var justReactive = {
 
                 if(Array.isArray(newval.val))
                 {
+                    var thisObj = this
                     Object.defineProperty(this[opt.prop], 'splice', {
                             enumerable: false
                           , configurable: true
@@ -581,8 +589,10 @@ var justReactive = {
                                     newObj[i] = newval.val[keys[i]]
                                 }
                                 
-                                newval.val = newObj
-                                justReactive.applyFunc(newval.val, newval)
+                                
+                                justReactive.megreFunc(newval, 'val', newObj)
+                                //newval.justWatch('val') 
+                                //justReactive.applyFunc(newval.val, newval)
                                 //setter.apply(this, [newObj]);
                                 return res;
                         }
@@ -667,7 +677,7 @@ var justReactive = {
         else if(opt.type == 'bindAttr')
         {
             var val = opt.callBack(this[opt.prop], opt.customData)
-            console.log("bindAttr", opt.prop, val);
+            //console.log("bindAttr", opt.prop, val);
             var html = ""
             if(val)
             { 
@@ -698,12 +708,12 @@ var justReactive = {
 
                 var observer = new MutationObserver(function(mutations)
                 {
-                    console.log("observer", mutations);
+                    //console.log("observer", mutations);
                     mutations.forEach(function(mutation)
                     {
                         if(mutation.type == "attributes" && mutation.attributeName == opt.attrName && thisObj[opt.prop] != mutation.target.getAttribute(opt.attrName))
                         {
-                            console.log("set new value");
+                            //console.log("set new value");
                             thisObj[opt.prop] = mutation.target.getAttribute(opt.attrName);
                             element.value = mutation.target.getAttribute(opt.attrName)
                         }

@@ -174,11 +174,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         hosts_data = [dict(name="127.0.1.1", type="HOST", vars={}),
                       dict(name="hostlocl", type="HOST",
                            vars={"ansible_user": "centos",
-                                 "ansible_ssh_private_key_file": "somekey"}),
+                                 "ansible_ssh_private_key_file":
+                                     "mykey"}),
                       dict(name="127.0.1.[3:4]", type="RANGE", vars={}),
                       dict(name="127.0.1.[5:6]", type="RANGE", vars={})]
-        groups_data = [dict(name="groups1", vars={"ansible_user": "ubuntu",
-                                                  "ansible_ssh_pass": "pass"},
+        groups_data = [dict(name="groups1",
+                            vars={"ansible_user": "ubuntu",
+                                  "ansible_ssh_pass": "mypass"},
                             children=True),
                        dict(name="groups2", vars={}, children=True),
                        dict(name="groups3", vars={}, children=True),
@@ -631,6 +633,26 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         # can't save with "../"
         data['inventory'] = "../inventory"
         self.get_result("post", url, 400, data=json.dumps(data))
+
+    def test_secret_periodictask_vars(self):
+        url = "/api/v1/periodic-tasks/"
+        data = dict(
+            mode="p1.yml", schedule="10", type="INTERVAL",
+            project=self.periodic_project_id,
+            inventory=self.inventory.id, name="one", vars={
+                "key-file": "secret",
+                "private-key": "secret",
+                "vault-password-file": "secret",
+                "new-vault-password-file": "secret",
+            }
+        )
+
+        host = self.post_result(url, data=json.dumps(data))
+        host_again = self.get_result("get", "{}{}/".format(url, host['id']))
+
+        for h in [host, host_again]:
+            for val in h['vars'].values():
+                self.assertEqual(val, "[~~ENCRYPTED~~]")
 
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):

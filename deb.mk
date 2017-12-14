@@ -67,9 +67,9 @@ override_dh_auto_install:
 	rm -rf $(BUILDROOT)/*
 	# install our package with all required python dependencies in virtualenv
 	virtualenv --no-site-packages $(BUILDROOT)/$(INSTALLDIR)
-	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements.txt -r requirements-doc.txt
-	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) dist/$(NAME)-$(VER).tar.gz[apache]
-	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements.txt -r requirements-git.txt
+	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements-doc.txt
+	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) dist/$(NAME)-$(VER).tar.gz
+	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements-git.txt
 	find $(BUILDROOT)/ -name "RECORD" -exec rm -rf {} \;
 	venvctrl-relocate --source=$(BUILDROOT)/$(INSTALLDIR) --destination=/$(INSTALLDIR)
 	find $(BUILDROOT)/$(INSTALLDIR)/lib -type f -name "*.c" -print0 | xargs -0 rm -rf

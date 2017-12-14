@@ -17,7 +17,7 @@ class DomainNameValidator(RegexValidator):
     surl = URLValidator.ul
     ipv4_re = URLValidator.ipv4_re
     ipv6_re = URLValidator.ipv6_re
-    domain_re = r"(?:\.{0,1}(?!-)[a-z" + surl + r"0-9-]{1,63}(?<!-)\.{0,1})*"
+    domain_re = r"(?:\.{0,1}(?!-)[a-zA-Z"+surl+r"0-9-]{1,63}(?<!-)\.{0,1})*"
     hostname_re = URLValidator.hostname_re
     regex = re.compile(
         r"^(?:" +

@@ -5,7 +5,7 @@ from ..models import Host, Group, Inventory
 
 class _ApiGHBaseTestCase(BaseTestCase):
     def _compare_list(self, url, rtype, code, gr_id, req_entries, list_url,
-                      res_entries):
+                      res_entries, failed=0):
         '''
         ensure that after executed operation object contains only enumerated
         entries
@@ -20,12 +20,21 @@ class _ApiGHBaseTestCase(BaseTestCase):
         '''
         single_url = url + "{}/".format(gr_id)  # URL to created group
         gr_lists_url = single_url + list_url + "/"  # URL to list in group
-        self.get_result(rtype, gr_lists_url, code,
-                        data=json.dumps(req_entries))
+        op_result = self.get_result(rtype, gr_lists_url, code,
+                                    data=json.dumps(req_entries))
+
+        if code != 409:
+            self.assertEqual(op_result['total'], len(req_entries))
+            self.assertEqual(op_result['operated'], len(req_entries) - failed)
+            self.assertEqual(op_result['not_found'], failed)
+            for id in op_result['failed_list']:
+                self.assertNotIn(id, res_entries)
+                self.assertIn(id, req_entries)
+
         if code != 409:
             rlist = self.get_result("get", single_url)[list_url]
             rlist = [i["id"] for i in rlist]
-            self.assertCount(rlist, len(req_entries))
+            self.assertCount(rlist, len(res_entries))
             self.assertCount(set(rlist).intersection(res_entries),
                              len(res_entries))
 
@@ -179,6 +188,44 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         data2 = dict(name="127.1.0.1")
         self._check_update(url, data2, vars=data1["vars"], name=data2["name"])
 
+    def test_secret_host_vars(self):
+        url = "/api/v1/hosts/"
+        data = dict(
+            name="127.0.1.1", type="HOST", vars=dict(
+                ansible_ssh_pass="secret",
+                ansible_ssh_private_key_file="secret",
+                ansible_become_pass="secret",
+            )
+        )
+
+        host = self.post_result(url, data=json.dumps(data))
+        single_url = "{}{}/".format(url, host['id'])
+        host_again = self.get_result("get", single_url)
+
+        for h in [host, host_again]:
+            for val in h['vars'].values():
+                self.assertEqual(val, "[~~ENCRYPTED~~]")
+
+        data = dict(
+            name="127.0.1.1", type="HOST", vars=dict(
+                ansible_ssh_pass="[~~ENCRYPTED~~]",
+                ansible_ssh_private_key_file="[~~ENCRYPTED~~]",
+                ansible_become_pass="[~~ENCRYPTED~~]",
+                ansible_host='lopuhost'
+            )
+        )
+
+        host = self.get_result("patch", single_url, data=json.dumps(data))
+
+        for key, val in host['vars'].items():
+            if key != "ansible_host":
+                self.assertEqual(val, "[~~ENCRYPTED~~]")
+            else:
+                self.assertEqual(val, "lopuhost")
+
+        val = Host.objects.get(pk=host['id']).vars['ansible_become_pass']
+        self.assertEqual(val, "secret")
+
 
 class ApiGroupsTestCase(_ApiGHBaseTestCase):
     def setUp(self):
@@ -295,7 +342,7 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
                            "groups", groups_id[1:2])
         # Full update groups of group
         self._compare_list(url, "put", 200, grch_id, groups_id[:-1], "groups",
-                           [])
+                           groups_id[:-1])
         # Error on operations with hosts
         self._compare_list(url, "post", 409, grch_id, hosts_id[0:2], "hosts",
                            [])
@@ -374,7 +421,8 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
                        dict(name="two", vars=self.vars2),
                        dict(name="three", vars=self.vars3)]
         hosts_data = [dict(name="127.0.1.1", type="HOST", vars=self.vars),
-                      dict(name="hostlocl", type="HOST", vars=self.vars3)]
+                      dict(name="hostlocl", type="HOST", vars=self.vars3),
+                      dict(name="h3", type="HOST", vars={})]
         groups_id = self._create_groups(groups_data)
         hosts_id = self._create_hosts(hosts_data)
 
@@ -402,6 +450,13 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         # Full update groups of inventory
         self._compare_list(url, "put", 200, inv_id, groups_id,
                            "groups", groups_id)
+
+        # Test for failed_list stats
+        for h_id in hosts_id[0:2]:
+            self.get_result("delete", "{}{}/".format("/api/v1/hosts/", h_id))
+
+        self._compare_list(url, "put", 200, inv_id, hosts_id, "hosts",
+                           hosts_id[2:3], 2)
 
     def test_filter_inventory(self):
         base_url = "/api/v1/inventories/"

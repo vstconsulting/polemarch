@@ -2207,8 +2207,7 @@ window.qunitTestsArray.push({
 
 
     syncQUnit.addTest('Создание не валидного periodic task', function ( assert )
-    {
-        debugger;
+    { 
         // Предполагается что мы от прошлого теста попали на страницу создания project
         var done = assert.async();
 
@@ -2222,7 +2221,7 @@ window.qunitTestsArray.push({
  
 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        var inventoryId = $("#inventories-autocomplete option")[2].value
+        var inventoryId = $("#inventories-autocomplete option")[0].value
 
         $.when(pmPeriodicTasks.selectInventory(inventoryId)).done(function()
         {
@@ -2265,7 +2264,7 @@ window.qunitTestsArray.push({
  
 
         var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
-        var inventoryId = $("#inventories-autocomplete option")[2].value
+        var inventoryId = $("#inventories-autocomplete option")[0].value
         
         $.when(pmPeriodicTasks.selectInventory(inventoryId)).done(function()
         {

@@ -11,12 +11,14 @@ import json
 import re
 import six
 from celery.schedules import crontab
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
+
 from .base import ForeignKeyACL
 
 from ..utils import AnsibleArgumentsReference
@@ -73,9 +75,16 @@ class PeriodicTask(AbstractModel):
     schedule       = models.CharField(max_length=4*1024)
     type           = models.CharField(max_length=10)
     save_result    = models.BooleanField(default=True)
+    enabled        = models.BooleanField(default=True)
 
     kinds = ["PLAYBOOK", "MODULE"]
     types = ["CRONTAB", "INTERVAL"]
+    HIDDEN_VARS = [
+        'key-file',
+        'private-key',
+        'vault-password-file',
+        'new-vault-password-file',
+    ]
 
     class Meta:
         default_related_name = "periodic_tasks"
@@ -275,15 +284,23 @@ class History(BModel):
                                        related_query_name="history",
                                        blank=True, null=True, default=None)
     mode           = models.CharField(max_length=256)
+    revision       = models.CharField(max_length=256, blank=True, null=True)
     kind           = models.CharField(max_length=50, default="PLAYBOOK")
     start_time     = models.DateTimeField(default=timezone.now)
     stop_time      = models.DateTimeField(blank=True, null=True)
     raw_args       = models.TextField(default="")
+    json_args      = models.TextField(default="{}")
     raw_inventory  = models.TextField(default="")
     status         = models.CharField(max_length=50)
     initiator      = models.IntegerField(default=0)
     # Initiator type should be always as in urls for api
     initiator_type = models.CharField(max_length=50, default="users")
+
+    def __init__(self, *args, **kwargs):
+        execute_args = kwargs.pop('execute_args', None)
+        super(History, self).__init__(*args, **kwargs)
+        if execute_args:
+            self.execute_args = execute_args
 
     class NoFactsAvailableException(NotApplicable):
         def __init__(self):
@@ -315,6 +332,20 @@ class History(BModel):
         elif self.initiator_type == "scheduler":
             data["initiator"]['name'] = self.initiator_object.name
         return data
+
+    @property
+    def execute_args(self):
+        return json.loads(self.json_args)
+
+    @execute_args.setter
+    def execute_args(self, value):
+        if not isinstance(value, dict):
+            raise ValidationError(dict(args="Should be a list."))
+        data = {k: v for k, v in value.items() if k not in ['group']}
+        for key in data.keys():
+            if key in PeriodicTask.HIDDEN_VARS:
+                data[key] = "[~~ENCRYPTED~~]"
+        self.json_args = json.dumps(data)
 
     @property
     def initiator_object(self):

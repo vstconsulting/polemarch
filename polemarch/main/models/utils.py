@@ -125,17 +125,28 @@ class AnsibleCommand(object):
         self.args = args
         self.kwargs = kwargs
 
+    def __generate_arg_file(self, value):
+        file = tmp_file(value)
+        return file.name, [file]
+
+    def __parse_key(self, key, value):
+        # pylint: disable=unused-argument,
+        if "BEGIN RSA PRIVATE KEY" in value:
+            return self.__generate_arg_file(value)
+        else:
+            return "{}/{}".format(self.workdir, value), []
+
     def __parse_extra_args(self, **extra):
         extra_args, files = list(), list()
         extra.pop("verbose", None)
         for key, value in extra.items():
+            result = [value, list()]
             if key == "key-file":
-                if "BEGIN RSA PRIVATE KEY" in value:
-                    kfile = tmp_file(value)
-                    files.append(kfile)
-                    value = kfile.name
-                else:
-                    value = "{}/{}".format(self.workdir, value)
+                result = self.__parse_key(key, value)
+            elif key in ["vault-password-file", "new-vault-password-file"]:
+                result = self.__generate_arg_file(value)
+            value = result[0]
+            files = files + result[1]
             extra_args.append("--{}".format(key))
             extra_args += [str(value)] if value else []
         return AnsibleExtra(extra_args, files)
@@ -158,6 +169,7 @@ class AnsibleCommand(object):
         self.inventory_object = self.Inventory(inventory, cwd=self.workdir)
         self.history.raw_inventory = self.inventory_object.raw
         self.history.status = "RUN"
+        self.history.revision = project.revision
         self.history.save()
         self.executor = Executor(self.history)
 
