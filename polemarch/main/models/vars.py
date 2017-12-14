@@ -37,12 +37,11 @@ class AbstractVarsQuerySet(ACLQuerySet):
 
     @transaction.atomic
     def create(self, **kwargs):
-        variables = kwargs.pop("vars", None)
+        variables = kwargs.pop("vars", {})
         obj = super(AbstractVarsQuerySet, self).create(**kwargs)
-        if variables is not None:
-            if isinstance(variables, (string_types, text_type)):
-                variables = json.loads(variables)
-            obj.vars = variables
+        if isinstance(variables, (string_types, text_type)):
+            variables = json.loads(variables)
+        obj.vars = variables
         return obj
 
     def var_filter(self, **kwargs):
