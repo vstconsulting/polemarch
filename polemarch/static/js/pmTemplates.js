@@ -35,6 +35,40 @@ pmTemplates.copyAndEdit = function(item_id)
     return def.promise();
 }
     
+pmTemplates.execute = function(item_id)
+{ 
+    var def = new $.Deferred(); 
+    spajs.ajax.Call({
+        url: "/api/v1/"+this.model.name+"/" + item_id+"/execute/",
+        type: "POST",
+        data:JSON.stringify({}),
+        contentType:'application/json',
+                success: function(data)
+        {
+            $.notify("Started", "success");
+            if(data && data.history_id)
+            {
+                $.when(spajs.open({ menuId:"/history/"+data.history_id}) ).done(function(){
+                    def.resolve()
+                }).fail(function(){
+                    def.reject()
+                })
+            }
+            else
+            {
+                def.reject()
+            }
+        },
+        error:function(e)
+        {
+            def.reject()
+            polemarch.showErrors(e.responseJSON)
+        }
+    })
+
+    return def.promise(); 
+}
+
     
 // Содержит соответсвия разных kind к объектами с ними работающими.
 pmTemplates.model.kindObjects = {}

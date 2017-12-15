@@ -12,30 +12,7 @@ pmModuleTemplates.model.kind = "Module"
 pmModuleTemplates.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete() 
 
 pmTemplates.model.kindObjects[pmModuleTemplates.model.kind] = pmModuleTemplates
- 
-pmModuleTemplates.execute = function(item_id)
-{
-    var thisObj = this;
-    var def = new $.Deferred();
-    $.when(this.loadItem(item_id)).done(function()
-    {
-        var val = thisObj.model.items[item_id]
-        $.when(pmAnsibleModule.execute(val.data.project, val.data.inventory, val.data.group, val.data.module, val.data.args, val.data.vars)).done(function()
-        {
-            def.resolve();
-        }).fail(function()
-        {
-            def.reject();
-        })
-
-    }).fail(function()
-    {
-        def.reject();
-    })
-
-    return def.promise()
-}
-
+  
 
 /**
  * Для ввода пароля

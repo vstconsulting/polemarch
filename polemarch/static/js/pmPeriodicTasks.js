@@ -150,42 +150,11 @@ pmPeriodicTasks.deleteItem = function(item_id, force)
     
 pmPeriodicTasks.execute = function(project_id, item_id)
 {
-    var def = new $.Deferred();
-   
-    var kind_type = $("#periodic-tasks_"+item_id+"_kind").val();
-
-    var data = jsonEditor.jsonEditorGetValues(kind_type);
-    data.inventory = pmPeriodicTasks.inventoriesAutocompletefiled.getValue() 
-
-    var kind = 'execute-playbook'
-    if(kind_type == 'MODULE')
-    {
-        kind = 'execute-module'
-        data.module = $("#module-autocomplete").val()
-        if(!data.module)
-        {
-            $.notify("Module name is empty", "error");
-            def.reject();
-            return def.promise();
-        }
-        data.group = pmGroups.getGroupsAutocompleteValue()
-        data.args = moduleArgsEditor.getModuleArgs()
-    }
-    else
-    {
-        data.playbook = $("#periodic-tasks_"+item_id+"_playbook").val()
-        if(!data.playbook)
-        {
-            $.notify("Playbook name is empty", "error");
-            def.reject();
-            return def.promise();
-        }
-    }
- 
+    var def = new $.Deferred(); 
     spajs.ajax.Call({
-        url: "/api/v1/projects/"+project_id+"/"+kind+"/",
+        url: "/api/v1/"+this.model.name+"/" + item_id+"/execute/",
         type: "POST",
-        data:JSON.stringify(data),
+        data:JSON.stringify({}),
         contentType:'application/json',
                 success: function(data)
         {

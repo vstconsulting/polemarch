@@ -255,29 +255,6 @@ pmTasksTemplates.showModuleWidget = function(holder)
     return pmTasksTemplates.showWidget(holder, "Module")
 }
 
-pmTasksTemplates.execute = function(item_id)
-{
-    var thisObj = this;
-    var def = new $.Deferred();
-    $.when(this.loadItem(item_id)).done(function()
-    {
-        var val = thisObj.model.items[item_id]
-        $.when(pmTasks.execute(val.data.project, val.data.inventory, val.data.playbook, val.data.vars)).done(function()
-        {
-            def.resolve();
-        }).fail(function()
-        {
-            def.reject();
-        })
-
-    }).fail(function()
-    {
-        def.reject();
-    })
-
-    return def.promise()
-}
-
 pmTasksTemplates.showItem = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
