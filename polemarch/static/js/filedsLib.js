@@ -55,6 +55,13 @@ filedsLib.filed.text = inheritance(filedsLib.filed.simpleText)
 filedsLib.filed.text.type = 'text'
 
 /**
+ * Для показа текста без его изменения
+ * @type Object
+ */
+filedsLib.filed.disabled = inheritance(filedsLib.filed.simpleText)
+filedsLib.filed.disabled.type = 'disabled'
+
+/**
  * Для ввода пароля
  * @type Object
  */
