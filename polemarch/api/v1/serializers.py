@@ -557,11 +557,15 @@ class OneTemplateSerializer(TemplateSerializer):
             'owner',
             'data',
         )
+
+    def execute(self, request):
+        serializer = OneProjectSerializer(self.instance.project)
+        return self.instance.execute(serializer, request.user)
+
+
 ###################################
 # Subclasses for operations
 # with hosts and groups
-
-
 class _InventoryOperations(_WithVariablesSerializer):
 
     def hosts_operations(self, method, data):
@@ -696,12 +700,11 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
 
-    def _execution(self, kind, request):
-        data = dict(request.data)
+    def _execution(self, kind, data, user):
         inventory = data.pop("inventory")
         try:
             inventory = Inventory.objects.get(id=int(inventory))
-            if not inventory.viewable_by(request.user):  # nocv
+            if not inventory.viewable_by(user):  # nocv
                 raise PermissionDenied(
                     "You don't have permission to inventory."
                 )
@@ -709,17 +712,17 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
             pass
         history_id = self.instance.execute(
             kind, str(data.pop(kind)), inventory,
-            initiator=request.user.id, **data
+            initiator=user.id, **data
         )
         rdata = dict(detail="Started at inventory {}.".format(inventory),
                      history_id=history_id)
         return Response(rdata, 201)
 
     def execute_playbook(self, request):
-        return self._execution("playbook", request)
+        return self._execution("playbook", dict(request.data), request.user)
 
     def execute_module(self, request):
-        return self._execution("module", request)
+        return self._execution("module", dict(request.data), request.user)
 
 
 class PermissionsSerializer(_SignalSerializer):
