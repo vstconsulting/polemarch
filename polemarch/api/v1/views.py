@@ -190,6 +190,12 @@ class TemplateViewSet(base.PermissionMixin, base.ModelViewSetSet):
     def supported_kinds(self, request):
         return base.Response(self.model.template_fields, 200).resp
 
+    @detail_route(methods=["post"])
+    def execute(self, request, *args, **kwargs):
+        obj = self.get_object()
+        self.get_serializer(obj).execute(request)
+        return base.Response("Template executed: {}".format(obj.id), 200).resp
+
 
 class HookViewSet(base.ModelViewSetSet):
     model = serializers.models.Hook

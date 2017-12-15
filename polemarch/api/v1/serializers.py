@@ -10,7 +10,7 @@ from django.db import transaction
 
 from rest_framework import serializers
 from rest_framework import exceptions
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, UnsupportedMediaType
 
 from ...main.models import Inventory
 from ...main import models, exceptions as main_exceptions
@@ -557,11 +557,29 @@ class OneTemplateSerializer(TemplateSerializer):
             'owner',
             'data',
         )
+
+    _exec_types = {
+        "Task": "playbook",
+        "Module": "module",
+    }
+
+    def execute(self, request):
+        # pylint: disable=protected-access
+        try:
+            tp = self._exec_types[self.instance.kind]
+        except KeyError:
+            raise UnsupportedMediaType(media_type=self.instance.kind)
+        serializer = OneProjectSerializer(self.instance.project)
+        data = self.instance.get_data()
+        data.pop("project", None)
+        vars = data.pop("vars", {})
+        data.update(vars)
+        return serializer._execution(tp, data, request.user)
+
+
 ###################################
 # Subclasses for operations
 # with hosts and groups
-
-
 class _InventoryOperations(_WithVariablesSerializer):
 
     def hosts_operations(self, method, data):
@@ -696,12 +714,11 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
 
-    def _execution(self, kind, request):
-        data = dict(request.data)
+    def _execution(self, kind, data, user):
         inventory = data.pop("inventory")
         try:
             inventory = Inventory.objects.get(id=int(inventory))
-            if not inventory.viewable_by(request.user):  # nocv
+            if not inventory.viewable_by(user):  # nocv
                 raise PermissionDenied(
                     "You don't have permission to inventory."
                 )
@@ -709,17 +726,17 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
             pass
         history_id = self.instance.execute(
             kind, str(data.pop(kind)), inventory,
-            initiator=request.user.id, **data
+            initiator=user.id, **data
         )
         rdata = dict(detail="Started at inventory {}.".format(inventory),
                      history_id=history_id)
         return Response(rdata, 201)
 
     def execute_playbook(self, request):
-        return self._execution("playbook", request)
+        return self._execution("playbook", dict(request.data), request.user)
 
     def execute_module(self, request):
-        return self._execution("module", request)
+        return self._execution("module", dict(request.data), request.user)
 
 
 class PermissionsSerializer(_SignalSerializer):
