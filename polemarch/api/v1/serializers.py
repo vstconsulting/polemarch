@@ -514,6 +514,13 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'vars',
                   'url',)
 
+    def execute(self):
+        inventory = self.instance.inventory
+        history_id = self.instance.execute(sync=False)
+        rdata = dict(detail="Started at inventory {}.".format(inventory),
+                     history_id=history_id)
+        return Response(rdata, 201)
+
 
 class TemplateSerializer(_WithVariablesSerializer):
     data = DictField(required=True, write_only=True)

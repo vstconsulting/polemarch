@@ -654,6 +654,29 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             for val in h['vars'].values():
                 self.assertEqual(val, "[~~ENCRYPTED~~]")
 
+    @patch("polemarch.main.models.projects.Project.execute")
+    def test_periodictask_execute_now(self, execute):
+        def side(*args, **kwargs):
+            self.assertEqual(args[0], self.ptask1.kind)
+            self.assertEqual(args[1], self.ptask1.mode)
+            self.assertEqual(args[2], self.inventory)
+            self.assertEqual(kwargs["initiator_type"], "scheduler")
+            self.assertEqual(kwargs["initiator"], self.ptask1.id)
+            self.assertEqual(kwargs["save_result"], self.ptask1.save_result)
+            self.assertTrue(not kwargs["sync"])
+            return 0
+
+        execute.side_effect = side
+        url = "/api/v1/periodic-tasks/"
+        result = self.get_result(
+            "post", "{}{}/execute/".format(url, self.ptask1.id)
+        )
+        self.assertEqual(
+            "Started at inventory {}.".format(self.inventory), result['detail']
+        )
+        self.assertEquals(result["history_id"], 0)
+        self.assertEquals(execute.call_count, 1)
+
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
