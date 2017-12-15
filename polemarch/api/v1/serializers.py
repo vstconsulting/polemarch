@@ -10,7 +10,7 @@ from django.db import transaction
 
 from rest_framework import serializers
 from rest_framework import exceptions
-from rest_framework.exceptions import PermissionDenied, UnsupportedMediaType
+from rest_framework.exceptions import PermissionDenied
 
 from ...main.models import Inventory
 from ...main import models, exceptions as main_exceptions
@@ -558,23 +558,9 @@ class OneTemplateSerializer(TemplateSerializer):
             'data',
         )
 
-    _exec_types = {
-        "Task": "playbook",
-        "Module": "module",
-    }
-
     def execute(self, request):
-        # pylint: disable=protected-access
-        try:
-            tp = self._exec_types[self.instance.kind]
-        except KeyError:
-            raise UnsupportedMediaType(media_type=self.instance.kind)
         serializer = OneProjectSerializer(self.instance.project)
-        data = self.instance.get_data()
-        data.pop("project", None)
-        vars = data.pop("vars", {})
-        data.update(vars)
-        return serializer._execution(tp, data, request.user)
+        return self.instance.execute(serializer, request.user)
 
 
 ###################################
