@@ -210,14 +210,21 @@ class BulkViewSet(rest_views.APIView):
     serializer_classes = serializers
 
     _op_types = {
+        "get": "perform_get",
         "add": "perform_create",
         "set": "perform_update",
         "del": "perform_delete",
         "mod": "perform_modify"
     }
-    _allowed_types = [
-        'host', 'group', 'inventory', 'project', 'periodictask', 'template'
-    ]
+    _allowed_types = {
+        'host': _op_types.keys(),
+        'group': _op_types.keys(),
+        'inventory': _op_types.keys(),
+        'project': _op_types.keys(),
+        'periodictask': _op_types.keys(),
+        'template': _op_types.keys(),
+        'history': ['del', "get"]
+    }
 
     def get_serializer_class(self, item):
         if item not in self._allowed_types:
@@ -236,6 +243,10 @@ class BulkViewSet(rest_views.APIView):
         if not obj.editable_by(self.request.user):
             raise PermissionDenied("You don't have permission to this object.")
         return obj
+
+    def perform_get(self, item, pk):
+        serializer = self.get_serializer(self.get_object(item, pk), item=item)
+        return base.Response(serializer.data, 200).resp_dict
 
     def perform_create(self, item, data):
         serializer = self.get_serializer(data=data, item=item)
@@ -261,12 +272,20 @@ class BulkViewSet(rest_views.APIView):
         operation = getattr(serializer, "{}_operations".format(data_type))
         return operation(method, data).resp_dict
 
+    def _check_type(self, op_type, item):
+        allowed_types = self._allowed_types.get(item, [])
+        if op_type not in allowed_types:
+            raise serializers.exceptions.UnsupportedMediaType(
+                media_type=op_type
+            )
+
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         operations = request.data
         results = []
         for operation in operations:
             op_type = operation.pop("type")
+            self._check_type(op_type, operation.get("item", None))
             perf_method = getattr(self, self._op_types[op_type])
             result = perf_method(**operation)
             result['type'] = op_type
