@@ -77,11 +77,11 @@ pmModuleTemplates.model.page_item = {
         {
             class:'btn btn-warning',
             function:function(item_id){ 
-                return "spajs.showLoader(pmAnsibleModule.execute($('#projects-autocomplete').val(), pmModuleTemplates.inventoriesAutocompletefiled.getValue(), pmGroups.getGroupsAutocompleteValue(), $('#module-autocomplete').val(), $('#module-args-string').val(), jsonEditor.jsonEditorGetValues())); return false;"
+                return "spajs.showLoader("+this.model.className+".saveAndExecute("+item_id+")); return false;"
             },
-            title:'Execute',
+            title:'Save and execute',
             link:function(){ return '#'},
-            help:'Execute'
+            help:'Save and execute'
         }, 
         {
             class:'btn btn-default copy-btn',
@@ -146,6 +146,22 @@ pmModuleTemplates.model.page_item = {
         return data;
     },
 }
+
+
+pmModuleTemplates.saveAndExecute = function(item_id)
+{
+    var def = new $.Deferred();
+    $.when(this.updateItem(item_id)).done(function()
+    {
+        $.when(pmModuleTemplates.execute(item_id)).always(function(){
+            def.resolve();
+        })
+    }).fail(function(){
+        def.reject();
+    })
+    return def.promise()
+}
+
 
 pmModuleTemplates.showItem = function(holder, menuInfo, data)
 { 

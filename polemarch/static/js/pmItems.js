@@ -731,20 +731,41 @@ pmItems.deleteRows = function(elements)
     })
 }
 
+/**
+ * Удалит все выделенные элементы 
+ * @returns {promise}
+ */
 pmItems.deleteSelected = function()
 {
-    var item_ids = []
+    //var item_ids = []
+    var deleteBulk = []
+    
     for(var i in this.model.selectedItems)
     {
         if(this.model.selectedItems[i])
         {
-            item_ids.push(i)
+            //item_ids.push(i)
+            
+            deleteBulk.push({ 
+                type:"del",
+                item:this.model.name,
+                pk:i
+            })
         }
     }
-
-    return $.when(this.multiOperationsOnItems('deleteItemQuery', item_ids)).always(function(){
-        spajs.openURL(window.location.href);
+     
+    return $.when(spajs.ajax.Call({
+            url: "/api/v1/_bulk/",
+            type: "POST",
+            contentType:'application/json',
+            data:JSON.stringify(deleteBulk)
+    })).always(function(){
+       spajs.openURL(window.location.href);
     }).promise();
+
+    //return $.when(this.multiOperationsOnItems('deleteItemQuery', item_ids)).always(function(){
+    //    spajs.openURL(window.location.href);
+    //}).promise();
 }
 
 pmItems.multiOperationsOnItems = function(operation, item_ids, force, def)
