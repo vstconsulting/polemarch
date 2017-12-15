@@ -247,16 +247,17 @@ class BulkViewSet(rest_views.APIView):
         kwargs["context"] = {'request': self.request}
         return self.get_serializer_class(kwargs.pop("item"))(*args, **kwargs)
 
-    def get_object(self, item, pk):
+    def get_object(self, item, pk, access="editable"):
         serializer_class = self.get_serializer_class(item)
         model = serializer_class.Meta.model
         obj = model.objects.get(pk=pk)
-        if not obj.editable_by(self.request.user):
+        if not getattr(obj, access + "_by")(self.request.user):
             raise PermissionDenied("You don't have permission to this object.")
         return obj
 
     def perform_get(self, item, pk):
-        serializer = self.get_serializer(self.get_object(item, pk), item=item)
+        obj = self.get_object(item, pk, access="viewable")
+        serializer = self.get_serializer(obj, item=item)
         return base.Response(serializer.data, 200).resp_dict
 
     def perform_create(self, item, data):
