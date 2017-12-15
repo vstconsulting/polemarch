@@ -85,7 +85,7 @@ pmProjects.model.page_list = {
              * @returns {String} Значение для ячейки в таблице
              */
             value:function(item, filed_name, opt){
-                return item.justText(filed_name)
+                return this.model.items[item.id].justText(filed_name)
             },
         }
     ],
@@ -332,6 +332,11 @@ pmProjects.model.page_item = {
                 filed: new pmProjects.filed.selectRepositoryType(),
                 name:'repository',
             },
+            {
+                filed: new filedsLib.filed.disabled(),
+                name:'revision',
+                title:'Revision',
+            },
         ]
     ],
     /**
@@ -365,6 +370,8 @@ pmProjects.model.page_item = {
             }
         }
 
+        delete data.revision
+        delete data.repository
         return data;
     },
 }

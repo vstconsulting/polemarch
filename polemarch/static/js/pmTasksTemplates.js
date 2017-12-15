@@ -144,11 +144,11 @@ pmTasksTemplates.model.page_item = {
         {
             class:'btn btn-warning',
             function:function(item_id){ 
-                return "spajs.showLoader(pmTasks.execute($('#projects-autocomplete').val(), pmTasksTemplates.inventoriesAutocompletefiled.getValue(), $('#playbook-autocomplete').val(), jsonEditor.jsonEditorGetValues())); return false;"
+                return "spajs.showLoader("+this.model.className+".saveAndExecute("+item_id+")); return false;"
             },
-            title:'Execute',
+            title:'Save and execute',
             link:function(){ return '#'},
-            help:'Execute'
+            help:'Save and execute'
         }, 
         {
             class:'btn btn-default copy-btn',
@@ -215,6 +215,21 @@ pmTasksTemplates.model.page_item = {
     },
 }
 
+pmTasksTemplates.saveAndExecute = function(item_id)
+{
+    var def = new $.Deferred();
+    $.when(this.updateItem(item_id)).done(function()
+    {
+        $.when(pmTasksTemplates.execute(item_id)).always(function(){
+            def.resolve();
+        })
+    }).fail(function(){
+        def.reject();
+    })
+    return def.promise()
+}
+
+
 pmTasksTemplates.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete() 
 pmTasksTemplates.showWidget = function(holder, kind)
 {
@@ -238,29 +253,6 @@ pmTasksTemplates.showTaskWidget = function(holder)
 pmTasksTemplates.showModuleWidget = function(holder)
 {
     return pmTasksTemplates.showWidget(holder, "Module")
-}
-
-pmTasksTemplates.execute = function(item_id)
-{
-    var thisObj = this;
-    var def = new $.Deferred();
-    $.when(this.loadItem(item_id)).done(function()
-    {
-        var val = thisObj.model.items[item_id]
-        $.when(pmTasks.execute(val.data.project, val.data.inventory, val.data.playbook, val.data.vars)).done(function()
-        {
-            def.resolve();
-        }).fail(function()
-        {
-            def.reject();
-        })
-
-    }).fail(function()
-    {
-        def.reject();
-    })
-
-    return def.promise()
 }
 
 pmTasksTemplates.showItem = function(holder, menuInfo, data)

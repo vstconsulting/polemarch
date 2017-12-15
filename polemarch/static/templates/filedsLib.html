@@ -17,7 +17,25 @@
     </div>
 </script>
 
-<!-- Шаблон текстового поля -->
+<!-- Шаблон disabled поля -->
+<script type="text/x-just" data-just="filed_type_disabled">
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label" ><%- filed.title %></label>
+        <input 
+            type="text" 
+            class="form-control" 
+            placeholder="<%- filed.placeholder %>" 
+            disabled
+            id="filed_<%- filed.name %>"
+            <% if(item_id){ %>
+                <%= pmObj.model.items[item_id].justAttr(filed.name, 'value') %>
+            <% } %>
+        >
+        <div class="help-block"><%- filed.help || '' %></div>
+    </div>
+</script>
+
+<!-- Шаблон password поля -->
 <script type="text/x-just" data-just="filed_type_password">
     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
         <label class="control-label" ><%- filed.title %></label>

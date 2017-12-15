@@ -527,19 +527,44 @@
                        </div>
                        
                         <% if(pmHistory.model.items[item_id].execute_args){ %>
-                            <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12"> 
-                                <label class="control-label" >Execute args</label>
-                                <div> 
-                                    <% for(var i in pmHistory.model.items[item_id].execute_args){ var val = pmHistory.model.items[item_id].execute_args[i] %> 
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label"><%- i %></label> 
-                                            <div class="col-sm-10">
-                                                <input type="email" class="form-control disabled" disabled="" value="<%- val %>" >
-                                            </div>
-                                        </div>
-                                    <% } %> 
-                                </div>
+                            <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                                <h4>Execute args</h4>
                             </div>
+                            <% for(var i in pmHistory.model.items[item_id].execute_args){ var val = pmHistory.model.items[item_id].execute_args[i] %>  
+                                
+                                <% if(val == ""){ %>
+                                    <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                                       <label class="control-label" ><%- i %></label>
+                                       <div 
+                                               class="form-control disabled"
+                                               disabled=""
+                                               maxlength="255">
+                                               <%- val %>
+                                       </div>
+                                       <div class="help-block"></div>
+                                   </div>
+                                   <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12 boolean-select">
+                                        <label class="control-label"><%- i %></label>
+                                        <div class="form-control selected" onselectstart="return false" onmousedown="return false" style="cursor: pointer;" >
+                                            <div class="ico-on fa fa-toggle-on"></div> 
+                                            <div class="boolean-title">Boolean value</div>
+                                        </div>
+                                        <div class="help-block"></div>
+                                    </div>
+                                <% }else{ %>
+                                    <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                                       <label class="control-label" ><%- i %></label>
+                                       <div 
+                                               class="form-control disabled"
+                                               disabled=""
+                                               maxlength="255">
+                                               <%- val %>
+                                       </div>
+                                       <div class="help-block"></div>
+                                   </div>
+                                <% } %>
+                               
+                            <% } %>
                         <% } %>
 
                     </div>
