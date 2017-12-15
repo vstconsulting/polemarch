@@ -198,8 +198,7 @@ class TemplateViewSet(base.PermissionMixin, base.ModelViewSetSet):
     @detail_route(methods=["post"])
     def execute(self, request, *args, **kwargs):
         obj = self.get_object()
-        self.get_serializer(obj).execute(request)
-        return base.Response("Template executed: {}".format(obj.id), 200).resp
+        return self.get_serializer(obj).execute(request).resp
 
 
 class HookViewSet(base.ModelViewSetSet):

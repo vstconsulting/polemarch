@@ -721,7 +721,7 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         tmplt = self.post_result(url, data=json.dumps(self.tmplt_data))
         single_url = "{}{}/".format(url, tmplt['id'])
         # test playbook execution
-        self.post_result(single_url + "execute/", code=200)
+        self.post_result(single_url + "execute/", code=201)
         self.assertIn('test.yml', ansible_args)
         # test module execution
         ansible_args = []
@@ -737,7 +737,8 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             )
         )
         self.get_result("patch", single_url, data=json.dumps(module_data))
-        self.post_result(single_url + "execute/", code=200)
+        res = self.post_result(single_url + "execute/", code=201)
+        self.assertIsNotNone(res["history_id"])
         self.assertIn('shell', ansible_args)
         # test incorrect template
         ptask_data = dict(
