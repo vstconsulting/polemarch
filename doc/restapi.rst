@@ -2162,12 +2162,14 @@ All of those methods returns such json as result:
   {
      "not_found":0,
      "operated":2,
-     "total":2
+     "total":2,
+     "failed_list": []
   }
 
 There ``not_found`` counter for items, which can't be processed for some
 reason. ``operated`` for processed successfully. And ``total`` is number of
-elements that was in initial request.
+elements that was in initial request. If some items not operated successfully,
+`failed_list` will be list of them. Otherwise just empty list.
 
 IDs always for object kind, which must be stored in this sublist. For example,
 for ``groups/{group_id}/hosts/`` it must be ids of existent hosts. If host with
@@ -2879,7 +2881,9 @@ License (Polemarch+ only)
             "users": 5,
             "organization": "VST Consulting",
             "contacts": "sergey.k@vstconsulting.net",
-            "hosts": null
+            "hosts": null,
+            "actual_hosts": 3,
+            "actual_users": 2
         }
 
    :>json string expiry: date, when license will be (or was) expired. If `null`
@@ -2890,3 +2894,6 @@ License (Polemarch+ only)
    :>json string contacts: contatc information of license owner.
    :>json number hosts: number of hosts available with this license. If `null`
      - unlimited.
+   :>json number actual_hosts: how many hosts (RANGE calculates appropriately)
+     currently in system.
+   :>json number actual_users: how many users currently in system.

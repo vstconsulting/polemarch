@@ -686,6 +686,47 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             data=self.job_template.data
         ))
 
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_templates_execution(self, subprocess_function):
+        # prepare mock and some vars
+        ansible_args = []
+
+        def side_effect(call_args, *args, **kwargs):
+            ansible_args.extend(call_args)
+        subprocess_function.side_effect = side_effect
+        url = "/api/v1/templates/"
+        tmplt = self.post_result(url, data=json.dumps(self.tmplt_data))
+        single_url = "{}{}/".format(url, tmplt['id'])
+        # test playbook execution
+        self.post_result(single_url + "execute/", code=200)
+        self.assertIn('test.yml', ansible_args)
+        # test module execution
+        ansible_args = []
+        module_data = dict(
+            kind="Module",
+            data=dict(
+                module="shell",
+                group="all",
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
+                args="ls -la",
+                vars={},
+            )
+        )
+        self.get_result("patch", single_url, data=json.dumps(module_data))
+        self.post_result(single_url + "execute/", code=200)
+        self.assertIn('shell', ansible_args)
+        # test incorrect template
+        ptask_data = dict(
+            kind="Host",
+            data=dict(
+                name="somename",
+                vars={}
+            )
+        )
+        self.get_result("patch", single_url, data=json.dumps(ptask_data))
+        self.post_result(single_url + "execute/", code=415)
+
     def test_string_template_data(self):
         tmplt_data = dict(
             name="test_tmplt",

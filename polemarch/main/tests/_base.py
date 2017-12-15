@@ -27,10 +27,13 @@ class BaseTestCase(TestCase):
         with open(file_path, 'r') as inventory_file:
             return inventory_file.read()
 
-    def get_model_filter(self, model, **kwargs):
+    def get_model_class(self, model):
         if isinstance(model, (six.text_type, six.string_types)):
             model = getattr(models, model)
-        return model.objects.filter(**kwargs)
+        return model
+
+    def get_model_filter(self, model, **kwargs):
+        return self.get_model_class(model).objects.filter(**kwargs)
 
     def get_count(self, model, **kwargs):
         return self.get_model_filter(model, **kwargs).count()

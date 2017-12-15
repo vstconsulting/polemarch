@@ -1,5 +1,6 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 from collections import OrderedDict
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.http import HttpResponse
 from rest_framework import exceptions as excepts, views as rest_views
@@ -189,6 +190,12 @@ class TemplateViewSet(base.PermissionMixin, base.ModelViewSetSet):
     def supported_kinds(self, request):
         return base.Response(self.model.template_fields, 200).resp
 
+    @detail_route(methods=["post"])
+    def execute(self, request, *args, **kwargs):
+        obj = self.get_object()
+        self.get_serializer(obj).execute(request)
+        return base.Response("Template executed: {}".format(obj.id), 200).resp
+
 
 class HookViewSet(base.ModelViewSetSet):
     model = serializers.models.Hook
@@ -206,18 +213,24 @@ class HookViewSet(base.ModelViewSetSet):
 
 
 class BulkViewSet(rest_views.APIView):
-    permission_classes = (StaffPermission,)
     serializer_classes = serializers
 
     _op_types = {
+        "get": "perform_get",
         "add": "perform_create",
         "set": "perform_update",
         "del": "perform_delete",
         "mod": "perform_modify"
     }
-    _allowed_types = [
-        'host', 'group', 'inventory', 'project', 'periodictask', 'template'
-    ]
+    _allowed_types = {
+        'host': _op_types.keys(),
+        'group': _op_types.keys(),
+        'inventory': _op_types.keys(),
+        'project': _op_types.keys(),
+        'periodictask': _op_types.keys(),
+        'template': _op_types.keys(),
+        'history': ['del', "get"]
+    }
 
     def get_serializer_class(self, item):
         if item not in self._allowed_types:
@@ -232,7 +245,14 @@ class BulkViewSet(rest_views.APIView):
     def get_object(self, item, pk):
         serializer_class = self.get_serializer_class(item)
         model = serializer_class.Meta.model
-        return model.objects.get(pk=pk)
+        obj = model.objects.get(pk=pk)
+        if not obj.editable_by(self.request.user):
+            raise PermissionDenied("You don't have permission to this object.")
+        return obj
+
+    def perform_get(self, item, pk):
+        serializer = self.get_serializer(self.get_object(item, pk), item=item)
+        return base.Response(serializer.data, 200).resp_dict
 
     def perform_create(self, item, data):
         serializer = self.get_serializer(data=data, item=item)
@@ -258,12 +278,20 @@ class BulkViewSet(rest_views.APIView):
         operation = getattr(serializer, "{}_operations".format(data_type))
         return operation(method, data).resp_dict
 
+    def _check_type(self, op_type, item):
+        allowed_types = self._allowed_types.get(item, [])
+        if op_type not in allowed_types:
+            raise serializers.exceptions.UnsupportedMediaType(
+                media_type=op_type
+            )
+
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         operations = request.data
         results = []
         for operation in operations:
             op_type = operation.pop("type")
+            self._check_type(op_type, operation.get("item", None))
             perf_method = getattr(self, self._op_types[op_type])
             result = perf_method(**operation)
             result['type'] = op_type
