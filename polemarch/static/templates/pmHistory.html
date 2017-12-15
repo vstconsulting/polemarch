@@ -532,17 +532,7 @@
                             </div>
                             <% for(var i in pmHistory.model.items[item_id].execute_args){ var val = pmHistory.model.items[item_id].execute_args[i] %>  
                                 
-                                <% if(val == ""){ %>
-                                    <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
-                                       <label class="control-label" ><%- i %></label>
-                                       <div 
-                                               class="form-control disabled"
-                                               disabled=""
-                                               maxlength="255">
-                                               <%- val %>
-                                       </div>
-                                       <div class="help-block"></div>
-                                   </div>
+                                <% if(val == ""){ %> 
                                    <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12 boolean-select">
                                         <label class="control-label"><%- i %></label>
                                         <div class="form-control selected" onselectstart="return false" onmousedown="return false" style="cursor: pointer;" >

@@ -48,7 +48,7 @@ pmTemplates.execute = function(item_id)
             $.notify("Started", "success");
             if(data && data.history_id)
             {
-                $.when(spajs.open({ menuId:"/history/"+data.history_id}) ).done(function(){
+                $.when(spajs.open({ menuId:"history/"+data.history_id}) ).done(function(){
                     def.resolve()
                 }).fail(function(){
                     def.reject()
