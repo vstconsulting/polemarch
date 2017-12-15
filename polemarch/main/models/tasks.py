@@ -143,10 +143,10 @@ class PeriodicTask(AbstractModel):
             return crontab(**self.crontab_kwargs)
         return float(self.schedule)
 
-    def execute(self):
-        self.project.execute(
+    def execute(self, sync=True):
+        return self.project.execute(
             self.kind, self.mode, self.inventory,
-            sync=True, save_result=self.save_result,
+            sync=sync, save_result=self.save_result,
             initiator=self.id, initiator_type="scheduler",
             **self.vars
         )

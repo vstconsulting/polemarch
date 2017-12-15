@@ -147,6 +147,11 @@ class PeriodicTaskViewSet(base.LimitedPermissionMixin, base.ModelViewSetSet):
     serializer_class_one = serializers.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
 
+    @detail_route(methods=["post"])
+    def execute(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.execute().resp
+
 
 class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
     model = serializers.models.History
