@@ -726,9 +726,35 @@ pmItems.multiOperationsOnEachRow = function(elements, operation)
 
 pmItems.deleteRows = function(elements)
 {
-    $.when(this.multiOperationsOnEachRow(elements, 'deleteItemQuery')).always(function(){
+    var deleteBulk = []
+    for(var i=0; i< elements.length; i++)
+    {
+        deleteBulk.push({ 
+            type:"del",
+            item:this.model.name,
+            pk:$(elements[i]).attr('data-id')
+        }) 
+    }
+
+    var thisObj = this;
+    return $.when(spajs.ajax.Call({
+            url: "/api/v1/_bulk/",
+            type: "POST",
+            contentType:'application/json',
+            data:JSON.stringify(deleteBulk)
+    })).always(function()
+    {
+        for(var i in deleteBulk)
+        {
+            $(".item-"+deleteBulk[i].pk).hide();
+            thisObj.toggleSelect(deleteBulk[i].pk, false);
+        }
         spajs.openURL(window.location.href);
-    })
+    }).promise();
+        
+    //$.when(this.multiOperationsOnEachRow(elements, 'deleteItemQuery')).always(function(){
+    //    spajs.openURL(window.location.href);
+    //})
 }
 
 /**
@@ -737,8 +763,9 @@ pmItems.deleteRows = function(elements)
  */
 pmItems.deleteSelected = function()
 { 
-    if(this.model.name == 'history')
-    {
+    //if(this.model.name == 'history')
+    //{
+        var thisObj = this;
         var deleteBulk = []
         for(var i in this.model.selectedItems)
         {
@@ -757,12 +784,18 @@ pmItems.deleteSelected = function()
                 type: "POST",
                 contentType:'application/json',
                 data:JSON.stringify(deleteBulk)
-        })).always(function(){
-           spajs.openURL(window.location.href);
+        })).always(function()
+        {
+            for(var i in deleteBulk)
+            {
+                $(".item-"+deleteBulk[i].pk).hide();
+                thisObj.toggleSelect(deleteBulk[i].pk, false);
+            }
+            spajs.openURL(window.location.href);
         }).promise();
 
-    }
-
+    //}
+    /*
     var item_ids = []
     for(var i in this.model.selectedItems)
     {
@@ -774,7 +807,7 @@ pmItems.deleteSelected = function()
      
     return $.when(this.multiOperationsOnItems('deleteItemQuery', item_ids)).always(function(){
         spajs.openURL(window.location.href);
-    }).promise();
+    }).promise();*/
 }
 
 pmItems.multiOperationsOnItems = function(operation, item_ids, force, def)

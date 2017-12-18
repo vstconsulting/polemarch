@@ -526,7 +526,7 @@
                            <div class="help-block"></div>
                        </div>
                        
-                        <% if(pmHistory.model.items[item_id].execute_args){ %>
+                        <% if(pmHistory.model.items[item_id].execute_args && Object.keys(pmHistory.model.items[item_id].execute_args).length){ %>
                             <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
                                 <h4>Execute args</h4>
                             </div>
