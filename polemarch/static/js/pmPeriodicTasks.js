@@ -395,6 +395,12 @@ pmPeriodicTasks.model.page_item = {
                 name:'save_result',
                 help:'Save result of task in history',  
             },
+            {
+                filed: new filedsLib.filed.boolean(),
+                title:'Enabled',
+                name:'enabled',
+                help:'',  
+            },
         ],[
             {
                 filed: new pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime(),
