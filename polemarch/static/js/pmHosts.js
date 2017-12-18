@@ -3,6 +3,7 @@ var pmHosts = inheritance(pmItems)
 
 pmHosts.model.name = "hosts"
 pmHosts.model.page_name = "host"
+pmHosts.model.bulk_name = "host"
 pmHosts.model.className = "pmHosts"
 
 pmHosts.model.page_list = {

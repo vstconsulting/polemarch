@@ -4,7 +4,8 @@ var pmProjects = inheritance(pmItems)
 pmProjects.model.name = "projects"
 pmProjects.model.page_name = "project"
 pmProjects.model.className = "pmProjects"
-
+pmProjects.model.bulk_name = "project"
+ 
 jsonEditor.options[pmProjects.model.name] = {};
 pmProjects.model.selectedInventory = 0
 

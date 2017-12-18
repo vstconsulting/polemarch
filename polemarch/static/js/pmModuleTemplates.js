@@ -3,6 +3,7 @@ var pmModuleTemplates =  inheritance(pmTemplates)
 
 pmModuleTemplates.model.name = "templates"
 pmModuleTemplates.model.page_name = "template"
+pmModuleTemplates.model.bulk_name = "template"
 pmModuleTemplates.model.selectedInventory = 0
 pmModuleTemplates.model.className = "pmModuleTemplates"
 

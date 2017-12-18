@@ -6,7 +6,7 @@ encryptedCopyModal.find = function(data, prefix)
     {
         prefix = "";
     }
-     
+
     for(var i in data)
     {
         if(typeof data[i] == "string" && data[i] == "[~~ENCRYPTED~~]")
@@ -18,27 +18,27 @@ encryptedCopyModal.find = function(data, prefix)
             this.find(data[i], prefix + i + ".")
         }
     }
-    
+
     return this.encryptedFileds;
 }
 
 encryptedCopyModal.setNewValues = function()
-{ 
+{
     var encryptedFileds = $(".encryptedFiled")
-    
+
     this.newObjectData = $.extend(true, {}, this.objectData)
-    
+
     for(var i = 0; i<encryptedFileds.length; i++)
-    { 
+    {
         var key = $(encryptedFileds[i]).attr('data-key-name')
-        
+
         key = "['"+key.replace(/\./mg, "']['") + "']"
-        
-        
+
+
         eval('encryptedCopyModal.newObjectData'+key+'=$(".encryptedFiled")['+i+'].value')
     }
-     
-    $('#replaceEncryptedModal').modal('hide') 
+
+    $('#replaceEncryptedModal').modal('hide')
 }
 
 encryptedCopyModal.replace = function(objectData)
@@ -47,39 +47,39 @@ encryptedCopyModal.replace = function(objectData)
     {
         this.def.reject()
     }
-    
+
     this.newObjectData = undefined
     $("#replaceEncryptedModal").remove()
-    
+
     this.objectData = objectData
     this.def = new $.Deferred();
-    
+
     this.encryptedFileds = []
     this.encryptedFileds = this.find(objectData)
     if(!this.encryptedFileds.length)
     {
-        this.def.resolve(objectData) 
-        return this.def.promise(); 
+        this.def.resolve(objectData)
+        return this.def.promise();
     }
-    
+
     $("body").appendTpl(spajs.just.render("replaceEncryptedModal", {encryptedFileds:this.encryptedFileds}))
     $('#replaceEncryptedModal').modal()
-    
+
     var thisObj = this;
-    $('#replaceEncryptedModal').on('hidden.bs.modal', function () 
+    $('#replaceEncryptedModal').on('hidden.bs.modal', function ()
     {
         $("#replaceEncryptedModal").remove()
-        
+
         if(!thisObj.newObjectData)
         {
             thisObj.def.reject()
         }
         else
         {
-            thisObj.def.resolve(thisObj.newObjectData) 
+            thisObj.def.resolve(thisObj.newObjectData)
         }
     })
-     
+
     return this.def.promise();
 }
 
@@ -100,8 +100,9 @@ pmItems.model.items = {}
 pmItems.model.items_permissions = {}
 pmItems.model.name = "based"
 pmItems.model.page_name = "based"
+pmItems.model.bulk_name = "base"
 pmItems.model.selectedCount = 0;
-pmItems.model.className = "pmItems" 
+pmItems.model.className = "pmItems"
 
 pmItems.filed = {}
 
@@ -262,7 +263,7 @@ pmItems.showList = function(holder, menuInfo, data)
         {
             tpl = 'items_list'
         }
-        
+
         $(holder).insertTpl(spajs.just.render(tpl, {query:"", pmObj:thisObj, opt:{}}))
     }).fail(function()
     {
@@ -270,8 +271,8 @@ pmItems.showList = function(holder, menuInfo, data)
     })
 }
 
-/** 
- * @param {string} query 
+/**
+ * @param {string} query
  * @returns {HTML} Шаблон формы поиска
  */
 pmItems.searchFiled = function(options)
@@ -283,7 +284,7 @@ pmItems.searchFiled = function(options)
 
 /**
  * Выполняет переход на страницу с результатами поиска
- * @param {string} query 
+ * @param {string} query
  * @returns {$.Deferred}
  */
 pmItems.search = function(query, options)
@@ -292,7 +293,7 @@ pmItems.search = function(query, options)
     {
         return spajs.open({ menuId:this.model.name, reopen:true});
     }
- 
+
     return spajs.open({ menuId:this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
 }
 
@@ -307,7 +308,7 @@ pmItems.isEmptySearchQuery = function(query)
     {
         return true;
     }
- 
+
     return false;
 }
 
@@ -328,14 +329,14 @@ pmItems.showSearchResults = function(holder, menuInfo, data)
         {
             tpl = 'items_list'
         }
-        
+
         $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(data.reg[1]), pmObj:thisObj, opt:{}}))
     }).fail(function()
     {
         $.notify("", "error");
     })
 }
- 
+
 pmItems.copyItem = function(item_id)
 {
     var def = new $.Deferred();
@@ -346,7 +347,7 @@ pmItems.copyItem = function(item_id)
         var data = thisObj.model.items[item_id];
         delete data.id;
         data.name = "copy from " + data.name
-        
+
         $.when(encryptedCopyModal.replace(data)).done(function(data)
         {
             spajs.ajax.Call({
@@ -367,7 +368,7 @@ pmItems.copyItem = function(item_id)
         }).fail(function(e)
         {
             def.reject(e)
-        }) 
+        })
     }).fail(function(){
         def.reject(e)
     })
@@ -433,7 +434,7 @@ pmItems.showItem = function(holder, menuInfo, data)
         {
             tpl = 'items_page'
         }
-        
+
         $(holder).insertTpl(spajs.just.render(tpl, {item_id:data.reg[1], pmObj:thisObj, opt:{}}))
     }).fail(function()
     {
@@ -451,7 +452,7 @@ pmItems.showNewItemPage = function(holder, menuInfo, data)
         tpl = 'items_new_page'
     }
 
-    var text = spajs.just.render(tpl, {parent_item:data.reg[2], parent_type:data.reg[1], pmObj:this, opt:{}}) 
+    var text = spajs.just.render(tpl, {parent_item:data.reg[2], parent_type:data.reg[1], pmObj:this, opt:{}})
     $(holder).insertTpl(text)
 
     def.resolve()
@@ -520,7 +521,7 @@ pmItems.searchStringToObject = function(query, defaultName)
     {
         return search;
     }
-    
+
     if(!defaultName)
     {
         defaultName = 'name'
@@ -553,19 +554,19 @@ pmItems.sendSearchQuery = function(query, limit, offset)
 {
     if(!limit)
     {
-        limit = 999; 
+        limit = 999;
     }
 
     if(!offset)
     {
-        offset = 0; 
+        offset = 0;
     }
 
     var q = [];
-    
+
     q.push("limit="+encodeURIComponent(limit))
     q.push("offset="+encodeURIComponent(offset))
-    
+
     for(var i in query)
     {
         if(Array.isArray(query[i]))
@@ -579,13 +580,13 @@ pmItems.sendSearchQuery = function(query, limit, offset)
         }
         q.push(encodeURIComponent(i)+"="+encodeURIComponent(query[i]))
     }
-    
+
 
     var thisObj = this;
     return spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/?"+q.join("&"),
         type: "GET",
-        contentType:'application/json', 
+        contentType:'application/json',
         success: function(data)
         {
             //console.log("update Items", data)
@@ -621,14 +622,14 @@ pmItems.searchItems = function(query, attrName, limit, offset)
 }
 
 pmItems.loadItemsByIds = function(ids)
-{ 
-    var q = {id:ids} 
+{
+    var q = {id:ids}
     for(var i in ids)
-    { 
+    {
         if(this.model.items[ids[i]] === undefined)
         {
             this.model.items[ids[i]] = {}
-        } 
+        }
     }
     return this.sendSearchQuery(q);
 }
@@ -641,15 +642,15 @@ pmItems.loadItem = function(item_id)
     {
         throw "Error in pmItems.loadItem with item_id = `" + item_id + "`"
     }
-    
+
     var def = new $.Deferred();
     var thisObj = this;
-    
+
     if(thisObj.model.items[item_id] === undefined)
     {
         thisObj.model.items[item_id] = {}
     }
-  
+
     spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "GET",
@@ -682,29 +683,29 @@ pmItems.deleteItem = function(item_id, force)
     {
         throw "Error in pmItems.deleteItem with item_id = `" + item_id + "`"
     }
-    
+
     var def = new $.Deferred();
     if(!force && !confirm("Are you sure?"))
     {
         def.reject();
         return def.promise()
     }
-    
+
     var thisObj = this;
     $.when(this.deleteItemQuery(item_id)).done(function(data)
     {
         $.when(spajs.open({ menuId:thisObj.model.name})).done(function()
         {
-            def.resolve() 
+            def.resolve()
         }).fail(function(e){
             def.reject();
             polemarch.showErrors(e.responseJSON)
-        }) 
+        })
     }).fail(function(e){
         def.reject();
         polemarch.showErrors(e.responseJSON)
     })
-            
+
     return def.promise()
 }
 
@@ -726,54 +727,57 @@ pmItems.multiOperationsOnEachRow = function(elements, operation)
 
 pmItems.deleteRows = function(elements)
 {
-    var deleteBulk = []
-    for(var i=0; i< elements.length; i++)
+    if($.inArray(this.model.bulk_name, ['history', 'host', 'group', 'inventory', 'project', 'periodictask', 'template']) != -1)
     {
-        deleteBulk.push({ 
-            type:"del",
-            item:this.model.name,
-            pk:$(elements[i]).attr('data-id')
-        }) 
+        var deleteBulk = []
+        for(var i=0; i< elements.length; i++)
+        {
+            deleteBulk.push({
+                type:"del",
+                item:this.model.bulk_name,
+                pk:$(elements[i]).attr('data-id')
+            })
+        }
+
+        var thisObj = this;
+        return $.when(spajs.ajax.Call({
+                url: "/api/v1/_bulk/",
+                type: "POST",
+                contentType:'application/json',
+                data:JSON.stringify(deleteBulk)
+        })).always(function()
+        {
+            for(var i in deleteBulk)
+            {
+                $(".item-"+deleteBulk[i].pk).hide();
+                thisObj.toggleSelect(deleteBulk[i].pk, false);
+            }
+            spajs.openURL(window.location.href);
+        }).promise();
     }
 
-    var thisObj = this;
-    return $.when(spajs.ajax.Call({
-            url: "/api/v1/_bulk/",
-            type: "POST",
-            contentType:'application/json',
-            data:JSON.stringify(deleteBulk)
-    })).always(function()
-    {
-        for(var i in deleteBulk)
-        {
-            $(".item-"+deleteBulk[i].pk).hide();
-            thisObj.toggleSelect(deleteBulk[i].pk, false);
-        }
+    $.when(this.multiOperationsOnEachRow(elements, 'deleteItemQuery')).always(function(){
         spajs.openURL(window.location.href);
-    }).promise();
-        
-    //$.when(this.multiOperationsOnEachRow(elements, 'deleteItemQuery')).always(function(){
-    //    spajs.openURL(window.location.href);
-    //})
+    })
 }
 
 /**
- * Удалит все выделенные элементы 
+ * Удалит все выделенные элементы
  * @returns {promise}
  */
 pmItems.deleteSelected = function()
-{ 
-    //if(this.model.name == 'history')
-    //{
+{
+    if($.inArray(this.model.bulk_name, ['history', 'host', 'group', 'inventory', 'project', 'periodictask', 'template']) != -1)
+    {
         var thisObj = this;
         var deleteBulk = []
         for(var i in this.model.selectedItems)
         {
             if(this.model.selectedItems[i])
             {
-                deleteBulk.push({ 
+                deleteBulk.push({
                     type:"del",
-                    item:this.model.name,
+                    item:this.model.bulk_name,
                     pk:i
                 })
             }
@@ -793,9 +797,8 @@ pmItems.deleteSelected = function()
             }
             spajs.openURL(window.location.href);
         }).promise();
+    }
 
-    //}
-    /*
     var item_ids = []
     for(var i in this.model.selectedItems)
     {
@@ -804,10 +807,10 @@ pmItems.deleteSelected = function()
             item_ids.push(i)
         }
     }
-     
+
     return $.when(this.multiOperationsOnItems('deleteItemQuery', item_ids)).always(function(){
         spajs.openURL(window.location.href);
-    }).promise();*/
+    }).promise();
 }
 
 pmItems.multiOperationsOnItems = function(operation, item_ids, force, def)
@@ -974,13 +977,13 @@ pmItems.addItem = function(parent_type, parent_item, opt)
 {
     var def = new $.Deferred();
     var data = {}
-    
+
     for(var i in this.model.page_new.fileds)
     {
         for(var j in this.model.page_new.fileds[i])
         {
             var val = this.model.page_new.fileds[i][j];
-            
+
             data[val.name] = val.filed.getValue(this, val)
             if(val.validator !== undefined && !val.validator.apply(this, [data[val.name]]))
             {
@@ -989,7 +992,7 @@ pmItems.addItem = function(parent_type, parent_item, opt)
             }
         }
     }
-    
+
     if(this.model.page_new.onBeforeSave)
     {
         data = this.model.page_new.onBeforeSave.apply(this, [data, opt]);
@@ -999,7 +1002,7 @@ pmItems.addItem = function(parent_type, parent_item, opt)
             return def.promise();
         }
     }
-    
+
     var thisObj = this;
     spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/",
@@ -1007,18 +1010,18 @@ pmItems.addItem = function(parent_type, parent_item, opt)
         contentType:'application/json',
         data: JSON.stringify(data),
         success: function()
-        { 
+        {
             var agrs = []
             for(var i =0; i<arguments.length; i++)
             {
                 agrs.push(arguments[i])
             }
-            
+
             agrs.push({
                 parent_type:parent_type,
                 parent_item:parent_item
             })
-            
+
             $.when(thisObj.model.page_new.onCreate.apply(thisObj, agrs)).always(function(){
                 def.resolve()
             })
@@ -1037,13 +1040,13 @@ pmItems.updateItem = function(item_id, opt)
 {
     var def = new $.Deferred();
     var data = {}
-    
+
     for(var i in this.model.page_item.fileds)
     {
         for(var j in this.model.page_item.fileds[i])
         {
             var val = this.model.page_item.fileds[i][j];
-            
+
             data[val.name] = val.filed.getValue(this, val)
             if(val.validator !== undefined && !val.validator.apply(this, [data[val.name]]))
             {
@@ -1052,7 +1055,7 @@ pmItems.updateItem = function(item_id, opt)
             }
         }
     }
-    
+
     if(this.model.page_item.onBeforeSave)
     {
         data = this.model.page_item.onBeforeSave.apply(this, [data, item_id, opt]);
@@ -1062,7 +1065,7 @@ pmItems.updateItem = function(item_id, opt)
             return def.promise();
         }
     }
-    
+
     var thisObj = this;
     spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/"+item_id+"/",
@@ -1083,7 +1086,7 @@ pmItems.updateItem = function(item_id, opt)
         }
     });
 
-    return def.promise(); 
+    return def.promise();
 }
 
  pmItems.getFiledByName = function(fileds, name)
@@ -1094,7 +1097,7 @@ pmItems.updateItem = function(item_id, opt)
         {
             if(fileds[i][j].name == name)
             {
-                return fileds[i][j]  
+                return fileds[i][j]
             }
         }
     }

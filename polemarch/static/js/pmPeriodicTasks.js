@@ -2,6 +2,7 @@
 var pmPeriodicTasks = inheritance(pmItems)
 
 pmPeriodicTasks.model.page_name = "periodic-task"
+pmPeriodicTasks.model.bulk_name = "periodictask"
 pmPeriodicTasks.model.name = "periodic-tasks"  
 pmPeriodicTasks.model.selectedInventory = 0;
 pmPeriodicTasks.model.className = "pmPeriodicTasks"

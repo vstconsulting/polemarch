@@ -3,6 +3,7 @@
 var pmInventories = inheritance(pmItems)
 pmInventories.model.name = "inventories"
 pmInventories.model.page_name = "inventory"
+pmInventories.model.bulk_name = "inventory"
 pmInventories.model.className = "pmInventories"
 
 /**
