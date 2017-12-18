@@ -2,6 +2,7 @@
 var pmHistory = inheritance(pmItems)
 
 pmHistory.model.name = "history"
+pmHistory.model.bulk_name = "history"
 pmHistory.model.linePerPage = 130;
 pmHistory.justDeepWatch('model');
 pmHistory.model.className = "pmHistory"
