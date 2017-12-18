@@ -508,7 +508,7 @@ table{
     background: #fff;
 }
 
-@media (max-height: 767px) {
+@media (min-width: 767px) {
     .history-stdout{ 
         max-height: calc(100vh - 414px);
     }
