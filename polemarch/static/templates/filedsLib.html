@@ -58,6 +58,8 @@
         <label class="control-label" ><%- filed.title %></label>
         <div class="form-control <% if(item_id){ %>
                                     <%= pmObj.model.items[item_id].justClass(filed.name, 'selected') %>
+                                 <% } else if(filed.default) { %>
+                                    selected
                                  <% } %>"
                 onclick="$(this).toggleClass('selected');"
                 onselectstart="return false"
