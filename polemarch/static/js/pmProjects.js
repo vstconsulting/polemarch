@@ -26,6 +26,21 @@ pmProjects.filed.selectRepositoryType.getValue = function(pmObj, filed){
 }
 
 
+/**
+ * Вызывается после загрузки информации об элементе но до его вставки в любые массивы.
+ * Должна вернуть отредактированый или не изменный элемент
+ * @param {object} item загруженный с сервера элемента
+ * @returns {object} обработаный элемент
+ */
+pmProjects.afterItemLoad = function(item)
+{
+    if(item.status == "WAIT_SYNC" && item.revision == "ERROR")
+    {
+        item.revision = "WAIT SYNC"
+    }
+    return item;
+}
+
 pmProjects.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete()
 
 /**

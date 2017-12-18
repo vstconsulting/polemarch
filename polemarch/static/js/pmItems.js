@@ -1,91 +1,3 @@
-
-var encryptedCopyModal = {}
-encryptedCopyModal.find = function(data, prefix)
-{
-    if(!prefix)
-    {
-        prefix = "";
-    }
-
-    for(var i in data)
-    {
-        if(typeof data[i] == "string" && data[i] == "[~~ENCRYPTED~~]")
-        {
-            this.encryptedFileds.push(prefix+i)
-        }
-        else if(typeof data[i] == "object" && data[i] != null)
-        {
-            this.find(data[i], prefix + i + ".")
-        }
-    }
-
-    return this.encryptedFileds;
-}
-
-encryptedCopyModal.setNewValues = function()
-{
-    var encryptedFileds = $(".encryptedFiled")
-
-    this.newObjectData = $.extend(true, {}, this.objectData)
-
-    for(var i = 0; i<encryptedFileds.length; i++)
-    {
-        var key = $(encryptedFileds[i]).attr('data-key-name')
-
-        key = "['"+key.replace(/\./mg, "']['") + "']"
-
-
-        eval('encryptedCopyModal.newObjectData'+key+'=$(".encryptedFiled")['+i+'].value')
-    }
-
-    $('#replaceEncryptedModal').modal('hide')
-}
-
-encryptedCopyModal.replace = function(objectData)
-{
-    if(this.def && this.def.reject)
-    {
-        this.def.reject()
-    }
-
-    this.newObjectData = undefined
-    $("#replaceEncryptedModal").remove()
-
-    this.objectData = objectData
-    this.def = new $.Deferred();
-
-    this.encryptedFileds = []
-    this.encryptedFileds = this.find(objectData)
-    if(!this.encryptedFileds.length)
-    {
-        this.def.resolve(objectData)
-        return this.def.promise();
-    }
-
-    $("body").appendTpl(spajs.just.render("replaceEncryptedModal", {encryptedFileds:this.encryptedFileds}))
-    $('#replaceEncryptedModal').modal()
-
-    var thisObj = this;
-    $('#replaceEncryptedModal').on('hidden.bs.modal', function ()
-    {
-        $("#replaceEncryptedModal").remove()
-
-        if(!thisObj.newObjectData)
-        {
-            thisObj.def.reject()
-        }
-        else
-        {
-            thisObj.def.resolve(thisObj.newObjectData)
-        }
-    })
-
-    return this.def.promise();
-}
-
-
-
-
 function pmItems()
 {
 
@@ -463,6 +375,18 @@ pmItems.loadAllItems = function()
 {
     return this.loadItems(999999);
 }
+
+/**
+ * Вызывается после загрузки информации об элементе но до его вставки в любые массивы.
+ * Должна вернуть отредактированый или не изменный элемент
+ * @param {object} item загруженный с сервера элемента
+ * @returns {object} обработаный элемент
+ */
+pmItems.afterItemLoad = function(item)
+{
+    return item;
+}
+
 /**
  * Обновляет поле модел this.model.itemslist и ложит туда список пользователей
  * Обновляет поле модел this.model.items и ложит туда список инфу о пользователях по их id
@@ -495,7 +419,7 @@ pmItems.loadItems = function(limit, offset)
 
             for(var i in data.results)
             {
-                var val = data.results[i]
+                var val = thisObj.afterItemLoad(data.results[i])
                 thisObj.model.items.justWatch(val.id);
                 thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
             }
@@ -658,9 +582,9 @@ pmItems.loadItem = function(item_id)
         data: "",
         success: function(data)
         {
-            //console.log("loadUser", data)
+            //console.log("loadUser", data) 
             thisObj.model.items.justWatch(item_id)
-            thisObj.model.items[item_id] = data
+            thisObj.model.items[item_id] = thisObj.afterItemLoad(data)
             def.resolve(data)
         },
         error:function(e)
