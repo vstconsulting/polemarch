@@ -86,6 +86,7 @@ pmUsers.model.page_new = {
                 filed: new filedsLib.filed.boolean(), 
                 title:'Is active',
                 name:'is_active', 
+                default:true,
             }
         ]
     ],

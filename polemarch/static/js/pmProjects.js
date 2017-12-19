@@ -4,7 +4,8 @@ var pmProjects = inheritance(pmItems)
 pmProjects.model.name = "projects"
 pmProjects.model.page_name = "project"
 pmProjects.model.className = "pmProjects"
-
+pmProjects.model.bulk_name = "project"
+ 
 jsonEditor.options[pmProjects.model.name] = {};
 pmProjects.model.selectedInventory = 0
 
@@ -24,6 +25,21 @@ pmProjects.filed.selectRepositoryType.getValue = function(pmObj, filed){
     return '';
 }
 
+
+/**
+ * Вызывается после загрузки информации об элементе но до его вставки в любые массивы.
+ * Должна вернуть отредактированый или не изменный элемент
+ * @param {object} item загруженный с сервера элемента
+ * @returns {object} обработаный элемент
+ */
+pmProjects.afterItemLoad = function(item)
+{
+    if(item.status == "WAIT_SYNC" && item.revision == "ERROR")
+    {
+        item.revision = "WAIT SYNC"
+    }
+    return item;
+}
 
 pmProjects.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete()
 
@@ -85,7 +101,7 @@ pmProjects.model.page_list = {
              * @returns {String} Значение для ячейки в таблице
              */
             value:function(item, filed_name, opt){
-                return item.justText(filed_name)
+                return this.model.items[item.id].justText(filed_name)
             },
         }
     ],
@@ -162,6 +178,9 @@ pmProjects.model.page_new = {
         [
             /**
              * Поле ввода
+             * @todo В целом в следующем приступе неудержимого рефакторинга будет правильнее
+             *  все параметры кроме filed перенести в конструктор поля filed
+             *  и тогда массив fileds будет содержать только экземпляры filedsLib.filed.* или его наследников 
              */
             {
                 filed: new filedsLib.filed.text(),                              // Объект поля ввода
@@ -332,6 +351,11 @@ pmProjects.model.page_item = {
                 filed: new pmProjects.filed.selectRepositoryType(),
                 name:'repository',
             },
+            {
+                filed: new filedsLib.filed.disabled(),
+                name:'revision',
+                title:'Revision',
+            },
         ]
     ],
     /**
@@ -365,6 +389,8 @@ pmProjects.model.page_item = {
             }
         }
 
+        delete data.revision
+        delete data.repository
         return data;
     },
 }

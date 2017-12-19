@@ -504,10 +504,16 @@ table{
 
 .history-stdout{
     overflow: auto;
-    max-height: 300px;
+    max-height: calc(100vh - 338px);
+    min-height: 400px;
     background: #fff;
 }
 
+@media (min-width: 767px) {
+    .history-stdout{ 
+        max-height: calc(100vh - 414px);
+    }
+}
 
 @media (min-width: 992px) {
     .h1-header{

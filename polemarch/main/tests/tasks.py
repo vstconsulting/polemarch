@@ -654,6 +654,29 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             for val in h['vars'].values():
                 self.assertEqual(val, "[~~ENCRYPTED~~]")
 
+    @patch("polemarch.main.models.projects.Project.execute")
+    def test_periodictask_execute_now(self, execute):
+        def side(*args, **kwargs):
+            self.assertEqual(args[0], self.ptask1.kind)
+            self.assertEqual(args[1], self.ptask1.mode)
+            self.assertEqual(args[2], self.inventory)
+            self.assertEqual(kwargs["initiator_type"], "scheduler")
+            self.assertEqual(kwargs["initiator"], self.ptask1.id)
+            self.assertEqual(kwargs["save_result"], self.ptask1.save_result)
+            self.assertTrue(not kwargs["sync"])
+            return 0
+
+        execute.side_effect = side
+        url = "/api/v1/periodic-tasks/"
+        result = self.get_result(
+            "post", "{}{}/execute/".format(url, self.ptask1.id)
+        )
+        self.assertEqual(
+            "Started at inventory {}.".format(self.inventory), result['detail']
+        )
+        self.assertEquals(result["history_id"], 0)
+        self.assertEquals(execute.call_count, 1)
+
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
@@ -685,6 +708,48 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             kind=self.job_template.kind,
             data=self.job_template.data
         ))
+
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_templates_execution(self, subprocess_function):
+        # prepare mock and some vars
+        ansible_args = []
+
+        def side_effect(call_args, *args, **kwargs):
+            ansible_args.extend(call_args)
+        subprocess_function.side_effect = side_effect
+        url = "/api/v1/templates/"
+        tmplt = self.post_result(url, data=json.dumps(self.tmplt_data))
+        single_url = "{}{}/".format(url, tmplt['id'])
+        # test playbook execution
+        self.post_result(single_url + "execute/", code=201)
+        self.assertIn('test.yml', ansible_args)
+        # test module execution
+        ansible_args = []
+        module_data = dict(
+            kind="Module",
+            data=dict(
+                module="shell",
+                group="all",
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
+                args="ls -la",
+                vars={},
+            )
+        )
+        self.get_result("patch", single_url, data=json.dumps(module_data))
+        res = self.post_result(single_url + "execute/", code=201)
+        self.assertIsNotNone(res["history_id"])
+        self.assertIn('shell', ansible_args)
+        # test incorrect template
+        ptask_data = dict(
+            kind="Host",
+            data=dict(
+                name="somename",
+                vars={}
+            )
+        )
+        self.get_result("patch", single_url, data=json.dumps(ptask_data))
+        self.post_result(single_url + "execute/", code=415)
 
     def test_string_template_data(self):
         tmplt_data = dict(

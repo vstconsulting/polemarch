@@ -2,6 +2,7 @@
 var pmHistory = inheritance(pmItems)
 
 pmHistory.model.name = "history"
+pmHistory.model.bulk_name = "history"
 pmHistory.model.linePerPage = 130;
 pmHistory.justDeepWatch('model');
 pmHistory.model.className = "pmHistory"
@@ -63,7 +64,7 @@ pmHistory.search = function(query, options)
         return spajs.open({ menuId:this.model.name, reopen:true});
     }
 
-    return spajs.open({ menuId:this.model.name+"/search/"+encodeURIComponent(trim(query)), reopen:true});
+    return spajs.open({ menuId:this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
 }
 
 

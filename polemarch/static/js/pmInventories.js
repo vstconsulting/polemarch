@@ -3,6 +3,7 @@
 var pmInventories = inheritance(pmItems)
 pmInventories.model.name = "inventories"
 pmInventories.model.page_name = "inventory"
+pmInventories.model.bulk_name = "inventory"
 pmInventories.model.className = "pmInventories"
 
 /**
@@ -484,7 +485,7 @@ pmInventories.importInventory = function(inventory)
  
     var def = new $.Deferred();
     
-    if(!inventory.name && $("#inventory_name").length != 0)
+    if($("#inventory_name").val() != "")
     {
         inventory.name = $("#inventory_name").val();
     }

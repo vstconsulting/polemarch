@@ -18,6 +18,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
+from rest_framework.exceptions import UnsupportedMediaType
 
 from .base import ForeignKeyACL
 
@@ -142,10 +143,10 @@ class PeriodicTask(AbstractModel):
             return crontab(**self.crontab_kwargs)
         return float(self.schedule)
 
-    def execute(self):
-        self.project.execute(
+    def execute(self, sync=True):
+        return self.project.execute(
             self.kind, self.mode, self.inventory,
-            sync=True, save_result=self.save_result,
+            sync=sync, save_result=self.save_result,
             initiator=self.id, initiator_type="scheduler",
             **self.vars
         )
@@ -181,6 +182,11 @@ class Template(ACLModel):
     template_fields["Host"] = ["name", "vars"]
     template_fields["Group"] = template_fields["Host"] + ["children"]
 
+    _exec_types = {
+        "Task": "playbook",
+        "Module": "module",
+    }
+
     def get_data(self):
         data = json.loads(self.template_data)
         if "project" in self.template_fields[self.kind] and self.project:
@@ -191,6 +197,17 @@ class Template(ACLModel):
             except ValueError:
                 data['inventory'] = self.inventory
         return data
+
+    def execute(self, serializer, user):
+        # pylint: disable=protected-access
+        tp = self._exec_types.get(self.kind, None)
+        if tp is None:
+            raise UnsupportedMediaType(media_type=self.kind)
+        data = self.get_data()
+        data.pop("project", None)
+        vars = data.pop("vars", {})
+        data.update(vars)
+        return serializer._execution(tp, data, user)
 
     def _convert_to_data(self, value):
         if isinstance(value, (six.string_types, six.text_type)):

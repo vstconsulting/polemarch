@@ -2,6 +2,7 @@
 var pmGroups = inheritance(pmItems)
 pmGroups.model.name = "groups"
 pmGroups.model.page_name = "group"
+pmGroups.model.bulk_name = "group"
 pmGroups.model.className = "pmGroups"
 
 pmGroups.copyItem = function(item_id)

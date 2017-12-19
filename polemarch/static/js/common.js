@@ -132,3 +132,9 @@ if(pmLocalSettings.get('hideMenu'))
 {
     $("body").addClass('sidebar-collapse')
 }
+
+
+function toIdString(str)
+{
+    return str.replace(/[^A-z0-9]/img, "_");
+}

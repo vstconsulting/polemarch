@@ -1,5 +1,6 @@
 import json
-
+from datetime import timedelta
+from django.utils.timezone import now
 from .inventory import _ApiGHBaseTestCase
 from .. import models
 
@@ -129,6 +130,39 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
         new["name"] = "test2_tmplt"
         self.abstract_test_bulk(
             data, new, "/api/v1/templates/", "template"
+        )
+
+    def test_bulk_history(self):
+        models.History.objects.all().delete()
+        repo = "git@ex.us:dir/rep3.git"
+        ph = self.get_model_filter("Project").create(
+            name="Prj_History", repository=repo, vars=dict(repo_type="TEST")
+        )
+        default_kwargs = dict(
+            project=ph, mode="task.yml", raw_inventory="inventory",
+            raw_stdout="text", initiator=self.user.id
+        )
+        h = self.get_model_class("History").objects.create(
+            status="OK", start_time=now() - timedelta(hours=15),
+            stop_time=now() - timedelta(hours=14), **default_kwargs)
+        bulk_data = [
+            {'type': "get", 'item': "history", 'pk': h.id},
+            {'type': "del", 'item': "history", 'pk': h.id},
+        ]
+        result = self.get_result(
+            "post", "/api/v1/_bulk/", 200, data=json.dumps(bulk_data)
+        )
+        self.assertEqual(result[0]['data']['id'], h.id)
+        self.assertEqual(result[0]['status'], 200)
+        self.assertEqual(result[0]['type'], 'get')
+        self.assertEqual(result[1]['status'], 200)
+        self.assertEqual(result[1]['data']['detail'], "Ok")
+        self.assertCount(models.History.objects.all(), 0)
+        bulk_data = [
+            {'type': "mod", 'item': "history", 'pk': h.id},
+        ]
+        self.get_result(
+            "post", "/api/v1/_bulk/", 415, data=json.dumps(bulk_data)
         )
 
     def test_bulk_unsupported(self):
