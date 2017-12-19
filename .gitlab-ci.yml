@@ -94,6 +94,7 @@ code_style:
       - .tox/flake
   only:
     - /^.{0,}issue_.*$/
+    - developer
   retry: 2
 
 py27-django111-coverage:
@@ -168,7 +169,6 @@ pep8_checks:
   stage: code_standarts
   only:
    - master
-   - developer
   script:
    - make test ENVS=flake
   allow_failure: false
@@ -178,7 +178,6 @@ pylint_checks:
   stage: code_standarts
   only:
    - master
-   - developer
   script:
    - make test ENVS=pylint
   allow_failure: false
