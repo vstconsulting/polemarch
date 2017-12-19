@@ -787,17 +787,18 @@ pmItems.deleteItemQuery = function(item_id)
     });
 }
 
-pmItems.updateList = function(menuInfo, data, searchFunction)
+pmItems.updateList = function(updated_ids)
 {
+    
     var thisObj = this;
-    $.when(searchFunction(menuInfo, data)).always(function()
+    $.when(this.loadItemsByIds(updated_ids)).always(function()
     {
         if(thisObj.model.updateTimeoutId)
         {
             clearTimeout(thisObj.model.updateTimeoutId)
         }
         thisObj.model.updateTimeoutId = setTimeout(function(){
-            thisObj.updateList(menuInfo, data, searchFunction)
+            thisObj.updateList(updated_ids)
         }, 5001)
     })
 }
@@ -817,7 +818,7 @@ pmItems.stopUpdates = function()
  * @param {function} searchFunction функция поиска новых данных
  * @returns {$.Deferred}
  */
-pmItems.showUpdatedList = function(holder, menuInfo, data, functionName, searchFunction)
+pmItems.showUpdatedList = function(holder, menuInfo, data, functionName)
 {
     var thisObj = this;
     if(functionName == undefined)
@@ -825,25 +826,19 @@ pmItems.showUpdatedList = function(holder, menuInfo, data, functionName, searchF
         functionName = "showList"
     }
 
-    if(searchFunction == undefined)
+    return $.when(this[functionName](holder, menuInfo, data)).always(function(updated_data)
     {
-        searchFunction = function(menuInfo, data)
+        var updated_ids = []
+        if(updated_data.results)
         {
-            var offset = 0
-            var limit = thisObj.pageSize;
-            if(data.reg && data.reg[1] > 0)
+            for(var i in updated_data.results)
             {
-                offset = thisObj.pageSize*(data.reg[1] - 1);
+                updated_ids.push(updated_data.results[i].id)
             }
-
-            return thisObj.loadItems(limit, offset)
         }
-    }
-
-    return $.when(this[functionName](holder, menuInfo, data)).always(function()
-    {
+        
         thisObj.model.updateTimeoutId = setTimeout(function(){
-            thisObj.updateList(menuInfo, data, searchFunction);
+            thisObj.updateList(updated_ids);
         }, 5001)
     }).promise();
 }

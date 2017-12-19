@@ -532,7 +532,8 @@
                                 || (
                                         Object.keys(pmHistory.model.items[item_id].execute_args).length 
                                     &&
-                                        $.inArray("args", Object.keys(pmHistory.model.items[item_id].execute_args)) == -1)
+                                        pmHistory.model.items[item_id].execute_args.args === undefined)
+                                ||  pmHistory.model.items[item_id].execute_args.args != ""
                             ){ %>
                             <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
                                 <h4>Execute args</h4>
