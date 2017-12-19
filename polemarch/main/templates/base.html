@@ -20,6 +20,8 @@
             var hostname = window.location.host;
             var server_status_types = '{{server_status_types|safe}}';
 
+            var polemarch_version = '{{polemarch_version}}';
+            
             {% if user.is_authenticated %}
                 var my_user_id = '{{user.id}}' 
             {% else %}
@@ -50,25 +52,25 @@
         {% block bootstrap_theme %} 
         {% endblock %}  
          
-        <link href="{% static 'plugins/select2/select2.min.css' %}" rel="stylesheet" />
+        <link href="{% static 'plugins/select2/select2.min.css' %}?v={{polemarch_version}}" rel="stylesheet" />
         
         <!-- Bootstrap 3.3.6 -->
-        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}?v={{polemarch_version}}">
         <!-- Font Awesome -->
-        <link rel="stylesheet" href="{% static 'lte/css/font-awesome.min.css' %}">
+        <link rel="stylesheet" href="{% static 'lte/css/font-awesome.min.css' %}?v={{polemarch_version}}">
         <!-- Ionicons -->
-        <link rel="stylesheet" href="{% static 'lte/css/ionicons.min.css' %}">
+        <link rel="stylesheet" href="{% static 'lte/css/ionicons.min.css' %}?v={{polemarch_version}}">
         <!-- Theme style -->
-        <link rel="stylesheet" href="{% static 'lte/css/AdminLTE.min.css' %}">
+        <link rel="stylesheet" href="{% static 'lte/css/AdminLTE.min.css' %}?v={{polemarch_version}}">
         <!-- AdminLTE Skins. Choose a skin from the css/skins
              folder instead of downloading all of them to reduce the load. -->
-        <link rel="stylesheet" href="{% static 'lte/css/skins/_all-skins.min.css' %}">
+        <link rel="stylesheet" href="{% static 'lte/css/skins/_all-skins.min.css' %}?v={{polemarch_version}}">
          
-        <link rel="stylesheet" href="{% static 'js/libs/c3/c3.min.css' %}">
+        <link rel="stylesheet" href="{% static 'js/libs/c3/c3.min.css' %}?v={{polemarch_version}}">
         
-        <link rel="stylesheet" href="{% static 'css/gui.css' %}">
+        <link rel="stylesheet" href="{% static 'css/gui.css' %}?v={{polemarch_version}}">
 
-        <link rel="stylesheet" href="{% static 'css/ansi-colors.css' %}">
+        <link rel="stylesheet" href="{% static 'css/ansi-colors.css' %}?v={{polemarch_version}}">
         
         {% block custom_style %}
         {% endblock %}
@@ -77,14 +79,14 @@
       {% block commonScripts %}
       
         <!-- jQuery 2.2.3 -->
-        <script src="{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}"></script>
-        <script src="{% static 'js/libs/notify.js' %}"></script>
+        <script src="{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{polemarch_version}}"></script>
+        <script src="{% static 'js/libs/notify.js' %}?v={{polemarch_version}}"></script>
         <!-- Bootstrap 3.3.6 -->
-        <script defer src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+        <script defer src="{% static 'bootstrap/js/bootstrap.min.js' %}?v={{polemarch_version}}"></script>
         <!-- FastClick -->
-        <script defer src="{% static 'plugins/fastclick/fastclick.min.js' %}"></script>
+        <script defer src="{% static 'plugins/fastclick/fastclick.min.js' %}?v={{polemarch_version}}"></script>
         <!-- AdminLTE App -->
-        <script defer src="{% static 'js/app.js' %}"></script>
+        <script defer src="{% static 'js/app.js' %}?v={{polemarch_version}}"></script>
         
       {% endblock %}
       

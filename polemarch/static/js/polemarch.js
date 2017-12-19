@@ -22,7 +22,7 @@ function getCookie(name)
 function loadTpl(name)
 {  
     return jQuery.ajax({
-       url: window.pmStaticPath+""+name+".html",
+       url: window.pmStaticPath+""+name+".html?v="+window.polemarch_version,
        type: "GET",
        success: function(res)
        {
