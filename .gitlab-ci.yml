@@ -86,6 +86,7 @@ stages:
 ###########################################
 code_style:
   stage: code_standarts
+  image: git.vst.lan/vst/tests:tox
   script:
    - make test ENVS=flake,pylint
   cache:
