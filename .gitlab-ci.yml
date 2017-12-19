@@ -1,3 +1,4 @@
+# set to local images because too long execution
 image: onegreyonewhite/tox:tox
 
 variables:
@@ -16,6 +17,7 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
+  image: git.vst.lan/vst/tests:tox
   variables:
     TOX_ENVS: ""
   script:
@@ -37,6 +39,7 @@ stages:
 
 .pack_tamplate: &packing-test
   stage: packaging-test
+  image: git.vst.lan/vst/tests:tox
   variables:
     MYSQL_ROOT_PASSWORD: 'polemarch'
     MYSQL_DATABASE: 'polemarch'
@@ -61,9 +64,9 @@ stages:
     - dist/
   allow_failure: false
   only:
-    - /^issue_.*$/
+    # - /^issue_.*$/
     - developer
-    - master
+    # - master
     - make_bin_packages
   retry: 2
 
@@ -116,7 +119,7 @@ default_rpm_tests:
 
 default_oracle_tests:
   <<: *packing-test
-  image: onegreyonewhite/tox:oracle
+  image: git.vst.lan/vst/tests:oracle
   script:
    - cat /etc/hosts
    - make rpm RELEASE=${CI_BUILD_ID}
@@ -128,7 +131,7 @@ default_oracle_tests:
 
 default_deb_tests:
   <<: *packing-test
-  image: onegreyonewhite/tox:ubuntu
+  image: git.vst.lan/vst/tests:ubuntu
   script:
    - cat /etc/hosts
    - make deb RELEASE=${CI_BUILD_ID}
@@ -160,7 +163,6 @@ py35-django111:
   <<: *tests_template
 py36-django111:
   <<: *tests_template
-
 
 pep8_checks:
   stage: code_standarts
@@ -201,7 +203,7 @@ release_deb:
   stage: release
   only:
    - tags
-  image: onegreyonewhite/tox:ubuntu
+  image: git.vst.lan/vst/tests:ubuntu
   script:
    - make deb
   allow_failure: false
