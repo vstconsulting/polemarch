@@ -505,6 +505,7 @@ table{
 .history-stdout{
     overflow: auto;
     max-height: calc(100vh - 338px);
+    min-height: 400px;
     background: #fff;
 }
 
