@@ -31,11 +31,16 @@ encryptedCopyModal.setNewValues = function()
     for(var i = 0; i<encryptedFileds.length; i++)
     {
         var key = $(encryptedFileds[i]).attr('data-key-name')
-
         key = "['"+key.replace(/\./mg, "']['") + "']"
-
-
-        eval('encryptedCopyModal.newObjectData'+key+'=$(".encryptedFiled")['+i+'].value')
+        
+        if($(encryptedFileds[i]).val() == "")
+        {
+            eval('delete encryptedCopyModal.newObjectData'+key+'')
+        }
+        else
+        {
+            eval('encryptedCopyModal.newObjectData'+key+'=$(".encryptedFiled")['+i+'].value')
+        }
     }
 
     $('#replaceEncryptedModal').modal('hide')
@@ -82,5 +87,27 @@ encryptedCopyModal.replace = function(objectData)
 
     return this.def.promise();
 }
+ 
+encryptedCopyModal.loadFile = function(event, element)
+{
+    console.log("encryptedCopyModal.loadFile", event.target.files)
+    for(var i=0; i<event.target.files.length; i++)
+    {
+        if( event.target.files[i].size > 1024*1024*1)
+        {
+            $.notify("File too large", "error");
+            console.log("File too large " + event.target.files[i].size)
+            continue;
+        }
 
+        var reader = new FileReader();
+        reader.onload = function(e)
+        {
+            $(element)[0].setAttribute("value", e.target.result)
+            $(element).val(e.target.result)
+        }
 
+        reader.readAsText(event.target.files[i]);
+        return;
+    }
+}
