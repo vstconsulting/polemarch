@@ -485,7 +485,7 @@ pmInventories.importInventory = function(inventory)
  
     var def = new $.Deferred();
     
-    if(!inventory.name && $("#inventory_name").length != 0)
+    if($("#inventory_name").val() != "")
     {
         inventory.name = $("#inventory_name").val();
     }
