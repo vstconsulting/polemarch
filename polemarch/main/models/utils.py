@@ -188,16 +188,17 @@ class AnsibleCommand(object):
             self.history.status = default_code
 
     def execute(self, target, inventory, history, project, **extra_args):
-        self.prepare(target, inventory, history, project)
-        self.history.status = "OK"
         try:
+            self.prepare(target, inventory, history, project)
+            self.history.status = "OK"
             extra = self.__parse_extra_args(**extra_args)
             args = self.get_args(self.target, extra.args)
             self.history.raw_stdout = self.executor.execute(args, self.workdir)
         except Exception as exception:
             self.error_handler(exception)
         finally:
-            self.inventory_object.close()
+            inventory_object = getattr(self, "inventory_object", None)
+            inventory_object and inventory_object.close()
             self.history.stop_time = timezone.now()
             self.history.save()
 
