@@ -140,7 +140,7 @@ class HistoryModelViewSet(GenericViewSet,
 
 
 class ModelViewSetSet(GenericViewSet, viewsets.ModelViewSet):
-    pass
+    POST_WHITE_LIST = []
 
 
 class NonModelsViewSet(GenericViewSet):
