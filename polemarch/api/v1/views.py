@@ -62,6 +62,9 @@ class TeamViewSet(base.PermissionMixin, base.ModelViewSetSet):
     serializer_class_one = serializers.OneTeamSerializer
     filter_class = filters.TeamFilter
 
+    def get_extra_queryset(self):
+        return self.queryset
+
 
 class HostViewSet(base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Host
