@@ -422,12 +422,18 @@ class History(BModel):
             return self.project.editable_by(user)
         return self.inventory.editable_by(user)
 
+    def _inventory_editable(self, user):
+        return self.inventory and self.inventory.editable_by(user)
+
+    def _inventory_viewable(self, user):
+        return not self.inventory or self.inventory.viewable_by(user)
+
     def viewable_by(self, user):
         return (
             self.project.editable_by(user) or
-            self.inventory.editable_by(user) or
+            self._inventory_editable(user) or
             (self.initiator == user.id and self.initiator_type == "users") or
-            (self.project.viewable_by(user) & self.inventory.viewable_by(user))
+            (self.project.viewable_by(user) & self._inventory_viewable(user))
         )
 
 

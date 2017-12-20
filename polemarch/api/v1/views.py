@@ -109,6 +109,7 @@ class ProjectViewSet(base.PermissionMixin, base.ModelViewSetSet,
     serializer_class = serializers.ProjectSerializer
     serializer_class_one = serializers.OneProjectSerializer
     filter_class = filters.ProjectFilter
+    POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
 
     @list_route(methods=["get"], url_path="supported-repos")
     def supported_repos(self, request):
@@ -146,6 +147,7 @@ class PeriodicTaskViewSet(base.LimitedPermissionMixin, base.ModelViewSetSet):
     serializer_class = serializers.PeriodictaskSerializer
     serializer_class_one = serializers.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
+    POST_WHITE_LIST = ['execute']
 
     @detail_route(methods=["post"])
     def execute(self, request, *args, **kwargs):
@@ -158,6 +160,7 @@ class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
     serializer_class = serializers.HistorySerializer
     serializer_class_one = serializers.OneHistorySerializer
     filter_class = filters.HistoryFilter
+    POST_WHITE_LIST = ['cancel']
 
     @detail_route(methods=["get"])
     def raw(self, request, *args, **kwargs):
@@ -190,6 +193,7 @@ class TemplateViewSet(base.PermissionMixin, base.ModelViewSetSet):
     serializer_class = serializers.TemplateSerializer
     serializer_class_one = serializers.OneTemplateSerializer
     filter_class = filters.TemplateFilter
+    POST_WHITE_LIST = ['execute']
 
     @list_route(methods=["get"], url_path="supported-kinds")
     def supported_kinds(self, request):
