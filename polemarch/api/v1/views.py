@@ -210,8 +210,8 @@ class HookViewSet(base.ModelViewSetSet):
     @list_route(['get'])
     def types(self, request):
         data = dict(
-            types=self.model.handlers.list(),
-            when=self.model.handlers.when_types
+            types=self.model.handlers.list().keys(),
+            when=self.model.handlers.when_types_names
         )
         return base.Response(data, 200).resp
 

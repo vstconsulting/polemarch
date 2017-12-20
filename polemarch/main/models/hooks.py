@@ -5,7 +5,17 @@ from ..utils import ModelHandlers, raise_context
 
 
 class HookHandlers(ModelHandlers):
-    when_types = ['on_execution', 'after_execution']
+    when_types_names = dict(
+        on_execution="Before start task",
+        after_execution="After end task",
+        on_user_add="When new user register",
+        on_user_upd="When user update data",
+        on_user_del="When user was removed",
+        on_object_add="When new Polemarch object was added",
+        on_object_upd="When Polemarch object was updated",
+        on_object_del="When Polemarch object was removed",
+    )
+    when_types = when_types_names.keys()
 
     def get_handler(self, obj):
         return self[obj.type](obj, self.when_types, **self.opts(obj.type))
