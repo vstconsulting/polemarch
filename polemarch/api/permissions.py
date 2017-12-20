@@ -12,7 +12,7 @@ class ModelPermission(permissions.IsAuthenticated):
             return True
         if request.method in permissions.SAFE_METHODS:  # nocv
             return obj.viewable_by(request.user)  # nocv
-        if view.action in view.POST_WHITE_LIST: # nocv
+        if view.action in view.POST_WHITE_LIST:  # nocv
             return obj.viewable_by(request.user)  # nocv
         return obj.editable_by(request.user)
 
