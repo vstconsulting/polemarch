@@ -902,6 +902,35 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         res = self.get_result("get", search_url)
         self.assertEqual(res["count"], real_count, [res, real_count])
 
+    def test_secret_template_vars(self):
+        url = "/api/v1/templates/"
+        data = dict(
+            name="test_tmplt",
+            kind="Task",
+            data=dict(
+                playbook="test.yml",
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
+                vars={
+                    "vault-password-file": "secret",
+                }
+            )
+        )
+
+        t = self.post_result(url, data=json.dumps(data))
+        t_again = self.get_result("get", "{}{}/".format(url, t['id']))
+
+        for i in [t, t_again]:
+            for val in i['data']['vars'].values():
+                self.assertEqual(val, "[~~ENCRYPTED~~]")
+
+        data['data']['vars']['vault-password-file'] = "[~~ENCRYPTED~~]"
+        self.get_result("patch", "{}{}/".format(url, t['id']),
+                        data=json.dumps(data))
+
+        for val in Template.objects.get(pk=t['id']).data['vars'].values():
+            self.assertEqual(val, "secret")
+
 
 class ApiHistoryTestCase(_ApiGHBaseTestCase):
     def setUp(self):

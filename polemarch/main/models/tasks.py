@@ -217,6 +217,15 @@ class Template(ACLModel):
         else:
             raise ValueError("Unknown data type set.")
 
+    def keep_encrypted(self, new_vars):
+        if not self.template_data:
+            return new_vars
+        old_vars = self.data['vars']
+        for key in new_vars.keys():
+            if new_vars[key] == '[~~ENCRYPTED~~]':
+                new_vars[key] = old_vars.get(key, new_vars[key])
+        return new_vars
+
     def set_data(self, value):
         data = self._convert_to_data(value)
         project_id = data.pop('project', None)
@@ -231,6 +240,7 @@ class Template(ACLModel):
                 self.inventory = Inventory.objects.get(pk=int(inventory_id)).id
             except (ValueError, TypeError, Inventory.DoesNotExist):
                 self.inventory = inventory_id
+        data['vars'] = self.keep_encrypted(data['vars'])
         self.template_data = json.dumps(data)
 
     def __setattr__(self, key, value):
