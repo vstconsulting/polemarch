@@ -492,6 +492,8 @@ pmInventories.importInventory = function(inventory)
     
     if(!inventory.name)
     {
+        // inventory.name = "new imported inventory"
+        
         $.notify("Error in field inventory name", "error");
         def2.reject()
         return def2.promise(); 
