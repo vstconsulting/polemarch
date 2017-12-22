@@ -336,6 +336,7 @@ class HookSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'type',
+            'when',
             'recipients'
         )
 

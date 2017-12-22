@@ -4,6 +4,11 @@ from django.test import Client
 from django.contrib.auth.hashers import make_password
 from django.utils.timezone import now
 
+try:
+    from mock import patch
+except ImportError:
+    from unittest.mock import patch
+
 from ..utils import redirect_stdany
 from ._base import BaseTestCase, User, json
 from .project import ApiProjectsTestCase
@@ -183,17 +188,41 @@ class ApiUsersTestCase(BaseTestCase):
         self.result(client.post, "/api/v1/users/", 409, data)
         self._logout(client)
 
-    def test_api_users_insert_and_delete(self):
+    @patch('polemarch.main.hooks.http.Backend._execute')
+    def test_api_users_insert_and_delete(self, execute_method):
+        self.sended = False
+        hook_url = 'http://ex.com'
+        hook_data = dict(
+            name="test", type='HTTP', recipients=hook_url, when='on_user_add'
+        )
+        user_data = {
+            "username": "test_user", "password": "eadgbe",
+            "is_active": True, "first_name": "user_f_name",
+            "last_name": "user_l_name", "email": "test@domain.lan"
+        }
+        for w in ['on_user_add', 'on_user_upd', 'on_user_del']:
+            hd = dict(**hook_data)
+            hd['when'] = w
+            self.post_result("/api/v1/hooks/", data=json.dumps(hd))
+
+        def side_effect_method(url, when, message):
+            self.assertEqual(url, hook_url)
+            self.assertEqual(when, 'on_user_add')
+            json.dumps(message)
+            self.assertEqual(
+                message['target']['username'], user_data['username']
+            )
+            self.sended = True
+            return '200 OK: {"result": "ok"}'
+
         client = self._login()
         self.result(client.get, "/api/v1/users/")
-        result = self.result(client.post, "/api/v1/users/", 201,
-                             {"username": "test_user",
-                              "password": "eadgbe",
-                              "is_active": True,
-                              "first_name": "user_f_name",
-                              "last_name": "user_l_name",
-                              "email": "test@domain.lan"
-                              })
+        execute_method.reset_mock()
+        execute_method.side_effect = side_effect_method
+        result = self.result(client.post, "/api/v1/users/", 201, user_data)
+        self.assertEquals(execute_method.call_count, 2)
+        execute_method.reset_mock()
+        self.assertTrue(self.sended, "Raised on sending.")
         self.assertEqual(result["username"], "test_user")
         self.assertEqual(result["first_name"], "user_f_name")
         self.assertEqual(result["last_name"], "user_l_name")
@@ -201,7 +230,15 @@ class ApiUsersTestCase(BaseTestCase):
         id = str(result['id'])
         url = "/api/v1/users/{}/".format(id)
         self.assertRCode(client.get(url), 200)
+        result = self.result(
+            client.patch, url,
+            data=json.dumps({'last_name': 'tttt'}),
+            content_type="application/json"
+        )
+        self.assertEquals(execute_method.call_count, 1)
+        execute_method.reset_mock()
         self.assertRCode(client.delete(url), 204)
+        self.assertEquals(execute_method.call_count, 1)
         idself = self.user.id
         url = "/api/v1/users/{}/".format(idself)
         self.assertRCode(client.delete(url), 409)

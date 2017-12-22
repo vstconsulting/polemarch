@@ -10,9 +10,11 @@ class ModelPermission(permissions.IsAuthenticated):
             return True
         if request.user == obj:  # nocv
             return True
-        if request.method not in permissions.SAFE_METHODS:  # nocv
-            return obj.editable_by(request.user)
-        return obj.viewable_by(request.user)  # nocv
+        if request.method in permissions.SAFE_METHODS:  # nocv
+            return obj.viewable_by(request.user)  # nocv
+        if view.action in view.POST_WHITE_LIST:  # nocv
+            return obj.viewable_by(request.user)  # nocv
+        return obj.editable_by(request.user)
 
 
 class SuperUserPermission(ModelPermission):

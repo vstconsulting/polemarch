@@ -33,3 +33,21 @@ class BaseHook(object):
 
     def after_execution(self, message):
         return self.send(message, when='after_execution')
+
+    def on_user_add(self, message):
+        return self.send(message, when='on_user_add')
+
+    def on_user_upd(self, message):
+        return self.send(message, when='on_user_upd')
+
+    def on_user_del(self, message):
+        return self.send(message, when='on_user_del')
+
+    def on_object_add(self, message):
+        return self.send(message, when='on_object_add')
+
+    def on_object_upd(self, message):
+        return self.send(message, when='on_object_upd')
+
+    def on_object_del(self, message):
+        return self.send(message, when='on_object_del')

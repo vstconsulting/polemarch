@@ -4,4 +4,4 @@ exclude = ./polemarch/*/migrations/*,./polemarch/main/settings*.py,.tox/*,./etc/
 
 [flake8]
 ignore = E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741
-exclude = ./polemarch/*/migrations/*,./polemarch/main/settings*.py,.tox/*,./etc/*,./*/__init__.py,./t_openstack.py
+exclude = ./polemarch/*/migrations/*,./polemarch/main/settings*.py,.tox/*,./etc/*,./*/__init__.py,./t_openstack.py,./polemarch/projects/*
