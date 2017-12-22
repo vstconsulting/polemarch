@@ -773,6 +773,80 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.get_result("patch", single_url, data=json.dumps(ptask_data))
         self.post_result(single_url + "execute/", code=415)
 
+        # Execution with options
+        ansible_args = []
+        tmpl_with_opts = dict(
+            kind="Module",
+            name='Test opts',
+            data=dict(
+                module="shell",
+                group="all",
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
+                args="ls -la",
+                vars=dict(
+                    forks=8,
+                ),
+            ),
+            options=dict(
+                one=dict(group='test_group'),
+                two=dict(args='pwd', vars=dict(forks=1))
+            )
+        )
+        tmplt = self.post_result(url, data=json.dumps(tmpl_with_opts))
+        for option in tmpl_with_opts['options'].keys():
+            self.assertIn(option, tmplt['options_list'], tmplt)
+        single_url = "{}{}/".format(url, tmplt['id'])
+        # test playbook execution default
+        self.post_result(single_url + "execute/", 201)
+        self.assertIn(tmpl_with_opts['data']['module'], ansible_args)
+        self.assertIn(tmpl_with_opts['data']['group'], ansible_args)
+        self.assertIn('--forks', ansible_args)
+        self.assertIn(
+            str(tmpl_with_opts['data']['vars']['forks']), ansible_args
+        )
+
+        # test playbook execution one option
+        ansible_args = []
+        self.post_result(single_url + "execute/", 201, data=dict(option='one'))
+        self.assertIn(tmpl_with_opts['data']['module'], ansible_args)
+        self.assertIn(tmpl_with_opts['options']['one']['group'], ansible_args)
+        self.assertIn('--forks', ansible_args)
+        self.assertIn(
+            str(tmpl_with_opts['data']['vars']['forks']), ansible_args
+        )
+
+        # test playbook execution two option
+        ansible_args = []
+        self.post_result(single_url + "execute/", 201, data=dict(option='two'))
+        self.assertIn(tmpl_with_opts['data']['module'], ansible_args)
+        self.assertIn(tmpl_with_opts['options']['two']['args'], ansible_args)
+        self.assertIn('--forks', ansible_args)
+        self.assertIn(
+            str(tmpl_with_opts['options']['two']['vars']['forks']),
+            ansible_args
+        )
+
+        # test invalid attrs for options
+        invalid_inventory = dict(**tmpl_with_opts)
+        invalid_inventory['options']['three'] = dict(inventory='some_str')
+        res = self.post_result(url, 400, data=json.dumps(invalid_inventory))
+        self.assertIn(
+            'Disallowed to override inventory.', res['detail']['options'], res
+        )
+
+        # test encrypted keys
+        enc_keys = dict(**tmpl_with_opts)
+        enc_keys['options']['three'] = dict(
+            vars={"key-file": "some_very_secret_data"}
+        )
+        res = self.post_result(url, data=json.dumps(enc_keys))
+        single_url = "{}{}/".format(url, res['id'])
+        res = self.get_result("get", single_url)
+        self.assertEqual(
+            res['options']['three']['vars']['key-file'], '[~~ENCRYPTED~~]', res
+        )
+
     def test_string_template_data(self):
         tmplt_data = dict(
             name="test_tmplt",
