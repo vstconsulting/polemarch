@@ -21,7 +21,7 @@ moduleArgsEditor.loadAllModule = function()
         {
             console.warn(e)
             polemarch.showErrors(e)
-            def.reject();
+            def.reject(e);
         }
     });
     return def.promise();

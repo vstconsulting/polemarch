@@ -27,10 +27,10 @@ pmPeriodicTasks.copyAndEdit = function(item_id)
         }).fail(function(e){
             $.notify("Error in duplicate item", "error");
             polemarch.showErrors(e)
-            def.reject()
+            def.reject(e)
         })
-    }).fail(function(){
-        def.reject()
+    }).fail(function(e){
+        def.reject(e)
     })
 
     return def.promise();
@@ -99,8 +99,8 @@ pmPeriodicTasks.selectInventory = function(inventory_id)
         $.when(pmInventories.loadItem(inventory_id)).done(function(){
             thisObj.model.selectedInventory = inventory_id;
             def.resolve();
-        }).fail(function(){
-            def.reject();
+        }).fail(function(e){
+            def.reject(e);
         });
     }
     else
@@ -134,15 +134,15 @@ pmPeriodicTasks.deleteItem = function(item_id, force)
             {
                 def.resolve() 
             }).fail(function(e){
-                def.reject();
+                def.reject(e);
                 polemarch.showErrors(e.responseJSON)
             })
         }).fail(function(e){
-            def.reject();
+            def.reject(e);
             polemarch.showErrors(e.responseJSON)
         })
     }).fail(function(e){
-        def.reject();
+        def.reject(e);
         polemarch.showErrors(e.responseJSON)
     })
 
@@ -164,18 +164,18 @@ pmPeriodicTasks.execute = function(project_id, item_id)
             {
                 $.when(spajs.open({ menuId:"project/"+project_id+"/history/"+data.history_id}) ).done(function(){
                     def.resolve()
-                }).fail(function(){
-                    def.reject()
+                }).fail(function(e){
+                    def.reject(e)
                 })
             }
             else
             {
-                def.reject()
+                def.reject({text:"No history_id", status:500})
             }
         },
         error:function(e)
         {
-            def.reject()
+            def.reject(e)
             polemarch.showErrors(e.responseJSON)
         }
     })
@@ -531,10 +531,10 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
         
         def.resolve();
         
-    }).fail(function()
+    }).fail(function(e)
     {
         $.notify("", "error");
-        def.reject();
+        def.reject(e);
     })
             
     return def.promise()
@@ -640,7 +640,7 @@ pmPeriodicTasks.addItem = function(project_id)
         error:function(e)
         {
             polemarch.showErrors(e.responseJSON)
-            def.reject()
+            def.reject(e)
         }
     });
     return def.promise();

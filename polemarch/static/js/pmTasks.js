@@ -15,14 +15,14 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
     if(!playbook)
     {
         $.notify("Playbook name is empty", "error");
-        def.reject();
+        def.reject({text:"Playbook name is empty"});
         return def.promise();
     }
 
     if(!(project_id/1))
     {
         $.notify("Invalid field `project` ", "error");
-        def.reject();
+        def.reject({text:"Invalid field `project` "});
         return def.promise();
     }
 
@@ -45,18 +45,18 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
             { 
                 $.when(spajs.open({ menuId:"project/"+project_id+"/history/"+data.history_id}) ).done(function(){
                     def.resolve()
-                }).fail(function(){
-                    def.reject()
+                }).fail(function(e){
+                    def.reject(e)
                 })
             }
             else
             {
-                def.reject()
+                def.reject({text:"No history_id", status:500})
             }
         },
         error:function(e)
         {
-            def.reject()
+            def.reject(e)
             polemarch.showErrors(e.responseJSON)
         }
     })

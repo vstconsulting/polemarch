@@ -509,9 +509,9 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
         });
 
         def.resolve();
-    }).fail(function()
+    }).fail(function(e)
     {
-        def.reject();
+        def.reject(e);
     })
 
     return def.promise();

@@ -150,8 +150,8 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
                 $.notify("Started", "success");
                 $.when(spajs.open({ menuId:"history/"+data.history_id}) ).done(function(){
                     def.resolve()
-                }).fail(function(){
-                    def.reject()
+                }).fail(function(e){
+                    def.reject(e)
                 })
             }
             else
@@ -161,7 +161,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
         },
         error:function(e)
         {
-            def.reject()
+            def.reject(e)
             polemarch.showErrors(e.responseJSON)
         }
     })

@@ -385,7 +385,7 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
             if(data.not_found > 0)
             {
                 $.notify("Item not found", "error");
-                def.reject()
+                def.reject({text:"Item not found", status:404})
                 return;
             }
 
@@ -409,7 +409,7 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
         {
             console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
-            def.reject()
+            def.reject(e)
         }
     });
     return def.promise();
@@ -441,7 +441,7 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
             if(data.not_found > 0)
             {
                 $.notify("Item not found", "error");
-                def.reject()
+                def.reject({text:"Item not found", status:404})
                 return;
             }
 
@@ -465,7 +465,7 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
         {
             console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
-            def.reject()
+            def.reject(e)
         }
     });
     return def.promise();

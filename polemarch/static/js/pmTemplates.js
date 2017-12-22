@@ -27,10 +27,10 @@ pmTemplates.copyAndEdit = function(item_id)
         }).fail(function(e){
             $.notify("Error in duplicate item", "error");
             polemarch.showErrors(e)
-            def.reject()
+            def.reject(e)
         })
-    }).fail(function(){
-        def.reject()
+    }).fail(function(e){
+        def.reject(e)
     })
 
     return def.promise();
@@ -51,18 +51,18 @@ pmTemplates.execute = function(item_id)
             {
                 $.when(spajs.open({ menuId:"history/"+data.history_id}) ).done(function(){
                     def.resolve()
-                }).fail(function(){
-                    def.reject()
+                }).fail(function(e){
+                    def.reject(e)
                 })
             }
             else
             {
-                def.reject()
+                def.reject({text:"No history_id", status:500})
             }
         },
         error:function(e)
         {
-            def.reject()
+            def.reject(e)
             polemarch.showErrors(e.responseJSON)
         }
     })
@@ -81,7 +81,7 @@ pmTemplates.exportToFile = function(item_ids)
     if(!item_ids)
     {
         $.notify("No data for export", "error");
-        def.reject();
+        def.reject("No data for export");
         return def.promise();
     }
 
@@ -136,7 +136,7 @@ pmTemplates.exportToFile = function(item_ids)
         {
             console.warn(e)
             polemarch.showErrors(e)
-            def.reject();
+            def.reject(e);
         }
     });
 
@@ -162,7 +162,7 @@ pmTemplates.importFromFile = function(files_event, project_id)
                 if(filedata.version/1 > 1)
                 {
                     polemarch.showErrors("Error file version is "+filedata.version)
-                    def.reject();
+                    def.reject({text:"Error file version is "+filedata.version});
                     return;
                 }
                 
@@ -189,7 +189,7 @@ pmTemplates.importFromFile = function(files_event, project_id)
                     {
                         console.warn(e)
                         polemarch.showErrors(e)
-                        def.reject();
+                        def.reject(e);
                     }
                 });
             };
