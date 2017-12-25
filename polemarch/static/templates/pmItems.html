@@ -1,4 +1,4 @@
- 
+
 <script  type="text/x-just" style="display: none;" data-just="pagination">
 <% if(totalPage > 1){ %>
         <ul class="pagination no-margin pull-right">
@@ -268,7 +268,7 @@
                     </div>
                     <div class="box-body"> 
                         <p>
-                            Status:<%- error.status %>
+                            Status: <%- error.status %>
                         </p>
                         <% if(error.error_data == undefined || error.status >= 500){ %> 
                             <a target="_blank" href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20<%- window.polemarch_version %>">
