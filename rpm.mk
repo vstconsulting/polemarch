@@ -93,7 +93,8 @@ install -m 755 initbin/%{shortname}worker.service $$RPM_BUILD_ROOT/etc/systemd/s
 install -m 755 initbin/%{shortname}.conf $$RPM_BUILD_ROOT/etc/tmpfiles.d/%{shortname}.conf
 
 %post
-sudo -H -u %{name} /opt/%{name}/bin/%{shortname}ctl migrate
+# sudo -H -u %{name} /opt/%{name}/bin/%{shortname}ctl migrate
+su - %{name} -c "/opt/%{name}/bin/%{shortname}ctl migrate"
 /usr/bin/systemctl daemon-reload
 /usr/bin/systemctl enable %{shortname}web.service
 /usr/bin/systemctl enable %{shortname}worker.service
