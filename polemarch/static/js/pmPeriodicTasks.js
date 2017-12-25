@@ -3,11 +3,11 @@ var pmPeriodicTasks = inheritance(pmItems)
 
 pmPeriodicTasks.model.page_name = "periodic-task"
 pmPeriodicTasks.model.bulk_name = "periodictask"
-pmPeriodicTasks.model.name = "periodic-tasks"  
+pmPeriodicTasks.model.name = "periodic-tasks"
 pmPeriodicTasks.model.selectedInventory = 0;
 pmPeriodicTasks.model.className = "pmPeriodicTasks"
 
-pmPeriodicTasks.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete() 
+pmPeriodicTasks.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete()
 
 
 pmPeriodicTasks.copyAndEdit = function(item_id)
@@ -16,11 +16,11 @@ pmPeriodicTasks.copyAndEdit = function(item_id)
     {
         throw "Error in pmPeriodicTasks.copyAndEdit with item_id = `" + item_id + "`"
     }
-    
+
     var def = new $.Deferred();
     var thisObj = this;
     return $.when(this.copyItem(item_id)).done(function(newItemId)
-    { 
+    {
         $.when(spajs.open({ menuId:"project/"+thisObj.model.items[item_id].project+"/"+thisObj.model.page_name + "/"+newItemId})).done(function(){
             $.notify("Item was duplicate", "success");
             def.resolve()
@@ -35,14 +35,14 @@ pmPeriodicTasks.copyAndEdit = function(item_id)
 
     return def.promise();
 }
-   
+
 pmPeriodicTasks.copyItem = function(item_id)
 {
     if(!item_id)
     {
         throw "Error in pmPeriodicTasks.copyItem with item_id = `" + item_id + "`"
     }
-    
+
     var def = new $.Deferred();
     var thisObj = this;
 
@@ -53,10 +53,10 @@ pmPeriodicTasks.copyItem = function(item_id)
         data.name = "copy from " + data.name
         data.vars.group = data.group
         data.vars.args = data.args
-        
+
         delete data.group;
         delete data.args;
-        
+
         $.when(encryptedCopyModal.replace(data)).done(function(data)
         {
             spajs.ajax.Call({
@@ -78,7 +78,7 @@ pmPeriodicTasks.copyItem = function(item_id)
         {
             def.reject(e)
         })
-        
+
     }).fail(function(e)
     {
         def.reject(e)
@@ -86,11 +86,11 @@ pmPeriodicTasks.copyItem = function(item_id)
 
 
     return def.promise();
-} 
+}
 
 
 pmPeriodicTasks.selectInventory = function(inventory_id)
-{ 
+{
     var def = new $.Deferred();
     var thisObj = this;
     inventory_id = inventory_id/1
@@ -117,12 +117,12 @@ pmPeriodicTasks.deleteItem = function(item_id, force)
     {
         throw "Error in pmPeriodicTasks.deleteItem with item_id = `" + item_id + "`"
     }
-    
+
     if(!force && !confirm("Are you sure?"))
     {
         return;
     }
-    
+
     var def = new $.Deferred();
     var thisObj = this;
     $.when(this.loadItem(item_id)).done(function()
@@ -132,7 +132,7 @@ pmPeriodicTasks.deleteItem = function(item_id, force)
         {
             $.when(spajs.open({ menuId: "project/"+project_id+"/periodic-tasks"})).done(function()
             {
-                def.resolve() 
+                def.resolve()
             }).fail(function(e){
                 def.reject(e);
                 polemarch.showErrors(e.responseJSON)
@@ -148,10 +148,10 @@ pmPeriodicTasks.deleteItem = function(item_id, force)
 
     return def.promise();
 }
-    
+
 pmPeriodicTasks.execute = function(project_id, item_id)
 {
-    var def = new $.Deferred(); 
+    var def = new $.Deferred();
     spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/" + item_id+"/execute/",
         type: "POST",
@@ -190,7 +190,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
  * @returns {promise}
  */
 pmPeriodicTasks.toggleSelectEachItem = function(mode, project_id)
-{ 
+{
     var thisObj = this;
     return $.when(this.searchItems(project_id, 'project')).done(function()
     {
@@ -213,7 +213,7 @@ pmPeriodicTasks.toggleSelectEachItem = function(mode, project_id)
             thisObj.model.selectedItems[item_id] = mode
         }
         thisObj.model.selectedCount += delta
-        
+
         if(thisObj.model.selectedCount < 0)
         {
             thisObj.model.selectedCount = 0;
@@ -235,7 +235,7 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
 
     return $.when(this.searchItems(project_id, 'project'), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:"", project_id:project_id}))  
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:"", project_id:project_id}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -253,14 +253,14 @@ pmPeriodicTasks.search = function(query, options)
 }
 
 pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
-{ 
+{
     var thisObj = this;
     var project_id = data.reg[1];
-    
-    
+
+
     var search = this.searchStringToObject(decodeURIComponent(data.reg[2]))
     search['project'] = project_id
-    
+
     return $.when(this.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
@@ -327,7 +327,7 @@ pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime.type = 'sele
 pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime.getValue = function(pmObj, filed){
     return '';
 }
- 
+
 pmPeriodicTasks.model.page_list = {
     short_title: 'Periodic tasks',
 }
@@ -342,13 +342,13 @@ pmPeriodicTasks.model.page_item = {
         },
         {
             class:'btn btn-warning',
-            function:function(item_id, opt){ 
+            function:function(item_id, opt){
                 return "spajs.showLoader(pmPeriodicTasks.execute("+opt.project_id+", "+item_id+")); return false;"
             },
             title:'Execute',
             link:function(){ return '#'},
             help:'Execute'
-        }, 
+        },
         {
             class:'btn btn-default copy-btn',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
@@ -360,18 +360,24 @@ pmPeriodicTasks.model.page_item = {
             class:'btn btn-danger danger-right',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
             title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
-            link:function(){ return '#'}, 
+            link:function(){ return '#'},
         },
     ],
     sections:[
-        function(section, item_id){ 
-            return jsonEditor.editor(pmPeriodicTasks.model.items[item_id].vars, {prefix: "PLAYBOOK", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'});
+        function(section, item_id)
+        {
+            return spajs.just.render('periodic-tasks_page_vars_section', {
+                item_id:item_id,
+                pmObj:this,
+                PLAYBOOK_VARS: jQuery.extend(true, {}, pmPeriodicTasks.model.items[item_id].vars),
+                MODULE_VARS: jQuery.extend(true, {}, pmPeriodicTasks.model.items[item_id].vars)
+            })
         }
     ],
     title: function(item_id){
         return "Periodic task "+this.model.items[item_id].justText('name')
     },
-    back_link: function(item_id, opt){ 
+    back_link: function(item_id, opt){
         return  polemarch.opt.host + "/?project/" + opt.project_id + "/" + this.model.name;
     },
     short_title: function(item_id){
@@ -383,8 +389,8 @@ pmPeriodicTasks.model.page_item = {
                 filed: new filedsLib.filed.text(),
                 title:'Name',
                 name:'name',
-                placeholder:'Enter template name', 
-                validator:function(value){ 
+                placeholder:'Enter template name',
+                validator:function(value){
                     return filedsLib.validator.notEmpty(value, 'Name')
                 },
                 fast_validator:function(value){ return value != '' && value}
@@ -393,27 +399,27 @@ pmPeriodicTasks.model.page_item = {
                 filed: new filedsLib.filed.boolean(),
                 title:'Save in history',
                 name:'save_result',
-                help:'Save result of task in history',  
+                help:'Save result of task in history',
             },
             {
                 filed: new filedsLib.filed.boolean(),
                 title:'Enabled',
                 name:'enabled',
-                help:'',  
+                help:'',
             },
         ],[
             {
                 filed: new pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime(),
                 name:'project',
-            }, 
+            },
         ]
     ],
     onUpdate:function(result)
-    { 
+    {
         return true;
     },
     onBeforeSave:function(data, item_id, opt)
-    { 
+    {
         if(!opt || !opt.project_id)
         {
             throw "Error in pmPeriodicTasks.onBeforeSave with opt.project_id is null"
@@ -422,13 +428,13 @@ pmPeriodicTasks.model.page_item = {
         data.project = opt.project_id
 
         data.type = $("#periodic-tasks_"+item_id+"_type").val()
-        data.inventory = pmPeriodicTasks.inventoriesAutocompletefiled.getValue() 
+        data.inventory = pmPeriodicTasks.inventoriesAutocompletefiled.getValue()
 
         data.kind = $("#periodic-tasks_"+item_id+"_kind").val()
- 
+
         if(!data.inventory)
         {
-            $.notify("Invalid field `inventory` ", "error"); 
+            $.notify("Invalid field `inventory` ", "error");
             return false;
         }
 
@@ -461,7 +467,7 @@ pmPeriodicTasks.model.page_item = {
             data.schedule = $("#periodic-tasks_"+item_id+"_schedule_INTERVAL").val()
             if(!data.schedule)
             {
-                $.notify("Invalid field `Interval schedule` ", "error"); 
+                $.notify("Invalid field `Interval schedule` ", "error");
                 return;
             }
         }
@@ -491,10 +497,10 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
         {
             tpl = 'items_page'
         }
-        
+
         $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{project_id:project_id}}))
         pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory)
-        
+
         $('#periodic-tasks_'+item_id+'_inventory').select2({ width: '100%' });
 
         new autoComplete({
@@ -528,15 +534,15 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
                 response(matches);
             }
         });
-        
+
         def.resolve();
-        
+
     }).fail(function(e)
     {
         $.notify("", "error");
         def.reject(e);
     })
-            
+
     return def.promise()
 }
 
@@ -550,7 +556,7 @@ pmPeriodicTasks.addItem = function(project_id)
     {
         throw "Error in pmPeriodicTasks.addItem with project_id = `" + project_id + "`"
     }
-    
+
     var def = new $.Deferred();
 
     var data = {}
@@ -567,15 +573,15 @@ pmPeriodicTasks.addItem = function(project_id)
         def.reject();
         return def.promise();
     }
-    
+
     if(!data.inventory)
     {
         $.notify("Invalid field `inventory` ", "error");
         def.reject();
         return def.promise();
     }
-    
-    
+
+
     data.kind = $("#new_periodic-tasks_kind").val()
 
     if(data.kind == "MODULE")
@@ -615,7 +621,7 @@ pmPeriodicTasks.addItem = function(project_id)
     }
 
     data.save_result = $("#new_periodic-tasks_save_result").hasClass('selected')
-    
+
     data.vars = jsonEditor.jsonEditorGetValues(data.kind)
 
     if(data.kind == "MODULE")
@@ -623,7 +629,7 @@ pmPeriodicTasks.addItem = function(project_id)
         data.vars.group = pmGroups.getGroupsAutocompleteValue()
         data.vars.args =  moduleArgsEditor.getModuleArgs();
     }
-    
+
     spajs.ajax.Call({
         url: "/api/v1/"+this.model.name+"/",
         type: "POST",
@@ -655,7 +661,7 @@ pmPeriodicTasks.loadItem = function(item_id)
         contentType:'application/json',
         data: "",
                 success: function(data)
-        { 
+        {
             if(data.kind == "MODULE")
             {
                 if(data && data.vars && data.vars.group !== undefined)
@@ -680,32 +686,32 @@ pmPeriodicTasks.loadItem = function(item_id)
         }
     });
 }
-  
+
 tabSignal.connect("polemarch.start", function()
-{ 
+{
     // tasks
     spajs.addMenu({
-        id:"PeriodicTasks", 
+        id:"PeriodicTasks",
         urlregexp:[/^project\/([0-9]+)\/periodic-tasks$/, /^project\/([0-9]+)\/periodic-task$/, /^project\/([0-9]+)\/periodic-tasks\/page\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showList(holder, menuInfo, data);} 
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showList(holder, menuInfo, data);}
     })
-    
+
     spajs.addMenu({
-        id:"PeriodicTasks-search", 
+        id:"PeriodicTasks-search",
         urlregexp:[/^project\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)$/],
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResults(holder, menuInfo, data);}
     })
-    
+
     spajs.addMenu({
-        id:"PeriodicTask", 
-        urlregexp:[/^project\/([0-9]+)\/periodic-task\/([0-9]+)$/], 
+        id:"PeriodicTask",
+        urlregexp:[/^project\/([0-9]+)\/periodic-task\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showItem(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
-        id:"newPeriodicTask", 
+        id:"newPeriodicTask",
         urlregexp:[/^project\/([0-9]+)\/new-periodic-tasks$/],
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showNewItemPage(holder, menuInfo, data);}
     })
-     
+
 })
