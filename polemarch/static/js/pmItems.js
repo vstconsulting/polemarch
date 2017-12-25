@@ -351,7 +351,7 @@ pmItems.showItem = function(holder, menuInfo, data)
     }).fail(function()
     {
         $.notify("", "error");
-    })
+    }).promise()
 }
 
 pmItems.showNewItemPage = function(holder, menuInfo, data)
