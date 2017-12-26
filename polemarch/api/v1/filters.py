@@ -85,7 +85,8 @@ class HostFilter(_BaseHGIFilter):
     class Meta:
         model = models.Host
         fields = ('id',
-                  'name',)
+                  'name',
+                  'type')
 
 
 class GroupFilter(_BaseHGIFilter):

@@ -271,7 +271,7 @@ pmHistory.loadItem = function(item_id)
         {
             console.warn("pmHistory.loadItem", e)
             polemarch.showErrors(e)
-            def.reject()
+            def.reject(e)
         }
     });
 
@@ -363,7 +363,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
         {
             console.warn(e)
             polemarch.showErrors(e)
-            def.reject()
+            def.reject(e)
         }
     });
 
@@ -455,7 +455,7 @@ pmHistory.loadItems = function(limit, offset)
         {
             console.warn(e)
             polemarch.showErrors(e)
-            def.reject()
+            def.reject(e)
         }
     });
 
@@ -637,7 +637,7 @@ pmHistory.loadLines = function(item_id, opt)
         {
             console.warn(e)
             polemarch.showErrors(e)
-            def.reject()
+            def.reject(e)
         }
     });
 

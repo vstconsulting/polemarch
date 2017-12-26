@@ -36,8 +36,15 @@
 
             {% if user.is_superuser %}
                 var is_superuser = true
-            {% else %}
-                var is_superuser = false
+                var is_staff = true
+            {% else %} 
+                {% if user.is_staff %}
+                    var is_superuser = true
+                    var is_staff = true
+                {% else %}
+                    var is_superuser = false
+                    var is_staff = false
+                {% endif %}
             {% endif %}
             
             window.pmStaticPath = "{% static '' %}";

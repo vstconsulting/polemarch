@@ -106,7 +106,8 @@ chown -R $(USER):$(USER) /var/log/$(NAME)
 chown -R $(USER):$(USER) /var/run/$(NAME)
 chown -R $(USER):$(USER) /var/lock/$(NAME)
 # making migration and activate services
-sudo -H -u $(USER) /opt/$(NAME)/bin/polemarchctl migrate
+# sudo -H -u $(USER) /opt/$(NAME)/bin/polemarchctl migrate
+su - $(USER) -c "/opt/$(NAME)/bin/polemarchctl migrate"
 systemctl daemon-reload
 systemctl enable polemarchweb.service
 systemctl enable polemarchworker.service

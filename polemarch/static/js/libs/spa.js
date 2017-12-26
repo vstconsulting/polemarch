@@ -646,6 +646,15 @@ if(!window.spajs)
         }
         
         var def = new $.Deferred();
+        
+        $.when(def).fail(function(e)
+        {
+            if(spajs.errorPage)
+            {
+                spajs.errorPage(jQuery('#spajs-right-area'), menuInfo, data, e)
+            }
+        })
+        
         if(!spajs.opt.addParamsToUrl && opt.event_state == undefined)
         {
             opt.event_state = {}
@@ -679,7 +688,7 @@ if(!window.spajs)
         if(!menuInfo || !menuInfo.onOpen)
         {
             console.error("URL not registered", opt.menuId, opt)
-            def.reject()
+            def.reject({detail:"Error URL not registered", status:404})
             throw "URL not registered " + opt.menuId;
             return def.promise();
         }
@@ -687,7 +696,7 @@ if(!window.spajs)
         if(spajs.currentOpenMenu && menuInfo.id == spajs.currentOpenMenu.id && !opt.reopen)
         {
             console.warn("Re-opening the menu", menuInfo)
-            def.reject()
+            def.resolve()
             return def.promise();
         }
 
@@ -763,7 +772,7 @@ if(!window.spajs)
                     // in-loading
                     $("body").removeClass("in-loading")
                     def.resolve()
-                }).fail(function()
+                }).fail(function(e)
                 {
                     //console.timeEnd("Mopen")
                     jQuery("#spajs-menu-"+menuInfo.id).removeClass("menu-loading")
@@ -771,7 +780,7 @@ if(!window.spajs)
                     // in-loading
                     $("body").removeClass("in-loading")
 
-                    def.reject()
+                    def.reject(e)
                 })
             }, 0)
         }

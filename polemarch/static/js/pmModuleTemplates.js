@@ -134,8 +134,8 @@ pmModuleTemplates.saveAndExecute = function(item_id)
         $.when(pmModuleTemplates.execute(item_id)).always(function(){
             def.resolve();
         })
-    }).fail(function(){
-        def.reject();
+    }).fail(function(e){
+        def.reject(e);
     })
     return def.promise()
 }
@@ -160,9 +160,9 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
             $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}})) 
             def.resolve();
         });
-    }).fail(function()
+    }).fail(function(e)
     {
-        def.reject();
+        def.reject(e);
     })
 
     return def.promise()
@@ -180,9 +180,9 @@ pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
         $("#projects-autocomplete").select2({ width: '100%' });
  
         def.resolve();
-    }).fail(function()
+    }).fail(function(e)
     {
-        def.reject();
+        def.reject(e);
     })
 
     return def.promise()
@@ -199,8 +199,8 @@ pmModuleTemplates.selectInventory = function(inventory_id)
         $.when(pmInventories.loadItem(inventory_id)).done(function(){
             thisObj.model.selectedInventory = inventory_id;
             def.resolve();
-        }).fail(function(){
-            def.reject();
+        }).fail(function(e){
+            def.reject(e);
         });
     }
     else
@@ -254,7 +254,7 @@ pmModuleTemplates.addItem = function()
         error:function(e)
         {
             polemarch.showErrors(e.responseJSON)
-            def.reject()
+            def.reject(e)
         }
     });
 

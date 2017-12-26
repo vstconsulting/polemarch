@@ -43,8 +43,8 @@ function loadTplArray(templatesArray)
     $.when.apply($, promiseArr).done(function()
     {
         def.resolve();
-    }).fail(function(){ 
-        def.reject();
+    }).fail(function(e){ 
+        def.reject(e);
     }) 
     
     return def.promise()
@@ -167,4 +167,41 @@ polemarch.showErrors = function(res)
             return polemarch.showErrors(res[i])
         }
     }
+}
+
+spajs.errorPage = function(holder, menuInfo, data, error_data)
+{ 
+    
+    var error = {
+        error_data:error_data
+    }
+    
+    error.status = "520"
+    if(error_data.status)
+    {
+        error.status = error_data.status
+    }
+    
+    if(error_data.responseJSON)
+    {
+        error_data = error_data.responseJSON
+    }
+
+    error.text = "Unknown error";
+    error.title = "Error"
+    if(error_data == undefined){
+        error.title = "Unknown error"
+    }
+    else
+    {
+        if(error_data.detail && error_data.detail.toString)
+        {
+            error.text = error_data.detail.toString()
+        }
+    }
+    
+    
+    debugger;
+    
+    $(holder).insertTpl(spajs.just.render("errorPage", {error:error, data:data, menuInfo:menuInfo}))
 }

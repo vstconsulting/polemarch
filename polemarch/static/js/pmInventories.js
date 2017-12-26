@@ -492,8 +492,10 @@ pmInventories.importInventory = function(inventory)
     
     if(!inventory.name)
     {
+        // inventory.name = "new imported inventory"
+        
         $.notify("Error in field inventory name", "error");
-        def2.reject()
+        def2.reject({text:"Error in field inventory name"})
         return def2.promise(); 
     }
 
@@ -784,7 +786,7 @@ pmInventories.importInventory = function(inventory)
             type: "POST",
             contentType:'application/json',
             data:JSON.stringify(delete_bulk),
-                    })).always(function(){
+        })).always(function(){
             def2.reject()
         })
     })
@@ -1241,8 +1243,8 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
         {
             if(data.not_found > 0)
             {
-                $.notify("Item not found", "error");
-                def.reject()
+                $.notify("Item not found", "error"); 
+                def.reject({text:"Item not found", status:404})
                 return;
             }
 
@@ -1266,7 +1268,7 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
         {
             console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
-            def.reject()
+            def.reject(e)
         }
     });
     return def.promise();
@@ -1299,7 +1301,7 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
             if(data.not_found > 0)
             {
                 $.notify("Item not found", "error");
-                def.reject()
+                def.reject({text:"Item not found", status:404})
                 return;
             }
 
@@ -1323,7 +1325,7 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
         {
             console.warn("group "+item_id+" update error - " + JSON.stringify(e));
             polemarch.showErrors(e.responseJSON)
-            def.reject()
+            def.reject(e)
         }
     });
     return def.promise();

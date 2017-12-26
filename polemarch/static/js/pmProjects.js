@@ -356,6 +356,11 @@ pmProjects.model.page_item = {
                 name:'revision',
                 title:'Revision',
             },
+            {
+                filed: new filedsLib.filed.disabled(),
+                name:'status',
+                title:'Status',
+            },
         ]
     ],
     /**
@@ -395,13 +400,30 @@ pmProjects.model.page_item = {
     },
 }
 
+pmProjects.startUpdateProjectItem = function(item_id)
+{
+    var thisObj = this; 
+    if(thisObj.model.items[item_id].status == "WAIT_SYNC" || thisObj.model.items[item_id].status == "SYNC")
+    {
+        thisObj.model.updateTimeoutId = setTimeout(function()
+        {
+            $.when(thisObj.loadItem(item_id)).always(function()
+            {
+                thisObj.startUpdateProjectItem(item_id)
+            })
+        }, 5000)
+    }
+}
+
 pmProjects.openItem = function(holder, menuInfo, data)
 {
+    var item_id = data.reg[1]
     var def = new $.Deferred();
     $.when(pmProjects.supportedRepos()).always(function()
     {
         $.when(pmProjects.showItem(holder, menuInfo, data)) .always(function()
         {
+            pmProjects.startUpdateProjectItem(item_id) 
             def.resolve();
         })
     }).promise();
@@ -487,9 +509,9 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
         });
 
         def.resolve();
-    }).fail(function()
+    }).fail(function(e)
     {
-        def.reject();
+        def.reject(e);
     })
 
     return def.promise();
@@ -561,7 +583,8 @@ tabSignal.connect("polemarch.start", function()
     spajs.addMenu({
         id:"project",
         urlregexp:[/^project\/([0-9]+)$/, /^projects\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.openItem(holder, menuInfo, data);}
+        onOpen:function(holder, menuInfo, data){return pmProjects.openItem(holder, menuInfo, data);},
+        onClose:function(){return pmHistory.stopUpdates();},
     })
 
     spajs.addMenu({

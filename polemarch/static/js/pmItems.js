@@ -325,10 +325,10 @@ pmItems.copyAndEdit = function(item_id)
         }).fail(function(e){
             $.notify("Error in duplicate item", "error");
             polemarch.showErrors(e)
-            def.reject()
+            def.reject(e)
         })
-    }).fail(function(){
-        def.reject()
+    }).fail(function(e){
+        def.reject(e)
     })
 
     return def.promise();
@@ -351,7 +351,7 @@ pmItems.showItem = function(holder, menuInfo, data)
     }).fail(function()
     {
         $.notify("", "error");
-    })
+    }).promise()
 }
 
 pmItems.showNewItemPage = function(holder, menuInfo, data)
@@ -622,11 +622,11 @@ pmItems.deleteItem = function(item_id, force)
         {
             def.resolve()
         }).fail(function(e){
-            def.reject();
+            def.reject(e);
             polemarch.showErrors(e.responseJSON)
         })
     }).fail(function(e){
-        def.reject();
+        def.reject(e);
         polemarch.showErrors(e.responseJSON)
     })
 
@@ -947,7 +947,7 @@ pmItems.addItem = function(parent_type, parent_item, opt)
         },
         error:function(e)
         {
-            def.reject()
+            def.reject(e)
             polemarch.showErrors(e.responseJSON)
         }
     });
@@ -1000,7 +1000,7 @@ pmItems.updateItem = function(item_id, opt)
         },
         error:function(e)
         {
-            def.reject()
+            def.reject(e)
             polemarch.showErrors(e.responseJSON)
         }
     });

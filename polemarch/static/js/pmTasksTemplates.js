@@ -224,8 +224,8 @@ pmTasksTemplates.saveAndExecute = function(item_id)
         $.when(pmTasksTemplates.execute(item_id)).always(function(){
             def.resolve();
         })
-    }).fail(function(){
-        def.reject();
+    }).fail(function(e){
+        def.reject(e);
     })
     return def.promise()
 }
@@ -274,9 +274,9 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
         $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
         
         def.resolve();
-    }).fail(function()
+    }).fail(function(e)
     {
-        def.reject();
+        def.reject(e);
     })
 
     return def.promise()
@@ -342,9 +342,9 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
         });
 
         def.resolve();
-    }).fail(function()
+    }).fail(function(e)
     {
-        def.reject();
+        def.reject(e);
     })
 
     return def.promise()
@@ -375,7 +375,7 @@ pmTasksTemplates.addItem = function()
     {
         console.warn("Invalid value in field name")
         $.notify("Invalid value in field name", "error");
-        def.reject()
+        def.reject("Invalid value in field name")
         return def.promise();
     }
 
@@ -395,7 +395,7 @@ pmTasksTemplates.addItem = function()
         error:function(e)
         {
             polemarch.showErrors(e.responseJSON)
-            def.reject()
+            def.reject(e)
         }
     });
 

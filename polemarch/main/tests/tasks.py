@@ -364,6 +364,12 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertIn('SCRIPT', result['types'])
         self.assertIn('on_execution', result['when'])
         self.assertIn('after_execution', result['when'])
+        self.assertIn('on_user_add', result['when'])
+        self.assertIn('on_user_upd', result['when'])
+        self.assertIn('on_user_del', result['when'])
+        self.assertIn('on_object_add', result['when'])
+        self.assertIn('on_object_upd', result['when'])
+        self.assertIn('on_object_del', result['when'])
         inv, _ = self.create_inventory()
         hook_url = 'http://ex.com'
         hook_data = dict(
@@ -399,8 +405,24 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             data=json.dumps(dict(inventory=inv, playbook=playbook, sync=1))
         )
         self.assertTrue(self.sended, "Raised on sending.")
-        self.assertEquals(execute_method.call_count, 4)
+        self.assertEquals(execute_method.call_count, 2)
         self.assertEquals(subprocess_function.call_count, 1)
+        execute_method.reset_mock()
+        for when in ['on_object_add', 'on_object_upd', 'on_object_del']:
+            hook_data_obj = dict(**hook_data)
+            hook_data_obj['when'] = when
+            self.post_result("/api/v1/hooks/", data=json.dumps(hook_data_obj))
+        range_int = 3
+        for i in range(range_int):
+            self.get_model_class('Host').objects.create(name="h-{}".format(i))
+        hosts = self.get_model_class('Host').objects.filter(
+            name__in=["h-{}".format(i) for i in range(range_int)]
+        )
+        for h in hosts:
+            h.type = 'RANGE'
+            h.save()
+        hosts.delete()
+        self.assertEquals(execute_method.call_count, 9)
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute_inventory_file(self, subprocess_function):
@@ -879,6 +901,35 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         ).count()
         res = self.get_result("get", search_url)
         self.assertEqual(res["count"], real_count, [res, real_count])
+
+    def test_secret_template_vars(self):
+        url = "/api/v1/templates/"
+        data = dict(
+            name="test_tmplt",
+            kind="Task",
+            data=dict(
+                playbook="test.yml",
+                project=self.pr_tmplt.id,
+                inventory=self.history_inventory.id,
+                vars={
+                    "vault-password-file": "secret",
+                }
+            )
+        )
+
+        t = self.post_result(url, data=json.dumps(data))
+        t_again = self.get_result("get", "{}{}/".format(url, t['id']))
+
+        for i in [t, t_again]:
+            for val in i['data']['vars'].values():
+                self.assertEqual(val, "[~~ENCRYPTED~~]")
+
+        data['data']['vars']['vault-password-file'] = "[~~ENCRYPTED~~]"
+        self.get_result("patch", "{}{}/".format(url, t['id']),
+                        data=json.dumps(data))
+
+        for val in Template.objects.get(pk=t['id']).data['vars'].values():
+            self.assertEqual(val, "secret")
 
 
 class ApiHistoryTestCase(_ApiGHBaseTestCase):

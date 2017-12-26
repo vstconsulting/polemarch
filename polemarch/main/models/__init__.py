@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 import os
 import json
-
+from collections import OrderedDict
 import django_celery_beat
 from django_celery_beat.models import IntervalSchedule, CrontabSchedule
 from django.db.models import signals
@@ -13,12 +13,39 @@ from django.conf import settings
 from .vars import Variable
 from .hosts import Host, Group, Inventory
 from .projects import Project
-from .users import UserGroup, ACLPermission
+from .users import BaseUser, UserGroup, ACLPermission
 from .tasks import Task, PeriodicTask, History, HistoryLines, Template
 from .hooks import Hook
 from ..validators import RegexValidator
 from ..exceptions import UnknownTypeException
 from ..utils import raise_context, AnsibleArgumentsReference
+from ..tasks import SendHook
+
+
+#####################################
+# FUNCTIONS
+#####################################
+def send_hook(when, target):
+    msg = OrderedDict(when=when)
+    msg['target'] = target
+    SendHook.delay(when, msg)
+
+
+@raise_context()
+def send_user_hook(when, instance):
+    send_hook(
+        when, OrderedDict(
+            user_id=instance.id,
+            username=instance.username,
+            admin=instance.is_staff
+        )
+    )
+
+
+@raise_context()
+def send_polemarch_models(when, instance, **kwargs):
+    target = OrderedDict(id=instance.id, name=instance.name, **kwargs)
+    send_hook(when, target)
 
 
 #####################################
@@ -164,3 +191,32 @@ def check_hook(instance, **kwargs):
     errors = instance.handlers.validate(instance)
     if errors:
         raise ValidationError(errors)
+
+
+@receiver([signals.post_save, signals.post_delete], sender=BaseUser,
+          dispatch_uid='user_add_hook')
+def user_add_hook(instance, **kwargs):
+    created = kwargs.get('created', None)
+    when = None
+    if created is None:
+        when = "on_user_del"
+    elif not created:
+        when = "on_user_upd"
+    elif created:
+        when = "on_user_add"
+    send_user_hook(when, instance) if when else None
+
+
+@receiver([signals.post_save, signals.post_delete], sender=Project)
+@receiver([signals.post_save, signals.post_delete], sender=PeriodicTask)
+@receiver([signals.post_save, signals.post_delete], sender=Inventory)
+@receiver([signals.post_save, signals.post_delete], sender=Group)
+@receiver([signals.post_save, signals.post_delete], sender=Host)
+def polemarch_hook(instance, **kwargs):
+    created = kwargs.get('created', None)
+    when = "on_object_add"
+    if created is None:
+        when = "on_object_del"
+    elif not created:
+        when = "on_object_upd"
+    send_polemarch_models(when, instance)
