@@ -1,6 +1,6 @@
 from .environment import prepare_environment
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 def _main(**kwargs):
     # pylint: disable=unused-variable
