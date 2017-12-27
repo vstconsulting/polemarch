@@ -249,7 +249,20 @@
     <% } %>
 </script>
 
+
+<!-- Страница создания periodic-task -->
+<script type="text/x-just" data-just="periodic-tasks_page_vars_section">
   
+    <div class="<%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
+        <%= jsonEditor.editor(PLAYBOOK_VARS, {prefix: "PLAYBOOK", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'}) %>
+    </div>
+
+    <div class="<%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
+        <%= jsonEditor.editor(MODULE_VARS, {prefix: "MODULE", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'}) %>
+    </div>
+
+</script>
+
 <!-- Страница создания periodic-task -->
 <script type="text/x-just" data-just="periodic-tasks_new_page">
     <section class="content-header">

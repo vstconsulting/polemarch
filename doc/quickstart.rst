@@ -80,6 +80,8 @@ To load the saved data, use:
 
       sudo -u polemarch /opt/polemarch/bin/polemarchctl loaddata /home/polemarch/backup.json
 
+But more faster backup is SQL backup and projects dir. We strongly recommended this manual backup in production.
+
 
 Update
 ------
