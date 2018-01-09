@@ -230,29 +230,7 @@ jsonEditor.jsonEditorGetValues = function(prefix)
         return {}
     }
 
-    return jsonEditor.model.data[prefix];
-
-    /*var data = {}
-    var arr = $(".jsonEditor-data"+prefix)
-    for(var i = 0; i< arr.length; i++)
-    {
-        var type = $(arr[i]).attr('data-type');
-        var index = $(arr[i]).attr('data-json-name');
-
-        if(type == "boolean")
-        {
-            if($(arr[i]).hasClass('selected'))
-            {
-                data[index] = "";
-            }
-        }
-        else
-        {
-            data[index] = $(arr[i]).val()
-        }
-    }
-
-    return data*/
+    return jsonEditor.model.data[prefix]; 
 }
 
 jsonEditor.jsonEditorRmVar = function(name, prefix)
@@ -304,7 +282,7 @@ jsonEditor.__devAddVar = function(name, value, optionsblock, prefix)
 /**
  * Делает импорт переменных из формата инвентория
  */
-jsonEditor.jsonEditorImportVars = function(optionsblock, prefix)
+jsonEditor.jsonEditorImportVars = function(optionsblock, prefix, varsText)
 {
     if(!prefix)
     {
@@ -317,7 +295,11 @@ jsonEditor.jsonEditorImportVars = function(optionsblock, prefix)
         optionsblock = 'base'
     }
 
-    var varsText = $('#new_json_vars'+prefix).val()
+    if(varsText == undefined)
+    {
+        varsText = $('#new_json_vars'+prefix).val()
+    }
+    
     var vars = varsText.split(/\n/gm)
     var varsresult = {}
 

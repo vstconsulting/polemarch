@@ -1331,7 +1331,7 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
     return def.promise();
 }
 
-pmInventories.validateGroupName = function(name)
+/**pmInventories.validateGroupName = function(name)
 {
     if(!name)
     {
@@ -1344,7 +1344,7 @@ pmInventories.validateGroupName = function(name)
     } 
     
     return false;
-}
+}*/
 
 
 

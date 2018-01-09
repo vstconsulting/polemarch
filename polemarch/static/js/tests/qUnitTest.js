@@ -367,6 +367,75 @@ window.qunitTestsArray.push({
 }})
 
 /**
+ * Тестирование crontabEditor
+ */
+window.qunitTestsArray.push({
+    step:1400,
+    test:function()
+{
+    syncQUnit.addTest('crontabEditor', function ( assert )
+    {
+        var done = assert.async();
+ 
+        var cronString = "1 * * * *"
+        
+        crontabEditor.parseCronString(undefined) 
+        assert.ok(cronString != crontabEditor.getCronString(), 'getCronString');
+        
+        crontabEditor.parseCronString("1 5") 
+        assert.ok(cronString != crontabEditor.getCronString(), 'getCronString');
+        
+        crontabEditor.parseCronString(cronString)
+        assert.ok(cronString == crontabEditor.getCronString(), 'getCronString');
+        
+        cronString = "1 1 1 1 1"
+        crontabEditor.parseCronString(cronString) 
+        assert.ok("1 1 1 1 1" == crontabEditor.getCronString(), 'getCronString');
+        
+        crontabEditor.setDaysOfWeek("1-2")
+        assert.ok("1 1 1 1 1,2" == crontabEditor.getCronString(), 'getCronString');
+        
+        crontabEditor.setMonths("1-2")
+        assert.ok("1 1 1 1,2 1,2" == crontabEditor.getCronString(), 'getCronString');
+        
+        crontabEditor.setDayOfMonth("1-2")
+        assert.ok("1 1 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString');
+        
+        crontabEditor.setHours("1-2")
+        assert.ok("1 1,2 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString');
+        
+        crontabEditor.setMinutes("1-2")
+        assert.ok("1,2 1,2 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString'); 
+        
+        crontabEditor.setMinutes("1,2,7")
+        assert.ok("1,2,7 1,2 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString'); 
+        
+        crontabEditor.setMinutes("1,2,*/7")
+        assert.ok("*/7,1,2 1,2 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString'); 
+        
+        crontabEditor.setMinutes("1,2,3,4,*/7")
+        assert.ok("*/7,1-4 1,2 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString'); 
+        
+        crontabEditor.setMinutes("1,2,3,4,*/7,45-51")
+        assert.ok("*/7,1-4,45-48,50,51 1,2 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString'); 
+        
+        crontabEditor.setMinutes("1,2,3,4,*/7,45-51,17-30/2")
+        assert.ok("*/7,*/23,*/25,1-4,17,19,27,29,45,47,48,51 1,2 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString'); 
+        
+        crontabEditor.setMinutes("1,2,3,4,*/7,45-51,17-380/2")
+        assert.ok("0-4,7,14,17,19,21,23,25,27-29,31,33,35,37,39,41-43,45-51,53,55-57,59 1,2 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString'); 
+        
+        crontabEditor.setMinutes("1,2,3,4,*/7,45-51,170-38/2")
+        assert.ok("*/7,*/12,*/16,1-4,6,8,10,18,20,22,26,30,34,38,45-47,50,51 1,2 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString'); 
+        
+        crontabEditor.setMinutes("1,2,3,4,5/5,45-51,170-38/2")
+        assert.ok("*/5,*/12,*/16,1-4,6,8,14,18,22,26,28,34,38,46,47,49,51 1,2 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString'); 
+        
+        render(done)
+    }); 
+}})
+
+/**
  * Тестирование users
  */
 window.qunitTestsArray.push({
@@ -389,6 +458,24 @@ window.qunitTestsArray.push({
         })
     });
 
+    syncQUnit.addTest('Страница списка пользователей toggleSelectEachItem', function ( assert )
+    { 
+        var done = assert.async();
+        
+        pmUsers.toggleSelectAll($('.multiple-select tr'), true); 
+        
+        $.when(pmUsers.toggleSelectEachItem(true)).done(function()
+        {
+            assert.ok(true, 'ok:toggleSelectEachItem');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'error:toggleSelectEachItem');
+            render(done)
+        })
+    })
+    
     syncQUnit.addTest('Открытие страницы добавления пользователя', function ( assert )
     {
         var done = assert.async();
@@ -1383,6 +1470,38 @@ window.qunitTestsArray.push({
         })
     })
 
+    syncQUnit.addTest('Проверка showAddSubHostsForm в inventory', function ( assert )
+    {
+        var done = assert.async();
+        var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+        $.when(pmInventories.showAddSubHostsForm(itemId)).done(function()
+        {
+            assert.ok(true, 'Проверка showAddSubHostsForm успешна');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при showAddSubHostsForm');
+            render(done)
+        })
+    })
+
+    syncQUnit.addTest('Проверка showAddSubGroupsForm в inventory', function ( assert )
+    {
+        var done = assert.async();
+        var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+        $.when(pmInventories.showAddSubGroupsForm(itemId)).done(function()
+        {
+            assert.ok(true, 'Проверка showAddSubGroupsForm успешна');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при showAddSubGroupsForm');
+            render(done)
+        })
+    })
+
     syncQUnit.addTest('Проверка добавления невалидных хостов к inventory', function ( assert )
     {
         var done = assert.async();
@@ -2092,6 +2211,39 @@ window.qunitTestsArray.push({
             render(done)
         })
     })
+    
+    syncQUnit.addTest('Страница periodic-tasks.toggleSelectEachItem', function ( assert )
+    { 
+        var done = assert.async(); 
+        $.when(pmPeriodicTasks.toggleSelectEachItem(true, projectId)).done(function()
+        {
+            assert.ok(true, 'ok:toggleSelectEachItem');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'error:toggleSelectEachItem');
+            render(done)
+        })
+    })
+    
+    syncQUnit.addTest('Страница periodic-tasks.search', function ( assert )
+    { 
+        var done = assert.async(); 
+        $.when(pmPeriodicTasks.search("test", {project_id:projectId})).done(function()
+        {
+            assert.ok(true, 'ok:periodic-tasks.search');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'error:periodic-tasks.search');
+            render(done)
+        })
+    })
+     
+    // pmPeriodicTasks.showSearchResults
+    
 /*
     syncQUnit.addTest('Страница нового inventory для проекта', function ( assert )
     {
@@ -2354,7 +2506,9 @@ window.qunitTestsArray.push({
         {
             assert.ok(true, 'Успешно copyAndEdit add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при copyAndEdit add Item');
             render(done)
         })
@@ -2373,8 +2527,27 @@ window.qunitTestsArray.push({
         {
             assert.ok(true, 'Успешно delete add Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete add Item');
+            render(done)
+        })
+    });
+    
+    syncQUnit.addTest('execute для Periodic Task', function ( assert )
+    {
+        var done = assert.async();
+ 
+        // Удаление пользователя.
+        $.when(pmPeriodicTasks.execute(projectId, taskId)).done(function()
+        {
+            assert.ok(true, 'Успешно execute для pmPeriodicTasks');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при execute для pmPeriodicTasks');
             render(done)
         })
     });
@@ -2388,7 +2561,9 @@ window.qunitTestsArray.push({
         {
             assert.ok(true, 'Успешно delete Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete Item');
             render(done)
         })
@@ -2404,6 +2579,7 @@ window.qunitTestsArray.push({
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Страница не открылась');
             render(done)
         })
@@ -2419,6 +2595,7 @@ window.qunitTestsArray.push({
             render(done)
         }).fail(function()
         {
+            debugger;
             assert.ok(false, 'Страница не открылась');
             render(done)
         })
@@ -2437,7 +2614,9 @@ window.qunitTestsArray.push({
         {
             assert.ok(true, 'Успешно delete Item');
             render(done)
-        }).fail(function(){
+        }).fail(function()
+        {
+            debugger;
             assert.ok(false, 'Ошибка при delete Item');
             render(done)
         })
@@ -2496,7 +2675,10 @@ window.qunitTestsArray.push({
         $("#Templates-name").val("!2 d#");
          
         jsonEditor.__devAddVar("syntax-check32", "syntax-check32") 
-       
+        
+        jsonEditor.jsonEditorImportVars("ansible_user=abc\nansible_host=htt")
+        jsonEditor.jsonEditorImportVars("ansible_user2:abc\nansible_host3:htt")
+        
         // Отправка формы с данными project
         $.when(pmTasksTemplates.addItem()).done(function()
         {
@@ -3025,6 +3207,84 @@ window.qunitTestsArray.push({
         })
     });
 
+    
+    syncQUnit.addTest('Страница history toggleSelectEachItem', function ( assert )
+    { 
+        var done = assert.async();
+        
+        pmHistory.toggleSelectAll($('.multiple-select tr'), true); 
+        
+        $.when(pmHistory.toggleSelectEachItem(true)).done(function()
+        {
+            assert.ok(true, 'ok:toggleSelectEachItem');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'error:toggleSelectEachItem');
+            render(done)
+        })
+    })
+    
+    syncQUnit.addTest('Страница history toggleSelectEachItem', function ( assert )
+    { 
+        var done = assert.async();
+        
+        pmHistory.toggleSelectAll($('.multiple-select tr'), false); 
+        
+        $.when(pmHistory.toggleSelectEachItem(false)).done(function()
+        {
+            $.when(pmHistory.deleteSelected()).done(function()
+            {
+                assert.ok(true, 'ok:deleteSelected');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'error:deleteSelected');
+                render(done)
+            })
+            
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'error:toggleSelectEachItem');
+            render(done)
+        })
+    })
+    
+    syncQUnit.addTest('Страница history deleteRows', function ( assert )
+    { 
+        var done = assert.async();
+         
+        $.when(pmHistory.deleteRows([])).done(function()
+        { 
+            assert.ok(true, 'ok:deleteRows');
+            render(done) 
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'error:deleteRows');
+            render(done)
+        })
+    })
+    
+    syncQUnit.addTest('Страница history multiOperationsOnEachRow.loadItem', function ( assert )
+    { 
+        var done = assert.async();
+         
+        $.when(pmHistory.multiOperationsOnEachRow([], 'loadItem', true)).done(function()
+        { 
+            assert.ok(true, 'ok:multiOperationsOnEachRow.loadItem');
+            render(done) 
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'error:multiOperationsOnEachRow.loadItem');
+            render(done)
+        })
+    })
+    
     syncQUnit.addTest('Страница history 2', function ( assert )
     { 
         var done = assert.async();
@@ -3061,6 +3321,7 @@ window.qunitTestsArray.push({
             assert.ok(true, 'Ошибка cancelTask');
             render(done)
         })
-    }); 
+    });
+    
 }})
 
