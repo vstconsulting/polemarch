@@ -197,7 +197,7 @@ jsonEditor.editor = function(json, opt)
         opt.prefix = 'prefix'
     }
 
-    opt.prefix = opt.prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    opt.prefix = toIdString(opt.prefix)
     jsonEditor.model.data[opt.prefix] = json;
     jsonEditor.model.form[opt.prefix] = {
         showImportForm:false
@@ -213,7 +213,7 @@ jsonEditor.jsonEditorScrollTo = function(param_name, prefix)
         prefix = "prefix"
     }
 
-    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    prefix = toIdString(prefix)
     $("body").scrollTo("#json_"+param_name+"_line"+prefix)
 }
 
@@ -223,7 +223,7 @@ jsonEditor.jsonEditorGetValues = function(prefix)
     {
         prefix = "prefix"
     }
-    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    prefix = toIdString(prefix)
 
     if(jsonEditor.model.data[prefix] === undefined)
     {
@@ -240,7 +240,7 @@ jsonEditor.jsonEditorRmVar = function(name, prefix)
         prefix = "prefix"
     }
 
-    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    prefix = toIdString(prefix)
     $('#json_'+name+'_line'+prefix+'').remove()
     if(!$(".jsonEditor-data"+prefix).length)
     {
@@ -288,7 +288,7 @@ jsonEditor.jsonEditorImportVars = function(optionsblock, prefix, varsText)
     {
         prefix = "prefix"
     }
-    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    prefix = toIdString(prefix)
 
     if(!optionsblock)
     {
@@ -314,7 +314,7 @@ jsonEditor.jsonEditorImportVars = function(optionsblock, prefix, varsText)
         if(res !== false)
         {
 
-            if($("#json_"+res.name.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")+"_value"+prefix).length)
+            if($("#json_"+res.name.replace(/[^A-z0-9\-]/g, "_").replace(/[\[\]]/gi, "_")+"_value"+prefix).length)
             {
                 $.notify("Var `"+res.name+"` already exists", "error");
                 continue;
@@ -420,7 +420,7 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
     {
         prefix = "prefix"
     }
-    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    prefix = toIdString(prefix)
 
     if(!optionsblock)
     {
@@ -436,7 +436,7 @@ jsonEditor.jsonEditorAddVar = function(optionsblock, prefix)
         return;
     }
 
-    if($("#json_"+name.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")+"_value"+prefix).length)
+    if($("#json_"+name.replace(/[^A-z0-9\-]/g, "_").replace(/[\[\]]/gi, "_")+"_value"+prefix).length)
     {
         $.notify("This var already exists", "error");
         return;
@@ -495,7 +495,7 @@ jsonEditor.initAutoComplete = function(optionsblock, prefix)
     {
         prefix = "prefix"
     }
-    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    prefix = toIdString(prefix)
 
     new autoComplete({
         selector: '#new_json_name'+prefix,
@@ -562,7 +562,7 @@ jsonEditor.initForm = function(optionsblock, prefix)
     {
         prefix = "prefix"
     }
-    prefix = prefix.replace(/[^A-z0-9]/g, "_").replace(/[\[\]]/gi, "_")
+    prefix = toIdString(prefix)
 
     //console.log(optionsblock, jsonEditor.options[optionsblock])
     if(jsonEditor.options[optionsblock])

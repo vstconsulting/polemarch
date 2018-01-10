@@ -2676,8 +2676,8 @@ window.qunitTestsArray.push({
          
         jsonEditor.__devAddVar("syntax-check32", "syntax-check32") 
         
-        jsonEditor.jsonEditorImportVars("ansible_user=abc\nansible_host=htt")
-        jsonEditor.jsonEditorImportVars("ansible_user2:abc\nansible_host3:htt")
+        jsonEditor.jsonEditorImportVars("playbook", "prefix", "syntax-check=\n")
+        jsonEditor.jsonEditorImportVars("playbook", "prefix", "syntax-check:\n")
         
         // Отправка формы с данными project
         $.when(pmTasksTemplates.addItem()).done(function()
@@ -2693,7 +2693,7 @@ window.qunitTestsArray.push({
     });
 
     syncQUnit.addTest('Сохранение шаблона задачи', function ( assert )
-    {
+    { 
         // Предполагается что мы от прошлого теста попали на страницу создания project
         var done = assert.async();
 
@@ -2805,6 +2805,29 @@ window.qunitTestsArray.push({
         })
     });
 
+    syncQUnit.addTest('Удаление шаблона', function ( assert )
+    {
+        var done = assert.async();
+        
+        $.when(spajs.open({ menuId:"template/Task/"+itemId})).done(function()
+        { 
+            $.when(pmTasksTemplates.saveAndExecute(itemId)).done(function()
+            {
+                assert.ok(true, 'Успешно pmTasksTemplates.saveAndExecute');
+                render(done)
+            }).fail(function(){
+                debugger;
+                assert.ok(false, 'Ошибка при pmTasksTemplates.saveAndExecute');
+                render(done)
+            })
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню template/Module/'+itemId);
+            render(done)
+        }) 
+    });
+    
     syncQUnit.addTest('Удаление шаблона', function ( assert )
     {
         var done = assert.async();
@@ -2997,6 +3020,22 @@ window.qunitTestsArray.push({
         })
     });*/
     
+    syncQUnit.addTest('pmTemplates.exportToFile', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(pmTemplates.exportToFile([itemId])).done(function()
+        {
+            assert.ok(true, 'pmTemplates.exportToFile ok');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'pmTemplates.exportToFile error');
+            render(done)
+        })
+    });
+
     syncQUnit.addTest('Удаление копии template Module', function ( assert )
     {
         var done = assert.async();
@@ -3017,6 +3056,29 @@ window.qunitTestsArray.push({
         })
     });
 
+    syncQUnit.addTest('Удаление шаблона Module', function ( assert )
+    {
+        var done = assert.async();
+        
+        $.when(spajs.open({ menuId:"template/Module/"+itemId})).done(function()
+        { 
+            $.when(pmModuleTemplates.saveAndExecute(itemId)).done(function()
+            {
+                assert.ok(true, 'Успешно pmModuleTemplates.saveAndExecute');
+                render(done)
+            }).fail(function(){
+                debugger;
+                assert.ok(false, 'Ошибка при pmModuleTemplates.saveAndExecute');
+                render(done)
+            })
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню template/Module/'+itemId);
+            render(done)
+        }) 
+    });
+    
     syncQUnit.addTest('Удаление шаблона', function ( assert )
     {
         var done = assert.async();
@@ -3049,8 +3111,14 @@ window.qunitTestsArray.push({
         $.when(spajs.open({ menuId:"home"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню pmDashboard');
+            
             setTimeout(function(){// Ждём завершения всех асинхронных запросов на странице
-                render(done) 
+                 
+                tabSignal.emit('pmLocalSettings.hideMenu', {type:'set', name:'hideMenu', value:false}) 
+                setTimeout(function()
+                {  
+                    render(done) 
+                }, 500) 
             }, 5000) 
         }).fail(function()
         {
@@ -3181,6 +3249,24 @@ window.qunitTestsArray.push({
             render(done)
         })
     });
+    
+    syncQUnit.addTest('Страница ошибки 400 в history', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"project/9999999999/history"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню project/9999999999/history');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню project/9999999999/history');
+            render(done)
+        })
+    });
+
+    
 }})
 
 
@@ -3324,4 +3410,4 @@ window.qunitTestsArray.push({
     });
     
 }})
-
+  
