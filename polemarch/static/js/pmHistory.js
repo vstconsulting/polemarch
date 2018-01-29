@@ -139,8 +139,16 @@ pmHistory.showItem = function(holder, menuInfo, data)
         {
             pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
         }
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
-        pmHistory.bindStdoutUpdates(item_id)
+        
+        var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
+        $.when(promiss).done(function(){
+             $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
+             pmHistory.bindStdoutUpdates(item_id)
+        }).fail(function(){
+            $.notify("", "error");
+        });
+       
+      
     }).fail(function()
     {
         $.notify("", "error");
@@ -159,6 +167,15 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
         {
             pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
         }
+        
+        var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
+        $.when(promiss).done(function(){
+             $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
+             pmHistory.bindStdoutUpdates(item_id)
+        }).fail(function(){
+            $.notify("", "error");
+        });
+        
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
