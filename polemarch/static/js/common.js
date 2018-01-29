@@ -136,5 +136,5 @@ if(pmLocalSettings.get('hideMenu'))
 
 function toIdString(str)
 {
-    return str.replace(/[^A-z0-9]/img, "_");
+    return str.replace(/[^A-z0-9\-]/img, "_").replace(/[\[\]]/gi, "_");
 }

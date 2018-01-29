@@ -633,7 +633,7 @@ pmItems.deleteItem = function(item_id, force)
     return def.promise()
 }
 
-pmItems.multiOperationsOnEachRow = function(elements, operation)
+pmItems.multiOperationsOnEachRow = function(elements, operation, force)
 {
     var def = new $.Deferred();
     var item_ids = []
@@ -642,7 +642,7 @@ pmItems.multiOperationsOnEachRow = function(elements, operation)
         item_ids.push($(elements[i]).attr('data-id'))
     }
 
-    $.when(this.multiOperationsOnItems(operation, item_ids)).always(function(){
+    $.when(this.multiOperationsOnItems(operation, item_ids, force)).always(function(){
         def.resolve()
     })
 
@@ -1008,17 +1008,17 @@ pmItems.updateItem = function(item_id, opt)
     return def.promise();
 }
 
- pmItems.getFiledByName = function(fileds, name)
- {
-    for(var i in fileds)
-    {
-        for(var j in fileds[i])
-        {
-            if(fileds[i][j].name == name)
-            {
-                return fileds[i][j]
-            }
-        }
-    }
-    debugger;
- }
+/*pmItems.getFiledByName = function(fileds, name)
+{
+   for(var i in fileds)
+   {
+       for(var j in fileds[i])
+       {
+           if(fileds[i][j].name == name)
+           {
+               return fileds[i][j]
+           }
+       }
+   }
+   debugger;
+}*/

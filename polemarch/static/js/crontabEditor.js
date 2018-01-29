@@ -102,6 +102,14 @@ crontabEditor.setMinutes = function(value)
     crontabEditor.updateCronString();
 }
 
+/**
+ * Парсит отдельный элемент в cron строке
+ * @param {type} resArr
+ * @param {type} str
+ * @param {type} minInt
+ * @param {type} maxInt
+ * @returns {Array}
+ */
 crontabEditor.parseItem = function(resArr, str, minInt, maxInt)
 {
     for(var i=minInt; i< maxInt; i++)
@@ -172,7 +180,7 @@ crontabEditor.parseItem = function(resArr, str, minInt, maxInt)
         }
         else if(/^([0-9]+)\/([0-9]+)$/.test(Parts[i]))
         {
-            var match = /^([0-9]+)-([0-9]+)$/.exec(Parts[i])
+            var match = /^([0-9]+)\/([0-9]+)$/.exec(Parts[i])
             if(match[1]/1 > maxInt)
             {
                 match[1] = minInt
