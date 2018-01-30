@@ -384,4 +384,3 @@ class APITestCase(ApiUsersTestCase,
         self.assertEqual(result['users'], self.get_count(User))
         # Check history counts
         self._check_stats_history(data['day'], result['jobs']['day'])
-        self._check_stats_history(data['year'], result['jobs']['year'])
