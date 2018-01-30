@@ -1061,7 +1061,7 @@ pmInventories.showAddSubGroupsForm = function(item_id, holder)
         $("#add_existing_item_to_inventory").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
         var scroll_el = "#add_existing_item_to_inventory"; 
-		if ($(scroll_el).length != 0) { 
+		if ($(scroll_el).length != 0)  { 
 			$('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000); 
 		}
         $("#polemarch-model-items-select").select2({ width: '100%' });

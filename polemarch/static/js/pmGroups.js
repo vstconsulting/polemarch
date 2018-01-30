@@ -485,6 +485,10 @@ pmGroups.showAddSubGroupsForm = function(item_id)
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_group', {item_id:item_id}))
+         var scroll_el = "#add_existing_item_to_group"; 
+		if ($(scroll_el).length != 0) { 
+			$('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000); 
+		}
         $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
@@ -505,6 +509,10 @@ pmGroups.showAddSubHostsForm = function(item_id)
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_group', {item_id:item_id}))
+        var scroll_el = "#add_existing_item_to_group"; 
+		if ($(scroll_el).length != 0) { 
+			$('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000); 
+		}
         $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
