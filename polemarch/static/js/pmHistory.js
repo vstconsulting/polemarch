@@ -140,13 +140,20 @@ pmHistory.showItem = function(holder, menuInfo, data)
             pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
         }
         
-        var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
-        $.when(promiss).done(function(){
-             $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
-             pmHistory.bindStdoutUpdates(item_id)
-        }).fail(function(){
-            $.notify("", "error");
-        });
+        
+        if (pmHistory.model.items[item_id].inventory != null) {
+            var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
+            $.when(promiss).done(function () {
+                $(holder).insertTpl(spajs.just.render(thisObj.model.name + '_page', {item_id: item_id, project_id: 0}))
+                pmHistory.bindStdoutUpdates(item_id)
+            }).fail(function () {
+                $.notify("", "error");
+            });
+        } else {
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name + '_page', {item_id: item_id, project_id: 0}))
+            pmHistory.bindStdoutUpdates(item_id)
+        }
+       
        
       
     }).fail(function()
@@ -168,13 +175,18 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
             pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
         }
         
-        var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
-        $.when(promiss).done(function(){
-             $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
-             pmHistory.bindStdoutUpdates(item_id)
-        }).fail(function(){
-            $.notify("", "error");
-        });
+         if (pmHistory.model.items[item_id].inventory != null) {
+            var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
+            $.when(promiss).done(function () {
+                $(holder).insertTpl(spajs.just.render(thisObj.model.name + '_page', {item_id: item_id, project_id: 0}))
+                pmHistory.bindStdoutUpdates(item_id)
+            }).fail(function () {
+                $.notify("", "error");
+            });
+        } else {
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name + '_page', {item_id: item_id, project_id: 0}))
+            pmHistory.bindStdoutUpdates(item_id)
+        }
         
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
         pmHistory.bindStdoutUpdates(item_id)

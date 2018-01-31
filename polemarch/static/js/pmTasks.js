@@ -18,13 +18,20 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
         def.reject({text:"Playbook name is empty"});
         return def.promise();
     }
-
+    
     if(!(project_id/1))
     {
         $.notify("Invalid field `project` ", "error");
         def.reject({text:"Invalid field `project` "});
         return def.promise();
-    }
+    }    
+   
+    if(inventory=="./")
+    {
+        $.notify("Inventory name is empty", "error");
+        def.reject({text:"Inventory name is empty"});
+        return def.promise();
+    }   
 
     if(data_vars == undefined)
     {

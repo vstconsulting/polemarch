@@ -526,19 +526,21 @@
                            <div class="help-block"></div>
                        </div>
                        
-                       <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
-                           <label class="control-label" >Inventory</label>
-                           <div
-                                   class="form-control disabled"
-                                   disabled=""
-                                   maxlength="255">
-                                    <a href="<%- polemarch.opt.host %>/?inventory/<%- pmHistory.model.items[item_id].inventory %>" onclick="return spajs.openURL(this.href);" >
-                                             <%= pmInventories.model.items[pmHistory.model.items[item_id].inventory].justText('name') %>
-                                    </a>
-                                  
-                           </div>
-                           <div class="help-block"></div>
-                       </div>
+                        <% if(pmHistory.model.items[item_id].inventory!=null) { %>
+                            <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                                <label class="control-label" >Inventory</label>
+                                <div
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+
+                                          <a href="<%- polemarch.opt.host %>/?inventory/<%- pmHistory.model.items[item_id].inventory %>" onclick="return spajs.openURL(this.href);" >
+                                                  <%= pmInventories.model.items[pmHistory.model.items[item_id].inventory].justText('name') %>
+                                         </a>
+                                </div>
+                                <div class="help-block"></div>
+                            </div>
+                        <%   } %>
                        
                         <% if(
                                 pmHistory.model.items[item_id].execute_args 
