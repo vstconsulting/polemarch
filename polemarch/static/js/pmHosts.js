@@ -271,7 +271,7 @@ setTimeout(function(){
     
     spajs.addMenu({
         id:"hosts-search", 
-        urlregexp:[/^hosts\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^hosts\/search\/([A-z0-9 %\-.:,=]+)$/, /^hosts\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showSearchResults(holder, menuInfo, data);}
     })
      

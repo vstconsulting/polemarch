@@ -1428,7 +1428,7 @@ pmInventories.filed.inventoriesAutocomplete.render = function(pmObj, filed, item
     
     spajs.addMenu({
         id:"inventories-search", 
-        urlregexp:[/^inventories\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^inventories\/search\/([A-z0-9 %\-.:,=]+)$/, /^inventories\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showSearchResults(holder, menuInfo, data);}
     })
 

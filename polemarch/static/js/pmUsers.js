@@ -254,7 +254,7 @@ pmUsers.copyItem = function(item_id)
 
     spajs.addMenu({
         id:"users-search",
-        urlregexp:[/^users\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^users\/search\/([A-z0-9 %\-.:,=]+)$/, /^users\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmUsers.showSearchResults(holder, menuInfo, data);}
     })
 

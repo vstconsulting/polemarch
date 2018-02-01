@@ -576,7 +576,7 @@ tabSignal.connect("polemarch.start", function()
 
     spajs.addMenu({
         id:"projects-search",
-        urlregexp:[/^projects\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^projects\/search\/([A-z0-9 %\-.:,=]+)$/, /^projects\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmProjects.showSearchResults(holder, menuInfo, data);}
     })
 

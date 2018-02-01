@@ -28,11 +28,20 @@ pmHistory.cancelTask = function(item_id)
 pmHistory.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
-
-    var search = this.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')
-    return $.when(this.sendSearchQuery(search)).done(function()
+  
+    var limit = this.pageSize;
+   
+    if(data.reg && data.reg[2] > 0)
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
+        offset = this.pageSize*(data.reg[2] - 1);
+    } else {
+        offset=0;
+    }
+    
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')    
+    return $.when(this.sendSearchQuery(search,limit,offset)).done(function()
+    {   
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))       
     }).fail(function()
     {
         $.notify("", "error");
@@ -685,7 +694,7 @@ pmHistory.loadLines = function(item_id, opt)
 
     spajs.addMenu({
         id:"history-search",
-        urlregexp:[/^history\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^history\/search\/([A-z0-9 %\-.:,=]+)$/, /^history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResults(holder, menuInfo, data);}
     })
 
@@ -725,7 +734,7 @@ pmHistory.loadLines = function(item_id, opt)
 
     spajs.addMenu({
         id:"project-history-search",
-        urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInProjects(holder, menuInfo, data);}
     })
 

@@ -414,7 +414,7 @@ tabSignal.connect("polemarch.start", function()
     
     spajs.addMenu({
         id:"tasks-search", 
-        urlregexp:[/^templates\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^templates\/search\/([A-z0-9 %\-.:,=]+)$/, /^templates\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showSearchResults(holder, menuInfo, data);}
     })
     
