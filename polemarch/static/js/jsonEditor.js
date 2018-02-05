@@ -427,19 +427,7 @@ jsonEditor.jsonEditorAddVar = function (optionsblock, prefix)
     //для autocomplete.js
     var name = $('#new_json_name' + prefix).val()
     var value = $('#new_json_value' + prefix).val()
-    //
-    if (typeof name == 'undefined' || jsonEditor.options[optionsblock].name == undefined)
-    {
-        type1 = "text";
-    } else
-    {
-        var type1 = jsonEditor.options[optionsblock][name].type;
-    }
-    //
-
-    //console.log(jsonEditor.options[optionsblock]);
-
-
+    
     if (!name)
     {
         $.notify("Empty varible name", "error");
@@ -534,7 +522,7 @@ jsonEditor.initAutoComplete = function (optionsblock, prefix)
                 var elementVar = '"#new_json_value' + prefix + '"';
                 var nameVar = '"ansible_ssh_private_key_file"';
                 var prefixVar = '"prefix"';
-                var inputVar = "<span id='loadFileId' class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px; margin-top:-20px; margin-bottom:10px;'><input type='file' class='input-file' onchange='jsonEditor.loadFile(event, " + elementVar + ", " + nameVar + ", " + prefixVar + ");'>" +
+                var inputVar = "<span id='loadFileId' class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px;  margin-bottom:10px;'><input type='file' class='input-file' onchange='jsonEditor.loadFile(event, " + elementVar + ", " + nameVar + ", " + prefixVar + ");'>" +
                         "<span class='glyphicon glyphicon-file'></span></span>";
                 $("#new_json_value" + prefix).before(inputVar);
             }
@@ -575,7 +563,7 @@ jsonEditor.initAutoComplete = function (optionsblock, prefix)
                 var elementVar = '"#new_json_value' + prefix + '"';
                 var nameVar = '"ansible_ssh_private_key_file"';
                 var prefixVar = '"prefix"';
-                var inputVar = "<span id='loadFileId' class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px; margin-top:-20px; margin-bottom:10px;'><input type='file' class='input-file' onchange='jsonEditor.loadFile(event, " + elementVar + ", " + nameVar + ", " + prefixVar + ");'>" +
+                var inputVar = "<span id='loadFileId' class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px; margin-bottom:10px;'><input type='file' class='input-file' onchange='jsonEditor.loadFile(event, " + elementVar + ", " + nameVar + ", " + prefixVar + ");'>" +
                         "<span class='glyphicon glyphicon-file'></span></span>";
                 $("#new_json_value" + prefix).before(inputVar);
             }
@@ -659,6 +647,10 @@ jsonEditor.loadFile = function (event, element, name, prefix)
     }
 }
 
+/**
+ * Функция, убирающая кнопку-инпут для загрузки текстового файла/файла ключа
+ * при добавлении vars 
+ */
 function removeLoadFileButton()
 {
     if ($("#loadFileId")) {
@@ -666,6 +658,9 @@ function removeLoadFileButton()
     }
 }
 
+/**
+ * Функция, скрывающая textarea, при добавлении vars 
+ */
 function removeNewJsonValueTeaxarea()
 {
     if ($("#new_json_value_block")) {
@@ -673,11 +668,18 @@ function removeNewJsonValueTeaxarea()
     }
 }
 
+/**
+ * Функция, показывающая textarea, при добавлении vars 
+ */
 function addNewJsonValueTeaxarea()
 {
     $("#new_json_value_block").show();
 }
 
+/**
+ * Функция, изменяющая параметры textarea, в зависимости от типа инпута,
+ * при добавлении vars 
+ */
 function changeTextareaSettings(element, options, prefix)
 {
     var thisElement = $(element);
@@ -696,7 +698,7 @@ function changeTextareaSettings(element, options, prefix)
             var elementVar = '"#new_json_value' + prefix + '"';
             var nameVar = '"' + name + '"';
             var prefixVar = '"' + prefix + '"';
-            var inputVar = "<span id='loadFileId' class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px; margin-top:-20px; margin-bottom:10px;'><input type='file' class='input-file' onchange='jsonEditor.loadFile(event, " + elementVar + ", " + nameVar + ", " + prefixVar + ");'>" +
+            var inputVar = "<span id='loadFileId' class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px;  margin-bottom:10px;'><input type='file' class='input-file' onchange='jsonEditor.loadFile(event, " + elementVar + ", " + nameVar + ", " + prefixVar + ");'>" +
                     "<span class='glyphicon glyphicon-file'></span></span>";
             $("#new_json_value" + prefix).before(inputVar);
             makeNotOnlyNumberInput('new_json_value', prefix);
@@ -714,7 +716,9 @@ function changeTextareaSettings(element, options, prefix)
     }
 }
 
-
+/**
+ * Функция, позволяющая вводить в инпут только цифры
+ */
 function makeNumberInputOnly(element, prefix)
 {
     var element = element;
@@ -750,7 +754,9 @@ function makeNumberInputOnly(element, prefix)
 
 }
 
-
+/**
+ * Функция, снимающая ограничение на ввод только цифр
+ */
 function makeNotOnlyNumberInput(element, prefix)
 {
     var element = element;
