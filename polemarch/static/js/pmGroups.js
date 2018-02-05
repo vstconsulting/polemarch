@@ -586,6 +586,7 @@ pmGroups.getGroupsAutocompleteValue = function(prefix)
         prefix = "prefix"
     }
     return $('#groups_autocomplete_filed'+prefix).val()
+    debugger;
 }
 
 /**

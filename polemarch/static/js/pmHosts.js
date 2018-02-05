@@ -287,3 +287,5 @@ setTimeout(function(){
         onOpen:function(holder, menuInfo, data){return pmHosts.showNewItemPage(holder, menuInfo, data);}
     }) 
  })
+ 
+ //изменение типа input'a на file при выборе 
