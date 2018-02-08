@@ -407,6 +407,70 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
 
     return def.promise();
 }
+//////////////////////////////
+/**
+*Функция проверяет, произошло ли изменение в количестве записей в истории.
+*Если изменения произошли, то она обновляет соответствующее свойство в объекте this.model
+*/
+
+pmHistory.ifIncreaseTotalCount = function()
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+     spajs.ajax.Call({
+        url: "/api/v1/history",
+        type: "GET",
+        contentType:'application/json',
+        data: "limit=1&rand="+Math.random(),
+        success: function(data)
+        {
+            var totalCount=data.count;
+            //console.log("new totalCount="+totalCount, "old totalCount="+thisObj.model.totalCount);
+            if(thisObj.model.totalCount!=totalCount)
+            {
+                 thisObj.model.totalCount=totalCount;
+                 def.resolve();
+            }
+            else
+            {
+                def.reject();
+            }
+
+        },
+        error: function (){
+            def.reject();
+        }
+     });
+     return def.promise();
+}
+
+/**
+*Функция обновляет список записей в истории каждые 5 секунд.
+*Если произошли изменения в количестве записей в списке,
+*то содержимое страницы обновляется.
+*/
+
+pmHistory.updateList = function (updated_ids)
+{
+    var thisObj = this;
+    return $.when(this.loadItemsByIds(updated_ids)).always(function ()
+    {
+        if (thisObj.model.updateTimeoutId)
+        {
+            clearTimeout(thisObj.model.updateTimeoutId)
+        }
+
+        thisObj.model.updateTimeoutId = setTimeout(function () {
+            thisObj.updateList(updated_ids)
+        }, 5001)
+
+        $.when(pmHistory.ifIncreaseTotalCount()).done(function() {
+            spajs.openMenuFromUrl();
+        })
+    }).promise()
+}
+
+//////////////////////////////
 
 /**
  * Обновляет поле модел this.model.itemslist и ложит туда список пользователей
@@ -439,7 +503,10 @@ pmHistory.loadItems = function(limit, offset)
             data.offset = offset
             thisObj.model.itemslist = data
             //thisObj.model.items = {}
-
+            //////
+            thisObj.model.totalCount=data.count;
+            //console.log(thisObj.model);
+            ////////
             var projects = [];
             var usersIds = [];
             var periodicTasks = [];
