@@ -358,6 +358,7 @@ class StatisticViewSet(base.ListNonModelViewSet):
         # pylint: disable=unused-argument
         stats = OrderedDict(
             projects=self._get_count_by_user(serializers.models.Project),
+            templates=self._get_count_by_user(serializers.models.Template),
             inventories=self._get_count_by_user(serializers.models.Inventory),
             groups=self._get_count_by_user(serializers.models.Group),
             hosts=self._get_count_by_user(serializers.models.Host),
