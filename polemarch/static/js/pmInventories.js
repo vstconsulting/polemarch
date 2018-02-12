@@ -33,13 +33,13 @@ pmInventories.parseMonoVarsLine = function(index, line)
     }
     return vars;
 }
- 
+
 /**
  * Параметры хоста
  * Строка где может быть несколько параметров ключ=значение через пробел
  */
 pmInventories.parseVarsLine = function(index, line)
-{ 
+{
     var vars = {}
     do{
         if(line.length == 0)
@@ -50,7 +50,7 @@ pmInventories.parseVarsLine = function(index, line)
         var params = /^([^=]+)=["'](.*?)["'] +[^=]+=/.exec(line)
         if(params)
         {
-            params[1] = trim(params[1]) 
+            params[1] = trim(params[1])
             vars[params[1]] = stripslashes(params[2])
             line = trim(line.slice(params[1].length + params[2].length + 3))
             continue;
@@ -59,7 +59,7 @@ pmInventories.parseVarsLine = function(index, line)
         params = /^([^=]+)=([^ ]*) +[^=]+=/.exec(line)
         if(params)
         {
-            params[1] = trim(params[1]) 
+            params[1] = trim(params[1])
             vars[params[1]] = stripslashes(params[2])
             line = trim(line.slice(params[1].length + params[2].length + 1))
             continue;
@@ -68,7 +68,7 @@ pmInventories.parseVarsLine = function(index, line)
         params = /^([^=]+)=["'](.*?)["'] *$/.exec(line)
         if(params)
         {
-            params[1] = trim(params[1]) 
+            params[1] = trim(params[1])
             vars[params[1]] = stripslashes(params[2])
             break;
         }
@@ -76,7 +76,7 @@ pmInventories.parseVarsLine = function(index, line)
         params = /^([^=]+)=([^ ]*) *$/.exec(line)
         if(params)
         {
-            params[1] = trim(params[1]) 
+            params[1] = trim(params[1])
             vars[params[1]] = stripslashes(params[2])
             line = trim(line.slice(params[1].length + params[2].length + 1))
             continue;
@@ -127,7 +127,7 @@ pmInventories.parseHostLine = function(index, line, section, inventory)
     }
 
     if(section !== "_hosts")
-    { 
+    {
         pmInventories.addGroupIfNotExists(inventory, section)
         inventory.groups[section].hosts.push(host)
     }
@@ -181,8 +181,8 @@ pmInventories.parseLine = function(index, line, section, inventory)
 
         pmInventories.addGroupIfNotExists(inventory, section)
         inventory.groups[section].children = true
-        inventory.groups[section].groups.push(line) 
-        pmInventories.addGroupIfNotExists(inventory, line) 
+        inventory.groups[section].groups.push(line)
+        pmInventories.addGroupIfNotExists(inventory, line)
         return true;
     }
 
@@ -197,7 +197,7 @@ pmInventories.parseLine = function(index, line, section, inventory)
  * @returns {Boolean} true если группа добавлена.
  */
 pmInventories.addGroupIfNotExists = function(inventory, group_name)
-{ 
+{
     if(!inventory.groups[group_name])
     {
         inventory.groups[group_name] = {
@@ -205,10 +205,10 @@ pmInventories.addGroupIfNotExists = function(inventory, group_name)
             groups:[],
             hosts:[],
         }
-        
+
         return true;
     }
-    
+
     return false;
 }
 
@@ -228,19 +228,19 @@ pmInventories.parseFromText = function(text)
         groups:{},
         vars:{},
         name:new Date().toString()
-    } 
+    }
 
     for(var i in lines)
     {
-        var line = lines[i].replace(/^ */g, "") 
-        
+        var line = lines[i].replace(/^ */g, "")
+
         if(/^\s*[#;]\s+inventory name: (.*)/ig.test(line))
         {
             var name = /^\s*[#;]\s+inventory name: (.*)/ig.exec(line)
             inventory.name = name[1]
             continue;
         }
-         
+
         if(/^\s*$/ig.test(line))
         {
             continue;
@@ -256,7 +256,7 @@ pmInventories.parseFromText = function(text)
         {
             var res = /^\[([A-z0-9\.:\-]+)\]/ig.exec(line)
             cSection = res[1]
-             
+
             var group_name = cSection.substring(0, cSection.length - ":vars".length)
             if(group_name != "all")
             {
@@ -305,44 +305,44 @@ pmInventories.addHierarchyDataToInventoryGroups = function(inventory, group_name
     {
         level = 0
     }
-    
+
     if(parents === undefined)
     {
         parents = []
     }
-    
+
     if(group_name === undefined || group_name == 'all')
     {
         for(var i in inventory.groups)
-        {  
+        {
             delete inventory.groups[i]['dataLevel']
         }
-        
+
         for(var i in inventory.groups)
-        {  
+        {
             pmInventories.addHierarchyDataToInventoryGroups(inventory, i, 1, ['all'])
         }
-        
+
         return;
     }
-    
-    
+
+
     if(inventory.groups[group_name].dataLevel && inventory.groups[group_name].dataLevel.level >= level )
     {
         return;
-    } 
-    
+    }
+
     parents.push(group_name)
     inventory.groups[group_name].dataLevel = {
         level:level,
         parents:parents,
     }
-    
+
     for(var i in inventory.groups[group_name].groups)
-    {   
+    {
         var hasError = false;
         for(var j in inventory.groups[group_name].dataLevel.parents)
-        {  
+        {
             var val = inventory.groups[group_name].dataLevel.parents[j]
             if(val == inventory.groups[group_name].groups[i])
             {
@@ -352,15 +352,15 @@ pmInventories.addHierarchyDataToInventoryGroups = function(inventory, group_name
                 break;
             }
         }
-        
+
         if(hasError)
         {
             continue;
         }
-        
+
         pmInventories.addHierarchyDataToInventoryGroups(inventory, inventory.groups[group_name].groups[i], level+1, parents.slice())
     }
-    
+
     return;
 }
 
@@ -398,7 +398,7 @@ pmInventories.openImportPageAndImportFiles = function(files_event)
 {
     $.when(spajs.open({ menuId:"inventories/import"})).done(function()
     {
-       pmInventories.importFromFile(files_event)
+        pmInventories.importFromFile(files_event)
     })
 }
 
@@ -413,7 +413,7 @@ pmInventories.importInventoriesAndOpen = function(inventory)
         spajs.open({ menuId:"inventory/"+inventory_id})
     }).fail(function(e){
         console.warn(e)
-        polemarch.showErrors(e) 
+        polemarch.showErrors(e)
     }).promise()
 }
 
@@ -423,22 +423,22 @@ pmInventories.showGroupVarsModal = function(opt)
 }
 
 pmInventories.showHostVarsModal = function(opt)
-{ 
+{
     return jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+opt.name)
 }
 
 pmInventories.showInventoryVarsModal = function(opt)
-{ 
+{
     return jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "inventory")
 }
 
 pmInventories.importInventory = function(inventory)
-{ 
-    var def2 = new $.Deferred();  
+{
+    var def2 = new $.Deferred();
     if(inventory.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(inventory.vars.ansible_ssh_private_key_file))
     {
         // <!--Вставка файла -->
-        $.notify("Error in field ansible_ssh_private_key_file invalid value", "error"); 
+        $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
         pmInventories.showInventoryVarsModal();
         def2.reject()
         return def2.promise();
@@ -446,7 +446,7 @@ pmInventories.importInventory = function(inventory)
 
     for(var i in inventory.hosts)
     {
-        var val = inventory.hosts[i] 
+        var val = inventory.hosts[i]
         if(val.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(val.vars.ansible_ssh_private_key_file))
         {
             // <!--Вставка файла -->
@@ -459,55 +459,55 @@ pmInventories.importInventory = function(inventory)
 
     for(var i in inventory.groups)
     {
-        var val = inventory.groups[i] 
+        var val = inventory.groups[i]
         if(val.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(val.vars.ansible_ssh_private_key_file))
         {
             // <!--Вставка файла -->
             $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-            pmInventories.showGroupVarsModal({name:i}); 
+            pmInventories.showGroupVarsModal({name:i});
             def2.reject()
             return def2.promise();
         }
 
         for(var j in val.hosts)
         {
-            var hval = val.hosts[j] 
+            var hval = val.hosts[j]
             if(hval.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(hval.vars.ansible_ssh_private_key_file))
             {
                 // <!--Вставка файла -->
-                $.notify("Error in field ansible_ssh_private_key_file invalid value", "error"); 
+                $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
                 pmInventories.showHostVarsModal({group:i, name:hval.name});
                 def2.reject()
                 return def2.promise();
             }
         }
     }
- 
+
     var def = new $.Deferred();
-    
+
     if($("#inventory_name").val() != "")
     {
         inventory.name = $("#inventory_name").val();
     }
-    
+
     if(!inventory.name)
     {
         // inventory.name = "new imported inventory"
-        
+
         $.notify("Error in field inventory name", "error");
         def2.reject({text:"Error in field inventory name"})
-        return def2.promise(); 
+        return def2.promise();
     }
 
     var inventoryObject = {
         name:inventory.name,
         vars:inventory.vars
     }
-    
+
     var deleteBulk = []
     $.when(pmInventories.importItem(inventoryObject)).done(function(inventory_id)
     {
-        deleteBulk.push({ 
+        deleteBulk.push({
             type:"del",
             item:'inventory',
             pk:inventory_id
@@ -565,7 +565,7 @@ pmInventories.importInventory = function(inventory)
             type: "POST",
             contentType:'application/json',
             data:JSON.stringify(bulkHosts),
-                        success: function(data)
+            success: function(data)
             {
                 var hasError = false;
                 var hosts_ids = []
@@ -579,7 +579,7 @@ pmInventories.importInventory = function(inventory)
                         continue;
                     }
                     hosts_ids.push(val.data.id)
-                    deleteBulk.push({ 
+                    deleteBulk.push({
                         type:"del",
                         item:'host',
                         pk:val.data.id
@@ -602,14 +602,14 @@ pmInventories.importInventory = function(inventory)
                         type: "POST",
                         contentType:'application/json',
                         data:JSON.stringify(bulkdata),
-                                                success: function(data)
+                        success: function(data)
                         {
                             var igroups_ids = []
                             var bulk_update = []
                             var hasError = false;
                             for(var i in data)
-                            { 
-                                deleteBulk.push({ 
+                            {
+                                deleteBulk.push({
                                     type:"del",
                                     item:data.item,
                                     pk:data[i].data.id
@@ -625,7 +625,7 @@ pmInventories.importInventory = function(inventory)
                                 if(val.data.children !== undefined )
                                 {
                                     igroups_ids.push(val.data.id)
- 
+
                                     // Это группа
                                     if(val.data.children)
                                     {
@@ -646,13 +646,13 @@ pmInventories.importInventory = function(inventory)
                                                 }
                                             }
                                             bulk_update.push({
-                                                type: "mod", 
+                                                type: "mod",
                                                 item:'group',
                                                 method: "PUT",
                                                 data_type: 'groups',
                                                 pk:val.data.id,
                                                 data:groups_ids
-                                            }) 
+                                            })
                                         }
                                     }
                                     else
@@ -674,13 +674,13 @@ pmInventories.importInventory = function(inventory)
                                                 }
                                             }
                                             bulk_update.push({
-                                                type: "mod", 
+                                                type: "mod",
                                                 item:'group',
                                                 method: "PUT",
                                                 data_type: 'hosts',
                                                 pk:val.data.id,
                                                 data:hosts_ids
-                                            }) 
+                                            })
                                         }
                                     }
                                 }
@@ -689,7 +689,7 @@ pmInventories.importInventory = function(inventory)
                                     // Это хост
                                 }
                             }
-                            
+
                             if(hasError)
                             {
                                 // По меньшей мере в одной операции была ошибка вставки.
@@ -697,7 +697,7 @@ pmInventories.importInventory = function(inventory)
                                 def.reject(deleteBulk);
                                 return;
                             }
-                            
+
                             $.when(pmInventories.addSubGroups(inventory_id, igroups_ids)).done(function()
                             {
                                 if(bulk_update.length)
@@ -707,7 +707,7 @@ pmInventories.importInventory = function(inventory)
                                         type: "POST",
                                         contentType:'application/json',
                                         data:JSON.stringify(bulk_update),
-                                                                                success: function(data)
+                                        success: function(data)
                                         {
                                             var hasError = false;
                                             for(var i in data)
@@ -734,10 +734,10 @@ pmInventories.importInventory = function(inventory)
                                         error:function(e)
                                         {
                                             console.warn(e)
-                                            polemarch.showErrors(e) 
+                                            polemarch.showErrors(e)
                                             def.reject(deleteBulk);
                                         }
-                                    }) 
+                                    })
                                 }
                                 else
                                 {
@@ -745,42 +745,42 @@ pmInventories.importInventory = function(inventory)
                                 }
                             }).fail(function(e){
                                 console.warn(e)
-                                polemarch.showErrors(e) 
+                                polemarch.showErrors(e)
                                 def.reject(deleteBulk);
-                            }) 
+                            })
                         },
                         error:function(e)
                         {
                             console.warn(e)
-                            polemarch.showErrors(e) 
+                            polemarch.showErrors(e)
                             def.reject(deleteBulk);
                         }
                     });
                 }).fail(function(e){
                     console.warn(e)
-                    polemarch.showErrors(e) 
+                    polemarch.showErrors(e)
                     def.reject(deleteBulk);
                 })
             },
             error:function(e)
             {
                 console.warn(e)
-                polemarch.showErrors(e) 
+                polemarch.showErrors(e)
                 def.reject(deleteBulk);
             }
         })
     }).fail(function(e)
     {
         console.warn(e)
-        polemarch.showErrors(e) 
+        polemarch.showErrors(e)
         def.reject(deleteBulk);
     })
-     
+
     $.when(def).done(function(inventory_id)
     {
         def2.resolve(inventory_id)
     }).fail(function(delete_bulk)
-    { 
+    {
         $.when(spajs.ajax.Call({
             url: "/api/v1/_bulk/",
             type: "POST",
@@ -790,7 +790,7 @@ pmInventories.importInventory = function(inventory)
             def2.reject()
         })
     })
-    
+
     return def2.promise();
 }
 
@@ -799,7 +799,7 @@ pmInventories.showImportPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
 
-    var text = spajs.just.render(this.model.name+'_import_page', {}) 
+    var text = spajs.just.render(this.model.name+'_import_page', {})
     $(holder).insertTpl(text)
 
     def.resolve()
@@ -812,7 +812,7 @@ pmInventories.renderImportedInventory = function(imported)
     {
         return ""
     }
-    
+
     var text = spajs.just.render(this.model.name+'_imported_inventory', {inventory:imported.inventory, text:imported.text})
     return text;
 }
@@ -827,7 +827,7 @@ pmInventories.copyItem = function(item_id)
         var data = thisObj.model.items[item_id];
         delete data.id;
         data.name = "copy from " + data.name
-        
+
         $.when(encryptedCopyModal.replace(data)).done(function(data)
         {
             spajs.ajax.Call({
@@ -835,25 +835,25 @@ pmInventories.copyItem = function(item_id)
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
-                            success: function(newItem)
+                success: function(newItem)
                 {
                     thisObj.model.items[newItem.id] = newItem
 
-                        var groups = []
-                        for(var i in data.groups)
-                        {
-                            groups.push(data.groups[i].id)
-                        }
+                    var groups = []
+                    for(var i in data.groups)
+                    {
+                        groups.push(data.groups[i].id)
+                    }
 
-                        var hosts = []
-                        for(var i in data.hosts)
-                        {
-                            hosts.push(data.hosts[i].id)
-                        }
+                    var hosts = []
+                    for(var i in data.hosts)
+                    {
+                        hosts.push(data.hosts[i].id)
+                    }
 
-                        $.when(thisObj.setSubGroups(newItem.id, groups), thisObj.setSubHosts(newItem.id, hosts)).always(function(){
-                            def.resolve(newItem.id)
-                        })
+                    $.when(thisObj.setSubGroups(newItem.id, groups), thisObj.setSubHosts(newItem.id, hosts)).always(function(){
+                        def.resolve(newItem.id)
+                    })
                 },
                 error:function(e)
                 {
@@ -863,7 +863,7 @@ pmInventories.copyItem = function(item_id)
         }).fail(function(e)
         {
             def.reject(e)
-        }) 
+        })
     }).fail(function(e)
     {
         def.reject(e)
@@ -883,8 +883,8 @@ pmInventories.model.page_list = {
         {
             class:'btn btn-primary',
             function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"'}); return false;"},
-            title:'Create', 
-            link:function(){ return '/?new-'+this.model.page_name}, 
+            title:'Create',
+            link:function(){ return '/?new-'+this.model.page_name},
         },
         {
             tpl:function(){
@@ -910,8 +910,8 @@ pmInventories.model.page_list = {
             function:function(item){ return '';},
             title:'Create sub group',
             link:function(item)
-            { 
-                return '/?inventory/'+item.id+'/new-group' 
+            {
+                return '/?inventory/'+item.id+'/new-group'
             },
         },
         {
@@ -919,8 +919,8 @@ pmInventories.model.page_list = {
             function:function(item){ return '';},
             title:'Create sub host',
             link:function(item)
-            { 
-                return '/?inventory/'+item.id+'/new-host' 
+            {
+                return '/?inventory/'+item.id+'/new-host'
             },
         }
     ]
@@ -936,11 +936,11 @@ pmInventories.model.page_new = {
                 title:'Name',
                 name:'name',
                 placeholder:'Enter inventory name',
-                validator:function(value){ 
+                validator:function(value){
                     return filedsLib.validator.notEmpty(value, 'Name')
                 },
                 fast_validator:filedsLib.validator.notEmpty
-            }, 
+            },
         ]
     ],
     sections:[
@@ -954,10 +954,10 @@ pmInventories.model.page_new = {
         return data;
     },
     onCreate:function(data, status, xhr, callOpt)
-    { 
+    {
         var def = new $.Deferred();
         $.notify("Inventory created", "success");
-        
+
         if(callOpt.parent_item)
         {
             if(callOpt.parent_type == 'project')
@@ -978,14 +978,14 @@ pmInventories.model.page_new = {
         return def.promise();
     }
 }
-   
+
 pmInventories.model.page_item = {
     buttons:[
         {
             class:'btn btn-primary',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
-            title:'Save', 
-            link:function(){ return '#'}, 
+            title:'Save',
+            link:function(){ return '#'},
         },
         {
             class:'btn btn-primary',
@@ -1004,7 +1004,7 @@ pmInventories.model.page_item = {
             class:'btn btn-danger danger-right',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
             title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
-            link:function(){ return '#'}, 
+            link:function(){ return '#'},
         },
     ],
     sections:[
@@ -1012,7 +1012,7 @@ pmInventories.model.page_item = {
             return jsonEditor.editor(this.model.items[item_id].vars, {block:this.model.name});
         },
         function(section, item_id){
-            return spajs.just.render("inventories_sub_items", {item_id:item_id}) 
+            return spajs.just.render("inventories_sub_items", {item_id:item_id})
         }
     ],
     title: function(item_id){
@@ -1032,7 +1032,7 @@ pmInventories.model.page_item = {
                     return filedsLib.validator.notEmpty(value, 'Name')
                 },
                 fast_validator:function(value){ return value != '' && value}
-            }, 
+            },
         ]
     ],
     onUpdate:function(result)
@@ -1041,11 +1041,11 @@ pmInventories.model.page_item = {
     },
     onBeforeSave:function(data, item_id)
     {
-        data.vars = jsonEditor.jsonEditorGetValues() 
+        data.vars = jsonEditor.jsonEditorGetValues()
         return data;
     },
 }
-   
+
 /**
  * Показывает форму со списком всех групп.
  * @return $.Deferred
@@ -1056,14 +1056,14 @@ pmInventories.showAddSubGroupsForm = function(item_id, holder)
     {
         throw "Error in pmInventories.showAddSubGroupsForm with item_id = `" + item_id + "`"
     }
-    
+
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
-        var scroll_el = "#add_existing_item_to_inventory"; 
-		if ($(scroll_el).length != 0)  { 
-			$('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000); 
-		}
+        var scroll_el = "#add_existing_item_to_inventory";
+        if ($(scroll_el).length != 0)  {
+            $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+        }
         $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
@@ -1080,14 +1080,14 @@ pmInventories.showAddSubHostsForm = function(item_id, holder)
     {
         throw "Error in pmInventories.showAddSubHostsForm with item_id = `" + item_id + "`"
     }
-    
+
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_inventory").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_inventory', {item_id:item_id}))
-         var scroll_el = "#add_existing_item_to_inventory"; 
-		if ($(scroll_el).length != 0) { 
-			$('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000); 
-		}
+        var scroll_el = "#add_existing_item_to_inventory";
+        if ($(scroll_el).length != 0) {
+            $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+        }
         $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
@@ -1106,7 +1106,7 @@ pmInventories.hasHosts = function(item_id, host_id)
     {
         throw "Error in pmInventories.hasHosts with item_id = `" + item_id + "`"
     }
-    
+
     if(pmInventories.model.items[item_id])
     {
         for(var i in pmInventories.model.items[item_id].hosts)
@@ -1132,7 +1132,7 @@ pmInventories.hasGroups = function(item_id, group_id)
     {
         throw "Error in pmInventories.hasGroups with item_id = `" + item_id + "`"
     }
-    
+
     if(pmInventories.model.items[item_id])
     {
         for(var i in pmInventories.model.items[item_id].groups)
@@ -1152,11 +1152,12 @@ pmInventories.hasGroups = function(item_id, group_id)
  */
 pmInventories.setSubGroups = function(item_id, groups_ids)
 {
+    var thisObj=this;
     if(!item_id)
     {
         throw "Error in pmInventories.setSubGroups with item_id = `" + item_id + "`"
     }
-    
+
     if(!groups_ids)
     {
         groups_ids = []
@@ -1167,16 +1168,9 @@ pmInventories.setSubGroups = function(item_id, groups_ids)
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
-                success: function(data)
+        success: function(data)
         {
-            if(pmInventories.model.items[item_id])
-            {
-                pmInventories.model.items[item_id].groups = []
-                for(var i in groups_ids)
-                {
-                    pmInventories.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
-                }
-            }
+            pmItems.checkSubItemsAndAdd(thisObj, pmGroups, data, item_id, "groups", groups_ids);
         },
         error:function(e)
         {
@@ -1191,32 +1185,25 @@ pmInventories.setSubGroups = function(item_id, groups_ids)
  */
 pmInventories.setSubHosts = function(item_id, hosts_ids)
 {
+    var thisObj=this;
     if(!hosts_ids)
     {
         hosts_ids = []
     }
-    
+
     if(!item_id)
     {
         throw "Error in pmInventories.setSubHosts with item_id = `" + item_id + "`"
     }
-    
 
     return spajs.ajax.Call({
         url: "/api/v1/inventories/"+item_id+"/hosts/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
-                success: function(data)
+        success: function(data)
         {
-            if(pmInventories.model.items[item_id])
-            {
-                pmInventories.model.items[item_id].hosts = []
-                for(var i in hosts_ids)
-                {
-                    pmInventories.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
-                }
-            }
+            pmItems.checkSubItemsAndAdd(thisObj, pmHosts, data, item_id, "hosts", hosts_ids);
         },
         error:function(e)
         {
@@ -1225,6 +1212,8 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
         }
     });
 }
+
+
 
 /**
  * @return $.Deferred
@@ -1235,7 +1224,7 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
     {
         throw "Error in pmInventories.addSubGroups with item_id = `" + item_id + "`"
     }
-    
+
     if(!groups_ids)
     {
         groups_ids = []
@@ -1247,11 +1236,11 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
-                success: function(data)
+        success: function(data)
         {
             if(data.not_found > 0)
             {
-                $.notify("Item not found", "error"); 
+                $.notify("Item not found", "error");
                 def.reject({text:"Item not found", status:404})
                 return;
             }
@@ -1291,10 +1280,10 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
     {
         throw "Error in pmInventories.addSubHosts with item_id = `" + item_id + "`"
     }
-    
+
     var def = new $.Deferred();
     if(!hosts_ids || hosts_ids.length == 0)
-    {  
+    {
         def.resolve()
         return def.promise();
     }
@@ -1304,7 +1293,7 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
-                success: function(data)
+        success: function(data)
         {
             if(data.not_found > 0)
             {
@@ -1340,19 +1329,19 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
 }
 
 /**pmInventories.validateGroupName = function(name)
-{
-    if(!name)
-    {
-        return false;
-    }
- 
-    if(/^[a-zA-Z0-9\-\._]*$/.test(name.toLowerCase()))
-    {
-        return true;
-    } 
-    
-    return false;
-}*/
+ {
+     if(!name)
+     {
+         return false;
+     }
+
+     if(/^[a-zA-Z0-9\-\._]*$/.test(name.toLowerCase()))
+     {
+         return true;
+     }
+
+     return false;
+ }*/
 
 
 
@@ -1362,7 +1351,7 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
  * @type Object
  */
 pmInventories.filed.inventoriesAutocomplete = inheritance(filedsLib.filed.simpleText)
-pmInventories.filed.inventoriesAutocomplete.type = 'inventoriesAutocomplete' 
+pmInventories.filed.inventoriesAutocomplete.type = 'inventoriesAutocomplete'
 pmInventories.filed.inventoriesAutocomplete.getValue = function(pmObj, filed)
 {
     var inventory = $("#inventories-autocomplete").val()
@@ -1375,7 +1364,7 @@ pmInventories.filed.inventoriesAutocomplete.getValue = function(pmObj, filed)
         }
     }
 
-    
+
     return inventory;
 }
 
@@ -1384,13 +1373,13 @@ pmInventories.filed.inventoriesAutocomplete.getValue = function(pmObj, filed)
  * @type Object
  */
 pmInventories.filed.inventoriesAutocomplete.render = function(pmObj, filed, item_id, opt)
-{ 
-    var html = spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id, filedObj:this, opt:opt}) 
+{
+    var html = spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id, filedObj:this, opt:opt})
     return spajs.just.onInsert(html, function()
     {
         // @FixMe требует чтоб были загружены все инвентории pmInventories.loadAllItems()
         $("#inventories-autocomplete").select2({ width: '100%' });
-         
+
         if(filed.onchange && item_id)
         {
             filed.onchange({value:filed.getFiledValue.apply(pmObj, [item_id])})
@@ -1408,45 +1397,45 @@ pmInventories.filed.inventoriesAutocomplete.render = function(pmObj, filed, item
         }
     });
 }
- 
 
- tabSignal.connect("polemarch.start", function()
- {
+
+tabSignal.connect("polemarch.start", function()
+{
     // inventories
     spajs.addMenu({
-        id:"inventories", 
+        id:"inventories",
         urlregexp:[/^inventories$/, /^inventory$/, /^inventories\/search\/?$/, /^inventories\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showList(holder, menuInfo, data);}
     })
-    
+
     spajs.addMenu({
-        id:"inventories-import", 
+        id:"inventories-import",
         urlregexp:[/^inventories\/import$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showImportPage(holder, menuInfo, data);}
     })
 
-    
+
     spajs.addMenu({
-        id:"inventories-search", 
+        id:"inventories-search",
         urlregexp:[/^inventories\/search\/([A-z0-9 %\-.:,=]+)$/, /^inventories\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showSearchResults(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
-        id:"inventory", 
+        id:"inventory",
         urlregexp:[/^inventory\/([0-9]+)$/, /^inventories\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showItem(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
-        id:"inventory-history", 
+        id:"inventory-history",
         urlregexp:[/^inventory\/([0-9]+)\/history$/, /^inventory\/([0-9]+)\/history\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showListInInventory(holder, menuInfo, data);}
     })
-    
+
     spajs.addMenu({
-        id:"newInventory", 
+        id:"newInventory",
         urlregexp:[/^new-inventory$/, /^([A-z0-9_]+)\/([0-9]+)\/new-inventory$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showNewItemPage(holder, menuInfo, data);}
-    }) 
- })
+    })
+})

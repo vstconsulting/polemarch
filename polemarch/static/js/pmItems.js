@@ -1016,6 +1016,41 @@ pmItems.updateItem = function (item_id, opt)
     return def.promise();
 }
 
+/**
+ *Функция сравнивает полученные данные из запроса(failed_list) с теми данными, что ввел пользователь.
+ *Если нашлись соответствия, то данный subItem не будет добавлен на страницу.
+ */
+pmItems.checkSubItemsAndAdd=function(thisObj, ObjToAdd, data, itemId, itemType, itemType_ids)
+{
+    var failled_list=data.failed_list;
+    console.log(failled_list);
+    if(thisObj.model.items[itemId])
+    {
+        //pmInventories.model.items[item_id].hosts= []
+        thisObj.model.items[itemId][itemType] = []
+        for(var i in itemType_ids)
+        {
+            var failIdBool=false;
+            for(var j=0; j<failled_list.length; j++)
+            {
+                if(itemType_ids[i]==failled_list[j]){failIdBool=true;}
+
+            }
+            if(failIdBool)
+            {
+                $.notify("Host with id="+itemType_ids[i]+" doesn't exist and wouldn't be added", "error");
+            }
+            else
+            {
+                thisObj.model.items[itemId][itemType].push(ObjToAdd.model.items[itemType_ids[i]]);
+            }
+
+
+        }
+    }
+}
+
+
 /*pmItems.getFiledByName = function(fileds, name)
  {
  for(var i in fileds)
