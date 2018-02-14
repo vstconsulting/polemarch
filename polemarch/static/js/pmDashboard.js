@@ -119,6 +119,7 @@ pmDashboard.updateData = function()
             time+=(3600*24*1000)
         }
 
+
         for(var i in pmDashboard.statsData.jobs.day)
         {
             var val = pmDashboard.statsData.jobs.day[i];
@@ -133,7 +134,7 @@ pmDashboard.updateData = function()
         }
 
         chart_tasks_start_x = ['time'];
-        chart_tasks_data = ['tasks'];
+        chart_tasks_data = ['All tasks'];
 
         for(var j in tasks_data_t)
         {
@@ -142,9 +143,19 @@ pmDashboard.updateData = function()
             chart_tasks_data.push(tasks_data[time]/1);
         }
 
+        chart_tasks_data_OK=pmDashboard.getDataForStatusChart(tasks_data, tasks_data_t, "OK");
+        chart_tasks_data_ERROR=pmDashboard.getDataForStatusChart(tasks_data, tasks_data_t, "ERROR");
+        chart_tasks_data_INTERRUPTED=pmDashboard.getDataForStatusChart(tasks_data, tasks_data_t, "INTERRUPTED");
+        chart_tasks_data_DELAY=pmDashboard.getDataForStatusChart(tasks_data, tasks_data_t, "DELAY");
+        chart_tasks_data_OFFLINE=pmDashboard.getDataForStatusChart(tasks_data, tasks_data_t, "OFFLINE");
+
         pmDashboard.model.historyChart.load({
             columns: [
-                chart_tasks_start_x,chart_tasks_data
+                chart_tasks_start_x,chart_tasks_data,
+
+                chart_tasks_data_OK, chart_tasks_data_ERROR,
+                chart_tasks_data_INTERRUPTED, chart_tasks_data_DELAY,
+                chart_tasks_data_OFFLINE
             ]
         });
     });
@@ -153,6 +164,39 @@ pmDashboard.updateData = function()
         pmDashboard.updateData()
     }, 1000*30)
 }
+
+/**
+ * Функция, которая формирует массив данных для кривых графика по отдельному статусу
+ */
+pmDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
+{
+    for(var i in tasks_data) {
+        tasks_data[i]=0;
+    }
+
+    for(var i in pmDashboard.statsData.jobs.day)
+    {
+        var val = pmDashboard.statsData.jobs.day[i];
+        var time = new Date(val.day)
+        time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
+
+        if(val.status==status){
+            tasks_data[time] = val.sum;
+            tasks_data_t.push(time)
+        }
+    }
+
+    var chart_tasks_data1 = [status];
+
+    for(var j in tasks_data_t)
+    {
+        var time = tasks_data_t[j]
+        chart_tasks_data1.push(tasks_data[time]/1);
+    }
+    return chart_tasks_data1;
+
+}
+
 
 pmDashboard.open  = function(holder, menuInfo, data)
 {
@@ -183,10 +227,22 @@ pmDashboard.open  = function(holder, menuInfo, data)
         data: {
             x: 'time',
             columns: [
-                ['time']
+                ['time'],
+                ['All tasks'],
+                ['OK'],
+                ['ERROR'],
+                ['INTERRUPTED'],
+                ['DELAY'],
+                ['OFFLINE']
             ],
-            //type: 'area-spline',
             type: 'area',
+            types: {
+                OK: 'line',
+                ERROR: 'line',
+                INTERRUPTED: 'line',
+                DELAY: 'line',
+                OFFLINE: 'line'
+            },
         },
         axis: {
             x: {
@@ -195,6 +251,9 @@ pmDashboard.open  = function(holder, menuInfo, data)
                     format: '%Y-%m-%d'
                 }
             }
+        },
+        color: {
+            pattern: ['#1f77b4',  '#276900', '#333333', '#9b97e4', '#808419', '#9e9e9e', '#d62728',  '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
         }
     });
 }
