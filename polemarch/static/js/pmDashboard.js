@@ -26,6 +26,17 @@ pmDashboard.statsData={
     templates:'-'
 }
 
+pmDashboard.statsDataLast=14;
+pmDashboard.statsDataLastQuery=14;
+pmDashboard.statsDataMomentType='day';
+
+if(window.localStorage['selected-chart-period'] && window.localStorage['selected-chart-period-query'] &&  window.localStorage['selected-chart-period-type'])
+{
+    pmDashboard.statsDataLast=window.localStorage['selected-chart-period'];
+    pmDashboard.statsDataLastQuery=window.localStorage['selected-chart-period-query'];
+    pmDashboard.statsDataMomentType=window.localStorage['selected-chart-period-type'];
+}
+
 /**
  * Двумерный массив с описанием списка отображаемых виджетов в каждой строке
  *
@@ -105,25 +116,66 @@ pmDashboard.updateData = function()
         pmwUsersCounter.updateCount();
 
         //строим график
-        var startTime = moment().subtract(14, 'days').format("YYYY-MM-DD")+"T00:00:00.000000Z"
 
-        tasks_data = {}
-        tasks_data_t = []
+        //ветка выполняется, если единица измерения для оси X - день
+        if(pmDashboard.statsDataMomentType=="day"){
+            var startTime = moment().subtract(pmDashboard.statsDataLast, pmDashboard.statsDataMomentType).format("YYYY-MM-DD")+"T00:00:00.000000Z";
+            tasks_data = {}
+            tasks_data_t = []
 
-        var time = new Date(startTime)
-        time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
-        for(var i = 0; i< 14; i++)
-        {
-            tasks_data[time] = 0;
-            tasks_data_t.push(time)
-            time+=(3600*24*1000)
+            var time = new Date(startTime)
+            time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
+
+            for(var i = -1; i<= pmDashboard.statsDataLast; i++)
+            {
+                tasks_data[time] = 0;
+                tasks_data_t.push(time)
+                time+=(3600*24*1000)
+            }
+            //ветка выполняется,  если единица измерения для оси X - месяц или год
+        } else {
+            //определяем текущий месяц и год
+            var monthNum=moment().format("MM");
+            var yearNum=moment().format("YYYY");
+            if(pmDashboard.statsDataMomentType=="year")
+            {
+                var startTimeOrg=yearNum+"-01-01";
+            }
+            else
+            {
+                var startTimeOrg=yearNum+"-"+monthNum+"-01";
+            }
+
+            //задаем стартовую дату для графика.
+            //pmDashboard.statsDataLast - количество периодов назад
+            //pmDashboard.statsDataMomentType - тип периода - месяц/год
+            var startTime = moment(startTimeOrg).subtract(pmDashboard.statsDataLast-1, pmDashboard.statsDataMomentType).format("YYYY-MM-DD")+"T00:00:00.000000Z";
+
+            tasks_data = {}
+            tasks_data_t = []
+
+
+            var time = new Date(startTime)
+            time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
+
+            //формируем в цикле временные отрезки для графика относительно стартовой даты
+            for(var i = 1; i<= pmDashboard.statsDataLast+1; i++)
+            {
+                tasks_data[time] = 0;
+                tasks_data_t.push(time);
+
+                //идем на период вперед
+                var newTime=moment(startTime).add(i, pmDashboard.statsDataMomentType).format("YYYY-MM-DD")+"T00:00:00.000000Z";
+                time = new Date(newTime);
+                time=Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
+            }
         }
 
-
-        for(var i in pmDashboard.statsData.jobs.day)
+        //формируем массив значений для кривой all tasks
+        for(var i in pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType])
         {
-            var val = pmDashboard.statsData.jobs.day[i];
-            var time = new Date(val.day)
+            var val = pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType][i];
+            var time = new Date(val[pmDashboard.statsDataMomentType])
             time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
 
             if(!tasks_data[time])
@@ -132,10 +184,8 @@ pmDashboard.updateData = function()
                 tasks_data_t.push(time)
             }
         }
-
         chart_tasks_start_x = ['time'];
         chart_tasks_data = ['All tasks'];
-
         for(var j in tasks_data_t)
         {
             var time = tasks_data_t[j]
@@ -143,12 +193,14 @@ pmDashboard.updateData = function()
             chart_tasks_data.push(tasks_data[time]/1);
         }
 
+        //формируем массив значений для кривой каждого статуса
         chart_tasks_data_OK=pmDashboard.getDataForStatusChart(tasks_data, tasks_data_t, "OK");
         chart_tasks_data_ERROR=pmDashboard.getDataForStatusChart(tasks_data, tasks_data_t, "ERROR");
         chart_tasks_data_INTERRUPTED=pmDashboard.getDataForStatusChart(tasks_data, tasks_data_t, "INTERRUPTED");
         chart_tasks_data_DELAY=pmDashboard.getDataForStatusChart(tasks_data, tasks_data_t, "DELAY");
         chart_tasks_data_OFFLINE=pmDashboard.getDataForStatusChart(tasks_data, tasks_data_t, "OFFLINE");
 
+        //загружаем график, перечисляем массивы данных для графика
         pmDashboard.model.historyChart.load({
             columns: [
                 chart_tasks_start_x,chart_tasks_data,
@@ -174,10 +226,11 @@ pmDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
         tasks_data[i]=0;
     }
 
-    for(var i in pmDashboard.statsData.jobs.day)
+
+    for(var i in pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType])
     {
-        var val = pmDashboard.statsData.jobs.day[i];
-        var time = new Date(val.day)
+        var val = pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType][i];
+        var time = new Date(val[pmDashboard.statsDataMomentType])
         time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
 
         if(val.status==status){
@@ -256,6 +309,10 @@ pmDashboard.open  = function(holder, menuInfo, data)
             pattern: ['#1f77b4',  '#276900', '#333333', '#9b97e4', '#808419', '#9e9e9e', '#d62728',  '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
         }
     });
+    if($('select').is('#chart-period'))
+    {
+        $('#chart-period').val(pmDashboard.statsDataLastQuery).change();
+    }
 }
 
 tabSignal.connect("polemarch.start", function()
@@ -280,7 +337,7 @@ pmDashboard.loadStats=function()
     var limit=1;
     var thisObj = this;
     return spajs.ajax.Call({
-        url: "/api/v1/stats/",
+        url: "/api/v1/stats/?last="+pmDashboard.statsDataLastQuery,
         type: "GET",
         contentType: 'application/json',
         data: "limit=" + encodeURIComponent(limit)+"&rand="+Math.random(),
@@ -295,6 +352,46 @@ pmDashboard.loadStats=function()
         }
     });
 }
+
+/**
+ *Функция вызывается, когда происходит изменение периода на графике(пользователь выбрал другой option в select).
+ *Функция обновляет значения переменных, которые в дальнейшем используются для запроса к api/v1/stats и отрисовки графика.
+ */
+
+pmDashboard.updateStatsDataLast=function(thisEl)
+{
+    var newLast=thisEl.value;
+    switch(newLast) {
+        case '1095':
+            pmDashboard.statsDataLast=3;
+            pmDashboard.statsDataMomentType="year";
+            window.localStorage['selected-chart-period']=3;
+            window.localStorage['selected-chart-period-type']="year";
+            break;
+        case '365':
+            pmDashboard.statsDataLast=12;
+            pmDashboard.statsDataMomentType="month";
+            window.localStorage['selected-chart-period']=12;
+            window.localStorage['selected-chart-period-type']="month";
+            break;
+        case '99':
+            pmDashboard.statsDataLast=3;
+            pmDashboard.statsDataMomentType="month";
+            window.localStorage['selected-chart-period']=3;
+            window.localStorage['selected-chart-period-type']="month";
+            break;
+        default:
+            pmDashboard.statsDataLast=newLast;
+            pmDashboard.statsDataMomentType="day";
+            window.localStorage['selected-chart-period']=newLast;
+            window.localStorage['selected-chart-period-type']="day";
+            break;
+    }
+    pmDashboard.statsDataLastQuery=newLast;
+    window.localStorage['selected-chart-period-query']=newLast;
+    pmDashboard.updateData();
+}
+
 
 /**
  * Базовый класс виджета

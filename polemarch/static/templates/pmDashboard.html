@@ -49,6 +49,29 @@
                     <div class="box-header ui-sortable-handle" style="cursor: move;">
                         <i class="fa fa-th"></i>
                         <h3 class="box-title">Tasks history</h3>
+
+                        <!--
+                        ///////////////////////////////////////
+                        -->
+
+                        <div class="pull-right" style="width:200px; min-width:130px;">
+                            <label  style="float:left; margin-right:10px; line-height:26px;">Period</label>
+                            <select id="chart-period" class="form-control" style="max-width:130px; height:26px; line-height:26px; padding:3px 12px; display:inline-block; float:left;" onchange="pmDashboard.updateStatsDataLast(this)">
+                                <option value="1095">last 3 years</option>
+                                <option value="365">last year</option>
+                                <option value="99">last 3 months</option>
+                                <option value="30">last month</option>
+                                <option value="14">last 2 weeks</option>
+                                <option value="7">last week</option>
+                                <option value="3">last 3 days</option>
+                            </select>
+                        </div>
+
+
+
+                        <!--
+                        ///////////////////////////////////////
+                        -->
                         <!-- 
                         <div class="box-tools pull-right">
                             <button type="button" class="btn btn-sm" data-widget="collapse"><i class="fa fa-minus"></i></button>
