@@ -1,0 +1,36 @@
+version: '3'
+services:
+  db-server:
+    image: mysql:latest
+    environment:
+    - MYSQL_DATABASE=polemarch
+    - MYSQL_ROOT_PASSWORD=polemarch
+    - MYSQL_USER=polemarch
+    - MYSQL_PASSWORD=polemarch
+  memcache-server:
+    image: memcached
+  rabbitmq-server:
+    image: rabbitmq:latest
+    environment:
+    - RABBITMQ_DEFAULT_USER=polemarch
+    - RABBITMQ_DEFAULT_PASS=polemarch
+    - RABBITMQ_DEFAULT_VHOST=polemarch
+  polemarch:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    entrypoint: /bin/bash -c "/bin/bash -c \"$${@}\""
+    command: |
+      /bin/bash -c "
+        set -e
+        sudo -u polemarch /opt/polemarch/bin/polemarchctl migrate
+        sudo -u polemarch /opt/polemarch/bin/uwsgi /opt/polemarch/lib/python2.7/site-packages/polemarch/web.ini
+        /bin/bash || exit 0
+      "
+    external_links:
+      - db-server
+      - cache-server:memcache-server
+      - locks-server:memcache-server
+      - rabbitmq-server
+    ports:
+      - "8080:8080"
