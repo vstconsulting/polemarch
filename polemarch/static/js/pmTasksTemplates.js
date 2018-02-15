@@ -237,7 +237,8 @@ pmTasksTemplates.showWidget = function(holder, kind)
     var thisObj = this;
     var offset = 0
     var limit = this.pageSize;
-    return $.when(this.sendSearchQuery({kind:kind}, limit, offset)).done(function()
+    var ordering="-id";
+    return $.when(this.sendSearchQuery({kind:kind}, limit, offset, ordering)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind}))
     }).fail(function()

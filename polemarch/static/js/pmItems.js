@@ -480,9 +480,10 @@ pmItems.searchObjectToString = function (query, defaultName)
  * @param {string|object} query запрос
  * @param {integer} limit
  * @param {integer} offset
+ * @param {string} ordering - сортировка по какому-то свойству объекта(id, name и т.д). Для обратной сортировки передавать "-id"
  * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
  */
-pmItems.sendSearchQuery = function (query, limit, offset)
+pmItems.sendSearchQuery = function (query, limit, offset, ordering)
 {
     if (!limit)
     {
@@ -494,10 +495,16 @@ pmItems.sendSearchQuery = function (query, limit, offset)
         offset = 0;
     }
 
+    if (!ordering)
+    {
+        ordering = "";
+    }
+
     var q = [];
 
     q.push("limit=" + encodeURIComponent(limit))
     q.push("offset=" + encodeURIComponent(offset))
+    q.push("ordering=" + encodeURIComponent(ordering))
 
     for (var i in query)
     {
