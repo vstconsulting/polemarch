@@ -199,9 +199,6 @@ spajs.errorPage = function(holder, menuInfo, data, error_data)
             error.text = error_data.detail.toString()
         }
     }
-    
-    
-    debugger;
-    
+     
     $(holder).insertTpl(spajs.just.render("errorPage", {error:error, data:data, menuInfo:menuInfo}))
 }

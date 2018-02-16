@@ -214,7 +214,10 @@ REST_FRAMEWORK = {
         "polemarch.api.permissions.ModelPermission",
     ),
     'EXCEPTION_HANDLER': 'polemarch.api.handlers.polemarch_exception_handler',
-    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': config.getint("web", "rest_page_limit", fallback=PAGE_LIMIT),
 }

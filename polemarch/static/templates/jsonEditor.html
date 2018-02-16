@@ -80,6 +80,15 @@
                                        style="resize:vertical;"
                                        <%= jsonEditor.model.data[opt.prefix].bindAttr(name, 'value') %> 
                                        ><%- value %></textarea>
+                            <% } else if(thisOpt.type == 'integer' ){ %>
+                                 <input type="number"
+                                       data-type="text"
+                                       placeholder="Enter value"
+                                       id="json_<%- name %>_value<%- opt.prefix %>"
+                                       <%= jsonEditor.model.data[opt.prefix].bindAttr(name, 'value') %> 
+                                       class="form-control jsonEditor-data<%- opt.prefix %>"
+                                       data-json-name="<%- name %>"
+                                       >
                             <% } else { %>
                                 <input type="text"
                                        data-type="text"
@@ -208,7 +217,7 @@
                             <% if(opt.select2){ %>
                                 <~ jsonEditor.model.isLoaded_cli_reference>
                                     <% if(jsonEditor.model.isLoaded_cli_reference){ %>
-                                        <select class="form-control select2" id="new_json_name<%- opt.prefix %>" data-placeholder="Select param" >
+                                        <select class="form-control select2" id="new_json_name<%- opt.prefix %>" data-placeholder="Select param" onChange="changeTextareaSettings('#new_json_name<%- opt.prefix %>', '<%- optionsblock %>', '<%- opt.prefix %>')">
                                             <option selected="" disabled="" value="" disabled>Not set</option>
                                             <% keys = Object.keys(jsonEditor.options[optionsblock]).sort(); 
                                                for(var i in keys){ %> 
@@ -233,9 +242,9 @@
                 </div>
 
 
-                <div class="row <%- jsonEditor.model.form[opt.prefix].justClass('showImportForm', 'hide') %>">
+                <div id="new_json_value_block" class="row <%- jsonEditor.model.form[opt.prefix].justClass('showImportForm', 'hide') %>">
                     <div class="form-group col-lg-12">
-                        <label class="col-sm-2 col-lg-2 control-label">
+                        <label class="col-sm-2 col-lg-2 control-label" >
                             Value
                         </label>
                         <div class="input-group col-sm-10 col-lg-10 col-xs-12"  >
@@ -245,9 +254,9 @@
                     </div>
                 </div>
 
-                <div class="row <%- jsonEditor.model.form[opt.prefix].justClass('showImportForm', 'hide') %>">
+                <div id="add_var_button" class="row <%- jsonEditor.model.form[opt.prefix].justClass('showImportForm', 'hide') %>">
                     <div class="form-group col-lg-1">
-                        <span class="btn btn-primary" onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>', '<%- opt.prefix %>');" >Add varible</span>
+                        <span class="btn btn-primary"  onclick="jsonEditor.jsonEditorAddVar('<%- optionsblock %>', '<%- opt.prefix %>');" >Add varible</span>
                     </div>
                 </div>
                 <div class="row <%- jsonEditor.model.form[opt.prefix].justNotClass('showImportForm', 'hide') %>">

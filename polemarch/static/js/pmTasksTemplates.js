@@ -237,7 +237,8 @@ pmTasksTemplates.showWidget = function(holder, kind)
     var thisObj = this;
     var offset = 0
     var limit = this.pageSize;
-    return $.when(this.sendSearchQuery({kind:kind}, limit, offset)).done(function()
+    var ordering="-id";
+    return $.when(this.sendSearchQuery({kind:kind}, limit, offset, ordering)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind}))
     }).fail(function()
@@ -414,7 +415,7 @@ tabSignal.connect("polemarch.start", function()
     
     spajs.addMenu({
         id:"tasks-search", 
-        urlregexp:[/^templates\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^templates\/search\/([A-z0-9 %\-.:,=]+)$/, /^templates\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showSearchResults(holder, menuInfo, data);}
     })
     

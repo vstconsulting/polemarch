@@ -453,7 +453,7 @@ pmProjects.executePlaybook = function(project_id)
 {
     var data_vars = jsonEditor.jsonEditorGetValues();
     data_vars.limit = pmGroups.getGroupsAutocompleteValue();
-    return pmTasks.execute(project_id, pmProjects.inventoriesAutocompletefiled.getValue(), $('#playbook-autocomplete').val(), data_vars);
+    return pmTasks.execute(project_id, pmProjects.inventoriesAutocompletefiled.getValue(), $('#playbook-autocomplete').val(), $('#groups_autocomplete_filedprefix').val(), data_vars);
 }
 
 /**
@@ -576,7 +576,7 @@ tabSignal.connect("polemarch.start", function()
 
     spajs.addMenu({
         id:"projects-search",
-        urlregexp:[/^projects\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^projects\/search\/([A-z0-9 %\-.:,=]+)$/, /^projects\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmProjects.showSearchResults(holder, menuInfo, data);}
     })
 

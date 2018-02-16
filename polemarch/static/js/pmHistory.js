@@ -28,11 +28,20 @@ pmHistory.cancelTask = function(item_id)
 pmHistory.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
-
-    var search = this.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')
-    return $.when(this.sendSearchQuery(search)).done(function()
+  
+    var limit = this.pageSize;
+   
+    if(data.reg && data.reg[2] > 0)
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
+        offset = this.pageSize*(data.reg[2] - 1);
+    } else {
+        offset=0;
+    }
+    
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')    
+    return $.when(this.sendSearchQuery(search,limit,offset)).done(function()
+    {   
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))       
     }).fail(function()
     {
         $.notify("", "error");
@@ -139,8 +148,23 @@ pmHistory.showItem = function(holder, menuInfo, data)
         {
             pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
         }
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_page', {item_id:item_id, project_id:0}))
-        pmHistory.bindStdoutUpdates(item_id)
+        
+        
+        if (pmHistory.model.items[item_id].inventory != null) {
+            var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
+            $.when(promiss).done(function () {
+                $(holder).insertTpl(spajs.just.render(thisObj.model.name + '_page', {item_id: item_id, project_id: 0}))
+                pmHistory.bindStdoutUpdates(item_id)
+            }).fail(function () {
+                $.notify("", "error");
+            });
+        } else {
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name + '_page', {item_id: item_id, project_id: 0}))
+            pmHistory.bindStdoutUpdates(item_id)
+        }
+       
+       
+      
     }).fail(function()
     {
         $.notify("", "error");
@@ -159,6 +183,20 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
         {
             pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
         }
+        
+         if (pmHistory.model.items[item_id].inventory != null) {
+            var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
+            $.when(promiss).done(function () {
+                $(holder).insertTpl(spajs.just.render(thisObj.model.name + '_page', {item_id: item_id, project_id: 0}))
+                pmHistory.bindStdoutUpdates(item_id)
+            }).fail(function () {
+                $.notify("", "error");
+            });
+        } else {
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name + '_page', {item_id: item_id, project_id: 0}))
+            pmHistory.bindStdoutUpdates(item_id)
+        }
+        
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
@@ -369,6 +407,70 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
 
     return def.promise();
 }
+//////////////////////////////
+/**
+*Функция проверяет, произошло ли изменение в количестве записей в истории.
+*Если изменения произошли, то она обновляет соответствующее свойство в объекте this.model
+*/
+
+pmHistory.ifIncreaseTotalCount = function()
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+     spajs.ajax.Call({
+        url: "/api/v1/history",
+        type: "GET",
+        contentType:'application/json',
+        data: "limit=1&rand="+Math.random(),
+        success: function(data)
+        {
+            var totalCount=data.count;
+            //console.log("new totalCount="+totalCount, "old totalCount="+thisObj.model.totalCount);
+            if(thisObj.model.totalCount!=totalCount)
+            {
+                 thisObj.model.totalCount=totalCount;
+                 def.resolve();
+            }
+            else
+            {
+                def.reject();
+            }
+
+        },
+        error: function (){
+            def.reject();
+        }
+     });
+     return def.promise();
+}
+
+/**
+*Функция обновляет список записей в истории каждые 5 секунд.
+*Если произошли изменения в количестве записей в списке,
+*то содержимое страницы обновляется.
+*/
+
+pmHistory.updateList = function (updated_ids)
+{
+    var thisObj = this;
+    return $.when(this.loadItemsByIds(updated_ids)).always(function ()
+    {
+        if (thisObj.model.updateTimeoutId)
+        {
+            clearTimeout(thisObj.model.updateTimeoutId)
+        }
+
+        thisObj.model.updateTimeoutId = setTimeout(function () {
+            thisObj.updateList(updated_ids)
+        }, 5001)
+
+        $.when(pmHistory.ifIncreaseTotalCount()).done(function() {
+            spajs.openMenuFromUrl();
+        })
+    }).promise()
+}
+
+//////////////////////////////
 
 /**
  * Обновляет поле модел this.model.itemslist и ложит туда список пользователей
@@ -401,7 +503,10 @@ pmHistory.loadItems = function(limit, offset)
             data.offset = offset
             thisObj.model.itemslist = data
             //thisObj.model.items = {}
-
+            //////
+            thisObj.model.totalCount=data.count;
+            //console.log(thisObj.model);
+            ////////
             var projects = [];
             var usersIds = [];
             var periodicTasks = [];
@@ -656,7 +761,7 @@ pmHistory.loadLines = function(item_id, opt)
 
     spajs.addMenu({
         id:"history-search",
-        urlregexp:[/^history\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^history\/search\/([A-z0-9 %\-.:,=]+)$/, /^history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResults(holder, menuInfo, data);}
     })
 
@@ -696,7 +801,7 @@ pmHistory.loadLines = function(item_id, opt)
 
     spajs.addMenu({
         id:"project-history-search",
-        urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInProjects(holder, menuInfo, data);}
     })
 

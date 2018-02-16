@@ -276,6 +276,7 @@ pmGroups.model.page_item = {
  */
 pmGroups.setSubGroups = function(item_id, groups_ids)
 {
+    var thisObj=this;
     if(!item_id)
     {
         throw "Error in pmGroups.setSubGroups with item_id = `" + item_id + "`"
@@ -293,18 +294,7 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
         data:JSON.stringify(groups_ids),
                 success: function(data)
         {
-            if(pmGroups.model.items[item_id])
-            {
-                pmGroups.model.items[item_id].groups = []
-                for(var i in groups_ids)
-                {
-                    if(!pmGroups.model.items[groups_ids[i]])
-                    {
-                        continue;
-                    }
-                    pmGroups.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
-                }
-            }
+            pmItems.checkSubItemsAndAdd(thisObj, pmGroups, data, item_id, "groups", groups_ids);
             //console.log("group update", data);
         },
         error:function(e)
@@ -320,6 +310,7 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
  */
 pmGroups.setSubHosts = function(item_id, hosts_ids)
 {
+    var thisObj=this;
     if(!item_id)
     {
         throw "Error in pmGroups.setSubHosts with item_id = `" + item_id + "`"
@@ -337,18 +328,7 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
         data:JSON.stringify(hosts_ids),
                 success: function(data)
         {
-            if(pmGroups.model.items[item_id])
-            {
-                pmGroups.model.items[item_id].hosts = []
-                for(var i in hosts_ids)
-                {
-                    if(!pmHosts.model.items[hosts_ids[i]])
-                    {
-                        continue;
-                    }
-                    pmGroups.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
-                }
-            }
+            pmItems.checkSubItemsAndAdd(thisObj, pmHosts, data, item_id, "hosts", hosts_ids);
             //console.log("group update", data);
         },
         error:function(e)
@@ -485,6 +465,10 @@ pmGroups.showAddSubGroupsForm = function(item_id)
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_group', {item_id:item_id}))
+         var  scroll_el = "#add_existing_item_to_group"; 
+		if ($(scroll_el).length != 0) { 
+			$('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000); 
+		}
         $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
@@ -505,6 +489,10 @@ pmGroups.showAddSubHostsForm = function(item_id)
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_group', {item_id:item_id}))
+        var scroll_el = "#add_existing_item_to_group"; 
+		if ($(scroll_el).length != 0) { 
+			$('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000); 
+		}
         $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
@@ -578,6 +566,7 @@ pmGroups.getGroupsAutocompleteValue = function(prefix)
         prefix = "prefix"
     }
     return $('#groups_autocomplete_filed'+prefix).val()
+    debugger;
 }
 
 /**
@@ -777,7 +766,7 @@ tabSignal.connect("polemarch.start", function()
 
     spajs.addMenu({
         id:"groups-search",
-        urlregexp:[/^groups\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^groups\/search\/([A-z0-9 %\-.:,=]+)$/, /^groups\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showSearchResults(holder, menuInfo, data);}
     })
 
