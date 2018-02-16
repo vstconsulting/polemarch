@@ -116,24 +116,11 @@ pmDashboard.updateData = function()
         pmwUsersCounter.updateCount();
 
         //строим график
-
-        //ветка выполняется, если единица измерения для оси X - день
-        if(pmDashboard.statsDataMomentType=="day"){
-            var startTime = moment().subtract(pmDashboard.statsDataLast, pmDashboard.statsDataMomentType).format("YYYY-MM-DD")+"T00:00:00.000000Z";
-            tasks_data = {}
-            tasks_data_t = []
-
-            var time = new Date(startTime)
-            time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
-
-            for(var i = -1; i<= pmDashboard.statsDataLast; i++)
-            {
-                tasks_data[time] = 0;
-                tasks_data_t.push(time)
-                time+=(3600*24*1000)
-            }
-            //ветка выполняется,  если единица измерения для оси X - месяц или год
-        } else {
+        //задаем стартовую дату для графика.
+        //pmDashboard.statsDataLast - количество периодов назад
+        //pmDashboard.statsDataMomentType - тип периода - месяц/год
+        if(pmDashboard.statsDataMomentType=="year" || pmDashboard.statsDataMomentType=="month")
+        {
             //определяем текущий месяц и год
             var monthNum=moment().format("MM");
             var yearNum=moment().format("YYYY");
@@ -145,31 +132,31 @@ pmDashboard.updateData = function()
             {
                 var startTimeOrg=yearNum+"-"+monthNum+"-01";
             }
-
-            //задаем стартовую дату для графика.
-            //pmDashboard.statsDataLast - количество периодов назад
-            //pmDashboard.statsDataMomentType - тип периода - месяц/год
             var startTime = moment(startTimeOrg).subtract(pmDashboard.statsDataLast-1, pmDashboard.statsDataMomentType).format("YYYY-MM-DD")+"T00:00:00.000000Z";
-
-            tasks_data = {}
-            tasks_data_t = []
-
-
-            var time = new Date(startTime)
-            time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
-
-            //формируем в цикле временные отрезки для графика относительно стартовой даты
-            for(var i = 1; i<= pmDashboard.statsDataLast+1; i++)
-            {
-                tasks_data[time] = 0;
-                tasks_data_t.push(time);
-
-                //идем на период вперед
-                var newTime=moment(startTime).add(i, pmDashboard.statsDataMomentType).format("YYYY-MM-DD")+"T00:00:00.000000Z";
-                time = new Date(newTime);
-                time=Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
-            }
         }
+        else
+        {
+            var startTime = moment().subtract(pmDashboard.statsDataLast-1, pmDashboard.statsDataMomentType).format("YYYY-MM-DD")+"T00:00:00.000000Z";
+        }
+
+        tasks_data = {};
+        tasks_data_t = [];
+
+        var time = new Date(startTime)
+        time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
+
+        //формируем в цикле временные отрезки для графика относительно стартовой даты
+        for(var i = 1; i<= pmDashboard.statsDataLast+1; i++)
+        {
+            tasks_data[time] = 0;
+            tasks_data_t.push(time);
+
+            //идем на период вперед
+            var newTime=moment(startTime).add(i, pmDashboard.statsDataMomentType).format("YYYY-MM-DD")+"T00:00:00.000000Z";
+            time = new Date(newTime);
+            time=Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
+        }
+
 
         //формируем массив значений для кривой all tasks
         for(var i in pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType])
@@ -369,9 +356,9 @@ pmDashboard.updateStatsDataLast=function(thisEl)
             window.localStorage['selected-chart-period-type']="year";
             break;
         case '365':
-            pmDashboard.statsDataLast=12;
+            pmDashboard.statsDataLast=13;
             pmDashboard.statsDataMomentType="month";
-            window.localStorage['selected-chart-period']=12;
+            window.localStorage['selected-chart-period']=13;
             window.localStorage['selected-chart-period-type']="month";
             break;
         case '99':
@@ -381,14 +368,14 @@ pmDashboard.updateStatsDataLast=function(thisEl)
             window.localStorage['selected-chart-period-type']="month";
             break;
         default:
-            pmDashboard.statsDataLast=newLast;
+            pmDashboard.statsDataLast=+newLast;
             pmDashboard.statsDataMomentType="day";
-            window.localStorage['selected-chart-period']=newLast;
+            window.localStorage['selected-chart-period']=+newLast;
             window.localStorage['selected-chart-period-type']="day";
             break;
     }
-    pmDashboard.statsDataLastQuery=newLast;
-    window.localStorage['selected-chart-period-query']=newLast;
+    pmDashboard.statsDataLastQuery=+newLast;
+    window.localStorage['selected-chart-period-query']=+newLast;
     pmDashboard.updateData();
 }
 
