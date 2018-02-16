@@ -30,7 +30,6 @@ RUN mkdir /tmp/polemarch
 ADD . /tmp/polemarch/
 RUN cd /tmp/polemarch && make rpm
 RUN yum install /tmp/polemarch/dist/*.rpm -y
-# COPY docker/polemarch/settings.ini /etc/polemarch/settings.ini
 RUN cp -vf /tmp/polemarch/test_settings.ini /etc/polemarch/settings.ini
 
 

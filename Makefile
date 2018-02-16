@@ -17,7 +17,10 @@ export DESCRIPTION
 SUMMARY = Infrastructure Heat Service for orchestration infrastructure by ansible.
 VENDOR = VST Consulting <sergey.k@vstconsulting.net>
 RELEASE = 0
-COMPOSE = docker-compose-test.yml
+COMPOSE = docker-compose-testrun.yml
+COMPOSE_ARGS = --abort-on-container-exit
+COMPLEX_TESTS_COMPOSE = docker-compose-tests.yml
+COMPLEX_TESTS_COMPOSE_ARGS = '--abort-on-container-exit --build'
 
 include rpm.mk
 include deb.mk
@@ -114,4 +117,7 @@ compose:
 	docker-compose -f $(COMPOSE) build
 
 run:
-	docker-compose -f $(COMPOSE) up
+	docker-compose -f $(COMPOSE) up $(COMPOSE_ARGS)
+
+complex_tests:
+	$(MAKE) run COMPOSE=$(COMPLEX_TESTS_COMPOSE) COMPOSE_ARGS=$(COMPLEX_TESTS_COMPOSE_ARGS)
