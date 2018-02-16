@@ -54,30 +54,72 @@ pmDashboard.model.widgets = [
     [
         {
             name:'pmwTemplatesCounter',
+            sortNum:0,
             opt:{},
         },
         {
             name:'pmwProjectsCounter',
+            sortNum:1,
             opt:{},
         },
         {
             name:'pmwInventoriesCounter',
+            sortNum:2,
             opt:{},
         },
         {
             name:'pmwHostsCounter',
+            sortNum:3,
             opt:{},
         },
         {
             name:'pmwGroupsCounter',
+            sortNum:4,
             opt:{},
         },
         {
             name:'pmwUsersCounter',
+            sortNum:5,
             opt:{},
         }, /**/
     ],
 ]
+
+/**
+*Функция, сортирующая массив объектов.
+ */
+pmDashboard.sortCountWidget=function(Obj1, Obj2)
+{
+    return Obj1.sortNum-Obj2.sortNum;
+}
+
+/**
+*Функция, обновляющая свойство SortNum(номер, учитываемый при сортировке) у объекта Widget-Count.
+ */
+pmDashboard.udpateSortNumCountWidget = function(widget)
+{
+    var wName=widget.name;
+    if(window.localStorage[wName])
+    {
+        widget.sortNum=window.localStorage[wName];
+    }
+    return widget;
+}
+
+/**
+*Функция, обновляющая свойство SortNum у всех объектов Widget-Count.
+ */
+pmDashboard.udpateAllSortNumCountWidgets = function(widgetGroup)
+{
+    for(var i=0; i<widgetGroup.length; i++){
+        pmDashboard.udpateSortNumCountWidget(widgetGroup[i]);
+    }
+    pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
+    return widgetGroup;
+}
+
+pmDashboard.udpateAllSortNumCountWidgets(pmDashboard.model.widgets[0]);
+
 
 pmDashboard.stopUpdates = function()
 {
@@ -241,6 +283,8 @@ pmDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
 pmDashboard.open  = function(holder, menuInfo, data)
 {
 
+    pmDashboard.udpateAllSortNumCountWidgets(pmDashboard.model.widgets[0]);
+
     var thisObj = this
 
     // Инициализация всех виджетов на странице
@@ -300,6 +344,42 @@ pmDashboard.open  = function(holder, menuInfo, data)
     {
         $('#chart-period').val(pmDashboard.statsDataLastQuery).change();
     }
+
+    //drag and drop для виджетов-счетчиков
+    if($('div').is('#dnd1'))
+    {
+        var groups_sort = Sortable.create(document.getElementById("dnd1"), {
+            animation: 150, // ms, animation speed moving items when sorting, `0` — without animation
+            handle: ".w-count", // Restricts sort start click/touch to the specified element
+            draggable: ".w-count", // Specifies which items inside the element should be sortable
+            onUpdate: function (evt)
+            {
+                // console.log("onUpdate[1]", evt);
+                var item = evt.item; // the current dragged HTMLElement
+                //запоминаем новый порядок сортировки
+                var divArr=$('.w-count');
+                var idArr=[];
+                for (var i=0; i<divArr.length; i++)
+                {
+                    idArr.push(divArr[i].id);
+                }
+
+                for(var i=0; i<idArr.length; i++)
+                {
+                    for(var j=0; j<pmDashboard.model.widgets[0].length; j++)
+                    {
+                        if(idArr[i].toLowerCase()==pmDashboard.model.widgets[0][j].name.toLowerCase())
+                        {
+                            pmDashboard.model.widgets[0][j].sortNum=i;
+                            var t=pmDashboard.model.widgets[0][j].name;
+                            window.localStorage.setItem(t, i);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
 }
 
 tabSignal.connect("polemarch.start", function()

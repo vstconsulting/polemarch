@@ -27,28 +27,28 @@
  * http://codepen.io/thomasgrant/pen/DgEFd
  */
 #loader-wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1000;
-  background-color: rgba(0, 0, 0, 0.35);
-  display: none;
-  opacity: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.35);
+    display: none;
+    opacity: 0;
 }
 
-.in-loading #loader-wrapper { 
-  display: block;
-  opacity: 1;
-  animation: appchat_load_success 0.1s;
+.in-loading #loader-wrapper {
+    display: block;
+    opacity: 1;
+    animation: appchat_load_success 0.1s;
 }
 
-.in-starting #loader-wrapper { 
-  display: block;
-  opacity: 1;
-  background-color: rgb(255, 255, 255); 
-  animation: appchat_load_start 0.3s;
+.in-starting #loader-wrapper {
+    display: block;
+    opacity: 1;
+    background-color: rgb(255, 255, 255);
+    animation: appchat_load_start 0.3s;
 }
 
 
@@ -59,129 +59,129 @@
 }*/
 
 @keyframes appchat_load_start {
-	from { opacity: 0; }
-	to { opacity: 0.35; }
+    from { opacity: 0; }
+    to { opacity: 0.35; }
 }
 
 
 @keyframes appchat_load_success {
-	from { opacity: 0; }
-	to { opacity: 0.35; }
+    from { opacity: 0; }
+    to { opacity: 0.35; }
 }
 
 #loader {
-  border: 3px solid transparent;
-  border-top-color: #3498db;
-  border-radius: 50%;
-  display: block;
-  margin: -75px 0 0 -75px;
-  width: 150px;
-  height: 150px;
-  position: relative;
-  top: 50%;
-  left: 50%;
-  -webkit-animation: spin 2s linear infinite;
-  -moz-animation: spin 2s linear infinite;
-  -o-animation: spin 2s linear infinite;
-  -ms-animation: spin 2s linear infinite;
-  animation: spin 2s linear infinite;
+    border: 3px solid transparent;
+    border-top-color: #3498db;
+    border-radius: 50%;
+    display: block;
+    margin: -75px 0 0 -75px;
+    width: 150px;
+    height: 150px;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    -webkit-animation: spin 2s linear infinite;
+    -moz-animation: spin 2s linear infinite;
+    -o-animation: spin 2s linear infinite;
+    -ms-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
 }
 #loader:before {
-  border: 3px solid transparent;
-  border-top-color: #e74c3c;
-  border-radius: 50%;
-  content: "";
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  bottom: 5px;
-  left: 5px;
-  -webkit-animation: spin 3s linear infinite;
-  -moz-animation: spin 3s linear infinite;
-  -o-animation: spin 3s linear infinite;
-  -ms-animation: spin 3s linear infinite;
-  animation: spin 3s linear infinite;
+    border: 3px solid transparent;
+    border-top-color: #e74c3c;
+    border-radius: 50%;
+    content: "";
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    bottom: 5px;
+    left: 5px;
+    -webkit-animation: spin 3s linear infinite;
+    -moz-animation: spin 3s linear infinite;
+    -o-animation: spin 3s linear infinite;
+    -ms-animation: spin 3s linear infinite;
+    animation: spin 3s linear infinite;
 }
 #loader:after {
-  border: 3px solid transparent;
-  border-top-color: #f9c922;
-  border-radius: 50%;
-  content: "";
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  bottom: 15px;
-  right: 15px;
-  -webkit-animation: spin 1.5s linear infinite;
-  -moz-animation: spin 1.5s linear infinite;
-  -o-animation: spin 1.5s linear infinite;
-  -ms-animation: spin 1.5s linear infinite;
-  animation: spin 1.5s linear infinite;
+    border: 3px solid transparent;
+    border-top-color: #f9c922;
+    border-radius: 50%;
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    bottom: 15px;
+    right: 15px;
+    -webkit-animation: spin 1.5s linear infinite;
+    -moz-animation: spin 1.5s linear infinite;
+    -o-animation: spin 1.5s linear infinite;
+    -ms-animation: spin 1.5s linear infinite;
+    animation: spin 1.5s linear infinite;
 }
 
 
 @-webkit-keyframes spin {
-  0% {
-    -webkit-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-    -ms-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
+    0% {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
 @-moz-keyframes spin {
-  0% {
-    -webkit-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-    -ms-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
+    0% {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
 @-o-keyframes spin {
-  0% {
-    -webkit-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-    -ms-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
+    0% {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
 @-ms-keyframes spin {
-  0% {
-    -webkit-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-    -ms-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
+    0% {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
 @keyframes spin {
-  0% {
-    -webkit-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-    -ms-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
+    0% {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
 
-/* CSS для анимации ожидания в стиле ios (http://codepen.io/anon/pen/MmQJbx) */ 
+/* CSS для анимации ожидания в стиле ios (http://codepen.io/anon/pen/MmQJbx) */
 div.spinner {
     position: relative;
     width: 180px;
@@ -197,72 +197,72 @@ div.gray.spinner div{
 }
 
 div.spinner div {
-  width: 6%;
-  height: 16%;
-  background: #FFF;
-  position: absolute;
-  left: 49%;
-  top: 43%;
-  opacity: 0;
-  -webkit-border-radius: 50px;
-  -webkit-box-shadow: 0 0 3px rgba(0,0,0,0.2);
-  -webkit-animation: fade 1s linear infinite;
+    width: 6%;
+    height: 16%;
+    background: #FFF;
+    position: absolute;
+    left: 49%;
+    top: 43%;
+    opacity: 0;
+    -webkit-border-radius: 50px;
+    -webkit-box-shadow: 0 0 3px rgba(0,0,0,0.2);
+    -webkit-animation: fade 1s linear infinite;
 }
 
 @-webkit-keyframes fade {
-  from {opacity: 1;}
-  to {opacity: 0.25;}
+    from {opacity: 1;}
+    to {opacity: 0.25;}
 }
 
 div.spinner div.bar1 {
-  -webkit-transform:rotate(0deg) translate(0, -130%);
-  -webkit-animation-delay: 0s;
-}    
+    -webkit-transform:rotate(0deg) translate(0, -130%);
+    -webkit-animation-delay: 0s;
+}
 
 div.spinner div.bar2 {
-  -webkit-transform:rotate(30deg) translate(0, -130%); 
-  -webkit-animation-delay: -0.9167s;
+    -webkit-transform:rotate(30deg) translate(0, -130%);
+    -webkit-animation-delay: -0.9167s;
 }
 
 div.spinner div.bar3 {
-  -webkit-transform:rotate(60deg) translate(0, -130%); 
-  -webkit-animation-delay: -0.833s;
+    -webkit-transform:rotate(60deg) translate(0, -130%);
+    -webkit-animation-delay: -0.833s;
 }
 div.spinner div.bar4 {
-  -webkit-transform:rotate(90deg) translate(0, -130%); 
-  -webkit-animation-delay: -0.7497s;
+    -webkit-transform:rotate(90deg) translate(0, -130%);
+    -webkit-animation-delay: -0.7497s;
 }
 div.spinner div.bar5 {
-  -webkit-transform:rotate(120deg) translate(0, -130%); 
-  -webkit-animation-delay: -0.667s;
+    -webkit-transform:rotate(120deg) translate(0, -130%);
+    -webkit-animation-delay: -0.667s;
 }
 div.spinner div.bar6 {
-  -webkit-transform:rotate(150deg) translate(0, -130%); 
-  -webkit-animation-delay: -0.5837s;
+    -webkit-transform:rotate(150deg) translate(0, -130%);
+    -webkit-animation-delay: -0.5837s;
 }
 div.spinner div.bar7 {
-  -webkit-transform:rotate(180deg) translate(0, -130%); 
-  -webkit-animation-delay: -0.5s;
+    -webkit-transform:rotate(180deg) translate(0, -130%);
+    -webkit-animation-delay: -0.5s;
 }
 div.spinner div.bar8 {
-  -webkit-transform:rotate(210deg) translate(0, -130%); 
-  -webkit-animation-delay: -0.4167s;
+    -webkit-transform:rotate(210deg) translate(0, -130%);
+    -webkit-animation-delay: -0.4167s;
 }
 div.spinner div.bar9 {
-  -webkit-transform:rotate(240deg) translate(0, -130%); 
-  -webkit-animation-delay: -0.333s;
+    -webkit-transform:rotate(240deg) translate(0, -130%);
+    -webkit-animation-delay: -0.333s;
 }
 div.spinner div.bar10 {
-  -webkit-transform:rotate(270deg) translate(0, -130%); 
-  -webkit-animation-delay: -0.2497s;
+    -webkit-transform:rotate(270deg) translate(0, -130%);
+    -webkit-animation-delay: -0.2497s;
 }
 div.spinner div.bar11 {
-  -webkit-transform:rotate(300deg) translate(0, -130%); 
-  -webkit-animation-delay: -0.167s;
+    -webkit-transform:rotate(300deg) translate(0, -130%);
+    -webkit-animation-delay: -0.167s;
 }
 div.spinner div.bar12 {
-  -webkit-transform:rotate(330deg) translate(0, -130%); 
-  -webkit-animation-delay: -0.0833s;
+    -webkit-transform:rotate(330deg) translate(0, -130%);
+    -webkit-animation-delay: -0.0833s;
 }
 
 .in-starting div.spinner{
@@ -270,16 +270,16 @@ div.spinner div.bar12 {
 }
 
 .in-starting div.spinner {
-    margin-top: 50%; 
+    margin-top: 50%;
 }
 
 .in-loading div.spinner {
-    margin-top: 50%; 
+    margin-top: 50%;
 }
 
 
 .navbar-toggle .icon-bar {
-    background: #fff;  
+    background: #fff;
 }
 
 
@@ -299,7 +299,7 @@ div.spinner div.bar12 {
 .platform-android .for-android{
     display: block !important;
 }
- 
+
 .borderless td, .borderless th {
     border: none;
     border-top: none !important;
@@ -354,23 +354,23 @@ div.spinner div.bar12 {
     color: #eee;
     cursor: pointer;
 }
-.boolean-title{ 
+.boolean-title{
     display: inline-block;
     position: absolute;
     padding-left: 28px;
     cursor: pointer;
 }
-    
-table{ 
+
+table{
     table-layout: fixed;
 }
 
 .popover-title{
-    color:#000; 
+    color:#000;
 }
 
 .popover-content{
-    color:#000; 
+    color:#000;
 }
 
 .popover-content i{
@@ -398,33 +398,33 @@ table{
     background-color: #3c8dbc;
     color: #fff;
 }
- 
+
 .crontabEditor .btn{
     /*background-color: #eee;*/
     min-width: 42px;
 }
 
 .popover{
-    max-width: none; 
+    max-width: none;
     word-wrap: break-word;
 }
 
 
 @media (max-width: 768px) {
     .popover{
-        max-width: 720px;  
+        max-width: 720px;
     }
 }
 
 @media (max-width: 480px) {
     .popover{
-        max-width: 420px;  
+        max-width: 420px;
     }
 }
 
 @media (max-width: 320px) {
     .popover{
-        max-width: 272px;   
+        max-width: 272px;
     }
 }
 
@@ -450,7 +450,7 @@ table{
 }
 
 .history-status-OFFLINE{
-    color: #9e9e9e;  
+    color: #9e9e9e;
 }
 
 .history-status-INTERRUPTED{
@@ -462,7 +462,7 @@ table{
 }
 
 .history-status-ERROR{
-    
+
 }
 
 .history-status-DELAY{
@@ -510,7 +510,7 @@ table{
 }
 
 @media (min-width: 767px) {
-    .history-stdout{ 
+    .history-stdout{
         max-height: calc(100vh - 414px);
     }
 }
@@ -521,9 +521,9 @@ table{
         max-width: calc(100% - 440px);
     }
 }
- 
+
 .error-note{
-    color: #ff5252; 
+    color: #ff5252;
 }
 
 .item-name{
@@ -531,10 +531,10 @@ table{
 }
 
 .input-file-holder{
-    
+
 }
 
-.btn-right{ 
+.btn-right{
     float: right;
     margin-left: 5px;
 }
@@ -574,4 +574,8 @@ table{
 
 .top-line-btn{
     margin-bottom: 5px;
+}
+
+#dnd1 div:hover {
+    cursor:move;
 }
