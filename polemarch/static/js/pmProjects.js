@@ -453,7 +453,7 @@ pmProjects.executePlaybook = function(project_id)
 {
     var data_vars = jsonEditor.jsonEditorGetValues();
     data_vars.limit = pmGroups.getGroupsAutocompleteValue();
-    return pmTasks.execute(project_id, pmProjects.inventoriesAutocompletefiled.getValue(), $('#playbook-autocomplete').val(), data_vars);
+    return pmTasks.execute(project_id, pmProjects.inventoriesAutocompletefiled.getValue(), $('#playbook-autocomplete').val(), $('#groups_autocomplete_filedprefix').val(), data_vars);
 }
 
 /**

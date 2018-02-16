@@ -188,7 +188,7 @@ pmDashboard.updateData = function()
         time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
 
         //формируем в цикле временные отрезки для графика относительно стартовой даты
-        for(var i = 1; i<= pmDashboard.statsDataLast+1; i++)
+        for(var i = 1; i<= pmDashboard.statsDataLast; i++)
         {
             tasks_data[time] = 0;
             tasks_data_t.push(time);
