@@ -50,7 +50,8 @@ except IOError:
     pass
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config.getboolean("main", "debug", fallback=False)
+DEBUG = os.getenv('DJANGO_DEBUG',
+                  config.getboolean("main", "debug", fallback=False))
 
 # Directory for git projects
 PROJECTS_DIR = config.get("main", "projects_dir", fallback="{HOME}/projects").format(**__kwargs)
