@@ -1162,6 +1162,13 @@ pmInventories.setSubGroups = function(item_id, groups_ids)
     {
         groups_ids = []
     }
+    else
+    {
+        for(var i in groups_ids)
+        {
+            groups_ids[i]=+groups_ids[i];
+        }
+    }
 
     return spajs.ajax.Call({
         url: "/api/v1/inventories/"+item_id+"/groups/",
@@ -1189,6 +1196,12 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
     if(!hosts_ids)
     {
         hosts_ids = []
+    }
+    else {
+        for(var i in hosts_ids)
+        {
+            hosts_ids[i]=+hosts_ids[i];
+        }
     }
 
     if(!item_id)
