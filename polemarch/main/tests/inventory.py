@@ -458,6 +458,20 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         self._compare_list(url, "put", 200, inv_id, hosts_id, "hosts",
                            hosts_id[2:3], 2)
 
+    def test_inventory_errors(self):
+        inv_url = '/api/v1/inventories'
+        inv_data = dict(name="inventory-test321", vars={})
+        hst_data = dict(name="inventory-test321", type="HOST", vars={})
+        inv_id = self._create_inventories([inv_data])[0]
+        hst_id = self._create_hosts([hst_data])[0]
+        data = [hst_id, 99999999]
+        url = "{}/{}/hosts/".format(inv_url, inv_id)
+        result = self.get_result('put', url, 200, data=json.dumps(data))
+        self.assertNotIn(hst_id, result['failed_list'])
+        data = [str(hst_id), 9999]
+        result = self.get_result('put', url, 200, data=json.dumps(data))
+        self.assertNotIn(hst_id, result['failed_list'])
+
     def test_filter_inventory(self):
         base_url = "/api/v1/inventories/"
         f_url = "{}?name=_inventory".format(base_url)
