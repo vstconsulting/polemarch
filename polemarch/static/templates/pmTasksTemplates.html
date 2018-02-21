@@ -2,9 +2,48 @@
 <!-- Список templates_list -->
 <script type="text/x-just" data-just="templates_widget">
     <section class="col-lg-6 col-sm-12 col-xs-12">
-        <div class="box box-info">
-            <div class="box-header with-border">
+        <div class="box box-info
+        <% for(var j in pmDashboard.model.widgets[0]){  %>
+
+            <% if(pmDashboard.model.widgets[0][j].name == 'pmwTasksTemplatesWidget' && kind=='Task'){ %>
+                <% if(pmDashboard.model.widgets[0][j].collapse) { %>
+                     collapsed-box
+                <% } %>
+            <% } %>
+            <% if(pmDashboard.model.widgets[0][j].name == 'pmwModulesTemplatesWidget' && kind=='Module'){ %>
+                <% if(pmDashboard.model.widgets[0][j].collapse) { %>
+                     collapsed-box
+                <% } %>
+            <% } %>
+        <% } %>
+        ">
+            <div class="box-header with-border cursor-move">
+
                 Templates <%- kind %>
+
+                <div class="pull-right">
+                      <button type="button" class="btn btn-sm w-btn" data-widget="collapse" onclick="pmDashboard.setNewWidgetCollapseValue(this)">
+                        <i
+                            <% for(var j in pmDashboard.model.widgets[0]){  %>
+                                <% if(pmDashboard.model.widgets[0][j].name == 'pmwTasksTemplatesWidget' && kind=='Task'){ %>
+                                    <% if(pmDashboard.model.widgets[0][j].collapse) { %>
+                                        class="fa fa-plus"
+                                    <% } else { %>
+                                        class="fa fa-minus"
+                                    <% } %>
+                                <% } %>
+                                <% if(pmDashboard.model.widgets[0][j].name == 'pmwModulesTemplatesWidget' && kind=='Module'){ %>
+                                    <% if(pmDashboard.model.widgets[0][j].collapse) { %>
+                                        class="fa fa-plus"
+                                    <% } else { %>
+                                        class="fa fa-minus"
+                                    <% } %>
+                                <% } %>
+                            <% } %>
+                        ></i>
+                      </button>
+                      <button type="button" class="btn btn-sm w-btn" data-widget="remove" onclick="pmDashboard.setNewWidgetActiveValue(this)"><i class="fa fa-times"></i></button>
+                </div>
             </div>
             <div class="box-body">
                 <table class="table table-bordered">

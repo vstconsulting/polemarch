@@ -242,6 +242,7 @@ pmUsers.copyItem = function(item_id)
 
     return def.promise();
 }
+
    
  tabSignal.connect("polemarch.start", function()
  {

@@ -54,39 +54,100 @@ pmDashboard.model.widgets = [
     [
         {
             name:'pmwTemplatesCounter',
+            title:'Templates Counter',
             sortNum:0,
+            active:true,
             opt:{},
+            type:1,
+            collapse:false,
         },
         {
             name:'pmwProjectsCounter',
+            title:'Projects Counter',
             sortNum:1,
+            active:true,
             opt:{},
+            type:1,
+            collapse:false,
         },
         {
             name:'pmwInventoriesCounter',
+            title:'Inventories Counter',
             sortNum:2,
+            active:true,
             opt:{},
+            type:1,
+            collapse:false,
         },
         {
             name:'pmwHostsCounter',
+            title:'Hosts Counter',
             sortNum:3,
+            active:true,
             opt:{},
+            type:1,
+            collapse:false,
         },
         {
             name:'pmwGroupsCounter',
+            title:'Groups Counter',
             sortNum:4,
+            active:true,
             opt:{},
+            type:1,
+            collapse:false,
         },
         {
             name:'pmwUsersCounter',
+            title:'Users Counter',
             sortNum:5,
+            active:true,
             opt:{},
-        }, /**/
+            type:1,
+            collapse:false,
+        },
+        {
+            name:'pmwAnsibleModuleWidget',
+            title:'Run shell command',
+            sortNum:6,
+            active:true,
+            opt:{},
+            type:0,
+            collapse:false,
+        },
+        {
+            name:'pmwChartWidget',
+            title:'Tasks history',
+            sortNum:7,
+            active:true,
+            opt:{},
+            type:0,
+            collapse:false,
+        },
+        {
+            name:'pmwTasksTemplatesWidget',
+            title:'Templates Task',
+            sortNum:8,
+            active:true,
+            opt:{},
+            type:0,
+            collapse:false,
+        },
+        {
+            name:'pmwModulesTemplatesWidget',
+            title:'Templates Module',
+            sortNum:9,
+            active:true,
+            opt:{},
+            type:0,
+            collapse:false,
+        },/**/
     ],
 ]
 
+
 /**
-*Функция, сортирующая массив объектов.
+ *Функция, сортирующая массив объектов.
  */
 pmDashboard.sortCountWidget=function(Obj1, Obj2)
 {
@@ -94,32 +155,260 @@ pmDashboard.sortCountWidget=function(Obj1, Obj2)
 }
 
 /**
-*Функция, обновляющая свойство SortNum(номер, учитываемый при сортировке) у объекта Widget-Count.
+ *Функция, обновляющая настройки только одного виджета.
  */
-pmDashboard.udpateSortNumCountWidget = function(widget)
+pmDashboard.udpateOneWidgetSettings = function(widget)
 {
     var wName=widget.name;
     if(window.localStorage[wName])
     {
-        widget.sortNum=window.localStorage[wName];
+        var objFromLocalStorage=JSON.parse(window.localStorage[wName]);
+        widget.sortNum=objFromLocalStorage.sortNum;
+        widget.active=objFromLocalStorage.active;
+        widget.collapse=objFromLocalStorage.collapse;
     }
     return widget;
 }
 
 /**
-*Функция, обновляющая свойство SortNum у всех объектов Widget-Count.
+ *Функция, обновляющая настройки всех виджетов сразу.
  */
-pmDashboard.udpateAllSortNumCountWidgets = function(widgetGroup)
+pmDashboard.udpateAllWidgetsSettings = function(widgetGroup)
 {
     for(var i=0; i<widgetGroup.length; i++){
-        pmDashboard.udpateSortNumCountWidget(widgetGroup[i]);
+        pmDashboard.udpateOneWidgetSettings(widgetGroup[i]);
     }
     pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
     return widgetGroup;
 }
 
-pmDashboard.udpateAllSortNumCountWidgets(pmDashboard.model.widgets[0]);
+/**
+ *Функция, меняющая свойство виджета active на false.
+ */
+pmDashboard.setNewWidgetActiveValue = function(thisButton)
+{
+    var widgetName=thisButton.parentElement.parentElement.parentElement.parentElement.parentElement.getAttribute("id");
+    for(var i in pmDashboard.model.widgets[0])
+    {
+        if(pmDashboard.model.widgets[0][i].name==widgetName)
+        {
+            pmDashboard.model.widgets[0][i].active=false;
+            var objJSON=JSON.stringify(pmDashboard.model.widgets[0][i]);
+            window.localStorage.setItem(widgetName, objJSON);
+        }
+    }
+}
 
+/**
+ *Функция, меняющая свойство виджета collapse на противоположное (true-false).
+ */
+pmDashboard.setNewWidgetCollapseValue = function(thisButton)
+{
+    var widgetName=thisButton.parentElement.parentElement.parentElement.parentElement.parentElement.getAttribute("id");
+    for(var i in pmDashboard.model.widgets[0])
+    {
+        if(pmDashboard.model.widgets[0][i].name==widgetName)
+        {
+            pmDashboard.model.widgets[0][i].collapse=!pmDashboard.model.widgets[0][i].collapse;
+            var objJSON=JSON.stringify(pmDashboard.model.widgets[0][i]);
+            window.localStorage.setItem(widgetName, objJSON);
+
+            //скрываем селект с выбором периода на виджете-графике при его сворачивании
+            if(widgetName=="pmwChartWidget")
+            {
+                if(pmDashboard.model.widgets[0][i].collapse==false)
+                {
+                    $("#period-list").slideDown(400);
+                }
+                else
+                {
+                    $("#period-list").slideUp(400);
+                }
+
+            }
+        }
+    }
+}
+
+/**
+ *Функция, сохраняющая настройки виджетов, внесенные в модальном окне.
+ */
+pmDashboard.saveWigdetsOptionsFromModal = function()
+{
+    var modalTable=document.getElementById("modal-table");
+    var modalTableTr=modalTable.getElementsByTagName("tr");
+    for(var i=1; i<modalTableTr.length; i++)
+    {
+        var widgetName=modalTableTr[i].getAttribute("rowname");
+        var modalTableTrTds=modalTableTr[i].children;
+        for(var j=0; j<modalTableTrTds.length; j++)
+        {
+            var valueName=modalTableTrTds[j].getAttribute("valuename");
+
+            if(valueName)
+            {
+                var classList1=modalTableTrTds[j].children[0].classList;
+                var selected=false;
+                for(var k in classList1)
+                {
+                    if(classList1[k]=="selected")
+                    {
+                        selected=true;
+                    }
+                }
+                for(var z in  pmDashboard.model.widgets[0])
+                {
+                    if(pmDashboard.model.widgets[0][z].name==widgetName)
+                    {
+                        pmDashboard.model.widgets[0][z][valueName]=selected;
+                        var objJSON=JSON.stringify(pmDashboard.model.widgets[0][z]);
+                        window.localStorage.setItem(widgetName, objJSON);
+                    }
+                }
+            }
+        }
+    }
+
+    $.when(pmDashboard.HideAfterSaveModalWindow()).done(function(){
+        return setTimeout(function(){return spajs.openURL("/");}, 250);
+    })
+}
+
+/**
+ * Функция, которая формирует массив данных для кривых графика по отдельному статусу
+ */
+pmDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
+{
+    for(var i in tasks_data) {
+        tasks_data[i]=0;
+    }
+
+
+    for(var i in pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType])
+    {
+        var val = pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType][i];
+        var time = new Date(val[pmDashboard.statsDataMomentType])
+        time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
+
+        if(val.status==status){
+            tasks_data[time] = val.sum;
+            tasks_data_t.push(time)
+        }
+    }
+
+    var chart_tasks_data1 = [status];
+
+    for(var j in tasks_data_t)
+    {
+        var time = tasks_data_t[j]
+        chart_tasks_data1.push(tasks_data[time]/1);
+    }
+    return chart_tasks_data1;
+
+}
+
+/**
+ * Функция, отправляющая запрос /api/v1/stats/,
+ * который дает нам информацию для виджетов класса pmwItemsCounter,
+ * а также для графика на странице Dashboard.
+ */
+pmDashboard.loadStats=function()
+{
+    var limit=1;
+    var thisObj = this;
+    return spajs.ajax.Call({
+        url: "/api/v1/stats/?last="+pmDashboard.statsDataLastQuery,
+        type: "GET",
+        contentType: 'application/json',
+        data: "limit=" + encodeURIComponent(limit)+"&rand="+Math.random(),
+        success: function (data)
+        {
+            pmDashboard.statsData=data;
+        },
+        error: function (e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+        }
+    });
+}
+
+/**
+ *Функция вызывается, когда происходит изменение периода на графике(пользователь выбрал другой option в select).
+ *Функция обновляет значения переменных, которые в дальнейшем используются для запроса к api/v1/stats и отрисовки графика.
+ */
+
+pmDashboard.updateStatsDataLast=function(thisEl)
+{
+    var newLast=thisEl.value;
+    switch(newLast) {
+        case '1095':
+            pmDashboard.statsDataLast=3;
+            pmDashboard.statsDataMomentType="year";
+            window.localStorage['selected-chart-period']=3;
+            window.localStorage['selected-chart-period-type']="year";
+            break;
+        case '365':
+            pmDashboard.statsDataLast=13;
+            pmDashboard.statsDataMomentType="month";
+            window.localStorage['selected-chart-period']=13;
+            window.localStorage['selected-chart-period-type']="month";
+            break;
+        case '99':
+            pmDashboard.statsDataLast=3;
+            pmDashboard.statsDataMomentType="month";
+            window.localStorage['selected-chart-period']=3;
+            window.localStorage['selected-chart-period-type']="month";
+            break;
+        default:
+            pmDashboard.statsDataLast=+newLast;
+            pmDashboard.statsDataMomentType="day";
+            window.localStorage['selected-chart-period']=+newLast;
+            window.localStorage['selected-chart-period-type']="day";
+            break;
+    }
+    pmDashboard.statsDataLastQuery=+newLast;
+    window.localStorage['selected-chart-period-query']=+newLast;
+    pmDashboard.updateData();
+}
+
+/**
+ * Ниже представлены 3 функции для работы с модальным окном - Set widget options
+ * pmDashboard.showModalWindow - открывает модальное окно, предварительно обновляя данные
+ * pmDashboard.HideAfterSaveModalWindow - скрывает модальное окно
+ * pmDashboard.renderModalWindow - отрисовывает модальное окно
+ */
+
+pmDashboard.showModalWindow = function()
+{
+    if($('div').is('#modal-widgets-settings'))
+    {
+        pmDashboard.udpateAllWidgetsSettings(pmDashboard.model.widgets[0]);
+        $('#modal-widgets-settings').empty();
+        $('#modal-widgets-settings').html(pmDashboard.renderModalWindow());
+        $("#modal-widgets-settings").modal('show');
+    }
+}
+
+pmDashboard.HideAfterSaveModalWindow = function()
+{
+    if($('div').is('#modal-widgets-settings'))
+    {
+        $("#modal-widgets-settings").modal('hide');
+    }
+
+}
+
+pmDashboard.renderModalWindow = function()
+{
+    var html=spajs.just.render('modalWidgetsSettings');
+    return html;
+}
+
+
+
+
+pmDashboard.udpateAllWidgetsSettings(pmDashboard.model.widgets[0]);
 
 pmDashboard.stopUpdates = function()
 {
@@ -246,44 +535,12 @@ pmDashboard.updateData = function()
     }, 1000*30)
 }
 
-/**
- * Функция, которая формирует массив данных для кривых графика по отдельному статусу
- */
-pmDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
-{
-    for(var i in tasks_data) {
-        tasks_data[i]=0;
-    }
 
-
-    for(var i in pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType])
-    {
-        var val = pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType][i];
-        var time = new Date(val[pmDashboard.statsDataMomentType])
-        time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
-
-        if(val.status==status){
-            tasks_data[time] = val.sum;
-            tasks_data_t.push(time)
-        }
-    }
-
-    var chart_tasks_data1 = [status];
-
-    for(var j in tasks_data_t)
-    {
-        var time = tasks_data_t[j]
-        chart_tasks_data1.push(tasks_data[time]/1);
-    }
-    return chart_tasks_data1;
-
-}
 
 
 pmDashboard.open  = function(holder, menuInfo, data)
 {
-
-    pmDashboard.udpateAllSortNumCountWidgets(pmDashboard.model.widgets[0]);
+    pmDashboard.udpateAllWidgetsSettings(pmDashboard.model.widgets[0]);
 
     var thisObj = this
 
@@ -292,7 +549,7 @@ pmDashboard.open  = function(holder, menuInfo, data)
     {
         for(var j in pmDashboard.model.widgets[i])
         {
-            if(pmDashboard.model.widgets[i][j].widget === undefined)
+            if(pmDashboard.model.widgets[i][j].widget === undefined  )
             {
                 pmDashboard.model.widgets[i][j].widget = new window[pmDashboard.model.widgets[i][j]['name']](pmDashboard.model.widgets[i][j].opt);
             }
@@ -302,9 +559,10 @@ pmDashboard.open  = function(holder, menuInfo, data)
     this.updateData()
     $(holder).insertTpl(spajs.just.render('dashboard_page', {}))
 
-    pmTasksTemplates.showTaskWidget($("#pmTasksTemplates-showTaskWidget"));
-    pmTasksTemplates.showModuleWidget($("#pmTasksTemplates-showModuleWidget"));
-    pmAnsibleModule.fastCommandWidget($("#pmAnsibleModule-fastCommandWidget"))
+    pmwTasksTemplatesWidget.render();
+    pmwModulesTemplatesWidget.render();
+    pmwAnsibleModuleWidget.render();
+    pmwChartWidget.render();
 
     pmDashboard.model.historyChart = c3.generate({
         bindto: '#c3-history-chart',
@@ -345,25 +603,24 @@ pmDashboard.open  = function(holder, menuInfo, data)
         $('#chart-period').val(pmDashboard.statsDataLastQuery).change();
     }
 
-    //drag and drop для виджетов-счетчиков
-    if($('div').is('#dnd1'))
+    //drag and drop для виджетов
+    if($('div').is('#dnd-container'))
     {
-        var groups_sort = Sortable.create(document.getElementById("dnd1"), {
+        var widget_sort = Sortable.create(document.getElementById("dnd-container"), {
             animation: 150, // ms, animation speed moving items when sorting, `0` — without animation
-            handle: ".w-count", // Restricts sort start click/touch to the specified element
-            draggable: ".w-count", // Specifies which items inside the element should be sortable
+            handle: ".dnd-block", // Restricts sort start click/touch to the specified element
+            draggable: ".dnd-block", // Specifies which items inside the element should be sortable
             onUpdate: function (evt)
             {
                 // console.log("onUpdate[1]", evt);
                 var item = evt.item; // the current dragged HTMLElement
                 //запоминаем новый порядок сортировки
-                var divArr=$('.w-count');
+                var divArr=$('.dnd-block');
                 var idArr=[];
                 for (var i=0; i<divArr.length; i++)
                 {
                     idArr.push(divArr[i].id);
                 }
-
                 for(var i=0; i<idArr.length; i++)
                 {
                     for(var j=0; j<pmDashboard.model.widgets[0].length; j++)
@@ -372,14 +629,15 @@ pmDashboard.open  = function(holder, menuInfo, data)
                         {
                             pmDashboard.model.widgets[0][j].sortNum=i;
                             var t=pmDashboard.model.widgets[0][j].name;
-                            window.localStorage.setItem(t, i);
+                            var objJSON=JSON.stringify(pmDashboard.model.widgets[0][j]);
+                            window.localStorage.setItem(t, objJSON);
+
                         }
                     }
                 }
             }
         });
     }
-
 }
 
 tabSignal.connect("polemarch.start", function()
@@ -392,72 +650,6 @@ tabSignal.connect("polemarch.start", function()
     })
 
 })
-
-
-/**
- * Функция, отправляющая запрос /api/v1/stats/,
- * который дает нам информацию для виджетов класса pmwItemsCounter,
- * а также для графика на странице Dashboard.
- */
-pmDashboard.loadStats=function()
-{
-    var limit=1;
-    var thisObj = this;
-    return spajs.ajax.Call({
-        url: "/api/v1/stats/?last="+pmDashboard.statsDataLastQuery,
-        type: "GET",
-        contentType: 'application/json',
-        data: "limit=" + encodeURIComponent(limit)+"&rand="+Math.random(),
-        success: function (data)
-        {
-            pmDashboard.statsData=data;
-        },
-        error: function (e)
-        {
-            console.warn(e)
-            polemarch.showErrors(e)
-        }
-    });
-}
-
-/**
- *Функция вызывается, когда происходит изменение периода на графике(пользователь выбрал другой option в select).
- *Функция обновляет значения переменных, которые в дальнейшем используются для запроса к api/v1/stats и отрисовки графика.
- */
-
-pmDashboard.updateStatsDataLast=function(thisEl)
-{
-    var newLast=thisEl.value;
-    switch(newLast) {
-        case '1095':
-            pmDashboard.statsDataLast=3;
-            pmDashboard.statsDataMomentType="year";
-            window.localStorage['selected-chart-period']=3;
-            window.localStorage['selected-chart-period-type']="year";
-            break;
-        case '365':
-            pmDashboard.statsDataLast=13;
-            pmDashboard.statsDataMomentType="month";
-            window.localStorage['selected-chart-period']=13;
-            window.localStorage['selected-chart-period-type']="month";
-            break;
-        case '99':
-            pmDashboard.statsDataLast=3;
-            pmDashboard.statsDataMomentType="month";
-            window.localStorage['selected-chart-period']=3;
-            window.localStorage['selected-chart-period-type']="month";
-            break;
-        default:
-            pmDashboard.statsDataLast=+newLast;
-            pmDashboard.statsDataMomentType="day";
-            window.localStorage['selected-chart-period']=+newLast;
-            window.localStorage['selected-chart-period-type']="day";
-            break;
-    }
-    pmDashboard.statsDataLastQuery=+newLast;
-    window.localStorage['selected-chart-period-query']=+newLast;
-    pmDashboard.updateData();
-}
 
 
 /**
@@ -476,6 +668,45 @@ pmDashboardWidget = {
         mergeDeep(this.model, opt)
     }
 }
+
+/**
+ * Создание классов для виджетов: tasks history, run shell command, template tasks, template module
+ * @type Object
+ */
+
+var pmwTasksTemplatesWidget = inheritance(pmDashboardWidget);
+pmwTasksTemplatesWidget.render = function()
+{
+    var div_id="#pmwTasksTemplatesWidget";
+    pmTasksTemplates.showTaskWidget($(div_id));
+    return "";
+}
+
+var pmwModulesTemplatesWidget = inheritance(pmDashboardWidget);
+pmwModulesTemplatesWidget.render = function()
+{
+    var div_id="#pmwModulesTemplatesWidget";
+    pmTasksTemplates.showModuleWidget($(div_id));
+    return "";
+}
+
+var pmwAnsibleModuleWidget = inheritance(pmDashboardWidget);
+pmwAnsibleModuleWidget.render = function()
+{
+    var div_id="#pmwAnsibleModuleWidget";
+    pmAnsibleModule.fastCommandWidget($(div_id));
+    return "";
+}
+
+var pmwChartWidget=inheritance(pmDashboardWidget);
+pmwChartWidget.render = function()
+{
+    var div_id="#pmwChartWidget";
+    var html=spajs.just.render('pmwChartWidget');
+    $(div_id).html(html);
+    return "";
+}
+
 
 /**
  * Базовый класс виджета показывающего количество элементов
