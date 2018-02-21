@@ -14,7 +14,7 @@ services:
   memcache-server:
     container_name: cachetest
     image: memcached
-  polemarch_test:
+  polemarch_test_rpm:
     build:
       context: .
       dockerfile: docker/Dockerfile.test.rpm

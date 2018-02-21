@@ -279,6 +279,23 @@ class ApiUsersTestCase(BaseTestCase):
         result = self.get_result("get", url_ug)
         self.assertCount(result["users"], 0)
 
+    def test_users_localsettings(self):
+        user_url = "/api/v1/users/{}/".format(self.user.id)
+        result = self.get_result("get", user_url)
+        self.assertEqual(result["username"], self.user.username)
+        data = {"some": True}
+        result = self.get_result(
+            "post", "{}settings/".format(user_url), 200, data=json.dumps(data)
+        )
+        self.assertEqual(result, data)
+        result = self.get_result("get", "{}settings/".format(user_url))
+        self.assertEqual(result, data)
+        result = self.get_result("delete", "{}settings/".format(user_url), 200)
+        self.assertEqual(result, {})
+        self.assertCount(
+            self.get_result("get", "{}settings/".format(user_url)), 0
+        )
+
 
 class APITestCase(ApiUsersTestCase,
                   ApiHostsTestCase, ApiGroupsTestCase,

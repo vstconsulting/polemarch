@@ -10,7 +10,7 @@ django-docs==0.2.1
 djangorestframework>=3.4, <=3.6.4
 django-filter
 django-crispy-forms
-django-celery-beat==1.0.1
+django-celery-beat==1.1.1
 jsonfield==2.0.2
 uWSGI==2.0.16
 

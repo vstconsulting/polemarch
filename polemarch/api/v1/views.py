@@ -55,6 +55,15 @@ class UserViewSet(base.ModelViewSetSet):
         self.perform_update(serializer)
         return base.Response(serializer.data, 200).resp
 
+    @detail_route(methods=["post", "delete", "get"], url_path="settings")
+    def user_settings(self, request, *args, **kwargs):
+        obj = self.get_object()
+        method = request.method
+        if method != "GET":
+            obj.settings.data = request.data if method == "POST" else {}
+            obj.settings.save()
+        return base.Response(obj.settings.data, 200).resp
+
 
 class TeamViewSet(base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.UserGroup
