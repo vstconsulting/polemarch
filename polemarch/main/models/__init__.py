@@ -13,7 +13,7 @@ from django.conf import settings
 from .vars import Variable
 from .hosts import Host, Group, Inventory
 from .projects import Project
-from .users import BaseUser, UserGroup, ACLPermission
+from .users import BaseUser, UserGroup, ACLPermission, UserSettings
 from .tasks import Task, PeriodicTask, History, HistoryLines, Template
 from .hooks import Hook
 from ..validators import RegexValidator
@@ -220,3 +220,8 @@ def polemarch_hook(instance, **kwargs):
     elif not created:
         when = "on_object_upd"
     send_polemarch_models(when, instance)
+
+
+@receiver(signals.post_save, sender=BaseUser)
+def create_settings_for_user(instance, **kwargs):
+    UserSettings.objects.get_or_create(user=instance)
