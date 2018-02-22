@@ -1053,7 +1053,12 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         self.assertEquals(result, raw_stdout)
 
         # Clear output
+        history.status = "RUN"
+        history.save()
         url = "/api/v1/history/{}/clear/".format(history.id)
+        self.get_result("delete", url, 406)
+        history.status = "OK"
+        history.save()
         self.get_result("delete", url)
         url = "/api/v1/history/{}/raw/".format(history.id)
         result = self.get_result("get", url)

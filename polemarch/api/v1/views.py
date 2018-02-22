@@ -201,8 +201,13 @@ class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
 
     @detail_route(methods=["delete"])
     def clear(self, request, *args, **kwargs):
+        default_message = "Output trancated.\n"
         obj = self.get_object()
-        obj.raw_stdout = "Output trancated.\n"
+        if obj.status == "RUN" or obj.raw_stdout == default_message:
+            raise excepts.NotAcceptable(
+                "Job is running or already trancated"
+            )
+        obj.raw_stdout = default_message
         result = self.get_serializer(obj).get_raw(request)
         return base.Response(result, 204).resp
 
