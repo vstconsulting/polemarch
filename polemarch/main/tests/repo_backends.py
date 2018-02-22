@@ -73,6 +73,7 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         project = self.get_result("get", single_url)
         self.assertEqual(project['status'], "OK")
         self.assertEqual(project['vars']['repo_branch'], "master")
+        self.assertEqual(project['branch'], "master")
         tasks_url = "/api/v1/tasks/?project={}".format(prj_id)
         tasks = self.get_result("get", tasks_url, 200)
         self.assertEquals(tasks["count"], 2)
@@ -85,10 +86,14 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         # change project branch
         data['vars']['repo_branch'] = "new_branch"
         self.get_result("patch", single_url, data=json.dumps(data))
+        project = self.get_result("get", single_url)
+        self.assertEqual(project['vars']['repo_branch'], "new_branch")
+        self.assertEqual(project['branch'], "master")
         self.get_result("post", single_url + "sync/", 200)
         project = self.get_result("get", single_url)
         self.assertEqual(project['status'], "OK")
         self.assertEqual(project['vars']['repo_branch'], "new_branch")
+        self.assertEqual(project['branch'], "new_branch")
         self.assertEqual(project["revision"], first_revision)
 
         # clone with branch name

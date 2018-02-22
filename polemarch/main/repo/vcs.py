@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import git
 from ._base import _Base, os
-from ..utils import tmp_file_context
+from ..utils import tmp_file_context, raise_context
 
 
 class _VCS(_Base):
@@ -48,6 +48,12 @@ class Git(_VCS):
             kwargs = self.options.get("FETCH_KWARGS", dict())
             fetch_result = repo.remotes.origin.pull(**kwargs)
         return fetch_result
+
+    def get_branch_name(self):
+        # pylint: disable=broad-except
+        with raise_context():
+            return self.get_repo().active_branch.name
+        return "waiting..."
 
     def make_clone(self, env):
         kw = dict(**self.options.get("CLONE_KWARGS", dict()))

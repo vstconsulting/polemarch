@@ -697,6 +697,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'vars',
                   'owner',
                   'revision',
+                  'branch',
                   'url',)
 
     def inventories_operations(self, method, data):

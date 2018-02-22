@@ -75,6 +75,9 @@ class _Base(object):
         # pylint: disable=unused-argument
         return "NO VCS"
 
+    def get_branch_name(self):
+        return "NO VCS"
+
     def delete(self):
         if os.path.exists(self.path):
             if os.path.isfile(self.path):
