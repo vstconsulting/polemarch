@@ -5,7 +5,18 @@ from ._base import _Base, os
 from ..utils import tmp_file_context
 
 
-class Git(_Base):
+class _VCS(_Base):
+    def vsc_clone(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def vcs_update(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def get_repo(self, *args, **kwargs):
+        raise NotImplementedError()
+
+
+class Git(_VCS):
     _fetch_statuses = [
         "NEW_TAG", "NEW_HEAD", "HEAD_UPTODATE",
         "TAG_UPDATE", "REJECTED", "FORCED_UPDATE",
@@ -26,28 +37,47 @@ class Git(_Base):
             1 << x: self._fetch_statuses[x] for x in range(8)
         }
 
+    def get_repo(self):
+        return git.Repo(self.path)
+
+    def vsc_clone(self, *args, **kwargs):
+        return git.Repo.clone_from(*args, **kwargs)
+
+    def vcs_update(self, repo, env):
+        with repo.git.custom_environment(**env):
+            kwargs = self.options.get("FETCH_KWARGS", dict())
+            fetch_result = repo.remotes.origin.pull(**kwargs)
+        return fetch_result
+
     def make_clone(self, env):
-        repo = git.Repo.clone_from(self.proj.repository, self.path, env=env,
-                                   **self.options.get("CLONE_KWARGS", dict()))
+        kw = dict(**self.options.get("CLONE_KWARGS", dict()))
+        branch = self.proj.vars.get('repo_branch', None)
+        if branch:
+            kw['branch'] = branch
+        repo = self.vsc_clone(self.proj.repository, self.path, env=env, **kw)
+        self.proj.variables.update_or_create(
+            key='repo_branch', defaults=dict(value=repo.active_branch.name)
+        )
         return repo, None
 
     def _get_or_create_repo(self, env):
         try:
-            repo = git.Repo(self.path)
+            repo = self.get_repo()
+            branch = self.proj.vars.get('repo_branch', None)
+            if branch and repo.active_branch.name != branch:
+                self.delete()
+                raise git.NoSuchPathError
         except git.NoSuchPathError:
             repo = self.make_clone(env)[0]
         return repo
 
     def make_update(self, env):
         repo = self._get_or_create_repo(env)
-        with repo.git.custom_environment(**env):
-            kwargs = self.options.get("FETCH_KWARGS", dict())
-            fetch_result = repo.remotes.origin.pull(**kwargs)
-        return repo, fetch_result
+        return repo, self.vcs_update(repo, env)
 
     def get_revision(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        repo = git.Repo(self.path)
+        repo = self.get_repo()
         return repo.head.object.hexsha
 
     def _with_password(self, tmp, env_vars):

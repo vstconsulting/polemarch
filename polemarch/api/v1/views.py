@@ -203,7 +203,7 @@ class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
     def clear(self, request, *args, **kwargs):
         default_message = "Output trancated.\n"
         obj = self.get_object()
-        if obj.status == "RUN" or obj.raw_stdout == default_message:
+        if obj.status in ["RUN", 'DELAY'] or obj.raw_stdout == default_message:
             raise excepts.NotAcceptable(
                 "Job is running or already trancated"
             )
