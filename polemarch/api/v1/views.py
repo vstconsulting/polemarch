@@ -199,6 +199,13 @@ class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
         objs = self.get_serializer(self.get_object()).get_facts(request)
         return base.Response(objs, 200).resp
 
+    @detail_route(methods=["delete"])
+    def clear(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.raw_stdout = "Output trancated.\n"
+        result = self.get_serializer(obj).get_raw(request)
+        return base.Response(result, 204).resp
+
 
 class TemplateViewSet(base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Template
