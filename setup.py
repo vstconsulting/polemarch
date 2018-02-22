@@ -120,10 +120,6 @@ cmdclass = {
 
 if has_sphinx:
     cmdclass['build_sphinx'] = BuildDoc
-    if [i for i in ['compile', 'install', 'sdist'] if i in sys.argv]:
-        sphinx.build_main(['setup.py', '-b', 'html',
-                           './doc/',
-                           './polemarch/doc/html/'])
 
 setup(
     name='polemarch',

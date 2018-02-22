@@ -153,7 +153,7 @@ if __DB_SETTINGS['ENGINE'] == 'django.db.backends.mysql':  # nocv
     pymysql.install_as_MySQLdb()
 
 if __DB_SETTINGS['ENGINE'] == 'django.db.polemarch.sqlite3':
-    __DB_OPTIONS["timeout"] = __DB_OPTIONS.get("timeout", 10)  # nocv
+    __DB_OPTIONS["timeout"] = __DB_OPTIONS.get("timeout", 20)  # nocv
 
 __DB_SETTINGS["OPTIONS"] = __DB_OPTIONS
 
