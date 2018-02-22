@@ -52,6 +52,15 @@ if(window.localStorage['selected-chart-period'] && window.localStorage['selected
  */
 pmDashboard.model.widgets = [
     [
+
+    ],
+]
+
+/*
+*Двумерный массив, хранящий в себе настройки виджетов по умолчанию.
+ */
+pmDashboard.model.defaultWidgets = [
+    [
         {
             name:'pmwTemplatesCounter',
             title:'Templates Counter',
@@ -147,39 +156,205 @@ pmDashboard.model.widgets = [
 
 
 /**
+ * Функция полностью копирует настройки по умолчанию для виджетов.
+ * Подразумевается, что данная функция вызывается, когда пришел из API пустой JSON.
+ */
+pmDashboard.cloneDefaultWidgetsTotally = function(){
+    for(var i in pmDashboard.model.defaultWidgets[0])
+    {
+        pmDashboard.model.widgets[0][i]={};
+        for (var j in pmDashboard.model.defaultWidgets[0][i])
+        {
+            pmDashboard.model.widgets[0][i][j]=pmDashboard.model.defaultWidgets[0][i][j];
+        }
+    }
+    console.log(pmDashboard.model.widgets[0]);
+    return pmDashboard.model.widgets[0];
+}
+
+/**
+ * Функция копирует "статичные" настройки по умолчанию для виджетов.
+ * Под "статичными" понимается name, title, opt, type.
+ * Данные настройки не меняются в ходе работы пользователя с интерфейсом.
+ * Подразумевается, что данная функция вызывается, когда пришел из API непустой JSON.
+ */
+pmDashboard.cloneDefaultWidgetsStaticSettingsOnly = function(){
+    for(var i in pmDashboard.model.defaultWidgets[0])
+    {
+        pmDashboard.model.widgets[0][i]={};
+        pmDashboard.model.widgets[0][i].name=pmDashboard.model.defaultWidgets[0][i].name;
+        pmDashboard.model.widgets[0][i].title=pmDashboard.model.defaultWidgets[0][i].title;
+        pmDashboard.model.widgets[0][i].opt=pmDashboard.model.defaultWidgets[0][i].opt;
+        pmDashboard.model.widgets[0][i].type=pmDashboard.model.defaultWidgets[0][i].type;
+    }
+    return pmDashboard.model.widgets[0];
+}
+
+/**
+ * Функция добавляет виджету оставшиеся(не "статичные") настройки.
+ * Функция проверяет есть ли соответсвуют ли пришедшие настройки для виджетов из API тем,
+ * что хранятся в массиве с настройками по умолчанию.
+ * Если данное свойство соответсвует, то его значение присваивается настройкам виджета.
+ * В противном случае ему присваивается настройка по умолчанию.
+ */
+pmDashboard.clonetWidgetsSettingsFromApiAndVerify = function(data){
+    pmDashboard.cloneDefaultWidgetsStaticSettingsOnly();
+    for(var i in pmDashboard.model.defaultWidgets[0])
+    {
+        for(var j in data)
+        {
+            if(pmDashboard.model.defaultWidgets[0][i].name==j)
+            {
+                for (var k in pmDashboard.model.defaultWidgets[0][i])
+                {
+                    if(k in data[j]){
+                        pmDashboard.model.widgets[0][i][k]=data[j][k];
+                    }
+                    else
+                    {
+                        pmDashboard.model.widgets[0][i][k]=pmDashboard.model.defaultWidgets[0][i][k];
+                    }
+                }
+            }
+        }
+    }
+    return pmDashboard.model.widgets[0];
+}
+
+/**
+ * Функция проверяет необходимо ли посылать запрос к API для загрузки пользовательских настроек виджетов.
+ * Если в модели отсутствует какой-либо виджет, либо у виджета отсутсвует какое-нибудь свойство,
+ * то запрос к API будет отправлен.
+ */
+pmDashboard.checkWidgetSettings = function()
+{
+    var bool1=false, bool2=false;
+    for (var i in pmDashboard.model.defaultWidgets[0]){
+        for (var j in pmDashboard.model.widgets[0])
+        {
+            if(pmDashboard.model.defaultWidgets[0][i].name==pmDashboard.model.widgets[0][j].name)
+            {
+                for(var k in pmDashboard.model.defaultWidgets[0][i])
+                {
+                    if(!(k in pmDashboard.model.widgets[0][j])){
+                       bool1=true;
+                    }
+
+                }
+            }
+        }
+    }
+
+    if(pmDashboard.model.defaultWidgets[0].length!=pmDashboard.model.widgets[0].length)
+    {
+        bool2=true;
+    }
+
+    if(bool1 || bool2)
+    {
+        //нужно послать запрос к api
+        return true;
+    }
+    else
+    {
+        //не нужно посылать запрос к api
+        return false;
+    }
+}
+
+/**
+ *Функция создает объект, в который вносит актуальные настройки виджета,
+ *на основе изменений, внесенных в pmDashboard.model.widgets[0][i].
+ *localObj- pmDashboard.model.widgets[0][i]
+ * @type Object
+ */
+pmDashboard.getNewWidgetSettings = function(localObj)
+{
+    var obj={};
+    obj.sortNum=localObj.sortNum;
+    obj.active=localObj.active;
+    obj.collapse=localObj.collapse;
+    return obj;
+}
+
+/**
+ *Функция заправшивает у API пользовательские настройки виджетов.
+ *Если они есть(пришел не пустой объект), то данные настройки добавляются в local storage.
+ */
+pmDashboard.getUserWidgetSettingsFromAPI = function()
+{
+    var userId=window.my_user_id;
+    if(pmDashboard.checkWidgetSettings())
+    {
+       return spajs.ajax.Call({
+        url: "/api/v1/users/" + userId + "/settings/",
+        type: "GET",
+        contentType: 'application/json',
+        success: function (data)
+        {
+            if ($.isEmptyObject(data))
+            {
+                console.log("empty object");
+                pmDashboard.cloneDefaultWidgetsTotally();
+            }
+            else
+            {
+                console.log("not empty object");
+                pmDashboard.clonetWidgetsSettingsFromApiAndVerify(data);
+                pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
+            }
+        },
+        error: function (e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+        }
+    });
+    }
+    else
+    {
+        return false;
+    }
+
+
+}
+
+/**
+ *Функция сохраняет в API пользовательские настройки виджетов.
+ */
+pmDashboard.putUserWidgetSettingsToAPI = function()
+{
+    var userId=window.my_user_id;
+    var dataToPut= {};
+    for(var i in  pmDashboard.model.widgets[0]){
+        var objName=pmDashboard.model.widgets[0][i].name;
+        dataToPut[objName]=pmDashboard.getNewWidgetSettings(pmDashboard.model.widgets[0][i]);
+    }
+    return spajs.ajax.Call({
+        url: "/api/v1/users/" + userId + "/settings/",
+        type: "POST",
+        contentType: 'application/json',
+        data: JSON.stringify(dataToPut),
+        success: function (data)
+        {
+            //console.log("Data was posted");
+
+        },
+        error: function (e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+        }
+    });
+
+}
+
+/**
  *Функция, сортирующая массив объектов.
  */
 pmDashboard.sortCountWidget=function(Obj1, Obj2)
 {
     return Obj1.sortNum-Obj2.sortNum;
-}
-
-/**
- *Функция, обновляющая настройки только одного виджета.
- */
-pmDashboard.udpateOneWidgetSettings = function(widget)
-{
-    var wName=widget.name;
-    if(window.localStorage[wName])
-    {
-        var objFromLocalStorage=JSON.parse(window.localStorage[wName]);
-        widget.sortNum=objFromLocalStorage.sortNum;
-        widget.active=objFromLocalStorage.active;
-        widget.collapse=objFromLocalStorage.collapse;
-    }
-    return widget;
-}
-
-/**
- *Функция, обновляющая настройки всех виджетов сразу.
- */
-pmDashboard.udpateAllWidgetsSettings = function(widgetGroup)
-{
-    for(var i=0; i<widgetGroup.length; i++){
-        pmDashboard.udpateOneWidgetSettings(widgetGroup[i]);
-    }
-    pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
-    return widgetGroup;
 }
 
 /**
@@ -193,10 +368,9 @@ pmDashboard.setNewWidgetActiveValue = function(thisButton)
         if(pmDashboard.model.widgets[0][i].name==widgetName)
         {
             pmDashboard.model.widgets[0][i].active=false;
-            var objJSON=JSON.stringify(pmDashboard.model.widgets[0][i]);
-            window.localStorage.setItem(widgetName, objJSON);
         }
     }
+    pmDashboard.putUserWidgetSettingsToAPI();
 }
 
 /**
@@ -210,8 +384,6 @@ pmDashboard.setNewWidgetCollapseValue = function(thisButton)
         if(pmDashboard.model.widgets[0][i].name==widgetName)
         {
             pmDashboard.model.widgets[0][i].collapse=!pmDashboard.model.widgets[0][i].collapse;
-            var objJSON=JSON.stringify(pmDashboard.model.widgets[0][i]);
-            window.localStorage.setItem(widgetName, objJSON);
 
             //скрываем селект с выбором периода на виджете-графике при его сворачивании
             if(widgetName=="pmwChartWidget")
@@ -224,10 +396,10 @@ pmDashboard.setNewWidgetCollapseValue = function(thisButton)
                 {
                     $("#period-list").slideUp(400);
                 }
-
             }
         }
     }
+    pmDashboard.putUserWidgetSettingsToAPI();
 }
 
 /**
@@ -261,17 +433,16 @@ pmDashboard.saveWigdetsOptionsFromModal = function()
                     if(pmDashboard.model.widgets[0][z].name==widgetName)
                     {
                         pmDashboard.model.widgets[0][z][valueName]=selected;
-                        var objJSON=JSON.stringify(pmDashboard.model.widgets[0][z]);
-                        window.localStorage.setItem(widgetName, objJSON);
                     }
                 }
             }
         }
     }
+    pmDashboard.putUserWidgetSettingsToAPI();
 
-    $.when(pmDashboard.HideAfterSaveModalWindow()).done(function(){
-        return setTimeout(function(){return spajs.openURL("/");}, 250);
-    })
+    return $.when(hidemodal(), pmDashboard.HideAfterSaveModalWindow()).done(function(){
+        return spajs.openURL("/");
+    }).promise();
 }
 
 /**
@@ -282,7 +453,6 @@ pmDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
     for(var i in tasks_data) {
         tasks_data[i]=0;
     }
-
 
     for(var i in pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType])
     {
@@ -337,7 +507,6 @@ pmDashboard.loadStats=function()
  *Функция вызывается, когда происходит изменение периода на графике(пользователь выбрал другой option в select).
  *Функция обновляет значения переменных, которые в дальнейшем используются для запроса к api/v1/stats и отрисовки графика.
  */
-
 pmDashboard.updateStatsDataLast=function(thisEl)
 {
     var newLast=thisEl.value;
@@ -378,12 +547,11 @@ pmDashboard.updateStatsDataLast=function(thisEl)
  * pmDashboard.HideAfterSaveModalWindow - скрывает модальное окно
  * pmDashboard.renderModalWindow - отрисовывает модальное окно
  */
-
 pmDashboard.showModalWindow = function()
 {
     if($('div').is('#modal-widgets-settings'))
     {
-        pmDashboard.udpateAllWidgetsSettings(pmDashboard.model.widgets[0]);
+        pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
         $('#modal-widgets-settings').empty();
         $('#modal-widgets-settings').html(pmDashboard.renderModalWindow());
         $("#modal-widgets-settings").modal('show');
@@ -394,7 +562,7 @@ pmDashboard.HideAfterSaveModalWindow = function()
 {
     if($('div').is('#modal-widgets-settings'))
     {
-        $("#modal-widgets-settings").modal('hide');
+        return $("#modal-widgets-settings").modal('hide');
     }
 
 }
@@ -406,9 +574,6 @@ pmDashboard.renderModalWindow = function()
 }
 
 
-
-
-pmDashboard.udpateAllWidgetsSettings(pmDashboard.model.widgets[0]);
 
 pmDashboard.stopUpdates = function()
 {
@@ -540,104 +705,104 @@ pmDashboard.updateData = function()
 
 pmDashboard.open  = function(holder, menuInfo, data)
 {
-    pmDashboard.udpateAllWidgetsSettings(pmDashboard.model.widgets[0]);
-
     var thisObj = this
 
-    // Инициализация всех виджетов на странице
-    for(var i in pmDashboard.model.widgets)
+    return $.when(pmDashboard.getUserWidgetSettingsFromAPI()).always(function()
     {
-        for(var j in pmDashboard.model.widgets[i])
+        // Инициализация всех виджетов на странице
+        for(var i in pmDashboard.model.widgets)
         {
-            if(pmDashboard.model.widgets[i][j].widget === undefined  )
+            for(var j in pmDashboard.model.widgets[i])
             {
-                pmDashboard.model.widgets[i][j].widget = new window[pmDashboard.model.widgets[i][j]['name']](pmDashboard.model.widgets[i][j].opt);
+                if(pmDashboard.model.widgets[i][j].widget === undefined  )
+                {
+                    pmDashboard.model.widgets[i][j].widget = new window[pmDashboard.model.widgets[i][j]['name']](pmDashboard.model.widgets[i][j].opt);
+                }
             }
         }
-    }
 
-    this.updateData()
-    $(holder).insertTpl(spajs.just.render('dashboard_page', {}))
+        thisObj.updateData()
+        $(holder).insertTpl(spajs.just.render('dashboard_page', {}))
 
-    pmwTasksTemplatesWidget.render();
-    pmwModulesTemplatesWidget.render();
-    pmwAnsibleModuleWidget.render();
-    pmwChartWidget.render();
+        pmwTasksTemplatesWidget.render();
+        pmwModulesTemplatesWidget.render();
+        pmwAnsibleModuleWidget.render();
+        pmwChartWidget.render();
 
-    pmDashboard.model.historyChart = c3.generate({
-        bindto: '#c3-history-chart',
-        data: {
-            x: 'time',
-            columns: [
-                ['time'],
-                ['All tasks'],
-                ['OK'],
-                ['ERROR'],
-                ['INTERRUPTED'],
-                ['DELAY'],
-                ['OFFLINE']
-            ],
-            type: 'area',
-            types: {
-                OK: 'line',
-                ERROR: 'line',
-                INTERRUPTED: 'line',
-                DELAY: 'line',
-                OFFLINE: 'line'
+        pmDashboard.model.historyChart = c3.generate({
+            bindto: '#c3-history-chart',
+            data: {
+                x: 'time',
+                columns: [
+                    ['time'],
+                    ['All tasks'],
+                    ['OK'],
+                    ['ERROR'],
+                    ['INTERRUPTED'],
+                    ['DELAY'],
+                    ['OFFLINE']
+                ],
+                type: 'area',
+                types: {
+                    OK: 'line',
+                    ERROR: 'line',
+                    INTERRUPTED: 'line',
+                    DELAY: 'line',
+                    OFFLINE: 'line'
+                },
             },
-        },
-        axis: {
-            x: {
-                type: 'timeseries',
-                tick: {
-                    format: '%Y-%m-%d'
-                }
-            }
-        },
-        color: {
-            pattern: ['#1f77b4',  '#276900', '#333333', '#9b97e4', '#808419', '#9e9e9e', '#d62728',  '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
-        }
-    });
-    if($('select').is('#chart-period'))
-    {
-        $('#chart-period').val(pmDashboard.statsDataLastQuery).change();
-    }
-
-    //drag and drop для виджетов
-    if($('div').is('#dnd-container'))
-    {
-        var widget_sort = Sortable.create(document.getElementById("dnd-container"), {
-            animation: 150, // ms, animation speed moving items when sorting, `0` — without animation
-            handle: ".dnd-block", // Restricts sort start click/touch to the specified element
-            draggable: ".dnd-block", // Specifies which items inside the element should be sortable
-            onUpdate: function (evt)
-            {
-                // console.log("onUpdate[1]", evt);
-                var item = evt.item; // the current dragged HTMLElement
-                //запоминаем новый порядок сортировки
-                var divArr=$('.dnd-block');
-                var idArr=[];
-                for (var i=0; i<divArr.length; i++)
-                {
-                    idArr.push(divArr[i].id);
-                }
-                for(var i=0; i<idArr.length; i++)
-                {
-                    for(var j=0; j<pmDashboard.model.widgets[0].length; j++)
-                    {
-                        if(idArr[i].toLowerCase()==pmDashboard.model.widgets[0][j].name.toLowerCase())
-                        {
-                            pmDashboard.model.widgets[0][j].sortNum=i;
-                            var t=pmDashboard.model.widgets[0][j].name;
-                            var objJSON=JSON.stringify(pmDashboard.model.widgets[0][j]);
-                            window.localStorage.setItem(t, objJSON);
-
-                        }
+            axis: {
+                x: {
+                    type: 'timeseries',
+                    tick: {
+                        format: '%Y-%m-%d'
                     }
                 }
+            },
+            color: {
+                pattern: ['#1f77b4',  '#276900', '#333333', '#9b97e4', '#808419', '#9e9e9e', '#d62728',  '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
             }
         });
-    }
+        if($('select').is('#chart-period'))
+        {
+            $('#chart-period').val(pmDashboard.statsDataLastQuery).change();
+        }
+
+        //drag and drop для виджетов
+        if($('div').is('#dnd-container'))
+        {
+            var widget_sort = Sortable.create(document.getElementById("dnd-container"), {
+                animation: 150, // ms, animation speed moving items when sorting, `0` — without animation
+                handle: ".dnd-block", // Restricts sort start click/touch to the specified element
+                draggable: ".dnd-block", // Specifies which items inside the element should be sortable
+                onUpdate: function (evt)
+                {
+                    // console.log("onUpdate[1]", evt);
+                    var item = evt.item; // the current dragged HTMLElement
+                    //запоминаем новый порядок сортировки
+                    var divArr=$('.dnd-block');
+                    var idArr=[];
+                    for (var i=0; i<divArr.length; i++)
+                    {
+                        idArr.push(divArr[i].id);
+                    }
+                    for(var i=0; i<idArr.length; i++)
+                    {
+                        for(var j=0; j<pmDashboard.model.widgets[0].length; j++)
+                        {
+                            if(idArr[i].toLowerCase()==pmDashboard.model.widgets[0][j].name.toLowerCase())
+                            {
+                                pmDashboard.model.widgets[0][j].sortNum=i;
+                                pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
+                            }
+                        }
+                    }
+                    pmDashboard.putUserWidgetSettingsToAPI();
+                }
+            });
+        }
+    }).promise();
+
 }
 
 tabSignal.connect("polemarch.start", function()
