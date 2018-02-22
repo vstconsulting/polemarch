@@ -1,5 +1,5 @@
 # Docs
-sphinx==1.6.3
+sphinx==1.7.0
 sphinx-autobuild==0.7.1
-sphinxcontrib-httpdomain==1.5.0
+sphinxcontrib-httpdomain==1.6.0
 sphinxcontrib-websupport==1.0.1
