@@ -67,6 +67,7 @@ override_dh_auto_install:
 	rm -rf $(BUILDROOT)/*
 	# install our package with all required python dependencies in virtualenv
 	virtualenv --no-site-packages $(BUILDROOT)/$(INSTALLDIR)
+	rm -rf $(BUILDROOT)/$(INSTALLDIR)/local
 	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements-doc.txt
 	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) dist/$(NAME)-$(VER).tar.gz
 	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements-git.txt
