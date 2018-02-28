@@ -36,13 +36,21 @@ pmTemplates.copyAndEdit = function (item_id)
     return def.promise();
 }
 
-pmTemplates.execute = function (item_id)
+pmTemplates.execute = function (item_id, option)
 {
+    if(!option || option=="[object Object]")
+    {
+        option={};
+    }
+    else
+    {
+        option={"option": option};
+    }
     var def = new $.Deferred();
     spajs.ajax.Call({
         url: "/api/v1/" + this.model.name + "/" + item_id + "/execute/",
         type: "POST",
-        data: JSON.stringify({}),
+        data: JSON.stringify(option),
         contentType: 'application/json',
         success: function (data)
         {

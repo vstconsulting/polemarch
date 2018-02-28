@@ -759,8 +759,8 @@ pmHistory.clearLogs=function(item_id)
         success: function(data)
         {
             $.notify("Output trancated", "success");
+            pmHistory.model.items[item_id].stdout={};
             spajs.openURL(window.location.href);
-
         },
         error:function(e)
         {
