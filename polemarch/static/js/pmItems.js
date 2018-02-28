@@ -1045,7 +1045,8 @@ pmItems.checkSubItemsAndAdd=function(thisObj, ObjToAdd, data, itemId, itemType, 
             }
             if(failIdBool)
             {
-                $.notify("Host with id="+itemType_ids[i]+" doesn't exist and wouldn't be added", "error");
+                var itemType1=itemType.slice(0,-1).replace(/\b\w/g, l => l.toUpperCase());
+                $.notify(itemType1+" with id="+itemType_ids[i]+" doesn't exist and wouldn't be added", "error");
             }
             else
             {

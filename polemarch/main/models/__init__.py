@@ -134,6 +134,10 @@ def validate_template_args(instance, **kwargs):
     if instance.kind == "PeriodicTask" and instance.data["kind"] == "MODULE":
         command = "module"
     AnsibleArgumentsReference().validate_args(command, ansible_args)
+    for _, data in dict(instance.options).items():
+        AnsibleArgumentsReference().validate_args(
+            command, data.get('vars', {})
+        )
 
 
 @receiver(signals.pre_delete, sender=Project)

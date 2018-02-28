@@ -171,6 +171,20 @@
                                                             </li>
                                                         <% } %>
                                                     <% } %>
+                                                    <!-- -->
+                                                    <% if(pmObj.model.itemslist.results[i].options_list) { %>
+                                                        <li role="separator" class="divider"></li>
+                                                        <% for(var k in pmObj.model.itemslist.results[i].options_list) { %>
+                                                            <li>
+                                                                <a href="#"
+                                                                onclick="<%- pmObj.model.page_list.actions[j].function.apply(pmObj, [pmObj.model.itemslist.results[i], pmObj.model.itemslist.results[i].options_list[k], opt]) %>">
+                                                                    Execute with <%= pmObj.model.itemslist.results[i].options_list[k] %>
+                                                                </a>
+                                                            </li>
+                                                            <% } %>
+                                                    <% } %>
+                                                    <!-- -->
+
                                                 </ul>
                                             </div>
                                         </td>

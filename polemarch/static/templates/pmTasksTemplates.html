@@ -2,9 +2,48 @@
 <!-- Список templates_list -->
 <script type="text/x-just" data-just="templates_widget">
     <section class="col-lg-6 col-sm-12 col-xs-12">
-        <div class="box box-info">
-            <div class="box-header with-border">
+        <div class="box box-info
+        <% for(var j in pmDashboard.model.widgets[0]){  %>
+
+            <% if(pmDashboard.model.widgets[0][j].name == 'pmwTasksTemplatesWidget' && kind=='Task'){ %>
+                <% if(pmDashboard.model.widgets[0][j].collapse) { %>
+                     collapsed-box
+                <% } %>
+            <% } %>
+            <% if(pmDashboard.model.widgets[0][j].name == 'pmwModulesTemplatesWidget' && kind=='Module'){ %>
+                <% if(pmDashboard.model.widgets[0][j].collapse) { %>
+                     collapsed-box
+                <% } %>
+            <% } %>
+        <% } %>
+        ">
+            <div class="box-header with-border cursor-move">
+
                 Templates <%- kind %>
+
+                <div class="pull-right">
+                      <button type="button" class="btn btn-sm w-btn" data-widget="collapse" onclick="pmDashboard.setNewWidgetCollapseValue(this)">
+                        <i
+                            <% for(var j in pmDashboard.model.widgets[0]){  %>
+                                <% if(pmDashboard.model.widgets[0][j].name == 'pmwTasksTemplatesWidget' && kind=='Task'){ %>
+                                    <% if(pmDashboard.model.widgets[0][j].collapse) { %>
+                                        class="fa fa-plus"
+                                    <% } else { %>
+                                        class="fa fa-minus"
+                                    <% } %>
+                                <% } %>
+                                <% if(pmDashboard.model.widgets[0][j].name == 'pmwModulesTemplatesWidget' && kind=='Module'){ %>
+                                    <% if(pmDashboard.model.widgets[0][j].collapse) { %>
+                                        class="fa fa-plus"
+                                    <% } else { %>
+                                        class="fa fa-minus"
+                                    <% } %>
+                                <% } %>
+                            <% } %>
+                        ></i>
+                      </button>
+                      <button type="button" class="btn btn-sm w-btn" data-widget="remove" onclick="pmDashboard.setNewWidgetActiveValue(this)"><i class="fa fa-times"></i></button>
+                </div>
             </div>
             <div class="box-body">
                 <table class="table table-bordered">
@@ -72,6 +111,69 @@
         </div>
     <% }else{ %>
         <!-- Не задан item_id -->
+    <% } %>
+</script>
+
+<!-- Шаблон полей  Project Inventory и Playbook for new option  -->
+<script type="text/x-just" data-just="filed_type_selectProjectInventoryAndPlaybookForNewOption">
+    <% if(item_id){ %>
+
+
+        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+            <label class="control-label" >Playbook</label>
+            <input type="text"
+                    class="playbook-autocomplete form-control"
+                    id="playbook-autocomplete"
+                    value="<% if(pmTasksTemplates.model.items[item_id].data.playbook){ %><%- pmTasksTemplates.model.items[item_id].data.playbook %><% } %>">
+        </div>
+    <% }else{ %>
+        <!-- Не задан item_id -->
+    <% } %>
+</script>
+
+<!-- Шаблон полей  Project Inventory и Playbook for  option  -->
+<script type="text/x-just" data-just="filed_type_selectProjectInventoryAndPlaybookForOption">
+    <% if(item_id){ %>
+
+
+        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+            <label class="control-label" >Playbook</label>
+            <input type="text"
+                    class="playbook-autocomplete form-control"
+                    id="playbook-autocomplete"
+                    value="<% if(pmTasksTemplates.model.items[item_id].data.playbook){ %><%- pmTasksTemplates.model.items[item_id].dataForOption.playbook %><% } %>">
+        </div>
+    <% }else{ %>
+        <!-- Не задан item_id -->
+    <% } %>
+</script>
+
+<!--options section on task template page -->
+<script type="text/x-just" data-just="options_section_task_page">
+    <% if ( $.isEmptyObject(pmTasksTemplates.model.items[item_id].options) ) { %>
+
+    <% } else { %>
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Options <br>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <% for (var i in pmTasksTemplates.model.items[item_id].options) { %>
+                                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                    <label class="control-label">Option</label>
+                                    <a href="<%- polemarch.opt.host %>/?<%- pmTasksTemplates.model.name %>/<%- pmTasksTemplates.model.kind %>/<%= item_id %>/option/<%= i %>" onclick="return spajs.openURL(this.href);">
+                                        <%= i %>
+                                    </a>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     <% } %>
 </script>
 

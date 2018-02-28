@@ -138,3 +138,15 @@ function toIdString(str)
 {
     return str.replace(/[^A-z0-9\-]/img, "_").replace(/[\[\]]/gi, "_");
 }
+
+function hidemodal() {
+
+
+    var def= new $.Deferred();
+    $(".modal.fade.in").on('hidden.bs.modal', function (e) {
+      def.resolve();
+    })
+    $(".modal.fade.in").modal('hide');
+
+    return def.promise();
+}

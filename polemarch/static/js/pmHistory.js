@@ -13,7 +13,7 @@ pmHistory.cancelTask = function(item_id)
         url: "/api/v1/history/"+item_id+"/cancel/",
         type: "POST",
         contentType:'application/json',
-                success: function(data)
+        success: function(data)
         {
             $.notify("Task canceled!", "warning");
         },
@@ -28,20 +28,20 @@ pmHistory.cancelTask = function(item_id)
 pmHistory.showSearchResults = function(holder, menuInfo, data)
 {
     var thisObj = this;
-  
+
     var limit = this.pageSize;
-   
+
     if(data.reg && data.reg[2] > 0)
     {
         offset = this.pageSize*(data.reg[2] - 1);
     } else {
         offset=0;
     }
-    
-    var search = this.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')    
+
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')
     return $.when(this.sendSearchQuery(search,limit,offset)).done(function()
-    {   
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))       
+    {
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
     }).fail(function()
     {
         $.notify("", "error");
@@ -148,8 +148,8 @@ pmHistory.showItem = function(holder, menuInfo, data)
         {
             pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
         }
-        
-        
+
+
         if (pmHistory.model.items[item_id].inventory != null) {
             var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
             $.when(promiss).done(function () {
@@ -162,9 +162,9 @@ pmHistory.showItem = function(holder, menuInfo, data)
             $(holder).insertTpl(spajs.just.render(thisObj.model.name + '_page', {item_id: item_id, project_id: 0}))
             pmHistory.bindStdoutUpdates(item_id)
         }
-       
-       
-      
+
+
+
     }).fail(function()
     {
         $.notify("", "error");
@@ -183,8 +183,8 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
         {
             pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
         }
-        
-         if (pmHistory.model.items[item_id].inventory != null) {
+
+        if (pmHistory.model.items[item_id].inventory != null) {
             var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
             $.when(promiss).done(function () {
                 $(holder).insertTpl(spajs.just.render(thisObj.model.name + '_page', {item_id: item_id, project_id: 0}))
@@ -196,7 +196,7 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
             $(holder).insertTpl(spajs.just.render(thisObj.model.name + '_page', {item_id: item_id, project_id: 0}))
             pmHistory.bindStdoutUpdates(item_id)
         }
-        
+
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
@@ -276,7 +276,7 @@ pmHistory.loadItem = function(item_id)
         contentType:'application/json',
         data: "",
         success: function(data)
-        {    
+        {
             if(!thisObj.model.items[item_id])
             {
                 thisObj.model.items[item_id] = {}
@@ -287,8 +287,8 @@ pmHistory.loadItem = function(item_id)
                 thisObj.model.items[item_id][i] = data[i]
             }
 
-            var promise = undefined; 
-            
+            var promise = undefined;
+
             if(data.initiator_type == 'scheduler')
             {
                 promise = pmPeriodicTasks.loadItemsByIds([data.initiator])
@@ -298,7 +298,7 @@ pmHistory.loadItem = function(item_id)
             {
                 promise = pmUsers.loadItemsByIds([data.initiator])
             }
- 
+
             pmHistory.model.items.justWatch(item_id);
 
             $.when(pmProjects.loadItem(data.project), promise).always(function(){
@@ -341,7 +341,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
-                success: function(data)
+        success: function(data)
         {
             //console.log("update Items", data)
             data.limit = limit
@@ -356,7 +356,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
             for(var i in data.results)
             {
                 var val = data.results[i]
-                 
+
                 thisObj.model.items[val.id] = val
 
                 if(val.project && !pmProjects.model.items[val.project] && $.inArray(val.project, projects) == -1)
@@ -409,15 +409,15 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
 }
 //////////////////////////////
 /**
-*Функция проверяет, произошло ли изменение в количестве записей в истории.
-*Если изменения произошли, то она обновляет соответствующее свойство в объекте this.model
-*/
+ *Функция проверяет, произошло ли изменение в количестве записей в истории.
+ *Если изменения произошли, то она обновляет соответствующее свойство в объекте this.model
+ */
 
 pmHistory.ifIncreaseTotalCount = function()
 {
     var def = new $.Deferred();
     var thisObj = this;
-     spajs.ajax.Call({
+    spajs.ajax.Call({
         url: "/api/v1/history",
         type: "GET",
         contentType:'application/json',
@@ -428,8 +428,8 @@ pmHistory.ifIncreaseTotalCount = function()
             //console.log("new totalCount="+totalCount, "old totalCount="+thisObj.model.totalCount);
             if(thisObj.model.totalCount!=totalCount)
             {
-                 thisObj.model.totalCount=totalCount;
-                 def.resolve();
+                thisObj.model.totalCount=totalCount;
+                def.resolve();
             }
             else
             {
@@ -440,15 +440,15 @@ pmHistory.ifIncreaseTotalCount = function()
         error: function (){
             def.reject();
         }
-     });
-     return def.promise();
+    });
+    return def.promise();
 }
 
 /**
-*Функция обновляет список записей в истории каждые 5 секунд.
-*Если произошли изменения в количестве записей в списке,
-*то содержимое страницы обновляется.
-*/
+ *Функция обновляет список записей в истории каждые 5 секунд.
+ *Если произошли изменения в количестве записей в списке,
+ *то содержимое страницы обновляется.
+ */
 
 pmHistory.updateList = function (updated_ids)
 {
@@ -495,8 +495,8 @@ pmHistory.loadItems = function(limit, offset)
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
-                success: function(data)
-        { 
+        success: function(data)
+        {
 
             //console.log("update Items", data)
             data.limit = limit
@@ -514,7 +514,7 @@ pmHistory.loadItems = function(limit, offset)
             for(var i in data.results)
             {
                 var val = data.results[i]
-                  
+
                 thisObj.model.items.justWatch(val.id);
                 thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
 
@@ -531,8 +531,8 @@ pmHistory.loadItems = function(limit, offset)
                 {
                     periodicTasks.push(val.initiator);
                 }
-            } 
-            
+            }
+
             var users_promise = undefined;
             var projects_promise = undefined;
             var periodicTasks_promise = undefined;
@@ -554,7 +554,7 @@ pmHistory.loadItems = function(limit, offset)
 
             $.when(users_promise, projects_promise, periodicTasks_promise).always(function(){
                 def.resolve(data)
-            }) 
+            })
         },
         error:function(e)
         {
@@ -585,19 +585,19 @@ pmHistory.stopUpdates = function()
  */
 pmHistory.Syntax = function(code)
 {
-	var comments	= [];	// Тут собираем все каменты
-	var strings		= [];	// Тут собираем все строки
-	var res			= [];	// Тут собираем все RegExp
-	var all			= { 'C': comments, 'S': strings, 'R': res };
-	var safe		= { '<': '<', '>': '>', '&': '&' };
+    var comments	= [];	// Тут собираем все каменты
+    var strings		= [];	// Тут собираем все строки
+    var res			= [];	// Тут собираем все RegExp
+    var all			= { 'C': comments, 'S': strings, 'R': res };
+    var safe		= { '<': '<', '>': '>', '&': '&' };
 
     var ansi_up = new AnsiUp;
     ansi_up.use_classes = true;
     var html = ansi_up.ansi_to_html(code);
     return html
-	// Табуляцию заменяем неразрывными пробелами
-		.replace(/\t/g,
-			'&nbsp;&nbsp;&nbsp;&nbsp;');
+    // Табуляцию заменяем неразрывными пробелами
+        .replace(/\t/g,
+            '&nbsp;&nbsp;&nbsp;&nbsp;');
 }
 
 pmHistory.getLine = function(item_id, line_id)
@@ -707,7 +707,7 @@ pmHistory.loadLines = function(item_id, opt)
         type: "GET",
         contentType:'application/json',
         data: opt,
-                success: function(data)
+        success: function(data)
         {
             if(!pmHistory.model.items[item_id].stdout)
             {
@@ -749,8 +749,36 @@ pmHistory.loadLines = function(item_id, opt)
     return def.promise();
 }
 
- tabSignal.connect("polemarch.start", function()
- {
+/////////////////////////////////
+pmHistory.clearLogs=function(item_id)
+{
+    return spajs.ajax.Call({
+        url: "/api/v1/history/"+item_id+"/clear/",
+        type: "DELETE",
+        contentType:'application/json',
+        success: function(data)
+        {
+            $.notify("Output trancated", "success");
+            pmHistory.model.items[item_id].stdout={};
+            spajs.openURL(window.location.href);
+        },
+        error:function(e)
+        {
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+
+pmHistory.hideClearLogsButton=function()
+{
+    if($('button').is('#clear_logs'))
+    {
+        $("#clear_logs").slideToggle();
+    }
+}
+/////////////////////////////////
+tabSignal.connect("polemarch.start", function()
+{
     // history
     spajs.addMenu({
         id:"history",
@@ -805,4 +833,4 @@ pmHistory.loadLines = function(item_id, opt)
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInProjects(holder, menuInfo, data);}
     })
 
- })
+})

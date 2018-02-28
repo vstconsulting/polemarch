@@ -576,6 +576,29 @@ table{
     margin-bottom: 5px;
 }
 
-#dnd1 div:hover {
+.cursor-move:hover {
     cursor:move;
+}
+
+.handle-class:hover{
+    cursor:move;
+}
+
+.w-btn {
+    padding: 5px;
+  font-size: 12px;
+  background: transparent;
+  color: #97a0b3;
+}
+
+.w-btn:focus{
+    color: #97a0b3;
+}
+
+.w-btn:focus ~ .period-list {
+    display: none;
+}
+
+.w-btn:hover {
+    color:#606c84;
 }
