@@ -407,7 +407,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
 
     return def.promise();
 }
-//////////////////////////////
+
 /**
  *Функция проверяет, произошло ли изменение в количестве записей в истории.
  *Если изменения произошли, то она обновляет соответствующее свойство в объекте this.model
@@ -470,7 +470,7 @@ pmHistory.updateList = function (updated_ids)
     }).promise()
 }
 
-//////////////////////////////
+
 
 /**
  * Обновляет поле модел this.model.itemslist и ложит туда список пользователей
