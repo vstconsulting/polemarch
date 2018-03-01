@@ -664,8 +664,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             inventory=self.inventory.id, name="one", vars={
                 "key-file": "secret",
                 "private-key": "secret",
-                "vault-password-file": "secret",
-                "new-vault-password-file": "secret",
+                "vault-password-file": "secret"
             }
         )
 
