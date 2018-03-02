@@ -447,6 +447,7 @@ if(!window.spajs)
     {
         if(!menu.id)
         {
+            console.error("Не задан menu.id", menu)
             return;
         }
         
@@ -456,37 +457,13 @@ if(!window.spajs)
         }
 
         var targetBlock = $("#left_sidebar")
-
-        if(menu.targetTab == "tab1")
-        {
-            targetBlock = $(".spa-tab1")
-        }
-        else if(menu.targetTab == "tab2")
-        {
-            targetBlock = $(".spa-tab2")
-        }
-        else if(menu.targetTab == "tab3")
-        {
-            targetBlock = $(".spa-tab3")
-        }
-        else if(menu.targetTab == "tablist1")
-        {
-            targetBlock = $(".spa-tablist1")
-        }
-        else if(menu.targetTab == "tablist2")
-        {
-            targetBlock = $(".spa-tablist2")
-        }
-        else if(menu.targetTab == "tablist3")
-        {
-            targetBlock = $(".spa-tablist3")
-        }
-
+ 
         for(var i in spajs.opt.menu)
         {
             if(spajs.opt.menu[i].id == menu.id)
             {
                 // Такой пункт уже есть в меню
+                console.error("Такой пункт уже есть в меню", menu)
                 return;
             }
         }
@@ -498,16 +475,7 @@ if(!window.spajs)
 
         spajs.opt.menu.push(menu)
 
-        if(menu.type == "bottom")
-        {
-            // @fixme Подумать над множественностью этих пунктов или перевести в тип custom
-            var bottomMenu = '<div  id="spajs-menu-'+menu.id+'"  class="terms-of-use" data-index="'+menu.priority+'" >\
-                                  <a href="'+menu.url+'"  onclick="spajs.openMenu(\''+menu.id+'\'); return false;" >'+menu.name+'</a>\
-                              </div>'
-
-            targetBlock.append(bottomMenu)
-        }
-        else if(menu.type == "custom")
+        if(menu.type == "custom")
         {
             targetBlock.append('<div data-index="'+menu.priority+'" >'+menu.menuHtml+'</div>');
         }
@@ -515,111 +483,14 @@ if(!window.spajs)
         {
             // Невидимый пункт меню.
         }
-        else if(menu.targetTab == "tablist1" || menu.targetTab == "tablist2" || menu.targetTab == "tablist3")
-        {
-            var imgHtml = "";
-            if(menu.ico)
-            {
-                imgHtml =  '<div class="img">\
-                                <img src="'+menu.ico+'">\
-                            </div>'
-            }
-
-            var roomMenu  = '<li id="spajs-menu-'+menu.id+'" data-index="'+menu.priority+'">\
-                                <a href="#" onclick="spajs.openMenu(\''+menu.id+'\'); return false;" >\
-                                    <span class="star"></span>\
-                                    '+imgHtml+'\
-                                    <div class="text">'+menu.name+'</div>\
-                                    <div class="count">\
-                                        <span class="spa-countNew" style="display: none;" ></span>\
-                                    </div>\
-                                </a>\
-                            </li>';
-
-            //$("#left_sidebar .left_menu .ul_reset").append(roomMenu)
-            targetBlock.append(roomMenu)
-        }
-        else
-        {
-            var imgHtml = "";
-            if(menu.ico)
-            {
-                imgHtml =  '<div class="img">\
-                                <img src="'+menu.ico+'">\
-                            </div>'
-            }
-
-            var roomMenu  = '<div class="left_menu" data-index="'+menu.priority+'" >\
-                                <ul class="ul_reset">\
-                                    <li id="spajs-menu-'+menu.id+'">\
-                                        <a href="#" onclick="spajs.openMenu(\''+menu.id+'\'); return false;" >\
-                                            '+imgHtml+'\
-                                            <div class="text">'+menu.name+'</div>\
-                                            <div class="count">\
-                                                <span class="spa-countNew" style="display: none;" ></span>\
-                                            </div>\
-                                        </a>\
-                                    </li>\
-                                </ul>\
-                            </div>';
-
-            //$("#left_sidebar .left_menu .ul_reset").append(roomMenu)
-            targetBlock.append(roomMenu)
-        }
-
+        
         spajs.sortMenu(targetBlock)
         if(menu.onInsert)
         {
             menu.onInsert($("#spajs-menu-"+menu.id))
         }
     }
-
-    /**
-     * Устанавливает значение на счётчик событий
-     * @param string menu_id
-     * @param string value если значение не задано то счётчик событий будет обнулён и спрятан
-     */
-    spajs.setEventCounterValue = function(menu_id, value)
-    {
-        if(value === undefined || value === "" || value === false)
-        {
-            $("#spajs-menu-"+menu_id+" .spa-countNew").hide().html('')
-        }
-        else
-        {
-            $("#spajs-menu-"+menu_id+" .spa-countNew").show().html(value)
-        }
-    }
-
-    /**
-     * Получает значение на счётчика событий
-     * @param string menu_id
-     */
-    spajs.getEventCounterValue = function(menu_id)
-    {
-        return $("#spajs-menu-"+menu_id+" .spa-countNew").html()
-    }
-
-    /**
-     * Добавляет значение на счётчика событий
-     * @param string menu_id
-     */
-    spajs.addEventCounterValue = function(menu_id)
-    {
-        var count = parseInt($("#spajs-menu-"+menu_id+" .spa-countNew").show().html());
-        if(count > 0)
-        {
-            $("#spajs-menu-"+menu_id+" .spa-countNew").html(count+1)
-            return count+1
-        }
-        else
-        {
-            $("#spajs-menu-"+menu_id+" .spa-countNew").html(1)
-            return 1;
-        }
-    }
-
-
+  
     spajs.currentOpenMenu = undefined
 
     /**

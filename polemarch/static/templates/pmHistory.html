@@ -421,12 +421,23 @@
                 <div class="box-header with-border">
                     stdout<br>
                     <div class="box-tools pull-right">
+
+                            <~ pmHistory.model.items[item_id].status>
+                            <% if(pmHistory.model.items[item_id].status != 'RUN' && pmHistory.model.items[item_id].status != 'DELAY'){ %>
+
+                                    <button type="button"  class="btn btn-default" id="clear_logs" style="margin-right:5px; padding: 3px 9px;" onclick="pmHistory.clearLogs(<%- item_id %>);">
+                                        <span class="fa fa-trash" style="font-size:20px;"></span> <span class="hidden-sm hidden-xs" ></span>
+                                    </button>
+
+                            <% } %>
+                            <~>
+
                         <button type="button" class="btn btn-box-tool btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
                             <i class="glyphicon glyphicon-resize-full"></i> 
                             <i class="glyphicon glyphicon-resize-small"></i> 
                         </button>
 
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="pmHistory.hideClearLogsButton()"><i class="fa fa-minus"></i> </button>
                     </div>
                 </div>
                 <div class="box-body">
@@ -437,6 +448,10 @@
                                         target="_blank"
                                         download="stdout-<%- pmHistory.model.items[item_id].mode %>-<%- pmHistory.model.items[item_id].start_time %>.log"
                                         >Full raw stdout</a>)</label>
+
+
+
+
                             <pre
                                 class="history-stdout"
                                 id="history-stdout"></pre>
@@ -526,6 +541,22 @@
                            <div class="help-block"></div>
                        </div>
                        
+                        <% if(pmHistory.model.items[item_id].inventory!=null) { %>
+                            <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                                <label class="control-label" >Inventory</label>
+                                <div
+                                        class="form-control disabled"
+                                        disabled=""
+                                        maxlength="255">
+
+                                          <a href="<%- polemarch.opt.host %>/?inventory/<%- pmHistory.model.items[item_id].inventory %>" onclick="return spajs.openURL(this.href);" >
+                                                  <%= pmInventories.model.items[pmHistory.model.items[item_id].inventory].justText('name') %>
+                                         </a>
+                                </div>
+                                <div class="help-block"></div>
+                            </div>
+                        <%   } %>
+                       
                         <% if(
                                 pmHistory.model.items[item_id].execute_args 
                                 && Object.keys(pmHistory.model.items[item_id].execute_args).length > 1
@@ -554,7 +585,8 @@
                                        <div 
                                                class="form-control disabled"
                                                disabled=""
-                                               maxlength="255">
+                                               maxlength="255"
+                                               style="overflow:hidden; height:auto;">
                                                <%- val %>
                                        </div>
                                        <div class="help-block"></div>
@@ -571,7 +603,7 @@
         </section>
     </div> 
 </script>
-    
+
 <script type="text/x-just" data-just="history_page">
     <section class="content-header">
         <h1>
@@ -594,6 +626,8 @@
                 <button type="button" onclick="spajs.showLoader(pmHistory.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
                     <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove history</span>
                 </button>
+
+
             <% }else{ %>
                 <button type="button" onclick="spajs.showLoader(pmHistory.cancelTask(<%- item_id %>)); return false;" class="btn btn-warning danger-right" >Cancel task</button>
             <% } %>

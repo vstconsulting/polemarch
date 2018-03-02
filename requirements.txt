@@ -4,17 +4,15 @@ celery>4.0.3,<=4.1.0
 six
 pyyaml
 sqlalchemy
-ansible>=2.1, <=2.4.2
-paramiko<=2.4.0
 django-docs==0.2.1
 
 # API
 djangorestframework>=3.4, <=3.6.4
 django-filter
 django-crispy-forms
-django-celery-beat==1.0.1
+django-celery-beat==1.1.1
 jsonfield==2.0.2
-uWSGI==2.0.15
+uWSGI==2.0.17
 
 # Repo types
 gitpython==2.1.8
@@ -25,3 +23,8 @@ requests==2.18.4
 # additional DB and cache connectors
 PyMySQL
 python-memcached
+
+# Ansible required packages
+ansible>=2.1, <=2.4.3
+paramiko<=2.4.0
+pywinrm[kerberos]==0.3.0

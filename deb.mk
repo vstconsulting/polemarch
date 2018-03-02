@@ -3,7 +3,7 @@ Source: $(NAME)
 Section: unknown
 Priority: optional
 Maintainer: $(VENDOR)
-Build-Depends: debhelper (>= 9), python-virtualenv, python-pip, python-dev, gcc, libffi-dev, libssl-dev, libyaml-dev
+Build-Depends: debhelper (>= 9), python-virtualenv, python-pip, python-dev, gcc, libffi-dev, libssl-dev, libyaml-dev, libkrb5-dev
 Standards-Version: 3.9.5
 Homepage: https://gitlab.com/vstconsulting/polemarch
 Vcs-Git: git@gitlab.com:vstconsulting/polemarch.git
@@ -11,7 +11,7 @@ Vcs-Browser: https://gitlab.com/vstconsulting/polemarch.git
 
 Package: $(NAME)
 Architecture: amd64
-Depends: $${shlibs:Depends}, $${misc:Depends}, python-virtualenv, libffi6, libssl-dev, sshpass, libpython2.7, git, libyaml-dev
+Depends: $${shlibs:Depends}, $${misc:Depends}, python-virtualenv, libffi6, libssl-dev, sshpass, libpython2.7, git, libyaml-dev, libkrb5-dev
 Description: $(SUMMARY)
 $(DESCRIPTION)
 endef
@@ -67,6 +67,7 @@ override_dh_auto_install:
 	rm -rf $(BUILDROOT)/*
 	# install our package with all required python dependencies in virtualenv
 	virtualenv --no-site-packages $(BUILDROOT)/$(INSTALLDIR)
+	rm -rf $(BUILDROOT)/$(INSTALLDIR)/local
 	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements-doc.txt
 	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) dist/$(NAME)-$(VER).tar.gz
 	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements-git.txt

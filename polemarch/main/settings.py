@@ -50,7 +50,8 @@ except IOError:
     pass
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config.getboolean("main", "debug", fallback=False)
+DEBUG = os.getenv('DJANGO_DEBUG',
+                  config.getboolean("main", "debug", fallback=False))
 
 # Directory for git projects
 PROJECTS_DIR = config.get("main", "projects_dir", fallback="{HOME}/projects").format(**__kwargs)
@@ -152,7 +153,7 @@ if __DB_SETTINGS['ENGINE'] == 'django.db.backends.mysql':  # nocv
     pymysql.install_as_MySQLdb()
 
 if __DB_SETTINGS['ENGINE'] == 'django.db.polemarch.sqlite3':
-    __DB_OPTIONS["timeout"] = __DB_OPTIONS.get("timeout", 10)  # nocv
+    __DB_OPTIONS["timeout"] = __DB_OPTIONS.get("timeout", 20)  # nocv
 
 __DB_SETTINGS["OPTIONS"] = __DB_OPTIONS
 
@@ -213,7 +214,10 @@ REST_FRAMEWORK = {
         "polemarch.api.permissions.ModelPermission",
     ),
     'EXCEPTION_HANDLER': 'polemarch.api.handlers.polemarch_exception_handler',
-    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': config.getint("web", "rest_page_limit", fallback=PAGE_LIMIT),
 }
@@ -348,7 +352,7 @@ CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 
 REPO_BACKENDS = {
     "GIT": {
-        "BACKEND": "polemarch.main.repo_backends.Git",
+        "BACKEND": "polemarch.main.repo.Git",
         "OPTIONS": {
             "CLONE_KWARGS": {
                 "depth": 1
@@ -363,10 +367,10 @@ REPO_BACKENDS = {
         }
     },
     "TAR": {
-        "BACKEND": "polemarch.main.repo_backends.Tar",
+        "BACKEND": "polemarch.main.repo.Tar",
     },
     "MANUAL": {
-        "BACKEND": "polemarch.main.repo_backends.Manual",
+        "BACKEND": "polemarch.main.repo.Manual",
     }
 }
 

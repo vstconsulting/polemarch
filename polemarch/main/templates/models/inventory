@@ -1,4 +1,4 @@
-# Hosts {% for host in hosts %}
+{% autoescape off %}# Hosts {% for host in hosts %}
 {{ host }}{% endfor %}
 
 {% if vars %}# Global vars
@@ -6,4 +6,4 @@
 {{ vars }}{% endif %}
 
 # Groups {% for group in groups %}
-{{ group }}{% endfor %}
+{{ group }}{% endfor %}{% endautoescape %}

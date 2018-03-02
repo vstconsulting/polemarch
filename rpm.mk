@@ -39,6 +39,7 @@ Requires: python, openssl-devel
 Requires: python-virtualenv
 Requires: git
 Requires: libyaml-devel
+Requires: krb5-devel, krb5-libs
 
 
 %description

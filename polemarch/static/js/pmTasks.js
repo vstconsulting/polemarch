@@ -9,7 +9,7 @@ var pmTasks = inheritance(pmItems)
 pmTasks.model.name = "tasks"
 pmTasks.model.className = "pmTasks"
 
-pmTasks.execute = function(project_id, inventory, playbook, data_vars)
+pmTasks.execute = function(project_id, inventory, playbook, group, data_vars)
 {
     var def = new $.Deferred();
     if(!playbook)
@@ -18,11 +18,25 @@ pmTasks.execute = function(project_id, inventory, playbook, data_vars)
         def.reject({text:"Playbook name is empty"});
         return def.promise();
     }
-
+    
     if(!(project_id/1))
     {
         $.notify("Invalid field `project` ", "error");
         def.reject({text:"Invalid field `project` "});
+        return def.promise();
+    }    
+   
+    if(inventory=="./")
+    {
+        $.notify("Inventory name is empty", "error");
+        def.reject({text:"Inventory name is empty"});
+        return def.promise();
+    }
+
+    if(group=="")
+    {
+        $.notify("Group name is empty", "error");
+        def.reject({text:"Group name is empty"});
         return def.promise();
     }
 

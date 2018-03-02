@@ -66,7 +66,10 @@ ext_list = [
     "polemarch.main.models.vars",
     "polemarch.main.tasks.tasks",
     'polemarch.main.settings',
-    'polemarch.main.repo_backends',
+    'polemarch.main.repo._base',
+    'polemarch.main.repo.manual',
+    'polemarch.main.repo.tar',
+    'polemarch.main.repo.vcs',
     'polemarch.main.validators',
     'polemarch.main.views',
     'polemarch.main.context_processors',
@@ -120,10 +123,6 @@ cmdclass = {
 
 if has_sphinx:
     cmdclass['build_sphinx'] = BuildDoc
-    if [i for i in ['compile', 'install', 'sdist'] if i in sys.argv]:
-        sphinx.build_main(['setup.py', '-b', 'html',
-                           './doc/',
-                           './polemarch/doc/html/'])
 
 setup(
     name='polemarch',

@@ -17,6 +17,10 @@ export DESCRIPTION
 SUMMARY = Infrastructure Heat Service for orchestration infrastructure by ansible.
 VENDOR = VST Consulting <sergey.k@vstconsulting.net>
 RELEASE = 0
+COMPOSE = docker-compose-testrun.yml
+COMPOSE_ARGS = --abort-on-container-exit
+COMPLEX_TESTS_COMPOSE = docker-compose-tests.yml
+COMPLEX_TESTS_COMPOSE_ARGS = '--abort-on-container-exit --build'
 
 include rpm.mk
 include deb.mk
@@ -66,7 +70,10 @@ build-clean:
 	find . -name "*.pyc" -print0 | xargs -0 rm -rf
 	-rm -rf build
 	-rm -rf *.egg-info
-	-rm pylint_*
+	-rm -rf pylint_*
+
+clean_dist:
+	-rm -rf dist
 
 fclean: clean
 	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
@@ -105,3 +112,12 @@ deb:
 	mv -v ../$(NAME)_$(VER)*.deb dist/
 	# cleanup
 	rm -rf debian
+
+compose:
+	docker-compose -f $(COMPOSE) build
+
+run:
+	docker-compose -f $(COMPOSE) up $(COMPOSE_ARGS)
+
+complex_tests:
+	$(MAKE) run COMPOSE=$(COMPLEX_TESTS_COMPOSE) COMPOSE_ARGS=$(COMPLEX_TESTS_COMPOSE_ARGS)

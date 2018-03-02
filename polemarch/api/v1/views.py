@@ -55,6 +55,15 @@ class UserViewSet(base.ModelViewSetSet):
         self.perform_update(serializer)
         return base.Response(serializer.data, 200).resp
 
+    @detail_route(methods=["post", "delete", "get"], url_path="settings")
+    def user_settings(self, request, *args, **kwargs):
+        obj = self.get_object()
+        method = request.method
+        if method != "GET":
+            obj.settings.data = request.data if method == "POST" else {}
+            obj.settings.save()
+        return base.Response(obj.settings.data, 200).resp
+
 
 class TeamViewSet(base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.UserGroup
@@ -189,6 +198,18 @@ class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
     def facts(self, request, *args, **kwargs):
         objs = self.get_serializer(self.get_object()).get_facts(request)
         return base.Response(objs, 200).resp
+
+    @detail_route(methods=["delete"])
+    def clear(self, request, *args, **kwargs):
+        default_message = "Output trancated.\n"
+        obj = self.get_object()
+        if obj.status in ["RUN", "DELAY"] or obj.raw_stdout == default_message:
+            raise excepts.NotAcceptable(
+                "Job is running or already trancated"
+            )
+        obj.raw_stdout = default_message
+        result = self.get_serializer(obj).get_raw(request)
+        return base.Response(result, 204).resp
 
 
 class TemplateViewSet(base.PermissionMixin, base.ModelViewSetSet):
@@ -358,6 +379,7 @@ class StatisticViewSet(base.ListNonModelViewSet):
         # pylint: disable=unused-argument
         stats = OrderedDict(
             projects=self._get_count_by_user(serializers.models.Project),
+            templates=self._get_count_by_user(serializers.models.Template),
             inventories=self._get_count_by_user(serializers.models.Inventory),
             groups=self._get_count_by_user(serializers.models.Group),
             hosts=self._get_count_by_user(serializers.models.Host),

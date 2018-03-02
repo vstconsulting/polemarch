@@ -11,7 +11,7 @@ build
 *egg-info
 dist
 env
-polemarch/polemarch/static
+# polemarch/polemarch/static
 *.log
 *.pid
 *nbproject

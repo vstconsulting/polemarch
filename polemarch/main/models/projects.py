@@ -163,3 +163,7 @@ class Project(AbstractModel):
     @property
     def revision(self):
         return self.repo_class.revision()
+
+    @property
+    def branch(self):
+        return self.repo_class.get_branch_name()

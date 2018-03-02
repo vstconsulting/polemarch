@@ -6,15 +6,13 @@ class ModelPermission(permissions.IsAuthenticated):
         return super(ModelPermission, self).has_permission(request, view)
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_staff:
-            return True
-        if request.user == obj:  # nocv
+        if request.user.is_staff or request.user == obj:
             return True
         if request.method in permissions.SAFE_METHODS:  # nocv
             return obj.viewable_by(request.user)  # nocv
         if view.action in view.POST_WHITE_LIST:  # nocv
             return obj.viewable_by(request.user)  # nocv
-        return obj.editable_by(request.user)
+        return obj.editable_by(request.user)  # noce
 
 
 class SuperUserPermission(ModelPermission):

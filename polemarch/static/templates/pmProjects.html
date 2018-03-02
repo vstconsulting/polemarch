@@ -1,4 +1,4 @@
-  
+
 <!-- Шаблон поля Repository type  -->
 <script type="text/x-just" data-just="filed_type_selectRepositoryType"> 
     <% if(!item_id){ %>
@@ -44,6 +44,20 @@
             <input type="password"  placeholder="Enter repository password"  id="new_project_password" value=""  class="form-control" maxlength="255">
             <div class="help-block"></div>
         </div>
+
+        <!-- -->
+         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmProjects.model.justClass('repository_type', 'hide', function(v){ return v == 'TAR' || v == 'MANUAL' }) %>">
+            <label class="control-label" >Branch</label>
+            <input type="text"
+                    placeholder="Enter branch name"
+                    id="new_project_branch"
+                    value=""
+                    class="form-control"
+                    maxlength="255">
+            <div class="help-block"></div>
+        </div>
+        <!-- -->
+
     <% }else{ %>  
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
             <label class="control-label" >Repository type</label>
@@ -84,11 +98,23 @@
                 <input type="password" 
                         placeholder="Enter repository password"
                         id="project_<%- pmObj.model.items[item_id].id %>_password"
-                        value="<%- pmObj.model.items[item_id].vars.repo_password %>"
+
+                        <% if(pmObj.model.items[item_id].vars.repo_password) { %>
+                            value="<%- pmObj.model.items[item_id].vars.repo_password %>"
+                        <% } else { %>
+                            value=""
+                        <% } %>
                         class="form-control"
                         maxlength="255">
                 <div class="help-block"></div>
             </div>
+
+            <!-- -->
+            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6" id="branch_block">
+                <%= pmProjects.renderBranchInput(item_id) %>
+            </div>
+            <!-- -->
+
         <% } %>
     <% } %>
 </script>
@@ -101,7 +127,7 @@
         <span class="glyphicon glyphicon-file"></span> Import templates
     </span>
 </script>
- 
+
 <script type="text/x-just" data-just="projects_run_playbook">
 <section class="content-header">
         <h1>
@@ -192,4 +218,73 @@
         </div>
     </section>
 </script>
- 
+
+
+<script type="text/x-just" data-just="branch_input">
+
+                <label class="control-label" >Branch</label>
+                <% if(pmObj.model.items[item_id].vars.repo_branch!=undefined) { %>
+                    <% if(pmObj.model.items[item_id].branch!=pmObj.model.items[item_id].vars.repo_branch) { %>
+                    <div style="display: flex; overflow:hidden;">
+                        <div style="position:relative;">
+                            <input type="text"
+                                    placeholder="Enter branch name"
+                                    value="<%- pmObj.model.items[item_id].branch %>"
+                                    class="form-control"
+                                    maxlength="255"
+                                    disabled
+                                    style="width: <%= (pmObj.model.items[item_id].branch.length +1)*8 +35 %>px; border-right:none; float:left;">
+                            <div class="form-control" style="width: 35px;  border-left:none; float:left; border-right:none; position:absolute; right:0px;" disabled>
+                                        <i class="glyphicon glyphicon-arrow-right"></i>
+                                    </div>
+
+                        </div>
+                        <div style="flex:1;">
+                            <div style="width: 100%; position:relative;">
+                                <input type="text"
+                                        placeholder="Enter branch name"
+                                        id="project_<%- pmObj.model.items[item_id].id %>_branch"
+                                        value="<%- pmObj.model.items[item_id].vars.repo_branch %>"
+                                        class="form-control"
+                                        maxlength="255"
+                                        style="float:left;"
+                                        onfocusout="pmProjects.checkBranchInput(<%= item_id %>);">
+
+
+
+                                <span class="clear-input-and-paste" onclick="pmProjects.clearAndPasteBranchInput(<%= item_id %>,'#project_<%- pmObj.model.items[item_id].id %>_branch');">
+                                    <span class="glyphicon glyphicon-remove"></span>
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <% } else { %>
+                        <input type="text"
+                                placeholder="Enter branch name"
+                                id="project_<%- pmObj.model.items[item_id].id %>_branch"
+                                value="<%- pmObj.model.items[item_id].branch %>"
+                                class="form-control"
+                                maxlength="255"
+                                onfocusout="pmProjects.checkBranchInput(<%= item_id %>);">
+
+
+                    <% } %>
+                <% } else { %>
+                    <input type="text"
+                                    placeholder="Enter branch name"
+                                    id="project_<%- pmObj.model.items[item_id].id %>_branch"
+                                    value="<%- pmObj.model.items[item_id].branch %>"
+                                    class="form-control"
+                                    maxlength="255"
+                                    onfocusout="pmProjects.checkBranchInput(<%= item_id %>);">
+
+
+                 <% } %>
+
+                <div class="help-block"></div>
+
+
+
+</script>

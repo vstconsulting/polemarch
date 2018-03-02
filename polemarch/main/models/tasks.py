@@ -162,6 +162,7 @@ class Template(ACLModel):
     name          = models.CharField(max_length=512)
     kind          = models.CharField(max_length=32)
     template_data = models.TextField(default="")
+    options_data  = models.TextField(default="")
     inventory     = models.CharField(max_length=128,
                                      default=None, blank=True, null=True)
     project       = ForeignKeyACL(Project,
@@ -182,13 +183,20 @@ class Template(ACLModel):
     template_fields["Host"] = ["name", "vars"]
     template_fields["Group"] = template_fields["Host"] + ["children"]
 
+    excepted_execution_fields = ['inventory', 'project']
     _exec_types = {
         "Task": "playbook",
         "Module": "module",
     }
 
+    def get_option_data(self, option):
+        return self.options.get(option, {})
+
+    def get_options_data(self):
+        return json.loads(self.options_data or '{}')
+
     def get_data(self):
-        data = json.loads(self.template_data)
+        data = json.loads(self.template_data or '{}')
         if "project" in self.template_fields[self.kind] and self.project:
             data['project'] = self.project.id
         if "inventory" in self.template_fields[self.kind] and self.inventory:
@@ -198,14 +206,18 @@ class Template(ACLModel):
                 data['inventory'] = self.inventory
         return data
 
-    def execute(self, serializer, user):
+    def execute(self, serializer, user, option=None):
         # pylint: disable=protected-access
         tp = self._exec_types.get(self.kind, None)
         if tp is None:
             raise UnsupportedMediaType(media_type=self.kind)
         data = self.get_data()
         data.pop("project", None)
+        option_data = self.get_option_data(option)
+        option_vars = option_data.pop("vars", {})
         vars = data.pop("vars", {})
+        vars.update(option_vars)
+        data.update(option_data)
         data.update(vars)
         return serializer._execution(tp, data, user)
 
@@ -217,14 +229,35 @@ class Template(ACLModel):
         else:
             raise ValueError("Unknown data type set.")
 
-    def keep_encrypted(self, new_vars):
-        if not self.template_data:
-            return new_vars
-        old_vars = self.data['vars']
+    def __encrypt(self, new_vars, data_name='data'):
+        old_vars = getattr(self, data_name).get('vars', {})
         for key in new_vars.keys():
             if new_vars[key] == '[~~ENCRYPTED~~]':
                 new_vars[key] = old_vars.get(key, new_vars[key])
         return new_vars
+
+    def keep_encrypted_data(self, new_vars):
+        if not self.template_data:
+            return new_vars
+        return self.__encrypt(new_vars)
+
+    def _validate_option_data(self, data):
+        errors = {}
+        for name in data.keys():
+            if name in self.excepted_execution_fields:
+                errors['options'] = ['Disallowed to override {}.'.format(name)]
+        if errors:
+            raise ValidationError(errors)
+
+    def set_options_data(self, value):
+        options_data = self._convert_to_data(value)
+        new = dict()
+        for option, data in options_data.items():
+            self._validate_option_data(data)
+            if data.get('vars', None):
+                data['vars'] = self.__encrypt(data['vars'], 'options')
+            new[option] = data
+        self.options_data = json.dumps(new)
 
     def set_data(self, value):
         data = self._convert_to_data(value)
@@ -240,7 +273,7 @@ class Template(ACLModel):
                 self.inventory = Inventory.objects.get(pk=int(inventory_id)).id
             except (ValueError, TypeError, Inventory.DoesNotExist):
                 self.inventory = inventory_id
-        data['vars'] = self.keep_encrypted(data['vars'])
+        data['vars'] = self.keep_encrypted_data(data['vars'])
         self.template_data = json.dumps(data)
 
     def __setattr__(self, key, value):
@@ -255,13 +288,29 @@ class Template(ACLModel):
 
     @data.setter
     def data(self, value):
-        return self.set_data(value)
+        self.set_data(value)
 
     @data.deleter
-    def data(self):
-        self.template_data = ""  # nocv
-        self.inventory = None  # nocv
-        self.project = None  # nocv
+    def data(self):  # nocv
+        self.template_data = ""
+        self.inventory = None
+        self.project = None
+
+    @property
+    def options(self):
+        return self.get_options_data()
+
+    @options.setter
+    def options(self, value):
+        self.set_options_data(value)
+
+    @options.deleter
+    def options(self):  # nocv
+        self.options_data = ''
+
+    @property
+    def options_list(self):
+        return list(self.options.keys())
 
 
 class HistoryQuerySet(ACLHistoryQuerySet):

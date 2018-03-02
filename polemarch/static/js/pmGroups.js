@@ -22,7 +22,7 @@ pmGroups.copyItem = function(item_id)
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
-                            success: function(newItem)
+                success: function(newItem)
                 {
                     thisObj.model.items[newItem.id] = newItem
 
@@ -58,7 +58,7 @@ pmGroups.copyItem = function(item_id)
         }).fail(function(e)
         {
             def.reject(e)
-        }) 
+        })
     }).fail(function(e)
     {
         def.reject(e)
@@ -73,9 +73,9 @@ pmGroups.model.page_list = {
         {
             class:'btn btn-primary',
             function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"'}); return false;"},
-            title:'Create', 
-            link:function(){ return '/?new-'+this.model.page_name}, 
-        }, 
+            title:'Create',
+            link:function(){ return '/?new-'+this.model.page_name},
+        },
     ],
     title: "Groups",
     short_title: "Groups",
@@ -123,7 +123,7 @@ pmGroups.validator = function(value)
     {
         return true;
     }
-    $.notify("Invalid value in field name it mast be as [^A-z0-9_.\-]", "error"); 
+    $.notify("Invalid value in field name it mast be as [^A-z0-9_.\-]", "error");
     return false;
 }
 
@@ -131,7 +131,7 @@ pmGroups.fast_validator = function(value)
 {
     return /[^A-z0-9_.\-]/.test(value)
 }
-    
+
 pmGroups.model.page_new = {
     title: "New group",
     short_title: "New group",
@@ -164,10 +164,10 @@ pmGroups.model.page_new = {
         return data;
     },
     onCreate:function(data, status, xhr, callOpt)
-    { 
+    {
         var def = new $.Deferred();
         $.notify("Group created", "success");
-        
+
         if(callOpt.parent_item)
         {
             if(callOpt.parent_type == 'group')
@@ -217,9 +217,9 @@ pmGroups.model.page_item = {
         {
             class:'btn btn-primary',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
-            title:'Save', 
-            link:function(){ return '#'}, 
-        }, 
+            title:'Save',
+            link:function(){ return '#'},
+        },
         {
             class:'btn btn-default copy-btn',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
@@ -231,7 +231,7 @@ pmGroups.model.page_item = {
             class:'btn btn-danger danger-right',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
             title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
-            link:function(){ return '#'}, 
+            link:function(){ return '#'},
         },
     ],
     sections:[
@@ -239,7 +239,7 @@ pmGroups.model.page_item = {
             return jsonEditor.editor(this.model.items[item_id].vars, {block:this.model.name});
         },
         function(section, item_id){
-            return spajs.just.render("groups_sub_items", {item_id:item_id}) 
+            return spajs.just.render("groups_sub_items", {item_id:item_id})
         }
     ],
     title: function(item_id){
@@ -266,24 +266,32 @@ pmGroups.model.page_item = {
     },
     onBeforeSave:function(data, item_id)
     {
-        data.vars = jsonEditor.jsonEditorGetValues() 
+        data.vars = jsonEditor.jsonEditorGetValues()
         return data;
     },
 }
-  
+
 /**
  * @return $.Deferred
  */
 pmGroups.setSubGroups = function(item_id, groups_ids)
 {
+    var thisObj=this;
     if(!item_id)
     {
         throw "Error in pmGroups.setSubGroups with item_id = `" + item_id + "`"
     }
-    
+
     if(!groups_ids)
     {
         groups_ids = []
+    }
+    else
+    {
+        for(var i in groups_ids)
+        {
+            groups_ids[i]=+groups_ids[i];
+        }
     }
 
     return spajs.ajax.Call({
@@ -291,20 +299,9 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
-                success: function(data)
+        success: function(data)
         {
-            if(pmGroups.model.items[item_id])
-            {
-                pmGroups.model.items[item_id].groups = []
-                for(var i in groups_ids)
-                {
-                    if(!pmGroups.model.items[groups_ids[i]])
-                    {
-                        continue;
-                    }
-                    pmGroups.model.items[item_id].groups.push(pmGroups.model.items[groups_ids[i]])
-                }
-            }
+            pmItems.checkSubItemsAndAdd(thisObj, pmGroups, data, item_id, "groups", groups_ids);
             //console.log("group update", data);
         },
         error:function(e)
@@ -320,14 +317,22 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
  */
 pmGroups.setSubHosts = function(item_id, hosts_ids)
 {
+    var thisObj=this;
     if(!item_id)
     {
         throw "Error in pmGroups.setSubHosts with item_id = `" + item_id + "`"
     }
-    
+
     if(!hosts_ids)
     {
         hosts_ids = []
+    }
+    else
+    {
+        for(var i in hosts_ids)
+        {
+            hosts_ids[i]=+hosts_ids[i];
+        }
     }
 
     return spajs.ajax.Call({
@@ -335,20 +340,9 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
-                success: function(data)
+        success: function(data)
         {
-            if(pmGroups.model.items[item_id])
-            {
-                pmGroups.model.items[item_id].hosts = []
-                for(var i in hosts_ids)
-                {
-                    if(!pmHosts.model.items[hosts_ids[i]])
-                    {
-                        continue;
-                    }
-                    pmGroups.model.items[item_id].hosts.push(pmHosts.model.items[hosts_ids[i]])
-                }
-            }
+            pmItems.checkSubItemsAndAdd(thisObj, pmHosts, data, item_id, "hosts", hosts_ids);
             //console.log("group update", data);
         },
         error:function(e)
@@ -368,7 +362,7 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
     {
         throw "Error in pmGroups.addSubGroups with item_id = `" + item_id + "`"
     }
-    
+
     if(!groups_ids)
     {
         groups_ids = []
@@ -380,7 +374,7 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
-                success: function(data)
+        success: function(data)
         {
             if(data.not_found > 0)
             {
@@ -424,7 +418,7 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
     {
         throw "Error in pmGroups.addSubHosts with item_id = `" + item_id + "`"
     }
-    
+
     if(!hosts_ids)
     {
         hosts_ids = []
@@ -436,7 +430,7 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
-                success: function(data)
+        success: function(data)
         {
             if(data.not_found > 0)
             {
@@ -481,10 +475,14 @@ pmGroups.showAddSubGroupsForm = function(item_id)
     {
         throw "Error in pmGroups.showAddSubGroupsForm with item_id = `" + item_id + "`"
     }
-    
+
     return $.when(pmGroups.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_group', {item_id:item_id}))
+        var  scroll_el = "#add_existing_item_to_group";
+        if ($(scroll_el).length != 0) {
+            $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+        }
         $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
@@ -501,10 +499,14 @@ pmGroups.showAddSubHostsForm = function(item_id)
     {
         throw "Error in pmGroups.showAddSubHostsForm with item_id = `" + item_id + "`"
     }
-    
+
     return $.when(pmHosts.loadAllItems()).done(function(){
         $("#add_existing_item_to_group").remove()
         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_group', {item_id:item_id}))
+        var scroll_el = "#add_existing_item_to_group";
+        if ($(scroll_el).length != 0) {
+            $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+        }
         $("#polemarch-model-items-select").select2({ width: '100%' });
     }).fail(function(){
 
@@ -523,7 +525,7 @@ pmGroups.hasHosts = function(item_id, host_id)
     {
         throw "Error in pmGroups.hasHosts with item_id = `" + item_id + "`"
     }
-    
+
     if(pmGroups.model.items[item_id])
     {
         for(var i in pmGroups.model.items[item_id].hosts)
@@ -549,7 +551,7 @@ pmGroups.hasGroups = function(item_id, group_id)
     {
         throw "Error in pmGroups.hasGroups with item_id = `" + item_id + "`"
     }
-    
+
     if(pmGroups.model.items[item_id])
     {
         for(var i in pmGroups.model.items[item_id].groups)
@@ -578,6 +580,7 @@ pmGroups.getGroupsAutocompleteValue = function(prefix)
         prefix = "prefix"
     }
     return $('#groups_autocomplete_filed'+prefix).val()
+    debugger;
 }
 
 /**
@@ -628,19 +631,19 @@ pmGroups.groupsAutocompleteTemplate = function(inventory_id, value, prefix)
                 {
                     //console.log('onSelect', term, item);
                     var value = $(item).attr('data-value');
-                    $("#groups_autocomplete_filed"+prefix).val(value); 
-                    $("#groups_autocomplete_filed"+prefix).attr({'data-hide':'hide'}); 
-                    
+                    $("#groups_autocomplete_filed"+prefix).val(value);
+                    $("#groups_autocomplete_filed"+prefix).attr({'data-hide':'hide'});
+
                 },
                 source: function(original_term, response)
                 {
                     var isHide = $("#groups_autocomplete_filed"+prefix).attr('data-hide')
                     if(isHide == "hide")
                     {
-                       $("#groups_autocomplete_filed"+prefix).attr({'data-hide':'show'})
+                        $("#groups_autocomplete_filed"+prefix).attr({'data-hide':'show'})
                         return;
-                    } 
-                    
+                    }
+
                     pmGroups.groupsAutocompleteMatcher(original_term, response, inventory_id)
                 }
             });
@@ -777,7 +780,7 @@ tabSignal.connect("polemarch.start", function()
 
     spajs.addMenu({
         id:"groups-search",
-        urlregexp:[/^groups\/search\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^groups\/search\/([A-z0-9 %\-.:,=]+)$/, /^groups\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showSearchResults(holder, menuInfo, data);}
     })
 
