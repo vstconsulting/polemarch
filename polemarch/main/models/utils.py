@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import re
 import sys
 import logging
 from os.path import dirname
@@ -8,6 +9,7 @@ from collections import namedtuple
 
 import six
 from django.utils import timezone
+from .hosts import Inventory
 from ...main.utils import (tmp_file, CmdExecutor,
                            KVExchanger, CalledProcessError)
 
@@ -92,6 +94,7 @@ class AnsibleCommand(object):
         def __init__(self, inventory, cwd="/tmp"):
             self.cwd = cwd
             self.__file = None
+            self.hidden_vars = Inventory.HIDDEN_VARS
             if isinstance(inventory, (six.string_types, six.text_type)):
                 self.raw, self.keys = self.get_from_file(inventory)
             else:
@@ -162,12 +165,23 @@ class AnsibleCommand(object):
     def path_to_ansible(self):
         return dirname(sys.executable) + "/" + self.command_type
 
+    def hide_passwords(self, raw):
+        regex = r""
+        for hide in self.inventory_object.hidden_vars:
+            regex += r"|" if regex else r""
+            regex += r"(?<=" + hide + r"=).{1,}?(?=[\n\t\s])"
+        subst = "[~~ENCRYPTED~~]"
+        raw = re.sub(regex, subst, raw, 0, re.MULTILINE)
+        return raw
+
     def prepare(self, target, inventory, history, project):
         project.check_path(inventory)
         self.target, self.project = target, project
         self.history = history if history else DummyHistory()
         self.inventory_object = self.Inventory(inventory, cwd=self.workdir)
-        self.history.raw_inventory = self.inventory_object.raw
+        self.history.raw_inventory = self.hide_passwords(
+            self.inventory_object.raw
+        )
         self.history.status = "RUN"
         self.history.revision = project.revision
         self.history.save()

@@ -43,13 +43,15 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
     correct_simple_inventory = (
         "127.0.1.1 ansible_user=centos "
-        "ansible_ssh_private_key_file="
+        "ansible_ssh_private_key_file=[~~ENCRYPTED~~] "
+        "ansible_become_pass=[~~ENCRYPTED~~]"
     )
 
     def create_inventory(self):
         inventory_data = dict(name="Inv1", vars={})
         host_data = dict(name="127.0.1.1", type="HOST",
                          vars={"ansible_user": "centos",
+                               "ansible_become_pass": "secret",
                                "ansible_ssh_private_key_file": "somekey"})
         # make host, inventory
         inventory = self.post_result("/api/v1/inventories/",
@@ -68,17 +70,18 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def test_execute(self, subprocess_function):
         inv1, h1 = self.create_inventory()
         # mock side effect to get ansible-playbook args for assertions in test
-        result = ["", ""]
+        result = dict()
 
         def side_effect(call_args, *args, **kwargs):
             inventory_path = call_args[3]
             with open(inventory_path, 'r') as inventory_file:
                 inventory = inventory_file.read().split('\n')
-                l = lambda x: x.startswith('127.')
-                result[0] = list(filter(l, inventory))[0]
-                key_path = result[0].split("=")[-1]
-                with open(key_path, 'r') as key_file:
-                    result[1] = key_file.read()
+                sHst = inventory[1].split(" ")
+                result['host'] = sHst[0]
+                result['ansible_user'] = sHst[1].split("=")[1]
+                result['ansible_become_pass'] = sHst[1].split("=")[1]
+                with open(sHst[2].split("=")[1], 'r') as key_file:
+                    result['ansible_ssh_private_key_file'] = key_file.read()
         subprocess_function.side_effect = side_effect
         # test that can't execute without inventory
         self.post_result(
@@ -92,8 +95,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible-playbook"))
         self.assertTrue(call_args[1].endswith("first.yml"))
-        self.assertTrue(result[0].startswith(self.correct_simple_inventory))
-        self.assertEquals(result[1], "somekey")
+        self.assertEquals(result['host'], "127.0.1.1")
+        self.assertEquals(result['ansible_user'], "centos")
+        self.assertEquals(result['ansible_ssh_private_key_file'], "somekey")
         # test simple execution sync
         subprocess_function.reset_mock()
         self.post_result(
@@ -104,14 +108,15 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible-playbook"))
         self.assertTrue(call_args[1].endswith("first.yml"))
-        self.assertTrue(result[0].startswith(self.correct_simple_inventory))
-        self.assertEquals(result[1], "somekey")
+        self.assertEquals(result['host'], "127.0.1.1")
+        self.assertEquals(result['ansible_user'], "centos")
+        self.assertEquals(result['ansible_ssh_private_key_file'], "somekey")
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute_module(self, subprocess_function):
         inv1, h1 = self.create_inventory()
         # mock side effect to get ansible-playbook args for assertions in test
-        result = ["", ""]
+        result = dict()
 
         def side_effect(call_args, *args, **kwargs):
             # check additional args
@@ -126,11 +131,12 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             inventory_path = call_args[3]
             with open(inventory_path, 'r') as inventory_file:
                 inventory = inventory_file.read().split('\n')
-                l = lambda x: x.startswith('127.')
-                result[0] = list(filter(l, inventory))[0]
-                key_path = result[0].split("=")[-1]
-                with open(key_path, 'r') as key_file:
-                    result[1] = key_file.read()
+                sHst = inventory[1].split(" ")
+                result['host'] = sHst[0]
+                result['ansible_user'] = sHst[1].split("=")[1]
+                result['ansible_become_pass'] = sHst[3].split("=")[1]
+                with open(sHst[2].split("=")[1], 'r') as key_file:
+                    result['ansible_ssh_private_key_file'] = key_file.read()
         subprocess_function.side_effect = side_effect
         # test that can't execute without inventory
         self.post_result(
@@ -147,11 +153,17 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible"))
         self.assertTrue(call_args[1].endswith("all"))
-        self.assertTrue(result[0].startswith(self.correct_simple_inventory))
-        self.assertEquals(result[1], "somekey")
+        self.assertEquals(result['host'], "127.0.1.1")
+        self.assertEquals(result['ansible_user'], "centos")
+        self.assertEquals(result['ansible_ssh_private_key_file'], "somekey")
+        self.assertEquals(result['ansible_become_pass'], "secret")
         history = History.objects.get(id=answer["history_id"])
         self.assertEquals(history.kind, "MODULE")
         self.assertEquals(history.mode, "shell")
+        self.assertIn(
+            "ansible_become_pass=[~~ENCRYPTED~~]", history.raw_inventory,
+            "\n"+history.raw_inventory
+        )
         # test simple execution without args
         kw_list = [dict(args=""), dict(args=None), dict()]
         for kwargs in kw_list:
