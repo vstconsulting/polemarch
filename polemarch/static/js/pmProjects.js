@@ -289,7 +289,7 @@ pmProjects.model.page_item = {
         },
         {
             class:'btn btn-warning',
-            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.syncRepo('+item_id+'));  return false;'},
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.syncRepoFromProjectPage('+item_id+'));  return false;'},
             title:'<i class="fa fa-refresh hidden-sm hidden-xs" aria-hidden="true"></i> Sync',
             link:function(){ return '#'},
             help:'Sync'
@@ -563,6 +563,25 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
  */
 pmProjects.syncRepo = function(item_id)
 {
+    return spajs.ajax.Call({
+        url: "/api/v1/projects/"+item_id+"/sync/",
+        type: "POST",
+        contentType:'application/json',
+        success: function(data)
+        {
+            $.notify("Send sync query", "success");
+        },
+        error:function(e)
+        {
+            console.warn("project "+item_id+" sync error - " + JSON.stringify(e));
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+
+}
+
+pmProjects.syncRepoFromProjectPage = function(item_id)
+{
     var thisObj = this;
     thisObj.model.items[item_id].status = "WAIT_SYNC";
     pmProjects.startUpdateProjectItem(item_id);
@@ -632,8 +651,7 @@ pmProjects.checkBranchInput = function(item_id)
 
 pmProjects.renderBranchInput = function(item_id)
 {
-    var thisObj = this;
-    var html=spajs.just.render('branch_input', {item_id:item_id, pmObj:thisObj});
+    var html=spajs.just.render('branch_input', {item_id:item_id, pmObj:pmProjects});
     return html;
 }
 
