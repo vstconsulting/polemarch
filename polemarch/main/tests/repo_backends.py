@@ -12,7 +12,7 @@ except ImportError:
     from unittest.mock import patch
 from django.test import override_settings
 from .inventory import _ApiGHBaseTestCase
-from ..repo_backends import _Base, logger, os
+from ..repo._base import _Base, logger, os
 
 
 class Test(_Base):
@@ -56,7 +56,12 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         repo = git.Repo.init(repo_dir)
         repo.index.add(["main.yml"])
         repo.index.commit("no message")
-        revision = repo.head.object.hexsha
+        first_revision = repo.head.object.hexsha
+        repo.create_head('new_branch')
+        open(repo_dir + "/other.yml", 'a').close()
+        repo.index.add(["other.yml"])
+        repo.index.commit("no message 2")
+        second_revision = repo.head.object.hexsha
         # actual test
         data = dict(name="GitProject{}".format(sys.version_info[0]),
                     repository=repo_dir,
@@ -67,17 +72,41 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         single_url = self.url + "{}/".format(prj_id)
         project = self.get_result("get", single_url)
         self.assertEqual(project['status'], "OK")
+        self.assertEqual(project['vars']['repo_branch'], "master")
+        self.assertEqual(project['branch'], "master")
         tasks_url = "/api/v1/tasks/?project={}".format(prj_id)
         tasks = self.get_result("get", tasks_url, 200)
-        self.assertEquals(tasks["count"], 1)
+        self.assertEquals(tasks["count"], 2)
         self.assertEquals(tasks["results"][0]["name"], "main")
-        self.assertEqual(project["revision"], revision)
+        self.assertEquals(tasks["results"][1]["name"], "other")
+        self.assertEqual(project["revision"], second_revision)
 
         self.get_result("post", single_url+"sync/", 200)
+
+        # change project branch
+        data['vars']['repo_branch'] = "new_branch"
+        self.get_result("patch", single_url, data=json.dumps(data))
+        project = self.get_result("get", single_url)
+        self.assertEqual(project['vars']['repo_branch'], "new_branch")
+        self.assertEqual(project['branch'], "master")
+        self.get_result("post", single_url + "sync/", 200)
+        project = self.get_result("get", single_url)
+        self.assertEqual(project['status'], "OK")
+        self.assertEqual(project['vars']['repo_branch'], "new_branch")
+        self.assertEqual(project['branch'], "new_branch")
+        self.assertEqual(project["revision"], first_revision)
+
+        # clone with branch name
+        prj_id = self.get_result("post", self.url, data=json.dumps(data))['id']
+        self.projects_to_delete.append(prj_id)
+        project = self.get_result("get", single_url)
+        self.assertEqual(project['status'], "OK")
+        self.assertEqual(project['vars']['repo_branch'], "new_branch")
+        self.assertEqual(project["revision"], first_revision)
         # delete test repository
         shutil.rmtree(repo_dir)
 
-    @patch('polemarch.main.repo_backends._ArchiveRepo._download')
+    @patch('polemarch.main.repo._base._ArchiveRepo._download')
     @override_settings(PROJECTS_DIR="/tmp/test_projs{}".format(sys.hexversion))
     def test_tar_import(self, download):
         download.side_effect = [self.tests_path + '/test_repo.tar'] * 10

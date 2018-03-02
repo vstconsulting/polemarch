@@ -352,7 +352,7 @@ CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 
 REPO_BACKENDS = {
     "GIT": {
-        "BACKEND": "polemarch.main.repo_backends.Git",
+        "BACKEND": "polemarch.main.repo.Git",
         "OPTIONS": {
             "CLONE_KWARGS": {
                 "depth": 1
@@ -367,10 +367,10 @@ REPO_BACKENDS = {
         }
     },
     "TAR": {
-        "BACKEND": "polemarch.main.repo_backends.Tar",
+        "BACKEND": "polemarch.main.repo.Tar",
     },
     "MANUAL": {
-        "BACKEND": "polemarch.main.repo_backends.Manual",
+        "BACKEND": "polemarch.main.repo.Manual",
     }
 }
 
