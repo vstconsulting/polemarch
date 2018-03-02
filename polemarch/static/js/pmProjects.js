@@ -437,38 +437,23 @@ pmProjects.startUpdateProjectItem = function(item_id)
 {
     var thisObj = this;
 
-    if(thisObj.model.items[item_id].vars.repo_type=="GIT")
+    if(thisObj.model.items[item_id].status == "WAIT_SYNC" || thisObj.model.items[item_id].status == "SYNC")
     {
-        if(thisObj.model.items[item_id].status == "WAIT_SYNC" || thisObj.model.items[item_id].status == "SYNC")
+        thisObj.model.updateTimeoutId = setTimeout(function()
         {
-            thisObj.model.updateTimeoutId = setTimeout(function()
+            $.when(thisObj.loadItem(item_id)).always(function()
             {
-                $.when(thisObj.loadItem(item_id)).always(function()
-                {
-                    thisObj.startUpdateProjectItem(item_id)
-                })
-            }, 5000)
-        }
-        if(thisObj.model.items[item_id].status != "WAIT_SYNC" || thisObj.model.items[item_id].status != "SYNC")
-        {
-            $("#branch_block").empty();
-            $("#branch_block").html(pmProjects.renderBranchInput(item_id));
-        }
+                thisObj.startUpdateProjectItem(item_id)
+            })
+        }, 5000)
     }
-    else
+
+    if(thisObj.model.items[item_id].status != "WAIT_SYNC" || thisObj.model.items[item_id].status != "SYNC")
     {
-        if(thisObj.model.items[item_id].status == "WAIT_SYNC" || thisObj.model.items[item_id].status == "SYNC")
-        {
-            console.log(thisObj.model.items[item_id].vars.repo_type);
-            thisObj.model.updateTimeoutId = setTimeout(function()
-            {
-                $.when(thisObj.loadItem(item_id)).always(function()
-                {
-                    thisObj.startUpdateProjectItem(item_id)
-                })
-            }, 5000)
-        }
+        $("#branch_block").empty();
+        $("#branch_block").html(pmProjects.renderBranchInput(item_id));
     }
+
 }
 
 pmProjects.openItem = function(holder, menuInfo, data)
