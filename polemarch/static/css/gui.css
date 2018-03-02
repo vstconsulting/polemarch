@@ -602,3 +602,22 @@ table{
 .w-btn:hover {
     color:#606c84;
 }
+
+.clear-input-and-paste {
+    float:left;
+    height: 34px;
+    line-height: 1.42857143;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    position:absolute;
+    z-index:10;
+    right:0px;
+    color: #555;
+    text-align: center;
+}
+
+.clear-input-and-paste:hover {
+    color: #fff;
+    background-color: #d9534f;
+}
+

@@ -5,7 +5,7 @@ pmProjects.model.name = "projects"
 pmProjects.model.page_name = "project"
 pmProjects.model.className = "pmProjects"
 pmProjects.model.bulk_name = "project"
- 
+
 jsonEditor.options[pmProjects.model.name] = {};
 pmProjects.model.selectedInventory = 0
 
@@ -169,7 +169,7 @@ pmProjects.model.page_list = {
 pmProjects.model.page_new = {
     title: "New project",               // Текст заголовка страницы
     short_title: "New project",         // Короткий текст заголовка страницы   
-    /** 
+    /**
      * Содержит массив с массивами описаний полей в списке элементов
      * Масиивы представляют собой блоки строк в которые вставляются поля ввода
      * @type Array
@@ -180,7 +180,7 @@ pmProjects.model.page_new = {
              * Поле ввода
              * @todo В целом в следующем приступе неудержимого рефакторинга будет правильнее
              *  все параметры кроме filed перенести в конструктор поля filed
-             *  и тогда массив fileds будет содержать только экземпляры filedsLib.filed.* или его наследников 
+             *  и тогда массив fileds будет содержать только экземпляры filedsLib.filed.* или его наследников
              */
             {
                 filed: new filedsLib.filed.text(),                              // Объект поля ввода
@@ -189,7 +189,7 @@ pmProjects.model.page_new = {
                 placeholder:'Project name',                                     // Подсказка
                 help:'',                                                        // Подсказка
                 validator:function(value){                                      // Функция валидации должна вернуть true или false+вывод сообщения об ошибке
-                    return filedsLib.validator.notEmpty(value, 'Name')          
+                    return filedsLib.validator.notEmpty(value, 'Name')
                 },
                 fast_validator:function(value){ return value != '' && value}    // Функция быстрой валидации должна вернуть true или false
             },
@@ -204,24 +204,38 @@ pmProjects.model.page_new = {
      * @type Array
      */
     sections:[
-        /** 
+        /**
          * @returns {String} Текст шаблона для вставки дополнительных блоков в страницу
          */
         // function(){ return ''}
     ],
     /**
-     * Функция вызываемая до сохранения объекта, должна вернуть объект 
+     * Функция вызываемая до сохранения объекта, должна вернуть объект
      * отправляемый на сохранение можно изменённый или вернуть false для того чтоб отменить сохранение.
-     * @param {object} data объект отправляемый на сохранение 
-     * @returns {object|boolean} 
+     * @param {object} data объект отправляемый на сохранение
+     * @returns {object|boolean}
      */
     onBeforeSave:function(data)
     {
         data.repository = $("#new_project_repository").val()
         data.vars = {
             repo_type:$("#new_project_type").val(),
-            repo_password:$("#new_project_password").val(),
+            //repo_password:$("#new_project_password").val(),
         }
+
+        if(data.vars.repo_type == "GIT")
+        {
+            if($("#new_project_branch").val().trim()!="")
+            {
+                data.vars.repo_branch=$("#new_project_branch").val().trim();
+            }
+
+            if($("#new_project_password").val().trim()!="")
+            {
+                data.vars.repo_password=$("#new_project_password").val().trim();
+            }
+        }
+
 
         if(!data.repository)
         {
@@ -265,11 +279,11 @@ pmProjects.model.page_item = {
     buttons:[
         {
             class:'btn btn-primary',
-            /** 
+            /**
              * @param {Integer} item_id Идентификатор редактируемого элемента
              * @returns {String} То что подставится в шаблон на onclick
              */
-            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
+            function:function(item_id){ return 'spajs.showLoader($.when('+this.model.className+'.updateItem('+item_id+')).done(function() {return spajs.openURL("'+window.location.href+'");}));  return false;'},
             title:'Save',
             link:function(){ return '#'},
         },
@@ -321,14 +335,14 @@ pmProjects.model.page_item = {
         },
     ],
     sections:[],
-    /** 
+    /**
      * @param {Integer} item_id Идентификатор редактируемого элемента
      * @returns {String} То что подставится в шаблон на title
      */
     title: function(item_id){
         return "Project "+this.model.items[item_id].justText('name')
     },
-    /** 
+    /**
      * @param {Integer} item_id Идентификатор редактируемого элемента
      * @returns {String} То что подставится в шаблон на short_title
      */
@@ -378,7 +392,26 @@ pmProjects.model.page_item = {
 
         data.vars = {
             repo_type:$("#project_"+item_id+"_type").val(),
-            repo_password:$("#project_"+item_id+"_password").val(),
+            //repo_password:$("#project_"+item_id+"_password").val(),
+        }
+
+        if(data.vars.repo_type=="GIT")
+        {
+            if($("#project_"+item_id+"_branch").val().trim()!="")
+            {
+
+                data.vars.repo_branch=$("#project_"+item_id+"_branch").val().trim();
+            }
+            else
+            {
+                $.notify("Branch name is empty", "error");
+                return false;
+            }
+
+            if($("#project_"+item_id+"_password").val().trim()!="")
+            {
+                data.vars.repo_password=$("#project_"+item_id+"_password").val().trim();
+            }
         }
 
         if(!data.repository)
@@ -402,16 +435,39 @@ pmProjects.model.page_item = {
 
 pmProjects.startUpdateProjectItem = function(item_id)
 {
-    var thisObj = this; 
-    if(thisObj.model.items[item_id].status == "WAIT_SYNC" || thisObj.model.items[item_id].status == "SYNC")
+    var thisObj = this;
+
+    if(thisObj.model.items[item_id].vars.repo_type=="GIT")
     {
-        thisObj.model.updateTimeoutId = setTimeout(function()
+        if(thisObj.model.items[item_id].status == "WAIT_SYNC" || thisObj.model.items[item_id].status == "SYNC")
         {
-            $.when(thisObj.loadItem(item_id)).always(function()
+            thisObj.model.updateTimeoutId = setTimeout(function()
             {
-                thisObj.startUpdateProjectItem(item_id)
-            })
-        }, 5000)
+                $.when(thisObj.loadItem(item_id)).always(function()
+                {
+                    thisObj.startUpdateProjectItem(item_id)
+                })
+            }, 5000)
+        }
+        if(thisObj.model.items[item_id].status != "WAIT_SYNC" || thisObj.model.items[item_id].status != "SYNC")
+        {
+            $("#branch_block").empty();
+            $("#branch_block").html(pmProjects.renderBranchInput(item_id));
+        }
+    }
+    else
+    {
+        if(thisObj.model.items[item_id].status == "WAIT_SYNC" || thisObj.model.items[item_id].status == "SYNC")
+        {
+            console.log(thisObj.model.items[item_id].vars.repo_type);
+            thisObj.model.updateTimeoutId = setTimeout(function()
+            {
+                $.when(thisObj.loadItem(item_id)).always(function()
+                {
+                    thisObj.startUpdateProjectItem(item_id)
+                })
+            }, 5000)
+        }
     }
 }
 
@@ -423,7 +479,7 @@ pmProjects.openItem = function(holder, menuInfo, data)
     {
         $.when(pmProjects.showItem(holder, menuInfo, data)) .always(function()
         {
-            pmProjects.startUpdateProjectItem(item_id) 
+            pmProjects.startUpdateProjectItem(item_id)
             def.resolve();
         })
     }).promise();
@@ -522,6 +578,10 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
  */
 pmProjects.syncRepo = function(item_id)
 {
+    var thisObj = this;
+    thisObj.model.items[item_id].status = "WAIT_SYNC";
+    pmProjects.startUpdateProjectItem(item_id);
+
     return spajs.ajax.Call({
         url: "/api/v1/projects/"+item_id+"/sync/",
         type: "POST",
@@ -536,6 +596,7 @@ pmProjects.syncRepo = function(item_id)
             polemarch.showErrors(e.responseJSON)
         }
     });
+
 }
 
 /**
@@ -562,6 +623,33 @@ pmProjects.supportedRepos = function()
             console.warn("supportedRepos error - " + JSON.stringify(e));
         }
     });
+}
+
+
+pmProjects.clearAndPasteBranchInput = function(item_id, thisInput)
+{
+    $(thisInput).empty();
+    $(thisInput).val(pmProjects.model.items[item_id].branch);
+    pmProjects.checkBranchInput(item_id);
+}
+
+pmProjects.checkBranchInput = function(item_id)
+{
+    var branchInputValue=$("#project_"+pmProjects.model.items[item_id].id+"_branch").val().trim();
+    if(branchInputValue!=pmProjects.model.items[item_id].vars.repo_branch)
+    {
+        pmProjects.model.items[item_id].vars.repo_branch=branchInputValue;
+        $("#branch_block").empty();
+        var html=pmProjects.renderBranchInput(item_id);
+        $("#branch_block").html(html);
+    }
+}
+
+pmProjects.renderBranchInput = function(item_id)
+{
+    var thisObj = this;
+    var html=spajs.just.render('branch_input', {item_id:item_id, pmObj:thisObj});
+    return html;
 }
 
 tabSignal.connect("polemarch.start", function()

@@ -87,9 +87,9 @@ pmModuleTemplates.model.page_item = {
             function:function(item_id){
                 return "spajs.showLoader("+this.model.className+".setNewOption("+item_id+")); return false;"
             },
-            title:'Set new option',
+            title:'Create new option',
             link:function(){ return '#'},
-            help:'Set new option'
+            help:'Create new option'
         },
         {
             class:'btn btn-default copy-btn',

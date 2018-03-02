@@ -955,7 +955,6 @@ pmItems.addItem = function (parent_type, parent_item, opt)
                 parent_type: parent_type,
                 parent_item: parent_item
             })
-
             $.when(thisObj.model.page_new.onCreate.apply(thisObj, agrs)).always(function () {
                 def.resolve()
             })

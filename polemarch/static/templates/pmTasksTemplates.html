@@ -61,7 +61,28 @@
                                             onclick="return spajs.openURL(this.href);" ><%- val.name %></a>
                                 </td>
                                 <td>
-                                    <a href="#" class="btn btn-warning"  onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- val.kind %>'].execute(<%- val.id %>)); return false;">Execute</a>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Actions
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-right">
+                                            <li><a href="#" onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- val.kind %>'].execute(<%- val.id %>)); return false;">Execute</a> </li>
+
+                                            <% if(val.options_list) { %>
+                                                <li role="separator" class="divider"></li>
+                                                <% for(var k in val.options_list) { %>
+                                                    <li>
+                                                        <a href="#"
+                                                        onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- val.kind %>'].execute(<%- val.id %>, '<%- val.options_list[k] %>')); return false;">
+                                                            Execute with <%= val.options_list[k] %>
+                                                        </a>
+                                                    </li>
+                                                    <% } %>
+                                            <% } %>
+
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         <% } %>
