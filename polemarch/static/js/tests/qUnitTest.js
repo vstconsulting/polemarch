@@ -3422,30 +3422,6 @@ window.qunitTestsArray.push({
 
     });
 
-    syncQUnit.addTest('Сохранение новой невалидной опции шаблона модуля2', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу создания project
-        var done = assert.async();
-        var itemId = /template\/Module\/([0-9]+)\/new-option/.exec(window.location.href)[1];
-
-        jsonEditor.jsonEditorRmVar("new-vault-password-file")
-        $("#new_json_nameprefix").val("new-vault-password-file");
-        $("#new_json_valueprefix").val("syntax-check");
-        jsonEditor.jsonEditorAddVar();
-
-        $.when(pmModuleTemplates.saveOption(itemId)).done(function()
-        {
-            debugger;
-            assert.ok(false, 'Успешно сохранено, а не должно было');
-            render(done)
-        }).fail(function(){
-            assert.ok(true, 'Ошибка при сохранении, как и задумано');
-            render(done)
-        })
-
-
-    });
-
     syncQUnit.addTest('Сохранение новой валидной опции шаблона модуля', function ( assert )
     {
         // Предполагается что мы от прошлого теста попали на страницу создания project
