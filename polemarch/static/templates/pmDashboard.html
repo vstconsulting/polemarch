@@ -2,7 +2,7 @@
 <!-- Шаблон виджета -->
 <script type="text/x-just" data-just="pmwItemsCounter">
     <div class="col-lg-2 col-sm-4 col-xs-6 dnd-block" id="pmw<%- model.countObject.model.name %>Counter">
-        <div class="small-box bg-aqua cursor-move">
+        <div class="small-box bg-aqua cursor-move1">
             <div class="inner">
                 <h3><%= model.justText('count') %></h3>
                 <p style="text-transform: capitalize"><%- model.countObject.model.name %></p>
@@ -25,7 +25,7 @@
             <% } %>
         <% } %>
         ">
-        <div class="box-header ui-sortable-handle cursor-move">
+        <div class="box-header ui-sortable-handle cursor-move1">
         <!--
         <i class="fa fa-th"></i>
         <h3 class="box-title">Tasks history</h3>
@@ -62,7 +62,7 @@
         <select id="chart-period" class="form-control" style="max-width:130px; height:26px; line-height:26px; padding:3px 12px; display:inline-block; float:left;" onchange="pmDashboard.updateStatsDataLast(this)">
         <option value="1095">last 3 years</option>
     <option value="365">last year</option>
-    <option value="99">last 3 months</option>
+    <option value="90">last 3 months</option>
     <option value="30">last month</option>
     <option value="14">last 2 weeks</option>
     <option value="7">last week</option>
@@ -143,7 +143,10 @@
         </h1>
 
         <button class="btn btn-default" onclick="pmDashboard.showModalWindow();" style="margin-left: 10px; margin-top:-7px;">
-           <i class="glyphicon glyphicon-cog"></i> Set widget options
+           <i class="glyphicon glyphicon-cog"></i>
+        </button>
+        <button class="btn btn-default" onclick="pmDashboard.toggleSortable(this);" style="margin-left: 5px; margin-top:-7px;">
+           <i class="fa fa-lock"></i>
         </button>
 
         <div id="modal-widgets-settings" class="modal fade">
