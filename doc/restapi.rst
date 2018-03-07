@@ -1,4 +1,3 @@
-
 Rest API
 ========
 
@@ -95,6 +94,7 @@ Hosts
 
    :query id: id of host if we want to filter by it.
    :query name: name of host if we want to filter by it.
+   :query type: type of host if we want to filter by it.
    :query id__not: id of host, which we want to filter out.
    :query name__not: name of host, which we want to filter out.
 
@@ -729,9 +729,19 @@ Projects
 
            ],
            "vars":{
+              "repo_branch": "other",
               "repo_password":"forgetit",
               "repo_type":"GIT"
            },
+           "owner": {
+              "id": 1,
+              "username": "admin",
+              "is_active": true,
+              "is_staff": true,
+              "url": "http://localhost:8080/api/v1/users/1/"
+           },
+           "revision": "5471aeb916ee7f8754d55f159e532592b995b0ec",
+           "branch": "master",
            "url":"http://localhost:8080/api/v1/projects/7/"
         }
 
@@ -746,6 +756,9 @@ Projects
    :>json array hosts: |project_hosts_def|
    :>json array groups: |project_groups_def|
    :>json object vars: |obj_vars_def| |project_vars_rem|
+   :>json object owner: |project_owner_details|
+   :>json string revision: ``GIT`` revision
+   :>json string branch: current branch of project to which project has been synced last time.
    :>json string url: url to this specific inventory.
 
 .. |project_repository_def| replace:: URL of repository (repo-specific URL).
@@ -755,10 +768,16 @@ Projects
 .. |project_groups_def| replace:: list of groups in project.
    See :ref:`groups` for fields explanation.
 .. |project_vars_rem| replace:: In this special case always exists
-     variables ``repo_password`` to store password for repository and
-     ``repo_type`` to store type of repository. Currently implemented types
-     are ``GIT`` for Git repositories. And ``TAR`` for uploading tar archive
-     with project files.
+     variable ``repo_type`` to store type of repository. Currently implemented types
+     are ``GIT`` - for Git repositories, ``TAR`` - for uploading tar archive
+     with project files and ``MANUAL`` - for creating empty project or for uploading
+     project files from server 'manually'.
+     For ``GIT`` projects such variables, as ``repo_password`` and ``repo_branch``, are also available.
+     ``repo_password`` is needed to store password for repository(if it exists)
+     and ``repo_branch`` means a branch of git project with which next
+     synchronization will be done.
+.. |project_owner_details| replace:: Owner of project. Supported fields
+   could see in :http:get:`/api/v1/users/{id}/`.
 .. |project_details_ref| replace:: **Response JSON Object:** response json
    fields same as in :http:get:`/api/v1/projects/{id}/`.
 
@@ -837,10 +856,9 @@ Projects
 
       {
          "name":"project_owl",
-         "repository":"somewhere-in-emptiness",
+         "repository":"http://example.com/project.tar",
          "vars":{
-            "repo_type":"TAR",
-            "repo_password":""
+            "repo_type":"TAR"
          }
       }
 
@@ -852,7 +870,7 @@ Projects
            "id":9,
            "name":"project_owl",
            "status":"WAIT_SYNC",
-           "repository":"somewhere-in-emptiness",
+           "repository":"http://example.com/project.tar",
            "hosts":[
 
            ],
@@ -863,9 +881,17 @@ Projects
 
            ],
            "vars":{
-              "repo_password":"",
               "repo_type":"TAR"
            },
+           "owner": {
+               "id": 1,
+               "username": "admin",
+               "is_active": true,
+               "is_staff": true,
+               "url": "http://localhost:8080/api/v1/users/1/"
+           },
+           "revision": "NO VCS",
+           "branch": "NO VCS",
            "url":"http://localhost:8080/api/v1/projects/9/"
         }
 
@@ -891,12 +917,7 @@ Projects
       Accept: application/json, text/javascript
 
       {
-         "name":"project_owl",
-         "repository":"somewhere-in-emptiness",
-         "vars":{
-            "repo_type":"TAR",
-            "repo_password":""
-         }
+         "name":"project_tar"
       }
 
    Results:
@@ -905,9 +926,9 @@ Projects
 
         {
            "id":9,
-           "name":"project_owl",
+           "name":"project_tar",
            "status":"WAIT_SYNC",
-           "repository":"somewhere-in-emptiness",
+           "repository":"http://example.com/project.tar",
            "hosts":[
 
            ],
@@ -918,9 +939,17 @@ Projects
 
            ],
            "vars":{
-              "repo_password":"",
               "repo_type":"TAR"
            },
+           "owner": {
+               "id": 1,
+               "username": "admin",
+               "is_active": true,
+               "is_staff": true,
+               "url": "http://localhost:8080/api/v1/users/1/"
+           },
+           "revision": "NO VCS",
+           "branch": "NO VCS",
            "url":"http://localhost:8080/api/v1/projects/9/"
         }
 
@@ -971,8 +1000,9 @@ Projects
    .. sourcecode:: js
 
         [
-            "TAR",
-            "GIT"
+            "GIT",
+            "MANUAL",
+            "TAR"
         ]
 
 .. http:post:: /api/v1/projects/{id}/sync/
@@ -1173,12 +1203,15 @@ Periodic tasks
 
         {
            "id":10,
+           "name":"periodic-test",
            "type":"CRONTAB",
            "schedule":"60* */2 sun,fri 1-15 *",
            "mode":"collect_data.yml",
            "kind":"PLAYBOOK",
            "project":7,
            "inventory":8,
+           "save_result": true,
+           "enabled": true,
            "vars":{
 
            },
@@ -1193,6 +1226,8 @@ Periodic tasks
      module run (``MODULE``).
    :>json number project: id of project which this task belongs to.
    :>json number inventory: id of inventory for which must execute_playbook playbook.
+   :>json boolean save_result: if ``save_result`` is true, the result will be saved.
+   :>json boolean enabled: if ``enabled`` is true, the periodic task will be enabled.
    :>json object vars: |ptask_vars_def|
    :>json string url: url to this specific periodic task.
 
@@ -1251,11 +1286,14 @@ Periodic tasks
            "results":[
               {
                  "id":10,
+                 "name":"periodic-test",
                  "type":"INTERVAL",
                  "schedule":"60",
                  "mode":"collect_data.yml",
                  "kind":"PLAYBOOK",
                  "inventory":8,
+                 "save_result": true,
+                 "enabled": true,
                  "vars":{
 
                  },
@@ -1263,11 +1301,14 @@ Periodic tasks
               },
               {
                  "id":11,
+                 "name":"periodic-test2",
                  "type":"CRONTAB",
                  "schedule":"* */2 sun,fri 1-15 *",
                  "mode":"do_greatest_evil.yml",
                  "kind":"PLAYBOOK",
                  "inventory":8,
+                 "save_result": true,
+                 "enabled": true,
                  "vars":{
 
                  },
@@ -1311,6 +1352,7 @@ Periodic tasks
       Accept: application/json, text/javascript
 
       {
+          "name":"new-periodic-test",
           "type": "INTERVAL",
           "schedule": "25",
           "mode": "touch_the_clouds.yml",
@@ -1327,12 +1369,15 @@ Periodic tasks
 
     {
         "id": 14,
+        "name":"new-periodic-test",
         "type": "INTERVAL",
         "schedule": "25",
         "mode": "touch_the_clouds.yml",
         "kind": "PLAYBOOK",
         "project": 7,
         "inventory": 8,
+        "save_result": true,
+        "enabled": true,
         "vars":{
 
          },
@@ -1372,16 +1417,59 @@ Periodic tasks
 
     {
         "id": 14,
+        "name":"new-periodic-test",
         "type": "INTERVAL",
         "schedule": "25",
         "mode": "touch_the_clouds.yml",
         "kind": "PLAYBOOK",
         "project": 7,
         "inventory": 8,
+        "save_result": true,
+        "enabled": true,
         "url": "http://127.0.0.1:8080/api/v1/periodic-tasks/14/?format=api"
     }
 
    |ptask_details_ref|
+
+.. http:post:: /api/v1/periodic-tasks/{id}/execute/
+
+   Execute periodic task.
+
+   :arg id: id of periodic task.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/periodic-tasks/14/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+          "name":"new-periodic-test",
+          "type": "INTERVAL",
+          "schedule": "25",
+          "mode": "touch_the_clouds.yml",
+          "kind": "PLAYBOOK",
+          "project": 7,
+          "inventory": 8,
+          "save_result": true,
+          "enabled": true,
+          "vars": {}
+
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "history_id": 158,
+        "detail": "Started at inventory 8."
+    }
+
+   **Request JSON Object:**
+   request json fields same as in :http:get:`/api/v1/periodic-tasks/{id}/` .
 
 .. _templates:
 
@@ -1410,24 +1498,54 @@ Templates
             "id": 1,
             "name": "test_tmplt",
             "kind": "Task",
+            "owner": {
+                "id": 1,
+                "username": "admin",
+                "is_active": true,
+                "is_staff": true,
+                "url": "http://localhost:8080/api/v1/users/1/"
+            },
             "data": {
+                "project": 1,
+                "inventory": 10,
                 "playbook": "test.yml",
                 "vars": {
                     "connection": "paramiko"
                 }
-            }
+            },
+             "options": {
+                 "only-local": {
+                     "playbook": "other.yml",
+                 },
+                 "only-server": {
+                     "vars": {
+                         "forks": "10",
+                         "limit": "Test-server"
+                     }
+                 }
+             },
+             "options_list": [
+                 "only-local",
+                 "only-server"
+             ]
         }
 
    :>json number id: id of template.
    :>json string name: name of template.
    :>json string kind: |template_kind_details|
+   :>json object owner: |template_owner_details|
    :>json string data: |template_data_details|
+   :>json object options: options of template, which can update some template's settings before new execution.
+   :>json array options_list: list of options' names for this template.
 
 .. |template_details_ref| replace:: **Response JSON Object:** response json
    fields same as in :http:get:`/api/v1/templates/{id}/`.
 
 .. |template_kind_details| replace:: Kind of template. Supported kinds
    could see in :http:get:`/api/v1/templates/supported-kinds/`.
+
+.. |template_owner_details| replace:: Owner of template. Supported fields
+   could see in :http:get:`/api/v1/users/{id}/`.
 
 .. |template_data_details| replace:: JSON structure of template. Supported
    fields could see in :http:get:`/api/v1/templates/supported-kinds/`.
@@ -1465,7 +1583,11 @@ Templates
                 {
                     "id": 1,
                     "name": "test_tmplt",
-                    "kind": "Task"
+                    "kind": "Task",
+                    "options_list": [
+                         "only-local",
+                         "only-server"
+                    ]
                 }
             ]
         }
@@ -1485,6 +1607,7 @@ Templates
    :<json string kind: |template_kind_details|
    :<json string data: |template_data_details|
    :<json string name: template name.
+   :<json string options: options of template, which can update some template's settings before new execution.
 
    Example request:
 
@@ -1498,11 +1621,16 @@ Templates
          "name": "test",
          "kind": "Task",
          "data": {
+            "project": 1,
+            "inventory": 10,
             "playbook": "test.yml",
             "vars": {
                   "connection": "paramiko"
             }
-         }
+         },
+         "options": {
+            "playbook": "other.yml"
+        }
       }
 
    Results:
@@ -1514,10 +1642,15 @@ Templates
         "name": "test",
         "kind": "Task",
         "data": {
+            "project": 1,
+            "inventory": 10,
             "playbook": "test.yml",
             "vars": {
                 "connection": "paramiko"
             }
+        },
+        "options": {
+            "playbook": "other.yml"
         }
     }
 
@@ -1554,18 +1687,64 @@ Templates
         "name": "test_new_name",
         "kind": "Task",
         "data": {
+            "project": 1,
+            "inventory": 10,
             "playbook": "test.yml",
             "vars": {
                 "connection": "paramiko"
             }
+        },
+        "options": {
+            "playbook": "other.yml"
         }
+    }
+
+   |template_details_ref|
+
+.. http:post:: /api/v1/templates/{id}/execute/
+
+   Execute template.
+
+   :arg id: id of template.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/templates/2/execute/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+          "name": "test_new_name",
+          "kind": "Task",
+          "data": {
+              "project": 1,
+              "inventory": 10,
+              "playbook": "test.yml",
+              "vars": {
+                  "connection": "paramiko"
+              }
+          },
+          "options": {
+              "option": "playbook"
+          }
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+    {
+        "history_id": 205,
+        "detail": "Started at inventory 10."
     }
 
    |template_details_ref|
 
 .. http:get:: /api/v1/templates/supported-kinds/
 
-   List of supported kinds.|pagination_def|
+   List of supported kinds. |pagination_def|
 
    Example request:
 
@@ -1580,30 +1759,39 @@ Templates
    .. sourcecode:: js
 
         {
-            "Task": [
-                "playbook",
-                "vars",
-                "inventory",
-                "project"
-            ],
-            "Host": [
-                "name",
-                "vars"
-            ],
-            "PeriodicTask": [
-                "playbook",
-                "vars",
-                "inventory",
-                "project",
-                "type",
-                "name",
-                "schedule"
-            ],
-            "Group": [
-                "name",
-                "vars",
-                "children"
-            ]
+             "Group": [
+                 "name",
+                 "vars",
+                 "children"
+             ],
+             "Host": [
+                 "name",
+                 "vars"
+             ],
+             "Task": [
+                 "playbook",
+                 "vars",
+                 "inventory",
+                 "project"
+             ],
+             "PeriodicTask": [
+                 "type",
+                 "name",
+                 "schedule",
+                 "inventory",
+                 "kind",
+                 "mode",
+                 "project",
+                 "vars"
+             ],
+             "Module": [
+                 "inventory",
+                 "module",
+                 "group",
+                 "args",
+                 "vars",
+                 "project"
+             ]
         }
 
 .. _history:
@@ -1637,11 +1825,18 @@ History records
            "kind": "PLAYBOOK",
            "start_time":"2017-07-02T12:48:11.922761Z",
            "stop_time":"2017-07-02T13:48:11.922777Z",
+           "inventory": 4,
            "raw_inventory":"inventory",
            "raw_args": "ansible-playbook main.yml -i /tmp/tmpvMIwMg -v",
-           "raw_stdout":"text",
+           "raw_stdout":"http://localhost:8080/api/v1/history/1/raw/",
            "initiator": 1,
-           "initiator_type": "users"
+           "initiator_type": "users",
+           "execute_args": {
+               "diff": "",
+               "become": ""
+           },
+           "revision": "NO VCS",
+           "url": "http://localhost:8080/api/v1/history/1/"
         }
 
    :>json number id: id of history record.
@@ -1656,6 +1851,7 @@ History records
    :>json string start_time: time, when playbook execution was started.
    :>json string stop_time: time, when playbook execution was ended (normally
      or not)
+   :>json number inventory: id of inventory.
    :>json string raw_inventory: Ansible inventory, which used for execution. It
      is generates from on of Polemarch's :ref:`inventory`
    :>json string raw_args: ansible command line during execution.
@@ -1664,6 +1860,8 @@ History records
      in :http:get:`/api/v1/history/{id}/raw/`.
    :>json number initiator: initiator id.
    :>json string initiator_type: initiator type like in api url.
+   :>json object execute_args: arguments which were used during execution.
+   :>json string revision: project revision.
    :>json string url: url to this specific history record.
 
 .. |history_details_ref| replace:: **Response JSON Object:** response json fields
@@ -1768,6 +1966,30 @@ History records
             ]
         }
 
+.. http:delete:: /api/v1/history/{id}/clear/
+
+   Delete full output of executed task.
+
+   :arg id: id of history record.
+
+   Example request:
+
+   .. sourcecode:: http
+
+      DELETE /api/v1/history/1/clear/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+            "detail": "Output trancated.\n"
+        }
+
+   :>json string detail: new output for history record's stdout.
+
 .. http:get:: /api/v1/history/
 
    List of history records. |pagination_def|
@@ -1819,19 +2041,25 @@ History records
                  "project": 3,
                  "mode": "main.yml",
                  "kind": "PLAYBOOK",
+                 "inventory": 6,
                  "status": "OK",
                  "start_time": "2017-07-24T06:39:52.052504Z",
                  "stop_time": "2017-07-24T06:41:06.521813Z",
+                 "initiator": 1,
+                 "initiator_type": "users",
                  "url": "http://localhost:8000/api/v1/history/121/"
               },
               {
                  "id": 118,
-                 "project": null,
+                 "project": 4,
                  "mode": "ping",
                  "kind": "MODULE",
+                 "inventory": 7,
                  "status": "OK",
                  "start_time": "2017-07-24T06:27:40.481588Z",
                  "stop_time": "2017-07-24T06:27:42.499873Z",
+                 "initiator": 1,
+                 "initiator_type": "users",
                  "url": "http://localhost:8000/api/v1/history/118/"
               }
            ]
@@ -1993,6 +2221,143 @@ Ansible
             "extras.source_control.gitlab_project",
             "core.source_control.git"
         ]
+
+
+.. _stats:
+
+Statistic list
+--------------
+
+Sometimes application needs to provide user with some statistic information
+like amount of different objects or frequency of executing some tasks and so on.
+For such kind of work we use our API's statistic list, which can provide user with information
+about amount of templates, users, teams, hosts, groups, inventories, projects in system in current moment
+and to tell him how many tasks of each status have been executed during last days, months and years.
+
+.. http:get:: /api/v1/stats/
+
+   Get statistic list.
+
+   :query last: filter to search statistic information for certain amount of past days (by default the last is 14, this filter is measured in days).
+
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/stats/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+   Results:
+
+   .. sourcecode:: js
+
+      {
+          "templates": 7,
+          "users": 1,
+          "teams": 0,
+          "hosts": 10,
+          "groups": 5,
+          "inventories": 4,
+          "projects": 3,
+          "jobs": {
+              "month": [
+                  {
+                      "status": "ERROR",
+                      "sum": 6,
+                      "all": 47,
+                      "month": "2018-03-01T00:00:00Z"
+                  },
+                  {
+                      "status": "OFFLINE",
+                      "sum": 5,
+                      "all": 47,
+                      "month": "2018-03-01T00:00:00Z"
+                  },
+                  {
+                      "status": "OK",
+                      "sum": 36,
+                      "all": 47,
+                      "month": "2018-03-01T00:00:00Z"
+                  }
+              ],
+              "day": [
+                  {
+                      "status": "ERROR",
+                      "sum": 3,
+                      "day": "2018-03-05T00:00:00Z",
+                      "all": 10
+                  },
+                  {
+                      "status": "OK",
+                      "sum": 7,
+                      "day": "2018-03-05T00:00:00Z",
+                      "all": 10
+                  },
+                  {
+                      "status": "ERROR",
+                      "sum": 2,
+                      "day": "2018-03-06T00:00:00Z",
+                      "all": 30
+                  },
+                  {
+                      "status": "OFFLINE",
+                      "sum": 5,
+                      "day": "2018-03-06T00:00:00Z",
+                      "all": 30
+                  },
+                  {
+                      "status": "OK",
+                      "sum": 23,
+                      "day": "2018-03-06T00:00:00Z",
+                      "all": 30
+                  },
+                  {
+                      "status": "ERROR",
+                      "sum": 1,
+                      "day": "2018-03-07T00:00:00Z",
+                      "all": 7
+                  },
+                  {
+                      "status": "OK",
+                      "sum": 6,
+                      "day": "2018-03-07T00:00:00Z",
+                      "all": 7
+                  }
+              ],
+              "year": [
+                  {
+                      "status": "ERROR",
+                      "sum": 6,
+                      "all": 47,
+                      "year": "2018-01-01T00:00:00Z"
+                  },
+                  {
+                      "status": "OFFLINE",
+                      "sum": 5,
+                      "all": 47,
+                      "year": "2018-01-01T00:00:00Z"
+                  },
+                  {
+                      "status": "OK",
+                      "sum": 36,
+                      "all": 47,
+                      "year": "2018-01-01T00:00:00Z"
+                  }
+              ]
+          }
+      }
+
+   :>json number templates: amount of templates in system in current moment.
+   :>json number users: amount of users in system in current moment.
+   :>json number teams: amount of teams in system in current moment. (Polemarch+ only)
+   :>json number hosts: amount of hosts in system in current moment.
+   :>json number groups: amount of groups in system in current moment.
+   :>json number inventories: amount of inventories in system in current moment.
+   :>json number projects: amount of projects in system in current moment.
+   :>json object jobs: amount of executed tasks during last days, months, years.
+
 
 .. _variables:
 
@@ -2370,7 +2735,7 @@ Users
 
    Update user. |patch_reminder|
 
-   :arg id: id of host.
+   :arg id: id of user.
 
    **Request JSON Object:**
    request json fields same as in :http:post:`/api/v1/users/`
@@ -2413,6 +2778,236 @@ Users
 
 .. |patch_reminder| replace:: All parameters except id are optional, so you can
    specify only needed to update. Only name for example.
+
+.. http:post:: /api/v1/users/{id}/settings/
+
+   Create user's view settings of Dashboard's widgets.
+
+   :arg id: id of user.
+
+
+
+   Example request:
+
+   .. sourcecode:: http
+
+      POST /api/v1/users/{id}/settings/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+        {
+         "pmwTasksTemplatesWidget": {
+           "active": true,
+           "sortNum": 8,
+           "collapse": true
+         },
+         "pmwUsersCounter": {
+           "active": true,
+           "sortNum": 5,
+           "collapse": false
+         },
+         "pmwProjectsCounter": {
+           "active": true,
+           "sortNum": 4,
+           "collapse": false
+         },
+         "pmwHostsCounter": {
+           "active": true,
+           "sortNum": 0,
+           "collapse": false
+         },
+         "pmwInventoriesCounter": {
+           "active": true,
+           "sortNum": 2,
+           "collapse": false
+         },
+         "pmwGroupsCounter": {
+           "active": true,
+           "sortNum": 1,
+           "collapse": false
+         },
+         "pmwChartWidget": {
+           "active": true,
+           "sortNum": 6,
+           "collapse": false
+         },
+         "pmwModulesTemplatesWidget": {
+           "active": true,
+           "sortNum": 9,
+           "collapse": true
+         },
+         "pmwTemplatesCounter": {
+           "active": true,
+           "sortNum": 3,
+           "collapse": false
+         },
+         "pmwAnsibleModuleWidget": {
+           "active": true,
+           "sortNum": 7,
+           "collapse": true
+         }
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+         "pmwTasksTemplatesWidget": {
+           "active": true,
+           "sortNum": 8,
+           "collapse": true
+         },
+         "pmwUsersCounter": {
+           "active": true,
+           "sortNum": 5,
+           "collapse": false
+         },
+         "pmwProjectsCounter": {
+           "active": true,
+           "sortNum": 4,
+           "collapse": false
+         },
+         "pmwHostsCounter": {
+           "active": true,
+           "sortNum": 0,
+           "collapse": false
+         },
+         "pmwInventoriesCounter": {
+           "active": true,
+           "sortNum": 2,
+           "collapse": false
+         },
+         "pmwGroupsCounter": {
+           "active": true,
+           "sortNum": 1,
+           "collapse": false
+         },
+         "pmwChartWidget": {
+           "active": true,
+           "sortNum": 6,
+           "collapse": false
+         },
+         "pmwModulesTemplatesWidget": {
+           "active": true,
+           "sortNum": 9,
+           "collapse": true
+         },
+         "pmwTemplatesCounter": {
+           "active": true,
+           "sortNum": 3,
+           "collapse": false
+         },
+         "pmwAnsibleModuleWidget": {
+           "active": true,
+           "sortNum": 7,
+           "collapse": true
+         }
+      }
+
+   :>json string pmw{widget_Name}: widget name.
+   :>json boolean active: |users_settings_active|
+   :>json number sortNum: |users_settings_sortNum|
+   :>json boolean collapse: |users_settings_collapse|
+
+.. |users_settings_active| replace:: one of widget's settings, if ``active`` is ``true``, this widget will be visible on Dashboard.
+
+.. |users_settings_sortNum| replace:: one of widget's settings, it means order number of widget on Dashboard.
+
+.. |users_settings_collapse| replace:: one of widget's settings, if ``collapse`` is ``true``, this widget will be collapsed on Dashboard.
+
+
+.. http:get:: /api/v1/users/{id}/settings/
+
+   Get user's view settings of Dashboard's widgets.
+
+   :arg id: id of user.
+
+
+
+   Example request:
+
+   .. sourcecode:: http
+
+      GET /api/v1/users/{id}/settings/ HTTP/1.1
+      Host: example.com
+      Accept: application/json, text/javascript
+
+      {
+
+      }
+
+   Results:
+
+   .. sourcecode:: js
+
+        {
+         "pmwTasksTemplatesWidget": {
+           "active": true,
+           "sortNum": 8,
+           "collapse": true
+         },
+         "pmwUsersCounter": {
+           "active": true,
+           "sortNum": 5,
+           "collapse": false
+         },
+         "pmwProjectsCounter": {
+           "active": true,
+           "sortNum": 4,
+           "collapse": false
+         },
+         "pmwHostsCounter": {
+           "active": true,
+           "sortNum": 0,
+           "collapse": false
+         },
+         "pmwInventoriesCounter": {
+           "active": true,
+           "sortNum": 2,
+           "collapse": false
+         },
+         "pmwGroupsCounter": {
+           "active": true,
+           "sortNum": 1,
+           "collapse": false
+         },
+         "pmwChartWidget": {
+           "active": true,
+           "sortNum": 6,
+           "collapse": false
+         },
+         "pmwModulesTemplatesWidget": {
+           "active": true,
+           "sortNum": 9,
+           "collapse": true
+         },
+         "pmwTemplatesCounter": {
+           "active": true,
+           "sortNum": 3,
+           "collapse": false
+         },
+         "pmwAnsibleModuleWidget": {
+           "active": true,
+           "sortNum": 7,
+           "collapse": true
+         }
+      }
+
+   :>json string pmw{widget_Name}: widget name.
+   :>json boolean active: |users_settings_active|
+   :>json number sortNum: |users_settings_sortNum|
+   :>json boolean collapse: |users_settings_collapse|
+
+
+.. http:delete:: /api/v1/users/{id}/settings/
+
+   Delete user's view settings of Dashboard's widgets.
+
+   :arg id: id of user.
+
+
+
 
 Teams (Polemarch+ only)
 -----------------------
