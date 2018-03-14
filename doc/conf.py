@@ -47,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Polemarch'
-copyright = '2017, VST Consulting'
+copyright = '2018, VST Consulting'
 author = 'VST Consulting'
 
 # The version info for the project you're documenting, acts as replacement for

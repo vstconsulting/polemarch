@@ -1,8 +1,8 @@
 GUI workflow
 ==============
 
-Welcome to Polemarch
---------------------
+Welcome to Polemarch GUI
+------------------------
 
 In this section of our documentation we will tell you about Polemarch GUI's opportunities.
 
@@ -83,7 +83,10 @@ Let's look at the example of GIT project's creation:
 .. image:: gui_gif1/create_git_project.gif
 
 As you can see at the gif-image above for GIT project
-it is possible to choose a branch to what user want to sync.
+it is possible to choose a branch to what user want to sync. In this example user has synced
+his GIT project from 'master' branch to 'other' branch. 'Arrow' icon in the branch input field
+shows us, that project will be sync from one branch to another. If there is no 'arrow' icon, it means,
+that next time project will be sync to the same branch as you can see it in 'Branch' input field.
 
 If you update something in your GIT repository, don't forget to run sync in
 Polemarch for pulling your changes.
@@ -101,7 +104,7 @@ executing some command on your servers:
 As you can see at the gif-image above
 when task has stopped running it become possible to clear ansible stdout.
 
-Of course you can run any Ansible modules and any of playbooks in your project.
+Also you can run any Ansible modules and any of playbooks in your project.
 
 Polemarch will scan project dir root for any .yml file and provide possibility
 to run them. So place available playbook targets at root of your Git repository
@@ -117,10 +120,6 @@ of our project:
 
 .. image:: gui_gif1/running_playbook.gif
 
-Almost everywhere in Polemarch you can filter your data. Let see for example
-how to filter your execution history records to find result of needed action:
-
-.. image:: gui_gif1/history_search.gif
 
 Templates
 ---------
@@ -131,28 +130,34 @@ to minimize hand work (either module run or playbook):
 
 .. image:: gui_gif1/create_template.gif
 
-Sometimes your need to have some similar templates, which are different by only several parameters.
+Sometimes your need to keep some similar templates, which are different by only several parameters.
 In this case template options will be extremly useful for you. In every template you can create
-a lot of options which can modify this template by some parameters. Let's look at the exampple:
+a lot of options which can modify this template by some parameters. Let's look at the example:
 
 .. image:: gui_gif1/create_template_option.gif
 
 
 Also you can backup/share your templates using import/export mechanism:
 
-.. image:: gui_gif/import_template.gif
+.. image:: gui_gif1/export-import-template.gif
 
 Periodic tasks
 --------------
 
-If you want to run some actions to run by schedule without any control from
-you, it possible with Polemarch. You can create periodic tasks, which runs
-every X seconds (interval based). You can even check those tasks using
-"Run now" command:
+If you want to run some actions by schedule without any control from
+you, it is possible with Polemarch. You can create periodic tasks, which runs
+every X seconds (interval based):
 
-.. image:: gui_gif/ptask_module_interval.gif
+.. image:: gui_gif1/create-periodic-task-interval.gif
 
 Also you can create periodic tasks with more advancing scheduling options
 (days of week, hours, month and so on) by using cron-style periodic tasks:
 
-.. image:: gui_gif/ptask_playbook_cron.gif
+.. image:: gui_gif1/create-periodic-schedule.gif
+
+Search
+------
+Almost everywhere in Polemarch you can filter your data. Let see for example
+how to filter your execution history records to find result of needed action:
+
+.. image:: gui_gif1/search2.gif
