@@ -1,0 +1,137 @@
+@import url(bootstrap/css/bootstrap.css);
+@import url(bootstrap/css/bootstrap-theme.css);
+@import url(css/alt/AdminLTE-bootstrap-social.css);
+@import url(css/alt/AdminLTE-fullcalendar.css);
+@import url(css/alt/AdminLTE-select2.css);
+@import url(css/alt/AdminLTE-without-plugins.css);
+@import url(css/AdminLTE.css);
+@import url(css/ansi-colors.css);
+@import url(css/font-awesome.min.css);
+/*@import url(/polemarch/static/css/gui.css);*/
+@import url(css/ionicons.min.css);
+
+
+
+@import url(css/skins/_all-skins.css);
+@import url(css/skins/skin-blue.css);
+@import url(css/skins/skin-blue-light.css);
+
+.sidebar-menu ul {
+    list-style: none;
+    margin: 0;
+    padding:0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.sidebar-menu ul li {
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-menu ul li  a
+{
+    font-weight: 600;
+    display:block;
+    padding-top:7px;
+    padding-bottom:7px;
+    padding-left:15px;
+}
+
+.sidebar-menu .caption {
+    display: none;
+}
+
+.sidebar-menu ul li  a:hover
+{
+    background-color: #f4f4f5;
+}
+
+.sidebar-menu ul li ul {
+    margin: 0;
+}
+
+
+.sidebar-menu ul li ul li a
+{
+    font-weight: 500;
+    display:block;
+    padding-top:7px;
+    padding-bottom:7px;
+    padding-left:35px;
+}
+
+.sidebar-menu,
+.main-sidebar .user-panel,
+.sidebar-menu > li.header {
+    white-space: normal!important;
+    overflow: visible!important;
+}
+
+.headerlink {
+    opacity:0;
+}
+
+.headerlink:hover {
+    opacity:1;
+}
+
+img {
+    width: 100%;
+}
+
+@media (min-width: 992px) {
+    img {
+        max-width: 650px;
+    }
+}
+
+.section h1 {
+    margin-top: 0px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    font-size: 22px;
+}
+
+.section h2 {
+    font-size: 22px;
+}
+
+.highlight pre {
+    background-color: #f7f7f9;
+}
+
+.highlight pre p {
+    color: #333;
+}
+
+.highlight .mi {
+    color: #208050;
+}
+
+.highlight .s2 {
+    /* color: #4070a0;*/
+    color: #D14;
+}
+
+.highlight .kc {
+    color: #000081;
+}
+
+.highlight .nf,
+.highlight .na {
+    font-weight: bold;
+}
+
+.highlight .l,
+.highlight .nn,
+.highlight .kr,
+.highlight .m {
+    color: #195f91;
+}
+
+.sidebar-collapse .wrapper .main-sidebar .sidebar
+{
+    opacity:0;
+}
