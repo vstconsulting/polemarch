@@ -1,11 +1,21 @@
 
 <!DOCTYPE html>
-
 {%- macro script() %}
-   <script type="text/javascript" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
+   <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'attr: polemarch.__version__',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+  <!-- <script type="text/javascript" src="{{ pathto('_static/documentation_options.js', 1) }}"></script> -->
     {%- for scriptfile in script_files %}
     <script type="text/javascript" src="{{ pathto(scriptfile, 1) }}"></script>
     {%- endfor %}
+
     <script type="text/javascript" src="{{ pathto('_static/bootstrap/js/bootstrap.js', 1) }}"></script>
     <script type="text/javascript" src="{{ pathto('_static/js/libs/tabSignal.js', 1) }}"></script>
     <script type="text/javascript" src="{{ pathto('_static/js/common.js', 1) }}"></script>
@@ -17,6 +27,8 @@
    <meta name="robots" content="NONE,NOARCHIVE" />
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+   <title>Polemarch documantation</title>
+   <link rel="shortcut icon" href="{{ pathto('_static/img/logo/favicon.ico', 1) }}" />
    <link rel="stylesheet" href="{{ pathto('_static/polemarch-style.css', 1) }}" type="text/css" />
     {%- block scripts %}
         {{- script() }}
@@ -33,11 +45,11 @@
     <header class="main-header">
         <!-- Logo -->
         <a href="/" class="logo">
-            <!-- mini logo for sidebar mini 50x50 pixels -->
-            <span class="logo-mini"><b>P</b></span>
-            <!-- logo for regular state and mobile devices -->
-            <span class="logo-lg"><b>P</b>olemarch</span>
-        </a>
+                    <!-- mini logo for sidebar mini 50x50 pixel -->
+                    <span class="logo-mini"><span class="bg-logo-min-doc" style="margin-left: 4px;"></span></span>
+                    <!-- logo for regular state and mobile devices -->
+                    <span class="logo-lg logo-span-doc"><span class="bg-logo-min-doc"></span> <span class="bg-logo-doc"></span></span>
+                </a>
         <!-- Header Navbar: style can be found in header.less -->
         <nav class="navbar navbar-static-top">
             <!-- Sidebar toggle button-->
@@ -64,6 +76,9 @@
                 <li class="header">DOCS NAVIGATION</li>
                 {{ toctree(includehidden=true, collapse=true) }}
             </ul>
+             {%- block sidebarsearch %}
+            {%- include "searchbox.html" %}
+            {%- endblock %}
 
         </section>
         <!-- /.sidebar -->

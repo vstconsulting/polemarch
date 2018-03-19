@@ -9,8 +9,11 @@
 @import url(css/font-awesome.min.css);
 /*@import url(/polemarch/static/css/gui.css);*/
 @import url(css/ionicons.min.css);
-
-
+@import url(bootstrap/fonts/glyphicons-halflings-regular.eot);
+@import url(bootstrap/fonts/glyphicons-halflings-regular.svg);
+@import url(bootstrap/fonts/glyphicons-halflings-regular.ttf);
+@import url(bootstrap/fonts/glyphicons-halflings-regular.woff);
+@import url(bootstrap/fonts/glyphicons-halflings-regular.woff2);
 
 @import url(css/skins/_all-skins.css);
 @import url(css/skins/skin-blue.css);
@@ -134,4 +137,110 @@ img {
 .sidebar-collapse .wrapper .main-sidebar .sidebar
 {
     opacity:0;
+}
+
+#search-documentation, #search-results h2{
+    font-size: 22px;
+}
+
+#search-documentation {
+    margin-top: 0px;
+    padding-top: 0px;
+    padding-bottom:7px;
+    border-bottom: 1px solid #eee;
+}
+
+#searchbox h3 {
+    font-weight: 600;
+    display:block;
+    padding-left:15px;
+    color: #444444;
+    font-size: 16px;
+}
+
+#search-results h2:first-child {
+    display: none;
+}
+
+.search-input-pm {
+    float:left;
+    border:1px solid #d2d6de;
+    height: 26px;
+}
+
+.search-button-wrapper {
+    position:relative;
+    float:left;
+    height: 26px;
+    width:30px;
+    border: 1px solid #d2d6de;
+    border-left:none;
+    background-color: #fff;
+}
+
+.search-button-icon {
+    position:absolute;
+    left: 7px;
+    top:5px;
+}
+
+.search-button-input {
+    height: 26px;
+    width:30px;
+    opacity:0;
+    z-index:10;
+}
+
+form.search {
+    padding-left:15px;
+}
+
+.bg-logo-doc {
+    background-image: url(img/logo/horizontal.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+    -webkit-background-size:150px 40px;
+	-o-background-size: 150px 40px;
+	-moz-background-size:150px 40px;
+	background-size: 150px 40px;
+    display: block;
+    width:150px;
+    height: 40px;
+    margin:0px;
+    margin-top: 5px;
+    float: left;
+
+
+}
+
+.bg-logo-min-doc {
+    background-image: url(img/logo/logo.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+    -webkit-background-size:40px 40px;
+	-o-background-size: 40px 40px;
+	-moz-background-size:40px 40px;
+	background-size: 40px 40px;
+    display: block;
+    width: 40px;
+    height: 40px;
+    float: left;
+    margin:0px;
+    margin-top: 5px;
+    margin-left: -10px;
+}
+
+.logo-span-doc {
+    width: 190px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+@media (max-width: 767px) {
+    .bg-logo-doc {
+        background-image: url(img/logo/horizontal-bw.png);
+    }
+    .bg-logo-min-doc {
+        background-image: url(img/logo/logo-bw.png);
+    }
 }
