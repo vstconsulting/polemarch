@@ -7,6 +7,11 @@ variables:
   ARTIFACT_DOWNLOAD_ATTEMPTS: 3
   RESTORE_CACHE_ATTEMPTS: 3
 
+cache:
+  paths:
+    - .pip-cache/
+
+
 stages:
   - code_standarts
   - build
@@ -89,10 +94,6 @@ code_style:
   image: git.vst.lan/vst/tests:tox
   script:
    - make test ENVS=flake,pylint
-  cache:
-    paths:
-      - .tox/pylint
-      - .tox/flake
   only:
     - /^.{0,}issue_.*$/
     - developer
