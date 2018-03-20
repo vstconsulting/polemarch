@@ -1,3 +1,4 @@
+var widget_sort={};
 
 var pmDashboard = {
     pageSize:20,
@@ -237,7 +238,7 @@ pmDashboard.checkWidgetSettings = function()
                 for(var k in pmDashboard.model.defaultWidgets[0][i])
                 {
                     if(!(k in pmDashboard.model.widgets[0][j])){
-                       bool1=true;
+                        bool1=true;
                     }
 
                 }
@@ -286,30 +287,30 @@ pmDashboard.getUserWidgetSettingsFromAPI = function()
     var userId=window.my_user_id;
     if(pmDashboard.checkWidgetSettings())
     {
-       return spajs.ajax.Call({
-        url: "/api/v1/users/" + userId + "/settings/",
-        type: "GET",
-        contentType: 'application/json',
-        success: function (data)
-        {
-            if ($.isEmptyObject(data))
+        return spajs.ajax.Call({
+            url: "/api/v1/users/" + userId + "/settings/",
+            type: "GET",
+            contentType: 'application/json',
+            success: function (data)
             {
-                console.log("empty object");
-                pmDashboard.cloneDefaultWidgetsTotally();
-            }
-            else
+                if ($.isEmptyObject(data))
+                {
+                    console.log("empty object");
+                    pmDashboard.cloneDefaultWidgetsTotally();
+                }
+                else
+                {
+                    console.log("not empty object");
+                    pmDashboard.clonetWidgetsSettingsFromApiAndVerify(data);
+                    pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
+                }
+            },
+            error: function (e)
             {
-                console.log("not empty object");
-                pmDashboard.clonetWidgetsSettingsFromApiAndVerify(data);
-                pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
+                console.warn(e)
+                polemarch.showErrors(e)
             }
-        },
-        error: function (e)
-        {
-            console.warn(e)
-            polemarch.showErrors(e)
-        }
-    });
+        });
     }
     else
     {
@@ -457,8 +458,7 @@ pmDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
     for(var i in pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType])
     {
         var val = pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType][i];
-        var time = new Date(val[pmDashboard.statsDataMomentType])
-        time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
+        var time =+ moment(val[pmDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
 
         if(val.status==status){
             tasks_data[time] = val.sum;
@@ -523,7 +523,7 @@ pmDashboard.updateStatsDataLast=function(thisEl)
             window.localStorage['selected-chart-period']=13;
             window.localStorage['selected-chart-period-type']="month";
             break;
-        case '99':
+        case '90':
             pmDashboard.statsDataLast=3;
             pmDashboard.statsDataMomentType="month";
             window.localStorage['selected-chart-period']=3;
@@ -581,6 +581,33 @@ pmDashboard.stopUpdates = function()
     this.model.updateTimeoutId = undefined;
 }
 
+pmDashboard.toggleSortable = function(thisButton)
+{
+    var state = widget_sort.option("disabled");
+    widget_sort.option("disabled", !state);
+    if(thisButton.children[0].getAttribute("class")=="fa fa-lock")
+    {
+        thisButton.children[0].setAttribute("class", "fa fa-unlock");
+        var sortableArr=$('.cursor-move1');
+        for (var i=0; i<sortableArr.length; i++)
+        {
+            $(sortableArr[i]).addClass('cursor-move');
+            $(sortableArr[i]).removeClass('cursor-move1');
+        }
+    }
+    else
+    {
+        thisButton.children[0].setAttribute("class", "fa fa-lock");
+        var sortableArr=$('.cursor-move');
+        for (var i=0; i<sortableArr.length; i++)
+        {
+            $(sortableArr[i]).addClass('cursor-move1');
+            $(sortableArr[i]).removeClass('cursor-move');
+        }
+    }
+}
+
+
 tabSignal.connect('pmLocalSettings.hideMenu', function(){
 
     setTimeout(function(){
@@ -612,55 +639,47 @@ pmDashboard.updateData = function()
         pmwUsersCounter.updateCount();
 
         //строим график
+        //определяем текущий месяц и год
+        var monthNum=moment().format("MM");
+        var yearNum=moment().format("YYYY");
+        var dayNum=moment().format("DD");
+        var hourNum=",T00:00:00";
+        var startTimeOrg="";
+
+        switch (pmDashboard.statsDataMomentType) {
+            case "year":
+                startTimeOrg=yearNum+"-01-01"+hourNum;
+                break;
+            case "month":
+                startTimeOrg=yearNum+"-"+monthNum+"-01"+hourNum;
+                break;
+            case "day":
+                startTimeOrg=yearNum+"-"+monthNum+"-"+dayNum+hourNum;
+                break;
+        }
+
         //задаем стартовую дату для графика.
         //pmDashboard.statsDataLast - количество периодов назад
         //pmDashboard.statsDataMomentType - тип периода - месяц/год
-        if(pmDashboard.statsDataMomentType=="year" || pmDashboard.statsDataMomentType=="month")
-        {
-            //определяем текущий месяц и год
-            var monthNum=moment().format("MM");
-            var yearNum=moment().format("YYYY");
-            if(pmDashboard.statsDataMomentType=="year")
-            {
-                var startTimeOrg=yearNum+"-01-01";
-            }
-            else
-            {
-                var startTimeOrg=yearNum+"-"+monthNum+"-01";
-            }
-            var startTime = moment(startTimeOrg).subtract(pmDashboard.statsDataLast-1, pmDashboard.statsDataMomentType).format("YYYY-MM-DD")+"T00:00:00.000000Z";
-        }
-        else
-        {
-            var startTime = moment().subtract(pmDashboard.statsDataLast-1, pmDashboard.statsDataMomentType).format("YYYY-MM-DD")+"T00:00:00.000000Z";
-        }
+        var startTime =+ moment(startTimeOrg).subtract(pmDashboard.statsDataLast-1, pmDashboard.statsDataMomentType).tz(window.timeZone).format("x");
 
         tasks_data = {};
         tasks_data_t = [];
 
-        var time = new Date(startTime)
-        time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
-
         //формируем в цикле временные отрезки для графика относительно стартовой даты
-        for(var i = 1; i<= pmDashboard.statsDataLast; i++)
+        for(var i = 0; i< pmDashboard.statsDataLast; i++)
         {
+            //идем на период вперед
+            var time=+moment(startTime).add(i, pmDashboard.statsDataMomentType).tz(window.timeZone).format("x");
             tasks_data[time] = 0;
             tasks_data_t.push(time);
-
-            //идем на период вперед
-            var newTime=moment(startTime).add(i, pmDashboard.statsDataMomentType).format("YYYY-MM-DD")+"T00:00:00.000000Z";
-            time = new Date(newTime);
-            time=Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
         }
-
 
         //формируем массив значений для кривой all tasks
         for(var i in pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType])
         {
             var val = pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType][i];
-            var time = new Date(val[pmDashboard.statsDataMomentType])
-            time = Math.floor(time.getTime()/(1000*3600*24))*3600*1000*24;
-
+            var time =+ moment(val[pmDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
             if(!tasks_data[time])
             {
                 tasks_data[time] = val.all;
@@ -771,10 +790,11 @@ pmDashboard.open  = function(holder, menuInfo, data)
         //drag and drop для виджетов
         if($('div').is('#dnd-container'))
         {
-            var widget_sort = Sortable.create(document.getElementById("dnd-container"), {
+            widget_sort = Sortable.create(document.getElementById("dnd-container"), {
                 animation: 150, // ms, animation speed moving items when sorting, `0` — without animation
                 handle: ".dnd-block", // Restricts sort start click/touch to the specified element
                 draggable: ".dnd-block", // Specifies which items inside the element should be sortable
+                disabled: true,
                 onUpdate: function (evt)
                 {
                     // console.log("onUpdate[1]", evt);

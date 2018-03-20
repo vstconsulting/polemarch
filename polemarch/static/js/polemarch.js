@@ -54,6 +54,8 @@ var polemarch = {
 
 }
 
+moment.tz.setDefault(window.timeZone);
+
 polemarch.opt = {}
 polemarch.opt.holder = undefined
 polemarch.opt.host = "//"+window.location.host

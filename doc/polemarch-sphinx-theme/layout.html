@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html>
+{%- macro script() %}
+   <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'attr: polemarch.__version__',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    {%- for scriptfile in script_files %}
+    <script type="text/javascript" src="{{ pathto(scriptfile, 1) }}"></script>
+    {%- endfor %}
+    <script type="text/javascript" src="{{ pathto('_static/bootstrap/js/bootstrap.js', 1) }}"></script>
+    <script type="text/javascript" src="{{ pathto('_static/js/libs/tabSignal.js', 1) }}"></script>
+    <script type="text/javascript" src="{{ pathto('_static/js/common.js', 1) }}"></script>
+     <script type="text/javascript" src="{{ pathto('_static/js/app.js', 1) }}"></script>
+{%- endmacro %}
+
+{%- block extrahead %}
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+   <meta name="robots" content="NONE,NOARCHIVE" />
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+   <title>Polemarch documantation</title>
+   <link rel="shortcut icon" href="{{ pathto('_static/img/logo/favicon.ico', 1) }}" />
+   <link rel="stylesheet" href="{{ pathto('_static/polemarch-style.css', 1) }}" type="text/css" />
+    {%- block scripts %}
+        {{- script() }}
+    {%- endblock %}
+{% endblock %}
+
+<body class="hold-transition skin-black-light sidebar-mini">
+<div id="loader-wrapper">
+    <div id="loader"></div>
+</div>
+<div class="wrapper" >
+    {% if theme_github_banner|lower != 'false' %}
+    <a href="https://github.com/{{ theme_github_user }}/{{ theme_github_repo }}" class="fork-me">
+        <img src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" />
+    </a>
+    {% endif %}
+    <header class="main-header">
+        <!-- Logo  -->
+        <a href="/" class="logo">
+                    <!-- mini logo for sidebar mini 50x50 pixel -->
+                    <span class="logo-mini"><span class="bg-logo-min-doc" style="margin-left: 4px;"></span></span>
+                    <!-- logo for regular state and mobile devices -->
+                    <span class="logo-lg logo-span-doc"><span class="bg-logo-min-doc"></span> <span class="bg-logo-doc"></span></span>
+                </a>
+        <!-- Header Navbar: style can be found in header.less -->
+        <nav class="navbar navbar-static-top">
+            <!-- Sidebar toggle button-->
+            <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                <span class="sr-only">Toggle navigation</span>
+            </a>
+            <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
+
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <!-- Left side column. contains the logo and sidebar -->
+    <aside class="main-sidebar">
+        <!-- sidebar: style can be found in sidebar.less -->
+        <section class="sidebar">
+            <!-- sidebar menu: : style can be found in sidebar.less -->
+            <ul class="sidebar-menu">
+                <li class="header">DOCS NAVIGATION</li>
+                {{ toctree(includehidden=true, collapse=true) }}
+            </ul>
+            <!-- github link  -->
+            {% if theme_github_user and theme_github_repo %}
+                {% if theme_github_button|lower == 'true' %}
+                <h3>Watch us on GitHub</h3>
+                <p>
+                <iframe src="https://ghbtns.com/github-btn.html?user={{ theme_github_user }}&repo={{ theme_github_repo }}&type={{ theme_github_type }}&count={{ theme_github_count }}&size=large&v=2"
+                  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+                </p>
+                {% endif %}
+            {% endif %}
+            <!-- quick search -->
+            {%- block sidebarsearch %}
+                {%- include "searchbox.html" %}
+            {%- endblock %}
+        </section>
+        <!-- /.sidebar -->
+    </aside>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper" id='spajs-right-area'>
+        <!--  Main content -->
+        <section class="content-header">
+                <h1>Polemarch documentation</h1>
+        </section>
+        <section class="content">
+            <div class="box box-info">
+                <div class="box-body">
+                {%- block content %}
+                    {%- block document %}
+                         {% block body %} {% endblock %}
+                    {%- endblock %}
+                {%- endblock %}
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="main-footer">
+         <div class="pull-right hidden-xs">
+             &copy; {{ copyright }}
+         </div>
+        <br>
+    </footer>
+</div>
+
+</body>
+
+</html>
+
+
