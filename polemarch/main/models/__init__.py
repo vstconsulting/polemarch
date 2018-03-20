@@ -1,6 +1,7 @@
 # pylint: disable=unused-argument,no-member
 from __future__ import absolute_import
 import os
+import sys
 import json
 from collections import OrderedDict
 import django_celery_beat
@@ -62,7 +63,7 @@ def validate_group_name(instance, **kwargs):
 
 @receiver(signals.m2m_changed, sender=Group.parents.through)
 def check_circular_deps(instance, action, pk_set, *args, **kw):
-    if action in ["pre_add", "post_add"]:
+    if action in ["pre_add", "post_add"] and 'loaddata' not in sys.argv:
         if instance.id in pk_set:
             raise instance.CiclicDependencyError("The group can "
                                                  "not refer to itself.")
