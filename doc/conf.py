@@ -84,32 +84,17 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 html_theme_path=['.']
-#html_theme = 'alabaster'
 html_theme = 'polemarch-sphinx-theme'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 
-#It's for alabaster
-# html_theme_options = {
-#     "description": "Polemarch Documentation",
-#     "github_user": "vstconsulting",
-#     "github_repo": "polemarch",
-#     "github_button": True,
-#     "github_banner": True,
-#     "show_powered_by": False,
-# }
-#
-#It's for alabaster
-# html_sidebars = {
-#     '**': [
-#         'about.html',
-#         'navigation.html',
-#         'relations.html',
-#         'searchbox.html',
-#         'donate.html',
-#     ]
-# }
+html_theme_options = {
+    "github_user": "vstconsulting",
+    "github_repo": "polemarch",
+    "github_button": True,
+    "github_banner": True,
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

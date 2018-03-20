@@ -8,7 +8,7 @@ In this section of our documentation we will tell you about Polemarch GUI's oppo
 
 Let's begin with Dashboard page:
 
-.. image:: gui_png/dashboard-1.png
+.. image:: gui_png/new-dashboard-1.png
 
 As you can see, Polemarch GUI provides user with 2 menus:
 
@@ -29,7 +29,7 @@ Polemarch opens modal window, where user can activate or collapse some widgets.
 
 To see all these features in work look at next gif-image:
 
-.. image:: gui_gif1/dashboard-1.gif
+.. image:: gui_gif1/new-dashboard-1.gif
 
 
 
@@ -42,7 +42,7 @@ Polemarch's functions are linked to the project.
 
 Let's start with creation of inventory:
 
-.. image:: gui_png/inventories_page.png
+.. image:: gui_png/new-inventories_page.png
 
 There are 2 ways of inventory's creation:
 
@@ -57,11 +57,11 @@ To understand it better let's look at next gif-images:
 
 Here you can see how user can create inventory and place his hosts and groups there manually:
 
-.. image:: gui_gif1/create_inventory_manually.gif
+.. image:: gui_gif1/new-create_inventory_manually.gif
 
 And here you can see how user can import Ansible inventory file:
 
-.. image:: gui_gif1/import_inventory.gif
+.. image:: gui_gif1/new-import_inventory.gif
 
 Futher to start your work with Polemarch you should create project.
 
@@ -80,7 +80,7 @@ There are 3 project types in Polemarch:
 
 Let's look at the example of GIT project's creation:
 
-.. image:: gui_gif1/create_git_project.gif
+.. image:: gui_gif1/new-create_git_project.gif
 
 As you can see at the gif-image above for GIT project
 it is possible to choose a branch to what user want to sync. In this example user has synced
@@ -99,7 +99,7 @@ Execution of playbook and modules
 Ok, we made all preparations and ready to do some real work. Let's start by
 executing some command on your servers:
 
-.. image:: gui_gif1/run_shell_command.gif
+.. image:: gui_gif1/new-run_shell_command.gif
 
 As you can see at the gif-image above
 when task has stopped running it become possible to clear ansible stdout.
@@ -118,7 +118,7 @@ in playbook execution page.
 Let's look at the example of running some playbook, which Polemarch imported from GIT repository
 of our project:
 
-.. image:: gui_gif1/running_playbook.gif
+.. image:: gui_gif1/new-running_playbook.gif
 
 
 Templates
@@ -128,18 +128,18 @@ If you have many arguments, which you pass to Ansible at every task run (like
 extra-vars, forks number and so on), you can create template for such action
 to minimize hand work (either module run or playbook):
 
-.. image:: gui_gif1/create_template.gif
+.. image:: gui_gif1/new-create_template.gif
 
 Sometimes your need to keep some similar templates, which are different by only several parameters.
 In this case template options will be extremly useful for you. In every template you can create
 a lot of options which can modify this template by some parameters. Let's look at the example:
 
-.. image:: gui_gif1/create_template_option.gif
+.. image:: gui_gif1/new-create_template_option.gif
 
 
 Also you can backup/share your templates using import/export mechanism:
 
-.. image:: gui_gif1/export-import-template.gif
+.. image:: gui_gif1/new-export-import-template.gif
 
 Periodic tasks
 --------------
@@ -148,16 +148,16 @@ If you want to run some actions by schedule without any control from
 you, it is possible with Polemarch. You can create periodic tasks, which runs
 every X seconds (interval based):
 
-.. image:: gui_gif1/create-periodic-task-interval.gif
+.. image:: gui_gif1/new-create-periodic-task-interval.gif
 
 Also you can create periodic tasks with more advancing scheduling options
 (days of week, hours, month and so on) by using cron-style periodic tasks:
 
-.. image:: gui_gif1/create-periodic-schedule.gif
+.. image:: gui_gif1/new-create-periodic-schedule.gif
 
 Search
 ------
 Almost everywhere in Polemarch you can filter your data. Let see for example
 how to filter your execution history records to find result of needed action:
 
-.. image:: gui_gif1/search2.gif
+.. image:: gui_gif1/new-search2.gif
