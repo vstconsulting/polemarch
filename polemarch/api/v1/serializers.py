@@ -250,6 +250,7 @@ class OneTeamSerializer(TeamSerializer):
 class OneUserSerializer(UserSerializer):
     groups = TeamSerializer(read_only=True, many=True)
     raw_password = serializers.HiddenField(default=False, initial=False)
+    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User

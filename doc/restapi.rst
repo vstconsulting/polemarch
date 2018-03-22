@@ -3003,7 +3003,6 @@ Users
         {
            "id":3,
            "username":"petya",
-           "password":"pbkdf2_sha256$36000$usSWH0uGIPZl$+Xzz3KpJrq8ZP3truExYOe3CjsaIWgOxuN6jIvJ5ZO8=",
            "is_active":true,
            "is_staff":false,
            "first_name":"Petya",
@@ -3118,7 +3117,6 @@ Users
         {
            "id":3,
            "username":"petya",
-           "password":"pbkdf2_sha256$36000$usSWH0uGIPZl$+Xzz3KpJrq8ZP3truExYOe3CjsaIWgOxuN6jIvJ5ZO8=",
            "is_active":true,
            "is_staff":false,
            "first_name":"Petya",
@@ -3157,7 +3155,6 @@ Users
         {
            "id":3,
            "username":"petrusha",
-           "password":"pbkdf2_sha256$36000$usSWH0uGIPZl$+Xzz3KpJrq8ZP3truExYOe3CjsaIWgOxuN6jIvJ5ZO8=",
            "is_active":true,
            "is_staff":false,
            "first_name":"Petya",
