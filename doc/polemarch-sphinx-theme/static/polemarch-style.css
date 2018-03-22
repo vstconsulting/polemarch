@@ -7,14 +7,7 @@
 @import url(css/AdminLTE.css);
 @import url(css/ansi-colors.css);
 @import url(css/font-awesome.min.css);
-/*@import url(/polemarch/static/css/gui.css);*/
 @import url(css/ionicons.min.css);
-@import url(bootstrap/fonts/glyphicons-halflings-regular.eot);
-@import url(bootstrap/fonts/glyphicons-halflings-regular.svg);
-@import url(bootstrap/fonts/glyphicons-halflings-regular.ttf);
-@import url(bootstrap/fonts/glyphicons-halflings-regular.woff);
-@import url(bootstrap/fonts/glyphicons-halflings-regular.woff2);
-
 @import url(css/skins/_all-skins.css);
 @import url(css/skins/skin-blue.css);
 @import url(css/skins/skin-blue-light.css);

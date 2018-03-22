@@ -94,9 +94,9 @@ pmTasksTemplates.newAutoCompletePlaybook = function()
                 term = term.toLowerCase();
 
                 var matches = []
-                for(var i in pmTasks.model.items)
+                for(var i in pmTasks.model.itemslist.results)
                 {
-                    var val = pmTasks.model.items[i]
+                    var val=pmTasks.model.itemslist.results[i];
                     if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
                     {
                         matches.push(val)
@@ -685,7 +685,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
                 var style = "";
                 if(thisObj.model.selectedProject != item.project)
                 {
-                    style = "style='disolay:none'"
+                    style = "style='display:none'"
                 }
                 return '<div class="autocomplete-suggestion playbook-project-' + item.project + ' " '+style+' data-value="' + item.playbook + '" >' + item.playbook + '</div>';
             },
@@ -700,9 +700,9 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
                 term = term.toLowerCase();
 
                 var matches = []
-                for(var i in pmTasks.model.items)
+                for(var i in pmTasks.model.itemslist.results)
                 {
-                    var val = pmTasks.model.items[i]
+                    var val=pmTasks.model.itemslist.results[i];
                     if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
                     {
                         matches.push(val)
@@ -714,6 +714,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
                 }
             }
         });
+        pmTasksTemplates.selectProject($("#projects-autocomplete").val());
 
         def.resolve();
     }).fail(function(e)

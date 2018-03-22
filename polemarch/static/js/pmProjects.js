@@ -447,8 +447,7 @@ pmProjects.startUpdateProjectItem = function(item_id)
             })
         }, 5000)
     }
-
-    if(thisObj.model.items[item_id].status != "WAIT_SYNC" || thisObj.model.items[item_id].status != "SYNC")
+    else
     {
         $("#branch_block").empty();
         $("#branch_block").html(pmProjects.renderBranchInput(item_id));
@@ -563,6 +562,27 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
  */
 pmProjects.syncRepo = function(item_id)
 {
+    for (var i in pmProjects.model.itemslist.results)
+    {
+        if (pmProjects.model.itemslist.results[i].id==item_id)
+        {
+            var status= pmProjects.model.itemslist.results[i].status;
+            var newStatus="WAIT_SYNC";
+            var projectTds=document.getElementsByClassName("item-"+item_id)[0].children;
+            for (var i=0; i<projectTds.length; i++)
+            {
+                if(projectTds[i].classList.contains("project-status"))
+                {
+                    projectTds[i].classList.remove("project-status-"+status);
+                    projectTds[i].classList.remove("just-old-val-project-status-"+status);
+                    projectTds[i].classList.add("project-status-"+newStatus);
+                    projectTds[i].classList.add("just-old-val-project-status-"+newStatus);
+                    projectTds[i].children[0].innerHTML=newStatus;
+                }
+            }
+        }
+    }
+
     return spajs.ajax.Call({
         url: "/api/v1/projects/"+item_id+"/sync/",
         type: "POST",
