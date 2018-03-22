@@ -14,16 +14,7 @@
 {%- endmacro %}
 
 {%- macro script() %}
-   <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     'attr: polemarch.__version__',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
     {%- for scriptfile in script_files %}
     <script type="text/javascript" src="{{ pathto(scriptfile, 1) }}"></script>
     {%- endfor %}
@@ -62,7 +53,7 @@
     <header class="main-header">
         <!-- Logo  -->
         <a href="/" class="logo">
-                    <!--  mini logo for sidebar mini 50x50 pixel -->
+                    <!-- mini logo for sidebar mini 50x50 pixel -->
                     <span class="logo-mini"><span class="bg-logo-min-doc" style="margin-left: 4px;"></span></span>
                     <!-- logo for regular state and mobile devices -->
                     <span class="logo-lg logo-span-doc"><span class="bg-logo-min-doc"></span> <span class="bg-logo-doc"></span></span>
