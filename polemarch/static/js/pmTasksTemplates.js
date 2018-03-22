@@ -96,7 +96,7 @@ pmTasksTemplates.newAutoCompletePlaybook = function()
                 var matches = []
                 for(var i in pmTasks.model.itemslist.results)
                 {
-                    var val = pmTasks.model.items[pmTasks.model.itemslist.results[i].id]
+                    var val=pmTasks.model.itemslist.results[i];
                     if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
                     {
                         matches.push(val)
@@ -702,7 +702,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
                 var matches = []
                 for(var i in pmTasks.model.itemslist.results)
                 {
-                    var val = pmTasks.model.items[pmTasks.model.itemslist.results[i].id]
+                    var val=pmTasks.model.itemslist.results[i];
                     if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
                     {
                         matches.push(val)
