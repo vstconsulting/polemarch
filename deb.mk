@@ -67,18 +67,6 @@ override_dh_auto_install:
 	touch $(BUILDROOT)/dummy
 	rm -rf $(BUILDROOT)/*
 	make BUILD_DIR=$(BUILDROOT)
-	# system folders which is needed for application to work (lob, lock, etc)
-	mkdir -p $(BUILDROOT)/var/log/$(NAME)
-	mkdir -p $(BUILDROOT)/var/run/$(NAME)
-	mkdir -p $(BUILDROOT)/var/lock/$(NAME)
-	mkdir -p $(BUILDROOT)/etc/$(NAME)
-	# systemd services
-	mkdir -p $(BUILDROOT)/etc/systemd/system/
-	mkdir -p $(BUILDROOT)/etc/tmpfiles.d/
-	cp initbin/*.service $(BUILDROOT)/etc/systemd/system/
-	cp initbin/*.conf $(BUILDROOT)/etc/tmpfiles.d/
-	# settings
-	cp $(NAME)/main/settings.ini $(BUILDROOT)/etc/$(NAME)/
 %:
 	dh $$@ 
 endef
