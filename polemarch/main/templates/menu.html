@@ -11,9 +11,9 @@
     <!--<li><a href="/admin/"><i class="glyphicon glyphicon-cog"></i> <span>{% trans 'Settings' %}</span></a></li>-->
     {% endif %}
     {% if user.is_authenticated %}
-    <li><a href='?users/{{ user.id }}' onclick="return spajs.openURL(this.href);"><i class="glyphicon glyphicon-user"></i> <span>{{user.username}}</span></a></li>
+    <li><a href='?profile/{{ user.id }}' onclick="return spajs.openURL(this.href);"><i class="glyphicon glyphicon-user"></i> <span>{{user.username}}</span></a></li>
     <li><a href='{{ logout_url|default:"/logout/" }}'><i class="glyphicon glyphicon-log-out"></i> <span>Logout</span></a></li>
     {% else %}
-    <li><a href='{{ login_url|default:"/login/" }}?next={{request.path}}'><i class="glyphicon glyphicon-user"></i> <span>Login</span></a></li>
+    <li><a href='{{ login_url|default:"/login/" }}?next={{request.path}}'><i class="glyphicon glyphicon-log-out"></i> <span>Login</span></a></li>
     {% endif %}
     

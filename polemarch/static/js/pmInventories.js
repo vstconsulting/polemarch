@@ -900,13 +900,11 @@ pmInventories.model.page_list = {
     ],
     actions:[
         {
-            class:'btn btn-danger',
             function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+'));  return false;'},
             title:'Delete',
             link:function(){ return '#'}
         },
         {
-            class:'btn btn-default',
             function:function(item){ return '';},
             title:'Create sub group',
             link:function(item)
@@ -915,7 +913,6 @@ pmInventories.model.page_list = {
             },
         },
         {
-            class:'btn btn-default',
             function:function(item){ return '';},
             title:'Create sub host',
             link:function(item)

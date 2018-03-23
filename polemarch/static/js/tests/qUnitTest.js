@@ -623,6 +623,7 @@ window.qunitTestsArray.push({
         })
     });
 
+    /*
     syncQUnit.addTest('Копирование пользователя с ошибкой', function ( assert )
     {
         var done = assert.async(); 
@@ -689,7 +690,7 @@ window.qunitTestsArray.push({
             render(done)
         })
     });
-
+    */
     syncQUnit.addTest('Удаление пользователя', function ( assert )
     {
         var done = assert.async();

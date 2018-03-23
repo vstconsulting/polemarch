@@ -135,6 +135,56 @@
   </div>
 </script>
 
+<!-- Шаблон настройки виджетов из профайла -->
+<script type="text/x-just" data-just="WidgetsSettingsFromProfile">
+    <section class="col-lg-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                Dashboard widgets options<br>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                </div>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered" id="modal-table">
+                    <tbody>
+                        <tr>
+                            <th>Name</th>
+                            <th>Is active</th>
+                            <th>Collapsed</th>
+                            <!--<th>Order</th>-->
+                        </tr>
+
+                         <% for(var i in pmDashboard.model.widgets){ %>
+                            <% for(var j in pmDashboard.model.widgets[i]){  %>
+                                <tr rowname="<%= pmDashboard.model.widgets[i][j].name %>">
+                                <% if(pmDashboard.model.widgets[i][j].title){ %>
+                                    <td><%= pmDashboard.model.widgets[i][j].title %></td>
+                                <% } %>
+                                <td class="boolean-select" valuename="active">
+                                <div class="form-control <% if(pmDashboard.model.widgets[i][j].active){ %> selected <% } %>" onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" style="cursor: pointer;">
+                                    <div class="ico-on fa fa-toggle-on"></div>
+                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                 </div>
+                                </td>
+                                <td class="boolean-select" valuename="collapse">
+                                    <div class="form-control <% if(pmDashboard.model.widgets[i][j].collapse){ %> selected <% } %>" <% if(pmDashboard.model.widgets[i][j].type==0){ %> onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" <% } %>>
+                                        <div class="ico-on fa fa-toggle-on" <% if(pmDashboard.model.widgets[i][j].type==1){ %> style="cursor: not-allowed!important;"<% } %>></div>
+                                        <div class="ico-off fa  fa-toggle-off" <% if(pmDashboard.model.widgets[i][j].type==1){ %> style="cursor: not-allowed!important;"<% } %>></div>
+                                     </div>
+                                </td>
+                               <!-- <td><input type="number" value="<%= pmDashboard.model.widgets[i][j].sortNum%>" class="form-control"></td>-->
+                                </tr>
+                             <% } %>
+
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</script>
+
 <!-- Страница dashboard -->
 <script type="text/x-just" data-just="dashboard_page">
     <section class="content-header" >

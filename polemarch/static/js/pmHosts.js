@@ -26,12 +26,11 @@ pmHosts.model.page_list = {
             title:'Type',
             name:'type',
             style:function(item){ return 'style="width: 70px"'},
-            class:function(item){ return 'class="hidden-xs"'}, 
+            class:function(item){ return 'class="hidden-xs"'},
         }
     ],
     actions:[
         {
-            class:'btn btn-danger',
             function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+')); return false;'},
             title:'Delete',
             link:function(){ return '#'}

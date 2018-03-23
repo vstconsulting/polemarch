@@ -161,7 +161,6 @@ pmTasksTemplates.model.page_list = {
     ],
     actions:[
         {
-            class:'btn btn-warning',
             function:function(item, option_name){ return "spajs.showLoader(pmTemplates.model.kindObjects['"+item.kind+"'].execute("+item.id+" , '"+option_name +"')); return false;"},
             title:'Execute',
             link:function(){ return '#'}
