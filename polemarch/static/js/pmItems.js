@@ -156,6 +156,7 @@ pmItems.validateRangeName = function (name)
  */
 pmItems.showList = function (holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var thisObj = this;
     var offset = 0
     var limit = this.pageSize;

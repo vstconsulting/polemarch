@@ -747,6 +747,7 @@ pmDashboard.updateData = function()
 
 pmDashboard.open  = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var thisObj = this
 
     return $.when(pmDashboard.getUserWidgetSettingsFromAPI()).always(function()

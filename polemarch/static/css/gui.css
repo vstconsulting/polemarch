@@ -678,3 +678,65 @@ table{
     vertical-align: middle;
     color: #276900;
 }
+
+.skin-black-light .sidebar-menu>li:hover>a, .skin-black-light .sidebar-menu>li.active>a {
+    color: #000;
+    background: #E4E7E7;
+}
+
+.skin-black-light .sidebar-menu>li>a {
+    border-left: 5px solid transparent;
+}
+
+.skin-black-light .sidebar-menu>li>ul {
+     border-left: 5px solid #fff;
+    padding: 0px;
+}
+
+.sidebar-menu>li.active-li>a,
+.sidebar-menu>li.active-li>ul  {
+    border-left: 5px solid #00c0ef;
+}
+
+.sidebar-menu .treeview-menu {
+    display: none;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    padding-left: 0px;
+}
+
+.sidebar-menu>li>ul>li {
+    padding-left: 20px;
+}
+
+.sidebar-menu>li>ul>li {
+    background-color: #fff;
+
+}
+
+.skin-black-light .treeview-menu>li>a {
+    color: #333;
+}
+
+.skin-black-light .treeview-menu>li>a:hover{
+    font-weight: bold;
+}
+
+.active-bold {
+    font-weight: bold;
+}
+
+
+.sidebar-mini.sidebar-collapse .sidebar-menu>li>.treeview-menu {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border-right: 5px solid #fff;
+    border-bottom-right-radius: 4px;
+    width: 182px!important;
+}
+.sidebar-mini.sidebar-collapse .sidebar-menu>.treeview>ul,
+.sidebar-mini.sidebar-collapse .sidebar-menu>.treeview>a>.li-header-span,
+.sidebar-mini.sidebar-collapse .sidebar-menu>li>a>.li-header-span{
+    box-shadow: 2px 1px 3px rgba(0,0,0,0.1);
+}

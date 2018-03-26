@@ -617,6 +617,7 @@ pmUsers.changePassword = function(item_id)
  */
 pmUsers.showProfile = function (holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var thisObj = this;
     //console.log(menuInfo, data)
 
