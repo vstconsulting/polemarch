@@ -4,13 +4,6 @@ define RPM_SPEC
 %define shortname $(NAME)
 %define file_permissions_user $(USER)
 %define file_permissions_group $(USER)
-%define venv_cmd $(PY) -m virtualenv --no-site-packages
-%define venv_name %{name}
-%define venv_install_dir /opt/%{venv_name}
-%define venv_dir %{buildroot}/%{venv_install_dir}
-%define venv_bin %{venv_dir}/bin
-%define venv_python %{venv_bin}/python
-%define venv_pip %{venv_python} %{venv_bin}/pip install $(PIPARGS)
 %define version $(VER)
 %define release $(RELEASE)
 %define __prelink_undo_cmd %{nil}
@@ -26,7 +19,6 @@ define RPM_SPEC
 Name: %{name}
 Version: %{version}
 Release: %{release}
-Source0: $(NAME).tar.gz
 Summary: $(SUMMARY)
 Group: Application/System
 Vendor: $(VENDOR)
@@ -49,7 +41,7 @@ $(DESCRIPTION)
 # Blocks
 %files
 %defattr(-,%{file_permissions_user},%{file_permissions_group},-)
-/%{venv_install_dir}
+$(INSTALL_DIR)
 /etc/%{name}
 /var/log/%{name}
 /var/run/%{name}
@@ -67,18 +59,6 @@ make BUILD_DIR=%{buildroot}
 
 cd %{buildroot}
 cd -
-# Setup init scripts
-mkdir -p $$RPM_BUILD_ROOT/etc/systemd/system
-mkdir -p $$RPM_BUILD_ROOT/etc/tmpfiles.d
-mkdir -p $$RPM_BUILD_ROOT/etc/%{name}
-mkdir -p $$RPM_BUILD_ROOT/var/log/%{name}
-mkdir -p $$RPM_BUILD_ROOT/var/run/%{name}
-mkdir -p $$RPM_BUILD_ROOT/var/lock/%{name}
-mkdir -p $$RPM_BUILD_ROOT/usr/bin
-install -m 755 %{name}/main/settings.ini $$RPM_BUILD_ROOT/etc/%{name}/settings.ini.template
-install -m 755 initbin/%{shortname}web.service $$RPM_BUILD_ROOT/etc/systemd/system/%{shortname}web.service
-install -m 755 initbin/%{shortname}worker.service $$RPM_BUILD_ROOT/etc/systemd/system/%{shortname}worker.service
-install -m 755 initbin/%{shortname}.conf $$RPM_BUILD_ROOT/etc/tmpfiles.d/%{shortname}.conf
 
 %post
 # sudo -H -u %{name} /opt/%{name}/bin/%{shortname}ctl migrate

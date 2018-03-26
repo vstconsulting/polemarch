@@ -64,25 +64,43 @@ compile: build-clean
 	$(PY) setup.py compile -v
 
 prebuild:
+	# Create virtualenv
 	$(PY) -m virtualenv --no-site-packages $(PREBUILD_DIR)
+	# Install required packages
 	$(PREBUILD_BINDIR)/pip install -U pip
 	$(PREBUILD_BINDIR)/pip install -U dist/$(NAME)-$(VER).tar.gz $(REQUIREMENTS)
 	$(PREBUILD_BINDIR)/pip install -U -r requirements-git.txt
+	# RECORD files are used by wheels for checksum. They contain path names which
+	# match the buildroot and must be removed or the package will fail to build.
 	find $(PREBUILD_DIR) -name "RECORD" -exec rm -rf {} \;
+	# Change the virtualenv path to the target installation direcotry.
 	venvctrl-relocate --source=$(PREBUILD_DIR) --destination=$(INSTALL_DIR)
+	# Remove sources for Clang
 	find $(PREBUILD_DIR)/lib -type f -name "*.c" -print0 | xargs -0 rm -rf
+	# Remove broken link
 	-rm -rf $(PREBUILD_DIR)/local
+	# Install settings
+	-install -Dm 755 $(NAME)/main/settings.ini $(BUILD_DIR)/etc/$(USER)/settings.ini.template
+	# Install systemd services
+	-install -Dm 755 initbin/$(NAME)web.service  $(BUILD_DIR)/etc/systemd/system/$(NAME)web.service
+	-install -Dm 755 initbin/$(NAME)worker.service  $(BUILD_DIR)/etc/systemd/system/$(NAME)worker.service
+	# Install tmpdirs config
+	-install -Dm 755 initbin/$(NAME).conf  $(BUILD_DIR)/etc/tmpfiles.d/$(NAME).conf
+	# Create tmpdirs
+	-mkdir -p $(BUILD_DIR)/var/{log,run,lock}/$(NAME)
 
 install:
-	mkdir -p $(INSTALL_DIR)
-	cp -rf $(PREBUILD_DIR)/* $(INSTALL_DIR)
+	# Change owner for packages
+	-chown -R $(USER):$(USER) $(PREBUILD_DIR) $(BUILD_DIR)/var/{log,run,lock}/$(NAME) $(BUILD_DIR)/etc/$(USER)
+	# Copy build
+	cp -rf $(BUILD_DIR)/* /
 	$(MAKE) clean_prebuild
 
 uninstall:
 	-rm -rf $(INSTALL_DIR)
 
 clean_prebuild:
-	-rm -rf $(BUILD_DIR)/$(INSTALL_PREFIX)
+	-rm -rf $(BUILD_DIR)/*
 
 clean: build-clean
 	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
