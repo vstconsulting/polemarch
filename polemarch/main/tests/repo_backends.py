@@ -77,8 +77,8 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         tasks_url = "/api/v1/tasks/?project={}".format(prj_id)
         tasks = self.get_result("get", tasks_url, 200)
         self.assertEquals(tasks["count"], 2)
-        self.assertEquals(tasks["results"][0]["name"], "main")
-        self.assertEquals(tasks["results"][1]["name"], "other")
+        for i in tasks["results"]:
+            self.assertIn(i["name"], ["main", "other"])
         self.assertEqual(project["revision"], second_revision)
 
         self.get_result("post", single_url+"sync/", 200)
