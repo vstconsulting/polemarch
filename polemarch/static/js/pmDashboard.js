@@ -404,9 +404,9 @@ pmDashboard.setNewWidgetCollapseValue = function(thisButton)
 }
 
 /**
- *Функция, сохраняющая настройки виджетов, внесенные в модальном окне.
+ *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a.
  */
-pmDashboard.saveWigdetsOptionsFromModal = function()
+pmDashboard.saveWigdetsOptions = function()
 {
     var modalTable=document.getElementById("modal-table");
     var modalTableTr=modalTable.getElementsByTagName("tr");
@@ -440,9 +440,32 @@ pmDashboard.saveWigdetsOptionsFromModal = function()
         }
     }
     pmDashboard.putUserWidgetSettingsToAPI();
+}
 
-    return $.when(hidemodal(), pmDashboard.HideAfterSaveModalWindow()).done(function(){
-        return spajs.openURL("/");
+/**
+ *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a,
+ *из модального окна на странице Dashboard'a.
+ */
+pmDashboard.saveWigdetsOptionsFromModal = function()
+{
+    return $.when(pmDashboard.saveWigdetsOptions()).done(function(){
+        return $.when(hidemodal(), pmDashboard.HideAfterSaveModalWindow()).done(function(){
+            return spajs.openURL("/");
+        }).promise();
+    }).promise();
+
+}
+
+/**
+ *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a,
+ *из секции на странице профиля пользователя.
+ */
+pmDashboard.saveWigdetsOptionsFromProfile = function()
+{
+    return $.when(pmDashboard.saveWigdetsOptions()).done(function(){
+        return $.notify("Dashboard widget options were successfully saved", "success");
+    }).fail(function(){
+        return $.notify("Dashboard widget options were not saved", "error");
     }).promise();
 }
 

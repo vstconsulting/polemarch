@@ -1009,6 +1009,7 @@ pmItems.updateItem = function (item_id, opt)
         {
             thisObj.model.items[item_id] = data
             $.when(thisObj.model.page_item.onUpdate.apply(thisObj, arguments)).always(function () {
+                $.notify("Changes in "+thisObj.model.name+" were successfully saved", "success");
                 def.resolve()
             })
         },

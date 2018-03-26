@@ -129,7 +129,7 @@
       <!-- Футер модального окна -->
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="pmDashboard.saveWigdetsOptionsFromModal()">Save</button>
+        <button type="button" class="btn btn-primary" onclick="spajs.showLoader(pmDashboard.saveWigdetsOptionsFromModal());  return false;">Save</button>
       </div>
     </div>
   </div>
@@ -138,11 +138,11 @@
 <!-- Шаблон настройки виджетов из профайла -->
 <script type="text/x-just" data-just="WidgetsSettingsFromProfile">
     <section class="col-lg-12">
-        <div class="box box-info">
+        <div class="box box-info collapsed-box">
             <div class="box-header with-border">
                 Dashboard widgets options<br>
                 <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
                 </div>
             </div>
             <div class="box-body">
@@ -180,6 +180,13 @@
                         <% } %>
                     </tbody>
                 </table>
+            </div>
+            <div class="box-footer">
+                <div class="row">
+                    <div class="form-group col-lg-1">
+                        <span class="btn btn-primary" onclick="spajs.showLoader(pmDashboard.saveWigdetsOptionsFromProfile());  return false;">Save</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

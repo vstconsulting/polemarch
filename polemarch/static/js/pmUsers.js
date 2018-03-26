@@ -20,6 +20,30 @@ pmUsers.model.page_list = {
         {
             title:'Name',
             name:'username',
+        },
+        {
+            title:'Active',
+            name:'is_active',
+            style:function(item, opt){ return 'style="width: 80px"'},
+            class:function(item, opt)
+            {
+                if(!item || !item.id)
+                {
+                    return 'class="hidden-xs hidden-sm"';
+                }
+
+                return 'class="hidden-xs hidden-sm user-status '+'user-status-'+item.id+ '"';
+            },
+            value:function(item, filed_name, opt){
+                if(this.model.items[item.id].is_active)
+                {
+                    return '<i class="fa fa-check" style="font-size:20px;"></i>'
+                }
+                else
+                {
+                    return '';
+                }
+            },
         }
     ],
     actions:[
@@ -62,6 +86,17 @@ pmUsers.model.page_new = {
                 fast_validator:function(value){ return value != '' && value}
             },
             {
+                filed: new filedsLib.filed.text(),
+                title:'Email',
+                name:'email',
+                placeholder:'Enter user email',
+                help:'',
+            }
+
+        ],
+
+        [
+            {
                 filed: new filedsLib.filed.password(),
                 title:'Password',
                 name:'password',
@@ -72,7 +107,20 @@ pmUsers.model.page_new = {
                 },
                 fast_validator:function(value){ return value != '' && value}
             },
-        ],[
+            {
+                filed: new filedsLib.filed.password(),
+                title:'Confirm password',
+                name:'confirm_password',
+                placeholder:'Enter user password again',
+                help:'',
+                validator:function(value){
+                    return filedsLib.validator.notEmpty(value, 'Confirm password')
+                },
+                fast_validator:function(value){ return value != '' && value}
+            }
+        ],
+
+        [
             {
                 filed: new filedsLib.filed.text(),
                 title:'First name',
@@ -88,14 +136,6 @@ pmUsers.model.page_new = {
                 help:'',
             }
         ],[
-
-            {
-                filed: new filedsLib.filed.text(),
-                title:'Email',
-                name:'email',
-                placeholder:'Enter user email',
-                help:'',
-            },
             {
                 filed: new filedsLib.filed.boolean(),
                 title:'Is active',
@@ -106,8 +146,17 @@ pmUsers.model.page_new = {
     ],
     onBeforeSave:function(data, item_id)
     {
-        data.is_staff = true
-        return data;
+        if(data.password == data.confirm_password)
+        {
+            data.is_staff = true
+            delete data.confirm_password;
+            return data;
+        }
+        else
+        {
+            $.notify("Confirm password value is not the same as password one", "error");
+            return false;
+        }
     },
     onCreate:function(result)
     {
@@ -158,15 +207,6 @@ pmUsers.model.page_item = {
                 }
             }
         },
-        /*
-        {
-            class:'btn btn-default copy-btn',
-            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
-            title:'<span class="glyphicon glyphicon-duplicate" ></span>',
-            link:function(){ return '#'},
-            help:'Copy'
-        },
-        */
         {
             class:'btn btn-danger danger-right',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
@@ -239,7 +279,7 @@ pmUsers.model.profile_page = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateProfile('+item_id+'));  return false;'},
             title:'Save',
             link:function(){ return '#'},
         },
@@ -326,7 +366,7 @@ pmUsers.model.profile_page = {
     ],
     sections:[
         function(){
-             return spajs.just.render("WidgetsSettingsFromProfile");
+            return spajs.just.render("WidgetsSettingsFromProfile");
         }
     ],
     onUpdate:function(result)
@@ -345,7 +385,9 @@ pmUsers.model.profile_page = {
     },
 }
 
-
+/**
+ *Функиця создает копию пользователя.
+ */
 pmUsers.copyItem = function(item_id)
 {
     var def = new $.Deferred();
@@ -387,7 +429,10 @@ pmUsers.copyItem = function(item_id)
     return def.promise();
 }
 
-
+/**
+ *Данная функция в зависимости от текущего статуса пользователя
+ *вызывает функцию активации/деактивации пользователя соответственно.
+ */
 pmUsers.changeItemActivation = function(item_id) {
     if(pmUsers.model.items[item_id].is_active==true)
     {
@@ -399,6 +444,9 @@ pmUsers.changeItemActivation = function(item_id) {
     }
 }
 
+/**
+ *Функция деактивирует пользователя, переводя значение поля is_active из true в false.
+ */
 pmUsers.deactivateItem = function(item_id, force) {
     var thisObj = this;
     var def = new $.Deferred();
@@ -407,7 +455,6 @@ pmUsers.deactivateItem = function(item_id, force) {
         def.reject();
         return def.promise()
     }
-    pmUsers.model.items[item_id].is_active=!pmUsers.model.items[item_id].is_active;
     var data={ "is_active": false }
     spajs.ajax.Call({
         url: "/api/v1/"+thisObj.model.name+"/"+item_id+"/",
@@ -422,14 +469,21 @@ pmUsers.deactivateItem = function(item_id, force) {
             }
             else {
                 $.notify("Account was deactivated", "success");
+                pmUsers.model.items[item_id].is_active=!pmUsers.model.items[item_id].is_active;
                 var t=$(".change-activation-"+item_id)[0];
                 $(t).html("Activate");
                 $(t).attr("title", "Activate account");
+                var s=$(".user-status-"+item_id)[0];
+                $(s).html("");
             }
             def.resolve()
         },
         error:function(e)
         {
+            if(e.status==403)
+            {
+                $.notify("You do not have permission to perform this action.", "error");
+            }
             def.reject(e)
         }
     });
@@ -437,10 +491,12 @@ pmUsers.deactivateItem = function(item_id, force) {
     return def.promise();
 }
 
+/**
+ *Функция активирует пользователя, переводя значение поля is_active из false в true.
+ */
 pmUsers.activateItem = function(item_id, force) {
     var thisObj = this;
     var def = new $.Deferred();
-    pmUsers.model.items[item_id].is_active=!pmUsers.model.items[item_id].is_active;
     var data={ "is_active": true }
     spajs.ajax.Call({
         url: "/api/v1/"+thisObj.model.name+"/"+item_id+"/",
@@ -450,13 +506,20 @@ pmUsers.activateItem = function(item_id, force) {
         success: function(data)
         {
             $.notify("Account was activated", "success");
+            pmUsers.model.items[item_id].is_active=!pmUsers.model.items[item_id].is_active;
             var t=$(".change-activation-"+item_id)[0];
             $(t).html("Deactivate");
             $(t).attr("title", "Deactivate account");
+            var s=$(".user-status-"+item_id)[0];
+            $(s).html('<i class="fa fa-check" style="font-size:20px;"></i>');
             def.resolve()
         },
         error:function(e)
         {
+            if(e.status==403)
+            {
+                $.notify("You do not have permission to perform this action.", "error");
+            }
             def.reject(e)
         }
     });
@@ -464,6 +527,9 @@ pmUsers.activateItem = function(item_id, force) {
     return def.promise();
 }
 
+/**
+ *Функция открывает модальное окно с формой для изменения пароля.
+ */
 pmUsers.openChangePasswordForm = function(item_id)
 {
     if($('div').is('#change_password_form'))
@@ -481,12 +547,20 @@ pmUsers.openChangePasswordForm = function(item_id)
     }
 }
 
+/**
+ *Функция рендинга модального окна для смены пароля пользователя.
+ */
 pmUsers.renderModalWindow = function(item_id)
 {
     var html=spajs.just.render('change_password_form', {item_id: item_id});
     return html;
 }
 
+/**
+ *Функция смены пароля пользователя: пользователь вводит новый ароль дважды, чтобы исключить вероятность опечатки.
+ *Если оба введенных значения идентичны друг другу, то новый пароль сохраняется.
+ *В противном случае выводится сообщение об ошибке.
+ */
 pmUsers.changePassword = function(item_id)
 {
     var thisObj = this;
@@ -532,12 +606,15 @@ pmUsers.changePassword = function(item_id)
     }
     else
     {
-        $.notify("New password value is not the same as the confirm value", "error");
+        $.notify("Confirm password value is not the same as new password one", "error");
         def.reject();
     }
     return def.promise();
 }
 
+/**
+ *Функция, открывающая страницу с профайлом пользователя.
+ */
 pmUsers.showProfile = function (holder, menuInfo, data)
 {
     var thisObj = this;
@@ -558,6 +635,18 @@ pmUsers.showProfile = function (holder, menuInfo, data)
     }).promise()
 }
 
+/**
+ *Функция, сохраняющая все настройки профиля пользоваетля.
+ */
+pmUsers.updateProfile = function (item_id) {
+    return $.when(pmUsers.updateItem(item_id), pmDashboard.saveWigdetsOptionsFromProfile()).done(function ()
+    {
+        $.notify("Profile was successfully updated", "success");
+    }).fail(function ()
+    {
+        $.notify("Profile was not updated", "error");
+    }).promise()
+}
 
 
 tabSignal.connect("polemarch.start", function()
@@ -587,7 +676,7 @@ tabSignal.connect("polemarch.start", function()
         onOpen:function(holder, menuInfo, data){return pmUsers.showNewItemPage(holder, menuInfo, data);}
     })
 
-     spajs.addMenu({
+    spajs.addMenu({
         id:"profile",
         urlregexp:[/^profile\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmUsers.showProfile(holder, menuInfo, data);}

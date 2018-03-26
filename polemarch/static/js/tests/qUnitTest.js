@@ -554,6 +554,7 @@ window.qunitTestsArray.push({
         // Заполнение формы с данными пользователя
         $("#filed_username").val("test-user-"+t);
         $("#filed_password").val("test-user-"+t);
+        $("#filed_confirm_password").val("test-user-"+t);
         $("#filed_email").val("test2@user.ru");
         $("#filed_first_name").val("test");
         $("#filed_last_name").val("user");
@@ -581,7 +582,6 @@ window.qunitTestsArray.push({
         userId = /user\/([0-9]+)/.exec(window.location.href)[1]
 
         $("#filed_username").val("admin");
-        $("#filed_password").val("test2-user-"+t);
         $("#filed_email").val("test2@user.ru");
         $("#filed_first_name").val("test2-"+t);
         $("#filed_last_name").val("user2-"+t);
@@ -606,7 +606,6 @@ window.qunitTestsArray.push({
         userId = /user\/([0-9]+)/.exec(window.location.href)[1]
 
         $("#filed_username").val("test2-user-"+t);
-        $("#filed_password").val("test2-user-"+t);
         $("#filed_email").val("test2@user.ru");
         $("#filed_first_name").val("test2-"+t);
         $("#filed_last_name").val("user2-"+t);
