@@ -246,6 +246,7 @@ class HookViewSet(base.ModelViewSetSet):
 
 class BulkViewSet(rest_views.APIView):
     serializer_classes = serializers
+    schema = None
 
     _op_types = {
         "get": "perform_get",

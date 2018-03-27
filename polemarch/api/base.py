@@ -153,6 +153,7 @@ class NonModelsViewSet(GenericViewSet):
 class ListNonModelViewSet(NonModelsViewSet,
                           viewsets.mixins.ListModelMixin):
     # pylint: disable=abstract-method
+    schema = None
 
     @property
     def methods(self):
