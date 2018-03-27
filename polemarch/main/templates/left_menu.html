@@ -1,27 +1,21 @@
 <li class="header">MAIN NAVIGATION</li>
 
 <li id="menu-home"><a href="/"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> <span class="li-header-span">Home</span></a></li>
-<li class="treeview" id="menu-projects">
-    <a href="#">
+<li class="pm-treeview" id="menu-projects">
+    <a href="/?projects"  onclick="return spajs.openURL(this.href);">
         <i class="glyphicon glyphicon-blackboard"></i> <span class="li-header-span">Projects</span>
-        <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
     </a>
-    <ul class="treeview-menu">
-        <li id="menu-projects-projects"><a href="/?projects"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-list"></i> --> <span>Projects</span></a></li>
+    <ul class="pm-treeview-menu">
+        <li class="group-header-copy" id="menu-projects-projects"><a href="/?projects"  onclick="return spajs.openURL(this.href);" ><span>Projects</span></a></li>
         <li id="menu-projects-templates"><a href="/?templates"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-cog"></i> --><span>Templates</span></a></li>
     </ul>
 </li>
-<li class="treeview" id="menu-inventories">
-    <a href="#">
+<li class="pm-treeview" id="menu-inventories">
+    <a href="/?inventories"  onclick="return spajs.openURL(this.href);">
         <i class="fa fa-folder"></i> <span class="li-header-span">Inventories</span>
-        <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
     </a>
-    <ul class="treeview-menu">
-        <li id="menu-inventories-inventories"><a href="/?inventories"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-th"></i> --> <span>Inventories</span></a></li>
+    <ul class="pm-treeview-menu">
+        <li class="group-header-copy" id="menu-inventories-inventories"><a href="/?inventories"  onclick="return spajs.openURL(this.href);" ><span>Inventories</span></a></li>
         <li id="menu-inventories-groups"><a href="/?groups"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-th-large"></i> --> <span>Groups</span></a></li>
         <li id="menu-inventories-hosts"><a href="/?hosts"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-tasks"></i> --> <span>Hosts</span></a></li>
     </ul>
@@ -38,72 +32,78 @@
         if(/\?projects/.test(window.location.href) || /\?project/.test(window.location.href) ||
             /\?new-project/.test(window.location.href))
         {
-            $("#menu-projects").addClass("active active-li");
-            $("#menu-projects-projects").addClass("active-bold");
+            $("#menu-projects").removeClass("pm-treeview");
+            $("#menu-projects").addClass("active pm-treeview-active");
+            $("#menu-projects").addClass("active-bold");
         }
         else if(/\?templates/.test(window.location.href) ||
             /\?template/.test(window.location.href))
         {
-            $("#menu-projects").addClass("active active-li");
+            $("#menu-projects").removeClass("pm-treeview");
+            $("#menu-projects").addClass("active pm-treeview-active");
             $("#menu-projects-templates").addClass("active-bold");
         }
         else if(/\?hosts/.test(window.location.href) || /\?host/.test(window.location.href) ||
             /\?new-host/.test(window.location.href))
         {
-            $("#menu-inventories").addClass("active active-li");
+            $("#menu-inventories").removeClass("pm-treeview");
+            $("#menu-inventories").addClass("active pm-treeview-active");
             $("#menu-inventories-hosts").addClass("active-bold");
         }
         else if(/\?new-group/.test(window.location.href) || /\?groups/.test(window.location.href) ||
             /\?group/.test(window.location.href))
         {
-            $("#menu-inventories").addClass("active active-li");
+            $("#menu-inventories").removeClass("pm-treeview");
+            $("#menu-inventories").addClass("active pm-treeview-active");
             $("#menu-inventories-groups").addClass("active-bold");
         }
         else if(/\?inventories/.test(window.location.href) || /\?inventory/.test(window.location.href) ||
             /\?new-inventory/.test(window.location.href))
         {
-            $("#menu-inventories").addClass("active active-li");
-            $("#menu-inventories-inventories").addClass("active-bold");
+            $("#menu-inventories").removeClass("pm-treeview");
+            $("#menu-inventories").addClass("active pm-treeview-active");
+            $("#menu-inventories").addClass("active-bold");
         }
         else if(/\?history/.test(window.location.href)){
 
-            $("#menu-history").addClass("active active-li");
+            $("#menu-history").addClass("active pm-treeview-active");
+            $("#menu-history").addClass("active-bold");
         }
         else if(/\?users/.test(window.location.href) || /\?user/.test(window.location.href) ||
             /\?new-user/.test(window.location.href) || /\?profile/.test(window.location.href))
         {
-            $("#menu-users").addClass("active active-li");
+            $("#menu-users").addClass("active pm-treeview-active");
+            $("#menu-users").addClass("active-bold");
+        }
+        else if(/\/api\//.test(window.location.href))
+        {
+
         }
         else
         {
-            $("#menu-home").addClass("active active-li");
+            $("#menu-home").addClass("active pm-treeview-active");
+            $("#menu-home").addClass("active-bold");
         }
     }
     function setActiveMenuLi()
     {
-        if($('li').is('.active-li'))
+        if($('li').is('.pm-treeview-active'))
         {
-            var t=$(".active-li")[0];
-            $(t).removeClass("active");
-            $(t).removeClass("active-li");
+            var t=$(".pm-treeview-active");
+            for(var i=0; i<t.length; i++)
+            {
+                $(t).removeClass("active");
+                $(t).removeClass("pm-treeview-active");
+                $(t).addClass("pm-treeview");
+            }
         }
 
-        if($('li').is(".treeview"))
+        if($('li').is(".pm-treeview"))
         {
             var s=$(".treeview");
             for(var i=0; i<s.length; i++)
             {
                 $(s).removeClass("active");
-            }
-
-            if($('ul').is('.treeview-menu'))
-            {
-                var s1=$(".treeview-menu");
-                for(var i=0; i<s1.length; i++)
-                {
-                    $(s1).removeClass("menu-open");
-                    $(s1).attr("style", "");
-                }
             }
         }
 
