@@ -194,13 +194,52 @@
                             <% } %>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <button type="button" onclick="spajs.showLoader(pmTasksTemplates.showExistingOptionsToEdit(<%= item_id %>)); return false;" class="btn btn-primary hidden-xs">Edit existing options</button>
+                            <button type="button" onclick="spajs.showLoader(pmTasksTemplates.setNewOption(<%= item_id %>)); return false;" class="btn btn-primary hidden-xs">Create new option</button>
+                            <button type="button" onclick="spajs.showLoader(pmTasksTemplates.showExistingOptionsToEdit(<%= item_id %>)); return false;" class="btn btn-primary btn-block visible-xs">Edit existing options</button>
+                            <button type="button" onclick="spajs.showLoader(pmTasksTemplates.setNewOption(<%= item_id %>)); return false;" class="btn btn-primary btn-block visible-xs">Create new option</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
     <% } %>
 </script>
 
-
+<!-- Форма редактирования существующих опций -->
+<script type="text/x-just" data-just="add_existing_options_to_task_template">
+    <div class="row" id="add_existing_options_to_task_template">
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Edit options<br>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="" >
+                                <% for(var i in pmTasksTemplates.model.items[item_id].options_list){ %>
+                                    <option
+                                        value="<%- pmTasksTemplates.model.items[item_id].options_list[i] %>" selected>
+                                        <%- pmTasksTemplates.model.items[item_id].options_list[i] %>
+                                    </option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-lg-12">
+                            <button type="button" onclick="$('#add_existing_options_to_module_template').hide(); spajs.showLoader(pmTasksTemplates.setOptionList(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
+                            <button type="button" onclick="$('#add_existing_options_to_module_template').remove(); return false;" class="btn btn-default" >Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</script>
 
 <script type="text/x-just" data-just="templates_new_page">
 <section class="content-header">

@@ -549,6 +549,76 @@ pmModuleTemplates.removeOption = function(item_id)
     return def.promise();
 }
 
+/**
+ *Функция добавляет на страницу секцию для удаления/добавления опций на страницу шаблона.
+ */
+pmModuleTemplates.showExistingOptionsToEdit = function (item_id) {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.showExistingOptionsToEdit with item_id = `" + item_id + "`"
+    }
+
+    $("#add_existing_options_to_module_template").remove();
+    $(".content").appendTpl(spajs.just.render('add_existing_options_to_module_template', {item_id:item_id}))
+    var scroll_el = "#add_existing_options_to_module_template";
+    if ($(scroll_el).length != 0)  {
+        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+    }
+    $("#polemarch-model-items-select").select2({ width: '100%' });
+
+}
+
+/**
+ *Функция сохраняет изменения внесенные в секции для удаления/добавления опций на странице шаблона.
+ */
+pmModuleTemplates.setOptionList = function(item_id, option_list)
+{
+    var thisObj=this;
+
+    if(!item_id)
+    {
+        throw "Error in pmModuleTemplates.setOptionList with item_id = `" + item_id + "`"
+    }
+
+    if(!option_list)
+    {
+         var options={};
+    }
+    else
+    {
+        var options=pmModuleTemplates.model.items[item_id].options;
+        for(var i in options)
+        {
+            var bool=false;
+            for(var j in option_list)
+            {
+                if(i==option_list[j])
+                {
+                    bool=true;
+                }
+            }
+            if(bool==false)
+            {
+                delete options[i];
+            }
+        }
+    }
+    return spajs.ajax.Call({
+        url: "/api/v1/templates/"+item_id+"/",
+        type: "PATCH",
+        contentType:'application/json',
+        data:JSON.stringify({options:options}),
+        success: function(data)
+        {
+           spajs.openURL(window.location.href);
+        },
+        error:function(e)
+        {
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+
 
 pmModuleTemplates.showItem = function(holder, menuInfo, data)
 {

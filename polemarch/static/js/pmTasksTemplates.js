@@ -569,6 +569,75 @@ pmTasksTemplates.removeOption = function(item_id)
 }
 
 /**
+ *Функция добавляет на страницу секцию для удаления/добавления опций на страницу шаблона.
+ */
+pmTasksTemplates.showExistingOptionsToEdit = function (item_id) {
+    if(!item_id)
+    {
+        throw "Error in pmTasksTemplates.showExistingOptionsToEdit with item_id = `" + item_id + "`"
+    }
+
+    $("#add_existing_options_to_task_template").remove();
+    $(".content").appendTpl(spajs.just.render('add_existing_options_to_task_template', {item_id:item_id}))
+    var scroll_el = "#add_existing_options_to_task_template";
+    if ($(scroll_el).length != 0)  {
+        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+    }
+    $("#polemarch-model-items-select").select2({ width: '100%' });
+
+}
+
+/**
+ *Функция сохраняет изменения внесенные в секции для удаления/добавления опций на странице шаблона.
+ */
+pmTasksTemplates.setOptionList = function(item_id, option_list)
+{
+    var thisObj=this;
+    if(!item_id)
+    {
+        throw "Error in pmTasksTemplates.setOptionList with item_id = `" + item_id + "`"
+    }
+
+    if(!option_list)
+    {
+       var options={};
+    }
+    else
+    {
+        var options=pmTasksTemplates.model.items[item_id].options;
+        for(var i in options)
+        {
+            var bool=false;
+            for(var j in option_list)
+            {
+                if(i==option_list[j])
+                {
+                    bool=true;
+                }
+            }
+            if(bool==false)
+            {
+                delete options[i];
+            }
+        }
+    }
+    return spajs.ajax.Call({
+        url: "/api/v1/templates/"+item_id+"/",
+        type: "PATCH",
+        contentType:'application/json',
+        data:JSON.stringify({options:options}),
+        success: function(data)
+        {
+           spajs.openURL(window.location.href);
+        },
+        error:function(e)
+        {
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+
+/**
  *Функция отрисовывает страницу для создания новой опции.
  */
 pmTasksTemplates.showNewOptionPage = function(holder, menuInfo, data)

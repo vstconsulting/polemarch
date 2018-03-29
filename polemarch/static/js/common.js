@@ -130,7 +130,9 @@ if(window.localStorage['pmLocalSettings'])
 
 if(pmLocalSettings.get('hideMenu'))
 {
-    $("body").addClass('sidebar-collapse')
+    if(window.innerWidth>767){
+         $("body").addClass('sidebar-collapse');
+    }
 }
 
 

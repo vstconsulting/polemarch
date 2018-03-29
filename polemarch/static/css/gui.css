@@ -718,6 +718,11 @@ table{
     border-bottom-right-radius: 4px;
 }
 
+.pm-treeview:hover .pm-treeview-menu>li:last-child,
+.pm-treeview:hover .pm-treeview-menu>li:last-child>a {
+    border-bottom-right-radius: 4px;
+}
+
 .pm-treeview:hover .pm-treeview-menu>li>a {
     padding: 12px 5px 12px 15px;
     display: block;
@@ -785,6 +790,13 @@ table{
     border-bottom-right-radius: 4px;
 }
 
+.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview:hover .pm-treeview-menu>li:last-child,
+.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview:hover .pm-treeview-menu>li:last-child>a,
+.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover .pm-treeview-menu>li:last-child,
+.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover .pm-treeview-menu>li:last-child>a{
+    border-bottom-right-radius: 4px;
+}
+
 .sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview:hover .pm-treeview-menu>li>a,
 .sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover .pm-treeview-menu>li>a {
     padding: 12px 5px 12px 20px;
@@ -830,6 +842,11 @@ table{
 .group-header-copy {
     font-weight: bold;
     border-bottom: 1px solid #d2d6de;
+    border-top-right-radius: 4px;
+}
+
+.group-header-copy a {
+    border-top-right-radius: 4px;
 }
 
 
