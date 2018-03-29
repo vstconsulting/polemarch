@@ -73,6 +73,7 @@ pmTasksTemplates.filed.selectProjectInventoryAndPlaybookForOption.render = funct
 
 pmTasksTemplates.newAutoCompletePlaybook = function()
 {
+    var thisObj=this;
     return new autoComplete({
             selector: '#playbook-autocomplete',
             minChars: 0,
@@ -693,6 +694,7 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
         }
 
         $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
+        pmTasksTemplates.selectProject($("#projects-autocomplete").val());
         def.resolve();
     }).fail(function(e)
     {
