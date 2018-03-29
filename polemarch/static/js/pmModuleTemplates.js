@@ -163,7 +163,7 @@ pmModuleTemplates.model.page_item_new_option = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(item_id){ return 'spajs.showLoader(pmModuleTemplates.saveOption('+item_id+'));  return false;'},
+            function:function(item_id){ return 'spajs.showLoader(pmModuleTemplates.saveNewOption('+item_id+'));  return false;'},
             title:'Create',
             link:function(){ return '#'},
         }
@@ -280,11 +280,40 @@ pmModuleTemplates.saveAndExecute = function(item_id)
     return def.promise()
 }
 
+/**
+ *Функция открывает страницу для создания новой опции.
+ */
 pmModuleTemplates.setNewOption = function(item_id)
 {
     return spajs.openURL(window.location.href+"/new-option");
 }
 
+/**
+ *Функция сохраняет новую опцию.
+ */
+pmModuleTemplates.saveNewOption = function(item_id)
+{
+    var def = new $.Deferred();
+    var optionName=$('#filed_option_name').val();
+    optionName=optionName.trim();
+    optionName=optionName.replace( /\s/g, "-" );
+    var templateOptionList=this.model.items[item_id].options_list;
+    for (var i=0; i<templateOptionList.length; i++)
+    {
+        if(templateOptionList[i]==optionName)
+        {
+            $.notify("Option with this name already exists", "error");
+            def.reject({text:"Option with this name already exists"});
+            return def.promise();
+        }
+    }
+
+    return pmModuleTemplates.saveOption(item_id);
+}
+
+/**
+ *Функция сохраняет изменения в уже существующей опции.
+ */
 pmModuleTemplates.saveOption = function(item_id)
 {
     var optionName=$('#filed_option_name').val();
@@ -350,6 +379,12 @@ pmModuleTemplates.saveOption = function(item_id)
         {
             delete dataToAdd1.options[optionName];
         }
+        else
+        {
+            var linkPartArr=window.location.href.split("/");
+            var previousNameOfOption=linkPartArr[linkPartArr.length-1];
+            delete dataToAdd1.options[previousNameOfOption];
+        }
         dataToAdd1.options[optionName]=dataToAdd;
         var thisObj = this;
         spajs.ajax.Call({
@@ -375,6 +410,10 @@ pmModuleTemplates.saveOption = function(item_id)
     return def.promise();
 }
 
+/**
+ *Функция сохраняет изменения в уже существующей опции
+ *и запускает выполнение шаблона с этой опцией.
+ */
 pmModuleTemplates.saveAndExecuteOption = function(item_id)
 {
     var def = new $.Deferred();
@@ -391,6 +430,9 @@ pmModuleTemplates.saveAndExecuteOption = function(item_id)
     return def.promise();
 }
 
+/**
+ *Функция отрисовывает страницу для создания новой опции.
+ */
 pmModuleTemplates.showNewOptionPage = function(holder, menuInfo, data)
 {
     var item_id = data.reg[1];
@@ -417,6 +459,9 @@ pmModuleTemplates.showNewOptionPage = function(holder, menuInfo, data)
     return def.promise()
 }
 
+/**
+ *Функция отрисовывает страницу для просмотра/редактирования уже существующей опции.
+ */
 pmModuleTemplates.showOptionPage = function(holder, menuInfo, data)
 {
     var item_id = data.reg[1];
@@ -446,11 +491,11 @@ pmModuleTemplates.showOptionPage = function(holder, menuInfo, data)
             }
             if(optionAPI.hasOwnProperty('vars'))
             {
-               pmModuleTemplates.model.items[item_id].dataForOption['vars']={};
-               for(var i in optionAPI['vars'])
-               {
-                   pmModuleTemplates.model.items[item_id].dataForOption['vars'][i]=optionAPI['vars'][i];
-               }
+                pmModuleTemplates.model.items[item_id].dataForOption['vars']={};
+                for(var i in optionAPI['vars'])
+                {
+                    pmModuleTemplates.model.items[item_id].dataForOption['vars'][i]=optionAPI['vars'][i];
+                }
             }
 
             var tpl = 'module_option_page'
@@ -470,6 +515,9 @@ pmModuleTemplates.showOptionPage = function(holder, menuInfo, data)
     return def.promise()
 }
 
+/**
+ *Функция удаляет опцию.
+ */
 pmModuleTemplates.removeOption = function(item_id)
 {
     var def = new $.Deferred();
