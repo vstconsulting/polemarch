@@ -632,6 +632,7 @@ pmTasksTemplates.showModuleWidget = function(holder)
 
 pmTasksTemplates.showItem = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var def = new $.Deferred();
     var thisObj = this;
     var item_id = data.reg[1]
@@ -664,6 +665,7 @@ pmTasksTemplates.selectProject = function(project_id){
 
 pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var def = new $.Deferred();
     var thisObj = this;
     $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()

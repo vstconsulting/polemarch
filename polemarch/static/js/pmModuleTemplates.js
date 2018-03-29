@@ -504,6 +504,7 @@ pmModuleTemplates.removeOption = function(item_id)
 
 pmModuleTemplates.showItem = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var item_id = data.reg[1];
     var def = new $.Deferred();
     var thisObj = this;
@@ -530,6 +531,7 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
 
 pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var def = new $.Deferred();
     var thisObj = this;
     $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems()).done(function()

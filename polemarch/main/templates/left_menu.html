@@ -44,14 +44,14 @@
             $("#menu-projects-templates").addClass("active-bold");
         }
         else if(/\?hosts/.test(window.location.href) || /\?host/.test(window.location.href) ||
-            /\?new-host/.test(window.location.href))
+            /\?new-host/.test(window.location.href) || /\?group\/([0-9]+)\/new-host/.test(window.location.href))
         {
             $("#menu-inventories").removeClass("pm-treeview");
             $("#menu-inventories").addClass("active pm-treeview-active");
             $("#menu-inventories-hosts").addClass("active-bold");
         }
         else if(/\?new-group/.test(window.location.href) || /\?groups/.test(window.location.href) ||
-            /\?group/.test(window.location.href))
+            /\?group/.test(window.location.href) || /\?inventory\/([0-9]+)\/new-group/.test(window.location.href))
         {
             $("#menu-inventories").removeClass("pm-treeview");
             $("#menu-inventories").addClass("active pm-treeview-active");
