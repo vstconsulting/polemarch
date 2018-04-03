@@ -90,6 +90,7 @@ class Project(AbstractModel):
             inventory=inventory, project=self,
             kind=kind, raw_stdout="", execute_args=extra,
             initiator=initiator, initiator_type=initiator_type,
+            hidden=self.hidden
         )
         if isinstance(inventory, (six.string_types, six.text_type)):
             history_kwargs['inventory'] = None

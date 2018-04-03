@@ -27,7 +27,9 @@ class _Base(object):
         self.proj.tasks.all().delete()
         for playbook in playbooks_names:
             name = playbook.split(".yml")[0]
-            self.proj.tasks.create(name=name, playbook=playbook)
+            self.proj.tasks.create(
+                name=name, playbook=playbook, hidden=self.proj.hidden
+            )
 
     def _update_tasks(self, files):
         reg = re.compile(self.regex)
