@@ -163,7 +163,7 @@ pmModuleTemplates.model.page_item_new_option = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(item_id){ return 'spajs.showLoader(pmModuleTemplates.saveOption('+item_id+'));  return false;'},
+            function:function(item_id){ return 'spajs.showLoader(pmModuleTemplates.saveNewOption('+item_id+'));  return false;'},
             title:'Create',
             link:function(){ return '#'},
         }
@@ -280,11 +280,40 @@ pmModuleTemplates.saveAndExecute = function(item_id)
     return def.promise()
 }
 
+/**
+ *Функция открывает страницу для создания новой опции.
+ */
 pmModuleTemplates.setNewOption = function(item_id)
 {
     return spajs.openURL(window.location.href+"/new-option");
 }
 
+/**
+ *Функция сохраняет новую опцию.
+ */
+pmModuleTemplates.saveNewOption = function(item_id)
+{
+    var def = new $.Deferred();
+    var optionName=$('#filed_option_name').val();
+    optionName=optionName.trim();
+    optionName=optionName.replace( /\s/g, "-" );
+    var templateOptionList=this.model.items[item_id].options_list;
+    for (var i=0; i<templateOptionList.length; i++)
+    {
+        if(templateOptionList[i]==optionName)
+        {
+            $.notify("Option with this name already exists", "error");
+            def.reject({text:"Option with this name already exists"});
+            return def.promise();
+        }
+    }
+
+    return pmModuleTemplates.saveOption(item_id);
+}
+
+/**
+ *Функция сохраняет изменения в уже существующей опции.
+ */
 pmModuleTemplates.saveOption = function(item_id)
 {
     var optionName=$('#filed_option_name').val();
@@ -350,6 +379,12 @@ pmModuleTemplates.saveOption = function(item_id)
         {
             delete dataToAdd1.options[optionName];
         }
+        else
+        {
+            var linkPartArr=window.location.href.split("/");
+            var previousNameOfOption=linkPartArr[linkPartArr.length-1];
+            delete dataToAdd1.options[previousNameOfOption];
+        }
         dataToAdd1.options[optionName]=dataToAdd;
         var thisObj = this;
         spajs.ajax.Call({
@@ -375,6 +410,10 @@ pmModuleTemplates.saveOption = function(item_id)
     return def.promise();
 }
 
+/**
+ *Функция сохраняет изменения в уже существующей опции
+ *и запускает выполнение шаблона с этой опцией.
+ */
 pmModuleTemplates.saveAndExecuteOption = function(item_id)
 {
     var def = new $.Deferred();
@@ -391,6 +430,9 @@ pmModuleTemplates.saveAndExecuteOption = function(item_id)
     return def.promise();
 }
 
+/**
+ *Функция отрисовывает страницу для создания новой опции.
+ */
 pmModuleTemplates.showNewOptionPage = function(holder, menuInfo, data)
 {
     var item_id = data.reg[1];
@@ -417,6 +459,9 @@ pmModuleTemplates.showNewOptionPage = function(holder, menuInfo, data)
     return def.promise()
 }
 
+/**
+ *Функция отрисовывает страницу для просмотра/редактирования уже существующей опции.
+ */
 pmModuleTemplates.showOptionPage = function(holder, menuInfo, data)
 {
     var item_id = data.reg[1];
@@ -446,11 +491,11 @@ pmModuleTemplates.showOptionPage = function(holder, menuInfo, data)
             }
             if(optionAPI.hasOwnProperty('vars'))
             {
-               pmModuleTemplates.model.items[item_id].dataForOption['vars']={};
-               for(var i in optionAPI['vars'])
-               {
-                   pmModuleTemplates.model.items[item_id].dataForOption['vars'][i]=optionAPI['vars'][i];
-               }
+                pmModuleTemplates.model.items[item_id].dataForOption['vars']={};
+                for(var i in optionAPI['vars'])
+                {
+                    pmModuleTemplates.model.items[item_id].dataForOption['vars'][i]=optionAPI['vars'][i];
+                }
             }
 
             var tpl = 'module_option_page'
@@ -470,6 +515,9 @@ pmModuleTemplates.showOptionPage = function(holder, menuInfo, data)
     return def.promise()
 }
 
+/**
+ *Функция удаляет опцию.
+ */
 pmModuleTemplates.removeOption = function(item_id)
 {
     var def = new $.Deferred();
@@ -501,9 +549,80 @@ pmModuleTemplates.removeOption = function(item_id)
     return def.promise();
 }
 
+/**
+ *Функция добавляет на страницу секцию для удаления/добавления опций на страницу шаблона.
+ */
+pmModuleTemplates.showExistingOptionsToEdit = function (item_id) {
+    if(!item_id)
+    {
+        throw "Error in pmInventories.showExistingOptionsToEdit with item_id = `" + item_id + "`"
+    }
+
+    $("#add_existing_options_to_module_template").remove();
+    $(".content").appendTpl(spajs.just.render('add_existing_options_to_module_template', {item_id:item_id}))
+    var scroll_el = "#add_existing_options_to_module_template";
+    if ($(scroll_el).length != 0)  {
+        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+    }
+    $("#polemarch-model-items-select").select2({ width: '100%' });
+
+}
+
+/**
+ *Функция сохраняет изменения внесенные в секции для удаления/добавления опций на странице шаблона.
+ */
+pmModuleTemplates.setOptionList = function(item_id, option_list)
+{
+    var thisObj=this;
+
+    if(!item_id)
+    {
+        throw "Error in pmModuleTemplates.setOptionList with item_id = `" + item_id + "`"
+    }
+
+    if(!option_list)
+    {
+         var options={};
+    }
+    else
+    {
+        var options=pmModuleTemplates.model.items[item_id].options;
+        for(var i in options)
+        {
+            var bool=false;
+            for(var j in option_list)
+            {
+                if(i==option_list[j])
+                {
+                    bool=true;
+                }
+            }
+            if(bool==false)
+            {
+                delete options[i];
+            }
+        }
+    }
+    return spajs.ajax.Call({
+        url: "/api/v1/templates/"+item_id+"/",
+        type: "PATCH",
+        contentType:'application/json',
+        data:JSON.stringify({options:options}),
+        success: function(data)
+        {
+           spajs.openURL(window.location.href);
+        },
+        error:function(e)
+        {
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+
 
 pmModuleTemplates.showItem = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var item_id = data.reg[1];
     var def = new $.Deferred();
     var thisObj = this;
@@ -530,6 +649,7 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
 
 pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var def = new $.Deferred();
     var thisObj = this;
     $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems()).done(function()

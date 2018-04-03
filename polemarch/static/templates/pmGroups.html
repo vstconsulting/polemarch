@@ -39,13 +39,13 @@
                                     type="button"
                                     onclick="spajs.showLoader(pmGroups.showAddSubGroupsForm(<%- item_id %>)); return false;"
                                     class="btn btn-primary"
-                                    >Edit existings groups</button>
+                                    >Edit existing groups</button>
                                     <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-group'}); return false;" class="btn btn-primary" >Create new group</button>
                         <% }else{ %>
                             <button type="button"
                                     onclick="spajs.showLoader(pmGroups.showAddSubHostsForm(<%- item_id %>)); return false;"
                                     class="btn btn-primary"
-                                    >Edit existings hosts</button>
+                                    >Edit existing hosts</button>
                                     <button type="button" onclick="spajs.open({ menuId:'group/<%- item_id %>/new-host'}); return false;" class="btn btn-primary" >Create new host</button>
                         <% } %>
                     </div>
