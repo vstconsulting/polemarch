@@ -44,10 +44,9 @@ class ScheduledTask(BaseTask):
     def run(self):
         from ..models import PeriodicTask
         try:
-            task = PeriodicTask.objects.get(id=self.job_id)
+            PeriodicTask.objects.get(id=self.job_id).execute()
         except PeriodicTask.DoesNotExist:
             return
-        task.execute()
 
 
 class _ExecuteAnsible(BaseTask):
