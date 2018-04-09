@@ -135,7 +135,7 @@ setup(
     include_package_data=True,
     scripts=['polemarchctl'],
     install_requires=[
-        "django>=1.11,<2.0",
+        "django>=1.11,<=2.0",
     ] + REQUIRES,
     dependency_links=[
     ] + REQUIRES_git,

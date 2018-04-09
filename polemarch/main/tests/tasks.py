@@ -18,6 +18,7 @@ except ImportError:
 from ..models import Project
 from ..models import Task, PeriodicTask, History, Inventory, Template
 from ..tasks.tasks import ScheduledTask
+from ..tasks.exceptions import TaskError
 
 from .inventory import _ApiGHBaseTestCase
 from ._base import AnsibleArgsValidationTest
@@ -358,7 +359,11 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         inv, _ = self.create_inventory()
         result = self.post_result(
             "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
-            data=json.dumps(dict(inventory=inv, playbook="first.yml")))
+            data=json.dumps({
+                "inventory":inv,
+                "playbook": "first.yml",
+                "vault-password-file": "vault-password-file1234",
+            }))
         history = self.get_result("get",
                                   "/api/v1/history/{}/".format(
                                       result["history_id"]
@@ -412,6 +417,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             return '200 OK: {"result": "ok"}'
 
         execute_method.side_effect = side_effect
+
         self.post_result(
             "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
             data=json.dumps(dict(inventory=inv, playbook=playbook, sync=1))
@@ -435,6 +441,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             h.save()
         hosts.delete()
         self.assertEquals(execute_method.call_count, 9)
+        hook_data['when'] = 'after_execution'
+        self.post_result("/api/v1/hooks/", data=json.dumps(hook_data))
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory=inv, playbook=playbook, sync=1))
+        )
+        self.assertTrue(self.sended, "Fail")
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute_inventory_file(self, subprocess_function):
@@ -456,6 +469,11 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
             data=json.dumps(dict(inventory="./12", module="ping", group="all"))
         )
+        #test parse extra args
+        # self.post_result(
+        #     "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
+        #     data=json.dumps(dict(inventory="./12", module="ping", group="all"))
+        # )
         self.post_result(
             "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
             data=json.dumps(dict(inventory="inventory", playbook="first.yml"))
@@ -656,6 +674,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                     inventory="inventory", name="one",
                     vars={"args": "ls -la", "group": "all"})
         id = self.get_result("post", url, 201, data=json.dumps(data))['id']
+        ScheduledTask.delay(-1)
         ScheduledTask.delay(id)
         self.assertEquals(subprocess_function.call_count, 1)
         call_args = subprocess_function.call_args[0][0]
@@ -859,6 +878,8 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         )
 
     def test_string_template_data(self):
+        with open(self.pr_tmplt.path + "/inv1", 'w') as inv1:
+            inv1.write("")
         tmplt_data = dict(
             name="test_tmplt",
             kind="Task",
@@ -872,7 +893,7 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         job_template.data = json.dumps(dict(
                 playbook="test.yml",
                 project=self.pr_tmplt.id,
-                inventory=self.history_inventory.id,
+                inventory="./inv1",
                 vars=dict(
                     connection="paramiko",
                     tags="update",

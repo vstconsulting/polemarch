@@ -5,7 +5,7 @@ from ._base import _Base, os
 from ..utils import tmp_file_context, raise_context
 
 
-class _VCS(_Base):
+class _VCS(_Base): #nocv
     def vsc_clone(self, *args, **kwargs):
         raise NotImplementedError()
 
@@ -110,7 +110,7 @@ class Git(_VCS):
             if self.proj.vars.get("repo_password", None) is not None:
                 env_vars = self._with_password(tmp, env_vars)
             elif self.proj.vars.get("repo_key", None) is not None:
-                env_vars = self._with_password(tmp, env_vars)
+                env_vars = self._with_key(tmp, env_vars)
             return super(Git, self)._operate(operation, **env_vars)
 
     def _get_files(self, repo=None):

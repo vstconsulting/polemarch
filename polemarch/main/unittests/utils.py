@@ -2,7 +2,7 @@ from subprocess import CalledProcessError
 
 from django.test import TestCase
 
-from ..utils import KVExchanger
+from ..utils import KVExchanger, model_lock_decorator, Lock, CmdExecutor
 
 try:
     from mock import MagicMock
@@ -33,3 +33,34 @@ class ExecutorTestCase(TestCase):
         executor = Executor(history)
         with self.assertRaises(CalledProcessError):
             executor.execute(['sleep', '5m'], '/')
+
+class KVExchangerTestCase(TestCase):
+    def test_kvexchanger(self):
+        KVExchanger("somekey").send(True, 10)
+        self.assertTrue(KVExchanger("somekey").get())
+
+
+class LocksTestCase(TestCase):
+    def test_locks(self):
+        @model_lock_decorator()
+        def method(pk):
+            # pylint: disable=unused-argument
+            pass
+
+        @model_lock_decorator()
+        def method2(pk):
+            method(pk=pk)
+
+        method(pk=123)
+        with self.assertRaises(Lock.AcquireLockException):
+            method2(pk=123)
+
+
+class CMDExecutorTestCase(TestCase):
+
+    test_cmd_executor = CmdExecutor()
+
+    def test_write_output(self):
+        self.assertEqual(True, True)
+       # self.test_cmd_executor.write_output(5)
+        #self.assertEqual(self.test_cmd_executor.output, 5)

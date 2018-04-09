@@ -14,8 +14,9 @@ class ACLPermissionQuerySet(BQuerySet):
 
 class ACLPermissionAbstract(BModel):
     objects = ACLPermissionQuerySet.as_manager()
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
-    uagroup = models.ForeignKey('main.UserGroup', blank=True, null=True)
+    # on_delete = None, fix for django 2.0, dont break on django 1.11
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=None,blank=True, null=True)
+    uagroup = models.ForeignKey('main.UserGroup', on_delete=None,blank=True, null=True)
 
     class Meta:
         abstract = True
@@ -33,7 +34,9 @@ class ACLHistoryQuerySet(ACLQuerySet):
 
 
 class ACLPermissionSubclass(models.Model):
+    # on_delete = None, fix for django 2.0, dont break on django 1.11
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
+                              on_delete=None,
                               default=first_staff_user,
                               related_name="polemarch_%(class)s_set")
     acl = models.ManyToManyField("main.ACLPermission",

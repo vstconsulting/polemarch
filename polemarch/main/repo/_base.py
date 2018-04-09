@@ -101,6 +101,7 @@ class _Base(object):
     def get(self):
         # pylint: disable=broad-except
         attempt = 2
+        print("something")
         for __ in range(attempt):
             try:
                 return self._make_operations(self.make_update)
