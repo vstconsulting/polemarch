@@ -6,7 +6,7 @@ from django.utils.timezone import now
 
 try:
     from mock import patch
-except ImportError:
+except ImportError: #nocv
     from unittest.mock import patch
 
 from ..utils import redirect_stdany

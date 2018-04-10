@@ -50,11 +50,8 @@ class _ApiGHBaseTestCase(BaseTestCase):
         return self.mass_create("/api/v1/inventories/", inventories,
                                 "name", "vars")
 
-    def _create_tasks(self, tasks):
-        return self.mass_create("/api/v1/tasks/", tasks,
-                                "inventory", "playbook")
-
-    def _create_periodic_tasks(self, tasks):
+    # No call of this function
+    def _create_periodic_tasks(self, tasks): #nocv
         return self.mass_create("/api/v1/periodic-tasks/", tasks,
                                 "task", "schedule", "type")
 
@@ -113,18 +110,6 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
 
         data = dict(name="127.0.1.1", type="host", vars=self.vars)
         self.get_result("post", url, 415, data=json.dumps(data))
-
-    def hosts_validation(self):
-        url = "/api/v1/hosts/"
-        data = [dict(name="???", type="HOST", vars={}),
-                dict(name="hostlocl", type="HOST",
-                     vars={"ansible_host": "???"})]
-        for h in data:
-            result = self.get_result("post", url, 400, data=json.dumps(h))
-            self.assertIn("Invalid hostname or IP", str(result))
-        data = dict(name="???", type="RANGE", vars={})
-        result = self.get_result("post", url, 400, data=json.dumps(data))
-        self.assertIn("Name must be Alphanumeric", str(result))
 
     def test_filter_host(self):
         base_url = "/api/v1/hosts/"

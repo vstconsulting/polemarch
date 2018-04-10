@@ -2,11 +2,11 @@ from subprocess import CalledProcessError
 
 from django.test import TestCase
 
-from ..utils import KVExchanger, model_lock_decorator, Lock, CmdExecutor
+from ..utils import KVExchanger, model_lock_decorator, Lock, CmdExecutor, tmp_file, ModelHandlers, Paginator, BasePaginator
 
 try:
     from mock import MagicMock
-except ImportError:
+except ImportError: #nocv
     from unittest.mock import MagicMock
 
 from ..models.utils import Executor
@@ -37,6 +37,7 @@ class ExecutorTestCase(TestCase):
 class KVExchangerTestCase(TestCase):
     def test_kvexchanger(self):
         KVExchanger("somekey").send(True, 10)
+        KVExchanger("somekey").prolong()
         self.assertTrue(KVExchanger("somekey").get())
 
 
@@ -52,6 +53,7 @@ class LocksTestCase(TestCase):
             method(pk=pk)
 
         method(pk=123)
+        method(pk=None)
         with self.assertRaises(Lock.AcquireLockException):
             method2(pk=123)
 
@@ -61,6 +63,21 @@ class CMDExecutorTestCase(TestCase):
     test_cmd_executor = CmdExecutor()
 
     def test_write_output(self):
-        self.assertEqual(True, True)
-       # self.test_cmd_executor.write_output(5)
-        #self.assertEqual(self.test_cmd_executor.output, 5)
+        self.test_cmd_executor.write_output(5)
+        self.assertEqual(self.test_cmd_executor.output, '5')
+
+class tmp_fileTestCase(TestCase):
+
+    def test_magic_enter_exit(self):
+        tmp = tmp_file(mode="r")
+        with tmp as test_tmp_file:
+            self.assertEqual(test_tmp_file, tmp)
+        tmp = tmp_file(mode="r")
+        self.assertEqual(tmp.__exit__(ValueError, 22, "Traceback"), False)
+
+class ModelHandlerTestCase(TestCase):
+
+    def test_iter(self):
+        test_model_handler = ModelHandlers("HOOKS", "'type' needed!")
+        for i in test_model_handler:
+            pass

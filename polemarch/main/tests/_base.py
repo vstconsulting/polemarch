@@ -80,7 +80,7 @@ class BaseTestCase(TestCase):
                 if (response.status_code != 404 and
                     getattr(response, "rendered_content", False)) \
                 else str(response.content.decode('utf-8'))
-        except ValueError:
+        except ValueError: #nocv
             return None
 
     def assertCount(self, list, count):

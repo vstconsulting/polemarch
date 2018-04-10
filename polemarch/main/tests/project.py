@@ -17,6 +17,12 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
                                            vars=dict(repo_type="TEST",
                                                      some_arg="search_arg"))
 
+    def test_pagenated(self):
+        for project in Project.objects.all().paged(chunk_size=1):
+            project.id
+
+
+
     def test_create_delete_project(self):
         url = "/api/v1/projects/"
         self.list_test(url, Project.objects.all().count())

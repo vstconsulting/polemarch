@@ -12,7 +12,7 @@ from django.core.validators import ValidationError
 
 try:
     from mock import patch
-except ImportError:
+except ImportError: #nocv
     from unittest.mock import patch
 
 from ..models import Project
@@ -501,11 +501,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
             data=json.dumps(dict(inventory="./12", module="ping", group="all"))
         )
-        #test parse extra args
-        # self.post_result(
-        #     "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
-        #     data=json.dumps(dict(inventory="./12", module="ping", group="all"))
-        # )
+
         self.post_result(
             "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
             data=json.dumps(dict(inventory="inventory", playbook="first.yml"))
@@ -764,6 +760,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
+
         super(ApiTemplateTestCase, self).setUp()
 
         self.pr_tmplt = Project.objects.create(**dict(

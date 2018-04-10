@@ -93,7 +93,7 @@ class CmdExecutor(object):
     newlines = ['\n', '\r\n', '\r']
 
     def __init__(self):
-        self.output = None
+        self.output = ''
 
     def write_output(self, line):
         '''
@@ -102,7 +102,7 @@ class CmdExecutor(object):
         :return: None
         :rtype: None
         '''
-        self.output += line
+        self.output += str(line)
 
     def _enqueue_output(self, out, queue):
         line = out.readline()
@@ -239,7 +239,7 @@ class KVExchanger(object):
 
     try:
         cache = caches["locks"]
-    except InvalidCacheBackendError:
+    except InvalidCacheBackendError: #nocv
         cache = caches["default"]
 
     def __init__(self, key, timeout=None):

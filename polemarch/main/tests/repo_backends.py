@@ -8,7 +8,7 @@ import git
 
 try:
     from mock import patch
-except ImportError:
+except ImportError: #nocv
     from unittest.mock import patch
 from django.test import override_settings
 from .inventory import _ApiGHBaseTestCase
@@ -140,11 +140,13 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         self.assertEquals(tasks["results"][0]["name"], "main")
         self.get_result("post", single_url + "sync/", 200)
 
-        #with
 
         download.side_effect = [self.tests_path + '/test_reposit.tar'] * 10
         self.get_result("post", single_url + "sync/", 200)
 
+        with patch('polemarch.main.repo._base._Base._make_operations') as tmp_mock:
+            tmp_mock.side_effect = ValueError
+            self.get_result("post", single_url + "sync/", 200)
 
         # TODO:
         # pull not cloned repo

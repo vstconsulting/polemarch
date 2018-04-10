@@ -12,14 +12,18 @@ from django.core.validators import ValidationError
 
 try:
     from mock import patch
-except ImportError:
+except ImportError: #nocv
     from unittest.mock import patch
 from django.test import TestCase
 from ..tasks.exceptions import TaskError
 from ..tasks import RepoTask
 from ..exceptions import PMException
-from ..models import Project
-from ..models import Task, PeriodicTask, History, Inventory, Template
+from ..models import History
+from ..tests.tasks import ApiTemplateTestCase
+from ..tests.inventory import _ApiGHBaseTestCase
+from ..tests._base import AnsibleArgsValidationTest
+from ..models.projects import Project
+from ..models.tasks import Template
 
 class TasksTestCase(TestCase):
     testHistory = History()
@@ -32,20 +36,38 @@ class TasksTestCase(TestCase):
         with self.assertRaises(ValidationError):
             self.testHistory.execute_args = "something"
 
-    # def test_editable_by(self):
-    #     self.testHistory.inventory = dict(inventory='somestr')
-    #     print(self.testHistory.editable_by("root"))
-    #     self.assertEqual(self.testHistory.editable_by("root"), True)
-    #
-    # def test_inventory_editable_by(self):
-    #     self.testHistory.inventory = dict(inventory='somestr')
-    #     print(self.testHistory.editable_by("root"))
-    #     self.assertEqual(self.testHistory._inventory_editable("root"), True)
-    #
-    # def test_inventory_editable_by(self):
-    #     self.testHistory.inventory = dict(inventory='somestr')
-    #     print(self.testHistory.editable_by("root"))
-    #     self.assertEqual(self.testHistory._inventory_viewable("root"), True)
+class ApiTemplateUnitTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
+    def setUp(self):
+        super(ApiTemplateUnitTestCase, self).setUp()
+
+        self.pr_tmplt = Project.objects.create(**dict(
+            name="TmpltProject",
+            repository="git@ex.us:dir/rep3.git",
+            vars=dict(repo_type="TEST")
+        )
+                                               )
+        self.tmplt_data = dict(
+            name="test_tmplt",
+            kind="Task",
+            data=dict(
+                playbook="test.yml",
+                somekey="somevalue",
+                project=1,
+                inventory=2,
+                vars=dict(
+                    connection="paramiko",
+                    tags="update",
+                )
+            )
+        )
+
+        with self.assertRaises(ValidationError):
+            Template.objects.create(**self.tmplt_data)
+
+    def test_setup(self):
+        self.setUp()
+        self.assertRaises(ValidationError)
+
 
 class TestTaskError(TestCase):
 

@@ -13,10 +13,10 @@ class BQuerySet(models.QuerySet):
             else self
         )
 
-    def paged(self, *args, **kwargs):  # nocv
+    def paged(self, *args, **kwargs):
         return self.get_paginator(*args, **kwargs).items()
 
-    def get_paginator(self, *args, **kwargs):  # nocv
+    def get_paginator(self, *args, **kwargs):
         return Paginator(self, *args, **kwargs)
 
     def _find(self, field_name, tp_name, *args, **kwargs):  # nocv
