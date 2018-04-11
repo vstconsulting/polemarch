@@ -8,12 +8,12 @@ In this section of our documentation we will tell you about Polemarch GUI's oppo
 
 Let's begin with Dashboard page:
 
-.. image:: gui_png/new-dashboard-1.png
+.. image:: gui_png/dashboard.png
 
 As you can see, Polemarch GUI provides user with 2 menus:
 
 * the first one is located in the left sidebar and it is aimed
-  to provide user with navigation between main system objects, like projects, templates, history records and ect.
+  to provide user with navigation between main system objects, like projects, inventories, history records and ect.
 
 * the second one is located in the top right conner of browser window and it is aimed
   to navigate user to API section, to user's page and to logout page.
@@ -27,41 +27,125 @@ user is able to change widgets' position by Drag and Drop.
 To collapse or to hide/show some widgets user should click on 'cogwheel' button. After this button has been clicked,
 Polemarch opens modal window, where user can activate or collapse some widgets.
 
-To see all these features in work look at next gif-image:
-
-.. image:: gui_gif1/new-dashboard-1.gif
-
-
 
 Before you start
 ----------------
 
 Before you can do any job with Polemarch you should create at least one
-inventory with your servers enumeration and at least one project, because all
+inventory with your servers enumeration(groups and hosts) and at least one project, because all
 Polemarch's functions are linked to the project.
 
-Let's start with creation of inventory:
+Inventories
+-----------
 
-.. image:: gui_png/new-inventories_page.png
+.. image:: gui_png/inventories.png
 
 There are 2 ways of inventory's creation:
 
-* the first one is to create inventory manually. To do it user should click on 'Create' button.
+* the first one is to create inventory manually. To do it user should click on "Create" button.
 
-* the second on is to import inventory from text file. To do it user should click on 'Import from file' button.
+* the second one is to import inventory from text file. To do it user should click on "Import from file" button.
 
 By inventory's creation, in this case, we understand creation of inventory, which includes at least one group,
 which, in it's turn, includes at least one host. In other words, beside inventory user should create host and group.
 
-To understand it better let's look at next gif-images:
+To understand it better let's look at next images, which will explain you how to create inventory manually.
+Here you can see the form for manual creation of inventory.
 
-Here you can see how user can create inventory and place his hosts and groups there manually:
+.. image:: gui_png/create-new-inventory.png
 
-.. image:: gui_gif1/new-create_inventory_manually.gif
+As you can see, this form is rather simple. There are only 2 sections with several fields to input.
 
-And here you can see how user can import Ansible inventory file:
+Section "New inventory":
 
-.. image:: gui_gif1/new-import_inventory.gif
+* **name** - name of your inventory.
+
+Section "Adding new variable":
+
+* **name** - name of ansible variable. This field has autocomplete, so you can just start typing
+  the variable name and Polemarch will suggest you appropriate name values.
+
+* **value** - value of ansible variable.
+
+After inventory creation you will see the next page:
+
+.. image:: gui_png/test-inventory.png
+
+As you can see, new "Sub items" section has appeared. This section has 4 buttons:
+
+* **edit existing groups** - this button gives you an opportunity to add to inventory groups, that are already created,
+  or to delete some groups from this inventory.
+
+* **create new group** - this button gives you an opportunity to create new group and add it to this inventory.
+
+* **edit existing hosts** - this button gives you an opportunity to add to inventory hosts, that are already created,
+  or to delete some hosts from this inventory.
+
+* **create new host** - this button gives you an opportunity to create new host and add it to this inventory.
+
+Let's look how you can create a group.
+
+Groups
+------
+
+.. image:: gui_png/create-new-group.png
+
+Section "New group":
+
+* **name** - name of your group.
+
+* **children** - if this field is true, group can consist of other croups only.
+  Otherwise, this group can consist of hosts only.
+
+Section "Adding new variable":
+
+* **name** - name of ansible variable. This field has autocomplete, so you can just start typing
+  the variable name and Polemarch will suggest you appropriate name values.
+
+* **value** - value of ansible variable.
+
+After group creation you will see the next page:
+
+.. image:: gui_png/test-group.png
+
+As you can see, new "Variables" and "Sub item" sections have appeared.
+
+"Sub item" section has 2 buttons:
+
+* **edit existing hosts** - this button gives you an opportunity to add to inventory hosts, that are already created,
+  or to delete some hosts from this inventory.
+
+* **create new host** - this button gives you an opportunity to create new host and add it to this inventory.
+
+"Variables" section has a list of variables that user have chosen during group creation.
+
+Let's look how you can create a host.
+
+Hosts
+-----
+
+.. image:: gui_png/create-new-host.png
+
+Section "New host":
+
+* **name** - name of your host.
+  Name can be either human-readable(example.com) or hostname/IP (192.168.0.12) or range of them(19[2:7].168.0.12).
+
+Section "Adding new variable":
+
+* **name** - name of ansible variable. This field has autocomplete, so you can just start typing
+  the variable name and Polemarch will suggest you appropriate name values.
+
+* **value** - value of ansible variable.
+
+After host creation you will see the next page:
+
+.. image:: gui_png/test-host.png
+
+As you can see, new "Variables" section has appeared and it has a list of variables that user have chosen during host creation.
+
+Projects
+--------
 
 Futher to start your work with Polemarch you should create project.
 
@@ -80,34 +164,135 @@ There are 3 project types in Polemarch:
 
 Let's look at the example of GIT project's creation:
 
-.. image:: gui_gif1/new-create_git_project.gif
+.. image:: gui_png/create-new-git-project.png
 
-As you can see at the gif-image above for GIT project
-it is possible to choose a branch to what user want to sync. In this example user has synced
-his GIT project from 'master' branch to 'other' branch. 'Arrow' icon in the branch input field
+As you can see, the form of new GIT project creation consist of 5 fields:
+
+* **name** - name of your project.
+
+* **repository type**  - type of project repository (GIT, TAR, MANUAL).
+
+* **repository URL** - URL to your repository.
+
+* **repository password** - repository password if it exist.
+
+* **branch** - branch of your GIT project, to what your Polemarch project will be synced.
+  If you stay it empty, Polemarch will sync to "master" branch.
+
+After project creation you will the next page:
+
+.. image:: gui_png/test-project.png
+
+As you can see at image above for GIT project
+it is possible to choose a branch to what user want to sync. In this example user will sync
+his GIT project from 'master' branch to 'other' branch during next synchronization. 'Arrow' icon in the branch input field
 shows us, that project will be sync from one branch to another. If there is no 'arrow' icon, it means,
 that next time project will be sync to the same branch as you can see it in 'Branch' input field.
+
+Also there are 2 new fields:
+
+* **revision** - GIT project revision.
+
+* **status** - Polemarch project status.
+  Possible values are: NEW - newly created project,
+  WAIT_SYNC - repository synchronization has been scheduled, but has not started to perform yet,
+  SYNC - synchronization is in progress,
+  ERROR - synchronization failed,
+  OK - project is synchronized.
+
+Also there are several buttons on this page:
+
+* **save** - this button saves all changes you have made on this page.
+
+* **sync** - this button syncs your Polemarch project with GIT repository.
+
+* **run playbook** - this button opens a "Run plabook" page.
+
+* **run module** - this button opens a "Run module" page.
+
+* **periodic tasks** - this button opens a page with list of periodic tasks of this project.
+
+* **history** - this button opens a page with list of history records of this project.
+
+* **import templates** - this button imports a text file with task/module template for this project from your computer.
+
+* **remove** - this button deletes this project.
 
 If you update something in your GIT repository, don't forget to run sync in
 Polemarch for pulling your changes.
 
 After your project's status has changed into "OK" you can confidently start working with Polemarch.
 
-Execution of playbook and modules
----------------------------------
+Execution of modules
+--------------------
 
 Ok, we made all preparations and ready to do some real work. Let's start by
 executing some command on your servers:
 
-.. image:: gui_gif1/new-run_shell_command.gif
+.. image:: gui_png/execute-ansible-module.png
 
-As you can see at the gif-image above
-when task has stopped running it become possible to clear ansible stdout.
+Here you can see 2 sections: "Execute ansible module" and "Adding new argument".
 
-Also you can run any Ansible modules and any of playbooks in your project.
+"Execute ansible module" consist of next fields:
+
+* **inventory source** - source of inventory. It can be either "From database" or "From file in project dir".
+
+* **inventory from project / inventory file** - name of inventory.
+
+* **group** - name of group to which this module will be executed.
+
+* **module** - name of ansible module. This field has autocomplete, so you can just start typing
+  the ansible module name and Polemarch will suggest you appropriate name values.
+
+* **args** - arguments for ansible module.
+
+Section "Adding new argument":
+
+* **name** - name of ansible variable.
+
+* **value** - value of ansible variable.
+
+After you completed all necessary fields you should click on "Execute" button to run this ansible module.
+After this you will see the next page:
+
+.. image:: gui_png/module-shell-1.png
+.. image:: gui_png/module-shell-2.png
+
+As you can see there are 3 sections on this page: "Inventory", "stdout", "Task".
+
+"Inventory" section includes  ansible inventory in text format.
+
+"stdout" section includes  what ansible has written to stdout and stderr during execution.
+With "Clear" button you can delete this output.
+
+"Task" sections consist of next fields:
+
+* **status** - status of task. It indicates different results of execution and can be
+  DELAY (scheduled for run), OK (successful run), INTERRUPTED (interrupted by user), RUN (currently running),
+  OFFLINE (can’t connect to node), ERROR (failure).
+
+* **module** - name of executed module.
+
+* **start time** - time, when task execution was started.
+
+* **stop time** - time, when task execution was finished.
+
+* **initiator** - name of object, who executed this task.
+
+* **revision** - project revision.
+
+* **inventory** - name of inventory.
+
+* **args** - list of args, which were used during task execution.
+
+
+Execution of playbooks
+----------------------
+
+Also you can run any of playbooks in your project.
 
 Polemarch will scan project dir root for any .yml file and provide possibility
-to run them. So place available playbook targets at root of your Git repository
+to run them. So place available playbook targets at root of your GIT repository
 or tar-archive or folder with your project files.
 
 Be aware that your project must have "OK" status, because your
@@ -118,28 +303,162 @@ in playbook execution page.
 Let's look at the example of running some playbook, which Polemarch imported from GIT repository
 of our project:
 
-.. image:: gui_gif1/new-running_playbook.gif
+.. image:: gui_png/execute-playbook.png
 
+Here you can see 2 sections: "Run playbook" and "Adding new argument".
+
+"Run playbook" consist of next fields:
+
+* **playbook** - name of playbook. This field has autocomplete with playbook names from your GIT/TAR/MANUAL project.
+
+* **inventory source** - source of inventory. It can be either "From database" or "From file in project dir".
+
+* **inventory from project / inventory file** - name of inventory.
+
+* **group** - name of group to which this module will be executed.
+
+Section "Adding new argument":
+
+* **name** - name of ansible variable.
+
+* **value** - value of ansible variable.
+
+After you completed all necessary fields you should click on "Execute" button to run this playbook.
+After this you will see the next page:
+
+.. image:: gui_png/playbook-executed-1.png
+.. image:: gui_png/playbook-executed-2.png
+
+As you can see there are 3 sections on this page: "Inventory", "stdout", "Task".
+
+"Inventory" section includes  ansible inventory in text format.
+
+"stdout" section includes  what ansible has written to stdout and stderr during execution.
+With "Clear" button you can delete this output.
+
+"Task" sections consist of next fields:
+
+* **status** - status of task. It indicates different results of execution and can be
+  DELAY (scheduled for run), OK (successful run), INTERRUPTED (interrupted by user), RUN (currently running),
+  OFFLINE (can’t connect to node), ERROR (failure).
+
+* **playbook** - name of executed playbook.
+
+* **start time** - time, when task execution was started.
+
+* **stop time** - time, when task execution was finished.
+
+* **initiator** - name of object, who executed this task.
+
+* **revision** - project revision.
+
+* **inventory** - name of inventory.
+
+* **args** - list of args, which were used during task execution.
 
 Templates
 ---------
 
 If you have many arguments, which you pass to Ansible at every task run (like
 extra-vars, forks number and so on), you can create template for such action
-to minimize hand work (either module run or playbook):
+to minimize hand work. Polemarch provides user with 2 kinds of templates:
+task template(template for playbook execution) and module template(template for module execution).
+Both of this template kinds are similar, that's why we will look at the example of module template creation only.
 
-.. image:: gui_gif1/new-create_template.gif
+.. image:: gui_png/create-module-template.png
+
+This page has 2 sections: "Run module template" and "Adding new argument".
+
+"Run module template" section consist of next fields:
+
+* **template name** - name of template.
+
+* **project** - name of project, for which this template will be available.
+
+* **inventory source** - source of inventory. It can be either "From database" or "From file in project dir".
+
+* **inventory from project / inventory file** - name of inventory.
+
+* **group** - name of group to which this module will be executed.
+
+* **module** - name of ansible module. This field has autocomplete, so you can just start typing
+  the ansible module name and Polemarch will suggest you appropriate name values.
+
+* **args** - arguments for ansible module.
+
+Section "Adding new argument":
+
+* **name** - name of ansible variable.
+
+* **value** - value of ansible variable.
+
+After you completed all necessary fields you should click on "Create" button to save this template.
+After this you will see the next page:
+
+.. image:: gui_png/module-template-page.png
+
+As you can see, this page has the same sections as the previous page.
+
+But also there are some new buttons here:
+
+* **save** - this button saves all changes you have made on this page.
+
+* **save and execute** - this button saves all changes you have made on this page and executes this template.
+
+* **create new option** - this button opens the "Create new option" page.
+
+* **copy** - this button creates a copy of this template.
+
+* **remove** - this button deletes this template.
+
+Options
+-------
 
 Sometimes your need to keep some similar templates, which are different by only several parameters.
 In this case template options will be extremly useful for you. In every template you can create
 a lot of options which can modify this template by some parameters. Let's look at the example:
 
-.. image:: gui_gif1/new-create_template_option.gif
+.. image:: gui_png/create-new-option.png
 
+As you can see there are 2 section on this page: "New option" and "Adding new argument".
 
-Also you can backup/share your templates using import/export mechanism:
+"New option" section consist of next fields:
 
-.. image:: gui_gif1/new-export-import-template.gif
+* **name** - name of option.
+
+* **group** - name of group to which this template will be executed, if this option be selected for execution.
+
+* **module** - name of ansible module  which will be executed, if this option be selected for execution.
+  This field has autocomplete, so you can just start typing
+  the ansible module name and Polemarch will suggest you appropriate name values.
+
+* **args** - ansible module arguments, which will be used, if this option be selected for execution.
+
+Section "Adding new argument":
+
+* **name** - name of ansible variable.
+
+* **value** - value of ansible variable.
+
+After you completed all necessary fields you should click on "Create" button to save this template option.
+After this you will see the next page:
+
+.. image:: gui_png/option-page.png
+
+There is new section "Additional arguments", that includes list of arguments, which will be added
+to template during execution.
+
+Buttons on this page:
+
+* **save** - this button saves all changes you have made on this page.
+
+* **save and execute** - this button saves all changes you have made on this page and executes template with this option.
+
+* **remove** - this button deletes this template option.
+
+Also you can backup/share your templates using export mechanism:
+
+.. image:: gui_png/export-template.png
 
 Periodic tasks
 --------------
@@ -148,16 +467,74 @@ If you want to run some actions by schedule without any control from
 you, it is possible with Polemarch. You can create periodic tasks, which runs
 every X seconds (interval based):
 
-.. image:: gui_gif1/new-create-periodic-task-interval.gif
+.. image:: gui_png/create-periodic.png
+
+As you can see there are 2 sections on this page: "New task" and "Adding new argument".
+
+"New task" section consist of next fields:
+
+* **name** - name of periodic task.
+
+* **save in history** - if value is true, the fact of task execution will be saved in history records.
+  Otherwise, no history records about this periodic task execution will be saved.
+
+* **inventory source** - source of inventory. It can be either "From database" or "From file in project dir".
+
+* **inventory from project / inventory file** - name of inventory.
+
+* **group** - name of group to which this periodic task will be executed.
+
+* **kind** - kind of task: module or playbook.
+
+* **playbook** - name of playbook. This field is available for kind=playbook only.
+
+* **module** - name of ansible module. This field has autocomplete, so you can just start typing
+  the ansible module name and Polemarch will suggest you appropriate name values.
+  This field is available for kind=module only.
+
+* **args** - arguments for ansible module. This field is available for kind=module only.
+
+* **type** - type of schedule. It can be either "Interval schedule" or "Cron style schedule".
+
+* **interval schedule / cron style schedule** - value for schedule.
+
+Section "Adding new argument":
+
+* **name** - name of ansible variable.
+
+* **value** - value of ansible variable.
+
+After you completed all necessary fields you should click on "Save task" button to save this periodic task.
+After this you will see the next page:
+
+.. image:: gui_png/test-periodic.png
+
+This page has the same sections as the previous one, but there is a new field:
+
+* **enabled** - if the value is true, this periodic task will be available and will be working.
+
+Buttons on this page:
+
+* **save** - this button saves all changes you have made on this page.
+
+* **execute** - this button executes this periodic task.
+
+* **copy** - this button creates a copy of this periodic task.
+
+* **remove** - this button deletes this periodic task.
 
 Also you can create periodic tasks with more advancing scheduling options
 (days of week, hours, month and so on) by using cron-style periodic tasks:
 
-.. image:: gui_gif1/new-create-periodic-schedule.gif
+.. image:: gui_png/cron-schedule.png
+
+As you can see this task will be executed at 9 o'clock each day of each month.
 
 Search
 ------
 Almost everywhere in Polemarch you can filter your data. Let see for example
 how to filter your execution history records to find result of needed action:
 
-.. image:: gui_gif1/new-search2.gif
+.. image:: gui_png/search0.png
+
+.. image:: gui_png/search.png

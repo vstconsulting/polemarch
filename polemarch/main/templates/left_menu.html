@@ -1,27 +1,21 @@
 <li class="header">MAIN NAVIGATION</li>
 
 <li id="menu-home"><a href="/"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> <span class="li-header-span">Home</span></a></li>
-<li class="treeview" id="menu-projects">
-    <a href="#">
+<li class="pm-treeview" id="menu-projects">
+    <a href="/?projects"  onclick="return spajs.openURL(this.href);">
         <i class="glyphicon glyphicon-blackboard"></i> <span class="li-header-span">Projects</span>
-        <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
     </a>
-    <ul class="treeview-menu">
-        <li id="menu-projects-projects"><a href="/?projects"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-list"></i> --> <span>Projects</span></a></li>
+    <ul class="pm-treeview-menu">
+        <li class="group-header-copy" id="menu-projects-projects"><a href="/?projects"  onclick="return spajs.openURL(this.href);" ><span>Projects</span></a></li>
         <li id="menu-projects-templates"><a href="/?templates"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-cog"></i> --><span>Templates</span></a></li>
     </ul>
 </li>
-<li class="treeview" id="menu-inventories">
-    <a href="#">
+<li class="pm-treeview" id="menu-inventories">
+    <a href="/?inventories"  onclick="return spajs.openURL(this.href);">
         <i class="fa fa-folder"></i> <span class="li-header-span">Inventories</span>
-        <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
     </a>
-    <ul class="treeview-menu">
-        <li id="menu-inventories-inventories"><a href="/?inventories"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-th"></i> --> <span>Inventories</span></a></li>
+    <ul class="pm-treeview-menu">
+        <li class="group-header-copy" id="menu-inventories-inventories"><a href="/?inventories"  onclick="return spajs.openURL(this.href);" ><span>Inventories</span></a></li>
         <li id="menu-inventories-groups"><a href="/?groups"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-th-large"></i> --> <span>Groups</span></a></li>
         <li id="menu-inventories-hosts"><a href="/?hosts"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-tasks"></i> --> <span>Hosts</span></a></li>
     </ul>

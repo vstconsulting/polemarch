@@ -345,6 +345,7 @@ pmItems.copyAndEdit = function (item_id)
 
 pmItems.showItem = function (holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var thisObj = this;
     //console.log(menuInfo, data)
 
@@ -365,6 +366,7 @@ pmItems.showItem = function (holder, menuInfo, data)
 
 pmItems.showNewItemPage = function (holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var def = new $.Deferred();
 
     var tpl = this.model.name + '_new_page'

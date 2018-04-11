@@ -224,6 +224,7 @@ pmPeriodicTasks.toggleSelectEachItem = function(mode, project_id)
 
 pmPeriodicTasks.showList = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var thisObj = this;
     var offset = 0
     var limit = this.pageSize;
@@ -272,6 +273,7 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
 
 pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var project_id = data.reg[1];
     var thisObj = this;
     return $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
@@ -485,6 +487,7 @@ pmPeriodicTasks.model.page_item = {
 
 pmPeriodicTasks.showItem = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var def = new $.Deferred();
     var thisObj = this;
     var item_id = data.reg[2];

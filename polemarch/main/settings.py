@@ -100,6 +100,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'polemarch.main.middleware.PolemarchHeadersMiddleware',
 ]
 # Fix for django 1.8-9
 MIDDLEWARE_CLASSES = MIDDLEWARE
@@ -215,7 +216,7 @@ REST_FRAMEWORK = {
     ),
     'EXCEPTION_HANDLER': 'polemarch.api.handlers.polemarch_exception_handler',
     'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework.filters.DjangoFilterBackend',
+        'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',

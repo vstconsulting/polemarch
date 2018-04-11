@@ -7,7 +7,7 @@ sqlalchemy
 django-docs==0.2.1
 
 # API
-djangorestframework>=3.4, <=3.6.4
+djangorestframework==3.7.7
 django-filter
 django-crispy-forms
 django-celery-beat==1.1.1
@@ -15,7 +15,7 @@ jsonfield==2.0.2
 uWSGI==2.0.17
 
 # Repo types
-gitpython==2.1.8
+gitpython==2.1.9
 
 # Hooks
 requests==2.18.4

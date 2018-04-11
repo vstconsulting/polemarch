@@ -90,6 +90,7 @@ class Project(AbstractModel):
             inventory=inventory, project=self,
             kind=kind, raw_stdout="", execute_args=extra,
             initiator=initiator, initiator_type=initiator_type,
+            hidden=self.hidden
         )
         if isinstance(inventory, (six.string_types, six.text_type)):
             history_kwargs['inventory'] = None
@@ -131,6 +132,17 @@ class Project(AbstractModel):
             msg['history'] = None
         SendHook.delay(when, msg)
 
+    def _sync_before(self, history):
+        if not self.vars.get('repo_sync_on_run', False):
+            return
+        try:
+            self.sync()
+        except Exception as exc:
+            history.raw_stdout = "ERROR on Sync operation: " + str(exc)
+            history.status = 'ERROR'
+            history.save()
+            raise
+
     def execute(self, kind, *args, **extra):
         kind = kind.upper()
         task_class = self.task_handlers.backend(kind)
@@ -140,6 +152,7 @@ class Project(AbstractModel):
         history = kwargs['history']
         if sync:
             self._send_hook('on_execution', kind, kwargs)
+            self._sync_before(history)
             task_class(**kwargs)
             self._send_hook('after_execution', kind, kwargs)
         else:
