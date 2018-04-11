@@ -458,7 +458,7 @@ pmTasksTemplates.saveOption = function(item_id)
         dataToAdd1.options[optionName]=dataToAdd;
         var thisObj = this;
         spajs.ajax.Call({
-            url: "/api/v1/" + this.model.name + "/" + item_id + "/",
+            url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/",
             type: "PATCH",
             contentType: 'application/json',
             data: JSON.stringify(dataToAdd1),
@@ -505,7 +505,7 @@ pmTasksTemplates.removeOption = function(item_id)
     dataToAdd1['options']=pmTasksTemplates.model.items[item_id].options;
     var thisObj = this;
     spajs.ajax.Call({
-        url: "/api/v1/" + this.model.name + "/" + item_id + "/",
+        url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/",
         type: "PATCH",
         contentType: 'application/json',
         data: JSON.stringify(dataToAdd1),
@@ -755,7 +755,7 @@ pmTasksTemplates.addItem = function()
 
     var thisObj = this;
     spajs.ajax.Call({
-        url: "/api/v1/templates/",
+        url: hostname + "/api/v1/templates/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(data),

@@ -288,7 +288,7 @@ pmDashboard.getUserWidgetSettingsFromAPI = function()
     if(pmDashboard.checkWidgetSettings())
     {
         return spajs.ajax.Call({
-            url: "/api/v1/users/" + userId + "/settings/",
+            url: hostname + "/api/v1/users/" + userId + "/settings/",
             type: "GET",
             contentType: 'application/json',
             success: function (data)
@@ -332,7 +332,7 @@ pmDashboard.putUserWidgetSettingsToAPI = function()
         dataToPut[objName]=pmDashboard.getNewWidgetSettings(pmDashboard.model.widgets[0][i]);
     }
     return spajs.ajax.Call({
-        url: "/api/v1/users/" + userId + "/settings/",
+        url: hostname + "/api/v1/users/" + userId + "/settings/",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(dataToPut),
@@ -510,7 +510,7 @@ pmDashboard.loadStats=function()
     var limit=1;
     var thisObj = this;
     return spajs.ajax.Call({
-        url: "/api/v1/stats/?last="+pmDashboard.statsDataLastQuery,
+        url: hostname + "/api/v1/stats/?last="+pmDashboard.statsDataLastQuery,
         type: "GET",
         contentType: 'application/json',
         data: "limit=" + encodeURIComponent(limit)+"&rand="+Math.random(),

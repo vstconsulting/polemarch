@@ -559,6 +559,7 @@ if(!window.spajs)
         if(!menuInfo || !menuInfo.onOpen)
         {
             console.error("URL not registered", opt.menuId, opt)
+            debugger;
             def.reject({detail:"Error URL not registered", status:404})
             throw "URL not registered " + opt.menuId;
             return def.promise();

@@ -139,7 +139,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
     }
 
     spajs.ajax.Call({
-        url: "/api/v1/projects/"+project_id+"/execute-module/",
+        url: hostname + "/api/v1/projects/"+project_id+"/execute-module/",
         type: "POST",
         data:JSON.stringify(data),
         contentType:'application/json',
