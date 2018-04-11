@@ -22,7 +22,7 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: git.vst.lan/vst/tests:tox
+  image: onegreyonewhite/tox:tox
   variables:
     TOX_ENVS: ""
   script:
@@ -44,7 +44,7 @@ stages:
 
 .pack_tamplate: &packing-test
   stage: packaging-test
-  image: git.vst.lan/vst/tests:tox
+  image: onegreyonewhite/tox:tox
   variables:
     MYSQL_ROOT_PASSWORD: 'polemarch'
     MYSQL_DATABASE: 'polemarch'
@@ -91,7 +91,7 @@ stages:
 ###########################################
 code_style:
   stage: code_standarts
-  image: git.vst.lan/vst/tests:tox
+  image: onegreyonewhite/tox:tox
   script:
    - make test ENVS=flake,pylint
   only:
@@ -122,7 +122,7 @@ default_rpm_tests:
 
 default_oracle_tests:
   <<: *packing-test
-  image: git.vst.lan/vst/tests:oracle
+  image: onegreyonewhite/tox:oracle
   script:
    - cat /etc/hosts
    - make rpm RELEASE=${CI_BUILD_ID}
@@ -134,7 +134,7 @@ default_oracle_tests:
 
 default_deb_tests:
   <<: *packing-test
-  image: git.vst.lan/vst/tests:ubuntu
+  image: onegreyonewhite/tox:ubuntu
   script:
    - cat /etc/hosts
    - make deb RELEASE=${CI_BUILD_ID}
@@ -204,7 +204,7 @@ release_deb:
   stage: release
   only:
    - tags
-  image: git.vst.lan/vst/tests:ubuntu
+  image: onegreyonewhite/tox:ubuntu
   script:
    - make deb
   allow_failure: false
