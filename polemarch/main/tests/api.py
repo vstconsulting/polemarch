@@ -6,7 +6,7 @@ from django.utils.timezone import now
 
 try:
     from mock import patch
-except ImportError: #nocv
+except ImportError:  # nocv
     from unittest.mock import patch
 
 from ..utils import redirect_stdany
@@ -21,7 +21,6 @@ from .tasks import (ApiTasksTestCase,
                     ApiHistoryTestCase)
 from .ansible import ApiAnsibleTestCase
 from .repo_backends import RepoBackendsTestCase
-from ..models import UserGroup, History
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -248,9 +247,11 @@ class ApiUsersTestCase(BaseTestCase):
         url = '/api/v1/teams/'
         range_groups = 10
         for i in range(range_groups):
-            UserGroup.objects.create(name="test_group_{}".format(i))
+            self.get_model_class('UserGroup').objects.create(
+                name="test_group_{}".format(i)
+            )
         self.list_test(url, range_groups)
-        ug = UserGroup.objects.all().last()
+        ug = self.get_model_class('UserGroup').objects.all().last()
         self.details_test(
             url + "{}/".format(ug.id),
             name=ug.name, id=ug.id
@@ -338,11 +339,13 @@ class APITestCase(ApiUsersTestCase,
         start_time = now() - timedelta(days=days_ago, hours=1)
         stop_time = now() - timedelta(days=days_ago)
         for i in range(count):
-            History.objects.create(start_time=start_time, stop_time=stop_time,
-                                   status=status, **default_kwargs)
+            self.get_model_class('History').objects.create(start_time=start_time,
+                                                           stop_time=stop_time,
+                                                           status=status,
+                                                           **default_kwargs)
 
     def _prepare_statisic(self):
-        History.objects.all().delete()
+        self.get_model_class('History').objects.all().delete()
         self._generate_history(1, 10, 'OK')
         self._generate_history(1, 3, 'ERROR')
         self._generate_history(1, 2, 'STOP')

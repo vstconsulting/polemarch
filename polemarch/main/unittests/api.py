@@ -1,16 +1,14 @@
-from django.test import TestCase
-
-from ..models import Host
+from ..tests._base import BaseTestCase
 from ...api.v1.serializers import ModelRelatedField
 from ...api.urls import router_v1, v1
-from ..models.users import UserGroup, UserSettings
 
-class ModelRelatedFieldTestCase(TestCase):
+
+class ModelRelatedFieldTestCase(BaseTestCase):
     def test_modelrelatedfield(self):
-        ModelRelatedField(model=Host)
+        ModelRelatedField(model=self.get_model_class('Host'))
 
 
-class RoutersTestCase(TestCase):
+class RoutersTestCase(BaseTestCase):
     def test_uregister(self):
         router_v1.unregister("history")
         for pattern in router_v1.get_urls():
@@ -23,16 +21,20 @@ class RoutersTestCase(TestCase):
                 self.assertEqual(pattern[1], v1.UserViewSet)
         self.assertTrue(checked, "Not registered!")
 
-class UserGroupTestCase(TestCase):
+
+class UserGroupTestCase(BaseTestCase):
 
     def test_unicode(self):
-        testing_use_group = UserGroup.objects.create(name="test_group_{}".format(9))
-        testing_use_group.__unicode__()
+        tmp_group = self.get_model_class('UserGroup').objects.create(
+            name="test_group_{}".format(9)
+        )
+        tmp_group.__unicode__()
 
-class UserSettingsTestCase(TestCase):
+
+class UserSettingsTestCase(BaseTestCase):
 
     def test_del_user_settings(self):
-        test_settings = UserSettings()
+        test_settings = self.get_model_class('UserSettings')()
         test_settings.data = 'something for test'
         del(test_settings.data)
         self.assertEqual(test_settings.data, {})

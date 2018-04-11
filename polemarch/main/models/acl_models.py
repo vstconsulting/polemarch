@@ -15,8 +15,10 @@ class ACLPermissionQuerySet(BQuerySet):
 class ACLPermissionAbstract(BModel):
     objects = ACLPermissionQuerySet.as_manager()
     # on_delete = None, fix for django 2.0, dont break on django 1.11
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=None,blank=True, null=True)
-    uagroup = models.ForeignKey('main.UserGroup', on_delete=None,blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=None,
+                             blank=True, null=True)
+    uagroup = models.ForeignKey('main.UserGroup', on_delete=None, blank=True,
+                                null=True)
 
     class Meta:
         abstract = True

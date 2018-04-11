@@ -1,29 +1,27 @@
-import json
-
-import re
-
-from datetime import timedelta
-
-import subprocess
-
-from django.conf import settings
-from django.utils.timezone import now
+# import json
+#
+# import re
+#
+# from datetime import timedelta
+#
+# import subprocess
+#
+# from django.conf import settings
+# from django.utils.timezone import now
 from django.core.validators import ValidationError
 
-try:
-    from mock import patch
-except ImportError: #nocv
-    from unittest.mock import patch
+# try:
+#     from mock import patch
+# except ImportError:  # nocv
+#     from unittest.mock import patch
 from django.test import TestCase
 from ..tasks.exceptions import TaskError
 from ..tasks import RepoTask
 from ..exceptions import PMException
 from ..models import History
-from ..tests.tasks import ApiTemplateTestCase
 from ..tests.inventory import _ApiGHBaseTestCase
 from ..tests._base import AnsibleArgsValidationTest
-from ..models.projects import Project
-from ..models.tasks import Template
+
 
 class TasksTestCase(TestCase):
     testHistory = History()
@@ -36,11 +34,12 @@ class TasksTestCase(TestCase):
         with self.assertRaises(ValidationError):
             self.testHistory.execute_args = "something"
 
+
 class ApiTemplateUnitTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
         super(ApiTemplateUnitTestCase, self).setUp()
 
-        self.pr_tmplt = Project.objects.create(**dict(
+        self.pr_tmplt = self.get_model_class('Project').objects.create(**dict(
             name="TmpltProject",
             repository="git@ex.us:dir/rep3.git",
             vars=dict(repo_type="TEST")
@@ -62,7 +61,7 @@ class ApiTemplateUnitTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         )
 
         with self.assertRaises(ValidationError):
-            Template.objects.create(**self.tmplt_data)
+            self.get_model_class('Template').objects.create(**self.tmplt_data)
 
     def test_setup(self):
         self.setUp()
@@ -76,6 +75,7 @@ class TestTaskError(TestCase):
         first_task_error = TaskError(msg)
         second_task_error = PMException(msg)
         self.assertEqual(first_task_error.msg, second_task_error.msg)
+
 
 class TestRepoTask(TestCase):
 

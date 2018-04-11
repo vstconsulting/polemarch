@@ -5,7 +5,7 @@ from ._base import _Base, os
 from ..utils import tmp_file_context, raise_context
 
 
-class _VCS(_Base): #nocv
+class _VCS(_Base):  # nocv
     def vsc_clone(self, *args, **kwargs):
         raise NotImplementedError()
 

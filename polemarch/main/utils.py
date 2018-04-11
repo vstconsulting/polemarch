@@ -239,7 +239,7 @@ class KVExchanger(object):
 
     try:
         cache = caches["locks"]
-    except InvalidCacheBackendError: #nocv
+    except InvalidCacheBackendError:  # nocv
         cache = caches["default"]
 
     def __init__(self, key, timeout=None):

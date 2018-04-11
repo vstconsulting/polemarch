@@ -33,10 +33,10 @@ def polemarch_exception_handler(exc, context):
     elif isinstance(exc, djexcs.ValidationError):
         if hasattr(exc, 'error_dict'):
             errors = dict(exc)
-        elif hasattr(exc, 'error_list'):                #nocv
-            errors =  {'other_errors': list(exc)}       
+        elif hasattr(exc, 'error_list'):  # nocv
+            errors =  {'other_errors': list(exc)}
         else:
-            errors = {'other_errors': str(exc)}         #nocv
+            errors = {'other_errors': str(exc)}  # nocv
         return Response({"detail": errors},
                         status=status.HTTP_400_BAD_REQUEST)
 

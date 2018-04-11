@@ -1,6 +1,5 @@
 from ...api.v1.views import HostViewSet
 from ._base import BaseTestCase, json
-from ..models import Host, Group, Inventory
 
 
 class _ApiGHBaseTestCase(BaseTestCase):
@@ -51,7 +50,7 @@ class _ApiGHBaseTestCase(BaseTestCase):
                                 "name", "vars")
 
     # No call of this function
-    def _create_periodic_tasks(self, tasks): #nocv
+    def _create_periodic_tasks(self, tasks):  # nocv
         return self.mass_create("/api/v1/periodic-tasks/", tasks,
                                 "task", "schedule", "type")
 
@@ -78,19 +77,24 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
         self.vars3 = dict(ansible_host="127.0.0.2")
         self.vars3.update(self.vars)
         self.vars3.update(self.vars2)
-        self.h1 = Host.objects.create(name="127.0.0.1",
-                                      type="HOST", vars=self.vars)
-        self.h2 = Host.objects.create(name="hostonlocal",
-                                      type="HOST", vars=self.vars3)
-        self.h3 = Host.objects.create(name="127.0.0.[3:4]",
-                                      type="RANGE", vars=self.vars)
-        self.h4 = Host.objects.create(name="127.0.0.[5:6]",
-                                      type="RANGE", vars=self.vars2)
+        self.h1 = self.get_model_class('Host').objects.create(name="127.0.0.1",
+                                                              type="HOST",
+                                                              vars=self.vars)
+        self.h2 = self.get_model_class('Host').objects.create(name="hostonlocal",
+                                                              type="HOST",
+                                                              vars=self.vars3)
+        self.h3 = self.get_model_class('Host').objects.create(name="127.0.0.[3:4]",
+                                                              type="RANGE",
+                                                              vars=self.vars)
+        self.h4 = self.get_model_class('Host').objects.create(name="127.0.0.[5:6]",
+                                                              type="RANGE",
+                                                              vars=self.vars2)
 
     def test_string_vars(self):
         vars3 = json.dumps(self.vars3)
-        host = Host.objects.create(name="127.0.0.1",
-                                   type="HOST", vars=vars3)
+        host = self.get_model_class('Host').objects.create(name="127.0.0.1",
+                                                           type="HOST",
+                                                           vars=vars3)
         self.assertEquals(host.vars['auth_user'], 'centos')
 
     def test_create_delete_host(self):
@@ -106,7 +110,8 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
 
         for host_id in results_id:
             self.get_result("delete", url + "{}/".format(host_id))
-        self.assertEqual(Host.objects.filter(id__in=results_id).count(), 0)
+        qs = self.get_model_class('Host').objects.filter(id__in=results_id)
+        self.assertEqual(qs.count(), 0)
 
         data = dict(name="127.0.1.1", type="host", vars=self.vars)
         self.get_result("post", url, 415, data=json.dumps(data))
@@ -208,7 +213,8 @@ class ApiHostsTestCase(_ApiGHBaseTestCase):
             else:
                 self.assertEqual(val, "lopuhost")
 
-        val = Host.objects.get(pk=host['id']).vars['ansible_become_pass']
+        host_objects = self.get_model_class('Host').objects
+        val = host_objects.get(pk=host['id']).vars['ansible_become_pass']
         self.assertEqual(val, "secret")
 
 
@@ -220,20 +226,20 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         self.vars3 = dict(ansible_ssh_pass="qwerty")
         self.vars3.update(self.vars)
         self.vars3.update(self.vars2)
-        self.gr1 = Group.objects.create(name="base_one")
-        self.gr2 = Group.objects.create(name="base_two")
-        self.gr3 = Group.objects.create(name="base_three")
+        self.gr1 = self.get_model_class('Group').objects.create(name="base_one")
+        self.gr2 = self.get_model_class('Group').objects.create(name="base_two")
+        self.gr3 = self.get_model_class('Group').objects.create(name="base_three")
 
     def test_circular_deps(self):
         url = "/api/v1/groups/"  # URL to groups layer
         groups = [
-            Group.objects.create(name="base_0", children=True),
-            Group.objects.create(name="base_1", children=True),
-            Group.objects.create(name="base_2", children=True),
-            Group.objects.create(name="base_3", children=True),
-            Group.objects.create(name="base_4", children=True),
-            Group.objects.create(name="base_5", children=True),
-            Group.objects.create(name="base_6", children=True)
+            self.get_model_class('Group').objects.create(name="base_0", children=True),
+            self.get_model_class('Group').objects.create(name="base_1", children=True),
+            self.get_model_class('Group').objects.create(name="base_2", children=True),
+            self.get_model_class('Group').objects.create(name="base_3", children=True),
+            self.get_model_class('Group').objects.create(name="base_4", children=True),
+            self.get_model_class('Group').objects.create(name="base_5", children=True),
+            self.get_model_class('Group').objects.create(name="base_6", children=True)
         ]
         groups[1].groups.add(*[groups[2], groups[3], groups[5]])
         groups[2].groups.add(groups[4])
@@ -254,9 +260,9 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
                                  data=json.dumps([groups[6].id]))
         self.assertEqual(result["error_type"], "CiclicDependencyError")
         # Fix for clear group if CiclicDependencyError
-        g1 = Group.objects.create(name="base_01")
-        g2 = Group.objects.create(name="base_02", children=True)
-        g3 = Group.objects.create(name="base_03", children=True)
+        g1 = self.get_model_class('Group').objects.create(name="base_01")
+        g2 = self.get_model_class('Group').objects.create(name="base_02", children=True)
+        g3 = self.get_model_class('Group').objects.create(name="base_03", children=True)
         g3.groups.add(g2)
         g2.groups.add(g1)
         test_url = "{}{}/groups/".format(url, g2.id)
@@ -267,7 +273,7 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
 
     def test_create_delete_group(self):
         url = "/api/v1/groups/"
-        self.list_test(url, Group.objects.count())
+        self.list_test(url, self.get_model_class('Group').objects.count())
         self.details_test(url + "{}/".format(self.gr1.id), name=self.gr1.name)
 
         data = [dict(name="one", vars=self.vars),
@@ -278,7 +284,7 @@ class ApiGroupsTestCase(_ApiGHBaseTestCase):
         for group_id in results_id:
             self.get_result("delete", url + "{}/".format(group_id))
         self.assertEqual(self.get_result("get", url)["count"],
-                         Group.objects.count())
+                         self.get_model_class('Group').objects.count())
 
     def test_hosts_in_group(self):
         url = "/api/v1/groups/"  # URL to groups layer
@@ -381,12 +387,16 @@ class ApiInventoriesTestCase(_ApiGHBaseTestCase):
         self.vars3 = dict(ansible_ssh_pass="qwerty")
         self.vars3.update(self.vars)
         self.vars3.update(self.vars2)
-        self.inv1 = Inventory.objects.create(name="First_inventory")
-        self.inv2 = Inventory.objects.create(name="Second_inventory")
+        self.inv1 = self.get_model_class('Inventory').objects.create(
+            name="First_inventory"
+        )
+        self.inv2 = self.get_model_class('Inventory').objects.create(
+            name="Second_inventory"
+        )
 
     def test_create_delete_inventory(self):
         url = "/api/v1/inventories/"
-        self.list_test(url, Inventory.objects.count())
+        self.list_test(url, self.get_model_class('Inventory').objects.count())
         self.details_test(url + "{}/".format(self.inv1.id),
                           name=self.inv1.name, hosts=[], groups=[])
 
