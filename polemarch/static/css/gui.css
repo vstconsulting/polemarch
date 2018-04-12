@@ -672,13 +672,19 @@ table{
     }
 }
 
-.user-status {
+.user-status, .group-children, .all-only, .new_subitem {
     font-weight: bold;
     text-align: center;
     vertical-align: middle;
     color: #276900;
 }
 
+.matches {
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+    color: #C1801A;
+}
 
 /*стили для сайдбара */
 .skin-black-light .sidebar-menu>li:hover>a, .skin-black-light .sidebar-menu>li.active>a {
@@ -851,4 +857,15 @@ table{
 
 
 
+.imported-subitems-table th, .imported-subitems-table td {
+    word-wrap:break-word;
+}
 
+.imported-subitems-table ul {
+    margin-left:0px;
+    padding-left: 0px;
+}
+
+.imported-subitems-table ul li {
+    list-style: none;
+}

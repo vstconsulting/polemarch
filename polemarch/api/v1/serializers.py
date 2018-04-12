@@ -110,7 +110,7 @@ class _WithPermissionsSerializer(_SignalSerializer):
             self.instance.acl.all(), many=True
         )
 
-    def __duplicates_check(self, data):
+    def __duplicates_check(self, data):  # noce
         without_role = [
             frozenset({e['member'], e['member_type']}) for e in data
         ]

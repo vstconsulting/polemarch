@@ -123,6 +123,11 @@ pmInventories.parseHostLine = function(index, line, section, inventory)
     var host = {
         name:name,
         type:type,
+        all_only:false,
+        matches:false,
+        match_id_arr:[],
+        match_arr:[],
+        extern:false,
         vars:pmInventories.parseVarsLine(index, line)
     }
 
@@ -204,6 +209,10 @@ pmInventories.addGroupIfNotExists = function(inventory, group_name)
             vars:{},
             groups:[],
             hosts:[],
+            matches:false,
+            match_id_arr:[],
+            match_arr:[],
+            extern:false,
         }
 
         return true;
@@ -372,6 +381,7 @@ pmInventories.importFromFile = function(files_event)
     this.model.files = files_event
     this.model.importedInventories = {}
     var thisObj = this;
+    pmInventories.model.importedInventoriesIsReady=false;
     for(var i=0; i<files_event.target.files.length; i++)
     {
         var reader = new FileReader();
@@ -384,6 +394,70 @@ pmInventories.importFromFile = function(files_event)
                     inventory:pmInventories.parseFromText(e.target.result),
                     text:e.target.result
                 }
+                //просматриваем все хосты имеющиеся в импортируемом инвентории, включая те, что вложены в группы
+                //если хост используется только в группе, все равно добавляем его к хостам, чтобы после импорта
+                //было удобно смотреть наши сущности. отличить вложенный хост от невложенного можно по свойству all_only
+                for(var i in pmInventories.model.importedInventories.inventory.groups)
+                {
+                    for(var j in pmInventories.model.importedInventories.inventory.groups[i].hosts)
+                    {
+                        var host_in_group=pmInventories.model.importedInventories.inventory.groups[i].hosts[j];
+                        var bool=false;
+                        for(var k in pmInventories.model.importedInventories.inventory.hosts)
+                        {
+                            var host_in_inventory=pmInventories.model.importedInventories.inventory.hosts[k];
+                            if(host_in_group.name==host_in_inventory.name)
+                            {
+                                bool=true;
+                                host_in_group=JSON.parse(JSON.stringify(host_in_inventory));
+                            }
+                        }
+                        if(bool==false)
+                        {
+                            host_in_group.all_only=true;
+                            pmInventories.model.importedInventories.inventory.hosts.push(host_in_group);
+                        }
+                    }
+                }
+
+                //ищем совпадения импортированных сущностей(хосты, группы) с уже имющимися в системе
+                //ищем хосты
+                for(var i in pmHosts.model.items)
+                {
+                    var exhisting_host=pmHosts.model.items[i];
+                    for(var j in pmInventories.model.importedInventories.inventory.hosts)
+                    {
+                        var new_host=pmInventories.model.importedInventories.inventory.hosts[j];
+                        if(exhisting_host.name==new_host.name)
+                        {
+                            new_host.matches=true;
+                            new_host.match_id_arr.push(exhisting_host.id);
+                        }
+                    }
+                }
+
+                //ищем совпадения импортированных сущностей(хосты, группы) с уже имющимися в системе
+                //ищем группы
+                for(var i in pmGroups.model.items)
+                {
+                    var exhisting_group=pmGroups.model.items[i];
+                    for(var j in pmInventories.model.importedInventories.inventory.groups)
+                    {
+                        var new_group=pmInventories.model.importedInventories.inventory.groups[j];
+                        if(exhisting_group.name==j)
+                        {
+                            new_group.matches=true;
+                            new_group.match_id_arr.push(exhisting_group.id);
+                        }
+                    }
+                }
+
+                pmInventories.model.importedInventoriesCopy=JSON.parse(JSON.stringify(pmInventories.model.importedInventories));
+
+                //pmInventories.model.importedInventoriesIsReady - отвечает за готовность перезагрузки шаблона страницы импортированного инвентория
+                //когда данное свойство изменится и станет равным true - шаблон "inventories_import_page" перерисуется
+                pmInventories.model.importedInventoriesIsReady=true;
+
             };
         })(i);
         reader.readAsText(files_event.target.files[i]);
@@ -394,12 +468,1134 @@ pmInventories.importFromFile = function(files_event)
     return def.promise();
 }
 
+/**
+ * Функция обновляет текст инвентория и инициализирует перерисовку страницу с импортированным инвенторием.
+ */
+pmInventories.updateImportedInventoryPage = function()
+{
+    pmInventories.model.importedInventories.text=pmInventories.getInventoryTextFromObjectCE(pmInventories.model.importedInventories.inventory);
+    pmInventories.model.importedInventoriesIsReady=!pmInventories.model.importedInventoriesIsReady;
+    pmInventories.model.importedInventoriesIsReady=!pmInventories.model.importedInventoriesIsReady;
+}
+
+/**
+ * Функция рендерит модальное окно для редактирования нового subitem(host or group),
+ * вложенного в импортируемый инвенторий.
+ * В данном модальном окне пользователь может изменить/удалить/добавить vars у данной subitem.
+ * Другие свойства subitem являются недоступными для редактирования.
+ * @param {string} subItemType - типа subitem(group or host)
+ * @param {integer/string} index - индекс данного subitem в массиве
+ */
+pmInventories.renderEditItemModal = function(subItemType, index)
+{
+    var imported_subitem=pmInventories.model.importedInventories.inventory[subItemType][index];
+    pmInventories.model.importedSubItem=JSON.parse(JSON.stringify(imported_subitem));
+    var html=spajs.just.render('edit_imported_subitem', {val:pmInventories.model.importedSubItem, subItemType:subItemType, index:index});
+    return html;
+}
+
+/**
+ * Функция открывает модальное окно для редактирования нового subitem(host or group),
+ * вложенного в импортируемый инвенторий.
+ * @param {string} subItemType - типа subitem(group or host)
+ * @param {integer/string} index - индекс данного subitem в массиве
+ */
+pmInventories.openEditItemModal = function(subItemType, index)
+{
+    if($('div').is('#edit_imported_subitem'))
+    {
+        $('#edit_imported_subitem').empty();
+        $('#edit_imported_subitem').insertTpl(pmInventories.renderEditItemModal(subItemType, index));
+        $("#edit_imported_subitem").modal('show');
+    }
+    else
+    {
+        var t=$(".content")[0];
+        $('<div>', { id: "edit_imported_subitem", class: "modal fade in"}).appendTo(t);
+        $('#edit_imported_subitem').insertTpl(pmInventories.renderEditItemModal(subItemType, index));
+        $("#edit_imported_subitem").modal('show');
+    }
+}
+
+/**
+ * Функция сохраняет изменения внесенные в модальном окне для редактирования нового subitem(host or group),
+ * вложенного в импортируемый инвенторий.
+ * @param {string} subItemType - типа subitem(group or host)
+ * @param {integer/string} index - индекс данного subitem в массиве
+ */
+pmInventories.saveChangesFromEditItemModal = function(subItemType, index)
+{
+    pmInventories.model.importedInventories.inventory[subItemType][index]=JSON.parse(JSON.stringify(pmInventories.model.importedSubItem));
+    var html=spajs.just.render('change_imported_subitem_vars', {vars:pmInventories.model.importedInventories.inventory[subItemType][index].vars});
+    $("#"+subItemType+"-"+index+"-vars").html(html);
+    $("#edit_imported_subitem").modal('hide');
+    pmInventories.updateImportedInventoryPage();
+}
+
+/**
+ * Функция открывает модальное окно, в котором пользователь может выбрать
+ * какой конкретно из subitems с одинаковым именем использовать в данном инвентории.
+ * Так же данная функция посылает bulk запрос, который подгружает свойства созданных ранее
+ * subitems с таким же именем.
+ * @param {string} subItemType - типа subitem(group or host)
+ * @param {integer/string} index - индекс данного subitem в массиве
+ */
+pmInventories.openChooseMatchingModal = function(subItemType, index)
+{
+    var def = new $.Deferred();
+    var bulkHosts=[];
+    var type1=subItemType.slice(0,-1);
+    var imported_subitem=pmInventories.model.importedInventories.inventory[subItemType][index];
+    imported_subitem=JSON.parse(JSON.stringify(imported_subitem));
+    for(var i in imported_subitem.match_id_arr)
+    {
+        bulkHosts.push({
+            type:"get",
+            item: type1,
+            pk: imported_subitem.match_id_arr[i]
+        })
+    }
+    return $.when(
+        spajs.ajax.Call({
+            url: "/api/v1/_bulk/",
+            type: "POST",
+            contentType:'application/json',
+            data:JSON.stringify(bulkHosts),
+            success: function(data)
+            {
+                for(var i in data)
+                {
+                    imported_subitem.match_arr.push(data[i].data);
+                }
+                pmInventories.model.importedSubItem=JSON.parse(JSON.stringify(imported_subitem));
+                if($('div').is('#choose_matching_modal'))
+                {
+                    $('#choose_matching_modal').empty();
+                    $('#choose_matching_modal').insertTpl(pmInventories.renderChooseMatchingModal(subItemType, index));
+                    $("#choose_matching_modal").modal('show');
+                }
+                else
+                {
+                    var t=$(".content")[0];
+                    $('<div>', { id: "choose_matching_modal", class: "modal fade in"}).appendTo(t);
+                    $('#choose_matching_modal').insertTpl(pmInventories.renderChooseMatchingModal(subItemType, index));
+                    $("#choose_matching_modal").modal('show');
+                }
+
+            },
+            error: function(e)
+            {
+                $.notify("Error with getting matching "+subItemType+"' data.", "error");
+            }
+        })).done(function(){def.promise();}).fail(function(){def.reject();}).promise();
+
+}
+
+
+/**
+ * Функция рендерит модальное окно, в котором пользователь может выбрать
+ * какой конкретно из subitems с одинаковым именем использовать в данном инвентории.
+ * @param {string} subItemType - типа subitem(group or host)
+ * @param {integer/string} index - индекс данного subitem в массиве
+ */
+pmInventories.renderChooseMatchingModal = function(subItemType, index)
+{
+    var html=spajs.just.render('choose_matching_modal', {val:pmInventories.model.importedSubItem, subItemType:subItemType, index:index});
+    return html;
+}
+
+/**
+ * Пользователь выбрал какой из subitems с одинаковым именем ему использовать.
+ * Данная функция снимает выделение со всех других subitems,
+ * и выделяет выбранный пользователем subitem.
+ * @param {object} thisEl - конкретный элемент
+ */
+pmInventories.toggleSelectMatchSubItem = function (thisEl)
+{
+    var mode=$(thisEl).parent().hasClass('selected');
+    var match_subitem_arr=$(".match-subitem");
+    for(var i=0; i<match_subitem_arr.length; i++){
+        $(match_subitem_arr[i]).removeClass('selected');
+    }
+    $(thisEl).parent().toggleClass('selected', !mode);
+}
+
+/**
+ * Функция рекурсивно вставляет в группу вложенные в нее группы и хосты из копии изначально имопртированного инвентория (pmInventories.model.importedInventoriesCopy.inventory)
+ * Если какие-то из вложенных групп имеют свойство children:true, то используется рекурсивный вызов этой же функции.
+ * @param {array} items_arr - массив с именами групп
+ */
+pmInventories.recursionInsertOfImportCopyGroups = function(items_arr)
+{
+    for(var i in items_arr)
+    {
+        var gName=items_arr[i];
+        pmInventories.model.importedInventories.inventory.groups[gName]=JSON.parse(JSON.stringify(pmInventories.model.importedInventoriesCopy.inventory.groups[gName]));
+        if(pmInventories.model.importedInventories.inventory.groups[gName].children!==undefined && pmInventories.model.importedInventories.inventory.groups[gName].children==true)
+        {
+            pmInventories.recursionInsertOfImportCopyGroups(pmInventories.model.importedInventories.inventory.groups[gName].children);
+        }
+        for(var j in pmInventories.model.importedInventories.inventory.groups[gName].hosts)
+        {
+            for(var k in pmInventories.model.importedInventoriesCopy.inventory.hosts)
+            {
+                if(pmInventories.model.importedInventories.inventory.groups[gName].hosts[j].name==pmInventories.model.importedInventoriesCopy.inventory.hosts[k].name)
+                {
+                    pmInventories.model.importedInventories.inventory.hosts[k]=JSON.parse(JSON.stringify(pmInventories.model.importedInventoriesCopy.inventory.hosts[k]));
+                }
+            }
+        }
+
+    }
+}
+
+/**
+ * После того, как пользователь поменял matching object, данная функция обновляет данные о данном объекте
+ * во всех объектах, где он является вложенным.
+ * @param {string} subItemType - тип subitem(group or host)
+ * @param {integer/string} index - индекс данного subitem в массиве
+ */
+pmInventories.updateLinkedItemsAfterSaveSelected = function(subItemType, index)
+{
+    if(subItemType=="hosts")
+    {
+        var item_name=pmInventories.model.importedInventories.inventory[subItemType][index].name;
+    }
+    else
+    {
+        var item_name=index;
+    }
+
+    for(var i in pmInventories.model.importedInventories.inventory.groups)
+    {
+        if(subItemType=="hosts")
+        {
+            for(var j in pmInventories.model.importedInventories.inventory.groups[i].hosts)
+            {
+                if(pmInventories.model.importedInventories.inventory.groups[i].hosts[j].name==item_name)
+                {
+                    pmInventories.model.importedInventories.inventory.groups[i].hosts[j]=JSON.parse(JSON.stringify(pmInventories.model.importedInventories.inventory[subItemType][index]));
+                }
+            }
+        }
+        else
+        {
+            for(var j in pmInventories.model.importedInventories.inventory.groups[i].groups)
+            {
+                if(typeof(pmInventories.model.importedInventories.inventory.groups[i].groups[j])=="object")
+                {
+                    if(pmInventories.model.importedInventories.inventory.groups[i].groups[j].name==item_name)
+                    {
+                        pmInventories.model.importedInventories.inventory.groups[i].groups[j]=item_name;
+                    }
+                }
+                else
+                {
+                    if(pmInventories.model.importedInventories.inventory.groups[i].groups[j]==item_name)
+                    {
+                        pmInventories.model.importedInventories.inventory.groups[i].groups[j]=JSON.parse(JSON.stringify(pmInventories.model.importedInventories.inventory[subItemType][index]));
+                        pmInventories.model.importedInventories.inventory.groups[i].groups[j].name=item_name;
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+
+/**
+ * Функция проверяет используется ли где-нибудь данный залинкованный объект.
+ * То есть является ли он вложенным subitem в какую-нибудь залинованную группу из данного импортированного инвентория.
+ * По результату проверки возвращает:
+ * - false, если объект используется в залинкованной группе, следовательно, нельзя выбирать для него matching object.
+ * - true, если объект не ипользуется в залинкованной группе, следовательно, его можно выбирать для него  matching object.
+ * @param {string} subItemType - тип subitem(group or host)
+ * @param {integer/string} index - индекс данного subitem в массиве
+ */
+pmInventories.checkAbilityToSelectMatching = function(subItemType, index)
+{
+    if(pmInventories.model.importedInventories.inventory[subItemType][index].id!==undefined)
+    {
+        if(subItemType=="hosts")
+        {
+            var item_name=pmInventories.model.importedInventories.inventory[subItemType][index].name;
+        }
+        else
+        {
+            var item_name=index;
+        }
+
+        for(var i in pmInventories.model.importedInventories.inventory.groups)
+        {
+            if(pmInventories.model.importedInventories.inventory.groups[i].id!==undefined)
+            {
+                for(var j in pmInventories.model.importedInventories.inventory.groups[i][subItemType])
+                {
+                    if(pmInventories.model.importedInventories.inventory.groups[i][subItemType][j].name==item_name)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+}
+
+/**
+ * Функция определяет какой из subitems с одинаковыми именами
+ * пользователь выбрал для данного инвентория.
+ * На основе данного выбора вносит изменения в модель : pmInventories.model.importedInventories.inventory[subItemType][index]
+ * и инициализирует перерисовку страницы импортируемого инвентория (той части, где находятся subitems).
+ * @param {string} subItemType - тип subitem(group or host)
+ * @param {integer/string} index - индекс данного subitem в массиве
+ */
+pmInventories.saveSelectedMatchSubItem1 = function(subItemType, index)
+{
+    var def = new $.Deferred();
+    if($(".match-subitem.selected").length==0)
+    {
+        $.notify("Please, select one of the "+subItemType+".", "error");
+        return def.reject();
+    }
+    else
+    {
+        $("#choose_matching_modal").modal('hide');
+
+        var subitem_id=$(".match-subitem.selected").attr("subitem-id");
+        if(subitem_id!="new")
+        {
+            for(var i in pmInventories.model.importedSubItem.match_arr)
+            {
+                var subitem=pmInventories.model.importedSubItem.match_arr[i];
+                if(subitem.id==subitem_id)
+                {
+                    pmInventories.model.importedSubItem.id=+subitem_id;
+                    pmInventories.model.importedSubItem.type=subitem.type;
+                    pmInventories.model.importedSubItem.vars=JSON.parse(JSON.stringify(subitem.vars));
+                    if(subItemType=="groups")
+                    {
+                        pmInventories.model.importedSubItem.children=subitem.children;
+                        if(subitem.children)
+                        {
+                            pmInventories.model.importedSubItem.groups=JSON.parse(JSON.stringify(subitem.groups));
+                            pmInventories.model.importedSubItem.hosts=[];
+
+                            $.when(pmInventories.getInnerDataForChildrenGroup()).done(function()
+                            {
+                                pmInventories.model.importedInventories.inventory[subItemType][index]=JSON.parse(JSON.stringify(pmInventories.model.importedSubItem));
+                                pmInventories.model.importedInventories.inventory[subItemType][index].match_arr=[];
+                                pmInventories.updateLinkedItemsAfterSaveSelected(subItemType, index);
+                                pmInventories.deleteAllExternSubItems("groups");
+                                pmInventories.deleteAllExternSubItems("hosts");
+                                pmInventories.updateImportedInventoryPage();
+                                $($(".item-"+index+"-hide-li")[0]).addClass("hide");
+                                def.resolve();
+                            });
+                        }
+                        else
+                        {
+                            pmInventories.model.importedSubItem.hosts=JSON.parse(JSON.stringify(subitem.hosts));
+                            pmInventories.model.importedSubItem.groups=[];
+                            $.when(pmInventories.getInnerDataForGroup()).done(function(){
+                                pmInventories.model.importedInventories.inventory[subItemType][index]=JSON.parse(JSON.stringify(pmInventories.model.importedSubItem));
+                                pmInventories.model.importedInventories.inventory[subItemType][index].match_arr=[];
+                                pmInventories.updateLinkedItemsAfterSaveSelected(subItemType, index);
+                                pmInventories.deleteAllExternSubItems("groups");
+                                pmInventories.deleteAllExternSubItems("hosts");
+                                pmInventories.updateImportedInventoryPage();
+                                $($(".item-"+index+"-hide-li")[0]).addClass("hide");
+                                def.resolve();
+                            });
+                        }
+                    }
+                    else
+                    {
+                        pmInventories.model.importedInventories.inventory[subItemType][index]=JSON.parse(JSON.stringify(pmInventories.model.importedSubItem));
+                        pmInventories.model.importedInventories.inventory[subItemType][index].match_arr=[];
+                        pmInventories.updateLinkedItemsAfterSaveSelected(subItemType, index);
+                        pmInventories.updateImportedInventoryPage();
+                        $($(".item-"+index+"-hide-li")[0]).addClass("hide");
+                        def.resolve();
+                    }
+                }
+            }
+        }
+        else //возвращаем изначально импортированные объекты и их параметры
+        {
+
+            pmInventories.model.importedInventories.inventory[subItemType][index]=JSON.parse(JSON.stringify(pmInventories.model.importedInventoriesCopy.inventory[subItemType][index]));
+
+            if(subItemType=="groups")  //при обновлении группы, обновляем также и ее содержимое
+            {
+                if(pmInventories.model.importedInventories.inventory[subItemType][index].children==true) //для групп children:true обновлем вложенные подгруппы, а также хосты вложенные в данные подгруппы
+                {
+                    for(var i in pmInventories.model.importedInventories.inventory[subItemType][index].groups)
+                    {
+                        var gName=pmInventories.model.importedInventories.inventory[subItemType][index].groups[i];
+                        pmInventories.model.importedInventories.inventory.groups[gName]=JSON.parse(JSON.stringify(pmInventories.model.importedInventoriesCopy.inventory.groups[gName]));
+                        if(pmInventories.model.importedInventories.inventory.groups[gName].children)
+                        {
+                            pmInventories.recursionInsertOfImportCopyGroups(pmInventories.model.importedInventoriesCopy.inventory.groups[gName].groups);
+                        }
+                        for(var j in pmInventories.model.importedInventories.inventory.groups[gName].hosts)
+                        {
+                            for(var k in pmInventories.model.importedInventoriesCopy.inventory.hosts)
+                            {
+                                if(pmInventories.model.importedInventories.inventory.groups[gName].hosts[j].name==pmInventories.model.importedInventoriesCopy.inventory.hosts[k].name)
+                                {
+                                    pmInventories.model.importedInventories.inventory.hosts[k]=JSON.parse(JSON.stringify(pmInventories.model.importedInventoriesCopy.inventory.hosts[k]));
+                                }
+                            }
+                        }
+                    }
+                }
+                else //для групп children:false обновлем вложенные в них хосты
+                {
+                    for(var i in pmInventories.model.importedInventories.inventory[subItemType][index].hosts)
+                    {
+                        var subitem_host_name=pmInventories.model.importedInventories.inventory[subItemType][index].hosts[i].name;
+                        for(var j in pmInventories.model.importedInventoriesCopy.inventory.hosts)
+                        {
+                            var host_copy_name=pmInventories.model.importedInventoriesCopy.inventory.hosts[j].name;
+                            if(subitem_host_name==host_copy_name)
+                            {
+                                pmInventories.model.importedInventories.inventory.hosts[j]=JSON.parse(JSON.stringify(pmInventories.model.importedInventoriesCopy.inventory.hosts[j]));
+                            }
+                        }
+                    }
+                }
+            }
+            pmInventories.deleteAllExternSubItems("groups");
+            pmInventories.deleteAllExternSubItems("hosts");
+            pmInventories.updateLinkedItemsAfterSaveSelected(subItemType, index);
+            pmInventories.updateImportedInventoryPage();
+            $($(".item-"+index+"-hide-li")[0]).removeClass("hide");
+            def.resolve();
+        }
+    }
+    return def.promise();
+}
+
+/**
+ * Функция вызывает функцию pmInventories.saveSelectedMatchSubItem1, которая сохраняет выбранный matching object,
+ * и отслеживает ее выполнение.
+ * @param {string} subItemType - тип subitem(group or host)
+ * @param {integer/string} index - индекс данного subitem в массиве
+ */
+pmInventories.saveSelectedMatchSubItem = function(subItemType, index)
+{
+    return $.when(pmInventories.saveSelectedMatchSubItem1(subItemType, index)).done(function()
+    {
+        $.notify("You choice was saved", "success");
+    }).promise();
+}
+
+/**
+ * Функция формирует и посылает bulk запрос на получение полной информации по всем группам, имеющимся в системе.
+ * Получив успешный ответ на запрос, записывает данные в pmInventories.model.allBulkGroup.
+ */
+pmInventories.getAllGroupDataBulk = function()
+{
+    var bulkArr=[];
+    var def=new $.Deferred();
+    for(var i in pmGroups.model.itemslist.results)
+    {
+        bulkArr.push({
+            type:"get",
+            item: "group",
+            pk: pmGroups.model.itemslist.results[i].id
+        })
+    }
+    spajs.ajax.Call({
+        url: "/api/v1/_bulk/",
+        type: "POST",
+        contentType:'application/json',
+        data:JSON.stringify(bulkArr),
+        success: function(data)
+        {
+            pmInventories.model.allBulkGroup=data;
+            def.resolve();
+        },
+        error: function(e)
+        {
+            $.notify("Error with getting group data.", "error");
+            def.reject();
+        }
+    })
+    return  def.promise();
+}
+
+/**
+ * Функция формирует и посылает bulk запрос на получение полной информации по всем хостам, имеющимся в системе.
+ * Получив успешный ответ на запрос, записывает данные в pmInventories.model.allBulkHost.
+ */
+pmInventories.getAllHostDataBulk = function()
+{
+    var bulkArr=[];
+    var def=new $.Deferred();
+    for(var i in pmHosts.model.itemslist.results)
+    {
+        bulkArr.push({
+            type:"get",
+            item: "host",
+            pk: pmHosts.model.itemslist.results[i].id
+        })
+    }
+    spajs.ajax.Call({
+        url: "/api/v1/_bulk/",
+        type: "POST",
+        contentType:'application/json',
+        data:JSON.stringify(bulkArr),
+        success: function(data)
+        {
+            pmInventories.model.allBulkHost=data;
+            def.resolve();
+        },
+        error: function(e)
+        {
+            $.notify("Error with getting hosts data.", "error");
+            def.reject();
+        }
+    })
+    return  def.promise();
+}
+
+/**
+ * Функция рекурсивно вставляет в группу вложенные в нее группы и хосты из копии pmInventories.model.allBulkGroup (массив, хранящий в себе полную инфу о всех группах)
+ * Если какие-то из вложенных групп имеют свойство children:true, то используется рекурсивный вызов этой же функции.
+ * @param {object} val - объект (конкретная группа)
+ * @param {array} data - массив с данными по группам, обновляемыми в текущий момент.
+ */
+pmInventories.recursionInsertOfInnerGroups=function(val, data)
+{
+    var data=data;
+    for(var i in val.groups)
+    {
+        for(var j in pmInventories.model.allBulkGroup)
+        {
+            if(val.groups[i].id==pmInventories.model.allBulkGroup[j].data.id)
+            {
+                data.push(pmInventories.model.allBulkGroup[j]);
+                if(val.groups[i].children)
+                {
+                    for(var l in pmInventories.model.allBulkGroup)
+                    {
+                        if(val.groups[i].id==pmInventories.model.allBulkGroup[l].data.id)
+                        {
+                            val.groups[i]=JSON.parse(JSON.stringify(pmInventories.model.allBulkGroup[l].data));
+                        }
+                    }
+                    pmInventories.recursionInsertOfInnerGroups(val.groups[i], data);
+                }
+            }
+        }
+    }
+    return data;
+}
+
+/**
+ * Функция вставляет в залинкованную группу со свойством children:true вложенные в нее группы и хосты.
+ */
+pmInventories.getInnerDataForChildrenGroup = function() {
+    return $.when(pmInventories.getAllGroupDataBulk(), pmInventories.getAllHostDataBulk()).done(function ()
+    {
+        var data=[];
+        var data1=[];
+        for(var i in pmInventories.model.allBulkGroup)
+        {
+            var val=pmInventories.model.allBulkGroup[i].data;
+            for(var j in pmInventories.model.importedSubItem.groups)
+            {
+                var val1=pmInventories.model.importedSubItem.groups[j];
+                if(val.id==val1.id)
+                {
+                    data.push(pmInventories.model.allBulkGroup[i]);
+                    if(val.children)
+                    {
+                        data=pmInventories.recursionInsertOfInnerGroups(val, data);
+                    }
+                }
+            }
+        }
+
+        for(var i in data)
+        {
+            for(var j in data[i].data.hosts)
+            {
+                var val=data[i].data.hosts[j];
+                for(var k in pmInventories.model.allBulkHost)
+                {
+                    var val1=pmInventories.model.allBulkHost[k].data;
+                    if(val.id==val1.id)
+                    {
+                        var bool=false;
+                        for(var l in data1)
+                        {
+                            if(data1[l].id==val.id)
+                            {
+                                bool=true;
+                            }
+                        }
+                        if(!bool)
+                        {
+                            data1.push(pmInventories.model.allBulkHost[k]);
+                        }
+                    }
+
+                }
+            }
+        }
+
+        for (var k in data)
+        {
+            if (pmInventories.model.importedInventories.inventory.groups[data[k].data.name] !== undefined)
+            {
+                pmInventories.model.importedInventories.inventory.groups[data[k].data.name].id = data[k].data.id;
+                pmInventories.model.importedInventories.inventory.groups[data[k].data.name].children = data[k].data.children;
+                pmInventories.model.importedInventories.inventory.groups[data[k].data.name].groups = JSON.parse(JSON.stringify(data[k].data.groups));
+                pmInventories.model.importedInventories.inventory.groups[data[k].data.name].hosts = JSON.parse(JSON.stringify(data[k].data.hosts));
+                pmInventories.model.importedInventories.inventory.groups[data[k].data.name].vars = JSON.parse(JSON.stringify(data[k].data.vars));
+            }
+            else
+            {
+                pmInventories.model.importedInventories.inventory.groups[data[k].data.name] = {
+                    id: data[k].data.id,
+                    children: data[k].data.children,
+                    vars: JSON.parse(JSON.stringify(data[k].data.vars)),
+                    groups: JSON.parse(JSON.stringify(data[k].data.groups)),
+                    hosts: JSON.parse(JSON.stringify(data[k].data.hosts)),
+                    matches: false,
+                    match_id_arr: [],
+                    match_arr: [],
+                    extern: true
+                };
+            }
+        }
+
+        pmInventories.insertHostsFromBulk(data1);
+
+    }).fail(function(){
+        $.notify("Error in bulk request", "error");
+    }).promise();
+}
+
+/**
+ * Функция вставляет в залинкованную группу со свойством children:false вложенные в нее хосты.
+ */
+pmInventories.getInnerDataForGroup = function()
+{
+    return $.when(pmInventories.getAllHostDataBulk()).done(function ()
+    {
+        var data1=[];
+        for(var i in pmInventories.model.importedSubItem.hosts)        {
+
+            var val = pmInventories.model.importedSubItem.hosts[i];
+            for (var j in pmInventories.model.allBulkHost)
+            {
+                var val1=pmInventories.model.allBulkHost[j].data;
+                if(val.id==val1.id)
+                {
+                    data1.push(pmInventories.model.allBulkHost[j]);
+                }
+            }
+
+        }
+        pmInventories.insertHostsFromBulk(data1);
+    }).fail(function(){
+        $.notify("Error in bulk request", "error");
+    }).promise();
+}
+
+
+/**
+ * Функция вставляет в модель актуальнные данные по хостам, взятые из bulk запроса.
+ * @param {array} data - массив с данными по хостам, обновляемыми в текущий момент.
+ */
+pmInventories.insertHostsFromBulk = function(data)
+{
+    for(var p in data)
+    {
+        var bool=false;
+        for(var f in pmInventories.model.importedInventoriesCopy.inventory.hosts)
+        {
+            if(data[p].data.name==pmInventories.model.importedInventoriesCopy.inventory.hosts[f].name) //проверяем является ли данный хост частью изначально импортированного инвентория
+            {
+                bool=true;
+                pmInventories.model.importedInventories.inventory.hosts[f]=JSON.parse(JSON.stringify(pmInventories.model.importedInventoriesCopy.inventory.hosts[f]));
+                pmInventories.model.importedInventories.inventory.hosts[f].id=data[p].data.id;
+                pmInventories.model.importedInventories.inventory.hosts[f].vars=JSON.parse(JSON.stringify(data[p].data.vars));
+            }
+        }
+
+        if(!bool) //если данный хост не является частью изначально импортированного инвентория, то
+        {
+            var bool1=false;
+            for(var t in pmInventories.model.importedInventories.inventory.hosts) //проверяем был ли он уже добавлен на страницу из какой-либо другой группы
+            {
+                var host_id=pmInventories.model.importedInventories.inventory.hosts[t].id;
+                if(host_id==data[p].data.id )
+                {
+                    bool1=true;
+                }
+
+            }
+
+            if(!bool1) //если данного хоста нет на странице и в нашей модели, то добавляем его.
+            {
+                data[p].data.all_only=true;
+                data[p].data.matches=false;
+                data[p].data.match_id_arr=[];
+                data[p].data.match_arr=[];
+                data[p].data.extern=true;
+                pmInventories.model.importedInventories.inventory.hosts.push(data[p].data);
+            }
+        }
+    }
+}
+
+
+/**
+ * Функция иницилизирует удаление всех внешних хостов/групп из модели импортированного инвентория.
+ * Внешний хост/группа (extern=true) - его/её нет в изначально импортированном инвентории, но он/она есть в какой-то из existing matching групп.
+ */
+pmInventories.deleteAllExternSubItems = function(subItemType)
+{
+    for(var i in pmInventories.model.importedInventories.inventory[subItemType])
+    {
+        if(pmInventories.model.importedInventories.inventory[subItemType][i].extern==true)
+        {
+            pmInventories.deleteExternSubItem(subItemType, pmInventories.model.importedInventories.inventory[subItemType][i].id);
+        }
+    }
+}
+
+/**
+ * Функция проверяет в скольких группах используется данный внешний хост/группа.
+ * Если используется хотя бы в одной, то оставлем его/её.
+ * Если не используется нигде, то удаляем его/её.
+ * Внешний хост/группа (extern=true) - его/её нет в изначально импортированном инвентории, но он/она есть в какой-то из existing matching групп.
+ * @param {number} group_id - id внешнего хоста/внешней группы.
+ */
+pmInventories.deleteExternSubItem = function(subItemType, subItem_id)
+{
+    var countInGroup=0; //countInGroup - количество вхождений данного subitem в группы
+    for(var i in pmInventories.model.importedInventories.inventory.groups)
+    {
+        var val=pmInventories.model.importedInventories.inventory.groups[i];
+        if(val.id!==undefined)
+        {
+            for(var j in val[subItemType])
+            {
+                if(val[subItemType][j].id==subItem_id)
+                {
+                    countInGroup+=1;
+                }
+
+            }
+        }
+    }
+    if(countInGroup==0)
+    {
+        for(var i in pmInventories.model.importedInventories.inventory[subItemType])
+        {
+            if(pmInventories.model.importedInventories.inventory[subItemType][i].id==subItem_id)
+            {
+                delete pmInventories.model.importedInventories.inventory[subItemType][i];
+            }
+        }
+    }
+
+}
+
+/**
+ * Функция выделяет/снимает выделение со всех доступных для выделения элементов в определенной таблице subitems(hosts/groups).
+ * @param {array} elements - массив выделенных элементов
+ * @param {boolean} mode - true - добавить выделение, false - снять выделение
+ * @param {string} div_id - id блока, в котором находятся данные элементы
+ */
+pmInventories.toggleSelectAllImportedSubItems = function (elements, mode, div_id)
+{
+    for (var i = 0; i < elements.length; i++)
+    {
+        if($(elements[i]).hasClass('item-row') && !($(elements[i]).hasClass('unselectable')))
+        {
+            $(elements[i]).toggleClass('selected', mode);
+        }
+    }
+    pmInventories.countSelectedSubItems(div_id);
+}
+
+/**
+ * Функция выделяет/снимает выделение с одного конкретного элемента в определенной таблице subitems(hosts/groups).
+ * @param {object} thisEl - конкретный элемент
+ * @param {string} div_id - id блока, в котором находится данный элемент
+ */
+pmInventories.toggleSelectImportedSubItem = function (thisEl, div_id)
+{
+    if(!$(thisEl).parent().hasClass('unselectable'))
+    {
+        $(thisEl).parent().toggleClass('selected');
+        pmInventories.countSelectedSubItems(div_id);
+    }
+
+}
+
+/**
+ * Функция подсчитывает количество выделенных элементов в определенной таблице subitems(hosts/groups).
+ * И запоминает данное число в pmInventories.model.selectedImportedSubItems.
+ * В зависимости от нового значения pmInventories.model.selectedImportedSubItems часть кнопок отображается либо скрывается.
+ * @param {string} div_id - id блока, в котором находятся данные элементы
+ */
+pmInventories.countSelectedSubItems = function (div_id)
+{
+    var elements=$("#"+div_id+"_table tr");
+    var count=0;
+    for (var i = 0; i < elements.length; i++)
+    {
+        if($(elements[i]).hasClass('item-row') && $(elements[i]).hasClass('selected'))
+        {
+            count+=1;
+        }
+    }
+
+    if(count==0)
+    {
+        $($("#"+div_id+" .actions_button")[0]).addClass("hide");
+        $($("#"+div_id+" .unselect_all")[0]).addClass("hide");
+    }
+    else
+    {
+        $($("#"+div_id+" .actions_button")[0]).removeClass("hide");
+        $($("#"+div_id+" .unselect_all")[0]).removeClass("hide");
+    }
+    pmInventories.model.selectedImportedSubItems=count;
+}
+
+/**
+ * Функция удаляет все выделенные subitems из импортируемого инвентория.
+ * @param {string} div_id - id блока, в котором находятся данные элементы
+ * @param {string} subitem_type - тип subitem(group or host)
+ */
+pmInventories.deleteSubItemsFromImportedInventory = function(div_id, subitem_type)
+{
+    var elements=$("#"+div_id+"_table tr");
+    for (var i = 0; i < elements.length; i++)
+    {
+        if($(elements[i]).hasClass('item-row') && $(elements[i]).hasClass('selected'))
+        {
+            if(pmInventories.model.importedInventories.inventory[subitem_type][$(elements[i]).attr("data-id")].id===undefined)
+            {
+                if(subitem_type=="hosts")
+                {
+                    var subitemName=$(elements[i]).attr("data-name");
+                    for(var j in pmInventories.model.importedInventories.inventory.groups)
+                    {
+                        for(var k in pmInventories.model.importedInventories.inventory.groups[j].hosts)
+                        {
+                            if(pmInventories.model.importedInventories.inventory.groups[j].hosts[k].name==subitemName && pmInventories.model.importedInventories.inventory.groups[j].id===undefined)
+                            {
+                                delete pmInventories.model.importedInventories.inventory.groups[j].hosts[k];
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if(pmInventories.model.importedInventories.inventory[subitem_type][$(elements[i]).attr("data-id")].children==true) //для групп children:true
+                    {
+                        for(var j in pmInventories.model.importedInventories.inventory[subitem_type][$(elements[i]).attr("data-id")].groups)
+                        {
+                            if(typeof(pmInventories.model.importedInventories.inventory[subitem_type][$(elements[i]).attr("data-id")].groups[j])=="string")
+                            {
+                                var gName=pmInventories.model.importedInventories.inventory[subitem_type][$(elements[i]).attr("data-id")].groups[j];
+                            }
+                            else
+                            {
+                                var gName=pmInventories.model.importedInventories.inventory[subitem_type][$(elements[i]).attr("data-id")].groups[j].name;
+                            }
+                            if(pmInventories.model.importedInventories.inventory.groups[gName]!==undefined)
+                            {
+                                if(pmInventories.model.importedInventories.inventory.groups[gName].children)
+                                {
+                                    pmInventories.recursionDeleteOfGroup(gName);
+                                }
+                                else
+                                {
+                                    for(var k in pmInventories.model.importedInventories.inventory.groups[gName].hosts)
+                                    {
+                                        var h_name1=pmInventories.model.importedInventories.inventory.groups[gName].hosts[k].name;
+                                        pmInventories.deleteImportedHost(h_name1);
+                                    }
+                                }
+                            }
+                            pmInventories.deleteThisGroupFromAllGroups(gName);
+                            delete pmInventories.model.importedInventories.inventory.groups[gName];
+                        }
+
+                    }
+                    else //для групп children:false обновлем вложенные в них хосты
+                    {
+                        for(var j in pmInventories.model.importedInventories.inventory[subitem_type][$(elements[i]).attr("data-id")].hosts)
+                        {
+                            var h_name=pmInventories.model.importedInventories.inventory[subitem_type][$(elements[i]).attr("data-id")].hosts[j].name;
+                            pmInventories.deleteImportedHost(h_name);
+                        }
+                    }
+                }
+                pmInventories.deleteThisGroupFromAllGroups($(elements[i]).attr("data-id"));
+                delete pmInventories.model.importedInventories.inventory[subitem_type][$(elements[i]).attr("data-id")];
+                $(elements[i]).remove();
+            }
+            else
+            {
+                $.notify("Linked subitem could not be deleted.", "error");
+            }
+
+            pmInventories.countSelectedSubItems(div_id);
+        }
+    }
+    pmInventories.deleteAllExternSubItems("groups");
+    pmInventories.deleteAllExternSubItems("hosts");
+    pmInventories.updateImportedInventoryPage();
+}
+
+
+/**
+ * Функция удаляет данную группу из всех групп, где она является вложенной.
+ * @param {string} item_name - имя группы
+ */
+pmInventories.deleteThisGroupFromAllGroups = function(item_name)
+{
+    for(var i in pmInventories.model.importedInventories.inventory.groups)
+    {
+        if(pmInventories.model.importedInventories.inventory.groups[i].children)
+        {
+            for(var j in pmInventories.model.importedInventories.inventory.groups[i].groups)
+            {
+                if(pmInventories.model.importedInventories.inventory.groups[i].groups[j]==item_name)
+                {
+                    delete pmInventories.model.importedInventories.inventory.groups[i].groups[j];
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Функция используется для удаления групп с большой вложенностью групп.
+ * @param {string} item_name - имя группы
+ */
+pmInventories.recursionDeleteOfGroup = function(item_name)
+{
+    var val=pmInventories.model.importedInventories.inventory.groups[item_name];
+    if(val.children)
+    {
+        for(var i in val.groups)
+        {
+            pmInventories.recursionDeleteOfGroup(val.groups[i]);
+        }
+
+    }
+    else
+    {
+        for(var k in val.hosts)
+        {
+            var h_name1=val.hosts[k].name;
+            pmInventories.deleteImportedHost(h_name1);
+        }
+    }
+    pmInventories.deleteThisGroupFromAllGroups(item_name);
+    delete pmInventories.model.importedInventories.inventory.groups[item_name];
+}
+
+/**
+ * Функция проверяет в скольких группах используется данный хост.
+ * Если используется хотя бы в одной, то оставлем его.
+ * Если не используется нигде, то удаляем его.
+ * @param {string} host_name - имя хоста.
+ */
+pmInventories.deleteImportedHost = function(host_name)
+{
+    var countInGroup=0; //countInGroup - количество вхождений данной группы в подгруппы других групп
+    for(var i in pmInventories.model.importedInventories.inventory.groups)
+    {
+        var val=pmInventories.model.importedInventories.inventory.groups[i];
+
+        for(var j in val.hosts)
+        {
+            if(val.hosts[j].name==host_name)
+            {
+                countInGroup+=1;
+            }
+        }
+    }
+
+    for(var i in pmInventories.model.importedInventories.inventory.hosts)
+    {
+        if(pmInventories.model.importedInventories.inventory.hosts[i].name==host_name)
+        {
+            var host_1=pmInventories.model.importedInventories.inventory.hosts[i];
+        }
+    }
+
+    if(countInGroup==1 && host_1.all_only==true)
+    {
+        for(var i in pmInventories.model.importedInventories.inventory.hosts)
+        {
+            if(pmInventories.model.importedInventories.inventory.hosts[i].name==host_name)
+            {
+                delete pmInventories.model.importedInventories.inventory.hosts[i];
+            }
+        }
+    }
+}
+
+/**
+ * Из объекта inventory делает текст inventory для анзибля.
+ * @param {Object} inventory
+ * @returns {String}
+ */
+pmInventories.getInventoryTextFromObjectCE = function(inventory)
+{
+    var result = "";
+    if(inventory.name)
+    {
+        result += "# inventory name: "+inventory.name+"\n\n"
+    }
+
+    result += this.renderHostsCE("all", inventory.hosts, true)
+    result += this.renderVarsCE("all", inventory.vars)
+
+    if(inventory.groups)
+    {
+        for(var i in inventory.groups)
+        {
+            var val = inventory.groups[i]
+
+            result += this.renderHostsCE(i, val.hosts, false)
+            result += this.renderVarsCE(i, val.vars)
+
+            if(!val.groups || val.groups.length != 0)
+            {
+                result += "\n[" + i + ":children]\n"
+                for(var j in val.groups)
+                {
+                    result += val.groups[j] + "\n";
+                }
+                result +=  "\n";
+            }
+        }
+    }
+    return result;
+}
+
+pmInventories.renderHostsCE = function(group, hosts, mode)
+{
+    var result = "";
+
+    if(!hosts || Object.keys(hosts).length == 0)
+    {
+        return result
+    }
+
+    if(mode===undefined)
+    {
+        mode=false;
+    }
+
+    if(group != 'all')
+    {
+        result += "["+group+"]\n";
+    }
+
+    if(mode)
+    {
+        result += "\n";
+    }
+
+    for(var i in hosts)
+    {
+        if(mode)
+        {
+            var val = hosts[i]
+            if(val.all_only==false)
+            {
+                var line = val.name + this.renderHostVars(val.vars);
+                result += line + "\n";
+            }
+        }
+        else
+        {
+            var val = hosts[i]
+            var line = val.name + this.renderHostVars(val.vars);
+            result += line + "\n";
+        }
+
+    }
+
+    return result + "\n";
+}
+
+pmInventories.renderHostVars = function(vars)
+{
+    if(!vars || Object.keys(vars).length == 0)
+    {
+        return "";
+    }
+
+    var result = []
+    for(var i in vars)
+    {
+        result.push(i +"=\""+addslashes(vars[i])+"\"")
+    }
+
+    return " "+result.join(" ");
+}
+
+pmInventories.renderVarsCE = function(group, vars)
+{
+    if(!vars || Object.keys(vars).length == 0)
+    {
+        // return "["+group+":vars]\n";
+        return "";
+    }
+
+    var result = "";
+    if(group)
+    {
+        result += "\n["+group+":vars]\n";
+    }
+
+    for(var i in vars)
+    {
+        var val = vars[i]
+
+        var line = i + "=\""+addslashes(val)+"\""
+        result += line + "\n";
+    }
+
+    return " "+result;
+}
+
+
 pmInventories.openImportPageAndImportFiles = function(files_event)
 {
-    $.when(spajs.open({ menuId:"inventories/import"})).done(function()
-    {
-        pmInventories.importFromFile(files_event)
-    })
+    pmHosts.model.items = {};
+    pmHosts.model.itemslist = {};
+    pmGroups.model.items = {};
+    pmGroups.model.itemslist = {};
+    return spajs.showLoader(
+        $.when(pmHosts.loadAllItems(), pmGroups.loadAllItems()).done(function()
+        {
+            $.when(spajs.open({ menuId:"inventories/import"})).done(function()
+            {
+                pmInventories.importFromFile(files_event);
+
+            })
+        })
+    )
 }
 
 pmInventories.importInventories = function()
@@ -447,45 +1643,79 @@ pmInventories.importInventory = function(inventory)
     for(var i in inventory.hosts)
     {
         var val = inventory.hosts[i]
-        if(val.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(val.vars.ansible_ssh_private_key_file))
+        if(val.id===undefined)
         {
-            // <!--Вставка файла -->
-            $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-            pmInventories.showHostVarsModal({group:'all', name:val.name});
-            def2.reject()
-            return def2.promise();
-        }
-    }
-
-    for(var i in inventory.groups)
-    {
-        var val = inventory.groups[i]
-        if(val.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(val.vars.ansible_ssh_private_key_file))
-        {
-            // <!--Вставка файла -->
-            $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-            pmInventories.showGroupVarsModal({name:i});
-            def2.reject()
-            return def2.promise();
-        }
-
-        for(var j in val.hosts)
-        {
-            var hval = val.hosts[j]
-            if(hval.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(hval.vars.ansible_ssh_private_key_file))
-            {
+            if (val.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(val.vars.ansible_ssh_private_key_file)) {
                 // <!--Вставка файла -->
                 $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-                pmInventories.showHostVarsModal({group:i, name:hval.name});
+                //pmInventories.showHostVarsModal({group: 'all', name: val.name});
+                var scroll_el = "#imported_hosts";
+                if ($(scroll_el).length != 0)  {
+                    $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
+                }
                 def2.reject()
                 return def2.promise();
             }
         }
     }
 
+    for(var i in inventory.groups)
+    {
+        var val = inventory.groups[i]
+        if(val.id===undefined)
+        {
+            if(val.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(val.vars.ansible_ssh_private_key_file))
+            {
+                // <!--Вставка файла -->
+                $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
+                //pmInventories.showGroupVarsModal({name:i});
+                var scroll_el = "#imported_groups";
+                if ($(scroll_el).length != 0)  {
+                    $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
+                }
+                def2.reject()
+                return def2.promise();
+            }
+
+        }
+        //проверяем, что пользователь не пытается создать инвенторий с уже существующей ранее группой с children==true
+        //которая так же включает в себя группы, название которых идентично тем, что пользователь хочет создать сейчас заново
+        if(inventory.groups[i].children!==undefined && inventory.groups[i].children==true && inventory.groups[i].id!==undefined)
+        {
+            for(var j in inventory.groups[i].groups)
+            {
+                if(inventory.groups[inventory.groups[i].groups[j].name]!==undefined && inventory.groups[inventory.groups[i].groups[j].name].id==undefined)
+                {
+                    $.notify('It is impossible to replace subitem "'+inventory.groups[i].groups[j].name+'" in existing group "'+i+'" with new one.', "error");
+                    var scroll_el = "#imported_groups";
+                    if ($(scroll_el).length != 0)  {
+                        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
+                    }
+                    def2.reject()
+                    return def2.promise();
+
+                }
+
+                if(inventory.groups[inventory.groups[i].groups[j].name]!==undefined && inventory.groups[inventory.groups[i].groups[j].name].id!=inventory.groups[i].groups[j].id)
+                {
+                    $.notify('It is impossible to replace subitem "'+inventory.groups[i].groups[j].name+'" in existing group "'+i+'" with another existing subitem.', "error");
+                    var scroll_el = "#imported_groups";
+                    if ($(scroll_el).length != 0)  {
+                        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
+                    }
+                    def2.reject()
+                    return def2.promise();
+
+                }
+
+            }
+        }
+
+    }
+
     var def = new $.Deferred();
 
-    if($("#inventory_name").val() != "")
+    if($("#inventory_name").val() != "" && $("#inventory_name").val()!==undefined)
     {
         inventory.name = $("#inventory_name").val();
     }
@@ -512,54 +1742,29 @@ pmInventories.importInventory = function(inventory)
             item:'inventory',
             pk:inventory_id
         })
-        var bulkdata = []
-        // Сбор групп и вложенных в них хостов
-        for(var i in inventory.groups)
+
+
+        // Сбор хостов вложенных к инвенторию
+        var bulkHosts = [];
+        for(var i in inventory.hosts)
         {
-            var val = inventory.groups[i]
-
-            bulkdata.push({
-                type:"add",
-                item:'group',
-                data:{
-                    name:i,
-                    children:val.children,
-                    vars:val.vars
-                }
-            })
-
-            for(var j in val.hosts)
+            var val = inventory.hosts[i]
+            if(val.id===undefined)
             {
-                var hval = val.hosts[j]
-                bulkdata.push({
+                bulkHosts.push({
                     type:"add",
                     item:'host',
                     data:{
-                        name:hval.name,
-                        type:hval.type,
-                        vars:hval.vars
+                        name:val.name,
+                        type:val.type,
+                        vars:val.vars
                     }
                 })
             }
         }
 
-        // Сбор хостов вложенных к инвенторию
-        var bulkHosts = []
-        for(var i in inventory.hosts)
-        {
-            var val = inventory.hosts[i]
-            bulkHosts.push({
-                type:"add",
-                item:'host',
-                data:{
-                    name:val.name,
-                    type:val.type,
-                    vars:val.vars
-                }
-            })
-        }
 
-        // Добавление хостов вложенных к инвенторию
+        // Добавление новых хостов вложенных к инвенторию
         spajs.ajax.Call({
             url: hostname + "/api/v1/_bulk/",
             type: "POST",
@@ -569,6 +1774,7 @@ pmInventories.importInventory = function(inventory)
             {
                 var hasError = false;
                 var hosts_ids = []
+                var just_added_hosts = [];
                 for(var i in data)
                 {
                     var val = data[i]
@@ -578,20 +1784,97 @@ pmInventories.importInventory = function(inventory)
                         hasError = true;
                         continue;
                     }
-                    hosts_ids.push(val.data.id)
-                    deleteBulk.push({
-                        type:"del",
-                        item:'host',
-                        pk:val.data.id
-                    })
+                    for(var j in inventory.hosts)
+                    {
+                        if(inventory.hosts[j].name==val.data.name)
+                        {
+                            if(just_added_hosts[val.data.name]===undefined)
+                            {
+                                just_added_hosts[val.data.name]=val.data;
+                                deleteBulk.push({
+                                    type:"del",
+                                    item:'host',
+                                    pk:val.data.id
+                                })
+                                if(inventory.hosts[j].all_only==false)
+                                {
+                                    hosts_ids.push(val.data.id);
+
+                                }
+                            }
+                        }
+                    }
+                }
+                //добавление существующих ранее хостов
+                for(var i in pmInventories.model.importedInventories.inventory.hosts)
+                {
+                    if(pmInventories.model.importedInventories.inventory.hosts[i].id)
+                    {
+                        var hostName=pmInventories.model.importedInventories.inventory.hosts[i].name;
+                        just_added_hosts[hostName]=pmInventories.model.importedInventories.inventory.hosts[i];
+
+                        //добавление существующих ранее хостов, вложенных непосредственно к инвенторию
+                        if(pmInventories.model.importedInventories.inventory.hosts[i].all_only==false)
+                        {
+                            hosts_ids.push(+pmInventories.model.importedInventories.inventory.hosts[i].id);
+                        }
+                    }
                 }
 
                 if(hasError)
                 {
                     // По меньшей мере в одной операции была ошибка вставки.
-                    // Инвенторий импортирован не полностью 
+                    // Инвенторий импортирован не полностью
                     def.reject(deleteBulk);
                     return;
+                }
+
+                var bulkdata = [];
+                var groups_with_just_added_hosts=[];
+                // Сбор групп и вложенных в них хостов
+                for(var i in inventory.groups)
+                {
+                    var val = inventory.groups[i]
+                    //если нужно создать новую группу(id===undefined, следовательно, она не была создана ранее)
+                    //то доавляем ее в bulk запрос
+                    if(val.id===undefined)
+                    {
+                        bulkdata.push({
+                            type: "add",
+                            item: 'group',
+                            data: {
+                                name: i,
+                                children: val.children,
+                                vars: val.vars
+                            }
+                        })
+
+                        //собираем хосты в нужные группы
+                        for(var j in val.hosts)
+                        {
+                            var hval = val.hosts[j];
+                            if(just_added_hosts[hval.name])
+                            {
+                                if(!groups_with_just_added_hosts[i])
+                                {
+                                    groups_with_just_added_hosts[i]=[];
+                                }
+                                groups_with_just_added_hosts[i].push(just_added_hosts[hval.name].id);
+                            }
+                            else
+                            {
+                                bulkdata.push({
+                                    type:"add",
+                                    item:'host',
+                                    data:{
+                                        name:hval.name,
+                                        type:hval.type,
+                                        vars:hval.vars
+                                    }
+                                })
+                            }
+                        }
+                    }
                 }
 
                 $.when(pmInventories.addSubHosts(inventory_id, hosts_ids)).done(function()
@@ -607,6 +1890,15 @@ pmInventories.importInventory = function(inventory)
                             var igroups_ids = []
                             var bulk_update = []
                             var hasError = false;
+                            for(var i in pmInventories.model.importedInventories.inventory.groups)
+                            {
+                                //собираем в igroups_ids группы, которые существовали в системе ранее
+                                if(pmInventories.model.importedInventories.inventory.groups[i].id)
+                                {
+                                    //igroups_ids - массив с id групп, которые будут добавлены в инвенторий в качестве subitems
+                                    igroups_ids.push(+pmInventories.model.importedInventories.inventory.groups[i].id);
+                                }
+                            }
                             for(var i in data)
                             {
                                 deleteBulk.push({
@@ -631,7 +1923,7 @@ pmInventories.importInventory = function(inventory)
                                     {
                                         if(inventory.groups[val.data.name].groups.length)
                                         {
-                                            // Добавление подгрупп 
+                                            // Добавление подгрупп
                                             var groups_ids = []
                                             for(var j in inventory.groups[val.data.name].groups)
                                             {
@@ -644,6 +1936,16 @@ pmInventories.importInventory = function(inventory)
                                                         break;
                                                     }
                                                 }
+
+                                                //добавляем подгруппы, которые являются созданными ранее группами
+                                                for(var l in pmInventories.model.importedInventories.inventory.groups)
+                                                {
+                                                    if(l==inventory.groups[val.data.name].groups[j] && pmInventories.model.importedInventories.inventory.groups[l].id)
+                                                    {
+                                                        groups_ids.push(pmInventories.model.importedInventories.inventory.groups[l].id);
+                                                    }
+                                                }
+
                                             }
                                             bulk_update.push({
                                                 type: "mod",
@@ -657,6 +1959,7 @@ pmInventories.importInventory = function(inventory)
                                     }
                                     else
                                     {
+                                        // Это хост
                                         if(inventory.groups[val.data.name].hosts.length)
                                         {
                                             // Добавление хостов
@@ -673,6 +1976,17 @@ pmInventories.importInventory = function(inventory)
                                                     }
                                                 }
                                             }
+
+                                            for(var z in groups_with_just_added_hosts)
+                                            {
+                                                if(z==val.data.name){
+                                                    for(var y in groups_with_just_added_hosts[z])
+                                                    {
+                                                        hosts_ids.push(groups_with_just_added_hosts[z][y]);
+                                                    }
+                                                }
+                                            }
+
                                             bulk_update.push({
                                                 type: "mod",
                                                 item:'group',
@@ -684,16 +1998,12 @@ pmInventories.importInventory = function(inventory)
                                         }
                                     }
                                 }
-                                else
-                                {
-                                    // Это хост
-                                }
                             }
 
                             if(hasError)
                             {
                                 // По меньшей мере в одной операции была ошибка вставки.
-                                // Инвенторий импортирован не полностью 
+                                // Инвенторий импортирован не полностью
                                 def.reject(deleteBulk);
                                 return;
                             }
@@ -724,7 +2034,7 @@ pmInventories.importInventory = function(inventory)
                                             if(hasError)
                                             {
                                                 // По меньшей мере в одной операции была ошибка обновления.
-                                                // Инвенторий импортирован не полностью 
+                                                // Инвенторий импортирован не полностью
                                                 def.reject(deleteBulk);
                                                 return;
                                             }
