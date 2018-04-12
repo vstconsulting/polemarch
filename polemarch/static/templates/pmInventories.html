@@ -1,4 +1,4 @@
- 
+
 <!-- Поля ввода инвентория -->
 <script type="text/x-just" data-just="filed_type_inventoriesAutocomplete">  
     
@@ -99,7 +99,7 @@
     </section>
 
     <section class="content">
-        
+
         <~ pmInventories.model.importedInventories>
             <% if(pmInventories.model.importedInventories && pmInventories.model.importedInventories.inventory){%> 
                 <button type="button" onclick="spajs.showLoader(pmInventories.importInventoriesAndOpen()); return false;" class="btn btn-primary" >Import inventory</button>
@@ -118,15 +118,20 @@
         <br>
         <br>
         <div class="row">
-            <~ pmInventories.model.importedInventories> 
-                <%= pmInventories.renderImportedInventory(pmInventories.model.importedInventories) %> 
+            <~ pmInventories.model.importedInventoriesIsReady>
+                <% if(pmInventories.model.importedInventoriesIsReady == true) { %>
+                    <%= pmInventories.renderImportedInventory(pmInventories.model.importedInventories) %>
+                <% } %>
             <~>
         </div> 
     </section>
 </script>
-    
-<script type="text/x-just" data-just="inventories_imported_inventory"> 
-    
+
+
+
+<!-- шаблон страницы импотированного инвентория -->
+<script type="text/x-just" data-just="inventories_imported_inventory">
+
 <section class="col-lg-12">
     <div class="box box-info collapsed-box">
         <div class="box-header with-border collapsed-box">
@@ -138,23 +143,23 @@
         <div class="box-body">
             <div class="form-group col-lg-12 col-ml-12 col-sm-12">
                 <pre><%- text %></pre>
-            </div>  
+            </div>
         </div>
     </div>
-</section> 
-        
+</section>
+
 <div class="col-lg-12">
-    <h1>Inventory</h1> 
-</div> 
+    <h1>Inventory</h1>
+</div>
 <section class="col-lg-12">
     <div class="box box-info">
         <div class="box-header with-border">
             Inventory<br>
             <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
             </div>
         </div>
-        <div class="box-body">   
+        <div class="box-body">
             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                 <label class="control-label" >Name</label>
                 <input type="text" id="inventory_name" value="<%- inventory.name %>"  class="form-control" maxlength="255">
@@ -162,84 +167,527 @@
             </div>
         </div>
     </div>
-</section> 
+</section>
 <%= jsonEditor.editor(inventory.vars, {block:'inventories', prefix:"inventory"}) %>
 
-
-<% for(var i in inventory.groups){ var valg = inventory.groups[i] %>   
-    <div class="col-lg-12">
-        <h1>Group: <%- i %></h1> 
-    </div> 
-    <%= jsonEditor.editor(valg.vars, {block:'groups', prefix: 'group'+i}) %> 
-<% } %>
-    
-<% for(var i in inventory.hosts){ var val = inventory.hosts[i] %>  
-    <div class="col-lg-12">
-        <h1>Host: <%- val.name %></h1> 
-    </div> 
-    <section class="col-lg-12">
-        <div class="box box-info">
-            <div class="box-header with-border">
-                Host: <%- val.name %><br>
-                <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
-                </div>
-            </div>
-            <div class="box-body">   
-                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                    <label class="control-label" >Name</label>
-                    <input type="text" disabled value="<%- val.name %>"  class="form-control" maxlength="255">
-                    <div class="help-block"></div>
-                </div>
-                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                    <label class="control-label" >Type</label>
-                    <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
-                    <div class="help-block"></div>
-                </div>  
+<div class="col-lg-12">
+    <h1>Subitems in inventory</h1>
+</div>
+<section class="col-lg-12">
+    <div class="box box-info" id="imported_hosts">
+        <div class="box-header with-border">
+            Hosts<br>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
             </div>
         </div>
-    </section> 
-    <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:'host'+val.name}) %> 
-<% } %>
+        <div class="box-body">
+            <table class="table table-bordered multiple-select imported-subitems-table" id="imported_hosts_table">
+                <tbody>
+                    <tr>
 
-<% for(var i in inventory.groups){ var valg = inventory.groups[i] %>  
-    <% for(var j in valg.hosts){ var val = valg.hosts[j] %> 
-        <div class="col-lg-12">
-            <h1>Group: <%- i %>, Host: <%- val.name %></h1>  
-        </div> 
-        <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    Group: <%- i %>, Host: <%- val.name %><br>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
-                    </div>
-                </div>
-                <div class="box-body">   
-                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                        <label class="control-label" >Name</label>
-                        <input type="text" disabled value="<%- val.name %>"  class="form-control" maxlength="255">
-                        <div class="help-block"></div>
-                    </div>
-                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                        <label class="control-label" >Type</label>
-                        <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
-                        <div class="help-block"></div>
-                    </div>  
-                </div>
+                        <th style="width: 45px" onclick="$(this).parent().toggleClass('selected'); pmInventories.toggleSelectAllImportedSubItems($('#imported_hosts_table tr'), $(this).parent().hasClass('selected'), 'imported_hosts'); return false;">
+                            <div class="ico-on fa fa-toggle-on"></div>
+                            <div class="ico-off fa  fa-toggle-off"></div>
+                        </th>
+
+                        <th style="width: 120px;">Name</th>
+                        <th style="width: 75px;" class="hidden-xs">Type</th>
+                        <th style="width: 85px;" class="hidden-xs">Exists</th>
+                        <th style="width: 85px;" class="hidden-xs">New item</th>
+
+                        <th>Vars</th>
+                        <th style="width: 100px;">Actions</th>
+                    </tr>
+                    <% for(var i in inventory.hosts){ var val = inventory.hosts[i] %>
+                        <tr class="item-row item-<%- i %>  <% if(val.id!==undefined) { %> unselectable <% } %>"
+                                        data-id="<%- i %>"
+                                        data-name="<%- val.name %>">
+
+                            <td class=""  <% if(val.id===undefined) { %> onclick="pmInventories.toggleSelectImportedSubItem(this, 'imported_hosts'); return false;" <% } %> >
+                                <div class="ico-on fa fa-toggle-on"></div>
+                                <div class="ico-off fa  fa-toggle-off"></div>
+                            </td>
+
+                            <td style="width: 120px;">
+                                 <% if(val.id===undefined) { %>
+                                    <%= val.name %>
+                                <% } else { %>
+                                    <a href="/?host/<%= val.id %>" target="_blank">  <%= val.name %> </a>
+                                <% } %>
+                            </td>
+
+                            <td style="width: 75px;" class="hidden-xs"> <%= val.type %> </td>
+                            <td style="width: 85px;" class="hidden-xs matches"> <% if(val.matches) { %> <i class="fa fa-check" style="font-size:20px;"></i>  <% } %></td>
+                            <td style="width: 85px;" class="hidden-xs new_subitem"> <% if(val.id===undefined) { %> <i class="fa fa-check" style="font-size:20px;"></i>  <% } %></td>
+                            <td id="hosts-<%= i %>-vars">
+                                <ul>
+                                    <% for(var j in val.vars) { %>
+                                        <li> <b> <%= j %>: </b> <%= val.vars[j] %> </li>
+                                    <% } %>
+                                </ul>
+                            </td>
+                            <td style="width: 100px;">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-primary dropdown-toggle"  data-toggle="dropdown"  aria-haspopup="true" aria-expanded="false"
+                                        <% if(val.id!==undefined && !pmInventories.checkAbilityToSelectMatching('hosts', i)) { %>
+                                            disabled
+                                        <% } %>
+                                    >
+
+                                        Actions
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right">
+                                        <li class="item-<%= i %>-hide-li">
+                                            <a href="#" onclick="spajs.showLoader(pmInventories.openEditItemModal('hosts', <%= i %>)); return false;" class="">
+                                                Edit new host
+                                            </a>
+                                        </li>
+                                        <li class="<% if(val.matches==false) { %> hide <% } %> ">
+                                            <a href="#" onclick="spajs.showLoader(pmInventories.openChooseMatchingModal('hosts', <%= i %>)); return false;" class="">
+                                                Select matching
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        <div class="box-footer clearfix">
+            <div class="btn-group hide actions_button" role="group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <~ pmInventories.model.selectedImportedSubItems>
+                    Actions <%= pmInventories.model.selectedImportedSubItems %> on items
+                    <~>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#"
+                            onclick="spajs.showLoader(pmInventories.deleteSubItemsFromImportedInventory('imported_hosts', 'hosts')); return false;" >Delete from this inventory</a>
+                    </li>
+                </ul>
             </div>
-        </section> 
-        <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:'host'+val.name}) %> 
-    <% } %>
-<% } %>  
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Select
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" onclick="spajs.showLoader(pmInventories.toggleSelectAllImportedSubItems($('#imported_hosts_table tr'), true, 'imported_hosts'));return false;" >Select all</a>
+                    </li>
+                    <li class="hide unselect_all" >
+                        <a href="#" onclick="spajs.showLoader(pmInventories.toggleSelectAllImportedSubItems($('#imported_hosts_table tr'), false, 'imported_hosts')); return false;" >Unselect all</a>
+                    </li>
+                </ul>
+            </div>
+    </div>
+    </div>
+</section>
+
+<section class="col-lg-12">
+    <div class="box box-info" id="imported_groups">
+        <div class="box-header with-border">
+            Groups<br>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+            </div>
+        </div>
+        <div class="box-body">
+            <table class="table table-bordered multiple-select imported-subitems-table" id="imported_groups_table">
+                <tbody>
+                    <tr>
+
+                        <th style="width: 45px" onclick="$(this).parent().toggleClass('selected'); pmInventories.toggleSelectAllImportedSubItems($('#imported_groups_table tr'), $(this).parent().hasClass('selected'), 'imported_groups'); return false;">
+                            <div class="ico-on fa fa-toggle-on"></div>
+                            <div class="ico-off fa  fa-toggle-off"></div>
+                        </th>
+                        <th style="width: 120px;">Name</th>
+                        <th class="hidden-xs" style="width:75px;">Children</th>
+                        <th style="width: 85px;" class="hidden-xs">Exists</th>
+                        <th style="width: 85px;" class="hidden-xs">New item</th>
+                        <th>Vars</th>
+                        <th>Subitems</th>
+                        <th style="width: 100px;">Actions</th>
+                    </tr>
+                    <% for(var i in inventory.groups){ var val = inventory.groups[i] %>
+                        <tr class="item-row item-<%- i %> <% if(val.id!==undefined) { %> unselectable <% } %>"
+                                        data-id="<%- i %>" >
+
+                            <td class="" <% if(val.id===undefined) { %> onclick="pmInventories.toggleSelectImportedSubItem(this, 'imported_groups'); return false;" <% } %> >
+                                <div class="ico-on fa fa-toggle-on"></div>
+                                <div class="ico-off fa  fa-toggle-off"></div>
+                            </td>
+
+                            <td style="width: 120px;">
+                                <% if(val.id===undefined) { %>
+                                    <%= i %>
+                                <% } else { %>
+                                    <a href="/?group/<%= val.id %>" target="_blank">  <%= i %> </a>
+                                <% } %>
+                            </td>
+                            <td class="group-children hidden-xs" style="width:75px;">
+                                <% if (val.children!==undefined && val.children==true) { %>
+                                    <i class="fa fa-check" style="font-size:20px;"></i>
+                                 <% } %>
+                            </td>
+                            <td style="width: 85px;" class="hidden-xs matches"> <% if(val.matches) { %> <i class="fa fa-check" style="font-size:20px;"></i>  <% } %></td>
+                            <td style="width: 85px;" class="hidden-xs new_subitem"> <% if(val.id===undefined) { %> <i class="fa fa-check" style="font-size:20px;"></i>  <% } %></td>
+                            <td id="groups-<%= i %>-vars">
+                                <ul>
+                                    <% for(var j in val.vars) { %>
+                                        <li> <b> <%= j %>: </b> <%= val.vars[j] %> </li>
+                                    <% } %>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <% if (val.children!==undefined && val.children==true) { %>
+                                      <% for(var j in val.groups) { %>
+                                        <% if(val.groups[j].id===undefined) { %>
+                                            <li> <b>Group:</b>  <%= val.groups[j] %> </li>
+                                        <% } else { %>
+                                            <li> <b>Group:</b> <a href="/?group/<%= val.groups[j].id %>" target="_blank">  <%= val.groups[j].name %> </a></li>
+                                         <% } %>
+                                      <% } %>
+                                    <% } else { %>
+                                        <% for(var j in val.hosts) { %>
+                                            <% if(val.hosts[j].id===undefined) { %>
+                                                <li> <b>Host:</b> <%= val.hosts[j].name %> </li>
+                                            <% } else { %>
+                                                <li> <b>Host:</b> <a href="/?host/<%= val.hosts[j].id %>" target="_blank"> <%= val.hosts[j].name %></a></li>
+                                            <% } %>
+                                        <% } %>
+                                    <% } %>
+                                </ul>
+                            </td>
+                            <td style="width: 100px;">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                        <% if(val.id!==undefined && !pmInventories.checkAbilityToSelectMatching('groups', i )) { %>
+                                            disabled
+                                        <% } %>
+                                    >
+                                        Actions
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right">
+                                        <li class="item-<%= i %>-hide-li">
+                                            <a href="#" onclick="spajs.showLoader(pmInventories.openEditItemModal('groups', '<%= i %>')); return false;" class="">
+                                                Edit new group
+                                            </a>
+                                        </li>
+                                        <li class="<% if(val.matches==false) { %> hide <% } %>">
+                                            <a href="#" onclick="spajs.showLoader(pmInventories.openChooseMatchingModal('groups', '<%= i %>')); return false;" class="">
+                                                Select matching
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        <div class="box-footer clearfix">
+            <div class="btn-group hide actions_button" role="group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <~ pmInventories.model.selectedImportedSubItems>
+                    Actions <%= pmInventories.model.selectedImportedSubItems %> on items
+                    <~>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#"
+                            onclick="spajs.showLoader(pmInventories.deleteSubItemsFromImportedInventory('imported_groups', 'groups')); return false;" >Delete from this inventory</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Select
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" onclick="spajs.showLoader(pmInventories.toggleSelectAllImportedSubItems($('#imported_groups_table tr'), true, 'imported_groups'));return false;" >Select all</a>
+                    </li>
+                    <li class="hide unselect_all" >
+                        <a href="#" onclick="spajs.showLoader(pmInventories.toggleSelectAllImportedSubItems($('#imported_groups_table tr'), false, 'imported_groups')); return false;" >Unselect all</a>
+                    </li>
+                </ul>
+            </div>
+    </div>
+    </div>
+</section>
 </script>
- 
+
+<!-- шаблон модального окна для редактирования нового subitem -->
+<script type="text/x-just" data-just="edit_imported_subitem">
+    <div class="modal-dialog" >
+    <div class="modal-content" >
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Inventory subitem options</h4>
+      </div>
+      <!-- Основное содержимое модального окна -->
+      <div class="modal-body" style="background-color:#ecf0f5; overflow:hidden;">
+      <% if(subItemType=="hosts") { %>
+            <div class="col-lg-12">
+                <h1>Host: <%- val.name %></h1>
+            </div>
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Host: <%- val.name %><br>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="form-group col-xs-12 col-sm-6 col-md-6">
+                            <label class="control-label" >Name</label>
+                            <input type="text" disabled value="<%- val.name %>"  class="form-control" maxlength="255">
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group col-xs-12 col-sm-6 col-md-6">
+                            <label class="control-label" >Type</label>
+                            <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <%= jsonEditor.editor(val.vars, {block:'hosts', prefix:'host'+val.name}) %>
+          </div>
+          <% } else { %>
+        <div class="col-lg-12">
+            <h1>Group: <%- index %></h1>
+        </div>
+        <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Group: <%- index %><br>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="form-group  col-xs-12 col-sm-6 col-md-6">
+                            <label class="control-label" >Name</label>
+                            <input type="text" disabled value="<%- index %>"  class="form-control" maxlength="255">
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group  col-xs-12 col-sm-6 col-md-6 boolean-select">
+                            <label class="control-label">Children</label>
+                            <div class="form-control <% if (val.children!==undefined && val.children==true) { %> selected <% } %>" style="background-color:#ffffff;" disabled>
+                                <div class="ico-on fa fa-toggle-on" style="background-color:#ffffff; cursor: not-allowed;"></div>
+                                <div class="ico-off fa  fa-toggle-off" style="background-color:#ffffff; cursor: not-allowed;"></div>
+                                <div class="boolean-title" style="background-color:#ffffff; cursor: not-allowed;">Boolean value</div>
+                            </div>
+                            <div class="help-block">If turn, then allow adding sub groups to group</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        <%= jsonEditor.editor(val.vars, {block:'groups', prefix: 'group'+index}) %>
+         </div>
+    <% } %>
+          <!-- Футер модального окна -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="spajs.showLoader(pmInventories.saveChangesFromEditItemModal('<%= subItemType %>', '<%= index %>'));  return false;">Save</button>
+          </div>
+        </div>
+  </div>
+</script>
+
+<!-- шаблон модального окна для выбора: какой из subitems с одинаковым именем использовать в данном инвентории -->
+<script type="text/x-just" data-just="choose_matching_modal">
+    <div class="modal-dialog" >
+        <div class="modal-content" >
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 class="modal-title">Select matching <%= subItemType %> </h3> <br>
+            <p>
+                Imported inventory includes <% var str=subItemType; str=str.slice(0,-1); %> <%= str %> <b> <% if(subItemType=="hosts") { %> <%= val.name %>  <% } else { %> <%= index %> <% } %> </b>.  <br>
+                There are <% var len=val.match_arr.length; %> <%= len %> <%= subItemType %> with the same name in system already. <br>
+                Please, select which of them you want to use in this inventory: new one or existing one.
+            </p>
+          </div>
+          <!-- Основное содержимое модального окна -->
+          <div class="modal-body" style="background-color:#ecf0f5; overflow:hidden;">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                       <% if(subItemType=="hosts") { %> Host: <%= val.name %>  <% } else { %> Group: <%= index %> <% } %> for new inventory<br>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered multiple-select imported-subitems-table">
+                            <tbody>
+                                 <% if(subItemType=="hosts") { %>
+                                    <tr>
+                                        <th style="width: 45px" onclick="">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </th>
+                                        <th style="width: 120px;">Name</th>
+                                        <th style="width: 75px;">Type</th>
+                                        <th>Vars</th>
+                                        <th style="width: 50px">New</th>
+                                    </tr>
+                                    <tr class="match-subitem <% if(val.id===undefined) { %> selected <% } %>" subitem-id="new">
+                                        <td onclick="pmInventories.toggleSelectMatchSubItem(this); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td> <%= pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].name %> </td>
+                                        <td> <%= pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].type %> </td>
+                                        <td>
+                                            <ul>
+                                                <% for(var j in pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].vars) { %>
+                                                    <li> <b> <%= j %>: </b> <%= pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].vars[j] %> </li>
+                                                <% } %>
+                                            </ul>
+                                        </td>
+                                        <td class="new_subitem" style="width: 50px"> <i class="fa fa-check" style="font-size:20px;"></i> </td>
+                                    </tr>
+                                    <% for(var i in val.match_arr){ var val1 = val.match_arr[i] %>
+                                        <tr class="match-subitem <% if(val.id!==undefined && val.id==val1.id) { %> selected <% } %>" subitem-id="<%= val1.id %>">
+                                            <td onclick="pmInventories.toggleSelectMatchSubItem(this); return false;">
+                                                <div class="ico-on fa fa-toggle-on"></div>
+                                                <div class="ico-off fa  fa-toggle-off"></div>
+                                            </td>
+                                            <td style="width: 120px;"> <%= val1.name %> </td>
+                                            <td style="width: 75px;"> <%= val1.type %> </td>
+                                            <td>
+                                                <ul>
+                                                    <% for(var j in val1.vars) { %>
+                                                        <li> <b> <%= j %>: </b> <%= val1.vars[j] %> </li>
+                                                    <% } %>
+                                                </ul>
+                                            </td>
+                                            <td style="width: 50px"></td>
+                                        </tr>
+                                    <% } %>
+                                <% } else { %>
+                                    <tr>
+                                        <th style="width: 45px" onclick="">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </th>
+                                        <th style="width: 120px;">Name</th>
+                                        <th style="width: 75px;">Children</th>
+                                        <th>Vars</th>
+                                        <th>Subitems</th>
+                                        <th style="width: 50px">New</th>
+                                    </tr>
+                                    <tr class="match-subitem <% if(val.id===undefined) { %> selected <% } %>" subitem-id="new">
+                                        <td onclick="pmInventories.toggleSelectMatchSubItem(this); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td> <%= index %> </td>
+                                        <td class="group-children hidden-xs" style="width:75px;"> <% if(pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].children) { %> <i class="fa fa-check" style="font-size:20px;"></i> <% } %> </td>
+                                        <td>
+                                            <ul>
+                                                <% for(var j in pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].vars) { %>
+                                                    <li> <b> <%= j %>: </b> <%= pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].vars[j] %> </li>
+                                                <% } %>
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <ul>
+                                                <% if(pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].children) { %>
+                                                    <% for(var j in pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].groups) { %>
+                                                        <li> <b> Group: </b> <%= pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].groups[j] %> </li>
+                                                    <% } %>
+                                                <% } else { %>
+                                                    <% for(var j in pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].hosts) { %>
+                                                        <li> <b> Host: </b> <%= pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].hosts[j].name %> </li>
+                                                    <% } %>
+                                                <% } %>
+                                            </ul>
+                                        </td>
+                                        <td class="new_subitem" style="width: 50px"> <i class="fa fa-check" style="font-size:20px;"></i> </td>
+                                    </tr>
+                                     <% for(var i in val.match_arr){ var val1 = val.match_arr[i] %>
+                                        <tr class="match-subitem <% if(val.id!==undefined && val.id==val1.id) { %> selected <% } %>" subitem-id="<%= val1.id %>">
+                                            <td onclick="pmInventories.toggleSelectMatchSubItem(this); return false;">
+                                                <div class="ico-on fa fa-toggle-on"></div>
+                                                <div class="ico-off fa  fa-toggle-off"></div>
+                                            </td>
+                                            <td style="width: 120px;"> <%= index %> </td>
+                                            <td class="group-children hidden-xs" style="width:75px;"> <% if(val1.children) { %> <i class="fa fa-check" style="font-size:20px;"></i> <% } %> </td>
+                                            <td>
+                                                <ul>
+                                                    <% for(var j in val1.vars) { %>
+                                                        <li> <b> <%= j %>: </b> <%= val1.vars[j] %> </li>
+                                                    <% } %>
+                                                </ul>
+                                            </td>
+                                            <td>
+                                                <ul>
+                                                <% if(val1.children) { %>
+                                                    <% for(var j in val1.groups) { %>
+                                                        <li> <b> Group: </b> <%= val1.groups[j].name %> </li>
+                                                    <% } %>
+                                                <% } else { %>
+                                                    <% for(var j in val1.hosts) { %>
+                                                        <li> <b> Host: </b> <%= val1.hosts[j].name %> </li>
+                                                    <% } %>
+                                                <% } %>
+                                            </ul>
+                                            </td>
+                                            <td style="width: 50px"></td>
+                                        </tr>
+                                    <% } %>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+          </div>
+          <!-- Футер модального окна -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="spajs.showLoader(pmInventories.saveSelectedMatchSubItem('<%= subItemType %>', '<%= index %>'));  return false;">Save</button>
+          </div>
+        </div>
+  </div>
+</script>
+
+<script type="text/x-just" data-just="change_imported_subitem_vars">
+    <% if(!$.isEmptyObject(vars)) { %>
+        <ul>
+            <% for(var i in vars) { %>
+                <li> <b> <%= i %>: </b> <%= vars[i] %> </li>
+            <% } %>
+        </ul>
+    <% } %>
+</script>
+
+
 <script type="text/x-just" data-just="inventories_btn_openImportPageAndImportFiles">
 <span class="btn btn-default textfile" style="margin-left: 10px;" >
     <input type="file" class="input-file"  onchange="spajs.showLoader(pmInventories.openImportPageAndImportFiles(event));"  >
     <span class="glyphicon glyphicon-file"></span> Import from file
 </span>
-</script> 
+</script>
 <script type="text/x-just" data-just="inventories_sub_items"> 
     <section class="col-lg-12">
         <div class="box box-info">
