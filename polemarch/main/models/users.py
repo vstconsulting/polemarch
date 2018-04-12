@@ -23,7 +23,7 @@ class UserGroup(BaseGroup, acl.ACLGroupSubclass, acl.ACLPermissionSubclass):
     parent = models.OneToOneField(BaseGroup, on_delete=None, parent_link=True)
     users = BaseGroup.user_set
 
-    def __unicode__(self):
+    def __unicode__(self):  # nocv
         return super(UserGroup, self).__unicode__()
 
     @property

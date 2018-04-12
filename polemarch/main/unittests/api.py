@@ -22,15 +22,6 @@ class RoutersTestCase(BaseTestCase):
         self.assertTrue(checked, "Not registered!")
 
 
-class UserGroupTestCase(BaseTestCase):
-
-    def test_unicode(self):
-        tmp_group = self.get_model_class('UserGroup').objects.create(
-            name="test_group_{}".format(9)
-        )
-        tmp_group.__unicode__()
-
-
 class UserSettingsTestCase(BaseTestCase):
 
     def test_del_user_settings(self):
