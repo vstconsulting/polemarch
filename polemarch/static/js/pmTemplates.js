@@ -48,7 +48,7 @@ pmTemplates.execute = function (item_id, option)
     }
     var def = new $.Deferred();
     spajs.ajax.Call({
-        url: "/api/v1/" + this.model.name + "/" + item_id + "/execute/",
+        url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/execute/",
         type: "POST",
         data: JSON.stringify(option),
         contentType: 'application/json',
@@ -100,7 +100,7 @@ pmTemplates.exportToFile = function (item_ids)
 
     var thisObj = this;
     spajs.ajax.Call({
-        url: "/api/v1/" + this.model.name + "/filter/?detail=1",
+        url: hostname + "/api/v1/" + this.model.name + "/filter/?detail=1",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -191,7 +191,7 @@ pmTemplates.importFromFile = function (files_event, project_id)
                             console.log(bulkdata)
 
                             spajs.ajax.Call({
-                                url: "/api/v1/_bulk/",
+                                url: hostname + "/api/v1/_bulk/",
                                 type: "POST",
                                 contentType: 'application/json',
                                 data: JSON.stringify(bulkdata),

@@ -204,3 +204,23 @@ spajs.errorPage = function(holder, menuInfo, data, error_data)
      
     $(holder).insertTpl(spajs.just.render("errorPage", {error:error, data:data, menuInfo:menuInfo}))
 }
+
+
+
+tabSignal.connect("loading.completed", function()
+{ 
+    var just = new JUST({
+        root : {
+            'app-body-gui':$("script[data-just=app-body-gui]").html()
+        }
+    });
+    
+    $("body").appendTpl(just.render('app-body-gui', {}))
+            
+    polemarch.start({
+        is_superuser:window.is_superuser,
+        holder:'#spajs-body'
+    })
+    
+    hideLoadingProgress();
+})

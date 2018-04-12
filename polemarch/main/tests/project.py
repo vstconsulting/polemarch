@@ -75,6 +75,24 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         self._filter_vars(url, "repo_type:TEST", 6)
         self._filter_vars(url, "some_arg:search_arg", 1)
 
+        # Create hidden projects for selfcare
+        data = dict(
+            name="TestHiddenProject",
+            vars=dict(repo_type='MANUAL'),
+            hidden=True
+        )
+        hidden_prj = self.get_model_class('Project').objects.create(**data)
+        self._filter_test(url, dict(name="TestHidden"), 0)
+        self.get_result("get", url + "{}/".format(hidden_prj.id), 404)
+        self.get_result("delete", url + "{}/".format(hidden_prj.id), 404)
+        with open(hidden_prj.path + "/hidden_test.yml", 'w+') as plbook:
+            plbook.write("")
+        hidden_prj.sync()
+        self.assertCount(hidden_prj.tasks.all(), 1)
+        result = self.get_result("get", '/api/v1/tasks/?name=hidden')
+        self.assertEqual(result['count'], 0)
+        hidden_prj.delete()
+
     def test_inventories_in_project(self):
         url = "/api/v1/projects/"  # URL to projects layer
 

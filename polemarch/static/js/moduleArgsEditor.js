@@ -9,7 +9,7 @@ moduleArgsEditor.loadAllModule = function()
     var def = new $.Deferred();
     var thisObj = this;
     spajs.ajax.Call({
-        url: "/api/v1/ansible/modules/",
+        url: hostname + "/api/v1/ansible/modules/",
         type: "GET",
         contentType:'application/json',
         success: function(data)

@@ -66,8 +66,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                          data=json.dumps([inventory]))
         return inventory, host
 
+    @patch('polemarch.main.models.projects.Project.sync')
     @patch('polemarch.main.utils.CmdExecutor.execute')
-    def test_execute(self, subprocess_function):
+    def test_execute(self, subprocess_function, sync):
         inv1, h1 = self.create_inventory()
         # mock side effect to get ansible-playbook args for assertions in test
         result = dict()
@@ -111,6 +112,37 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEquals(result['host'], "127.0.1.1")
         self.assertEquals(result['ansible_user'], "centos")
         self.assertEquals(result['ansible_ssh_private_key_file'], "somekey")
+        self.assertEquals(sync.call_count, 0)
+        subprocess_function.reset_mock()
+
+        # Sync on every execute.
+        # Add key for every run sync project
+        data = self.task_proj.vars
+        data['repo_sync_on_run'] = True
+        self.task_proj.vars = data
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(
+                dict(inventory=inv1, playbook="first.yml", sync=True)
+            )
+        )
+        self.assertEquals(sync.call_count, 1)
+        sync.reset_mock()
+
+        def side_effect(*args, **kwargs):
+            raise Exception("Test exceptions")
+
+        sync.side_effect = side_effect
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(
+                dict(inventory=inv1, playbook="first.yml", sync=True)
+            ), code=400
+        )
+        hist = self.get_model_class("History").objects.all().first()
+        self.assertIn("ERROR on Sync operation", hist.raw_stdout)
+        data['repo_sync_on_run'] = False
+        self.task_proj.vars = data
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute_module(self, subprocess_function):
