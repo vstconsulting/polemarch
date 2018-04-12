@@ -3,23 +3,29 @@ import json
 import sys
 import os
 from .inventory import _ApiGHBaseTestCase
-from ..models import Project
 
 
 class ApiProjectsTestCase(_ApiGHBaseTestCase):
     def setUp(self):
         super(ApiProjectsTestCase, self).setUp()
-        self.prj1 = Project.objects.create(name="First_project",
-                                           repository="git@ex.us:dir/rep1.git",
-                                           vars=dict(repo_type="TEST"))
-        self.prj2 = Project.objects.create(name="Second_project",
-                                           repository="git@ex.us:dir/rep2.git",
-                                           vars=dict(repo_type="TEST",
-                                                     some_arg="search_arg"))
+        self.prj1 = self.get_model_class('Project').objects.create(
+            name="First_project",
+            repository="git@ex.us:dir/rep1.git",
+            vars=dict(repo_type="TEST")
+        )
+        self.prj2 = self.get_model_class('Project').objects.create(
+            name="Second_project",
+            repository="git@ex.us:dir/rep2.git",
+            vars=dict(repo_type="TEST", some_arg="search_arg")
+        )
+
+    def test_pagenated(self):
+        for project in self.get_model_class('Project').objects.all().paged(chunk_size=1):
+            project.id
 
     def test_create_delete_project(self):
         url = "/api/v1/projects/"
-        self.list_test(url, Project.objects.all().count())
+        self.list_test(url, self.get_model_class('Project').objects.all().count())
         self.details_test(url + "{}/".format(self.prj1.id),
                           name=self.prj1.name,
                           repository="git@ex.us:dir/rep1.git")
@@ -42,7 +48,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         results_id = self.mass_create(url, data, "name", "repository")
 
         for project_id in results_id:
-            proj_obj = Project.objects.get(pk=project_id)
+            proj_obj = self.get_model_class('Project').objects.get(pk=project_id)
             self.assertEqual(proj_obj.vars["repo_type"], "TEST")
             self.assertEqual(proj_obj.status, "OK")
             file = "/f{}.yml".format(sys.version_info[0])
@@ -53,7 +59,8 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
                 self.assertEqual(f.readline(), "update")
             self.get_result("delete", url + "{}/".format(project_id))
             self.assertTrue(not os.path.exists(proj_obj.path + file))
-        self.assertEqual(Project.objects.filter(id__in=results_id).count(), 0)
+        qs = self.get_model_class('Project').objects.filter(id__in=results_id)
+        self.assertEqual(qs.count(), 0)
 
         repo_url = "git@sdf:cepreu/ansible-experiments.git"
         data = dict(name="GitProject{}".format(sys.version_info[0]),
@@ -124,7 +131,7 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         data = dict(name="Manual project", repository="manual",
                     vars=dict(repo_type="MANUAL"))
         prj_id = self.mass_create(url, [data], "name", "repository")[0]
-        project = Project.objects.get(pk=prj_id)
+        project = self.get_model_class('Project').objects.get(pk=prj_id)
         self.assertEqual(project.vars["repo_type"], "MANUAL")
         self.assertEqual(project.status, "OK")
         task_url = task_url.format(project.id)
