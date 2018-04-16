@@ -48,7 +48,7 @@ pmTasks.execute = function(project_id, inventory, playbook, group, data_vars)
     data_vars.playbook = playbook
     data_vars.inventory = inventory
     spajs.ajax.Call({
-        url: "/api/v1/projects/"+project_id+"/execute-playbook/",
+        url: hostname + "/api/v1/projects/"+project_id+"/execute-playbook/",
         type: "POST",
         data:JSON.stringify(data_vars),
         contentType:'application/json',
@@ -96,7 +96,7 @@ pmTasks.loadItems = function(limit, offset)
 
     var thisObj = this;
     return spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/",
+        url: hostname + "/api/v1/"+this.model.name+"/",
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
@@ -143,7 +143,7 @@ pmTasks.sendSearchQuery = function(query, limit, offset)
 
     var thisObj = this;
     return spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/?"+q.join('&'),
+        url: hostname + "/api/v1/"+this.model.name+"/?"+q.join('&'),
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),

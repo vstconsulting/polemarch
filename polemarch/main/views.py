@@ -19,6 +19,11 @@ class GUIView(BaseView):
     template_name = "gui/gui.html"
 
 
+class AppGUIView(BaseView):
+    login_required = True
+    template_name = "gui/app-gui.html"
+
+
 class Login(BaseView):
     template_name = 'auth/login.html'
 
@@ -33,6 +38,10 @@ class Login(BaseView):
 
     def post(self, request, *args, **kwargs):
         return self.login(request)
+
+
+class AppLogin(Login):
+    template_name = 'auth/app-login.html'
 
 
 class Logout(BaseView):

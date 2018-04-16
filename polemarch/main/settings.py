@@ -141,7 +141,7 @@ __DB_OPTIONS = { }
 try:
     int_values_types = ["timeout", "connect_timeout", "read_timeout", "write_timeout"]
     for k, v in config.items('database.options'):
-        if k in int_values_types:
+        if k in int_values_types: #nocv
             __DB_OPTIONS[k] = int(float(v))
             continue
         __DB_OPTIONS[k] = v.format(**__kwargs)  # nocv

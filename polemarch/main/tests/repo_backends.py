@@ -8,7 +8,7 @@ import git
 
 try:
     from mock import patch
-except ImportError:
+except ImportError:  # nocv
     from unittest.mock import patch
 from django.test import override_settings
 from .inventory import _ApiGHBaseTestCase
@@ -103,6 +103,19 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         self.assertEqual(project['status'], "OK")
         self.assertEqual(project['vars']['repo_branch'], "new_branch")
         self.assertEqual(project["revision"], first_revision)
+
+        # With key
+        del data['vars']['repo_password']
+        data['vars']['repo_key'] = "pN6BQnjCdVybFaaA"
+        prj_id = self.get_result("post", self.url, data=json.dumps(data))['id']
+        self.projects_to_delete.append(prj_id)
+
+        single_url = self.url + "{}/".format(prj_id)
+        project = self.get_result("get", single_url)
+        self.assertEqual(project['status'], "OK")
+        self.assertEqual(project['vars']['repo_branch'], "new_branch")
+        self.assertEqual(project['branch'], "new_branch")
+
         # delete test repository
         shutil.rmtree(repo_dir)
 
@@ -122,10 +135,18 @@ class RepoBackendsTestCase(_ApiGHBaseTestCase):
         self.assertEqual(self.get_result("get", single_url)['status'], "OK")
         tasks_url = "/api/v1/tasks/?project={}".format(prj_id)
         tasks = self.get_result("get", tasks_url, 200)
+
         self.assertEquals(tasks["count"], 1)
         self.assertEquals(tasks["results"][0]["name"], "main")
-
         self.get_result("post", single_url + "sync/", 200)
+
+        download.side_effect = [self.tests_path + '/test_reposit.tar'] * 10
+        self.get_result("post", single_url + "sync/", 200)
+
+        with patch('polemarch.main.repo._base._Base._make_operations') \
+                as tmp_mock:
+            tmp_mock.side_effect = ValueError
+            self.get_result("post", single_url + "sync/", 200)
 
         # TODO:
         # pull not cloned repo

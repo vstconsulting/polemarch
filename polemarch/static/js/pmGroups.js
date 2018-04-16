@@ -18,7 +18,7 @@ pmGroups.copyItem = function(item_id)
         $.when(encryptedCopyModal.replace(data)).done(function(data)
         {
             spajs.ajax.Call({
-                url: "/api/v1/"+thisObj.model.name+"/",
+                url: hostname + "/api/v1/"+thisObj.model.name+"/",
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
@@ -293,7 +293,7 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
     }
 
     return spajs.ajax.Call({
-        url: "/api/v1/groups/"+item_id+"/groups/",
+        url: hostname + "/api/v1/groups/"+item_id+"/groups/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
@@ -334,7 +334,7 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
     }
 
     return spajs.ajax.Call({
-        url: "/api/v1/groups/"+item_id+"/hosts/",
+        url: hostname + "/api/v1/groups/"+item_id+"/hosts/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
@@ -368,7 +368,7 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
 
     var def = new $.Deferred();
     spajs.ajax.Call({
-        url: "/api/v1/groups/"+item_id+"/groups/",
+        url: hostname + "/api/v1/groups/"+item_id+"/groups/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
@@ -424,7 +424,7 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
 
     var def = new $.Deferred();
     spajs.ajax.Call({
-        url: "/api/v1/groups/"+item_id+"/hosts/",
+        url: hostname + "/api/v1/groups/"+item_id+"/hosts/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),

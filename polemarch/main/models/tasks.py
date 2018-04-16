@@ -55,7 +55,7 @@ class Task(BModel):
         return str(self.name)  # nocv
 
     def viewable_by(self, user):
-        return self.project.viewable_by(user)
+        return self.project.viewable_by(user)  # nocv
 
 
 class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
@@ -155,7 +155,7 @@ class PeriodicTask(AbstractModel):
         return self.project.editable_by(user)
 
     def viewable_by(self, user):
-        return self.project.viewable_by(user)
+        return self.project.viewable_by(user)  # nocv
 
 
 class Template(ACLModel):
@@ -276,11 +276,11 @@ class Template(ACLModel):
         data['vars'] = self.keep_encrypted_data(data['vars'])
         self.template_data = json.dumps(data)
 
-    def __setattr__(self, key, value):
-        if key == "data":
-            self.set_data(value)
-        else:
-            super(Template, self).__setattr__(key, value)
+    # def __setattr__(self, key, value):
+    #    if key == "data":
+    #        self.set_data(value)
+    #    else:
+    #        super(Template, self).__setattr__(key, value)
 
     @property
     def data(self):
@@ -483,15 +483,15 @@ class History(BModel):
             history=self, line_number=number, line=value
         )
 
-    def editable_by(self, user):
+    def editable_by(self, user):  # noce
         if self.inventory is None:
             return self.project.editable_by(user)
         return self.inventory.editable_by(user)
 
-    def _inventory_editable(self, user):
+    def _inventory_editable(self, user):  # noce
         return self.inventory and self.inventory.editable_by(user)
 
-    def _inventory_viewable(self, user):
+    def _inventory_viewable(self, user):  # noce
         return not self.inventory or self.inventory.viewable_by(user)
 
     def viewable_by(self, user):

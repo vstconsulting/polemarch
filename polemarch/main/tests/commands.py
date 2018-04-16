@@ -18,8 +18,7 @@ class ServiceCommandTestCase(TestCase):
                 self.assertIn("Unknown level", str(e))
 
     def test_version_output(self):
-        command = ServiceCommand()
-        vstr = command.get_version()
+        vstr = ServiceCommand().get_version()
         self.assertIn("Polemarch", vstr)
         self.assertIn(__version__, vstr)
 

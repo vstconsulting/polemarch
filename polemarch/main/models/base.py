@@ -7,10 +7,16 @@ from ...main.utils import Paginator
 
 class BQuerySet(models.QuerySet):
 
-    def paged(self, *args, **kwargs):  # nocv
+    def cleared(self):
+        return (
+            self.filter(hidden=False) if hasattr(self.model, "hidden")
+            else self
+        )
+
+    def paged(self, *args, **kwargs):
         return self.get_paginator(*args, **kwargs).items()
 
-    def get_paginator(self, *args, **kwargs):  # nocv
+    def get_paginator(self, *args, **kwargs):
         return Paginator(self, *args, **kwargs)
 
     def _find(self, field_name, tp_name, *args, **kwargs):  # nocv
@@ -29,8 +35,8 @@ class BManager(models.Manager.from_queryset(BQuerySet)):
 
 class BModel(models.Model):
     objects    = BManager()
-    id         = models.AutoField(primary_key=True,
-                                  max_length=20)
+    id         = models.AutoField(primary_key=True, max_length=20)
+    hidden     = models.BooleanField(default=False)
 
     def __init__(self, *args, **kwargs):
         super(BModel, self).__init__(*args, **kwargs)
