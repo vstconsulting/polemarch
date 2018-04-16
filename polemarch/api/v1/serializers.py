@@ -297,6 +297,7 @@ class OneHistorySerializer(_SignalSerializer):
                   "status",
                   "start_time",
                   "stop_time",
+                  "execution_time",
                   "inventory",
                   "raw_inventory",
                   "raw_args",

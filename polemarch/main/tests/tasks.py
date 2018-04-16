@@ -1044,6 +1044,9 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                                    start_time=now() - timedelta(hours=35),
                                    stop_time=now() - timedelta(hours=34),
                                    **self.default_kwargs),
+            History.objects.create(status="RUN",
+                                   start_time=now() - timedelta(hours=40),
+                                   **self.default_kwargs)
         ]
         self.default_kwargs["raw_stdout"] = "one\ntwo\nthree\nfour"
         self.default_kwargs["mode"] = "task2.yml"
@@ -1065,14 +1068,28 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
             # stop_time=self.histories[0].stop_time.strftime(df),
             raw_inventory="inventory",
             inventory=self.history_inventory.id,
-            initiator=self.user.id, initiator_type="users"
+            initiator=self.user.id, initiator_type="users",
+            execution_time=3600
+        )
+
+        self.details_test(
+            url + "{}/".format(self.histories[3].id),
+            mode="task.yml",
+            status="RUN", project=self.ph.id,
+            #  Commented because DRF broke API by fields
+            # start_time=self.histories[0].start_time.strftime(df),
+            # stop_time=self.histories[0].stop_time.strftime(df),
+            raw_inventory="inventory",
+            inventory=self.history_inventory.id,
+            initiator=self.user.id, initiator_type="users",
+            execution_time=144000
         )
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)
 
         res = self.get_result("get", "{}?mode={}".format(url, "task.yml"))
-        self.assertEqual(res["count"], 3, res)
+        self.assertEqual(res["count"], 4, res)
 
         res = self.get_result("get", "{}?project={}".format(url, self.ph.id))
         self.assertEqual(res["count"], len(self.histories), res)
@@ -1096,12 +1113,12 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                         405, data=dict(**self.default_kwargs))
 
         # Lines pagination
-        lines_url = url+"{}/lines/?limit=2".format(self.histories[3].id)
+        lines_url = url+"{}/lines/?limit=2".format(self.histories[4].id)
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 4, result)
         self.assertCount(result["results"], 2)
         lines_url = url
-        lines_url += "{}/lines/?after=2&before=4".format(self.histories[3].id)
+        lines_url += "{}/lines/?after=2&before=4".format(self.histories[4].id)
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 1, result)
         self.assertCount(result["results"], 1)
@@ -1109,6 +1126,9 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         self.assertEqual(line_number, 3, result)
 
         self.get_result("delete", url + "{}/".format(self.histories[0].id))
+
+
+
 
     def test_history_raw_output(self):
         raw_stdout = "[0;35mdeprecate" \

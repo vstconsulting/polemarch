@@ -410,6 +410,13 @@ class History(BModel):
         return data
 
     @property
+    def execution_time(self):
+        if self.stop_time is None:
+            return int((now() - self.start_time).total_seconds())
+        else:
+            return int((self.stop_time - self.start_time).total_seconds())
+
+    @property
     def execute_args(self):
         return json.loads(self.json_args)
 
