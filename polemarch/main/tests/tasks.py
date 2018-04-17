@@ -345,7 +345,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                         history.start_time <= history.stop_time)
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
-        self.assertEqual(history.initiator_object, self.user)
+        self.assertEqual(history.executor, self.user)
+        history.initiator = 1
+        history.initiator_type = 'template'
+        self.assertEqual(
+            history.initiator_object,
+            self.get_model_class("Template").objects.get(id=history.initiator)
+        )
         self.get_model_class('History').objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, ""), "OFFLINE")
@@ -698,6 +704,8 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         subprocess_function.reset_mock()
         subprocess_function.side_effect = side_effect
         ScheduledTask(id)
+        for history in self.histories:
+            self.assertEqual(history.executor, None)
         self.assertEquals(subprocess_function.call_count, 1)
         self.assertCount(self.get_model_class('History').objects.all(), count)
 
@@ -814,8 +822,13 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         tmplt = self.post_result(url, data=json.dumps(self.tmplt_data))
         single_url = "{}{}/".format(url, tmplt['id'])
         # test playbook execution
-        self.post_result(single_url + "execute/", code=201)
+        result = self.post_result(single_url + "execute/", code=201)
         self.assertIn('test.yml', ansible_args)
+        history = self.get_model_filter('History', pk=result['history_id']).get()
+        self.assertEqual(history.initiator_type, "template")
+        self.assertEqual(history.initiator, tmplt['id'])
+        # fix
+        self.assertEqual(history.executor.id, tmplt['owner']['id'])
         # test module execution
         ansible_args = []
         module_data = dict(
@@ -1138,7 +1151,7 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
             # stop_time=self.histories[0].stop_time.strftime(df),
             raw_inventory="inventory",
             inventory=self.history_inventory.id,
-            initiator=self.user.id, initiator_type="users"
+            executor=None, initiator_type="project"
         )
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))

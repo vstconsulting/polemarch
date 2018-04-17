@@ -29,6 +29,9 @@ class TasksTestCase(TestCase):
     def test_initiator_object(self):
         self.testHistory.initiator_type = "Something else"
         self.assertEquals(self.testHistory.initiator_object, None)
+        self.testHistory.initiator_type = "project"
+        self.testHistory.initiator = 1
+        self.assertEqual(self.testHistory.initiator_object, self.testHistory)
 
     def test_execute_args_setter(self):
         with self.assertRaises(ValidationError):
