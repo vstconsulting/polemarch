@@ -1937,13 +1937,15 @@ History records
            "status":"OK",
            "kind": "PLAYBOOK",
            "start_time":"2017-07-02T12:48:11.922761Z",
-           "stop_time":"2017-07-02T13:48:11.922777Z",
+           "stop_time":"2017-07-02T13:48:16.922777Z",
+           "execution_time": 5,
            "inventory": 4,
            "raw_inventory":"inventory",
            "raw_args": "ansible-playbook main.yml -i /tmp/tmpvMIwMg -v",
            "raw_stdout":"http://localhost:8080/api/v1/history/1/raw/",
            "initiator": 1,
-           "initiator_type": "users",
+           "initiator_type": "project",
+           "executor": 1,
            "execute_args": {
                "diff": "",
                "become": ""
@@ -1963,6 +1965,7 @@ History records
    :>json string start_time: time, when playbook execution was started.
    :>json string stop_time: time, when playbook execution was ended (normally
      or not)
+   :>json number execution_time: time taken to perform task execution (in seconds).
    :>json number inventory: id of inventory.
    :>json string raw_inventory: ansible inventory, which was used for execution. It
      was generated from Polemarch's :ref:`inventory`
@@ -1972,6 +1975,7 @@ History records
      in :http:get:`/api/v1/history/{id}/raw/`.
    :>json number initiator: initiator id.
    :>json string initiator_type: initiator type like in api url.
+   :>json number executor: id of user, who has executed task.
    :>json object execute_args: arguments, which were used during execution.
    :>json string revision: project revision.
    :>json string url: url to this specific history record.
@@ -2160,7 +2164,8 @@ History records
                  "start_time": "2017-07-24T06:39:52.052504Z",
                  "stop_time": "2017-07-24T06:41:06.521813Z",
                  "initiator": 1,
-                 "initiator_type": "users",
+                 "initiator_type": "project",
+                 "executor": 1,
                  "url": "http://localhost:8000/api/v1/history/121/"
               },
               {
@@ -2173,7 +2178,8 @@ History records
                  "start_time": "2017-07-24T06:27:40.481588Z",
                  "stop_time": "2017-07-24T06:27:42.499873Z",
                  "initiator": 1,
-                 "initiator_type": "users",
+                 "initiator_type": "project",
+                 "executor": 1,
                  "url": "http://localhost:8000/api/v1/history/118/"
               }
            ]

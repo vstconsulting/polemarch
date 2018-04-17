@@ -282,6 +282,7 @@ class HistorySerializer(_SignalSerializer):
                   "stop_time",
                   "initiator",
                   "initiator_type",
+                  "executor",
                   "url")
 
 
@@ -304,6 +305,7 @@ class OneHistorySerializer(_SignalSerializer):
                   "raw_stdout",
                   "initiator",
                   "initiator_type",
+                  "executor",
                   "execute_args",
                   "revision",
                   "url")
@@ -741,7 +743,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
 
-    def _execution(self, kind, data, user):
+    def _execution(self, kind, data, user, template=None):
         inventory = data.pop("inventory")
         try:
             inventory = Inventory.objects.get(id=int(inventory))
@@ -751,12 +753,14 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                 )
         except ValueError:
             pass
+        init_type = "project" if not template else "template"
+        obj_id = self.instance.id if not template else template
         history_id = self.instance.execute(
             kind, str(data.pop(kind)), inventory,
-            initiator=user.id, **data
+            initiator=obj_id, initiator_type=init_type, executor=user, **data
         )
         rdata = dict(detail="Started at inventory {}.".format(inventory),
-                     history_id=history_id)
+                     history_id=history_id, executor=user.id)
         return Response(rdata, 201)
 
     def execute_playbook(self, request):

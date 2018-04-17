@@ -77,7 +77,8 @@ class Project(AbstractModel):
 
     def _get_history(self, kind, mod_name, inventory, **extra):
         initiator = extra.pop("initiator", 0)
-        initiator_type = extra.pop("initiator_type", "users")
+        initiator_type = extra.pop("initiator_type", "project")
+        executor = extra.pop("executor", None)
         save_result = extra.pop("save_result", True)
         command = kind.lower()
         ansible_args = dict(extra)
@@ -90,7 +91,7 @@ class Project(AbstractModel):
             inventory=inventory, project=self,
             kind=kind, raw_stdout="", execute_args=extra,
             initiator=initiator, initiator_type=initiator_type,
-            hidden=self.hidden
+            executor=executor, hidden=self.hidden
         )
         if isinstance(inventory, (six.string_types, six.text_type)):
             history_kwargs['inventory'] = None

@@ -219,7 +219,7 @@ class Template(ACLModel):
         vars.update(option_vars)
         data.update(option_data)
         data.update(vars)
-        return serializer._execution(tp, data, user)
+        return serializer._execution(tp, data, user, template=self.id)
 
     def _convert_to_data(self, value):
         if isinstance(value, (six.string_types, six.text_type)):
@@ -370,7 +370,8 @@ class History(BModel):
     status         = models.CharField(max_length=50)
     initiator      = models.IntegerField(default=0)
     # Initiator type should be always as in urls for api
-    initiator_type = models.CharField(max_length=50, default="users")
+    initiator_type = models.CharField(max_length=50, default="project")
+    executor       = models.ForeignKey(User, blank=True, null=True, default=None)
 
     def __init__(self, *args, **kwargs):
         execute_args = kwargs.pop('execute_args', None)
@@ -401,11 +402,7 @@ class History(BModel):
             initiator_type=self.initiator_type,
             initiator_id=self.initiator,
         )
-        if self.initiator_type == "users":
-            data["initiator"]['name'] = getattr(
-                self.initiator_object, 'username', None
-            )
-        elif self.initiator_type == "scheduler":
+        if self.initiator_type in ["template", "scheduler"]:
             data["initiator"]['name'] = self.initiator_object.name
         return data
 
@@ -432,10 +429,13 @@ class History(BModel):
 
     @property
     def initiator_object(self):
-        if self.initiator_type == "users" and self.initiator:
-            return User.objects.get(id=self.initiator)
+        print("123")
+        if self.initiator_type == "project" and self.initiator:
+            return self
         elif self.initiator_type == "scheduler" and self.initiator:
             return PeriodicTask.objects.get(id=self.initiator)
+        elif self.initiator_type == "template" and self.initiator:
+            return Template.objects.get(id=self.initiator)
         else:
             return None
 
