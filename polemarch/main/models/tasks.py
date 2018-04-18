@@ -429,7 +429,6 @@ class History(BModel):
 
     @property
     def initiator_object(self):
-        print("123")
         if self.initiator_type == "project" and self.initiator:
             return self
         elif self.initiator_type == "scheduler" and self.initiator:

@@ -12,11 +12,9 @@ from django.core.validators import ValidationError
 
 try:
     from mock import patch
-except ImportError:
+except ImportError:  # nocv
     from unittest.mock import patch
 
-from ..models import Project
-from ..models import Task, PeriodicTask, History, Inventory, Template
 from ..tasks.tasks import ScheduledTask
 
 from .inventory import _ApiGHBaseTestCase
@@ -1131,6 +1129,10 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                 start_time=now() - timedelta(hours=35),
                 stop_time=now() - timedelta(hours=34),
                 **self.default_kwargs),
+            self.get_model_class('History').objects.create(
+                status="RUN",
+                start_time=now() - timedelta(hours=40),
+                **self.default_kwargs)
         ]
         self.default_kwargs["raw_stdout"] = "one\ntwo\nthree\nfour"
         self.default_kwargs["mode"] = "task2.yml"
