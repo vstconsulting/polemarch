@@ -77,6 +77,60 @@ pmHistory.search = function(query, options)
 }
 
 
+/**
+ * Строит страницу со списком объектоа
+ * @param {type} holder
+ * @param {type} menuInfo
+ * @param {type} data
+ * @returns {$.Deferred}
+ */
+pmHistory.showList = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var thisObj = this;
+    var offset = 0
+    var limit = this.pageSize;
+    if (data.reg && data.reg[1] > 0)
+    {
+        offset = this.pageSize * (data.reg[1] - 1);
+    }
+
+    return $.when(this.loadItems(limit, offset), pmPeriodicTasks.loadAllItems(),
+        pmTasksTemplates.loadAllItems(), pmProjects.loadAllItems(), pmUsers.loadAllItems()).done(function ()
+    {
+        var tpl = thisObj.model.name + '_list'
+        if (!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_list'
+        }
+
+        $.when($(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, opt: {}}))).done(function()
+        {
+            $('.light-tr').on('click', function(evt) {
+
+                if(!(evt.target.classList.contains('light-tr-none') ||
+                        evt.target.classList.contains('ico-on') ||
+                        evt.target.classList.contains('ico-off'))
+                )
+                {
+                    if(evt.target.hasAttribute('href'))
+                    {
+                        var href =  evt.target.getAttribute('href');
+                    }
+                    else
+                    {
+                        var href =  "/?history/"+evt.currentTarget.getAttribute('data-id');
+                    }
+                    spajs.openURL(href);
+                }
+            });
+        })
+    }).fail(function ()
+    {
+        $.notify("", "error");
+    })
+}
+
 pmHistory.showListInProjects = function(holder, menuInfo, data)
 {
     var thisObj = this;
@@ -144,10 +198,24 @@ pmHistory.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[1];
     return $.when(this.loadItem(item_id)).done(function()
     {
-        if(pmHistory.model.items[item_id].initiator > 0 )
-        {
-            pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
-        }
+        // if(pmHistory.model.items[item_id].initiator > 0 )
+        // {
+        //     if(pmHistory.model.items[item_id].initiator_type=="project")
+        //     {
+        //         pmProjects.loadAllItems();
+        //         pmUsers.loadAllItems();
+        //     }
+        //     else if(pmHistory.model.items[item_id].initiator_type=="template")
+        //     {
+        //         pmTasksTemplates.loadAllItems();
+        //         pmUsers.loadAllItems();
+        //     }
+        //     else if(pmHistory.model.items[item_id].initiator_type=="scheduler")
+        //     {
+        //         pmPeriodicTasks.loadAllItems();
+        //     }
+        //
+        // }
 
 
         if (pmHistory.model.items[item_id].inventory != null) {
@@ -291,17 +359,24 @@ pmHistory.loadItem = function(item_id)
 
             if(data.initiator_type == 'scheduler')
             {
-                promise = pmPeriodicTasks.loadItemsByIds([data.initiator])
+                //promise = pmPeriodicTasks.loadItemsByIds([data.initiator])
+                promise = pmPeriodicTasks.loadAllItems();
+            }
+            else if(data.initiator_type == 'project')
+            {
+                //promise = pmUsers.loadItemsByIds([data.initiator])
+                promise = pmProjects.loadAllItems();
+            }
+            else if(data.initiator_type == 'template')
+            {
+                pmTasksTemplates.loadAllItems();
             }
 
-            if(data.initiator_type == 'users')
-            {
-                promise = pmUsers.loadItemsByIds([data.initiator])
-            }
+            var promise2 = pmUsers.loadAllItems();
 
             pmHistory.model.items.justWatch(item_id);
 
-            $.when(pmProjects.loadItem(data.project), promise).always(function(){
+            $.when(pmProjects.loadItem(data.project), promise, promise2).always(function(){
                 def.resolve(data)
             })
         },
@@ -749,7 +824,6 @@ pmHistory.loadLines = function(item_id, opt)
     return def.promise();
 }
 
-/////////////////////////////////
 pmHistory.clearLogs=function(item_id)
 {
     return spajs.ajax.Call({
@@ -776,7 +850,7 @@ pmHistory.hideClearLogsButton=function()
         $("#clear_logs").slideToggle();
     }
 }
-/////////////////////////////////
+
 tabSignal.connect("polemarch.start", function()
 {
     // history

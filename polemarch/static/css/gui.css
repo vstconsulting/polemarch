@@ -869,3 +869,9 @@ table{
 .imported-subitems-table ul li {
     list-style: none;
 }
+
+.light-tr:hover {
+    background-color: #D8EDF8;
+    cursor: pointer;
+}
+
