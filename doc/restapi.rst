@@ -1951,6 +1951,7 @@ History records
                "become": ""
            },
            "revision": "NO VCS",
+           "options": {},
            "url": "http://localhost:8080/api/v1/history/1/"
         }
 
@@ -1975,9 +1976,11 @@ History records
      in :http:get:`/api/v1/history/{id}/raw/`.
    :>json number initiator: initiator id.
    :>json string initiator_type: initiator type like in api url.
-   :>json number executor: id of user, who has executed task.
+   :>json number executor: id of user, who executed task.
    :>json object execute_args: arguments, which were used during execution.
    :>json string revision: project revision.
+   :>json object options: some additional options, which were used during this task execution.
+     For example, if you execute some template with option, name of this option will be saved to this object.
    :>json string url: url to this specific history record.
 
 .. |history_details_ref| replace:: **Response JSON Object:** response json fields are the
@@ -2166,6 +2169,7 @@ History records
                  "initiator": 1,
                  "initiator_type": "project",
                  "executor": 1,
+                 "options": {},
                  "url": "http://localhost:8000/api/v1/history/121/"
               },
               {
@@ -2177,9 +2181,12 @@ History records
                  "status": "OK",
                  "start_time": "2017-07-24T06:27:40.481588Z",
                  "stop_time": "2017-07-24T06:27:42.499873Z",
-                 "initiator": 1,
-                 "initiator_type": "project",
+                 "initiator": 2,
+                 "initiator_type": "template",
                  "executor": 1,
+                 "options": {
+                     "template_option": "some-vars"
+                 },
                  "url": "http://localhost:8000/api/v1/history/118/"
               }
            ]
