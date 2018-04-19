@@ -219,7 +219,10 @@ class Template(ACLModel):
         vars.update(option_vars)
         data.update(option_data)
         data.update(vars)
-        return serializer._execution(tp, data, user, template=self.id)
+        return serializer._execution(
+            tp, data, user,
+            template=self.id, template_option=option
+        )
 
     def _convert_to_data(self, value):
         if isinstance(value, (six.string_types, six.text_type)):
@@ -372,6 +375,7 @@ class History(BModel):
     # Initiator type should be always as in urls for api
     initiator_type = models.CharField(max_length=50, default="project")
     executor       = models.ForeignKey(User, blank=True, null=True, default=None)
+    json_options        = models.TextField(default="{}")
 
     def __init__(self, *args, **kwargs):
         execute_args = kwargs.pop('execute_args', None)
@@ -420,12 +424,23 @@ class History(BModel):
     @execute_args.setter
     def execute_args(self, value):
         if not isinstance(value, dict):
-            raise ValidationError(dict(args="Should be a list."))
+            raise ValidationError(dict(args="Should be a dict."))
         data = {k: v for k, v in value.items() if k not in ['group']}
         for key in data.keys():
             if key in PeriodicTask.HIDDEN_VARS:
                 data[key] = "[~~ENCRYPTED~~]"
         self.json_args = json.dumps(data)
+
+    # options
+    @property
+    def options(self):
+        return json.loads(self.json_options)
+
+    @options.setter
+    def options(self, value):
+        if not isinstance(value, dict):
+            raise ValidationError(dict(args="Should be a dict."))
+        self.json_options = json.dumps(value)
 
     @property
     def initiator_object(self):

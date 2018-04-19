@@ -3626,7 +3626,7 @@ window.qunitTestsArray.push({
         })
     });
     
-    syncQUnit.addTest('Страница ошибки 400 в history', function ( assert )
+    syncQUnit.addTest('Страница ошибки 400 в project history', function ( assert )
     {
         var done = assert.async();
 
@@ -3638,6 +3638,86 @@ window.qunitTestsArray.push({
         }).fail(function()
         {
             assert.ok(true, 'Ошибка при открытиии меню project/9999999999/history');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в project history search', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"project/9999999999/history/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню project/9999999999/history/search/name');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню project/9999999999/history/search/name');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в project history search page', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"project/9999999999/history/search/name/page/1"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню project/9999999999/history/search/name/page/1');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню project/9999999999/history/search/name/page/1');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в inventory history', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"inventory/9999999999/history"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню inventory/9999999999/history');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню inventory/9999999999/history');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в inventory history search', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"inventory/9999999999/history/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню inventory/9999999999/history/search/name');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню inventory/9999999999/history/search/name');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в inventory history search page', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"inventory/9999999999/history/search/name/page/1"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню inventory/9999999999/history/search/name/page/1');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню inventory/9999999999/history/search/name/page/1');
             render(done)
         })
     });

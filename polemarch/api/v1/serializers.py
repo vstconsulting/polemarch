@@ -743,7 +743,8 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
 
-    def _execution(self, kind, data, user, template=None):
+    def _execution(self, kind, data, user, **kwargs):
+        template = kwargs.pop("template", None)
         inventory = data.pop("inventory")
         try:
             inventory = Inventory.objects.get(id=int(inventory))
@@ -753,8 +754,13 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                 )
         except ValueError:
             pass
-        init_type = "project" if not template else "template"
-        obj_id = self.instance.id if not template else template
+        if template is not None:
+            init_type = "template"
+            obj_id = template
+            data['template_option'] = kwargs.get('template_option', None)
+        else:
+            init_type = "project"
+            obj_id = self.instance.id
         history_id = self.instance.execute(
             kind, str(data.pop(kind)), inventory,
             initiator=obj_id, initiator_type=init_type, executor=user, **data

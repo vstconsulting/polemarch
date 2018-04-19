@@ -826,7 +826,6 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         history = self.get_model_filter('History', pk=result['history_id']).get()
         self.assertEqual(history.initiator_type, "template")
         self.assertEqual(history.initiator, tmplt['id'])
-        # fix
         self.assertEqual(history.executor.id, tmplt['owner']['id'])
         # test module execution
         ansible_args = []
@@ -891,13 +890,20 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
         # test playbook execution one option
         ansible_args = []
-        self.post_result(single_url + "execute/", 201, data=dict(option='one'))
+        result = self.post_result(single_url + "execute/", 201, data=dict(option='one'))
         self.assertIn(tmpl_with_opts['data']['module'], ansible_args)
         self.assertIn(tmpl_with_opts['options']['one']['group'], ansible_args)
         self.assertIn('--forks', ansible_args)
         self.assertIn(
             str(tmpl_with_opts['data']['vars']['forks']), ansible_args
         )
+
+        # get history
+        history = self.get_model_filter('History', pk=result['history_id']).get()
+        # Check in options `template_option_name`
+        self.assertEqual(history.options['template_option'], 'one')
+        with self.assertRaises(ValidationError):
+            history.options = "string"
 
         # test playbook execution two option
         ansible_args = []

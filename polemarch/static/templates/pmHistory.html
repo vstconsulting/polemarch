@@ -44,7 +44,7 @@
                                     <% for(var i in pmHistory.model.itemslist.results){  val = pmHistory.model.itemslist.results[i]; %>
                                         <tr
                                             class="item-row item-<%- val.id %>  <%- pmHistory.model.selectedItems.justClass(val.id, 'selected') %> light-tr"
-                                            data-id="<%- val.id %>">
+                                            data-id="<%- val.id %>" data-href="/?history/<%- val.id %>">
                                             <td onclick="pmHistory.toggleSelect(<%- val.id %>); return false;" class="light-tr-none">
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
@@ -201,44 +201,75 @@
                                         <div class="ico-on fa fa-toggle-on"></div>
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
-                                    <th>Name</th>
-                                    <th style="width: 110px;">Status</th>
-                                    <th style="width: 110px;" class="hidden-xs hidden-sm">Initiator</th>
                                     <th style="width: 160px;" class="hidden-xs">Start time</th>
+                                    <th style="width: 110px;" class="hidden-xs hidden-sm">Executor</th>
+                                    <th>Initiator</th>
+                                    <th class="hidden-xs hidden-sm" style="width: 160px;">Name</th>
+                                    <th style="width: 110px;">Status</th>
                                     <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
                                 </tr>
                                 <% for(var i in pmHistory.model.itemslist.results){  val = pmHistory.model.itemslist.results[i]; %>
                                     <tr
-                                            class="item-row item-<%- val.id %>  <%- pmHistory.model.selectedItems.justClass(val.id, 'selected') %>"
-                                            data-id="<%- val.id %>" >
-                                            <td onclick="pmHistory.toggleSelect(<%- val.id %>); return false;">
+                                            class="item-row item-<%- val.id %>  <%- pmHistory.model.selectedItems.justClass(val.id, 'selected') %> light-tr"
+                                            data-id="<%- val.id %>" data-href="/?project/<%- project_id %>/history/<%- pmHistory.model.itemslist.results[i].id %>">
+                                            <td onclick="pmHistory.toggleSelect(<%- val.id %>); return false;" class="light-tr-none">
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
-                                            <td>
-                                                <a href="/?project/<%- project_id %>/history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
-                                                        onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].mode %></a>
-                                            </td>
-                                            <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %>  <%- pmHistory.model.items[val.id].justClassName('status', function(v){ return "history-status-"+v}) %>" >
-                                                <%= pmHistory.model.items[val.id].justText('status') %>
+                                            <td class="hidden-xs">
+                                                <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
                                             </td>
                                             <td class="hidden-xs hidden-sm">
-                                                <% if(val.initiator > 0  && val.initiator_type == 'users' && pmUsers.model.items[val.initiator]){ %>
-                                                    <a href="<%- polemarch.opt.host %>/?<%- val.initiator_type %>/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                        <%= pmUsers.model.items[val.initiator].justText('username') %> 
-                                                    </a>
-                                                <% }else if(val.initiator > 0  && val.initiator_type == 'scheduler' && pmPeriodicTasks.model.items[val.initiator]){ %>
-                                                    <a href="<%- polemarch.opt.host %>/?project/<%- pmHistory.model.items[val.id].project %>/periodic-task/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                        <%= pmPeriodicTasks.model.items[val.initiator].justText('name') %> 
-                                                    </a>
+                                                <% if(val.executor !== null){ %>
+                                                    <% if(pmUsers.model.items[val.executor]!==undefined) { %>
+                                                        <a href="<%- polemarch.opt.host %>/?user/<%- val.executor %>" onclick="return false;" >
+                                                            <%= pmUsers.model.items[val.executor]['username'] %>
+                                                        </a>
+                                                    <% } else { %>
+                                                        removed user
+                                                    <% } %>
+                                                <% }else{ %>
+                                                    system
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <% if(val.initiator > 0  && val.initiator_type == 'scheduler'){ %>
+                                                    <% if(pmPeriodicTasks.model.items[val.initiator]!==undefined && pmPeriodicTasks.model.items[val.initiator].id!==undefined) { %>
+                                                        <a href="<%- polemarch.opt.host %>/?project/<%- val.project %>/periodic-task/<%- val.initiator %>" onclick="return false;" >
+                                                            <%= pmPeriodicTasks.model.items[val.initiator]['name'] %>
+                                                        </a>
+                                                    <% } else { %>
+                                                        removed periodic task
+                                                    <% } %>
+                                                 <% }else if(val.initiator > 0  && val.initiator_type == 'project'){ %>
+                                                    <% if(pmProjects.model.items[val.initiator]!==undefined && pmProjects.model.items[val.initiator].id!==undefined) { %>
+                                                        <a href="<%- polemarch.opt.host %>/?project/<%- val.initiator %>" onclick="return false;" >
+                                                            <%= pmProjects.model.items[val.initiator]['name'] %>
+                                                        </a>
+                                                    <% } else { %>
+                                                        removed project
+                                                    <% } %>
+                                                <% }else if(val.initiator > 0  && val.initiator_type == 'template'){ %>
+                                                    <% if(pmTasksTemplates.model.items[val.initiator]!==undefined && pmTasksTemplates.model.items[val.initiator].id!==undefined) { %>
+                                                        <a href="<%- polemarch.opt.host %>/?template/<%- pmTasksTemplates.model.items[val.initiator].kind %>/<%- val.initiator %>" onclick="return false;" >
+                                                            <%= pmTasksTemplates.model.items[val.initiator]['name'] %>
+                                                        </a>
+                                                    <% } else { %>
+                                                        removed template
+                                                    <% } %>
                                                 <% }else{ %>
                                                     scheduler
                                                 <% } %>
                                             </td>
-
-                                            <td class="hidden-xs">
-                                                <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
+                                             <td class="hidden-xs hidden-sm">
+                                                <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
+                                                        onclick="return false;" ><%- val.mode %></a>
                                             </td>
+
+                                            <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> <%- pmHistory.model.items[val.id].justClassName('status', function(v){ return "history-status-"+v}) %>" >
+                                                <%= pmHistory.model.items[val.id].justText('status') %>
+                                            </td>
+
                                             <td class="hidden-xs hidden-sm">
                                                 <%= pmHistory.model.items[val.id].justText('stop_time', function(v){ return v ? moment(v).format("MM/DD/YYYY HH:mm:ss") : ''; }) %>
                                             </td>
@@ -323,55 +354,86 @@
                                         <div class="ico-on fa fa-toggle-on"></div>
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
-                                    <th>Name</th>
-                                    <th class="hidden-xs hidden-sm">Type</th>
-                                    <th style="width: 110px;">Status</th>
-                                    <th style="width: 110px;" class="hidden-xs hidden-sm">Initiator</th>
                                     <th style="width: 160px;" class="hidden-xs">Start time</th>
+                                    <th style="width: 110px;" class="hidden-xs hidden-sm">Executor</th>
+                                    <th>Initiator</th>
+                                    <th class="hidden-xs hidden-sm" >Project</th>
+                                    <th class="hidden-xs hidden-sm" style="width: 160px;">Name</th>
+                                    <th style="width: 110px;">Status</th>
                                     <th style="width: 160px;" class="hidden-xs hidden-sm">End time</th>
                                 </tr>
                                 <% for(var i in pmHistory.model.itemslist.results){  val = pmHistory.model.itemslist.results[i]; %>
                                     <tr
-                                        class="item-row item-<%- val.id %>  <%- pmHistory.model.selectedItems.justClass(val.id, 'selected') %>"
-                                        data-id="<%- val.id %>" >
-                                        <td class=""  onclick="pmHistory.toggleSelect(<%- val.id %>); return false;">
+                                        class="item-row item-<%- val.id %>  <%- pmHistory.model.selectedItems.justClass(val.id, 'selected') %> light-tr"
+                                        data-id="<%- val.id %>" data-href="/?inventory/<%- val.inventory %>/history/<%- val.id %>">
+                                        <td onclick="pmHistory.toggleSelect(<%- val.id %>); return false;" class="light-tr-none">
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
-                                        <td>
-                                            <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>/history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
-                                                    onclick="return spajs.openURL(this.href);" ><%- pmHistory.model.itemslist.results[i].mode %></a>
+                                        <td class="hidden-xs">
+                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
                                         </td>
                                         <td class="hidden-xs hidden-sm">
-                                            <% if(pmProjects.model.items[val.project]){ %>
-                                                <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>" class="item-name"
-                                                        onclick="return spajs.openURL(this.href);" >
-                                                        Project: <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
-                                                </a>
+                                            <% if(val.executor !== null){ %>
+                                                <% if(pmUsers.model.items[val.executor]!==undefined) { %>
+                                                    <a href="<%- polemarch.opt.host %>/?user/<%- val.executor %>" onclick="return false;" >
+                                                        <%= pmUsers.model.items[val.executor]['username'] %>
+                                                    </a>
+                                                <% } else { %>
+                                                    removed user
+                                                <% } %>
                                             <% }else{ %>
-                                                Module
+                                                system
                                             <% } %>
                                         </td>
-                                        <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %>  <%- pmHistory.model.items[val.id].justClassName('status', function(v){ return "history-status-"+v}) %>" >
-                                            <%= pmHistory.model.items[val.id].justText('status') %>
-                                        </td>
-                                        <td class="hidden-xs hidden-sm">
-                                            <% if(val.initiator > 0  && val.initiator_type == 'users' && pmUsers.model.items[val.initiator]){ %>
-                                                <a href="<%- polemarch.opt.host %>/?<%- val.initiator_type %>/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                    <%= pmUsers.model.items[val.initiator].justText('username') %> 
-                                                </a>
-                                            <% }else if(val.initiator > 0  && val.initiator_type == 'scheduler' && pmPeriodicTasks.model.items[val.initiator]){ %>
-                                                <a href="<%- polemarch.opt.host %>/?<%- val.initiator_type %>/<%- val.initiator %>" onclick="return spajs.openURL(this.href);" >
-                                                    <%= pmPeriodicTasks.model.items[val.initiator].justText('name') %> 
-                                                </a>
+                                        <td>
+                                            <% if(val.initiator > 0  && val.initiator_type == 'scheduler'){ %>
+                                                <% if(pmPeriodicTasks.model.items[val.initiator]!==undefined && pmPeriodicTasks.model.items[val.initiator].id!==undefined) { %>
+                                                    <a href="<%- polemarch.opt.host %>/?project/<%- val.project %>/periodic-task/<%- val.initiator %>" onclick="return false;" >
+                                                        <%= pmPeriodicTasks.model.items[val.initiator]['name'] %>
+                                                    </a>
+                                                <% } else { %>
+                                                    removed periodic task
+                                                <% } %>
+                                             <% }else if(val.initiator > 0  && val.initiator_type == 'project'){ %>
+                                                <% if(pmProjects.model.items[val.initiator]!==undefined && pmProjects.model.items[val.initiator].id!==undefined) { %>
+                                                    <a href="<%- polemarch.opt.host %>/?project/<%- val.initiator %>" onclick="return false;" >
+                                                        <%= pmProjects.model.items[val.initiator]['name'] %>
+                                                    </a>
+                                                <% } else { %>
+                                                    removed project
+                                                <% } %>
+                                            <% }else if(val.initiator > 0  && val.initiator_type == 'template'){ %>
+                                                <% if(pmTasksTemplates.model.items[val.initiator]!==undefined && pmTasksTemplates.model.items[val.initiator].id!==undefined) { %>
+                                                    <a href="<%- polemarch.opt.host %>/?template/<%- pmTasksTemplates.model.items[val.initiator].kind %>/<%- val.initiator %>" onclick="return false;" >
+                                                        <%= pmTasksTemplates.model.items[val.initiator]['name'] %>
+                                                    </a>
+                                                <% } else { %>
+                                                    removed template
+                                                <% } %>
                                             <% }else{ %>
                                                 scheduler
                                             <% } %>
                                         </td>
-
-                                        <td class="hidden-xs">
-                                            <%- moment(pmHistory.model.itemslist.results[i].start_time).format("MM/DD/YYYY HH:mm:ss") %>
+                                        <td class="hidden-xs hidden-sm">
+                                            <% if(pmProjects.model.items[val.project]!==undefined && pmProjects.model.items[val.project].id!==undefined){ %>
+                                                <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>" class="item-name"
+                                                        onclick="return false;" >
+                                                        <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
+                                                </a>
+                                            <% }else{ %>
+                                                removed project
+                                            <% } %>
                                         </td>
+                                         <td class="hidden-xs hidden-sm">
+                                            <a href="/?history/<%- pmHistory.model.itemslist.results[i].id %>" class="item-name"
+                                                    onclick="return false;" ><%- val.mode %></a>
+                                        </td>
+
+                                        <td class="history-status status-<%- pmHistory.model.itemslist.results[i].status %> <%- pmHistory.model.items[val.id].justClassName('status', function(v){ return "history-status-"+v}) %>" >
+                                            <%= pmHistory.model.items[val.id].justText('status') %>
+                                        </td>
+
                                         <td class="hidden-xs hidden-sm">
                                             <%= pmHistory.model.items[val.id].justText('stop_time', function(v){ return v ? moment(v).format("MM/DD/YYYY HH:mm:ss") : ''; }) %>
                                         </td>
@@ -748,5 +810,40 @@
         <br>
         
         <%= spajs.just.render('history_page_body', {item_id:item_id, project_id:project_id})  %>
+    </section>
+</script>
+
+<script type="text/x-just" data-just="history_pageInInventory">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?inventory/<%- inventory_id %>/history"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" ><%- capitalizeString(pmHistory.model.items[item_id].kind) %> `<%- pmHistory.model.items[item_id].mode %>`</span>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories" onclick="return spajs.openURL(this.href);" >Inventories</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories/<%- inventory_id %>" onclick="return spajs.openURL(this.href);" ><%- pmInventories.model.items[inventory_id].name.slice(0, 20) %></a></li>
+            <li><a href="<%- polemarch.opt.host %>/?inventories/<%- inventory_id %>/history"  onclick="return spajs.openURL(this.href);" >History</a></li>
+            <li class="active"><%- capitalizeString(pmHistory.model.items[item_id].kind) %> `<%- pmHistory.model.items[item_id].mode.slice(0, 20) %>`</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <~ pmHistory.model.items[item_id].status>
+            <% if(pmHistory.model.items[item_id].status != 'RUN' && pmHistory.model.items[item_id].status != 'DELAY'){ %>
+                <button type="button" onclick="spajs.showLoader(pmHistory.deleteItem(<%- item_id %>)); return false;" class="btn btn-danger danger-right" >
+                    <span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove history</span>
+                </button>
+            <% }else{ %>
+                <button type="button" onclick="spajs.showLoader(pmHistory.cancelTask(<%- item_id %>)); return false;" class="btn btn-warning danger-right" >Cancel task</button>
+            <% } %>
+        <~>
+        <br>
+        <br>
+
+        <%= spajs.just.render('history_page_body', {item_id:item_id, project_id:pmHistory.model.items[item_id].project})  %>
     </section>
 </script>

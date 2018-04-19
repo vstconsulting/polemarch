@@ -34,14 +34,18 @@ pmHistory.showSearchResults = function(holder, menuInfo, data)
     if(data.reg && data.reg[2] > 0)
     {
         offset = this.pageSize*(data.reg[2] - 1);
-    } else {
+    }
+    else
+    {
         offset=0;
     }
 
     var search = this.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')
     return $.when(this.sendSearchQuery(search,limit,offset)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
     }).fail(function()
     {
         $.notify("", "error");
@@ -95,8 +99,7 @@ pmHistory.showList = function (holder, menuInfo, data)
         offset = this.pageSize * (data.reg[1] - 1);
     }
 
-    return $.when(this.loadItems(limit, offset), pmPeriodicTasks.loadAllItems(),
-        pmTasksTemplates.loadAllItems(), pmProjects.loadAllItems(), pmUsers.loadAllItems()).done(function ()
+    return $.when(this.loadItems(limit, offset)).done(function ()
     {
         var tpl = thisObj.model.name + '_list'
         if (!spajs.just.isTplExists(tpl))
@@ -106,24 +109,7 @@ pmHistory.showList = function (holder, menuInfo, data)
 
         $.when($(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, opt: {}}))).done(function()
         {
-            $('.light-tr').on('click', function(evt) {
-
-                if(!(evt.target.classList.contains('light-tr-none') ||
-                        evt.target.classList.contains('ico-on') ||
-                        evt.target.classList.contains('ico-off'))
-                )
-                {
-                    if(evt.target.hasAttribute('href'))
-                    {
-                        var href =  evt.target.getAttribute('href');
-                    }
-                    else
-                    {
-                        var href =  "/?history/"+evt.currentTarget.getAttribute('data-id');
-                    }
-                    spajs.openURL(href);
-                }
-            });
+            pmHistory.setTableRowLinkInLink();
         })
     }).fail(function ()
     {
@@ -141,10 +127,12 @@ pmHistory.showListInProjects = function(holder, menuInfo, data)
         offset = this.pageSize*(data.reg[2] - 1);
     }
     var project_id = data.reg[1];
-
+   // debugger;
     return $.when(this.sendSearchQuery({project:project_id}, limit, offset), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:"", project_id:project_id}))
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:"", project_id:project_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
         thisObj.model.selectedCount = $('.multiple-select .selected').length;
     }).fail(function()
     {
@@ -165,7 +153,9 @@ pmHistory.showListInInventory = function(holder, menuInfo, data)
 
     return $.when(this.sendSearchQuery({inventory:inventory_id}, limit, offset), pmInventories.loadItem(inventory_id)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id}))
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
     }).fail(function()
     {
         $.notify("", "error");
@@ -176,13 +166,45 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
 {
     var thisObj = this;
     var project_id = data.reg[1];
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[3] > 0)
+    {
+        offset = this.pageSize*(data.reg[3] - 1);
+    }
 
     var search = this.searchStringToObject(decodeURIComponent(data.reg[2]), 'mode')
     search['project'] = project_id
 
-    return $.when(this.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
+    return $.when(this.sendSearchQuery(search, limit, offset), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showSearchResultsInInventory = function(holder, menuInfo, data)
+{
+    var thisObj = this;
+    var inventory_id = data.reg[1];
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[3] > 0)
+    {
+        offset = this.pageSize*(data.reg[3] - 1);
+    }
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]), 'mode')
+    search['inventory'] = inventory_id
+
+    return $.when(this.sendSearchQuery(search, limit, offset), pmInventories.loadItem(inventory_id)).done(function()
+    {
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:decodeURIComponent(data.reg[2]), inventory_id:inventory_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
     }).fail(function()
     {
         $.notify("", "error");
@@ -198,26 +220,6 @@ pmHistory.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[1];
     return $.when(this.loadItem(item_id)).done(function()
     {
-        // if(pmHistory.model.items[item_id].initiator > 0 )
-        // {
-        //     if(pmHistory.model.items[item_id].initiator_type=="project")
-        //     {
-        //         pmProjects.loadAllItems();
-        //         pmUsers.loadAllItems();
-        //     }
-        //     else if(pmHistory.model.items[item_id].initiator_type=="template")
-        //     {
-        //         pmTasksTemplates.loadAllItems();
-        //         pmUsers.loadAllItems();
-        //     }
-        //     else if(pmHistory.model.items[item_id].initiator_type=="scheduler")
-        //     {
-        //         pmPeriodicTasks.loadAllItems();
-        //     }
-        //
-        // }
-
-
         if (pmHistory.model.items[item_id].inventory != null) {
             var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
             $.when(promiss).done(function () {
@@ -231,8 +233,6 @@ pmHistory.showItem = function(holder, menuInfo, data)
             pmHistory.bindStdoutUpdates(item_id)
         }
 
-
-
     }).fail(function()
     {
         $.notify("", "error");
@@ -242,16 +242,11 @@ pmHistory.showItem = function(holder, menuInfo, data)
 pmHistory.showItemInProjects = function(holder, menuInfo, data)
 {
     var thisObj = this;
-    //console.log(menuInfo, data)
     var project_id = data.reg[1];
     var item_id = data.reg[2];
-    return $.when(this.loadItem(item_id), pmProjects.loadItem(project_id)).done(function()
+    //debugger;
+    return $.when(this.loadItem(item_id)).done(function()
     {
-        if(pmHistory.model.items[item_id].initiator > 0 )
-        {
-            pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
-        }
-
         if (pmHistory.model.items[item_id].inventory != null) {
             var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
             $.when(promiss).done(function () {
@@ -266,6 +261,21 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
         }
 
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
+        pmHistory.bindStdoutUpdates(item_id)
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showItemInInventory = function(holder, menuInfo, data)
+{
+    var thisObj = this;
+    var inventory_id = data.reg[1];
+    var item_id = data.reg[2];
+    return $.when(this.loadItem(item_id), pmInventories.loadItem(inventory_id)).done(function()
+    {
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInInventory', {item_id:item_id, inventory_id:inventory_id}))
         pmHistory.bindStdoutUpdates(item_id)
     }).fail(function()
     {
@@ -359,20 +369,25 @@ pmHistory.loadItem = function(item_id)
 
             if(data.initiator_type == 'scheduler')
             {
-                //promise = pmPeriodicTasks.loadItemsByIds([data.initiator])
-                promise = pmPeriodicTasks.loadAllItems();
+                promise = pmPeriodicTasks.loadItemsByIds([data.initiator])
+                //promise = pmPeriodicTasks.loadAllItems();
             }
             else if(data.initiator_type == 'project')
             {
-                //promise = pmUsers.loadItemsByIds([data.initiator])
-                promise = pmProjects.loadAllItems();
+                promise = pmProjects.loadItemsByIds([data.initiator])
+                //promise = pmProjects.loadAllItems();
             }
             else if(data.initiator_type == 'template')
             {
-                pmTasksTemplates.loadAllItems();
+                promise = pmTasksTemplates.loadItemsByIds([data.initiator])
+                //promise = pmTasksTemplates.loadAllItems();
             }
 
-            var promise2 = pmUsers.loadAllItems();
+            var promise2 = undefined;
+            if(data.executor!=null)
+            {
+                pmUsers.loadItem(data.executor);
+            }
 
             pmHistory.model.items.justWatch(item_id);
 
@@ -427,6 +442,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
             var projects = [];
             var usersIds = [];
             var periodicTasks = [];
+            var templates = [];
 
             for(var i in data.results)
             {
@@ -439,19 +455,29 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
                     projects.push(val.project)
                 }
 
-                if(val.initiator > 0 && val.initiator_type == 'users' && $.inArray(val.initiator, usersIds) == -1)
+                if(val.initiator > 0 && val.initiator_type == 'project' && $.inArray(val.initiator, projects) == -1)
                 {
-                    usersIds.push(val.initiator);
+                    projects.push(val.initiator);
                 }
                 else if(val.initiator > 0 && val.initiator_type == 'scheduler' && $.inArray(val.initiator, periodicTasks) == -1)
                 {
                     periodicTasks.push(val.initiator);
                 }
-            }
+                else if(val.initiator > 0 && val.initiator_type == 'template' && $.inArray(val.initiator, templates) == -1)
+                {
+                    templates.push(val.initiator);
+                }
 
+                if(val.executor && !pmUsers.model.items[val.executor] && $.inArray(val.executor, usersIds) == -1)
+                {
+                    usersIds.push(val.executor)
+                }
+            }
+            //debugger;
             var users_promise = undefined;
             var projects_promise = undefined;
             var periodicTasks_promise = undefined;
+            var templates_promise = undefined;
 
             if(periodicTasks.length)
             {
@@ -466,9 +492,15 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
             if(projects.length)
             {
                 projects_promise = pmProjects.sendSearchQuery({id:projects.join(',')})
+                //projects_promise = pmProjects.loadItemsByIds(projects)
             }
 
-            $.when(users_promise, projects_promise, periodicTasks_promise).done(function(){
+            if(templates.length)
+            {
+                templates_promise = pmTasksTemplates.loadItemsByIds(templates);
+            }
+
+            $.when(users_promise, projects_promise, periodicTasks_promise, templates_promise).done(function(){
                 def.resolve(data)
             })
         },
@@ -585,6 +617,7 @@ pmHistory.loadItems = function(limit, offset)
             var projects = [];
             var usersIds = [];
             var periodicTasks = [];
+            var templates = [];
 
             for(var i in data.results)
             {
@@ -598,19 +631,29 @@ pmHistory.loadItems = function(limit, offset)
                     projects.push(val.project)
                 }
 
-                if(val.initiator > 0 && val.initiator_type == 'users' && $.inArray(val.initiator, usersIds) == -1)
+                if(val.initiator > 0 && val.initiator_type == 'project' && $.inArray(val.initiator, projects) == -1)
                 {
-                    usersIds.push(val.initiator);
+                    projects.push(val.initiator);
                 }
                 else if(val.initiator > 0 && val.initiator_type == 'scheduler' && $.inArray(val.initiator, periodicTasks) == -1)
                 {
                     periodicTasks.push(val.initiator);
+                }
+                else if(val.initiator > 0 && val.initiator_type == 'template' && $.inArray(val.initiator, templates) == -1)
+                {
+                    templates.push(val.initiator);
+                }
+
+                if(val.executor && !pmUsers.model.items[val.executor] && $.inArray(val.executor, usersIds) == -1)
+                {
+                    usersIds.push(val.executor)
                 }
             }
 
             var users_promise = undefined;
             var projects_promise = undefined;
             var periodicTasks_promise = undefined;
+            var templates_promise = undefined;
 
             if(periodicTasks.length)
             {
@@ -627,7 +670,12 @@ pmHistory.loadItems = function(limit, offset)
                 projects_promise = pmProjects.sendSearchQuery({id:projects.join(',')})
             }
 
-            $.when(users_promise, projects_promise, periodicTasks_promise).always(function(){
+            if(templates.length)
+            {
+                templates_promise = pmTasksTemplates.loadItemsByIds(templates);
+            }
+
+            $.when(users_promise, projects_promise, periodicTasks_promise, templates_promise).always(function(){
                 def.resolve(data)
             })
         },
@@ -849,6 +897,28 @@ pmHistory.hideClearLogsButton=function()
     {
         $("#clear_logs").slideToggle();
     }
+}
+
+pmHistory.setTableRowLinkInLink = function()
+{
+    $('.light-tr').on('click', function(evt) {
+
+        if(!(evt.target.classList.contains('light-tr-none') ||
+                evt.target.classList.contains('ico-on') ||
+                evt.target.classList.contains('ico-off'))
+        )
+        {
+            if(evt.target.hasAttribute('href'))
+            {
+                var href =  evt.target.getAttribute('href');
+            }
+            else
+            {
+                var href =  evt.currentTarget.getAttribute('data-href');
+            }
+            spajs.openURL(href);
+        }
+    });
 }
 
 tabSignal.connect("polemarch.start", function()
