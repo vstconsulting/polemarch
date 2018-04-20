@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.conf import settings
 
-from ...main.utils import Paginator
+from ...main.utils import Paginator, classproperty, import_class
 
 
 class BQuerySet(models.QuerySet):
@@ -50,6 +51,20 @@ class BModel(models.Model):
 
     def __str__(self):
         return self.__unicode__()
+
+    @staticmethod
+    def get_acl(cls, obj=None):
+        handler_class_name = settings.ACL['MODEL_HANDLERS'].get(
+            cls.__name__, settings.ACL['MODEL_HANDLERS'].get("Default")
+        )
+        return import_class(handler_class_name)(cls, obj)
+
+    @classproperty
+    def acl_handler(self):
+        classObj = self.__class__
+        if isinstance(self, BModel):
+            return classObj.get_acl(classObj, self)
+        return self.get_acl(self)
 
 
 class BGroupedModel(BModel):

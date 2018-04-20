@@ -401,6 +401,9 @@ ACL = {
         "ACLInventoriesQuerySet": "django.db.models.query.QuerySet",
         "ACLHistoryQuerySet": "polemarch.main.models.acl_models.ACLHistoryQuerySet",
         "ACLUserGroupsQuerySet": "polemarch.main.models.acl_models.ACLQuerySet",
+    },
+    "MODEL_HANDLERS": {
+        "Default": "polemarch.main.acl.handlers.Default"
     }
 }
 

@@ -3,3 +3,4 @@ from .utils import ExecutorTestCase, KVExchangerTestCase, LocksTestCase, CMDExec
 from .api import RoutersTestCase, ModelRelatedFieldTestCase, UserSettingsTestCase
 from .hooks import HooksTestCase
 from .tasks import TasksTestCase, TestTaskError, TestRepoTask, ApiTemplateUnitTestCase
+from .models import ModelsTestCase
