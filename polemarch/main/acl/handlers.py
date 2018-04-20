@@ -1,6 +1,7 @@
 
 
 class Default(object):
+    qs_methods = []
     # pylint: disable=unused-argument
     def __init__(self, model=None, instance=None):
         self.instance = instance
@@ -23,3 +24,6 @@ class Default(object):
 
     def user_filter(self, qs, user, only_leads=False):
         return qs
+
+    def qs_create(self, original_method, **kwargs):
+        return original_method(**kwargs)

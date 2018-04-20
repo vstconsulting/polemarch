@@ -14,8 +14,21 @@ def first_staff_user():
 class BQuerySet(models.QuerySet):
     use_for_related_fields = True
 
+    def __decorator(self, func):
+        def wrapper(*args, **kwargs):
+            return func(self, *args, **kwargs)
+        return wrapper
+
+    def __getattribute__(self, item):
+        model = super(BQuerySet, self).__getattribute__("model")
+        if model and model.acl_handler and item in model.acl_handler.qs_methods:
+            return self.__decorator(getattr(model.acl_handler, "qs_{}".format(item)))
+        return super(BQuerySet, self).__getattribute__(item)
+
     def create(self, **kwargs):
-        return super(BQuerySet, self).create(**kwargs)
+        return self.model.acl_handler.qs_create(
+            super(BQuerySet, self).create, **kwargs
+        )
 
     def cleared(self):
         return (
@@ -72,6 +85,7 @@ class BaseModel(models.Model):
 
 
 class BModel(BaseModel):
+    objects    = BQuerySet.as_manager()
     id         = models.AutoField(primary_key=True, max_length=20)
     hidden     = models.BooleanField(default=False)
 

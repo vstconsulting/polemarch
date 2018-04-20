@@ -121,11 +121,11 @@ class _WithPermissionsSerializer(_SignalSerializer):
         self.__duplicates_check(data)
         for permission_args in data:
             if remove_old:
-                self.instance.acl.extend().filter(
+                self.instance.acl.all().extend().filter(
                     member=permission_args['member'],
                     member_type=permission_args['member_type']
                 ).delete()
-            self.instance.acl.create(**permission_args)
+            self.instance.acl.all().create(**permission_args)
 
     @transaction.atomic
     def permissions(self, request):  # noce
