@@ -600,7 +600,7 @@
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
                                         <td> <%= index %> </td>
-                                        <td class="group-children hidden-xs" style="width:75px;"> <% if(pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].children) { %> <i class="fa fa-check" style="font-size:20px;"></i> <% } %> </td>
+                                        <td class="group-children" style="width:75px;"> <% if(pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].children) { %> <i class="fa fa-check" style="font-size:20px;"></i> <% } %> </td>
                                         <td>
                                             <ul>
                                                 <% for(var j in pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].vars) { %>
@@ -630,7 +630,7 @@
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
                                             <td style="width: 120px;"> <%= index %> </td>
-                                            <td class="group-children hidden-xs" style="width:75px;"> <% if(val1.children) { %> <i class="fa fa-check" style="font-size:20px;"></i> <% } %> </td>
+                                            <td class="group-children" style="width:75px;"> <% if(val1.children) { %> <i class="fa fa-check" style="font-size:20px;"></i> <% } %> </td>
                                             <td>
                                                 <ul>
                                                     <% for(var j in val1.vars) { %>

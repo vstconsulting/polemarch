@@ -158,6 +158,15 @@ function capitalizeString(string)
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
+function isEmptyObject(obj) {
+    for (var i in obj) {
+        if (obj.hasOwnProperty(i)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 window.onresize=function ()
 {
     if(window.innerWidth>767)
@@ -271,3 +280,6 @@ tabSignal.connect("loading.completed", function()
 {
     setActiveMenuLiBase();
 })
+
+//remove this string, when android app code be ready and after that check correct work on PC
+    setActiveMenuLiBase();

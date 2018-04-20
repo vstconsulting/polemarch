@@ -2748,25 +2748,6 @@ tabSignal.connect("polemarch.start", function()
     })
 
     spajs.addMenu({
-        id:"inventory-history",
-        urlregexp:[/^inventory\/([0-9]+)\/history$/, /^inventory\/([0-9]+)\/history\/page\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmHistory.showListInInventory(holder, menuInfo, data);}
-    })
-
-    spajs.addMenu({
-        id:"history-item-in-inventory",
-        urlregexp:[/^inventory\/([0-9]+)\/history\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInInventory(holder, menuInfo, data);},
-        onClose:function(){return pmHistory.stopUpdates();}
-    })
-
-    spajs.addMenu({
-        id:"inventory-history-search",
-        urlregexp:[/^inventory\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^inventory\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInInventory(holder, menuInfo, data);}
-    })
-
-    spajs.addMenu({
         id:"newInventory",
         urlregexp:[/^new-inventory$/, /^([A-z0-9_]+)\/([0-9]+)\/new-inventory$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showNewItemPage(holder, menuInfo, data);}

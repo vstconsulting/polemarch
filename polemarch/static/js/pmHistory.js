@@ -341,7 +341,7 @@ pmHistory.bindStdoutUpdates = function(item_id)
 }
 
 /**
- * Обновляет поле модел this.model.items[item_id] и ложит туда пользователя
+ * Загружает данные элемента истории
  */
 pmHistory.loadItem = function(item_id)
 {
@@ -370,17 +370,14 @@ pmHistory.loadItem = function(item_id)
             if(data.initiator_type == 'scheduler')
             {
                 promise = pmPeriodicTasks.loadItemsByIds([data.initiator])
-                //promise = pmPeriodicTasks.loadAllItems();
             }
             else if(data.initiator_type == 'project')
             {
                 promise = pmProjects.loadItemsByIds([data.initiator])
-                //promise = pmProjects.loadAllItems();
             }
             else if(data.initiator_type == 'template')
             {
                 promise = pmTasksTemplates.loadItemsByIds([data.initiator])
-                //promise = pmTasksTemplates.loadAllItems();
             }
 
             var promise2 = undefined;
@@ -473,7 +470,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
                     usersIds.push(val.executor)
                 }
             }
-            //debugger;
+
             var users_promise = undefined;
             var projects_promise = undefined;
             var periodicTasks_promise = undefined;
@@ -492,7 +489,6 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
             if(projects.length)
             {
                 projects_promise = pmProjects.sendSearchQuery({id:projects.join(',')})
-                //projects_promise = pmProjects.loadItemsByIds(projects)
             }
 
             if(templates.length)
@@ -975,6 +971,25 @@ tabSignal.connect("polemarch.start", function()
         id:"project-history-search",
         urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInProjects(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"inventory-history",
+        urlregexp:[/^inventory\/([0-9]+)\/history$/, /^inventory\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showListInInventory(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"history-item-in-inventory",
+        urlregexp:[/^inventory\/([0-9]+)\/history\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInInventory(holder, menuInfo, data);},
+        onClose:function(){return pmHistory.stopUpdates();}
+    })
+
+    spajs.addMenu({
+        id:"inventory-history-search",
+        urlregexp:[/^inventory\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^inventory\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInInventory(holder, menuInfo, data);}
     })
 
 })

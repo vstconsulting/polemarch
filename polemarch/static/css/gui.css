@@ -875,3 +875,31 @@ table{
     cursor: pointer;
 }
 
+.start-time-td {
+    width:160px;
+}
+
+
+@media (max-width: 1200px) {
+    .hidden-1200 {
+        display: none;
+    }
+}
+
+@media (max-width: 1100px) {
+    .hidden-1100 {
+        display: none;
+    }
+}
+
+@media (max-width: 1000px) {
+    .hidden-1000 {
+        display: none;
+    }
+}
+
+@media (max-width: 850px) {
+    .start-time-td {
+        width:100px;
+    }
+}
