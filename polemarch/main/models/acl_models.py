@@ -24,14 +24,7 @@ class ACLPermissionAbstract(BModel):
         abstract = True
 
 
-class ACLQuerySet(BQuerySet):
-    use_for_related_fields = True
-
-    def user_filter(self, user, only_leads=False):
-        return self
-
-
-class ACLHistoryQuerySet(ACLQuerySet):
+class ACLHistoryQuerySet(BQuerySet):
     use_for_related_fields = True
 
 
@@ -43,17 +36,6 @@ class ACLPermissionSubclass(models.Model):
                               related_name="polemarch_%(class)s_set")
     acl = models.ManyToManyField("main.ACLPermission",
                                  blank=True, null=True)
-
-    class Meta:
-        abstract = True
-
-
-class ACLGroupSubclass(object):
-    pass
-
-
-class ACLModel(BModel, ACLPermissionSubclass):
-    objects = ACLQuerySet.as_manager()
 
     class Meta:
         abstract = True

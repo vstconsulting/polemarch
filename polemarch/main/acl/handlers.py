@@ -1,4 +1,7 @@
+
+
 class Default(object):
+    # pylint: disable=unused-argument
     def __init__(self, model=None, instance=None):
         self.instance = instance
         self.model = model
@@ -17,3 +20,6 @@ class Default(object):
 
     def viewable_by(self, user):
         return True
+
+    def user_filter(self, qs, user, only_leads=False):
+        return qs

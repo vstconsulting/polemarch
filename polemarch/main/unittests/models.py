@@ -11,4 +11,3 @@ class ModelsTestCase(BaseTestCase):
         self.assertEqual(class_handler.model, ObjClass)
         self.assertEqual(object_handler.instance, obj)
         self.assertEqual(object_handler.model, ObjClass)
-

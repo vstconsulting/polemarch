@@ -2,11 +2,20 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User as BaseUser
 
 from ...main.utils import Paginator, classproperty, import_class
 
 
+def first_staff_user():
+    return BaseUser.objects.filter(is_staff=True).first().id
+
+
 class BQuerySet(models.QuerySet):
+    use_for_related_fields = True
+
+    def create(self, **kwargs):
+        return super(BQuerySet, self).create(**kwargs)
 
     def cleared(self):
         return (
@@ -28,32 +37,27 @@ class BQuerySet(models.QuerySet):
             return getattr(self, tp_name)(**{field_name+"__in": field})
         return getattr(self, tp_name)(**{field_name: field})
 
+    def user_filter(self, user, only_leads=False):
+        # pylint: disable=unused-argument
+        return self.model.acl_handler.user_filter(self, user, only_leads=False)
 
-class BManager(models.Manager.from_queryset(BQuerySet)):
-    # pylint: disable=no-member
-    pass
 
-
-class BModel(models.Model):
-    objects    = BManager()
-    id         = models.AutoField(primary_key=True, max_length=20)
-    hidden     = models.BooleanField(default=False)
+class BaseModel(models.Model):
+    objects    = BQuerySet.as_manager()
 
     def __init__(self, *args, **kwargs):
-        super(BModel, self).__init__(*args, **kwargs)
+        super(BaseModel, self).__init__(*args, **kwargs)
         self.no_signal = False
 
     class Meta:
         abstract = True
-
-    def __unicode__(self):
-        return "<{}>".format(self.id)  # nocv
 
     def __str__(self):
         return self.__unicode__()
 
     @staticmethod
     def get_acl(cls, obj=None):
+        # pylint: disable=bad-staticmethod-argument
         handler_class_name = settings.ACL['MODEL_HANDLERS'].get(
             cls.__name__, settings.ACL['MODEL_HANDLERS'].get("Default")
         )
@@ -62,9 +66,20 @@ class BModel(models.Model):
     @classproperty
     def acl_handler(self):
         classObj = self.__class__
-        if isinstance(self, BModel):
+        if isinstance(self, BaseModel):
             return classObj.get_acl(classObj, self)
         return self.get_acl(self)
+
+
+class BModel(BaseModel):
+    id         = models.AutoField(primary_key=True, max_length=20)
+    hidden     = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+    def __unicode__(self):
+        return "<{}>".format(self.id)  # nocv
 
 
 class BGroupedModel(BModel):
@@ -99,3 +114,15 @@ class ManyToManyFieldACLReverse(models.ManyToManyField,
 class ForeignKeyACLReverse(models.ForeignKey,
                            ReverseAccessExtendsFieldMixin):
     pass
+
+
+class ACLModel(BModel):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
+                              on_delete=None,
+                              default=first_staff_user,
+                              related_name="polemarch_%(class)s_set")
+    acl = models.ManyToManyField("main.ACLPermission",
+                                 blank=True, null=True)
+
+    class Meta:
+        abstract = True

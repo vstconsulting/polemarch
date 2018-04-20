@@ -25,10 +25,10 @@ from .base import ForeignKeyACL
 from ..utils import AnsibleArgumentsReference
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
-from .base import BModel, BQuerySet, models
+from .base import BModel, ACLModel, BQuerySet, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project
-from .acl import ACLModel, ACLHistoryQuerySet
+
 
 logger = logging.getLogger("polemarch")
 
@@ -313,7 +313,7 @@ class Template(ACLModel):
         return list(self.options.keys())
 
 
-class HistoryQuerySet(ACLHistoryQuerySet):
+class HistoryQuerySet(BQuerySet):
     use_for_related_fields = True
 
     def create(self, **kwargs):

@@ -12,7 +12,7 @@ from django.core.validators import ValidationError
 
 from .. import utils
 from . import hosts as hosts_models
-from .vars import AbstractModel, AbstractVarsQuerySet, BManager, models
+from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
 from ..utils import ModelHandlers
 from .base import ManyToManyFieldACL
@@ -34,7 +34,7 @@ class ProjectQuerySet(AbstractVarsQuerySet):
 
 
 class Project(AbstractModel):
-    objects       = BManager.from_queryset(ProjectQuerySet)()
+    objects       = ProjectQuerySet.as_manager()
     handlers      = objects._queryset_class.handlers
     task_handlers = objects._queryset_class.task_handlers
     repository    = models.CharField(max_length=2*1024)
