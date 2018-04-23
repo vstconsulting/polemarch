@@ -92,6 +92,13 @@ pmModuleTemplates.model.page_item = {
             help:'Create new option'
         },
         {
+            class:'btn btn-info',
+            function:function(){ return 'return spajs.openURL(this.href);'},
+            title:'History',
+            link:function(item_id){ return polemarch.opt.host +'/?template/'+this.model.kind+'/'+ item_id + '/history'},
+            help:'Template execution history'
+        },
+        {
             class:'btn btn-default copy-btn',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
             title:'<span class="glyphicon glyphicon-duplicate" ></span>',

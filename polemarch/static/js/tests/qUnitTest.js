@@ -2959,7 +2959,8 @@ window.qunitTestsArray.push({
         })
     });
 
-    syncQUnit.addTest('Удаление шаблона', function ( assert )
+
+    syncQUnit.addTest('Сохранение и запуск шаблона', function ( assert )
     {
         var done = assert.async();
         
@@ -2981,7 +2982,40 @@ window.qunitTestsArray.push({
             render(done)
         }) 
     });
-    
+
+    var tt_history_id = undefined;
+    syncQUnit.addTest('Страница списка task template History', function ( assert )
+    {
+
+        tt_history_id=/history\/([0-9]+)/.exec(window.location.href)[1];
+        var done = assert.async();
+        $.when(spajs.open({ menuId:'template/Task/'+itemId+'/history'})).done(function()
+        {
+            assert.ok(true, 'Страница открылась');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Страница не открылась');
+            render(done)
+        })
+    })
+
+    syncQUnit.addTest('Страница task template History Item', function ( assert )
+    {
+        var done = assert.async();
+        $.when(spajs.open({ menuId:'template/Task/'+itemId+'/history/'+tt_history_id})).done(function()
+        {
+            assert.ok(true, 'Страница открылась');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Страница не открылась');
+            render(done)
+        })
+    })
+
     syncQUnit.addTest('Удаление шаблона', function ( assert )
     {
         var done = assert.async();
@@ -3391,7 +3425,7 @@ window.qunitTestsArray.push({
         })
     });
 
-    syncQUnit.addTest('Удаление шаблона Module', function ( assert )
+    syncQUnit.addTest('Сохранение и запуск шаблона Module', function ( assert )
     {
         var done = assert.async();
         
@@ -3413,6 +3447,39 @@ window.qunitTestsArray.push({
             render(done)
         }) 
     });
+
+    var tt_history_id_1 = undefined;
+    syncQUnit.addTest('Страница списка Module template History', function ( assert )
+    {
+
+        tt_history_id_1=/history\/([0-9]+)/.exec(window.location.href)[1];
+        var done = assert.async();
+        $.when(spajs.open({ menuId:'template/Module/'+itemId+'/history'})).done(function()
+        {
+            assert.ok(true, 'Страница открылась');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Страница не открылась');
+            render(done)
+        })
+    })
+
+    syncQUnit.addTest('Страница Module template History Item', function ( assert )
+    {
+        var done = assert.async();
+        $.when(spajs.open({ menuId:'template/Module/'+itemId+'/history/'+tt_history_id_1})).done(function()
+        {
+            assert.ok(true, 'Страница открылась');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Страница не открылась');
+            render(done)
+        })
+    })
     
     syncQUnit.addTest('Удаление шаблона', function ( assert )
     {
@@ -3677,6 +3744,71 @@ window.qunitTestsArray.push({
         }).fail(function()
         {
             assert.ok(true, 'Ошибка при открытиии меню inventory/9999999999/history/search/name/page/1');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в task template history search', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Task/9999999999/history/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Task/9999999999/history/search/name');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню template/Task/9999999999/history/search/name');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в module template history search', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Module/9999999999/history/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Module/9999999999/history/search/name');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню template/Module/9999999999/history/search/name');
+            render(done)
+        })
+    });
+
+
+    syncQUnit.addTest('Страница ошибки 400 в task template history search page', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Task/9999999999/history/search/name/page/1"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Task/9999999999/history/search/name/page/1');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню template/Task/9999999999/history/search/name/page/1');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в module template history search page', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Module/9999999999/history/search/name/page/1"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Module/9999999999/history/search/name/page/1');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню template/Module/9999999999/history/search/name/page/1');
             render(done)
         })
     });

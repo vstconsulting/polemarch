@@ -72,6 +72,15 @@ pmHistory.search = function(query, options)
 
         return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query), 'mode'), reopen:true});
     }
+    else if(options.initiator_type && options.initiator_type=='template')
+    {
+        if(this.isEmptySearchQuery(query))
+        {
+            return spajs.open({ menuId:'template/' + options.kind + '/' + options.initiator +"/" + this.model.name, reopen:true});
+        }
+
+        return spajs.open({ menuId:'template/' + options.kind + '/' + options.initiator +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query), 'mode'), reopen:true});
+    }
     else if(this.isEmptySearchQuery(query))
     {
         return spajs.open({ menuId:this.model.name, reopen:true});
@@ -127,7 +136,7 @@ pmHistory.showListInProjects = function(holder, menuInfo, data)
         offset = this.pageSize*(data.reg[2] - 1);
     }
     var project_id = data.reg[1];
-   // debugger;
+
     return $.when(this.sendSearchQuery({project:project_id}, limit, offset), pmProjects.loadItem(project_id)).done(function()
     {
         $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:"", project_id:project_id}))).done(function(){
@@ -156,6 +165,29 @@ pmHistory.showListInInventory = function(holder, menuInfo, data)
         $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id}))).done(function(){
             pmHistory.setTableRowLinkInLink();
         })
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showListInTemplate = function(holder, menuInfo, data, pmObj)
+{
+    var thisObj = this;
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[2] > 0)
+    {
+        offset = this.pageSize*(data.reg[2] - 1);
+    }
+    var template_id = data.reg[1];
+    //debugger;
+    return $.when(this.sendSearchQuery({initiator_type:"template",initiator:template_id}, limit, offset), pmObj.loadItem(template_id)).done(function()
+    {
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInTemplate', {query:"", pmObj:pmObj, template_id:template_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
+        thisObj.model.selectedCount = $('.multiple-select .selected').length;
     }).fail(function()
     {
         $.notify("", "error");
@@ -203,6 +235,32 @@ pmHistory.showSearchResultsInInventory = function(holder, menuInfo, data)
     return $.when(this.sendSearchQuery(search, limit, offset), pmInventories.loadItem(inventory_id)).done(function()
     {
         $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:decodeURIComponent(data.reg[2]), inventory_id:inventory_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showSearchResultsInTemplate = function(holder, menuInfo, data, pmObj)
+{
+    var thisObj = this;
+    var template_id = data.reg[1];
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[3] > 0)
+    {
+        offset = this.pageSize*(data.reg[3] - 1);
+    }
+
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]), 'mode');
+    search['initiator_type'] = 'template';
+    search['initiator'] = template_id;
+
+    return $.when(this.sendSearchQuery(search, limit, offset), pmObj.loadItem(template_id)).done(function()
+    {
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInTemplate', {query:decodeURIComponent(data.reg[2]), pmObj:pmObj, template_id:template_id}))).done(function(){
             pmHistory.setTableRowLinkInLink();
         })
     }).fail(function()
@@ -277,6 +335,24 @@ pmHistory.showItemInInventory = function(holder, menuInfo, data)
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInInventory', {item_id:item_id, inventory_id:inventory_id}))
         pmHistory.bindStdoutUpdates(item_id)
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showItemInTemplate = function(holder, menuInfo, data, pmObj)
+{
+    var thisObj = this;
+    var template_id = data.reg[1];
+    var item_id = data.reg[2];
+    return $.when(this.loadItem(item_id), pmObj.loadItem(template_id)).done(function()
+    {
+        $.when(pmInventories.loadItem(pmHistory.model.items[item_id].inventory)).done(function(){
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInTemplate', {item_id:item_id, pmObj:pmObj, template_id:template_id}))
+            pmHistory.bindStdoutUpdates(item_id);
+        });
+
     }).fail(function()
     {
         $.notify("", "error");
@@ -940,6 +1016,7 @@ tabSignal.connect("polemarch.start", function()
         onClose:function(){return pmHistory.stopUpdates();}
     })
 
+    // history in project
     spajs.addMenu({
         id:"history-item-in-project",
         urlregexp:[/^project\/([0-9]+)\/history\/([0-9]+)$/],
@@ -973,6 +1050,7 @@ tabSignal.connect("polemarch.start", function()
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInProjects(holder, menuInfo, data);}
     })
 
+    // history in inventory
     spajs.addMenu({
         id:"inventory-history",
         urlregexp:[/^inventory\/([0-9]+)\/history$/, /^inventory\/([0-9]+)\/history\/page\/([0-9]+)$/],
@@ -990,6 +1068,46 @@ tabSignal.connect("polemarch.start", function()
         id:"inventory-history-search",
         urlregexp:[/^inventory\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^inventory\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInInventory(holder, menuInfo, data);}
+    })
+
+    // history in task template
+    spajs.addMenu({
+        id:"task-template-history",
+        urlregexp:[/^template\/Task\/([0-9]+)\/history$/, /^template\/Task\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showListInTemplate(holder, menuInfo, data, pmTasksTemplates);}
+    })
+
+    spajs.addMenu({
+        id:"history-item-in-task-template",
+        urlregexp:[/^template\/Task\/([0-9]+)\/history\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInTemplate(holder, menuInfo, data, pmTasksTemplates);},
+        onClose:function(){return pmHistory.stopUpdates();}
+    })
+
+    spajs.addMenu({
+        id:"task-template-history-search",
+        urlregexp:[/^template\/Task\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^template\/Task\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInTemplate(holder, menuInfo, data, pmTasksTemplates);}
+    })
+
+    // history in module template
+    spajs.addMenu({
+        id:"module-template-history",
+        urlregexp:[/^template\/Module\/([0-9]+)\/history$/, /^template\/Module\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showListInTemplate(holder, menuInfo, data, pmModuleTemplates);}
+    })
+
+    spajs.addMenu({
+        id:"history-item-in-module-template",
+        urlregexp:[/^template\/Module\/([0-9]+)\/history\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInTemplate(holder, menuInfo, data, pmModuleTemplates);},
+        onClose:function(){return pmHistory.stopUpdates();}
+    })
+
+    spajs.addMenu({
+        id:"module-template-history-search",
+        urlregexp:[/^template\/Module\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^template\/Module\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInTemplate(holder, menuInfo, data, pmModuleTemplates);}
     })
 
 })

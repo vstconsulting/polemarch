@@ -2295,7 +2295,7 @@ pmInventories.model.page_item = {
             link:function(){ return '#'},
         },
         {
-            class:'btn btn-primary',
+            class:'btn btn-info',
             function:function(item_id){ return 'return spajs.openURL(this.href);'},
             title:'History',
             link:function(item_id){ return polemarch.opt.host + '/?inventory/' + item_id + '/history'},
