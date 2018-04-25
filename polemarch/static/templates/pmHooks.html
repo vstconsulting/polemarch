@@ -1,0 +1,44 @@
+<!-- Шаблон поля type для страниц hook/{id}, new-hook -->
+<script type="text/x-just" data-just="filed_type_selectHookType">
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label" >Type</label>
+        <% if(!item_id) { %>
+            <select class="form-control select2" id="new-hook-type"  data-placeholder="Select a type" >
+                <% for(var i in pmHooks.model.supportedTypes){ %>
+                    <option
+                        value="<%- pmHooks.model.supportedTypes[i] %>" ><%- pmHooks.model.supportedTypes[i] %>
+                    </option>
+                <% } %>
+            </select>
+        <% } else { %>
+            <input type="text" disabled   id="hook-<%- item_id %>-type" value="<%- pmHooks.model.items[item_id].type %>"  class="form-control" maxlength="255">
+            <div class="help-block"></div>
+        <% } %>
+    </div>
+</script>
+
+<!-- Шаблон поля when для страниц hook/{id}, new-hook -->
+<script type="text/x-just" data-just="filed_type_selectHookWhen">
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label" >When</label>
+        <% if(!item_id) { %>
+            <select class="form-control select2" id="new-hook-when" data-placeholder="Select when" >
+                <% for(var i in pmHooks.model.supportedWhens){ %>
+                    <option
+                        value="<%- i %>" ><%- pmHooks.model.supportedWhens[i] %>
+                    </option>
+                <% } %>
+            </select>
+        <% } else { %>
+            <select class="form-control select2" id="hook-<%- item_id %>-when" data-placeholder="Select when" >
+                <% for(var i in pmHooks.model.supportedWhens){ %>
+                    <option
+                        value="<%- i %>"
+                        <% if (pmHooks.model.items[item_id].when==i) { %> selected <% } %>>
+                        <%- pmHooks.model.supportedWhens[i] %>
+                    </option>
+                <% } %>
+            </select>
+        <% } %>
+    </div>
+</script>

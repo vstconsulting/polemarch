@@ -903,3 +903,9 @@ table{
         width:100px;
     }
 }
+
+@media (max-width: 480px) {
+    .hidden-480 {
+        display: none;
+    }
+}

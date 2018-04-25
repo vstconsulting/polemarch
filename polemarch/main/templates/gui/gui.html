@@ -40,7 +40,8 @@
     <script defer src="{% static 'js/pmModuleTemplates.js' %}?v={{polemarch_version}}"></script> 
     <script defer src="{% static 'js/pmAnsibleModule.js' %}?v={{polemarch_version}}"></script>
     <script defer src="{% static 'js/moduleArgsEditor.js' %}?v={{polemarch_version}}"></script>
-    <script defer src="{% static 'js/pmDashboard.js' %}?v={{polemarch_version}}"></script>  
+    <script defer src="{% static 'js/pmDashboard.js' %}?v={{polemarch_version}}"></script>
+    <script defer src="{% static 'js/pmHooks.js' %}?v={{polemarch_version}}"></script>
 {% endblock %}
 
 {% block script %}
@@ -65,7 +66,8 @@
             'templates/pmGroups',
             'templates/pmItems',
             //'templates/pmHosts',
-            'templates/pmUsers'
+            'templates/pmUsers',
+            'templates/pmHooks'
         ]
         
         // alert("New-")

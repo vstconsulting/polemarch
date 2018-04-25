@@ -3651,6 +3651,22 @@ window.qunitTestsArray.push({
             render(done)
         })
     });
+
+    syncQUnit.addTest('Поиск hooks', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"hooks/search/hook-example"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню hooks/search/hook-example');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню hooks/search/hook-example');
+            render(done)
+        })
+    });
     
     syncQUnit.addTest('Страница ошибки 400 в project history', function ( assert )
     {
@@ -3957,4 +3973,119 @@ window.qunitTestsArray.push({
     });
     
 }})
-  
+
+
+/**
+ * Тестирование hooks
+ */
+window.qunitTestsArray.push({
+    step:1200,
+    test:function()
+{
+    syncQUnit.addTest('Страница hooks', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"hooks"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню hooks');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню hooks');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Открытие cтраницы new hook', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"new-hook"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-hook');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню new-hook');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение невалидного hook', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(pmHooks.addItem()).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Хук успешно сохранен, а не должен был');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при сохранении хука, как и задумано');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение валидного hook', function ( assert )
+    {
+        var done = assert.async();
+
+        $('#filed_name').val('test-hook');
+        $('#filed_recipients').val('test-recipient');
+
+        $.when(pmHooks.addItem()).done(function()
+        {
+            assert.ok(true, 'Hook успешно создан');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при создании hook');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Изменение  hook', function ( assert )
+    {
+        var done = assert.async();
+        var item_id=/hook\/([0-9]+)/.exec(window.location.href)[1]
+
+        $('#filed_name').val('test-hook2');
+
+        $.when(pmHooks.updateItem(item_id)).done(function()
+        {
+            assert.ok(true, 'Hook успешно изменен');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при изменении hook');
+            render(done)
+        })
+    });
+
+
+    syncQUnit.addTest('Удаление  hook', function ( assert )
+    {
+        var done = assert.async();
+        var item_id=/hook\/([0-9]+)/.exec(window.location.href)[1]
+
+        $('#filed_name').val('test-hook2');
+
+        $.when(pmHooks.deleteItem(item_id, true)).done(function()
+        {
+            assert.ok(true, 'Hook успешно удален');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при удалении hook');
+            render(done)
+        })
+    });
+
+}})
