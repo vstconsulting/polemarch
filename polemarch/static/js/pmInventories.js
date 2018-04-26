@@ -2248,6 +2248,14 @@ pmInventories.model.page_new = {
                 },
                 fast_validator:filedsLib.validator.notEmpty
             },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
+            },
         ]
     ],
     sections:[
@@ -2295,7 +2303,7 @@ pmInventories.model.page_item = {
             link:function(){ return '#'},
         },
         {
-            class:'btn btn-info',
+            class:'btn btn-primary',
             function:function(item_id){ return 'return spajs.openURL(this.href);'},
             title:'History',
             link:function(item_id){ return polemarch.opt.host + '/?inventory/' + item_id + '/history'},
@@ -2339,6 +2347,14 @@ pmInventories.model.page_item = {
                     return filedsLib.validator.notEmpty(value, 'Name')
                 },
                 fast_validator:function(value){ return value != '' && value}
+            },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
             },
         ]
     ],

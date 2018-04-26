@@ -149,6 +149,14 @@ pmGroups.model.page_new = {
                 name:'children',
                 help:'If turn, then allow adding sub groups to group'
             },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
+            },
         ]
     ],
     sections:[
@@ -255,6 +263,14 @@ pmGroups.model.page_item = {
                 placeholder:'Enter group name',
                 validator:pmGroups.validator,
                 fast_validator:pmGroups.fast_validator
+            },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
             },
         ]
     ],

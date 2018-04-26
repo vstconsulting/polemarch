@@ -196,6 +196,14 @@ pmProjects.model.page_new = {
                 filed: new pmProjects.filed.selectRepositoryType(),
                 name:'repository',
             },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
+            },
         ]
     ],
     /**
@@ -373,6 +381,14 @@ pmProjects.model.page_item = {
                 filed: new filedsLib.filed.disabled(),
                 name:'status',
                 title:'Status',
+            },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
             },
         ]
     ],

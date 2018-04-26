@@ -138,10 +138,19 @@ pmModuleTemplates.model.page_item = {
                 },
                 fast_validator:function(value){ return value != '' && value}
             },
-        ],[
+        ],
+        [
             {
                 filed: new pmModuleTemplates.filed.selectProjectInventoryGroupAndModule(),
                 name:'inventory',
+            },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
             },
         ]
     ],
@@ -724,6 +733,8 @@ pmModuleTemplates.addItem = function()
         def.reject()
         return;
     }
+
+    data.notes=$("#filed_notes").val();
 
     var thisObj = this;
     spajs.ajax.Call({

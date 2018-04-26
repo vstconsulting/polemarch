@@ -798,7 +798,8 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                     connection="paramiko",
                     tags="update",
                 )
-            )
+            ),
+            notes="Test template"
         )
         job_tmplt = self.get_model_class('Template').objects.create(**self.tmplt_data)
         self.job_template = job_tmplt

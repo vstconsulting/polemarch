@@ -437,11 +437,13 @@ class HostSerializer(_WithVariablesSerializer):
 class OneHostSerializer(HostSerializer):
     owner = UserSerializer(read_only=True)
     vars = DictField(required=False)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Host
         fields = ('id',
                   'name',
+                  'notes',
                   'type',
                   'vars',
                   'owner',
@@ -506,11 +508,13 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
     vars = DictField(required=False)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
                   'name',
+                  'notes',
                   'type',
                   'schedule',
                   'mode',
@@ -587,12 +591,14 @@ class OneTemplateSerializer(TemplateSerializer):
     owner = UserSerializer(read_only=True)
     options = DictField(required=False)
     options_list = DictField(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Template
         fields = (
             'id',
             'name',
+            'notes',
             'kind',
             'owner',
             'data',
@@ -638,11 +644,13 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
     hosts  = HostSerializer(read_only=True, many=True)
     groups = GroupSerializer(read_only=True, many=True)
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Group
         fields = ('id',
                   'name',
+                  'notes',
                   'hosts',
                   "groups",
                   'vars',
@@ -681,11 +689,13 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
     groups = GroupSerializer(read_only=True, many=True, source="groups_list")
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Inventory
         fields = ('id',
                   'name',
+                  'notes',
                   'hosts',
                   'all_hosts',
                   "groups",
@@ -720,11 +730,13 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     groups      = GroupSerializer(read_only=True, many=True)
     inventories = InventorySerializer(read_only=True, many=True)
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Project
         fields = ('id',
                   'name',
+                  'notes',
                   'status',
                   'repository',
                   'hosts',
