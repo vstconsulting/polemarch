@@ -187,88 +187,78 @@ window.onresize=function ()
         }
     }
 }
- function setActiveMenuLiBase()
+function setActiveMenuLiBase()
 {
     if(/\?projects/.test(window.location.href) || /\?project/.test(window.location.href) ||
         /\?new-project/.test(window.location.href))
     {
-        $("#menu-projects").addClass("active active-li");
+        $("#menu-projects").addClass("pm-treeview-active active active-li active-bold");
         $("#menu-projects-projects").addClass("active-bold");
+        $("#menu-projects").removeClass("pm-treeview");
     }
     else if(/\?templates/.test(window.location.href) ||
         /\?template/.test(window.location.href))
     {
-        $("#menu-projects").addClass("active active-li");
+        $("#menu-projects").addClass("pm-treeview-active active active-li");
         $("#menu-projects-templates").addClass("active-bold");
+        $("#menu-projects").removeClass("pm-treeview");
     }
     else if(/\?hosts/.test(window.location.href) || /\?host/.test(window.location.href) ||
         /\?new-host/.test(window.location.href))
     {
-        $("#menu-inventories").addClass("active active-li");
+        $("#menu-inventories").addClass("pm-treeview-active active active-li");
         $("#menu-inventories-hosts").addClass("active-bold");
+        $("#menu-inventories").removeClass("pm-treeview");
     }
     else if(/\?new-group/.test(window.location.href) || /\?groups/.test(window.location.href) ||
         /\?group/.test(window.location.href))
     {
-        $("#menu-inventories").addClass("active active-li");
+        $("#menu-inventories").addClass("pm-treeview-active active active-li");
         $("#menu-inventories-groups").addClass("active-bold");
+        $("#menu-inventories").removeClass("pm-treeview");
     }
     else if(/\?inventories/.test(window.location.href) || /\?inventory/.test(window.location.href) ||
         /\?new-inventory/.test(window.location.href))
     {
-        $("#menu-inventories").addClass("active active-li");
+        $("#menu-inventories").addClass("pm-treeview-active active active-li active-bold");
         $("#menu-inventories-inventories").addClass("active-bold");
+        $("#menu-inventories").removeClass("pm-treeview");
     }
     else if(/\?history/.test(window.location.href)){
 
-        $("#menu-history").addClass("active active-li");
+        $("#menu-history").addClass("active active-li active-bold");
     }
     else if(/\?users/.test(window.location.href) || /\?user/.test(window.location.href) ||
         /\?new-user/.test(window.location.href) || /\?profile/.test(window.location.href))
     {
-        $("#menu-users").addClass("active active-li");
+        $("#menu-users").addClass("active active-li active-bold");
     }
     else
     {
-        $("#menu-home").addClass("active active-li");
+        $("#menu-home").addClass("active active-li active-bold");
     }
 }
 
 function setActiveMenuLi()
 {
-    if($('li').is('.active-li'))
+    if($('li').is('.pm-treeview-active'))
     {
-        var t=$(".active-li")[0];
-        $(t).removeClass("active");
-        $(t).removeClass("active-li");
+        var t=$(".pm-treeview-active");
+        $(t).addClass("pm-treeview");
+        $(t).removeClass("pm-treeview-active");
     }
 
-    if($('li').is(".treeview"))
+    if($('li').is('.active-li'))
     {
-        var s=$(".treeview");
-        for(var i=0; i<s.length; i++)
-        {
-            $(s).removeClass("active");
-        }
-
-        if($('ul').is('.treeview-menu'))
-        {
-            var s1=$(".treeview-menu");
-            for(var i=0; i<s1.length; i++)
-            {
-                $(s1).removeClass("menu-open");
-                $(s1).attr("style", "");
-            }
-        }
+        var t=$(".active-li");
+        $(t).removeClass("active");
+        $(t).removeClass("active-li");
     }
 
     if($('li').is('.active-bold'))
     {
         var g=$(".active-bold");
-        for(var i=0; i<g.length; i++)
-        {
-            $(g).removeClass("active-bold");
-        }
+        $(g).removeClass("active-bold");
     }
 
     return setActiveMenuLiBase();
@@ -282,4 +272,4 @@ tabSignal.connect("loading.completed", function()
 })
 
 //remove this string, when android app code be ready and after that check correct work on PC
-    setActiveMenuLiBase();
+setActiveMenuLiBase();

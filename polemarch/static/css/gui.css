@@ -745,7 +745,8 @@ table{
 
 .sidebar-menu>li.pm-treeview-active>.pm-treeview-menu>li>a:hover,
 .pm-treeview-active>a:hover,
-.sidebar-mini.sidebar-collapse .sidebar-menu>li.pm-treeview-active>a{
+.sidebar-mini.sidebar-collapse .sidebar-menu>li.pm-treeview-active>a,
+.sidebar-mini.sidebar-collapse .sidebar-menu>li.active-li>a {
     background-color: #E0E0E0!important;
 }
 
@@ -790,7 +791,6 @@ table{
     background-color: #fcfcfc;
     box-shadow: 2px 1px 3px rgba(0,0,0,0.1);
     width: 180px;
-    list-style: none;
     border-left: none;
     border-top: 1px solid #d2d6de;
     border-bottom-right-radius: 4px;
@@ -811,14 +811,14 @@ table{
 }
 
 .sidebar-mini.sidebar-collapse .sidebar-menu>li>a>.li-header-span,
-.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover pm-treeview-menu>li>.li-header-span {
+.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover .pm-treeview-menu>li>.li-header-span {
     background-color: #fcfcfc!important;
     box-shadow: 2px 1px 3px rgba(0,0,0,0.1);
 }
 
 
 .sidebar-mini.sidebar-collapse .sidebar-menu>li>a>.li-header-span:hover,
-.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover pm-treeview-menu>li>.li-header-span:hover,
+.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover .pm-treeview-menu>li>.li-header-span:hover,
 .sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover .pm-treeview-menu>li>a:hover,
 .sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview:hover .pm-treeview-menu>li>a:hover {
     background-color: #EEEEEE!important;
