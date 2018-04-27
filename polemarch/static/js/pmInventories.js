@@ -122,6 +122,7 @@ pmInventories.parseHostLine = function(index, line, section, inventory)
 
     var host = {
         name:name,
+        notes:"",
         type:type,
         all_only:false,
         matches:false,
@@ -206,6 +207,7 @@ pmInventories.addGroupIfNotExists = function(inventory, group_name)
     if(!inventory.groups[group_name])
     {
         inventory.groups[group_name] = {
+            notes:"",
             vars:{},
             groups:[],
             hosts:[],
@@ -236,7 +238,8 @@ pmInventories.parseFromText = function(text)
         hosts:[],
         groups:{},
         vars:{},
-        name:new Date().toString()
+        name:new Date().toString(),
+        notes:""
     }
 
     for(var i in lines)
@@ -525,6 +528,7 @@ pmInventories.openEditItemModal = function(subItemType, index)
  */
 pmInventories.saveChangesFromEditItemModal = function(subItemType, index)
 {
+    pmInventories.model.importedSubItem.notes=$("#"+subItemType+"_notes").val();
     pmInventories.model.importedInventories.inventory[subItemType][index]=JSON.parse(JSON.stringify(pmInventories.model.importedSubItem));
     var html=spajs.just.render('change_imported_subitem_vars', {vars:pmInventories.model.importedInventories.inventory[subItemType][index].vars});
     $("#"+subItemType+"-"+index+"-vars").html(html);
@@ -772,6 +776,7 @@ pmInventories.saveSelectedMatchSubItem1 = function(subItemType, index)
                 if(subitem.id==subitem_id)
                 {
                     pmInventories.model.importedSubItem.id=+subitem_id;
+                    pmInventories.model.importedSubItem.notes=subitem.notes;
                     pmInventories.model.importedSubItem.type=subitem.type;
                     pmInventories.model.importedSubItem.vars=JSON.parse(JSON.stringify(subitem.vars));
                     if(subItemType=="groups")
@@ -1053,6 +1058,7 @@ pmInventories.getInnerDataForChildrenGroup = function() {
             if (pmInventories.model.importedInventories.inventory.groups[data[k].data.name] !== undefined)
             {
                 pmInventories.model.importedInventories.inventory.groups[data[k].data.name].id = data[k].data.id;
+                pmInventories.model.importedInventories.inventory.groups[data[k].data.name].notes = data[k].data.notes;
                 pmInventories.model.importedInventories.inventory.groups[data[k].data.name].children = data[k].data.children;
                 pmInventories.model.importedInventories.inventory.groups[data[k].data.name].groups = JSON.parse(JSON.stringify(data[k].data.groups));
                 pmInventories.model.importedInventories.inventory.groups[data[k].data.name].hosts = JSON.parse(JSON.stringify(data[k].data.hosts));
@@ -1062,6 +1068,7 @@ pmInventories.getInnerDataForChildrenGroup = function() {
             {
                 pmInventories.model.importedInventories.inventory.groups[data[k].data.name] = {
                     id: data[k].data.id,
+                    notes: data[k].data.notes,
                     children: data[k].data.children,
                     vars: JSON.parse(JSON.stringify(data[k].data.vars)),
                     groups: JSON.parse(JSON.stringify(data[k].data.groups)),
@@ -1125,6 +1132,7 @@ pmInventories.insertHostsFromBulk = function(data)
                 bool=true;
                 pmInventories.model.importedInventories.inventory.hosts[f]=JSON.parse(JSON.stringify(pmInventories.model.importedInventoriesCopy.inventory.hosts[f]));
                 pmInventories.model.importedInventories.inventory.hosts[f].id=data[p].data.id;
+                pmInventories.model.importedInventories.inventory.hosts[f].notes=data[p].data.notes;
                 pmInventories.model.importedInventories.inventory.hosts[f].vars=JSON.parse(JSON.stringify(data[p].data.vars));
             }
         }
@@ -1731,7 +1739,8 @@ pmInventories.importInventory = function(inventory)
 
     var inventoryObject = {
         name:inventory.name,
-        vars:inventory.vars
+        vars:inventory.vars,
+        notes:$("#filed_notes").val()
     }
 
     var deleteBulk = []
@@ -1756,6 +1765,7 @@ pmInventories.importInventory = function(inventory)
                     item:'host',
                     data:{
                         name:val.name,
+                        notes:val.notes,
                         type:val.type,
                         vars:val.vars
                     }
@@ -1844,6 +1854,7 @@ pmInventories.importInventory = function(inventory)
                             item: 'group',
                             data: {
                                 name: i,
+                                notes: val.notes,
                                 children: val.children,
                                 vars: val.vars
                             }
@@ -1868,6 +1879,7 @@ pmInventories.importInventory = function(inventory)
                                     item:'host',
                                     data:{
                                         name:hval.name,
+                                        notes:hval.notes,
                                         type:hval.type,
                                         vars:hval.vars
                                     }
