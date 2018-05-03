@@ -168,8 +168,7 @@ class Template(ACLModel):
     project       = ForeignKeyACL(Project,
                                   on_delete=models.SET_NULL,
                                   default=None, blank=True, null=True)
-    # for object notes
-    notes_field = models.TextField(default="")
+    notes         = models.TextField(default="")
 
     class Meta:
         index_together = [
@@ -316,14 +315,6 @@ class Template(ACLModel):
     @property
     def options_list(self):
         return list(self.options.keys())
-
-    @property
-    def notes(self):
-        return self.notes_field
-
-    @notes.setter
-    def notes(self, value):
-        self.notes_field = value
 
 
 class HistoryQuerySet(ACLHistoryQuerySet):

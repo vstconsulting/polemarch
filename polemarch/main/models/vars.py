@@ -57,8 +57,7 @@ class AbstractModel(ACLModel):
                                    default=uuid.uuid1)
     variables   = GenericRelation(Variable, related_query_name="variables",
                                   object_id_field="object_id")
-    # for object notes
-    notes_field        = models.TextField(default="")
+    notes       = models.TextField(default="")
 
     class Meta:
         abstract = True
@@ -130,11 +129,3 @@ class AbstractModel(ACLModel):
     @property
     def have_vars(self):
         return bool(len(self.vars))  # nocv
-
-    @property
-    def notes(self):
-        return self.notes_field
-
-    @notes.setter
-    def notes(self, value):
-        self.notes_field = value
