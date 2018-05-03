@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 import polemarch.main.models.users
-import polemarch.main.models.acl_models
+import polemarch.main.models.base
 
 
 class Migration(migrations.Migration):
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             name='UserGroup',
             fields=[
                 ('parent', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='auth.Group')),
-                ('owner', models.ForeignKey(default=polemarch.main.models.acl_models.first_staff_user, on_delete=django.db.models.deletion.CASCADE, related_name='polemarch_usergroup_set', to=settings.AUTH_USER_MODEL)),
+                ('owner', models.ForeignKey(default=polemarch.main.models.base.first_staff_user, on_delete=django.db.models.deletion.CASCADE, related_name='polemarch_usergroup_set', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'abstract': False,

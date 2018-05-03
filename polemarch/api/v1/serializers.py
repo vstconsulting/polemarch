@@ -117,6 +117,7 @@ class _WithPermissionsSerializer(_SignalSerializer):
         if len(without_role) != len(list(set(without_role))):
             raise ValueError("There is duplicates in your permissions set.")
 
+    @transaction.atomic
     def __permission_set(self, data, remove_old=True):  # noce
         self.__duplicates_check(data)
         for permission_args in data:
@@ -125,7 +126,7 @@ class _WithPermissionsSerializer(_SignalSerializer):
                     member=permission_args['member'],
                     member_type=permission_args['member_type']
                 ).delete()
-            self.instance.acl.all().create(**permission_args)
+            self.instance.acl.create(**permission_args)
 
     @transaction.atomic
     def permissions(self, request):  # noce
@@ -134,7 +135,7 @@ class _WithPermissionsSerializer(_SignalSerializer):
                 not self.instance.acl_handler.manageable_by(user):
             raise PermissionDenied(self.perms_msg)
         if request.method == "DELETE":
-            self.instance.acl.filter_by_data(request.data).delete()
+            self.instance.acl.all().filter_by_data(request.data).delete()
         elif request.method == "POST":
             self.__permission_set(request.data)
         elif request.method == "PUT":

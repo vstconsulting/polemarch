@@ -1,8 +1,9 @@
 
 
 class Default(object):
-    qs_methods = []
     # pylint: disable=unused-argument
+    qs_methods = []
+
     def __init__(self, model=None, instance=None):
         self.instance = instance
         self.model = model

@@ -20,7 +20,7 @@ class ACLPermission(BModel):
     role = models.CharField(max_length=10)
 
     @property
-    def member(self): # noce
+    def member(self):  # noce
         # pylint: disable=no-member
         if self.user is not None:
             return self.user.id
@@ -28,18 +28,18 @@ class ACLPermission(BModel):
             return self.uagroup.id
 
     @member.setter
-    def member(self, value): # noce
+    def member(self, value):  # noce
         pass
 
     @property
-    def member_type(self): # noce
+    def member_type(self):  # noce
         if self.user is not None:
             return "user"
         else:
             return "team"
 
     @member_type.setter
-    def member_type(self, value): # noce
+    def member_type(self, value):  # noce
         pass
 
 
