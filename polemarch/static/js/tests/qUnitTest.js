@@ -4034,7 +4034,7 @@ window.qunitTestsArray.push({
         var done = assert.async();
 
         $('#filed_name').val('test-hook');
-        $('#filed_recipients').val('test-recipient');
+        pmHooks.model.newItem.recipients=['test-recipient'];
 
         $.when(pmHooks.addItem()).done(function()
         {

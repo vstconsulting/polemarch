@@ -228,10 +228,19 @@ function setActiveMenuLiBase()
 
         $("#menu-history").addClass("active active-li active-bold");
     }
+    else if(/\?hooks/.test(window.location.href) || /\?hook/.test(window.location.href) ||
+        /\?new-hook/.test(window.location.href))
+    {
+        $("#menu-users").addClass("pm-treeview-active active active-li");
+        $("#menu-users-hooks").addClass("active-bold");
+        $("#menu-users").removeClass("pm-treeview");
+    }
     else if(/\?users/.test(window.location.href) || /\?user/.test(window.location.href) ||
         /\?new-user/.test(window.location.href) || /\?profile/.test(window.location.href))
     {
-        $("#menu-users").addClass("active active-li active-bold");
+        $("#menu-users").addClass("pm-treeview-active active active-li active-bold");
+        $("#menu-users-users").addClass("active-bold");
+        $("#menu-users").removeClass("pm-treeview");
     }
     else
     {
