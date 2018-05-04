@@ -9,10 +9,10 @@ class ModelPermission(permissions.IsAuthenticated):
         if request.user.is_staff or request.user == obj:
             return True
         if request.method in permissions.SAFE_METHODS:  # nocv
-            return obj.viewable_by(request.user)  # nocv
+            return obj.acl_handler.viewable_by(request.user)  # nocv
         if view.action in view.POST_WHITE_LIST:  # nocv
-            return obj.viewable_by(request.user)  # nocv
-        return obj.editable_by(request.user)  # noce
+            return obj.acl_handler.viewable_by(request.user)  # nocv
+        return obj.acl_handler.editable_by(request.user)  # noce
 
 
 class SuperUserPermission(ModelPermission):
