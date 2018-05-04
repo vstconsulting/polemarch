@@ -2923,9 +2923,9 @@ Polemarch has his own system of hooks.
 
       {
           "name": "new hook",
-          "type": "HTTP",
+          "type": "SCRIPT",
           "when": "on_execution",
-          "recipients": "http://localhost:8000/new_hook_trigger"
+          "recipients": "new-test.sh"
       }
 
    Results:

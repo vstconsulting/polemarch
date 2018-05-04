@@ -4034,7 +4034,7 @@ window.qunitTestsArray.push({
         var done = assert.async();
 
         $('#filed_name').val('test-hook');
-        pmHooks.model.newItem.recipients=['test-recipient'];
+        pmHooks.model.newItem.recipients='test-recipient';
 
         $.when(pmHooks.addItem()).done(function()
         {
@@ -4048,7 +4048,7 @@ window.qunitTestsArray.push({
         })
     });
 
-    syncQUnit.addTest('Изменение  hook', function ( assert )
+    syncQUnit.addTest('Изменение имени hook', function ( assert )
     {
         var done = assert.async();
         var item_id=/hook\/([0-9]+)/.exec(window.location.href)[1]
@@ -4067,6 +4067,24 @@ window.qunitTestsArray.push({
         })
     });
 
+    syncQUnit.addTest('Изменение when hook на null', function ( assert )
+    {
+        var done = assert.async();
+        var item_id=/hook\/([0-9]+)/.exec(window.location.href)[1]
+
+        $('#hook-'+item_id+'-when').val('null');
+
+        $.when(pmHooks.updateItem(item_id)).done(function()
+        {
+            assert.ok(true, 'Hook успешно изменен');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при изменении hook');
+            render(done)
+        })
+    });
 
     syncQUnit.addTest('Удаление  hook', function ( assert )
     {

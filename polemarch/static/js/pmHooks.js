@@ -48,8 +48,18 @@ pmHooks.model.page_list = {
         {
             title:'Recipients',
             name: 'recipients',
-            class:function(item){ return 'class="hidden-xs"'},
-            value:function(item){ return item['recipients']},
+            class:function(item){ return 'class="hidden-xs recipients_list"'},
+            value:function(item)
+            {
+                var recipient_list="<ul>";
+                var recipients_arr = pmHooks.parseRecipientsFromStrToArr(item['recipients'])
+                for (var i in recipients_arr)
+                {
+                    recipient_list+="<li>"+recipients_arr[i]+"</li>";
+                }
+                recipient_list+="</ul>";
+                return recipient_list;
+            },
         }
     ],
     actions:[
@@ -106,7 +116,7 @@ pmHooks.model.page_item = {
     ],
     sections:[
         function(section, item_id){
-            return spajs.just.render("new_hook_recipients", {item_id:item_id})
+            return spajs.just.render("section_hook_recipients", {item_id:item_id})
         }
     ],
     onUpdate:function(result)
@@ -122,7 +132,11 @@ pmHooks.model.page_item = {
         }
         data['type'] = $('#hook-'+item_id+'-type').val();
         data['when'] = $('#hook-'+item_id+'-when').val();
-        data['recipients'] = pmHooks.model.items[item_id].recipients.join(' | ');
+        if(data['when'] == "null")
+        {
+           data['when'] = null;
+        }
+        data['recipients'] = pmHooks.model.items[item_id].recipients;
         return data
     },
 }
@@ -155,7 +169,7 @@ pmHooks.model.page_new = {
     ],
     sections:[
         function(section){
-            return spajs.just.render("new_hook_recipients", {item_id:"new"})
+            return spajs.just.render("section_hook_recipients", {item_id:"new"})
         }
     ],
     onBeforeSave:function(data)
@@ -167,7 +181,11 @@ pmHooks.model.page_new = {
         }
         data['type'] = $('#new-hook-type').val();
         data['when'] = $('#new-hook-when').val();
-        data['recipients'] = pmHooks.model.newItem.recipients.join(' | ');
+        if(data['when'] == "null")
+        {
+            data['when'] = null;
+        }
+        data['recipients'] = pmHooks.model.newItem.recipients;
 
         return data
     },
@@ -183,9 +201,10 @@ pmHooks.model.page_new = {
     }
 }
 
+
 /**
  * Функция получает доступные types и when для хуков
- * и сохраняет их в pmHooks.model.supportedTypes и pmHooks.model.supportedTypes
+ * и сохраняет их в pmHooks.model.supportedTypes и pmHooks.model.supportedWhens
  */
 pmHooks.getSupportedTypes = function()
 {
@@ -197,6 +216,7 @@ pmHooks.getSupportedTypes = function()
         {
             pmHooks.model.supportedTypes = data['types'];
             pmHooks.model.supportedWhens = data['when'];
+            pmHooks.model.supportedWhens['null'] = 'Always';
         },
         error:function(e)
         {
@@ -204,6 +224,7 @@ pmHooks.getSupportedTypes = function()
         }
     });
 }
+
 
 /**
  * Функция вызывается при открытии какого либо из меню(url) предназначенного для хуков.
@@ -219,7 +240,7 @@ pmHooks.openSomeHookPage = function (holder, menuInfo, data, functionName)
         if(functionName=="showNewItemPage")
         {
             pmHooks.model.newItem={};
-            pmHooks.model.newItem.recipients=[];
+            pmHooks.model.newItem.recipients="";
         }
         pmHooks[functionName](holder, menuInfo, data);
 
@@ -229,145 +250,46 @@ pmHooks.openSomeHookPage = function (holder, menuInfo, data, functionName)
     }).promise();
 }
 
-pmHooks.loadItem = function (item_id)
+
+/**
+ * Фукнция преобраузет строку с со списком recipients в массив.
+ * @param {String} recipients_str - строка содержащая список recipients, которые разделены
+ * между собой группой символов: " | ".
+ */
+pmHooks.parseRecipientsFromStrToArr = function(recipients_str)
 {
-    if (!item_id)
+    if(recipients_str == "")
     {
-        throw "Error in pmItems.loadItem with item_id = `" + item_id + "`"
+        return [];
     }
-
-    var def = new $.Deferred();
-    var thisObj = this;
-
-    if (thisObj.model.items[item_id] === undefined)
+    else
     {
-        thisObj.model.items[item_id] = {}
+        return recipients_str.split(" | ");
     }
-
-    spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/",
-        type: "GET",
-        contentType: 'application/json',
-        data: "",
-        success: function (data)
-        {
-            //console.log("loadUser", data)
-            thisObj.model.items.justWatch(item_id)
-            thisObj.model.items[item_id] = thisObj.afterItemLoad(data)
-            thisObj.model.items[item_id].recipients = thisObj.model.items[item_id].recipients.split(" | ");
-            def.resolve(data)
-        },
-        error: function (e)
-        {
-            console.warn(e)
-            //polemarch.showErrors(e)
-            def.reject(e)
-        }
-    });
-
-    return def.promise();
-}
-
-pmHooks.loadItems = function (limit, offset)
-{
-    if (!limit)
-    {
-        limit = 30;
-    }
-
-    if (!offset)
-    {
-        offset = 0;
-    }
-
-    var thisObj = this;
-    return spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/",
-        type: "GET",
-        contentType: 'application/json',
-        data: "limit=" + encodeURIComponent(limit) + "&offset=" + encodeURIComponent(offset),
-        success: function (data)
-        {
-            data.limit = limit
-            data.offset = offset
-            thisObj.model.itemslist = data
-
-            for (var i in thisObj.model.itemslist.results)
-            {
-                thisObj.model.itemslist.results[i].recipients = thisObj.model.itemslist.results[i].recipients.split(" | ");
-            }
-
-            for (var i in data.results)
-            {
-                var val = thisObj.afterItemLoad(data.results[i])
-                thisObj.model.items.justWatch(val.id);
-                thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val);
-            }
-        },
-        error: function (e)
-        {
-            console.warn(e)
-            polemarch.showErrors(e)
-        }
-    });
-}
-
-pmHooks.updateItem = function (item_id, opt)
-{
-    var def = new $.Deferred();
-    var data = {}
-
-    for (var i in this.model.page_item.fileds)
-    {
-        for (var j in this.model.page_item.fileds[i])
-        {
-            var val = this.model.page_item.fileds[i][j];
-
-            data[val.name] = val.filed.getValue(this, val)
-            if (val.validator !== undefined && !val.validator.apply(this, [data[val.name]]))
-            {
-                def.reject()
-                return def.promise();
-            }
-        }
-    }
-
-    if (this.model.page_item.onBeforeSave)
-    {
-        data = this.model.page_item.onBeforeSave.apply(this, [data, item_id, opt]);
-        if (data == undefined || data == false)
-        {
-            def.reject()
-            return def.promise();
-        }
-    }
-
-    var thisObj = this;
-    spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/",
-        type: "PATCH",
-        contentType: 'application/json',
-        data: JSON.stringify(data),
-        success: function (data)
-        {
-            thisObj.model.items[item_id] = data
-            thisObj.model.items[item_id].recipients = thisObj.model.items[item_id].recipients.split(" | ");
-            $.when(thisObj.model.page_item.onUpdate.apply(thisObj, arguments)).always(function () {
-                $.notify("Changes in "+thisObj.model.name+" were successfully saved", "success");
-                def.resolve()
-            })
-        },
-        error: function (e)
-        {
-            def.reject(e)
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
-
-    return def.promise();
 }
 
 
+/**
+ * Фукнция преобраузет массив recipients в строку с разделителем: " | ".
+ * @param {Array} recipients_arr - массив содержащий список recipients
+ */
+pmHooks.parseRecipientsFromArrToStr = function(recipients_arr)
+{
+    if(recipients_arr.length == 0)
+    {
+        return "";
+    }
+    else
+    {
+        return recipients_arr.join(" | ");
+    }
+}
+
+
+/**
+ * Фукнция открывает модальное окно для создание нового recipient'a.
+ * @param {String/Number} item_id - "new" для нового хука либо id для существующего хука.
+ */
 pmHooks.openNewRecipientModal = function (item_id)
 {
     if($('div').is('#modal-new-recipient'))
@@ -385,33 +307,55 @@ pmHooks.openNewRecipientModal = function (item_id)
     }
 }
 
+
+/**
+ * Фукнция рендерит модальное окно для создание нового recipient'a.
+ * @param {String/Number} item_id - "new" для нового хука либо id для существующего хука.
+ */
 pmHooks.renderNewRecipientModal = function (item_id)
 {
     var html=spajs.just.render('new-recipient-modal', {item_id:item_id});
     return html;
 }
 
+
+/**
+ * Фукнция добавляет нового recipient'a к списку других recipient'ов.
+ * @param {String/Number} item_id - "new" для нового хука либо id для существующего хука.
+ */
 pmHooks.addNewRecipient = function (item_id)
 {
+    if($("#new_recipient").val().trim() == "")
+    {
+        $.notify("Recipient field should not be empty.", "error");
+        return false;
+    }
+
     if(item_id == "new")
     {
-        pmHooks.model.newItem.recipients.push($('#new_recipient').val().trim());
+        var recipients_arr = pmHooks.parseRecipientsFromStrToArr(pmHooks.model.newItem.recipients);
+        recipients_arr.push($('#new_recipient').val().trim());
+        pmHooks.model.newItem.recipients = pmHooks.parseRecipientsFromArrToStr(recipients_arr);
     }
     else
     {
-        var rec = pmHooks.model.items[item_id].recipients;
-        rec.push($('#new_recipient').val().trim());
-        pmHooks.model.items[item_id].recipients = rec;
-
+        var recipients_arr = pmHooks.parseRecipientsFromStrToArr(pmHooks.model.items[item_id].recipients);
+        recipients_arr.push($('#new_recipient').val().trim());
+        pmHooks.model.items[item_id].recipients = pmHooks.parseRecipientsFromArrToStr(recipients_arr);
     }
     $("#modal-new-recipient").modal('hide');
 }
 
+
+/**
+ * Фукнция отрисовывает форму для редактирования списка recipient'ов.
+ * @param {String/Number} item_id - "new" для нового хука либо id для существующего хука.
+ */
 pmHooks.showEditRecipientsForm = function(item_id)
 {
     if(!item_id)
     {
-        throw "Error in pmInventories.showAddSubGroupsForm with item_id = `" + item_id + "`"
+        throw "Error in pmHooks.showEditRecipientsForm with item_id = `" + item_id + "`"
     }
 
     $("#edit_hook_recipients").remove()
@@ -423,6 +367,12 @@ pmHooks.showEditRecipientsForm = function(item_id)
     $("#polemarch-model-recipients-select").select2({ width: '100%' });
 }
 
+
+/**
+ * Фукнция запоминает изменения в списке recipient'ов.
+ * @param {String/Number} item_id - "new" для нового хука либо id для существующего хука.
+ * @param {Array} recipients - массив с новым списком recipient'ов.
+ */
 pmHooks.setRecipients = function(item_id, recipients)
 {
     if(!item_id)
@@ -432,13 +382,13 @@ pmHooks.setRecipients = function(item_id, recipients)
 
     if(!recipients)
     {
-        recipients = [];
+        recipients = "";
     }
 
 
     if(item_id == "new")
     {
-        pmHooks.model.newItem.recipients = recipients;
+        pmHooks.model.newItem.recipients = pmHooks.parseRecipientsFromArrToStr(recipients);
     }
     else
     {
@@ -446,10 +396,10 @@ pmHooks.setRecipients = function(item_id, recipients)
             url: hostname + "/api/v1/hooks/"+item_id+"/",
             type: "PATCH",
             contentType:'application/json',
-            data:JSON.stringify({recipients:recipients.join(' | ')}),
+            data:JSON.stringify({recipients:pmHooks.parseRecipientsFromArrToStr(recipients)}),
             success: function(data)
             {
-                pmHooks.model.items[item_id].recipients = data.recipients.split(' | ');
+                pmHooks.model.items[item_id].recipients = data.recipients;
             },
             error:function(e)
             {
@@ -459,6 +409,7 @@ pmHooks.setRecipients = function(item_id, recipients)
         });
     }
 }
+
 
 tabSignal.connect("polemarch.start", function()
 {

@@ -36,7 +36,7 @@
                 <% for(var i in pmHooks.model.supportedWhens){ %>
                     <option
                         value="<%- i %>"
-                        <% if (pmHooks.model.items[item_id].when==i) { %> selected <% } %>>
+                        <% if (String(pmHooks.model.items[item_id].when)==i) { %> selected <% } %>>
                         <%- pmHooks.model.supportedWhens[i] %>
                     </option>
                 <% } %>
@@ -47,7 +47,7 @@
 </script>
 
 
-<script type="text/x-just" data-just="new_hook_recipients">
+<script type="text/x-just" data-just="section_hook_recipients">
     <section class="col-lg-12">
         <div class="box box-info">
             <div class="box-header with-border">
@@ -60,27 +60,23 @@
                 <div class="row">
                     <% if(item_id == "new") { %>
                         <~ pmHooks.model.newItem.recipients >
-                                <% var recipients_arr = pmHooks.model.newItem.recipients;
+                                <% var recipients_arr = pmHooks.parseRecipientsFromStrToArr(pmHooks.model.newItem.recipients);
                                 for(var i in recipients_arr){ %>
                                     <% if(recipients_arr[i] != "") { %>
                                         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                             <label class="control-label" >Recipient</label>
-                                            <a href="<%- recipients_arr[i] %>" onclick="return spajs.openURL(this.href);" >
                                                 <%- recipients_arr[i] %>
-                                            </a>
                                         </div>
                                     <% } %>
                                 <% } %>
                         <~>
                     <% } else { %>
                         <~ pmHooks.model.items[item_id].recipients >
-                                <% var recipients_arr = pmHooks.model.items[item_id].recipients;
+                                <% var recipients_arr = pmHooks.parseRecipientsFromStrToArr(pmHooks.model.items[item_id].recipients);
                                     for(var i in recipients_arr){ %>
                                     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label" >Recipient</label>
-                                        <a href="<%- recipients_arr[i] %>" onclick="return spajs.openURL(this.href);" >
                                             <%- recipients_arr[i] %>
-                                        </a>
                                     </div>
                                 <% } %>
                         <~>
@@ -142,7 +138,19 @@
                         title=""
                         data-placement="top"
                         data-html="true"
-                        data-content="For example recipient URL may be like this: `http://example.com/hook_trigger`"
+                        <% if (item_id == "new") { %>
+                            <% if ($("#new-hook-type").val() == "HTTP") { %>
+                               data-content="For example recipient URL may be like this: `http://example.com/hook_trigger`"
+                            <% } else { %>
+                               data-content="For example recipient script may be like this: `hook-script.sh`"
+                            <% } %>
+                        <% } else { %>
+                            <% if (pmHooks.model.items[item_id].type == "HTTP") { %>
+                               data-content="For example recipient URL may be like this: `http://example.com/hook_trigger`"
+                            <% } else { %>
+                               data-content="For example recipient script may be like this: `hook-script.sh`"
+                            <% } %>
+                        <% } %>
                         data-original-title="Hook recipient"></span>
                 </div>
             </div>
@@ -170,7 +178,7 @@
                         <div class="form-group col-lg-12">
                             <select class="form-control select2" id="polemarch-model-recipients-select" multiple="multiple" data-placeholder="" >
                                 <% if (item_id == "new") { %>
-                                    <% var recipients_arr = pmHooks.model.newItem.recipients;
+                                    <% var recipients_arr = pmHooks.parseRecipientsFromStrToArr(pmHooks.model.newItem.recipients);
                                     for (var i in recipients_arr) { %>
                                             <option
                                                 value="<%- recipients_arr[i] %>"
@@ -178,7 +186,7 @@
                                                 <%- recipients_arr[i] %></option>
                                     <% } %>
                                 <% } else { %>
-                                    <% var recipients_arr = pmHooks.model.items[item_id].recipients;
+                                    <% var recipients_arr = pmHooks.parseRecipientsFromStrToArr(pmHooks.model.items[item_id].recipients);
                                     for (var i in recipients_arr) { %>
                                         <option
                                             value="<%- recipients_arr[i] %>"

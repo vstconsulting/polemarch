@@ -870,6 +870,11 @@ table{
     list-style: none;
 }
 
+.recipients_list ul {
+    margin-left:15px;
+    padding-left: 0px;
+}
+
 .light-tr:hover {
     background-color: #D8EDF8;
     cursor: pointer;
