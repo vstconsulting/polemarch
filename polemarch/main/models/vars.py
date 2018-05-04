@@ -56,7 +56,6 @@ class AbstractModel(ACLModel):
                                    default=uuid.uuid1)
     variables   = GenericRelation(Variable, related_query_name="variables",
                                   object_id_field="object_id")
-    notes       = models.TextField(default="")
 
     class Meta:
         abstract = True

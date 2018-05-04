@@ -60,6 +60,9 @@ Section "New inventory":
 
 * **name** - name of your inventory.
 
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this inventory was created or something like this.
+
 Section "Adding new variable":
 
 * **name** - name of ansible variable. This field has autocomplete, so you can just start typing
@@ -97,6 +100,9 @@ Section "New group":
 * **children** - if this field is true, group can consist of other croups only.
   Otherwise, this group can consist of hosts only.
 
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this group was created or something like this.
+
 Section "Adding new variable":
 
 * **name** - name of ansible variable. This field has autocomplete, so you can just start typing
@@ -130,6 +136,9 @@ Section "New host":
 
 * **name** - name of your host.
   Name can be either human-readable(example.com) or hostname/IP (192.168.0.12) or range of them(19[2:7].168.0.12).
+
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this host was created or something like this.
 
 Section "Adding new variable":
 
@@ -178,6 +187,9 @@ As you can see, the form of new GIT project creation consist of 5 fields:
 
 * **branch** - branch of your GIT project, to what your Polemarch project will be synced.
   If you stay it empty, Polemarch will sync to "master" branch.
+
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this project was created or something like this.
 
 After project creation you will the next page:
 
@@ -386,6 +398,9 @@ This page has 2 sections: "Run module template" and "Adding new argument".
 
 * **args** - arguments for ansible module.
 
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this template was created or something like this.
+
 Section "Adding new argument":
 
 * **name** - name of ansible variable.
@@ -497,6 +512,9 @@ As you can see there are 2 sections on this page: "New task" and "Adding new arg
 * **type** - type of schedule. It can be either "Interval schedule" or "Cron style schedule".
 
 * **interval schedule / cron style schedule** - value for schedule.
+
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this periodic task was created or something like this.
 
 Section "Adding new argument":
 

@@ -134,8 +134,9 @@ class ACLModel(BModel):
                               on_delete=None,
                               default=first_staff_user,
                               related_name="polemarch_%(class)s_set")
-    acl = models.ManyToManyField("main.ACLPermission",
-                                 blank=True, null=True)
+    acl   = models.ManyToManyField("main.ACLPermission",
+                                   blank=True, null=True)
+    notes = models.TextField(default="")
 
     class Meta:
         abstract = True

@@ -236,12 +236,14 @@ class OneTeamSerializer(TeamSerializer):
     users = UserSerializer(many=True, required=False)
     users_list = DictField(required=False)
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.UserGroup
         fields = (
             'id',
             "name",
+            "notes",
             "users",
             "users_list",
             "owner",

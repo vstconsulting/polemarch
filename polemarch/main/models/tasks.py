@@ -156,7 +156,6 @@ class Template(ACLModel):
     project       = ForeignKeyACL(Project,
                                   on_delete=models.SET_NULL,
                                   default=None, blank=True, null=True)
-    notes         = models.TextField(default="")
 
     class Meta:
         index_together = [
