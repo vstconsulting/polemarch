@@ -279,7 +279,7 @@ class BulkViewSet(rest_views.APIView):
         serializer_class = self.get_serializer_class(item)
         model = serializer_class.Meta.model
         obj = model.objects.cleared().get(pk=pk)
-        if not getattr(obj, access + "_by")(self.request.user):
+        if not getattr(obj.acl_handler, access + "_by")(self.request.user):
             raise PermissionDenied(
                 "You don't have permission to this object."
             )  # nocv

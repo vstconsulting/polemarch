@@ -117,11 +117,12 @@ class _WithPermissionsSerializer(_SignalSerializer):
         if len(without_role) != len(list(set(without_role))):
             raise ValueError("There is duplicates in your permissions set.")
 
+    @transaction.atomic
     def __permission_set(self, data, remove_old=True):  # noce
         self.__duplicates_check(data)
         for permission_args in data:
             if remove_old:
-                self.instance.acl.extend().filter(
+                self.instance.acl.all().extend().filter(
                     member=permission_args['member'],
                     member_type=permission_args['member_type']
                 ).delete()
@@ -130,10 +131,11 @@ class _WithPermissionsSerializer(_SignalSerializer):
     @transaction.atomic
     def permissions(self, request):  # noce
         user = self.current_user()
-        if request.method != "GET" and not self.instance.manageable_by(user):
+        if request.method != "GET" and \
+                not self.instance.acl_handler.manageable_by(user):
             raise PermissionDenied(self.perms_msg)
         if request.method == "DELETE":
-            self.instance.acl.filter_by_data(request.data).delete()
+            self.instance.acl.all().filter_by_data(request.data).delete()
         elif request.method == "POST":
             self.__permission_set(request.data)
         elif request.method == "PUT":
@@ -142,9 +144,9 @@ class _WithPermissionsSerializer(_SignalSerializer):
         return Response(self.__get_all_permission_serializer().data, 200)
 
     def _change_owner(self, request):  # noce
-        if not self.instance.owned_by(self.current_user()):
+        if not self.instance.acl_handler.owned_by(self.current_user()):
             raise PermissionDenied(self.perms_msg)
-        self.instance.set_owner(User.objects.get(pk=request.data))
+        self.instance.acl_handler.set_owner(User.objects.get(pk=request.data))
         return Response("Owner changed", 200)
 
     def owner(self, request):  # noce
@@ -762,7 +764,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         inventory = data.pop("inventory")
         try:
             inventory = Inventory.objects.get(id=int(inventory))
-            if not inventory.viewable_by(user):  # nocv
+            if not inventory.acl_handler.viewable_by(user):  # nocv
                 raise PermissionDenied(
                     "You don't have permission to inventory."
                 )

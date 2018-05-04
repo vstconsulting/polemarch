@@ -1,23 +1,6 @@
-FROM centos:7
+FROM onegreyonewhite/tox:centos
+
 MAINTAINER sergey.k@vstconsulting.net
-
-#Update and install required packages
-RUN yum check-update || true
-RUN yum install epel-release -y
-RUN yum -y install sudo python-pip python-devel ansible sshpass git \
-                   rpm-build make gcc openssl-devel libffi libffi-devel \
-                   libyaml-devel python-virtualenv
-
-# For future tests
-# RUN yum -y install https://centos7.iuscommunity.org/ius-release.rpm
-# RUN yum -y install python3{5,6}u{,-devel,-pip}
-
-
-# Install pip requires
-RUN pip2 install -U pip
-RUN pip2 install -U -I pip tox coverage rpmvenv editdistance pyyaml
-RUN pip2 install -U 'cython>=0.25.2'
-
 
 # Build and install rpm
 COPY requirements-doc.txt /tmp/requirements-doc.txt

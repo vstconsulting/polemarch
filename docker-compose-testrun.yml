@@ -7,6 +7,7 @@ services:
     - MYSQL_ROOT_PASSWORD=polemarch
     - MYSQL_USER=polemarch
     - MYSQL_PASSWORD=polemarch
+    - MYSQL_HOST=%
     volumes:
       - "db_data:/var/lib/mysql"
   memcache-server:
@@ -27,12 +28,13 @@ services:
         set -e
         curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh | tee ./wait-for-it.sh
         chmod +x wait-for-it.sh
-        ./wait-for-it.sh db-server:3306
-        ./wait-for-it.sh rabbitmq-server:5672
+        ./wait-for-it.sh db-server:3306 -s -t 30
+        ./wait-for-it.sh rabbitmq-server:5672 -s -t 30
         mkdir -p /var/run/polemarch
         chown polemarch:polemarch /projects /var/run/polemarch
         sudo -u polemarch /opt/polemarch/bin/polemarchctl migrate
         sudo -u polemarch /opt/polemarch/bin/uwsgi /opt/polemarch/lib/python2.7/site-packages/polemarch/web.ini
+        cat /etc/polemarch/settings.ini
         /bin/bash || exit 0
       "
     external_links:
