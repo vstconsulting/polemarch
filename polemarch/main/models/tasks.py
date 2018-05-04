@@ -36,9 +36,6 @@ logger = logging.getLogger("polemarch")
 class TaskFilterQuerySet(BQuerySet):
     use_for_related_fields = True
 
-    def user_filter(self, user):
-        return self.filter(project__in=Project.objects.all().user_filter(user))
-
 
 # Block of real models
 class Task(BModel):
@@ -53,9 +50,6 @@ class Task(BModel):
 
     def __unicode__(self):
         return str(self.name)  # nocv
-
-    def viewable_by(self, user):
-        return self.project.viewable_by(user)  # nocv
 
 
 class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
@@ -150,12 +144,6 @@ class PeriodicTask(AbstractModel):
             initiator=self.id, initiator_type="scheduler",
             **self.vars
         )
-
-    def editable_by(self, user):
-        return self.project.editable_by(user)
-
-    def viewable_by(self, user):
-        return self.project.viewable_by(user)  # nocv
 
 
 class Template(ACLModel):
@@ -275,12 +263,6 @@ class Template(ACLModel):
                 self.inventory = inventory_id
         data['vars'] = self.keep_encrypted_data(data['vars'])
         self.template_data = json.dumps(data)
-
-    # def __setattr__(self, key, value):
-    #    if key == "data":
-    #        self.set_data(value)
-    #    else:
-    #        super(Template, self).__setattr__(key, value)
 
     @property
     def data(self):
@@ -474,25 +456,6 @@ class History(BModel):
     def write_line(self, value, number):  # nocv
         self.raw_history_line.create(
             history=self, line_number=number, line=value
-        )
-
-    def editable_by(self, user):  # noce
-        if self.inventory is None:
-            return self.project.editable_by(user)
-        return self.inventory.editable_by(user)
-
-    def _inventory_editable(self, user):  # noce
-        return self.inventory and self.inventory.editable_by(user)
-
-    def _inventory_viewable(self, user):  # noce
-        return not self.inventory or self.inventory.viewable_by(user)
-
-    def viewable_by(self, user):
-        return (
-            self.project.editable_by(user) or
-            self._inventory_editable(user) or
-            (self.initiator == user.id and self.initiator_type == "users") or
-            (self.project.viewable_by(user) & self._inventory_viewable(user))
         )
 
 

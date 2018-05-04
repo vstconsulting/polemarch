@@ -94,10 +94,10 @@ class ClassPropertyDescriptor(object):
         if obj is not None:
             return self.fget.__get__(obj, obj)()
         if klass is None:
-            klass = type(obj)
+            klass = type(obj)  # noce
         return self.fget.__get__(obj, klass)()
 
-    def __set__(self, obj, value):
+    def __set__(self, obj, value):  # noce
         if not self.fset:
             raise AttributeError("can't set attribute")
         if obj is not None:
@@ -105,7 +105,7 @@ class ClassPropertyDescriptor(object):
         type_ = type(obj)
         return self.fset.__get__(obj, type_)(value)
 
-    def setter(self, func):
+    def setter(self, func):  # noce
         if not isinstance(func, (classmethod, staticmethod)):
             func = classmethod(func)
         self.fset = func
@@ -398,7 +398,7 @@ class ModelHandlers(object):
     def __init__(self, tp, err_message=None):
         '''
         :param tp: -- type name for backends.Like name in dict.
-        :type tp: str
+        :type tp: str,unicode
         '''
         self.type = tp
         self.err_message = err_message

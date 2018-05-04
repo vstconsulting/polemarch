@@ -24,6 +24,7 @@ PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
 
 
 class ProjectQuerySet(AbstractVarsQuerySet):
+    use_for_related_fields = True
     handlers = ModelHandlers("REPO_BACKENDS", "'repo_type' variable needed!")
     task_handlers = ModelHandlers("TASKS_HANDLERS", "Unknown execution type!")
 
