@@ -392,12 +392,15 @@ class History(BModel):
             data["initiator"]['name'] = self.initiator_object.name
         return data
 
+    def _get_seconds_from_time(self, value):
+        return int(value.total_seconds())
+
     @property
     def execution_time(self):
         if self.stop_time is None:
-            return int((now() - self.start_time).total_seconds())
+            return self._get_seconds_from_time(now() - self.start_time)
         else:
-            return int((self.stop_time - self.start_time).total_seconds())
+            return self._get_seconds_from_time(self.stop_time - self.start_time)
 
     @property
     def execute_args(self):
