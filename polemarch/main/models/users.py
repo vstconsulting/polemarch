@@ -6,20 +6,45 @@ import json
 
 from django.contrib.auth.models import Group as BaseGroup
 from django.contrib.auth.models import User as BaseUser
-from .base import models, BModel
-from . import acl
+from .base import settings, models, BModel, ACLModel, BQuerySet
 
 
 logger = logging.getLogger("polemarch")
 
 
-class ACLPermission(acl.ACLPermissionAbstract):
+class ACLPermission(BModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=None,
+                             blank=True, null=True)
+    uagroup = models.ForeignKey('main.UserGroup', on_delete=None, blank=True,
+                                null=True)
     role = models.CharField(max_length=10)
 
+    @property
+    def member(self):  # noce
+        # pylint: disable=no-member
+        if self.user is not None:
+            return self.user.id
+        else:
+            return self.uagroup.id
 
-class UserGroup(BaseGroup, acl.ACLGroupSubclass, acl.ACLPermissionSubclass):
-    objects = acl.ACLUserGroupsQuerySet.as_manager()
-    # on_delete = None, fix for django 2.0, dont break on django 1.11
+    @member.setter
+    def member(self, value):  # noce
+        pass
+
+    @property
+    def member_type(self):  # noce
+        if self.user is not None:
+            return "user"
+        else:
+            return "team"
+
+    @member_type.setter
+    def member_type(self, value):  # noce
+        pass
+
+
+class UserGroup(BaseGroup, ACLModel):
+    objects = BQuerySet.as_manager()
     parent = models.OneToOneField(BaseGroup, on_delete=None, parent_link=True)
     users = BaseGroup.user_set
 
@@ -36,7 +61,6 @@ class UserGroup(BaseGroup, acl.ACLGroupSubclass, acl.ACLPermissionSubclass):
 
 
 class UserSettings(BModel):
-    # on_delete = None, fix for django 2.0, dont break on django 1.11
     user     = models.OneToOneField(BaseUser,
                                     on_delete=None,
                                     related_query_name="settings",

@@ -117,11 +117,12 @@ class _WithPermissionsSerializer(_SignalSerializer):
         if len(without_role) != len(list(set(without_role))):
             raise ValueError("There is duplicates in your permissions set.")
 
+    @transaction.atomic
     def __permission_set(self, data, remove_old=True):  # noce
         self.__duplicates_check(data)
         for permission_args in data:
             if remove_old:
-                self.instance.acl.extend().filter(
+                self.instance.acl.all().extend().filter(
                     member=permission_args['member'],
                     member_type=permission_args['member_type']
                 ).delete()
@@ -130,10 +131,11 @@ class _WithPermissionsSerializer(_SignalSerializer):
     @transaction.atomic
     def permissions(self, request):  # noce
         user = self.current_user()
-        if request.method != "GET" and not self.instance.manageable_by(user):
+        if request.method != "GET" and \
+                not self.instance.acl_handler.manageable_by(user):
             raise PermissionDenied(self.perms_msg)
         if request.method == "DELETE":
-            self.instance.acl.filter_by_data(request.data).delete()
+            self.instance.acl.all().filter_by_data(request.data).delete()
         elif request.method == "POST":
             self.__permission_set(request.data)
         elif request.method == "PUT":
@@ -142,9 +144,9 @@ class _WithPermissionsSerializer(_SignalSerializer):
         return Response(self.__get_all_permission_serializer().data, 200)
 
     def _change_owner(self, request):  # noce
-        if not self.instance.owned_by(self.current_user()):
+        if not self.instance.acl_handler.owned_by(self.current_user()):
             raise PermissionDenied(self.perms_msg)
-        self.instance.set_owner(User.objects.get(pk=request.data))
+        self.instance.acl_handler.set_owner(User.objects.get(pk=request.data))
         return Response("Owner changed", 200)
 
     def owner(self, request):  # noce
@@ -234,12 +236,14 @@ class OneTeamSerializer(TeamSerializer):
     users = UserSerializer(many=True, required=False)
     users_list = DictField(required=False)
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.UserGroup
         fields = (
             'id',
             "name",
+            "notes",
             "users",
             "users_list",
             "owner",
@@ -283,6 +287,7 @@ class HistorySerializer(_SignalSerializer):
                   "initiator",
                   "initiator_type",
                   "executor",
+                  "options",
                   "url")
 
 
@@ -308,6 +313,7 @@ class OneHistorySerializer(_SignalSerializer):
                   "executor",
                   "execute_args",
                   "revision",
+                  "options",
                   "url")
 
     def get_raw(self, request):
@@ -435,11 +441,13 @@ class HostSerializer(_WithVariablesSerializer):
 class OneHostSerializer(HostSerializer):
     owner = UserSerializer(read_only=True)
     vars = DictField(required=False)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Host
         fields = ('id',
                   'name',
+                  'notes',
                   'type',
                   'vars',
                   'owner',
@@ -504,11 +512,13 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
     vars = DictField(required=False)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
                   'name',
+                  'notes',
                   'type',
                   'schedule',
                   'mode',
@@ -585,12 +595,14 @@ class OneTemplateSerializer(TemplateSerializer):
     owner = UserSerializer(read_only=True)
     options = DictField(required=False)
     options_list = DictField(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Template
         fields = (
             'id',
             'name',
+            'notes',
             'kind',
             'owner',
             'data',
@@ -636,11 +648,13 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
     hosts  = HostSerializer(read_only=True, many=True)
     groups = GroupSerializer(read_only=True, many=True)
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Group
         fields = ('id',
                   'name',
+                  'notes',
                   'hosts',
                   "groups",
                   'vars',
@@ -679,11 +693,13 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
     groups = GroupSerializer(read_only=True, many=True, source="groups_list")
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Inventory
         fields = ('id',
                   'name',
+                  'notes',
                   'hosts',
                   'all_hosts',
                   "groups",
@@ -718,11 +734,13 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     groups      = GroupSerializer(read_only=True, many=True)
     inventories = InventorySerializer(read_only=True, many=True)
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Project
         fields = ('id',
                   'name',
+                  'notes',
                   'status',
                   'repository',
                   'hosts',
@@ -743,18 +761,24 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
 
-    def _execution(self, kind, data, user, template=None):
+    def _execution(self, kind, data, user, **kwargs):
+        template = kwargs.pop("template", None)
         inventory = data.pop("inventory")
         try:
             inventory = Inventory.objects.get(id=int(inventory))
-            if not inventory.viewable_by(user):  # nocv
+            if not inventory.acl_handler.viewable_by(user):  # nocv
                 raise PermissionDenied(
                     "You don't have permission to inventory."
                 )
         except ValueError:
             pass
-        init_type = "project" if not template else "template"
-        obj_id = self.instance.id if not template else template
+        if template is not None:
+            init_type = "template"
+            obj_id = template
+            data['template_option'] = kwargs.get('template_option', None)
+        else:
+            init_type = "project"
+            obj_id = self.instance.id
         history_id = self.instance.execute(
             kind, str(data.pop(kind)), inventory,
             initiator=obj_id, initiator_type=init_type, executor=user, **data

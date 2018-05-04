@@ -409,10 +409,19 @@ pmPeriodicTasks.model.page_item = {
                 name:'enabled',
                 help:'',
             },
-        ],[
+        ],
+        [
             {
                 filed: new pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime(),
                 name:'project',
+            },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
             },
         ]
     ],
@@ -632,6 +641,8 @@ pmPeriodicTasks.addItem = function(project_id)
         data.vars.group = pmGroups.getGroupsAutocompleteValue()
         data.vars.args =  moduleArgsEditor.getModuleArgs();
     }
+
+    data.notes=$("#filed_notes").val();
 
     spajs.ajax.Call({
         url: hostname + "/api/v1/"+this.model.name+"/",

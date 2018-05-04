@@ -196,7 +196,13 @@ pmTasksTemplates.model.page_item = {
             link:function(){ return '#'},
             help:'Create new option'
         },
-
+        {
+            class:'btn btn-info',
+            function:function(){ return 'return spajs.openURL(this.href);'},
+            title:'History',
+            link:function(item_id){ return polemarch.opt.host +'/?template/'+this.model.kind+'/'+ item_id + '/history'},
+            help:'Template execution history'
+        },
         {
             class:'btn btn-default copy-btn',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
@@ -238,10 +244,19 @@ pmTasksTemplates.model.page_item = {
                 fast_validator:function(value){ return value != '' && value}
             },
             // @todo дорефакторить поля ввода
-        ],[
+        ],
+        [
             {
                 filed: new pmTasksTemplates.filed.selectProjectInventoryAndPlaybook(),
                 name:'project',
+            },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
             },
         ]
     ],
@@ -297,7 +312,8 @@ pmTasksTemplates.model.page_item_new_option = {
                 value:''
             }
             // @todo дорефакторить поля ввода
-        ],[
+        ],
+        [
             {
                 filed: new pmTasksTemplates.filed.selectProjectInventoryAndPlaybookForNewOption(),
                 name:'project',
@@ -871,6 +887,8 @@ pmTasksTemplates.addItem = function()
         def.reject("Invalid value in field name")
         return def.promise();
     }
+
+    data.notes=$("#filed_notes").val();
 
     var thisObj = this;
     spajs.ajax.Call({

@@ -798,7 +798,8 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                     connection="paramiko",
                     tags="update",
                 )
-            )
+            ),
+            notes="Test template"
         )
         job_tmplt = self.get_model_class('Template').objects.create(**self.tmplt_data)
         self.job_template = job_tmplt
@@ -826,7 +827,6 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         history = self.get_model_filter('History', pk=result['history_id']).get()
         self.assertEqual(history.initiator_type, "template")
         self.assertEqual(history.initiator, tmplt['id'])
-        # fix
         self.assertEqual(history.executor.id, tmplt['owner']['id'])
         # test module execution
         ansible_args = []
@@ -891,13 +891,20 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
         # test playbook execution one option
         ansible_args = []
-        self.post_result(single_url + "execute/", 201, data=dict(option='one'))
+        result = self.post_result(single_url + "execute/", 201, data=dict(option='one'))
         self.assertIn(tmpl_with_opts['data']['module'], ansible_args)
         self.assertIn(tmpl_with_opts['options']['one']['group'], ansible_args)
         self.assertIn('--forks', ansible_args)
         self.assertIn(
             str(tmpl_with_opts['data']['vars']['forks']), ansible_args
         )
+
+        # get history
+        history = self.get_model_filter('History', pk=result['history_id']).get()
+        # Check in options `template_option_name`
+        self.assertEqual(history.options['template_option'], 'one')
+        with self.assertRaises(ValidationError):
+            history.options = "string"
 
         # test playbook execution two option
         ansible_args = []
@@ -1158,18 +1165,21 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
             execution_time=3600
             )
 
-        self.details_test(
-            url + "{}/".format(self.histories[3].id),
-            mode="task.yml",
-            status="RUN", project=self.ph.id,
-            #  Commented because DRF broke API by fields
-            # start_time=self.histories[0].start_time.strftime(df),
-            # stop_time=self.histories[0].stop_time.strftime(df),
-            raw_inventory="inventory",
-            inventory=self.history_inventory.id,
-            executor=None, initiator_type="project",
-            execution_time=144000
-        )
+        pached_method = 'polemarch.main.models.tasks.History._get_seconds_from_time'
+        with patch(pached_method) as time_mock:
+            time_mock.return_value = 144000
+            self.details_test(
+                url + "{}/".format(self.histories[3].id),
+                mode="task.yml",
+                status="RUN", project=self.ph.id,
+                #  Commented because DRF broke API by fields
+                # start_time=self.histories[0].start_time.strftime(df),
+                # stop_time=self.histories[0].stop_time.strftime(df),
+                raw_inventory="inventory",
+                inventory=self.history_inventory.id,
+                executor=None, initiator_type="project",
+                execution_time=144000
+            )
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)

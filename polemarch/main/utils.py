@@ -84,6 +84,40 @@ def get_render(name, data, trans='en'):
     return result
 
 
+class ClassPropertyDescriptor(object):
+
+    def __init__(self, fget, fset=None):
+        self.fget = fget
+        self.fset = fset
+
+    def __get__(self, obj, klass=None):
+        if obj is not None:
+            return self.fget.__get__(obj, obj)()
+        if klass is None:
+            klass = type(obj)  # noce
+        return self.fget.__get__(obj, klass)()
+
+    def __set__(self, obj, value):  # noce
+        if not self.fset:
+            raise AttributeError("can't set attribute")
+        if obj is not None:
+            return self.fset.__get__(obj, obj)(value)
+        type_ = type(obj)
+        return self.fset.__get__(obj, type_)(value)
+
+    def setter(self, func):  # noce
+        if not isinstance(func, (classmethod, staticmethod)):
+            func = classmethod(func)
+        self.fset = func
+        return self
+
+
+def classproperty(func):
+    if not isinstance(func, (classmethod, staticmethod)):
+        func = classmethod(func)
+    return ClassPropertyDescriptor(func)
+
+
 class CmdExecutor(object):
     # pylint: disable=no-member
     '''
@@ -364,7 +398,7 @@ class ModelHandlers(object):
     def __init__(self, tp, err_message=None):
         '''
         :param tp: -- type name for backends.Like name in dict.
-        :type tp: str
+        :type tp: str,unicode
         '''
         self.type = tp
         self.err_message = err_message
