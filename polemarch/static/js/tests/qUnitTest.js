@@ -1702,7 +1702,7 @@ os-controller-2.vst.lan ansible_host=10.20.0.8
         })
     });
 
-    var etalon = {"hosts":[{"name":"1.2.3.[1:255]","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}},{"name":"124.3.4.[44:55]","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}},{"name":"124.3.5.[1:250]","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"124.3.5.[1:251]","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"124.3.5.[1:252]","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.12","ansible_user":"r\"o'ot","ansible_ssh_pass":"eadgbe"}}],"groups":{"git":{"vars":{},"groups":["ci","git-servers"],"hosts":[],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"children":true,"dataLevel":{"level":2,"parents":["all","cloud","git"]}},"ci":{"vars":{},"groups":[],"hosts":[{"name":"git-ci-1","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"172.16.1.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"git-ci-2","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"172.16.1.14"}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":3,"parents":["all","cloud","git","ci"]}},"git-servers":{"vars":{},"groups":[],"hosts":[{"name":"git.vst.lan","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":3,"parents":["all","cloud","git","git-servers"]}},"cloud":{"vars":{},"groups":["git","services","test"],"hosts":[],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"children":true,"dataLevel":{"level":1,"parents":["all","cloud"]}},"services":{"vars":{},"groups":[],"hosts":[{"name":"chat.vstconsulting.net","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"172.16.1.16"}},{"name":"pipc.vst.lan","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}},{"name":"redmine.vst.lan","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":2,"parents":["all","cloud","services"]}},"test":{"vars":{"ansible_ssh_private_key_file":"/root/f.txt"},"groups":[],"hosts":[{"name":"test.vst.lan","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_user":"centos"}},{"name":"test2.vst.lan","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"172.16.1.26"}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":2,"parents":["all","cloud","test"]}},"openstack":{"vars":{},"groups":[],"hosts":[{"name":"fuel.vst.lan","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"os-compute-1.vst.lan","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.9"}},{"name":"os-compute-2.vst.lan","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"os-controller-1.vst.lan","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.6"}},{"name":"os-controller-2.vst.lan","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.8"}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":1,"parents":["all","openstack"]}}},"vars":{"ansible_user":"grey","ansible_ssh_private_key_file":"/root/f.txt","ansible_ssh_extra_args":"-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"},"name":"inventory"}
+    var etalon = {"hosts":[{"name":"1.2.3.[1:255]","notes":"","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}},{"name":"124.3.4.[44:55]","notes":"","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}},{"name":"124.3.5.[1:250]","notes":"","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"124.3.5.[1:251]","notes":"","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"124.3.5.[1:252]","notes":"","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.12","ansible_user":"r\"o'ot","ansible_ssh_pass":"eadgbe"}}],"groups":{"git":{"notes":"","vars":{},"groups":["ci","git-servers"],"hosts":[],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"children":true,"dataLevel":{"level":2,"parents":["all","cloud","git"]}},"ci":{"notes":"","vars":{},"groups":[],"hosts":[{"name":"git-ci-1","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"172.16.1.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"git-ci-2","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"172.16.1.14"}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":3,"parents":["all","cloud","git","ci"]}},"git-servers":{"notes":"","vars":{},"groups":[],"hosts":[{"name":"git.vst.lan","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":3,"parents":["all","cloud","git","git-servers"]}},"cloud":{"notes":"","vars":{},"groups":["git","services","test"],"hosts":[],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"children":true,"dataLevel":{"level":1,"parents":["all","cloud"]}},"services":{"notes":"","vars":{},"groups":[],"hosts":[{"name":"chat.vstconsulting.net","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"172.16.1.16"}},{"name":"pipc.vst.lan","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}},{"name":"redmine.vst.lan","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":2,"parents":["all","cloud","services"]}},"test":{"notes":"","vars":{"ansible_ssh_private_key_file":"/root/f.txt"},"groups":[],"hosts":[{"name":"test.vst.lan","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_user":"centos"}},{"name":"test2.vst.lan","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"172.16.1.26"}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":2,"parents":["all","cloud","test"]}},"openstack":{"notes":"","vars":{},"groups":[],"hosts":[{"name":"fuel.vst.lan","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.2","ansible_user":"root","ansible_ssh_pass":"eadgbe"}},{"name":"os-compute-1.vst.lan","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.9"}},{"name":"os-compute-2.vst.lan","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.13","ansible_ssh_private_key_file":"/root/f.txt"}},{"name":"os-controller-1.vst.lan","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.6"}},{"name":"os-controller-2.vst.lan","notes":"","type":"HOST","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{"ansible_host":"10.20.0.8"}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":1,"parents":["all","openstack"]}}},"vars":{"ansible_user":"grey","ansible_ssh_private_key_file":"/root/f.txt","ansible_ssh_extra_args":"-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"},"name":"inventory","notes":""}
     var inventory = undefined;
 
     syncQUnit.addTest('Парсинг inventory', function ( assert )
@@ -1811,8 +1811,7 @@ c2libGVfYmVjb21lPXRydWU="
         inventoryText = Base64.decode(inventoryText)
         
         inventory = pmInventories.parseFromText(inventoryText)
-        var etalon ={"hosts":[],"groups":{"servers":{"vars":{"ansible_user":"centos","ansible_ssh_private_key_file":"/home/cepreu/default.pem","ansible_become":"true"},"groups":["usual","unusual"],"hosts":[],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"children":true,"dataLevel":{"level":1,"parents":["all","servers"]}},"usual":{"vars":{},"groups":[],"hosts":[{"name":"172.16.1.[30:31]","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":2,"parents":["all","servers","usual"]}},"unusual":{"vars":{},"groups":[],"hosts":[],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":2,"parents":["all","servers","unusual"]}}},"vars":{},"name":"inventory"}
-
+        var etalon = {"hosts":[],"groups":{"servers":{"notes":"","vars":{"ansible_user":"centos","ansible_ssh_private_key_file":"/home/cepreu/default.pem","ansible_become":"true"},"groups":["usual","unusual"],"hosts":[],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"children":true,"dataLevel":{"level":1,"parents":["all","servers"]}},"usual":{"notes":"","vars":{},"groups":[],"hosts":[{"name":"172.16.1.[30:31]","notes":"","type":"RANGE","all_only":false,"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"vars":{}}],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":2,"parents":["all","servers","usual"]}},"unusual":{"notes":"","vars":{},"groups":[],"hosts":[],"matches":false,"match_id_arr":[],"match_arr":[],"extern":false,"dataLevel":{"level":2,"parents":["all","servers","unusual"]}}},"vars":{},"name":"inventory","notes":""}
         inventory.name = "inventory"
        
         var res = deepEqual(etalon, inventory)
@@ -2686,6 +2685,188 @@ window.qunitTestsArray.push({
         })
     });
 
+    //тестируем опции шаблона
+    var itemIdForOptionTest=undefined;
+    syncQUnit.addTest('Открытие страницы создания новой опции шаблона задачи', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+        itemIdForOptionTest = /template\/Task\/([0-9]+)/.exec(window.location.href)[1];
+
+        $.when(spajs.open({ menuId:"template/Task/"+itemIdForOptionTest+"/new-option"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню templates/Task/item_id/new-option');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню templates/Task/item_id/new-option');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение новой невалидной опции шаблона задачи', function ( assert )
+    {
+        var done = assert.async();
+
+        //пытаемся сохранить пустую опцию, даже не забав имя
+        $.when(pmTasksTemplates.saveNewOption(itemIdForOptionTest)).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно сохранено, а не должно было');
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Ошибка при сохранении, как и задумано');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение новой невалидной опции шаблона задачи 2', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        $("#filed_option_name").val("test-option");
+
+        //пытаемся сохранить пустую опцию, с именем, но идентичную шаблону
+        $.when(pmTasksTemplates.saveOption(itemIdForOptionTest)).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно сохранено, а не должно было');
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Ошибка при сохранении, как и задумано');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение новой валидной опции шаблона задачи', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        jsonEditor.jsonEditorRmVar("become2")
+        $("#new_json_nameprefix").val("become");
+        jsonEditor.jsonEditorAddVar();
+
+        $.when(pmTasksTemplates.saveNewOption(itemIdForOptionTest)).done(function()
+        {
+            assert.ok(true, 'Опция успешно сохранена');
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при сохранении опции');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Изменение опции шаблона задачи', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        jsonEditor.jsonEditorRmVar("check2")
+        $("#new_json_nameprefix").val("check");
+        jsonEditor.jsonEditorAddVar();
+
+        $.when(pmTasksTemplates.saveOption(itemIdForOptionTest)).done(function()
+        {
+            assert.ok(true, 'Опция успешно изменена');
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при изменении опции');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение и запуск опции шаблона задачи', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу просмотра/редактирования опции шаблона
+        var done = assert.async();
+
+        $.when(pmTasksTemplates.saveAndExecuteOption(itemIdForOptionTest)).done(function()
+        {
+            assert.ok(true, 'Опция успешно сохранена');
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при сохранении опции');
+            render(done)
+        })
+    });
+
+    //открываем стрницу для создания новой опции для дальнейших тестов
+    syncQUnit.addTest('Открытие страницы создания новой опции шаблона задачи', function ( assert )
+    {
+        var done = assert.async();
+        $.when(spajs.open({ menuId:"template/Task/"+itemIdForOptionTest+"/new-option"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню templates/Task/item_id/new-option');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню templates/Task/item_id/new-option');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение новой опции с уже существующим именем', function ( assert )
+    {
+        var done = assert.async();
+
+        $("#filed_option_name").val("test-option");
+         jsonEditor.jsonEditorRmVar("become2")
+        $("#new_json_nameprefix").val("become");
+        jsonEditor.jsonEditorAddVar();
+
+
+        $.when(pmTasksTemplates.saveNewOption(itemIdForOptionTest)).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно сохранено, а не должно было');
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Ошибка при сохранении, как и задумано');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение новой опции с новым именем', function ( assert )
+    {
+        var done = assert.async();
+
+        $("#filed_option_name").val("test-option2");
+
+        $.when(pmTasksTemplates.saveNewOption(itemIdForOptionTest)).done(function()
+        {
+            assert.ok(true, 'Успешно сохранено');
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при сохранении');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление опции', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(pmTasksTemplates.removeOption(itemIdForOptionTest)).done(function()
+        {
+            assert.ok(true, 'Опция успешно удалена');
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при удалении опции');
+            render(done)
+        })
+    });
+
+    //конец тестирования опции шаблона
+
     syncQUnit.addTest('Изменение не валидного шаблона', function ( assert )
     {
         var done = assert.async();
@@ -2777,7 +2958,8 @@ window.qunitTestsArray.push({
         })
     });
 
-    syncQUnit.addTest('Удаление шаблона', function ( assert )
+
+    syncQUnit.addTest('Сохранение и запуск шаблона', function ( assert )
     {
         var done = assert.async();
         
@@ -2799,211 +2981,44 @@ window.qunitTestsArray.push({
             render(done)
         }) 
     });
-    
+
+    var tt_history_id = undefined;
+    syncQUnit.addTest('Страница списка task template History', function ( assert )
+    {
+
+        tt_history_id=/history\/([0-9]+)/.exec(window.location.href)[1];
+        var done = assert.async();
+        $.when(spajs.open({ menuId:'template/Task/'+itemId+'/history'})).done(function()
+        {
+            assert.ok(true, 'Страница открылась');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Страница не открылась');
+            render(done)
+        })
+    })
+
+    syncQUnit.addTest('Страница task template History Item', function ( assert )
+    {
+        var done = assert.async();
+        $.when(spajs.open({ menuId:'template/Task/'+itemId+'/history/'+tt_history_id})).done(function()
+        {
+            assert.ok(true, 'Страница открылась');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Страница не открылась');
+            render(done)
+        })
+    })
+
     syncQUnit.addTest('Удаление шаблона', function ( assert )
     {
         var done = assert.async();
 
-        // Удаление project.
-        $.when(pmTasksTemplates.deleteItem(itemId, true)).done(function()
-        {
-            assert.ok(true, 'Успешно delete Item');
-            render(done)
-        }).fail(function(){
-            debugger;
-            assert.ok(false, 'Ошибка при delete Item');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Список шаблонов', function ( assert )
-    {
-        var done = assert.async();
-
-        $.when(spajs.open({ menuId:"templates"})).done(function()
-        {
-            assert.ok(true, 'Успешно открыто меню templates');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при открытиии меню templates');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Новый template/new-task', function ( assert )
-    {
-        var done = assert.async();
-
-        // Открытие пункта меню new-project
-        $.when(spajs.open({ menuId:"template/new-task"})).done(function()
-        {
-            assert.ok(true, 'Успешно открыто меню new-project');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при открытиии меню new-project');
-            render(done)
-        })
-    });
-
-    var t = new Date();
-    t = t.getTime()
-
-    syncQUnit.addTest('Сохранение не валидного шаблона задачи', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу создания project
-        var done = assert.async();
-
-        // Заполнение формы с данными project
-        $("#Templates-name").val("!2 d#");
-
-        jsonEditor.__devAddVar("syntax-check32", "syntax-check32")
-
-        jsonEditor.jsonEditorImportVars("playbook", "prefix", "syntax-check=\n")
-        jsonEditor.jsonEditorImportVars("playbook", "prefix", "syntax-check:\n")
-
-        // Отправка формы с данными project
-        $.when(pmTasksTemplates.addItem()).done(function()
-        {
-            debugger;
-            assert.ok(false, 'Успешно template add Item, а не должно было');
-            render(done)
-        }).fail(function()
-        {
-            assert.ok(true, 'Ошибка при template add Item, как и задумано');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Сохранение шаблона задачи', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу создания project
-        var done = assert.async();
-
-        // Заполнение формы с данными project
-        $("#Templates-name").val("test-template-"+t);
-        jsonEditor.jsonEditorRmVar("syntax-check32");
-
-        // Отправка формы с данными project
-        $.when(pmTasksTemplates.addItem()).done(function()
-        {
-            assert.ok(true, 'Успешно template add Item');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при template add Item');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Открытие страницы создания новой опции шаблона задачи', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу создания project
-        var done = assert.async();
-        var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1];
-
-        $.when(spajs.open({ menuId:"template/Task/"+itemId+"/new-option"})).done(function()
-        {
-            assert.ok(true, 'Успешно открыто меню templates/Task/item_id/new-option');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при открытиии меню templates/Task/item_id/new-option');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Сохранение новой невалидной опции шаблона задачи', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу создания project
-        var done = assert.async();
-        var itemId = /template\/Task\/([0-9]+)\/new-option/.exec(window.location.href)[1];
-
-        $("#filed_option_name").val("test-option");
-
-        $.when(pmTasksTemplates.saveOption(itemId)).done(function()
-        {
-            debugger;
-            assert.ok(false, 'Успешно сохранено, а не должно было');
-            render(done)
-        }).fail(function(){
-            assert.ok(true, 'Ошибка при сохранении, как и задумано');
-            render(done)
-        })
-
-
-    });
-
-    syncQUnit.addTest('Сохранение новой валидной опции шаблона задачи', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу создания project
-        var done = assert.async();
-        var itemId = /template\/Task\/([0-9]+)\/new-option/.exec(window.location.href)[1];
-
-        jsonEditor.jsonEditorRmVar("become2")
-        $("#new_json_nameprefix").val("become");
-        jsonEditor.jsonEditorAddVar();
-
-        $.when(pmTasksTemplates.saveOption(itemId)).done(function()
-        {
-            assert.ok(true, 'Опция успешно сохранена');
-            render(done)
-        }).fail(function(){
-            debugger;
-            assert.ok(false, 'Ошибка при сохранении опции');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Сохранение и запуск опции шаблона задачи', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу просмотра/редактирования опции шаблона
-        var done = assert.async();
-        var itemId = /template\/Task\/([0-9]+)\/option\/([A-z0-9 %\-.:,=]+)/.exec(window.location.href)[1];
-
-        $.when(pmTasksTemplates.saveAndExecuteOption(itemId)).done(function()
-        {
-            assert.ok(true, 'Опция успешно сохранена');
-            render(done)
-        }).fail(function(){
-            debugger;
-            assert.ok(false, 'Ошибка при сохранении опции');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Удаление шаблона', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1];
-        $.when(spajs.open({ menuId:"template/Task/"+itemId})).done(function()
-        {
-            $.when(pmTasksTemplates.saveAndExecute(itemId)).done(function()
-            {
-                assert.ok(true, 'Успешно pmTasksTemplates.saveAndExecute');
-                render(done)
-            }).fail(function(){
-                debugger;
-                assert.ok(false, 'Ошибка при pmTasksTemplates.saveAndExecute');
-                render(done)
-            })
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при открытиии меню template/Module/'+itemId);
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Удаление шаблона', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /template\/Task\/([0-9]+)/.exec(window.location.href)[1];
         // Удаление project.
         $.when(pmTasksTemplates.deleteItem(itemId, true)).done(function()
         {
@@ -3112,6 +3127,188 @@ window.qunitTestsArray.push({
         })
     });
 
+    //начало тестирования опций шаблона
+    var itemIdForOptionTest1=undefined;
+    syncQUnit.addTest('Открытие страницы создания новой опции шаблона модуля', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+        itemIdForOptionTest1 = /template\/Module\/([0-9]+)/.exec(window.location.href)[1];
+
+        $.when(spajs.open({ menuId:"template/Module/"+itemIdForOptionTest1+"/new-option"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню templates/Module/item_id/new-option');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню templates/Module/item_id/new-option');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение  новой невалидной опции шаблона модуля', function ( assert )
+    {
+        var done = assert.async();
+
+        //пытаемся сохранить пустую опцию, даже не забав имя
+        $.when(pmModuleTemplates.saveNewOption(itemIdForOptionTest1)).done(function()
+        {
+            assert.ok(false, 'Опция успешно сохранена, а не должна была');
+            debugger;
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Ошибка при сохранении опции, что и ожидалось');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение новой невалидной опции шаблона модуля 2', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        $("#filed_option_name").val("test-option");
+
+        //пытаемся сохранить пустую опцию, с именем, но идентичную шаблону
+        $.when(pmModuleTemplates.saveOption(itemIdForOptionTest1)).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно сохранено, а не должно было');
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Ошибка при сохранении, как и задумано');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение новой валидной опции шаблона модуля', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу опции
+        var done = assert.async();
+
+        jsonEditor.jsonEditorRmVar('new-vault-password-file', 'prefix');
+        jsonEditor.jsonEditorRmVar("become2")
+        $("#new_json_nameprefix").val("become");
+        jsonEditor.jsonEditorAddVar();
+
+        $.when(pmModuleTemplates.saveNewOption(itemIdForOptionTest1)).done(function()
+        {
+            assert.ok(true, 'Опция успешно сохранена');
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при сохранении опции');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Изменение опции шаблона модуля', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу создания project
+        var done = assert.async();
+
+        jsonEditor.jsonEditorRmVar("check2")
+        $("#new_json_nameprefix").val("check");
+        jsonEditor.jsonEditorAddVar();
+
+        $.when(pmModuleTemplates.saveOption(itemIdForOptionTest1)).done(function()
+        {
+            assert.ok(true, 'Опция успешно изменена');
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при изменении опции');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение и запуск опции шаблона модуля', function ( assert )
+    {
+        // Предполагается что мы от прошлого теста попали на страницу просмотра/редактирования опции шаблона
+        var done = assert.async();
+
+        $.when(pmModuleTemplates.saveAndExecuteOption(itemIdForOptionTest1)).done(function()
+        {
+            assert.ok(true, 'Опция успешно сохранена');
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при сохранении опции');
+            render(done)
+        })
+    });
+
+    //открываем страницу создания новой опции для дальнейших тестов
+    syncQUnit.addTest('Открытие страницы создания новой опции шаблона модуля', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Module/"+itemIdForOptionTest1+"/new-option"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню templates/Module/item_id/new-option');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню templates/Module/item_id/new-option');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение  опции шаблона модуля с уже существующем именем', function ( assert )
+    {
+        var done = assert.async();
+
+        jsonEditor.jsonEditorRmVar("become2")
+        $("#new_json_nameprefix").val("become");
+        jsonEditor.jsonEditorAddVar();
+        $("#filed_option_name").val("test-option");
+
+        $.when(pmModuleTemplates.saveNewOption(itemIdForOptionTest1)).done(function()
+        {
+            assert.ok(false, 'Опция успешно сохранена, а не должна была');
+            debugger;
+            render(done)
+        }).fail(function(){
+            assert.ok(true, 'Ошибка при сохранении опции, что и ожидалось');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение опции шаблона модуля с новым именем', function ( assert )
+    {
+        var done = assert.async();
+
+        $("#filed_option_name").val("test-option2");
+
+        $.when(pmModuleTemplates.saveNewOption(itemIdForOptionTest1)).done(function()
+        {
+            assert.ok(true, 'Опция успешно сохранена');
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при сохранении опции');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление опции шаблона модуля', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(pmModuleTemplates.removeOption(itemIdForOptionTest1)).done(function()
+        {
+            assert.ok(true, 'Опция успешно удалена');
+            render(done)
+        }).fail(function(){
+            debugger;
+            assert.ok(false, 'Ошибка при удалении опции');
+            render(done)
+        })
+    });
+    //конец тестирования опции шаблона
+
     syncQUnit.addTest('Изменение не валидного шаблона модуля', function ( assert )
     { 
         var done = assert.async();
@@ -3120,7 +3317,7 @@ window.qunitTestsArray.push({
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
 
-        $("#module-autocomplete").val("test2-playbook-"+t); 
+        $("#module-autocomplete").val("test2-playbook-"+t);
         jsonEditor.__devAddVar("new-vault-password-file2", "syntax-check") 
 
 
@@ -3147,7 +3344,6 @@ window.qunitTestsArray.push({
         $("#new_json_nameprefix").val("new-vault-password-file");
         $("#new_json_valueprefix").val("syntax-check");
         jsonEditor.jsonEditorAddVar();
-
 
         $.when(pmModuleTemplates.updateItem(itemId)).done(function()
         {
@@ -3228,7 +3424,7 @@ window.qunitTestsArray.push({
         })
     });
 
-    syncQUnit.addTest('Удаление шаблона Module', function ( assert )
+    syncQUnit.addTest('Сохранение и запуск шаблона Module', function ( assert )
     {
         var done = assert.async();
         
@@ -3250,215 +3446,44 @@ window.qunitTestsArray.push({
             render(done)
         }) 
     });
+
+    var tt_history_id_1 = undefined;
+    syncQUnit.addTest('Страница списка Module template History', function ( assert )
+    {
+
+        tt_history_id_1=/history\/([0-9]+)/.exec(window.location.href)[1];
+        var done = assert.async();
+        $.when(spajs.open({ menuId:'template/Module/'+itemId+'/history'})).done(function()
+        {
+            assert.ok(true, 'Страница открылась');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Страница не открылась');
+            render(done)
+        })
+    })
+
+    syncQUnit.addTest('Страница Module template History Item', function ( assert )
+    {
+        var done = assert.async();
+        $.when(spajs.open({ menuId:'template/Module/'+itemId+'/history/'+tt_history_id_1})).done(function()
+        {
+            assert.ok(true, 'Страница открылась');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Страница не открылась');
+            render(done)
+        })
+    })
     
     syncQUnit.addTest('Удаление шаблона', function ( assert )
     {
         var done = assert.async();
 
-        // Удаление project.
-        $.when(pmModuleTemplates.deleteItem(itemId, true)).done(function()
-        {
-            assert.ok(true, 'Успешно delete Item');
-            render(done)
-        }).fail(function(){
-            debugger;
-            assert.ok(false, 'Ошибка при delete Item');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Список шаблонов', function ( assert )
-    {
-        var done = assert.async();
-
-        $.when(spajs.open({ menuId:"templates"})).done(function()
-        {
-            assert.ok(true, 'Успешно открыто меню templates');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при открытиии меню templates');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Новый template/new-module', function ( assert )
-    {
-        var done = assert.async();
-
-        // Открытие пункта меню new-project
-        $.when(spajs.open({ menuId:"template/new-module"})).done(function()
-        {
-            assert.ok(true, 'Успешно открыто меню new-project');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при открытиии меню new-project');
-            render(done)
-        })
-    });
-
-    var t = new Date();
-    t = t.getTime()
-
-    syncQUnit.addTest('Сохранение не валидного шаблона модуля', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу создания project
-        var done = assert.async();
-
-        // Заполнение формы с данными project
-        $("#Templates-name").val("test-template-"+t);
-
-        jsonEditor.__devAddVar("new-vault-password-file2", "syntax-check")
-
-        // Отправка формы с данными project
-        $.when(pmModuleTemplates.addItem()).done(function()
-        {
-            debugger;
-            assert.ok(false, 'Успешно template add Item, а не должно было');
-            render(done)
-        }).fail(function()
-        {
-            assert.ok(true, 'Ошибка при template add Item, как и задумано');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Сохранение шаблона модуля', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу создания project
-        var done = assert.async();
-
-        jsonEditor.jsonEditorRmVar("new-vault-password-file2")
-        $("#new_json_nameprefix").val("new-vault-password-file");
-        $("#new_json_valueprefix").val("syntax-check");
-        jsonEditor.jsonEditorAddVar();
-
-        $("#inventories-autocomplete").val($("#inventories-autocomplete option")[0].value).trigger('change.select2');
-
-
-        // Заполнение формы с данными project
-        $("#Templates-name").val("test-template-"+t);
-
-        // Отправка формы с данными project
-        $.when(pmModuleTemplates.addItem()).done(function()
-        {
-            assert.ok(true, 'Успешно template add Item');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при template add Item');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Открытие страницы создания новой опции шаблона модуля', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу создания project
-        var done = assert.async();
-        var itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1];
-
-        $.when(spajs.open({ menuId:"template/Module/"+itemId+"/new-option"})).done(function()
-        {
-            assert.ok(true, 'Успешно открыто меню templates/Module/item_id/new-option');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при открытиии меню templates/Module/item_id/new-option');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Сохранение новой невалидной опции шаблона модуля', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу создания project
-        var done = assert.async();
-        var itemId = /template\/Module\/([0-9]+)\/new-option/.exec(window.location.href)[1];
-
-        $("#filed_option_name").val("test-option");
-
-        $.when(pmModuleTemplates.saveOption(itemId)).done(function()
-        {
-            debugger;
-            assert.ok(false, 'Успешно сохранено, а не должно было');
-            render(done)
-        }).fail(function(){
-            assert.ok(true, 'Ошибка при сохранении, как и задумано');
-            render(done)
-        })
-
-
-    });
-
-    syncQUnit.addTest('Сохранение новой валидной опции шаблона модуля', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу создания project
-        var done = assert.async();
-        var itemId = /template\/Module\/([0-9]+)\/new-option/.exec(window.location.href)[1];
-
-        jsonEditor.jsonEditorRmVar('new-vault-password-file', 'prefix');
-        jsonEditor.jsonEditorRmVar("become2")
-        $("#new_json_nameprefix").val("become");
-        jsonEditor.jsonEditorAddVar();
-
-        $.when(pmModuleTemplates.saveOption(itemId)).done(function()
-        {
-            assert.ok(true, 'Опция успешно сохранена');
-            render(done)
-        }).fail(function(){
-            debugger;
-            assert.ok(false, 'Ошибка при сохранении опции');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Сохранение и запуск опции шаблона модуля', function ( assert )
-    {
-        // Предполагается что мы от прошлого теста попали на страницу просмотра/редактирования опции шаблона
-        var done = assert.async();
-        var itemId = /template\/Module\/([0-9]+)\/option\/([A-z0-9 %\-.:,=]+)/.exec(window.location.href)[1];
-
-        $.when(pmModuleTemplates.saveAndExecuteOption(itemId)).done(function()
-        {
-            assert.ok(true, 'Опция успешно сохранена');
-            render(done)
-        }).fail(function(){
-            debugger;
-            assert.ok(false, 'Ошибка при сохранении опции');
-            render(done)
-        })
-    });
-    syncQUnit.addTest('Удаление шаблона Module', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(spajs.open({ menuId:"template/Module/"+itemId})).done(function()
-        {
-            $.when(pmModuleTemplates.saveAndExecute(itemId)).done(function()
-            {
-                assert.ok(true, 'Успешно pmModuleTemplates.saveAndExecute');
-                render(done)
-            }).fail(function(){
-                debugger;
-                assert.ok(false, 'Ошибка при pmModuleTemplates.saveAndExecute');
-                render(done)
-            })
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при открытиии меню template/Module/'+itemId);
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Удаление шаблона', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /template\/Module\/([0-9]+)/.exec(window.location.href)[1]
         // Удаление project.
         $.when(pmModuleTemplates.deleteItem(itemId, true)).done(function()
         {
@@ -3625,8 +3650,24 @@ window.qunitTestsArray.push({
             render(done)
         })
     });
+
+    syncQUnit.addTest('Поиск hooks', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"hooks/search/hook-example"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню hooks/search/hook-example');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню hooks/search/hook-example');
+            render(done)
+        })
+    });
     
-    syncQUnit.addTest('Страница ошибки 400 в history', function ( assert )
+    syncQUnit.addTest('Страница ошибки 400 в project history', function ( assert )
     {
         var done = assert.async();
 
@@ -3638,6 +3679,151 @@ window.qunitTestsArray.push({
         }).fail(function()
         {
             assert.ok(true, 'Ошибка при открытиии меню project/9999999999/history');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в project history search', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"project/9999999999/history/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню project/9999999999/history/search/name');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню project/9999999999/history/search/name');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в project history search page', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"project/9999999999/history/search/name/page/1"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню project/9999999999/history/search/name/page/1');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню project/9999999999/history/search/name/page/1');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в inventory history', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"inventory/9999999999/history"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню inventory/9999999999/history');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню inventory/9999999999/history');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в inventory history search', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"inventory/9999999999/history/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню inventory/9999999999/history/search/name');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню inventory/9999999999/history/search/name');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в inventory history search page', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"inventory/9999999999/history/search/name/page/1"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню inventory/9999999999/history/search/name/page/1');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню inventory/9999999999/history/search/name/page/1');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в task template history search', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Task/9999999999/history/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Task/9999999999/history/search/name');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню template/Task/9999999999/history/search/name');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в module template history search', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Module/9999999999/history/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Module/9999999999/history/search/name');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню template/Module/9999999999/history/search/name');
+            render(done)
+        })
+    });
+
+
+    syncQUnit.addTest('Страница ошибки 400 в task template history search page', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Task/9999999999/history/search/name/page/1"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Task/9999999999/history/search/name/page/1');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню template/Task/9999999999/history/search/name/page/1');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Страница ошибки 400 в module template history search page', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Module/9999999999/history/search/name/page/1"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Module/9999999999/history/search/name/page/1');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при открытиии меню template/Module/9999999999/history/search/name/page/1');
             render(done)
         })
     });
@@ -3786,4 +3972,137 @@ window.qunitTestsArray.push({
     });
     
 }})
-  
+
+
+/**
+ * Тестирование hooks
+ */
+window.qunitTestsArray.push({
+    step:1200,
+    test:function()
+{
+    syncQUnit.addTest('Страница hooks', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"hooks"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню hooks');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню hooks');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Открытие cтраницы new hook', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"new-hook"})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню new-hook');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню new-hook');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение невалидного hook', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(pmHooks.addItem()).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Хук успешно сохранен, а не должен был');
+            render(done)
+        }).fail(function()
+        {
+            assert.ok(true, 'Ошибка при сохранении хука, как и задумано');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение валидного hook', function ( assert )
+    {
+        var done = assert.async();
+
+        $('#filed_name').val('test-hook');
+        pmHooks.model.newItem.recipients='test-recipient';
+
+        $.when(pmHooks.addItem()).done(function()
+        {
+            assert.ok(true, 'Hook успешно создан');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при создании hook');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Изменение имени hook', function ( assert )
+    {
+        var done = assert.async();
+        var item_id=/hook\/([0-9]+)/.exec(window.location.href)[1]
+
+        $('#filed_name').val('test-hook2');
+
+        $.when(pmHooks.updateItem(item_id)).done(function()
+        {
+            assert.ok(true, 'Hook успешно изменен');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при изменении hook');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Изменение when hook на null', function ( assert )
+    {
+        var done = assert.async();
+        var item_id=/hook\/([0-9]+)/.exec(window.location.href)[1]
+
+        $('#hook-'+item_id+'-when').val('null');
+
+        $.when(pmHooks.updateItem(item_id)).done(function()
+        {
+            assert.ok(true, 'Hook успешно изменен');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при изменении hook');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Удаление  hook', function ( assert )
+    {
+        var done = assert.async();
+        var item_id=/hook\/([0-9]+)/.exec(window.location.href)[1]
+
+        $('#filed_name').val('test-hook2');
+
+        $.when(pmHooks.deleteItem(item_id, true)).done(function()
+        {
+            assert.ok(true, 'Hook успешно удален');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при удалении hook');
+            render(done)
+        })
+    });
+
+}})

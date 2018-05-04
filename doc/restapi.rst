@@ -68,6 +68,7 @@ Hosts
         {
            "id":12,
            "name":"038108237241668497-0875926814493907",
+           "notes":"some notes about this host",
            "type":"HOST",
            "vars":{
 
@@ -84,6 +85,7 @@ Hosts
 
    :>json number id: id of host.
    :>json string name: |host_name_def|
+   :>json string notes: |host_notes_def|
    :>json string type: |host_type_def|
    :>json object vars: |obj_vars_def|
    :>json object owner: |host_owner_details|
@@ -94,6 +96,8 @@ Hosts
    otherwise is ``HOST``.
 .. |host_name_def| replace:: either human-readable name or hostname/IP or range
    of them (it is depends on context of using this host during playbooks running).
+.. |host_notes_def| replace:: not required field for some user's notes, for example,
+   for what purpose this host was created or something like this.
 .. |host_owner_details| replace:: owner of host. Supported fields
    could be seen in :http:get:`/api/v1/users/{id}/`.
 .. |hosts_details_ref| replace:: **Response JSON Object:** response json fields are the
@@ -166,6 +170,7 @@ Hosts
    Creates host.
 
    :<json string name: |host_name_def|
+   :<json string notes: |host_notes_def|
    :<json string type: |host_type_def|
    :<json object vars: |obj_vars_def|
 
@@ -179,6 +184,7 @@ Hosts
 
       {
          "name":"038108237241668497-0875926814493907",
+         "notes":"",
          "type":"HOST",
          "vars":{
 
@@ -192,6 +198,7 @@ Hosts
         {
            "id":12,
            "name":"038108237241668497-0875926814493907",
+           "notes":"",
            "type":"HOST",
            "vars":{
 
@@ -236,6 +243,7 @@ Hosts
         {
            "id":12,
            "name":"038108237241668497-0875926814493907",
+           "notes":"",
            "type":"HOST",
            "vars":{
 
@@ -278,6 +286,7 @@ Groups
       {
          "id":1,
          "name":"Group1",
+         "notes":"some notes about this group",
          "hosts":[
             {
                "id":41,
@@ -311,6 +320,7 @@ Groups
 
    :>json number id: id of group.
    :>json string name: name of group.
+   :>json string notes: |group_notes_def|
    :>json array hosts: |group_hosts_def|
    :>json array groups: |group_groups_def|
    :>json object vars: |obj_vars_def|
@@ -322,6 +332,8 @@ Groups
    ``false``, otherwise empty. See :ref:`hosts` for fields explanation.
 .. |group_groups_def| replace:: list of subgroups in group, if ``children`` is
    ``true``, otherwise empty.
+.. |group_notes_def| replace:: not required field for some user's notes, for example,
+   for what purpose this group was created or something like this.
 .. |group_children_def| replace:: either this group of subgroups or group of
    hosts.
 .. |group_owner_details| replace:: owner of group. Supported fields
@@ -383,6 +395,7 @@ Groups
    Creates group.
 
    :<json string name: name of new group.
+   :<json string notes: |group_notes_def|
    :<json boolean children: |group_children_def|
    :<json object vars: |obj_vars_def|
 
@@ -396,6 +409,7 @@ Groups
 
       {
          "name":"SomeGroup",
+         "notes": "",
          "children":true,
          "vars":{
 
@@ -409,6 +423,7 @@ Groups
       {
          "id":3,
          "name":"SomeGroup",
+         "notes": "",
          "hosts":[
 
          ],
@@ -459,6 +474,7 @@ Groups
       {
          "id":3,
          "name":"SomeGroupChanged",
+         "notes": "",
          "hosts":[
 
          ],
@@ -552,6 +568,7 @@ Inventories
         {
            "id":8,
            "name":"Inventory1",
+           "notes": "some notes about this inventory",
            "hosts":[
               {
                   "id": 7,
@@ -603,6 +620,7 @@ Inventories
 
    :>json number id: id of inventory.
    :>json string name: name of inventory.
+   :>json string notes: |inventory_notes_def|
    :>json array hosts: |inventory_hosts_def|
    :>json array all_hosts: |inventory_all_hosts_def|
    :>json array groups: |inventory_groups_def|
@@ -612,6 +630,8 @@ Inventories
 
 .. |inventory_hosts_def| replace:: list of hosts in inventory. See :ref:`hosts`
    for fields explanation.
+.. |inventory_notes_def| replace:: not required field for some user's notes, for example,
+   for what purpose this inventory was created or something like this.
 .. |inventory_all_hosts_def| replace:: list of all hosts in inventory(includes also hosts from this
    inventory's groups) . See :ref:`hosts` for fields explanation.
 .. |inventory_groups_def| replace:: list of groups in inventory.
@@ -673,6 +693,7 @@ Inventories
    Creates inventory.
 
    :<json string name: name of new inventory.
+   :<json string notes: |inventory_notes_def|
    :<json object vars: |obj_vars_def|
 
    Example request:
@@ -685,6 +706,7 @@ Inventories
 
       {
          "name":"Test servers",
+         "notes":"",
          "vars":{
 
          }
@@ -697,6 +719,7 @@ Inventories
         {
            "id":9,
            "name":"Test servers",
+           "notes":"",
            "hosts":[
 
            ],
@@ -749,6 +772,7 @@ Inventories
         {
            "id":9,
            "name":"New test servers",
+           "notes":"",
            "hosts":[
 
            ],
@@ -823,6 +847,7 @@ Projects
         {
            "id":7,
            "name":"project_pooh",
+           "notes":"some notes about this project",
            "status":"WAIT_SYNC",
            "repository":"git@ex.us:dir/rep1.git",
            "hosts":[
@@ -853,6 +878,7 @@ Projects
 
    :>json number id: id of project.
    :>json string name: name of project.
+   :>json string notes: |project_notes_def|
    :>json string repository: |project_repository_def|
    :>json string status: current status of project. Possible values are:
      ``NEW`` - newly created project, ``WAIT_SYNC`` - repository
@@ -867,6 +893,8 @@ Projects
    :>json string branch: current branch of project, to which project has been synced last time.
    :>json string url: url to this specific inventory.
 
+.. |project_notes_def| replace:: not required field for some user's notes, for example,
+   for what purpose this project was created or something like this.
 .. |project_repository_def| replace:: URL of repository (repo-specific URL).
    For ``TAR`` it is just HTTP-link to archive.
 .. |project_hosts_def| replace:: list of hosts in project. See :ref:`hosts`
@@ -949,6 +977,7 @@ Projects
    description :http:post:`/api/v1/projects/{id}/sync/`
 
    :<json string name: name of new project.
+   :<json string notes: |project_notes_def|
    :<json object vars: |obj_vars_def| |project_vars_rem|
    :<json string repository: |project_repository_def|
 
@@ -962,6 +991,7 @@ Projects
 
       {
          "name":"project_owl",
+         "notes":"",
          "repository":"http://example.com/project.tar",
          "vars":{
             "repo_type":"TAR"
@@ -975,6 +1005,7 @@ Projects
         {
            "id":9,
            "name":"project_owl",
+           "notes":"",
            "status":"WAIT_SYNC",
            "repository":"http://example.com/project.tar",
            "hosts":[
@@ -1033,6 +1064,7 @@ Projects
         {
            "id":9,
            "name":"project_tar",
+           "notes":"",
            "status":"WAIT_SYNC",
            "repository":"http://example.com/project.tar",
            "hosts":[
@@ -1319,6 +1351,7 @@ Periodic tasks
         {
            "id":10,
            "name":"periodic-test",
+           "notes":"some notes about this periodic task",
            "type":"CRONTAB",
            "schedule":"60* */2 sun,fri 1-15 *",
            "mode":"collect_data.yml",
@@ -1334,6 +1367,8 @@ Periodic tasks
         }
 
    :>json number id: id of periodic task.
+   :>json string name: name of periodic task.
+   :>json string notes: |ptask_notes_def|
    :>json string type: |ptask_type_details|
    :>json string schedule: |ptask_schedule_details|
    :>json string mode: playbook or module to run periodically.
@@ -1345,6 +1380,10 @@ Periodic tasks
    :>json boolean enabled: if ``enabled`` is true, the periodic task will be enabled.
    :>json object vars: |ptask_vars_def|
    :>json string url: url to this specific periodic task.
+
+.. |ptask_notes_def| replace:: not required field for some user's notes, for example,
+   for what purpose this periodic task was created or something like this.
+
 
 .. |ptask_details_ref| replace:: **Response JSON Object:** response json
    fields are the same as in :http:get:`/api/v1/periodic-tasks/{id}/`.
@@ -1457,6 +1496,7 @@ Periodic tasks
 
       {
           "name":"new-periodic-test",
+          "notes":"",
           "type": "INTERVAL",
           "schedule": "25",
           "mode": "touch_the_clouds.yml",
@@ -1475,6 +1515,7 @@ Periodic tasks
     {
         "id": 14,
         "name":"new-periodic-test",
+        "notes":"",
         "type": "INTERVAL",
         "schedule": "25",
         "mode": "touch_the_clouds.yml",
@@ -1523,6 +1564,7 @@ Periodic tasks
     {
         "id": 14,
         "name":"new-periodic-test",
+        "notes":"",
         "type": "INTERVAL",
         "schedule": "25",
         "mode": "touch_the_clouds.yml",
@@ -1602,6 +1644,7 @@ Templates
         {
             "id": 1,
             "name": "test_tmplt",
+            "notes": "some notes about this template",
             "kind": "Task",
             "owner": {
                 "id": 1,
@@ -1637,11 +1680,15 @@ Templates
 
    :>json number id: id of template.
    :>json string name: name of template.
+   :>json string notes: |template_notes_def|
    :>json string kind: |template_kind_details|
    :>json object owner: |template_owner_details|
    :>json string data: |template_data_details|
    :>json object options: tepmlate options, which can update some template's settings before new execution.
    :>json array options_list: list of options' names for this template.
+
+.. |template_notes_def| replace:: not required field for some user's notes, for example,
+   for what purpose this template was created or something like this.
 
 .. |template_details_ref| replace:: **Response JSON Object:** response json
    fields are the same as in :http:get:`/api/v1/templates/{id}/`.
@@ -1717,9 +1764,10 @@ Templates
 
    Creates template
 
+   :<json string name: template name.
+   :<json string notes: |template_notes_def|
    :<json string kind: |template_kind_details|
    :<json string data: |template_data_details|
-   :<json string name: template name.
    :<json string options: template options, which can update some template's settings before new execution.
 
    Example request:
@@ -1732,6 +1780,7 @@ Templates
 
       {
          "name": "test",
+         "notes":"",
          "kind": "Task",
          "data": {
             "project": 1,
@@ -1753,6 +1802,7 @@ Templates
     {
         "id": 3,
         "name": "test",
+        "notes":"",
         "kind": "Task",
         "data": {
             "project": 1,
@@ -1798,6 +1848,7 @@ Templates
     {
         "id": 3,
         "name": "test_new_name",
+        "notes":"",
         "kind": "Task",
         "data": {
             "project": 1,
@@ -1937,18 +1988,21 @@ History records
            "status":"OK",
            "kind": "PLAYBOOK",
            "start_time":"2017-07-02T12:48:11.922761Z",
-           "stop_time":"2017-07-02T13:48:11.922777Z",
+           "stop_time":"2017-07-02T13:48:16.922777Z",
+           "execution_time": 5,
            "inventory": 4,
            "raw_inventory":"inventory",
            "raw_args": "ansible-playbook main.yml -i /tmp/tmpvMIwMg -v",
            "raw_stdout":"http://localhost:8080/api/v1/history/1/raw/",
            "initiator": 1,
-           "initiator_type": "users",
+           "initiator_type": "project",
+           "executor": 1,
            "execute_args": {
                "diff": "",
                "become": ""
            },
            "revision": "NO VCS",
+           "options": {},
            "url": "http://localhost:8080/api/v1/history/1/"
         }
 
@@ -1963,6 +2017,7 @@ History records
    :>json string start_time: time, when playbook execution was started.
    :>json string stop_time: time, when playbook execution was ended (normally
      or not)
+   :>json number execution_time: time taken to perform task execution (in seconds).
    :>json number inventory: id of inventory.
    :>json string raw_inventory: ansible inventory, which was used for execution. It
      was generated from Polemarch's :ref:`inventory`
@@ -1972,8 +2027,11 @@ History records
      in :http:get:`/api/v1/history/{id}/raw/`.
    :>json number initiator: initiator id.
    :>json string initiator_type: initiator type like in api url.
+   :>json number executor: id of user, who executed task.
    :>json object execute_args: arguments, which were used during execution.
    :>json string revision: project revision.
+   :>json object options: some additional options, which were used during this task execution.
+     For example, if you execute some template with option, name of this option will be saved to this object.
    :>json string url: url to this specific history record.
 
 .. |history_details_ref| replace:: **Response JSON Object:** response json fields are the
@@ -2160,7 +2218,9 @@ History records
                  "start_time": "2017-07-24T06:39:52.052504Z",
                  "stop_time": "2017-07-24T06:41:06.521813Z",
                  "initiator": 1,
-                 "initiator_type": "users",
+                 "initiator_type": "project",
+                 "executor": 1,
+                 "options": {},
                  "url": "http://localhost:8000/api/v1/history/121/"
               },
               {
@@ -2172,8 +2232,12 @@ History records
                  "status": "OK",
                  "start_time": "2017-07-24T06:27:40.481588Z",
                  "stop_time": "2017-07-24T06:27:42.499873Z",
-                 "initiator": 1,
-                 "initiator_type": "users",
+                 "initiator": 2,
+                 "initiator_type": "template",
+                 "executor": 1,
+                 "options": {
+                     "template_option": "some-vars"
+                 },
                  "url": "http://localhost:8000/api/v1/history/118/"
               }
            ]
@@ -2859,9 +2923,9 @@ Polemarch has his own system of hooks.
 
       {
           "name": "new hook",
-          "type": "HTTP",
+          "type": "SCRIPT",
           "when": "on_execution",
-          "recipients": "http://localhost:8000/new_hook_trigger"
+          "recipients": "new-test.sh"
       }
 
    Results:
@@ -3426,6 +3490,7 @@ in ACL system.
     {
         "id": 1,
         "name": "myteam",
+        "notes": "some notes about this team",
         "users": [
             {
                 "id": 1,
@@ -3458,6 +3523,7 @@ in ACL system.
 
    :>json number id: id of team.
    :>json string name: name of team.
+   :>json string notes: |team_notes_def|
    :>json array users: array of users in team. See :ref:`users` for fields
     explanation.
    :>json array users_list: ids of users in team.
@@ -3466,6 +3532,8 @@ in ACL system.
 
 .. |team_details_ref| replace:: **Response JSON Object:** response json fields are the
    same as in :http:get:`/api/v1/teams/{id}/`.
+.. |team_notes_def| replace::  not required field for some user’s notes, for example,
+   for what purpose this team was created or something like this.
 
 .. http:get:: /api/v1/teams/
 
@@ -3514,6 +3582,7 @@ in ACL system.
    Creates team.
 
    :<json string name: name of new team.
+   :<json string notes: |team_notes_def|
 
    Example request:
 
@@ -3524,7 +3593,8 @@ in ACL system.
       Accept: application/json, text/javascript
 
       {
-         "name":"another_team"
+         "name":"another_team",
+         "notes":""
       }
 
    Results:
@@ -3534,6 +3604,7 @@ in ACL system.
     {
         "id": 2,
         "name": "another_team",
+        "notes":"",
         "users": [],
         "users_list": [],
         "owner": {
@@ -3576,6 +3647,7 @@ in ACL system.
     {
         "id": 2,
         "name": "another_team",
+        "notes":"",
         "users": [
             {
                 "id": 1,

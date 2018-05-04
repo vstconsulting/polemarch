@@ -236,12 +236,14 @@ class OneTeamSerializer(TeamSerializer):
     users = UserSerializer(many=True, required=False)
     users_list = DictField(required=False)
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.UserGroup
         fields = (
             'id',
             "name",
+            "notes",
             "users",
             "users_list",
             "owner",
@@ -284,6 +286,8 @@ class HistorySerializer(_SignalSerializer):
                   "stop_time",
                   "initiator",
                   "initiator_type",
+                  "executor",
+                  "options",
                   "url")
 
 
@@ -299,14 +303,17 @@ class OneHistorySerializer(_SignalSerializer):
                   "status",
                   "start_time",
                   "stop_time",
+                  "execution_time",
                   "inventory",
                   "raw_inventory",
                   "raw_args",
                   "raw_stdout",
                   "initiator",
                   "initiator_type",
+                  "executor",
                   "execute_args",
                   "revision",
+                  "options",
                   "url")
 
     def get_raw(self, request):
@@ -434,11 +441,13 @@ class HostSerializer(_WithVariablesSerializer):
 class OneHostSerializer(HostSerializer):
     owner = UserSerializer(read_only=True)
     vars = DictField(required=False)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Host
         fields = ('id',
                   'name',
+                  'notes',
                   'type',
                   'vars',
                   'owner',
@@ -503,11 +512,13 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
     vars = DictField(required=False)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
                   'name',
+                  'notes',
                   'type',
                   'schedule',
                   'mode',
@@ -584,12 +595,14 @@ class OneTemplateSerializer(TemplateSerializer):
     owner = UserSerializer(read_only=True)
     options = DictField(required=False)
     options_list = DictField(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Template
         fields = (
             'id',
             'name',
+            'notes',
             'kind',
             'owner',
             'data',
@@ -635,11 +648,13 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
     hosts  = HostSerializer(read_only=True, many=True)
     groups = GroupSerializer(read_only=True, many=True)
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Group
         fields = ('id',
                   'name',
+                  'notes',
                   'hosts',
                   "groups",
                   'vars',
@@ -678,11 +693,13 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
     groups = GroupSerializer(read_only=True, many=True, source="groups_list")
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Inventory
         fields = ('id',
                   'name',
+                  'notes',
                   'hosts',
                   'all_hosts',
                   "groups",
@@ -717,11 +734,13 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     groups      = GroupSerializer(read_only=True, many=True)
     inventories = InventorySerializer(read_only=True, many=True)
     owner = UserSerializer(read_only=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Project
         fields = ('id',
                   'name',
+                  'notes',
                   'status',
                   'repository',
                   'hosts',
@@ -742,7 +761,8 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         data = dict(detail="Sync with {}.".format(self.instance.repository))
         return Response(data, 200)
 
-    def _execution(self, kind, data, user):
+    def _execution(self, kind, data, user, **kwargs):
+        template = kwargs.pop("template", None)
         inventory = data.pop("inventory")
         try:
             inventory = Inventory.objects.get(id=int(inventory))
@@ -752,12 +772,19 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                 )
         except ValueError:
             pass
+        if template is not None:
+            init_type = "template"
+            obj_id = template
+            data['template_option'] = kwargs.get('template_option', None)
+        else:
+            init_type = "project"
+            obj_id = self.instance.id
         history_id = self.instance.execute(
             kind, str(data.pop(kind)), inventory,
-            initiator=user.id, **data
+            initiator=obj_id, initiator_type=init_type, executor=user, **data
         )
         rdata = dict(detail="Started at inventory {}.".format(inventory),
-                     history_id=history_id)
+                     history_id=history_id, executor=user.id)
         return Response(rdata, 201)
 
     def execute_playbook(self, request):

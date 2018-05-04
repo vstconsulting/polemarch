@@ -345,7 +345,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                         history.start_time <= history.stop_time)
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
-        self.assertEqual(history.initiator_object, self.user)
+        self.assertEqual(history.executor, self.user)
+        history.initiator = 1
+        history.initiator_type = 'template'
+        self.assertEqual(
+            history.initiator_object,
+            self.get_model_class("Template").objects.get(id=history.initiator)
+        )
         self.get_model_class('History').objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, ""), "OFFLINE")
@@ -698,6 +704,8 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         subprocess_function.reset_mock()
         subprocess_function.side_effect = side_effect
         ScheduledTask(id)
+        for history in self.histories:
+            self.assertEqual(history.executor, None)
         self.assertEquals(subprocess_function.call_count, 1)
         self.assertCount(self.get_model_class('History').objects.all(), count)
 
@@ -771,7 +779,6 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
 class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
-
         super(ApiTemplateTestCase, self).setUp()
 
         self.pr_tmplt = self.get_model_class('Project').objects.create(**dict(
@@ -791,7 +798,8 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                     connection="paramiko",
                     tags="update",
                 )
-            )
+            ),
+            notes="Test template"
         )
         job_tmplt = self.get_model_class('Template').objects.create(**self.tmplt_data)
         self.job_template = job_tmplt
@@ -814,8 +822,12 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         tmplt = self.post_result(url, data=json.dumps(self.tmplt_data))
         single_url = "{}{}/".format(url, tmplt['id'])
         # test playbook execution
-        self.post_result(single_url + "execute/", code=201)
+        result = self.post_result(single_url + "execute/", code=201)
         self.assertIn('test.yml', ansible_args)
+        history = self.get_model_filter('History', pk=result['history_id']).get()
+        self.assertEqual(history.initiator_type, "template")
+        self.assertEqual(history.initiator, tmplt['id'])
+        self.assertEqual(history.executor.id, tmplt['owner']['id'])
         # test module execution
         ansible_args = []
         module_data = dict(
@@ -879,13 +891,20 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
         # test playbook execution one option
         ansible_args = []
-        self.post_result(single_url + "execute/", 201, data=dict(option='one'))
+        result = self.post_result(single_url + "execute/", 201, data=dict(option='one'))
         self.assertIn(tmpl_with_opts['data']['module'], ansible_args)
         self.assertIn(tmpl_with_opts['options']['one']['group'], ansible_args)
         self.assertIn('--forks', ansible_args)
         self.assertIn(
             str(tmpl_with_opts['data']['vars']['forks']), ansible_args
         )
+
+        # get history
+        history = self.get_model_filter('History', pk=result['history_id']).get()
+        # Check in options `template_option_name`
+        self.assertEqual(history.options['template_option'], 'one')
+        with self.assertRaises(ValidationError):
+            history.options = "string"
 
         # test playbook execution two option
         ansible_args = []
@@ -1117,6 +1136,10 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                 start_time=now() - timedelta(hours=35),
                 stop_time=now() - timedelta(hours=34),
                 **self.default_kwargs),
+            self.get_model_class('History').objects.create(
+                status="RUN",
+                start_time=now() - timedelta(hours=40),
+                **self.default_kwargs)
         ]
         self.default_kwargs["raw_stdout"] = "one\ntwo\nthree\nfour"
         self.default_kwargs["mode"] = "task2.yml"
@@ -1138,14 +1161,31 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
             # stop_time=self.histories[0].stop_time.strftime(df),
             raw_inventory="inventory",
             inventory=self.history_inventory.id,
-            initiator=self.user.id, initiator_type="users"
-        )
+            executor=None, initiator_type="project",
+            execution_time=3600
+            )
+
+        pached_method = 'polemarch.main.models.tasks.History._get_seconds_from_time'
+        with patch(pached_method) as time_mock:
+            time_mock.return_value = 144000
+            self.details_test(
+                url + "{}/".format(self.histories[3].id),
+                mode="task.yml",
+                status="RUN", project=self.ph.id,
+                #  Commented because DRF broke API by fields
+                # start_time=self.histories[0].start_time.strftime(df),
+                # stop_time=self.histories[0].stop_time.strftime(df),
+                raw_inventory="inventory",
+                inventory=self.history_inventory.id,
+                executor=None, initiator_type="project",
+                execution_time=144000
+            )
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)
 
         res = self.get_result("get", "{}?mode={}".format(url, "task.yml"))
-        self.assertEqual(res["count"], 3, res)
+        self.assertEqual(res["count"], 4, res)
 
         res = self.get_result("get", "{}?project={}".format(url, self.ph.id))
         self.assertEqual(res["count"], len(self.histories), res)
@@ -1169,12 +1209,12 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                         405, data=dict(**self.default_kwargs))
 
         # Lines pagination
-        lines_url = url+"{}/lines/?limit=2".format(self.histories[3].id)
+        lines_url = url+"{}/lines/?limit=2".format(self.histories[4].id)
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 4, result)
         self.assertCount(result["results"], 2)
         lines_url = url
-        lines_url += "{}/lines/?after=2&before=4".format(self.histories[3].id)
+        lines_url += "{}/lines/?after=2&before=4".format(self.histories[4].id)
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 1, result)
         self.assertCount(result["results"], 1)

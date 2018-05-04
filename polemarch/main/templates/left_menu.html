@@ -7,7 +7,7 @@
     </a>
     <ul class="pm-treeview-menu">
         <li class="group-header-copy" id="menu-projects-projects"><a href="/?projects"  onclick="return spajs.openURL(this.href);" ><span>Projects</span></a></li>
-        <li id="menu-projects-templates"><a href="/?templates"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-cog"></i> --><span>Templates</span></a></li>
+        <li id="menu-projects-templates"><a href="/?templates"  onclick="return spajs.openURL(this.href);" ><span>Templates</span></a></li>
     </ul>
 </li>
 <li class="pm-treeview" id="menu-inventories">
@@ -16,13 +16,23 @@
     </a>
     <ul class="pm-treeview-menu">
         <li class="group-header-copy" id="menu-inventories-inventories"><a href="/?inventories"  onclick="return spajs.openURL(this.href);" ><span>Inventories</span></a></li>
-        <li id="menu-inventories-groups"><a href="/?groups"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-th-large"></i> --> <span>Groups</span></a></li>
-        <li id="menu-inventories-hosts"><a href="/?hosts"  onclick="return spajs.openURL(this.href);" ><!--<i class="glyphicon glyphicon-tasks"></i> --> <span>Hosts</span></a></li>
+        <li id="menu-inventories-groups"><a href="/?groups"  onclick="return spajs.openURL(this.href);" ><span>Groups</span></a></li>
+        <li id="menu-inventories-hosts"><a href="/?hosts"  onclick="return spajs.openURL(this.href);" ><span>Hosts</span></a></li>
     </ul>
 </li>
 
 
 <li id="menu-history"><a href="/?history"  onclick="return spajs.openURL(this.href);" ><i class="glyphicon glyphicon-calendar"></i> <span class="li-header-span">History</span></a></li>
-<li id="menu-users"><a href="/?users"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-user"></i> <span class="li-header-span">Users</span></a></li>
+
+<li class="pm-treeview" id="menu-users">
+    <a href="/?users"  onclick="return spajs.openURL(this.href);">
+        <i class="fa fa-user"></i> <span class="li-header-span">Users</span>
+    </a>
+    <ul class="pm-treeview-menu">
+        <li class="group-header-copy" id="menu-users-users"><a href="/?users"  onclick="return spajs.openURL(this.href);" ><span>Users</span></a></li>
+        <li id="menu-users-hooks"><a href="/?hooks"  onclick="return spajs.openURL(this.href);" ><span>Hooks</span></a></li>
+    </ul>
+</li>
+
 <li id="menu-docs"><a href="/docs/index.html"><i class="fa fa-book"></i> <span class="li-header-span">Documentation</span></a></li>
  

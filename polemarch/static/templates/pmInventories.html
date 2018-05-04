@@ -162,7 +162,14 @@
         <div class="box-body">
             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                 <label class="control-label" >Name</label>
-                <input type="text" id="inventory_name" value="<%- inventory.name %>"  class="form-control" maxlength="255">
+                <input type="text" id="inventory_name" value="<%- inventory.name %>"  class="form-control" maxlength="255" onchange="pmInventories.model.importedInventories.inventory.name=this.value;">
+                <div class="help-block"></div>
+            </div>
+            <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                <label class="control-label">Notes</label>
+                <textarea class="form-control" style="resize:vertical; min-height:75px;"
+                placeholder="Not required field, just for your notes" id="filed_notes"
+                onchange="pmInventories.model.importedInventories.inventory.notes=this.value;"><%- inventory.notes %></textarea>
                 <div class="help-block"></div>
             </div>
         </div>
@@ -464,6 +471,12 @@
                             <input type="text" disabled value="<%- val.type %>"  class="form-control" maxlength="255">
                             <div class="help-block"></div>
                         </div>
+                        <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                            <label class="control-label">Notes</label>
+                            <textarea class="form-control" style="resize:vertical; min-height:75px;"
+                            placeholder="Not required field, just for your notes" id="hosts_notes"><%- val.notes %></textarea>
+                            <div class="help-block"></div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -496,6 +509,12 @@
                             </div>
                             <div class="help-block">If turn, then allow adding sub groups to group</div>
                         </div>
+                        <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                            <label class="control-label">Notes</label>
+                            <textarea class="form-control" style="resize:vertical; min-height:75px;"
+                            placeholder="Not required field, just for your notes" id="groups_notes"><%- val.notes %></textarea>
+                            <div class="help-block"></div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -520,7 +539,13 @@
             <h3 class="modal-title">Select matching <%= subItemType %> </h3> <br>
             <p>
                 Imported inventory includes <% var str=subItemType; str=str.slice(0,-1); %> <%= str %> <b> <% if(subItemType=="hosts") { %> <%= val.name %>  <% } else { %> <%= index %> <% } %> </b>.  <br>
-                There are <% var len=val.match_arr.length; %> <%= len %> <%= subItemType %> with the same name in system already. <br>
+                <% var len=val.match_arr.length; %>
+                <% if (len > 1) { %>
+                    There are  <%= len %> <%= subItemType %> with the same name in system already. <br>
+                <% } else { %>
+                    There is a  <%= str %> with the same name in system already. <br>
+                <% } %>
+
                 Please, select which of them you want to use in this inventory: new one or existing one.
             </p>
           </div>
@@ -570,7 +595,7 @@
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
-                                            <td style="width: 120px;"> <%= val1.name %> </td>
+                                            <td style="width: 120px;"> <a href="/?host/<%= val1.id %>" target="_blank"><%= val1.name %></a> </td>
                                             <td style="width: 75px;"> <%= val1.type %> </td>
                                             <td>
                                                 <ul>
@@ -600,7 +625,7 @@
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
                                         <td> <%= index %> </td>
-                                        <td class="group-children hidden-xs" style="width:75px;"> <% if(pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].children) { %> <i class="fa fa-check" style="font-size:20px;"></i> <% } %> </td>
+                                        <td class="group-children" style="width:75px;"> <% if(pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].children) { %> <i class="fa fa-check" style="font-size:20px;"></i> <% } %> </td>
                                         <td>
                                             <ul>
                                                 <% for(var j in pmInventories.model.importedInventoriesCopy.inventory[subItemType][index].vars) { %>
@@ -629,8 +654,8 @@
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
-                                            <td style="width: 120px;"> <%= index %> </td>
-                                            <td class="group-children hidden-xs" style="width:75px;"> <% if(val1.children) { %> <i class="fa fa-check" style="font-size:20px;"></i> <% } %> </td>
+                                            <td style="width: 120px;"> <a href="/?group/<%= val1.id %>" target="_blank"><%= index %></a></td>
+                                            <td class="group-children" style="width:75px;"> <% if(val1.children) { %> <i class="fa fa-check" style="font-size:20px;"></i> <% } %> </td>
                                             <td>
                                                 <ul>
                                                     <% for(var j in val1.vars) { %>
@@ -642,11 +667,11 @@
                                                 <ul>
                                                 <% if(val1.children) { %>
                                                     <% for(var j in val1.groups) { %>
-                                                        <li> <b> Group: </b> <%= val1.groups[j].name %> </li>
+                                                        <li> <b> Group: </b>  <a href="/?group/<%= val1.groups[j].id %>" target="_blank"> <%= val1.groups[j].name %> </a> </li>
                                                     <% } %>
                                                 <% } else { %>
                                                     <% for(var j in val1.hosts) { %>
-                                                        <li> <b> Host: </b> <%= val1.hosts[j].name %> </li>
+                                                        <li> <b> Host: </b> <a href="/?host/<%= val1.hosts[j].id %>" target="_blank">  <%= val1.hosts[j].name %> </a> </li>
                                                     <% } %>
                                                 <% } %>
                                             </ul>

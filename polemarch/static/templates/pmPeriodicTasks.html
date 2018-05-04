@@ -412,14 +412,23 @@
                                 <div class="help-block" id="interval-schedule-help"></div>
                             </div> 
                         </div>
-
-                        <div class="form-group col-lg-12 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
-                            <label class="control-label" >Schedule `CRONTAB`</label>
-                            <%= crontabEditor.editor({string:''}) %>
-                            <div class="help-block" id=""></div>
-                        </div> 
+                        <div class="row">
+                            <div class="form-group col-lg-12 <%- pmPeriodicTasks.model.newitem.justClass('type', 'hide', function(v){ return v != 'CRONTAB' }) %> ">
+                                <label class="control-label" >Schedule `CRONTAB`</label>
+                                <%= crontabEditor.editor({string:''}) %>
+                                <div class="help-block" id=""></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                                <label class="control-label">Notes</label>
+                                <textarea class="form-control" style="resize:vertical; min-height:75px;"
+                                placeholder="Not required field, just for your notes" id="filed_notes"></textarea>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
                     </div>
-                </div> 
+                </div>
                 <div class="row <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
                     <%= jsonEditor.editor({}, {prefix: "PLAYBOOK", block:'periodic_playbook', title1:'Arguments', title2:'Adding new argument'}) %>
                 </div>

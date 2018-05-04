@@ -75,3 +75,23 @@
         <div class="help-block"><%- filed.help || '' %></div>
     </div> 
 </script>
+
+<!-- Шаблон текстового поля типа textarea -->
+<script type="text/x-just" data-just="filed_type_textarea">
+    <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+        <label class="control-label" ><%- filed.title %></label>
+        <textarea
+            class="form-control"
+            style="resize:vertical; min-height:75px;"
+            placeholder="<%- filed.placeholder %>"
+            id="filed_<%- filed.name %>"
+            <% var t_a_value = ""
+               if(filed.value !== undefined){  %>
+                <% t_a_value = filed.value %>
+            <% } else if(item_id && pmObj.model.items[item_id][filed.name] !== undefined){ %>
+                <%  t_a_value = pmObj.model.items[item_id][filed.name] %>
+            <% } %>
+        ><%- t_a_value %></textarea>
+        <div class="help-block"><%- filed.help || '' %></div>
+    </div>
+</script>

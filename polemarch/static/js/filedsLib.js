@@ -80,6 +80,17 @@ filedsLib.filed.boolean.getValue = function(pmObj, filed){
 }
 
 
+/**
+ * Для ввода текстового поля типа textarea
+ * @type Object
+ */
+filedsLib.filed.textarea = inheritance(filedsLib.filed.simpleText)
+filedsLib.filed.textarea.type = 'textarea'
+
+filedsLib.filed.textarea.getValue = function(pmObj, filed){
+    return $("#filed_"+filed.name).val();
+}
+
 filedsLib.validator.notEmpty = function(value, name)
 {
     if(value != '' && value)

@@ -54,6 +54,14 @@ class Project(AbstractModel):
         'repo_password',
     ]
 
+    EXTRA_OPTIONS = {
+        'initiator': 0,
+        'initiator_type': 'project',
+        'executor': None,
+        'save_result': True,
+        'template_option': None
+    }
+
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
 
@@ -77,21 +85,25 @@ class Project(AbstractModel):
         return self.variables.get(key="repo_type").value
 
     def _get_history(self, kind, mod_name, inventory, **extra):
-        initiator = extra.pop("initiator", 0)
-        initiator_type = extra.pop("initiator_type", "users")
-        save_result = extra.pop("save_result", True)
+        extra_options = dict()
+        for option in self.EXTRA_OPTIONS:
+            extra_options[option] = extra.pop(option, self.EXTRA_OPTIONS[option])
+        options = dict()
+        if extra_options['template_option'] is not None:
+            options['template_option'] = extra_options['template_option']
         command = kind.lower()
         ansible_args = dict(extra)
         utils.AnsibleArgumentsReference().validate_args(command, ansible_args)
-        if not save_result:
+        if not extra_options['save_result']:
             return None, extra
         from .tasks import History
         history_kwargs = dict(
             mode=mod_name, start_time=timezone.now(),
             inventory=inventory, project=self,
             kind=kind, raw_stdout="", execute_args=extra,
-            initiator=initiator, initiator_type=initiator_type,
-            hidden=self.hidden
+            initiator=extra_options['initiator'],
+            initiator_type=extra_options['initiator_type'],
+            executor=extra_options['executor'], hidden=self.hidden, options=options
         )
         if isinstance(inventory, (six.string_types, six.text_type)):
             history_kwargs['inventory'] = None

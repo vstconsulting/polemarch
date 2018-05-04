@@ -11,7 +11,8 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         self.prj1 = self.get_model_class('Project').objects.create(
             name="First_project",
             repository="git@ex.us:dir/rep1.git",
-            vars=dict(repo_type="TEST")
+            vars=dict(repo_type="TEST"),
+            notes="Description example"
         )
         self.prj2 = self.get_model_class('Project').objects.create(
             name="Second_project",

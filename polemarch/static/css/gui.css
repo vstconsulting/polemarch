@@ -745,7 +745,8 @@ table{
 
 .sidebar-menu>li.pm-treeview-active>.pm-treeview-menu>li>a:hover,
 .pm-treeview-active>a:hover,
-.sidebar-mini.sidebar-collapse .sidebar-menu>li.pm-treeview-active>a{
+.sidebar-mini.sidebar-collapse .sidebar-menu>li.pm-treeview-active>a,
+.sidebar-mini.sidebar-collapse .sidebar-menu>li.active-li>a {
     background-color: #E0E0E0!important;
 }
 
@@ -790,7 +791,6 @@ table{
     background-color: #fcfcfc;
     box-shadow: 2px 1px 3px rgba(0,0,0,0.1);
     width: 180px;
-    list-style: none;
     border-left: none;
     border-top: 1px solid #d2d6de;
     border-bottom-right-radius: 4px;
@@ -811,14 +811,14 @@ table{
 }
 
 .sidebar-mini.sidebar-collapse .sidebar-menu>li>a>.li-header-span,
-.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover pm-treeview-menu>li>.li-header-span {
+.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover .pm-treeview-menu>li>.li-header-span {
     background-color: #fcfcfc!important;
     box-shadow: 2px 1px 3px rgba(0,0,0,0.1);
 }
 
 
 .sidebar-mini.sidebar-collapse .sidebar-menu>li>a>.li-header-span:hover,
-.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover pm-treeview-menu>li>.li-header-span:hover,
+.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover .pm-treeview-menu>li>.li-header-span:hover,
 .sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active:hover .pm-treeview-menu>li>a:hover,
 .sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview:hover .pm-treeview-menu>li>a:hover {
     background-color: #EEEEEE!important;
@@ -868,4 +868,49 @@ table{
 
 .imported-subitems-table ul li {
     list-style: none;
+}
+
+.recipients_list ul {
+    margin-left:15px;
+    padding-left: 0px;
+}
+
+.light-tr:hover {
+    background-color: #D8EDF8;
+    cursor: pointer;
+}
+
+.start-time-td {
+    width:160px;
+}
+
+
+@media (max-width: 1200px) {
+    .hidden-1200 {
+        display: none;
+    }
+}
+
+@media (max-width: 1100px) {
+    .hidden-1100 {
+        display: none;
+    }
+}
+
+@media (max-width: 1000px) {
+    .hidden-1000 {
+        display: none;
+    }
+}
+
+@media (max-width: 850px) {
+    .start-time-td {
+        width:100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hidden-480 {
+        display: none;
+    }
 }
