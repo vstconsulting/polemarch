@@ -392,15 +392,8 @@ TASKS_HANDLERS = {
 }
 
 ACL = {
-    "DEFAULT_ACL_CLASSES": {
-        "ACLPermissionAbstract": "polemarch.main.models.acl_models.ACLPermissionAbstract",
-        "ACLModel": "polemarch.main.models.acl_models.ACLModel",
-        "ACLPermissionSubclass": "polemarch.main.models.acl_models.ACLPermissionSubclass",
-        "ACLGroupSubclass": "polemarch.main.models.acl_models.ACLGroupSubclass",
-        "ACLQuerySet": "polemarch.main.models.acl_models.ACLQuerySet",
-        "ACLInventoriesQuerySet": "django.db.models.query.QuerySet",
-        "ACLHistoryQuerySet": "polemarch.main.models.acl_models.ACLHistoryQuerySet",
-        "ACLUserGroupsQuerySet": "polemarch.main.models.acl_models.ACLQuerySet",
+    "MODEL_HANDLERS": {
+        "Default": "polemarch.main.acl.handlers.Default"
     }
 }
 

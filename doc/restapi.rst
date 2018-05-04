@@ -3490,6 +3490,7 @@ in ACL system.
     {
         "id": 1,
         "name": "myteam",
+        "notes": "some notes about this team",
         "users": [
             {
                 "id": 1,
@@ -3522,6 +3523,7 @@ in ACL system.
 
    :>json number id: id of team.
    :>json string name: name of team.
+   :>json string notes: |team_notes_def|
    :>json array users: array of users in team. See :ref:`users` for fields
     explanation.
    :>json array users_list: ids of users in team.
@@ -3530,6 +3532,8 @@ in ACL system.
 
 .. |team_details_ref| replace:: **Response JSON Object:** response json fields are the
    same as in :http:get:`/api/v1/teams/{id}/`.
+.. |team_notes_def| replace::  not required field for some user’s notes, for example,
+   for what purpose this team was created or something like this.
 
 .. http:get:: /api/v1/teams/
 
@@ -3578,6 +3582,7 @@ in ACL system.
    Creates team.
 
    :<json string name: name of new team.
+   :<json string notes: |team_notes_def|
 
    Example request:
 
@@ -3588,7 +3593,8 @@ in ACL system.
       Accept: application/json, text/javascript
 
       {
-         "name":"another_team"
+         "name":"another_team",
+         "notes":""
       }
 
    Results:
@@ -3598,6 +3604,7 @@ in ACL system.
     {
         "id": 2,
         "name": "another_team",
+        "notes":"",
         "users": [],
         "users_list": [],
         "owner": {
@@ -3640,6 +3647,7 @@ in ACL system.
     {
         "id": 2,
         "name": "another_team",
+        "notes":"",
         "users": [
             {
                 "id": 1,

@@ -14,8 +14,7 @@ from django.contrib.contenttypes.fields import (GenericForeignKey,
                                                 GenericRelation)
 
 from ..utils import tmp_file
-from .base import BModel, BManager, models
-from .acl import ACLModel, ACLQuerySet
+from .base import ACLModel, BQuerySet, BModel, models
 
 
 logger = logging.getLogger("polemarch")
@@ -32,7 +31,7 @@ class Variable(BModel):
         return "{}={}".format(self.key, self.value)
 
 
-class AbstractVarsQuerySet(ACLQuerySet):
+class AbstractVarsQuerySet(BQuerySet):
     use_for_related_fields = True
 
     @transaction.atomic
@@ -52,12 +51,11 @@ class AbstractVarsQuerySet(ACLQuerySet):
 
 
 class AbstractModel(ACLModel):
-    objects     = BManager.from_queryset(AbstractVarsQuerySet)
+    objects     = AbstractVarsQuerySet.as_manager()
     name        = models.CharField(max_length=512,
                                    default=uuid.uuid1)
     variables   = GenericRelation(Variable, related_query_name="variables",
                                   object_id_field="object_id")
-    notes       = models.TextField(default="")
 
     class Meta:
         abstract = True

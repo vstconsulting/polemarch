@@ -5,9 +5,8 @@ import logging
 
 from django.db import transaction
 from django.db.models import Q
-from .acl import ACLInventoriesQuerySet
 
-from .base import BManager, models
+from .base import models
 from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
 from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex
@@ -45,7 +44,7 @@ class HostQuerySet(AbstractVarsQuerySet):
 
 
 class Host(AbstractModel):
-    objects     = BManager.from_queryset(HostQuerySet)()
+    objects     = HostQuerySet.as_manager()
     type        = models.CharField(max_length=5,
                                    default="HOST")
 
@@ -109,7 +108,7 @@ class GroupQuerySet(AbstractVarsQuerySet):
 
 class Group(AbstractModel):
     CiclicDependencyError = CiclicDependencyError
-    objects     = BManager.from_queryset(GroupQuerySet)()
+    objects     = GroupQuerySet.as_manager()
     hosts       = ManyToManyFieldACL(Host, related_query_name="groups")
     parents     = ManyToManyFieldACLReverse('Group', blank=True, null=True,
                                             related_query_name="childrens")
@@ -138,12 +137,7 @@ class Group(AbstractModel):
         return get_render("models/group", data), keys
 
 
-class InventoriesQuerySet(AbstractVarsQuerySet, ACLInventoriesQuerySet):
-    pass
-
-
 class Inventory(AbstractModel):
-    objects     = InventoriesQuerySet.as_manager()
     hosts       = ManyToManyFieldACL(Host)
     groups      = ManyToManyFieldACL(Group)
 
