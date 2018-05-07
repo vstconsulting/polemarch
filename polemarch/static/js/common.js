@@ -231,16 +231,16 @@ function setActiveMenuLiBase()
     else if(/\?hooks/.test(window.location.href) || /\?hook/.test(window.location.href) ||
         /\?new-hook/.test(window.location.href))
     {
-        $("#menu-users").addClass("pm-treeview-active active active-li");
-        $("#menu-users-hooks").addClass("active-bold");
-        $("#menu-users").removeClass("pm-treeview");
+        $("#menu-system").addClass("pm-treeview-active active active-li");
+        $("#menu-system-hooks").addClass("active-bold");
+        $("#menu-system").removeClass("pm-treeview");
     }
     else if(/\?users/.test(window.location.href) || /\?user/.test(window.location.href) ||
         /\?new-user/.test(window.location.href) || /\?profile/.test(window.location.href))
     {
-        $("#menu-users").addClass("pm-treeview-active active active-li active-bold");
-        $("#menu-users-users").addClass("active-bold");
-        $("#menu-users").removeClass("pm-treeview");
+        $("#menu-system").addClass("pm-treeview-active active active-li");
+        $("#menu-system-users").addClass("active-bold");
+        $("#menu-system").removeClass("pm-treeview");
     }
     else
     {

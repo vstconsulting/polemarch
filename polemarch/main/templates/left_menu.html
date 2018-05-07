@@ -24,13 +24,17 @@
 
 <li id="menu-history"><a href="/?history"  onclick="return spajs.openURL(this.href);" ><i class="glyphicon glyphicon-calendar"></i> <span class="li-header-span">History</span></a></li>
 
-<li class="pm-treeview" id="menu-users">
+<li class="pm-treeview" id="menu-system">
     <a href="/?users"  onclick="return spajs.openURL(this.href);">
-        <i class="fa fa-user"></i> <span class="li-header-span">Users</span>
+        <i class="glyphicon glyphicon-cog"></i> <span class="li-header-span">System</span>
     </a>
     <ul class="pm-treeview-menu">
-        <li class="group-header-copy" id="menu-users-users"><a href="/?users"  onclick="return spajs.openURL(this.href);" ><span>Users</span></a></li>
-        <li id="menu-users-hooks"><a href="/?hooks"  onclick="return spajs.openURL(this.href);" ><span>Hooks</span></a></li>
+        <li class="group-header-copy" id="menu-system-default"><a href="/?users"  onclick="return spajs.openURL(this.href);" ><span>System</span></a></li>
+        <li id="menu-system-users"><a href="/?users"  onclick="return spajs.openURL(this.href);" ><span>Users</span></a></li>
+        {% if user.is_staff %}
+            <li id="menu-system-hooks"><a href="/?hooks"  onclick="return spajs.openURL(this.href);" ><span>Hooks</span></a></li>
+        {% endif %}
+
     </ul>
 </li>
 
