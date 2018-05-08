@@ -346,12 +346,6 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
         self.assertEqual(history.executor, self.user)
-        history.initiator = 1
-        history.initiator_type = 'template'
-        self.assertEqual(
-            history.initiator_object,
-            self.get_model_class("Template").objects.get(id=history.initiator)
-        )
         self.get_model_class('History').objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, ""), "OFFLINE")
@@ -828,6 +822,10 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEqual(history.initiator_type, "template")
         self.assertEqual(history.initiator, tmplt['id'])
         self.assertEqual(history.executor.id, tmplt['owner']['id'])
+        self.assertEqual(
+            history.initiator_object,
+            self.get_model_filter('Template', pk=tmplt['id']).get()
+        )
         # test module execution
         ansible_args = []
         module_data = dict(
