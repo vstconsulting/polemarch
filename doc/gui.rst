@@ -74,7 +74,12 @@ After inventory creation you will see the next page:
 
 .. image:: gui_png/test-inventory.png
 
-As you can see, new "Sub items" section has appeared. This section has 4 buttons:
+There are some new buttons here:
+
+* **save** - this button saves all changes you have made on this page.
+* **history** - this button opens history list of inventory executions.
+
+As you can see, also new "Sub items" section has appeared. This section has 4 buttons:
 
 * **edit existing groups** - this button gives you an opportunity to add to inventory groups, that are already created,
   or to delete some groups from this inventory.
@@ -187,6 +192,9 @@ As you can see, the form of new GIT project creation consist of 5 fields:
 
 * **branch** - branch of your GIT project, to what your Polemarch project will be synced.
   If you stay it empty, Polemarch will sync to "master" branch.
+
+* **update before execution** - if true, project will be updated before each task
+  execution from this project.
 
 * **notes** - not required field for some user’s notes, for example,
   for what purpose this project was created or something like this.
@@ -421,6 +429,8 @@ But also there are some new buttons here:
 * **save and execute** - this button saves all changes you have made on this page and executes this template.
 
 * **create new option** - this button opens the "Create new option" page.
+
+* **history** - this button opens history list of template executions.
 
 * **copy** - this button creates a copy of this template.
 
