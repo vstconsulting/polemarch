@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import os
 import sys
 import json
+import logging
 from collections import OrderedDict
 import django_celery_beat
 from django_celery_beat.models import IntervalSchedule, CrontabSchedule
@@ -20,7 +21,9 @@ from .hooks import Hook
 from ..validators import RegexValidator
 from ..exceptions import UnknownTypeException
 from ..utils import raise_context, AnsibleArgumentsReference
-from ..tasks import SendHook
+
+
+logger = logging.getLogger('polemarch')
 
 
 #####################################
@@ -29,7 +32,8 @@ from ..tasks import SendHook
 def send_hook(when, target):
     msg = OrderedDict(when=when)
     msg['target'] = target
-    SendHook.delay(when, msg)
+    logger.info('Sending {} hooks...'.format(when))
+    Hook.objects.execute(when, msg)
 
 
 @raise_context()
