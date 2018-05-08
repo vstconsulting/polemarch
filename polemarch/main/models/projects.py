@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 import os
 import logging
-from collections import OrderedDict
-
 import six
 from django.conf import settings
 from django.utils import timezone

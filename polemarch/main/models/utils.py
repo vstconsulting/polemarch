@@ -25,6 +25,7 @@ AnsibleExtra = namedtuple('AnsibleExtraArgs', [
 
 # Classes and methods for support
 class DummyHistory(object):
+    # pylint: disable=unused-argument
     def __init__(self, *args, **kwargs):
         self.mode = kwargs.get('mode', None)
 
@@ -239,7 +240,7 @@ class AnsibleCommand(object):
     def run(self):
         try:
             return self.execute(*self.args, **self.kwargs)
-        except Exception as ex:  # nocv
+        except Exception:  # nocv
             logger.error(traceback.format_exc())
             raise
 
