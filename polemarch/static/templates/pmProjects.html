@@ -289,3 +289,25 @@
 
 
 </script>
+
+
+<!-- Шаблон boolean repo_sync_on_run -->
+<script type="text/x-just" data-just="filed_type_repo_sync_on_run">
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
+        <label class="control-label" >Update before execution</label>
+        <div class="form-control <% if(item_id && pmObj.model.items[item_id].vars.repo_sync_on_run
+                                    && pmObj.model.items[item_id].vars.repo_sync_on_run=="True"){ %>
+                                    selected
+                                 <% } %>"
+                onclick="$(this).toggleClass('selected');"
+                onselectstart="return false"
+                onmousedown="return false"
+                style="cursor: pointer;"
+                id="filed_<%- filed.name %>">
+            <div class="ico-on fa fa-toggle-on"></div>
+            <div class="ico-off fa  fa-toggle-off"></div>
+            <div class="boolean-title" >Boolean value</div>
+        </div>
+        <div class="help-block"><%- filed.help || '' %></div>
+    </div>
+</script>

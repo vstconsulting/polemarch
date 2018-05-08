@@ -25,6 +25,12 @@ pmProjects.filed.selectRepositoryType.getValue = function(pmObj, filed){
     return '';
 }
 
+pmProjects.filed.repoSyncOnRun = inheritance(filedsLib.filed.simpleText)
+pmProjects.filed.repoSyncOnRun.type = 'repo_sync_on_run'
+pmProjects.filed.repoSyncOnRun.getValue = function(pmObj, filed){
+    return '';
+}
+
 
 /**
  * Вызывается после загрузки информации об элементе но до его вставки в любые массивы.
@@ -196,6 +202,12 @@ pmProjects.model.page_new = {
                 filed: new pmProjects.filed.selectRepositoryType(),
                 name:'repository',
             },
+            {
+                filed: new filedsLib.filed.boolean(),
+                title:'Update before execution',
+                name:'repo_sync_on_run',
+                help:'If true, project will be updated before execution.'
+            },
         ],
         [
             {
@@ -229,6 +241,13 @@ pmProjects.model.page_new = {
             repo_type:$("#new_project_type").val(),
             //repo_password:$("#new_project_password").val(),
         }
+
+        if(data.repo_sync_on_run)
+        {
+            data.vars.repo_sync_on_run = true;
+        }
+
+        delete data.repo_sync_on_run;
 
         if(data.vars.repo_type == "GIT")
         {
@@ -382,6 +401,12 @@ pmProjects.model.page_item = {
                 name:'status',
                 title:'Status',
             },
+            {
+                filed: new pmProjects.filed.repoSyncOnRun(),
+                title:'Update before execution',
+                name:'repo_sync_on_run',
+                help:'If true, project will be updated before execution.'
+            }
         ],
         [
             {
@@ -409,6 +434,13 @@ pmProjects.model.page_item = {
             repo_type:$("#project_"+item_id+"_type").val(),
             //repo_password:$("#project_"+item_id+"_password").val(),
         }
+
+        if($("#filed_repo_sync_on_run").hasClass('selected'))
+        {
+            data.vars.repo_sync_on_run=true;
+        }
+
+        delete data.repo_sync_on_run;
 
         if(data.vars.repo_type=="GIT")
         {
