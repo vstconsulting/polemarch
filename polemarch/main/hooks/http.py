@@ -1,5 +1,10 @@
+import logging
+import traceback
 import requests
 from .base import BaseHook
+
+
+logger = logging.getLogger("polemarch")
 
 
 class Backend(BaseHook):
@@ -11,6 +16,10 @@ class Backend(BaseHook):
                 response.status_code, response.reason, response.text
             )
         except BaseException as err:
+            logger.error(traceback.format_exc())
+            logger.error("Details:\nURL:{}\nWHEN:{}\n".format(
+                url, when
+            ))
             return str(err)
 
     def send(self, message, when):
