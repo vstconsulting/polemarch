@@ -948,6 +948,12 @@ table{
     }
 }
 
+@media (max-width: 1050px) {
+    .hidden-1050 {
+        display: none;
+    }
+}
+
 @media (max-width: 1000px) {
     .hidden-1000 {
         display: none;
