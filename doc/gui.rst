@@ -73,6 +73,7 @@ Section "Adding new variable":
 After inventory creation you will see the next page:
 
 .. image:: gui_png/test-inventory.png
+.. image:: gui_png/test-inventory2.png
 
 There are some new buttons here:
 
@@ -118,6 +119,7 @@ Section "Adding new variable":
 After group creation you will see the next page:
 
 .. image:: gui_png/test-group.png
+.. image:: gui_png/test-group2.png
 
 As you can see, new "Variables" and "Sub item" sections have appeared.
 
@@ -297,7 +299,11 @@ With "Clear" button you can delete this output.
 
 * **stop time** - time, when task execution was finished.
 
+* **execution time** - amount of time the execution took.
+
 * **initiator** - name of object, who executed this task.
+
+* **executor** - name of user, who executed this task.
 
 * **revision** - project revision.
 
@@ -368,7 +374,11 @@ With "Clear" button you can delete this output.
 
 * **stop time** - time, when task execution was finished.
 
+* **execution time** - amount of time the execution took.
+
 * **initiator** - name of object, who executed this task.
+
+* **executor** - name of user, who executed this task.
 
 * **revision** - project revision.
 
