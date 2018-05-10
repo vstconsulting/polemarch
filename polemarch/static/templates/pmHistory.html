@@ -211,6 +211,7 @@
                                     <th class="hidden-xs start-time-td">Start time</th>
                                     <th style="width: 110px;" class="hidden-xs">Executor</th>
                                     <th>Initiator</th>
+                                    <th class="hidden-xs hidden-sm hidden-1000" >Revision</th>
                                     <th class="hidden-xs hidden-sm hidden-1100" >Name</th>
                                     <th style="width: 120px;">Status</th>
                                     <th style="width: 160px;" class="hidden-xs hidden-sm hidden-1200">End time</th>
@@ -273,6 +274,13 @@
                                                     <% } %>
                                                 <% }else{ %>
                                                     scheduler
+                                                <% } %>
+                                            </td>
+                                            <td class="hidden-xs hidden-sm hidden-1000">
+                                                <% if(val.revision !== null) { %>
+                                                    <%- val.revision.slice(0,8) %>
+                                                <% } else { %>
+                                                    no revision
                                                 <% } %>
                                             </td>
                                              <td class="hidden-xs hidden-sm hidden-1100">
@@ -371,6 +379,8 @@
                                     <th class="hidden-xs start-time-td">Start time</th>
                                     <th style="width: 110px;" class="hidden-xs">Executor</th>
                                     <th>Initiator</th>
+                                    <th class="hidden-xs hidden-sm hidden-1000" >Project</th>
+                                    <th class="hidden-xs hidden-sm hidden-1050" >Revision</th>
                                     <th class="hidden-xs hidden-sm hidden-1100" >Name</th>
                                     <th style="width: 120px;">Status</th>
                                     <th style="width: 160px;" class="hidden-xs hidden-sm hidden-1200">End time</th>
@@ -433,6 +443,23 @@
                                                     <% } %>
                                                 <% }else{ %>
                                                     scheduler
+                                                <% } %>
+                                            </td>
+                                            <td class="hidden-xs hidden-sm hidden-1000" >
+                                                <% if(pmProjects.model.items[val.project]!==undefined && pmProjects.model.items[val.project].id!==undefined){ %>
+                                                    <a href="/?project/<%- pmHistory.model.itemslist.results[i].project %>" class="item-name"
+                                                            onclick="return false;" >
+                                                            <%- pmProjects.model.items[pmHistory.model.itemslist.results[i].project].name %>
+                                                    </a>
+                                                <% }else{ %>
+                                                    removed project
+                                                <% } %>
+                                            </td>
+                                            <td class="hidden-xs hidden-sm hidden-1050">
+                                                <% if(val.revision !== null) { %>
+                                                    <%- val.revision.slice(0,8) %>
+                                                <% } else { %>
+                                                    no revision
                                                 <% } %>
                                             </td>
                                              <td class="hidden-xs hidden-sm hidden-1100">

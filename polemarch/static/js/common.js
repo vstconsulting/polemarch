@@ -231,16 +231,16 @@ function setActiveMenuLiBase()
     else if(/\?hooks/.test(window.location.href) || /\?hook/.test(window.location.href) ||
         /\?new-hook/.test(window.location.href))
     {
-        $("#menu-users").addClass("pm-treeview-active active active-li");
-        $("#menu-users-hooks").addClass("active-bold");
-        $("#menu-users").removeClass("pm-treeview");
+        $("#menu-system").addClass("pm-treeview-active active active-li");
+        $("#menu-system-hooks").addClass("active-bold");
+        $("#menu-system").removeClass("pm-treeview");
     }
     else if(/\?users/.test(window.location.href) || /\?user/.test(window.location.href) ||
         /\?new-user/.test(window.location.href) || /\?profile/.test(window.location.href))
     {
-        $("#menu-users").addClass("pm-treeview-active active active-li active-bold");
-        $("#menu-users-users").addClass("active-bold");
-        $("#menu-users").removeClass("pm-treeview");
+        $("#menu-system").addClass("pm-treeview-active active active-li");
+        $("#menu-system-users").addClass("active-bold");
+        $("#menu-system").removeClass("pm-treeview");
     }
     else
     {
@@ -273,7 +273,45 @@ function setActiveMenuLi()
     return setActiveMenuLiBase();
 }
 
+/*
+ * Функция добавляет элементу меню (при наведении на него)
+ * css-класс hover-li, который добавляет необходимые стили.
+ * Добавление класса происходит не сразу, а после небольшой паузы.
+ * Это необходимо для того, чтобы выпавшее подменю быстро не пропадало
+ * при попытке навести курсор на него.
+ */
+$(".sidebar-menu > li").mouseenter(function () {
+    var thisEl = this;
+    setTimeout(function () {
+        var pmTreeviewMenues = $(".pm-treeview-menu");
+        var bool = false;
+        for(var i=0; i<pmTreeviewMenues.length; i++)
+        {
+            if($(pmTreeviewMenues[i]).is(':hover'))
+            {
+                bool = true;
+            }
+        }
 
+        if(bool==false)
+        {
+            $(".hover-li").removeClass("hover-li");
+            $(thisEl).addClass("hover-li");
+        }
+    }, 200);
+})
+
+/*
+ * Два обработчика событий, удаляющих класс hover-li у элементов меню, после того
+ * как с меню убрали курсор.
+ */
+$(".content-wrapper").hover(function () {
+    $(".hover-li").removeClass("hover-li");
+})
+
+$(".navbar").hover(function () {
+    $(".hover-li").removeClass("hover-li");
+})
 
 tabSignal.connect("loading.completed", function()
 {

@@ -287,6 +287,7 @@ class HistorySerializer(_SignalSerializer):
                   "initiator",
                   "initiator_type",
                   "executor",
+                  "revision",
                   "options",
                   "url")
 

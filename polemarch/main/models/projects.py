@@ -48,8 +48,15 @@ class Project(AbstractModel):
     class Meta:
         default_related_name = "projects"
 
+    class SyncError(Exception):
+        pass
+
     HIDDEN_VARS = [
         'repo_password',
+    ]
+
+    BOOLEAN_VARS = [
+        'repo_sync_on_run'
     ]
 
     EXTRA_OPTIONS = {
@@ -136,10 +143,7 @@ class Project(AbstractModel):
         try:
             self.sync()
         except Exception as exc:
-            history.raw_stdout = "ERROR on Sync operation: " + str(exc)
-            history.status = 'ERROR'
-            history.save()
-            raise
+            raise self.SyncError("ERROR on Sync operation: " + str(exc))
 
     def execute(self, kind, *args, **extra):
         kind = kind.upper()
@@ -149,7 +153,6 @@ class Project(AbstractModel):
         kwargs = self._prepare_kw(kind, *args, **extra)
         history = kwargs['history']
         if sync:
-            self._sync_before(history)
             task_class(**kwargs)
         else:
             task_class.delay(**kwargs)

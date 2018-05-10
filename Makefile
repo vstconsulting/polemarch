@@ -157,6 +157,9 @@ deb:
 	# cleanup
 	rm -rf debian
 
+compose_down:
+	docker-compose -f $(COMPOSE) down
+
 compose:
 	docker-compose -f $(COMPOSE) build
 
