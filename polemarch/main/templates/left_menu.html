@@ -1,79 +1,42 @@
 <li class="header">MAIN NAVIGATION</li>
 
-<li><a href="/"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> <span>Home</span></a></li>
-<li><a href="/?projects"  onclick="return spajs.openURL(this.href);" ><i class="glyphicon glyphicon-list"></i> <span>Projects</span></a></li> 
-<li><a href="/?templates"  onclick="return spajs.openURL(this.href);" ><i class="glyphicon glyphicon-cog"></i> <span>Templates</span></a></li>
-<li><a href="/?history"  onclick="return spajs.openURL(this.href);" ><i class="glyphicon glyphicon-calendar"></i> <span>History</span></a></li>
-<li><a href="/?hosts"  onclick="return spajs.openURL(this.href);" ><i class="glyphicon glyphicon-tasks"></i> <span>Hosts</span></a></li>
-<li><a href="/?groups"  onclick="return spajs.openURL(this.href);" ><i class="glyphicon glyphicon-th-large"></i> <span>Groups</span></a></li>
-<li><a href="/?inventories"  onclick="return spajs.openURL(this.href);" ><i class="glyphicon glyphicon-th"></i> <span>Inventories</span></a></li>
-<li><a href="/?users"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-user"></i> <span>Users</span></a></li>
-<li><a href="/docs/index.html"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
-
-<!--
-<li>
-    <a href="pages/widgets.html">
-        <i class="fa fa-th"></i> <span>Widgets</span>
-        <span class="pull-right-container">
-            <small class="label pull-right bg-green">new</small>
-        </span>
+<li id="menu-home"><a href="/"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> <span class="li-header-span"><i class="li-header-span-i">Home</i></span></a></li>
+<li class="pm-treeview" id="menu-projects">
+    <a href="/?projects"  onclick="return spajs.openURL(this.href);">
+        <i class="glyphicon glyphicon-blackboard"></i> <span class="li-header-span"><i class="li-header-span-i">Projects</i></span>
     </a>
-</li> 
-<li>
-    <a href="pages/calendar.html">
-        <i class="fa fa-calendar"></i> <span>Calendar</span>
-        <span class="pull-right-container">
-            <small class="label pull-right bg-red">3</small>
-            <small class="label pull-right bg-blue">17</small>
-        </span>
-    </a>
+    <ul class="pm-treeview-menu">
+        <li class="group-header-copy" id="menu-projects-projects"><a href="/?projects"  onclick="return spajs.openURL(this.href);" ><span>Projects</span></a></li>
+        <li id="menu-projects-templates"><a href="/?templates"  onclick="return spajs.openURL(this.href);" ><span>Templates</span></a></li>
+    </ul>
 </li>
-<li>
-    <a href="pages/mailbox/mailbox.html">
-        <i class="fa fa-envelope"></i> <span>Mailbox</span>
-        <span class="pull-right-container">
-            <small class="label pull-right bg-yellow">12</small>
-            <small class="label pull-right bg-green">16</small>
-            <small class="label pull-right bg-red">5</small>
-        </span>
+<li class="pm-treeview" id="menu-inventories">
+    <a href="/?inventories"  onclick="return spajs.openURL(this.href);">
+        <i class="fa fa-folder"></i> <span class="li-header-span"><i class="li-header-span-i">Inventories</i></span>
     </a>
-</li>
-<li class="treeview">
-    <a href="#">
-        <i class="fa fa-share"></i> <span>Multilevel</span>
-        <span class="pull-right-container">
-            <i class="fa fa-angle-left pull-right"></i>
-        </span>
-    </a>
-    <ul class="treeview-menu">
-        <li><a href="#"><i class="fa fa-circle-o"></i> Level One</a></li>
-        <li>
-            <a href="#"><i class="fa fa-circle-o"></i> Level One
-                <span class="pull-right-container">
-                    <i class="fa fa-angle-left pull-right"></i>
-                </span>
-            </a>
-            <ul class="treeview-menu">
-                <li><a href="#"><i class="fa fa-circle-o"></i> Level Two</a></li>
-                <li>
-                    <a href="#"><i class="fa fa-circle-o"></i> Level Two
-                        <span class="pull-right-container">
-                            <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li><a href="#"><i class="fa fa-circle-o"></i> Level Three</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o"></i> Level Three</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-        <li><a href="#"><i class="fa fa-circle-o"></i> Level One</a></li>
+    <ul class="pm-treeview-menu">
+        <li class="group-header-copy" id="menu-inventories-inventories"><a href="/?inventories"  onclick="return spajs.openURL(this.href);" ><span>Inventories</span></a></li>
+        <li id="menu-inventories-groups"><a href="/?groups"  onclick="return spajs.openURL(this.href);" ><span>Groups</span></a></li>
+        <li id="menu-inventories-hosts"><a href="/?hosts"  onclick="return spajs.openURL(this.href);" ><span>Hosts</span></a></li>
     </ul>
 </li>
 
 
-<li class="header">LABELS</li>
-<li><a href="#"><i class="fa fa-circle-o text-red"></i> <span>Important</span></a></li>
-<li><a href="#"><i class="fa fa-circle-o text-yellow"></i> <span>Warning</span></a></li>
-<li><a href="#"><i class="fa fa-circle-o text-aqua"></i> <span>Information</span></a></li>-->
+<li id="menu-history"><a href="/?history"  onclick="return spajs.openURL(this.href);" ><i class="glyphicon glyphicon-calendar"></i> <span class="li-header-span"><i class="li-header-span-i">History</i></span></a></li>
+
+<li class="pm-treeview" id="menu-system">
+    <a href="/?users"  onclick="return spajs.openURL(this.href);">
+        <i class="glyphicon glyphicon-cog"></i> <span class="li-header-span"><i class="li-header-span-i">System</i></span>
+    </a>
+    <ul class="pm-treeview-menu">
+        <li class="group-header-copy" id="menu-system-default"><a href="/?users"  onclick="return spajs.openURL(this.href);" ><span>System</span></a></li>
+        <li id="menu-system-users"><a href="/?users"  onclick="return spajs.openURL(this.href);" ><span>Users</span></a></li>
+        {% if user.is_staff %}
+            <li id="menu-system-hooks"><a href="/?hooks"  onclick="return spajs.openURL(this.href);" ><span>Hooks</span></a></li>
+        {% endif %}
+
+    </ul>
+</li>
+
+<li id="menu-docs"><a href="/docs/index.html"><i class="fa fa-book"></i> <span class="li-header-span"><i class="li-header-span-i">Documentation</i></span></a></li>
+ 

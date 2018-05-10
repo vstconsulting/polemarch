@@ -60,7 +60,7 @@ pmPeriodicTasks.copyItem = function(item_id)
         $.when(encryptedCopyModal.replace(data)).done(function(data)
         {
             spajs.ajax.Call({
-                url: "/api/v1/"+thisObj.model.name+"/",
+                url: hostname + "/api/v1/"+thisObj.model.name+"/",
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
@@ -153,7 +153,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
 {
     var def = new $.Deferred();
     spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/" + item_id+"/execute/",
+        url: hostname + "/api/v1/"+this.model.name+"/" + item_id+"/execute/",
         type: "POST",
         data:JSON.stringify({}),
         contentType:'application/json',
@@ -224,6 +224,7 @@ pmPeriodicTasks.toggleSelectEachItem = function(mode, project_id)
 
 pmPeriodicTasks.showList = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var thisObj = this;
     var offset = 0
     var limit = this.pageSize;
@@ -272,6 +273,7 @@ pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
 
 pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var project_id = data.reg[1];
     var thisObj = this;
     return $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
@@ -407,10 +409,19 @@ pmPeriodicTasks.model.page_item = {
                 name:'enabled',
                 help:'',
             },
-        ],[
+        ],
+        [
             {
                 filed: new pmPeriodicTasks.filed.selectInventoryKindPlaybookGroupModuleAndTime(),
                 name:'project',
+            },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
             },
         ]
     ],
@@ -485,6 +496,7 @@ pmPeriodicTasks.model.page_item = {
 
 pmPeriodicTasks.showItem = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var def = new $.Deferred();
     var thisObj = this;
     var item_id = data.reg[2];
@@ -630,8 +642,10 @@ pmPeriodicTasks.addItem = function(project_id)
         data.vars.args =  moduleArgsEditor.getModuleArgs();
     }
 
+    data.notes=$("#filed_notes").val();
+
     spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/",
+        url: hostname + "/api/v1/"+this.model.name+"/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
@@ -656,7 +670,7 @@ pmPeriodicTasks.loadItem = function(item_id)
 {
     var thisObj = this;
     return spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/"+item_id+"/",
+        url: hostname + "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "GET",
         contentType:'application/json',
         data: "",

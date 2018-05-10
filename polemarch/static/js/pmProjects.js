@@ -25,6 +25,12 @@ pmProjects.filed.selectRepositoryType.getValue = function(pmObj, filed){
     return '';
 }
 
+pmProjects.filed.repoSyncOnRun = inheritance(filedsLib.filed.simpleText)
+pmProjects.filed.repoSyncOnRun.type = 'repo_sync_on_run'
+pmProjects.filed.repoSyncOnRun.getValue = function(pmObj, filed){
+    return '';
+}
+
 
 /**
  * Вызывается после загрузки информации об элементе но до его вставки в любые массивы.
@@ -154,7 +160,6 @@ pmProjects.model.page_list = {
             // separator
         },
         {
-            class:'btn btn-danger',
             function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+')); return false;'},
             title:'Delete',
             link:function(){ return '#'}
@@ -197,6 +202,20 @@ pmProjects.model.page_new = {
                 filed: new pmProjects.filed.selectRepositoryType(),
                 name:'repository',
             },
+            {
+                filed: new filedsLib.filed.boolean(),
+                title:'Update before execution',
+                name:'repo_sync_on_run',
+                help:'If true, project will be updated before execution.'
+            },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
+            },
         ]
     ],
     /**
@@ -222,6 +241,13 @@ pmProjects.model.page_new = {
             repo_type:$("#new_project_type").val(),
             //repo_password:$("#new_project_password").val(),
         }
+
+        if(data.repo_sync_on_run)
+        {
+            data.vars.repo_sync_on_run = true;
+        }
+
+        delete data.repo_sync_on_run;
 
         if(data.vars.repo_type == "GIT")
         {
@@ -375,6 +401,20 @@ pmProjects.model.page_item = {
                 name:'status',
                 title:'Status',
             },
+            {
+                filed: new pmProjects.filed.repoSyncOnRun(),
+                title:'Update before execution',
+                name:'repo_sync_on_run',
+                help:'If true, project will be updated before execution.'
+            }
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
+            },
         ]
     ],
     /**
@@ -394,6 +434,13 @@ pmProjects.model.page_item = {
             repo_type:$("#project_"+item_id+"_type").val(),
             //repo_password:$("#project_"+item_id+"_password").val(),
         }
+
+        if($("#filed_repo_sync_on_run").hasClass('selected'))
+        {
+            data.vars.repo_sync_on_run=true;
+        }
+
+        delete data.repo_sync_on_run;
 
         if(data.vars.repo_type=="GIT")
         {
@@ -447,8 +494,7 @@ pmProjects.startUpdateProjectItem = function(item_id)
             })
         }, 5000)
     }
-
-    if(thisObj.model.items[item_id].status != "WAIT_SYNC" || thisObj.model.items[item_id].status != "SYNC")
+    else
     {
         $("#branch_block").empty();
         $("#branch_block").html(pmProjects.renderBranchInput(item_id));
@@ -563,8 +609,29 @@ pmProjects.openRunPlaybookPage = function(holder, menuInfo, data)
  */
 pmProjects.syncRepo = function(item_id)
 {
+    for (var i in pmProjects.model.itemslist.results)
+    {
+        if (pmProjects.model.itemslist.results[i].id==item_id)
+        {
+            var status= pmProjects.model.itemslist.results[i].status;
+            var newStatus="WAIT_SYNC";
+            var projectTds=document.getElementsByClassName("item-"+item_id)[0].children;
+            for (var i=0; i<projectTds.length; i++)
+            {
+                if(projectTds[i].classList.contains("project-status"))
+                {
+                    projectTds[i].classList.remove("project-status-"+status);
+                    projectTds[i].classList.remove("just-old-val-project-status-"+status);
+                    projectTds[i].classList.add("project-status-"+newStatus);
+                    projectTds[i].classList.add("just-old-val-project-status-"+newStatus);
+                    projectTds[i].children[0].innerHTML=newStatus;
+                }
+            }
+        }
+    }
+
     return spajs.ajax.Call({
-        url: "/api/v1/projects/"+item_id+"/sync/",
+        url: hostname + "/api/v1/projects/"+item_id+"/sync/",
         type: "POST",
         contentType:'application/json',
         success: function(data)
@@ -587,7 +654,7 @@ pmProjects.syncRepoFromProjectPage = function(item_id)
     pmProjects.startUpdateProjectItem(item_id);
 
     return spajs.ajax.Call({
-        url: "/api/v1/projects/"+item_id+"/sync/",
+        url: hostname + "/api/v1/projects/"+item_id+"/sync/",
         type: "POST",
         contentType:'application/json',
         success: function(data)
@@ -609,7 +676,7 @@ pmProjects.syncRepoFromProjectPage = function(item_id)
 pmProjects.supportedRepos = function()
 {
     return spajs.ajax.Call({
-        url: "/api/v1/projects/supported-repos/",
+        url: hostname + "/api/v1/projects/supported-repos/",
         type: "GET",
         contentType:'application/json',
         success: function(data)

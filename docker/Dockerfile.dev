@@ -1,31 +1,10 @@
-FROM centos:7
+FROM onegreyonewhite/tox:centos
+
 MAINTAINER sergey.k@vstconsulting.net
 
-#Update and install required packages
-RUN yum check-update || true
-RUN yum install epel-release -y
-RUN yum -y install sudo python-pip python-devel ansible sshpass git \
-                   rpm-build make gcc openssl-devel libffi libffi-devel \
-                   libyaml-devel python-virtualenv
-
-# For future tests
-# RUN yum -y install https://centos7.iuscommunity.org/ius-release.rpm
-# RUN yum -y install python3{5,6}u{,-devel,-pip}
-
-
-# Install pip requires
-RUN pip2 install -U pip
-RUN pip2 install -U -I pip tox coverage rpmvenv editdistance pyyaml
-RUN pip2 install -U 'cython>=0.25.2'
-
-
 # Build and install rpm
-COPY requirements-doc.txt /tmp/requirements-doc.txt
-COPY requirements-git.txt /tmp/requirements-git.txt
-COPY requirements.txt /tmp/requirements.txt
-RUN pip2 install -U -r /tmp/requirements-doc.txt \
-                    -r /tmp/requirements-git.txt \
-                    -r /tmp/requirements.txt
+RUN curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh | tee /usr/bin/wait-for-it.sh && \
+    chmod +x /usr/bin/wait-for-it.sh
 RUN mkdir /tmp/polemarch
 ADD . /tmp/polemarch/
 RUN cd /tmp/polemarch && make rpm

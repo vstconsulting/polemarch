@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import sys
 import time
+import logging
 import traceback
 from subprocess import CalledProcessError, Popen, PIPE, STDOUT
 from threading import Thread
@@ -36,12 +37,15 @@ from . import exceptions as ex
 from . import __file__ as file
 
 
+logger = logging.getLogger('polemarch')
+
+
 def import_class(path):
     '''
     Get class from string-path
 
     :param path: -- string containing full python-path
-    :type path: str
+    :type path: str,unicode
     :return: -- return class or module in path
     :rtype: class, module, object
     '''
@@ -84,6 +88,40 @@ def get_render(name, data, trans='en'):
     return result
 
 
+class ClassPropertyDescriptor(object):
+
+    def __init__(self, fget, fset=None):
+        self.fget = fget
+        self.fset = fset
+
+    def __get__(self, obj, klass=None):
+        if obj is not None:
+            return self.fget.__get__(obj, obj)()
+        if klass is None:
+            klass = type(obj)  # noce
+        return self.fget.__get__(obj, klass)()
+
+    def __set__(self, obj, value):  # noce
+        if not self.fset:
+            raise AttributeError("can't set attribute")
+        if obj is not None:
+            return self.fset.__get__(obj, obj)(value)
+        type_ = type(obj)
+        return self.fset.__get__(obj, type_)(value)
+
+    def setter(self, func):  # noce
+        if not isinstance(func, (classmethod, staticmethod)):
+            func = classmethod(func)
+        self.fset = func
+        return self
+
+
+def classproperty(func):
+    if not isinstance(func, (classmethod, staticmethod)):
+        func = classmethod(func)
+    return ClassPropertyDescriptor(func)
+
+
 class CmdExecutor(object):
     # pylint: disable=no-member
     '''
@@ -93,7 +131,7 @@ class CmdExecutor(object):
     newlines = ['\n', '\r\n', '\r']
 
     def __init__(self):
-        self.output = None
+        self.output = ''
 
     def write_output(self, line):
         '''
@@ -102,7 +140,7 @@ class CmdExecutor(object):
         :return: None
         :rtype: None
         '''
-        self.output += line
+        self.output += str(line)
 
     def _enqueue_output(self, out, queue):
         line = out.readline()
@@ -239,7 +277,7 @@ class KVExchanger(object):
 
     try:
         cache = caches["locks"]
-    except InvalidCacheBackendError:
+    except InvalidCacheBackendError:  # nocv
         cache = caches["default"]
 
     def __init__(self, key, timeout=None):
@@ -364,7 +402,7 @@ class ModelHandlers(object):
     def __init__(self, tp, err_message=None):
         '''
         :param tp: -- type name for backends.Like name in dict.
-        :type tp: str
+        :type tp: str,unicode
         '''
         self.type = tp
         self.err_message = err_message
@@ -467,7 +505,10 @@ class raise_context(assertRaises):
     def execute(self, func, *args, **kwargs):
         with self.__class__(self._excepts, **self._kwargs):
             return func(*args, **kwargs)
-        return sys.exc_info()
+        type, value, traceback_obj = sys.exc_info()
+        if type is not None:  # nocv
+            logger.debug(traceback.format_exc())
+        return type, value, traceback_obj
 
     def __enter__(self):
         return self.execute

@@ -17,7 +17,7 @@
       {% block pmInlineScripts %}
       
         <script type="text/javascript">
-            var hostname = window.location.host;
+            var hostname = '{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}';
             var server_status_types = '{{server_status_types|safe}}';
 
             var polemarch_version = '{{polemarch_version}}';
@@ -60,28 +60,28 @@
         {% block bootstrap_theme %} 
         {% endblock %}  
 
-        <link rel="shortcut icon" href="{% static 'img/logo/favicon.ico' %}?v={{polemarch_version}}" />
-        <link href="{% static 'plugins/select2/select2.min.css' %}?v={{polemarch_version}}" rel="stylesheet" />
+        <link rel="shortcut icon" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'img/logo/favicon.ico' %}?v={{polemarch_version}}" />
+        <link href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'plugins/select2/select2.min.css' %}?v={{polemarch_version}}" rel="stylesheet" />
 
 
 
         <!-- Bootstrap 3.3.6 -->
-        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}?v={{polemarch_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/css/bootstrap.min.css' %}?v={{polemarch_version}}">
         <!-- Font Awesome -->
-        <link rel="stylesheet" href="{% static 'lte/css/font-awesome.min.css' %}?v={{polemarch_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/font-awesome.min.css' %}?v={{polemarch_version}}">
         <!-- Ionicons -->
-        <link rel="stylesheet" href="{% static 'lte/css/ionicons.min.css' %}?v={{polemarch_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/ionicons.min.css' %}?v={{polemarch_version}}">
         <!-- Theme style -->
-        <link rel="stylesheet" href="{% static 'lte/css/AdminLTE.min.css' %}?v={{polemarch_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/AdminLTE.min.css' %}?v={{polemarch_version}}">
         <!-- AdminLTE Skins. Choose a skin from the css/skins
              folder instead of downloading all of them to reduce the load. -->
-        <link rel="stylesheet" href="{% static 'lte/css/skins/_all-skins.min.css' %}?v={{polemarch_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/skins/_all-skins.min.css' %}?v={{polemarch_version}}">
          
-        <link rel="stylesheet" href="{% static 'js/libs/c3/c3.min.css' %}?v={{polemarch_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'js/libs/c3/c3.min.css' %}?v={{polemarch_version}}">
         
-        <link rel="stylesheet" href="{% static 'css/gui.css' %}?v={{polemarch_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'css/gui.css' %}?v={{polemarch_version}}">
 
-        <link rel="stylesheet" href="{% static 'css/ansi-colors.css' %}?v={{polemarch_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'css/ansi-colors.css' %}?v={{polemarch_version}}">
         
         {% block custom_style %}
         {% endblock %}
@@ -90,14 +90,14 @@
       {% block commonScripts %}
       
         <!-- jQuery 2.2.3 -->
-        <script src="{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{polemarch_version}}"></script>
-        <script src="{% static 'js/libs/notify.js' %}?v={{polemarch_version}}"></script>
+        <script src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{polemarch_version}}"></script>
+        <script src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'js/libs/notify.js' %}?v={{polemarch_version}}"></script>
         <!-- Bootstrap 3.3.6 -->
-        <script defer src="{% static 'bootstrap/js/bootstrap.min.js' %}?v={{polemarch_version}}"></script>
+        <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/js/bootstrap.min.js' %}?v={{polemarch_version}}"></script>
         <!-- FastClick -->
-        <script defer src="{% static 'plugins/fastclick/fastclick.min.js' %}?v={{polemarch_version}}"></script>
+        <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'plugins/fastclick/fastclick.min.js' %}?v={{polemarch_version}}"></script>
         <!-- AdminLTE App -->
-        <script defer src="{% static 'js/app.js' %}?v={{polemarch_version}}"></script>
+        <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'js/app.js' %}?v={{polemarch_version}}"></script>
         
       {% endblock %}
       

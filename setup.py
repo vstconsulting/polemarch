@@ -87,9 +87,13 @@ if 'develop' in sys.argv:
     ext_modules = []
 else:
     ext_modules = list(Extension(m, f) for m, f in extensions_dict.items())
+    ext_count = len(ext_modules)
+    nthreads = ext_count if ext_count < 10 else 10
 
     if use_cython and has_cython:
-        ext_modules = cythonize(ext_modules)
+        ext_modules = cythonize(
+            ext_modules, nthreads=nthreads, force=True
+        )
 
 
 class PostInstallCommand(install):
@@ -131,7 +135,7 @@ setup(
     include_package_data=True,
     scripts=['polemarchctl'],
     install_requires=[
-        "django>=1.11,<2.0",
+        "django>=1.11,<=2.0",
     ] + REQUIRES,
     dependency_links=[
     ] + REQUIRES_git,

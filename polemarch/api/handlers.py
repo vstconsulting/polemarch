@@ -4,6 +4,7 @@ import traceback
 from django.core.exceptions import PermissionDenied
 
 from django.core import exceptions as djexcs
+from django.http.response import Http404
 from rest_framework import exceptions, status, views
 from rest_framework.response import Response
 
@@ -25,17 +26,17 @@ def polemarch_exception_handler(exc, context):
         return Response({"detail": exc.msg},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
 
-    elif isinstance(exc, mexcs.NotApplicable):
-        return Response({"detail": exc.msg},
+    elif isinstance(exc, (mexcs.NotApplicable, Http404)):
+        return Response({"detail": getattr(exc, 'msg', str(exc))},
                         status=status.HTTP_404_NOT_FOUND)
 
     elif isinstance(exc, djexcs.ValidationError):
         if hasattr(exc, 'error_dict'):
             errors = dict(exc)
-        elif hasattr(exc, 'error_list'):
+        elif hasattr(exc, 'error_list'):  # nocv
             errors =  {'other_errors': list(exc)}
         else:
-            errors = {'other_errors': str(exc)}
+            errors = {'other_errors': str(exc)}  # nocv
         return Response({"detail": errors},
                         status=status.HTTP_400_BAD_REQUEST)
 

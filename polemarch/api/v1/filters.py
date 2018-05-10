@@ -1,5 +1,5 @@
 # pylint: disable=import-error
-from rest_framework import filters
+from django_filters import rest_framework as filters
 from django_filters import (CharFilter, NumberFilter, IsoDateTimeFilter)
 from django.contrib.auth.models import User
 from ...main import models

@@ -288,7 +288,7 @@ pmDashboard.getUserWidgetSettingsFromAPI = function()
     if(pmDashboard.checkWidgetSettings())
     {
         return spajs.ajax.Call({
-            url: "/api/v1/users/" + userId + "/settings/",
+            url: hostname + "/api/v1/users/" + userId + "/settings/",
             type: "GET",
             contentType: 'application/json',
             success: function (data)
@@ -332,7 +332,7 @@ pmDashboard.putUserWidgetSettingsToAPI = function()
         dataToPut[objName]=pmDashboard.getNewWidgetSettings(pmDashboard.model.widgets[0][i]);
     }
     return spajs.ajax.Call({
-        url: "/api/v1/users/" + userId + "/settings/",
+        url: hostname + "/api/v1/users/" + userId + "/settings/",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(dataToPut),
@@ -404,9 +404,9 @@ pmDashboard.setNewWidgetCollapseValue = function(thisButton)
 }
 
 /**
- *Функция, сохраняющая настройки виджетов, внесенные в модальном окне.
+ *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a.
  */
-pmDashboard.saveWigdetsOptionsFromModal = function()
+pmDashboard.saveWigdetsOptions = function()
 {
     var modalTable=document.getElementById("modal-table");
     var modalTableTr=modalTable.getElementsByTagName("tr");
@@ -440,9 +440,32 @@ pmDashboard.saveWigdetsOptionsFromModal = function()
         }
     }
     pmDashboard.putUserWidgetSettingsToAPI();
+}
 
-    return $.when(hidemodal(), pmDashboard.HideAfterSaveModalWindow()).done(function(){
-        return spajs.openURL("/");
+/**
+ *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a,
+ *из модального окна на странице Dashboard'a.
+ */
+pmDashboard.saveWigdetsOptionsFromModal = function()
+{
+    return $.when(pmDashboard.saveWigdetsOptions()).done(function(){
+        return $.when(hidemodal(), pmDashboard.HideAfterSaveModalWindow()).done(function(){
+            return spajs.openURL("/");
+        }).promise();
+    }).promise();
+
+}
+
+/**
+ *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a,
+ *из секции на странице профиля пользователя.
+ */
+pmDashboard.saveWigdetsOptionsFromProfile = function()
+{
+    return $.when(pmDashboard.saveWigdetsOptions()).done(function(){
+        return $.notify("Dashboard widget options were successfully saved", "success");
+    }).fail(function(){
+        return $.notify("Dashboard widget options were not saved", "error");
     }).promise();
 }
 
@@ -487,7 +510,7 @@ pmDashboard.loadStats=function()
     var limit=1;
     var thisObj = this;
     return spajs.ajax.Call({
-        url: "/api/v1/stats/?last="+pmDashboard.statsDataLastQuery,
+        url: hostname + "/api/v1/stats/?last="+pmDashboard.statsDataLastQuery,
         type: "GET",
         contentType: 'application/json',
         data: "limit=" + encodeURIComponent(limit)+"&rand="+Math.random(),
@@ -724,6 +747,7 @@ pmDashboard.updateData = function()
 
 pmDashboard.open  = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var thisObj = this
 
     return $.when(pmDashboard.getUserWidgetSettingsFromAPI()).always(function()

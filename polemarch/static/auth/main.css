@@ -101,7 +101,8 @@ h3 {
 
 .mobile-index {
     background-image: linear-gradient(7deg, #f6f8fb, #eaeef5);
-    height:100vh;
+    min-height:100vh;
+    height: auto;
     width: 100%;
     text-align: center;
     padding: 20px 25px;
@@ -131,7 +132,7 @@ h3 {
     /* height: 300px; */
     max-width: 750px;
     margin: 0 auto;
-    margin-top: 100px;
+    /*margin-top: 100px;*/
 }
 
 .mobile-index-body-inner h1 {
@@ -174,7 +175,7 @@ h3 {
     display: block;
     width: 100%;
     height: 58px;
-   /* border-radius: 29px;*/
+    /* border-radius: 29px;*/
     padding: 0 32px;
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 23px;
@@ -263,10 +264,18 @@ h1 {
 .logo-img {
     width:50%;
     margin-bottom:20px;
+    margin-top: 12vh;
 }
 
 @media (max-width: 480px) {
     .logo-img {
         width:80%;
+        margin-top: 8vh;
+    }
+}
+
+@media (max-width: 320px) {
+    .logo-img {
+        margin-top: 0vh;
     }
 }

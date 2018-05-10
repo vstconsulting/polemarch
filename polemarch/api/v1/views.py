@@ -246,6 +246,7 @@ class HookViewSet(base.ModelViewSetSet):
 
 class BulkViewSet(rest_views.APIView):
     serializer_classes = serializers
+    schema = None
 
     _op_types = {
         "get": "perform_get",
@@ -266,7 +267,7 @@ class BulkViewSet(rest_views.APIView):
 
     def get_serializer_class(self, item):
         if item not in self._allowed_types:
-            raise excepts.UnsupportedMediaType(media_type=item)
+            raise excepts.UnsupportedMediaType(media_type=item)  # nocv
         item = "One{}Serializer".format(item.title())
         return getattr(self.serializer_classes, item)
 
@@ -277,9 +278,11 @@ class BulkViewSet(rest_views.APIView):
     def get_object(self, item, pk, access="editable"):
         serializer_class = self.get_serializer_class(item)
         model = serializer_class.Meta.model
-        obj = model.objects.get(pk=pk)
-        if not getattr(obj, access + "_by")(self.request.user):
-            raise PermissionDenied("You don't have permission to this object.")
+        obj = model.objects.cleared().get(pk=pk)
+        if not getattr(obj.acl_handler, access + "_by")(self.request.user):
+            raise PermissionDenied(
+                "You don't have permission to this object."
+            )  # nocv
         return obj
 
     def perform_get(self, item, pk):

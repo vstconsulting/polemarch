@@ -25,19 +25,16 @@ from .base import ForeignKeyACL
 from ..utils import AnsibleArgumentsReference
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
-from .base import BModel, BQuerySet, models
+from .base import BModel, ACLModel, BQuerySet, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project
-from .acl import ACLModel, ACLHistoryQuerySet
+
 
 logger = logging.getLogger("polemarch")
 
 
 class TaskFilterQuerySet(BQuerySet):
     use_for_related_fields = True
-
-    def user_filter(self, user):
-        return self.filter(project__in=Project.objects.all().user_filter(user))
 
 
 # Block of real models
@@ -53,9 +50,6 @@ class Task(BModel):
 
     def __unicode__(self):
         return str(self.name)  # nocv
-
-    def viewable_by(self, user):
-        return self.project.viewable_by(user)
 
 
 class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
@@ -151,12 +145,6 @@ class PeriodicTask(AbstractModel):
             **self.vars
         )
 
-    def editable_by(self, user):
-        return self.project.editable_by(user)
-
-    def viewable_by(self, user):
-        return self.project.viewable_by(user)
-
 
 class Template(ACLModel):
     name          = models.CharField(max_length=512)
@@ -219,7 +207,10 @@ class Template(ACLModel):
         vars.update(option_vars)
         data.update(option_data)
         data.update(vars)
-        return serializer._execution(tp, data, user)
+        return serializer._execution(
+            tp, data, user,
+            template=self.id, template_option=option
+        )
 
     def _convert_to_data(self, value):
         if isinstance(value, (six.string_types, six.text_type)):
@@ -276,12 +267,6 @@ class Template(ACLModel):
         data['vars'] = self.keep_encrypted_data(data['vars'])
         self.template_data = json.dumps(data)
 
-    def __setattr__(self, key, value):
-        if key == "data":
-            self.set_data(value)
-        else:
-            super(Template, self).__setattr__(key, value)
-
     @property
     def data(self):
         return self.get_data()
@@ -313,7 +298,7 @@ class Template(ACLModel):
         return list(self.options.keys())
 
 
-class HistoryQuerySet(ACLHistoryQuerySet):
+class HistoryQuerySet(BQuerySet):
     use_for_related_fields = True
 
     def create(self, **kwargs):
@@ -370,7 +355,9 @@ class History(BModel):
     status         = models.CharField(max_length=50)
     initiator      = models.IntegerField(default=0)
     # Initiator type should be always as in urls for api
-    initiator_type = models.CharField(max_length=50, default="users")
+    initiator_type = models.CharField(max_length=50, default="project")
+    executor       = models.ForeignKey(User, blank=True, null=True, default=None)
+    json_options        = models.TextField(default="{}")
 
     def __init__(self, *args, **kwargs):
         execute_args = kwargs.pop('execute_args', None)
@@ -401,13 +388,19 @@ class History(BModel):
             initiator_type=self.initiator_type,
             initiator_id=self.initiator,
         )
-        if self.initiator_type == "users":
-            data["initiator"]['name'] = getattr(
-                self.initiator_object, 'username', None
-            )
-        elif self.initiator_type == "scheduler":
+        if self.initiator_type in ["template", "scheduler"]:
             data["initiator"]['name'] = self.initiator_object.name
         return data
+
+    def _get_seconds_from_time(self, value):
+        return int(value.total_seconds())
+
+    @property
+    def execution_time(self):
+        if self.stop_time is None:
+            return self._get_seconds_from_time(now() - self.start_time)
+        else:
+            return self._get_seconds_from_time(self.stop_time - self.start_time)
 
     @property
     def execute_args(self):
@@ -416,19 +409,32 @@ class History(BModel):
     @execute_args.setter
     def execute_args(self, value):
         if not isinstance(value, dict):
-            raise ValidationError(dict(args="Should be a list."))
+            raise ValidationError(dict(args="Should be a dict."))
         data = {k: v for k, v in value.items() if k not in ['group']}
         for key in data.keys():
             if key in PeriodicTask.HIDDEN_VARS:
                 data[key] = "[~~ENCRYPTED~~]"
         self.json_args = json.dumps(data)
 
+    # options
+    @property
+    def options(self):
+        return json.loads(self.json_options)
+
+    @options.setter
+    def options(self, value):
+        if not isinstance(value, dict):
+            raise ValidationError(dict(args="Should be a dict."))
+        self.json_options = json.dumps(value)
+
     @property
     def initiator_object(self):
-        if self.initiator_type == "users" and self.initiator:
-            return User.objects.get(id=self.initiator)
+        if self.initiator_type == "project" and self.initiator:
+            return self
         elif self.initiator_type == "scheduler" and self.initiator:
             return PeriodicTask.objects.get(id=self.initiator)
+        elif self.initiator_type == "template" and self.initiator:
+            return Template.objects.get(id=self.initiator)
         else:
             return None
 
@@ -474,25 +480,6 @@ class History(BModel):
     def write_line(self, value, number):  # nocv
         self.raw_history_line.create(
             history=self, line_number=number, line=value
-        )
-
-    def editable_by(self, user):
-        if self.inventory is None:
-            return self.project.editable_by(user)
-        return self.inventory.editable_by(user)
-
-    def _inventory_editable(self, user):
-        return self.inventory and self.inventory.editable_by(user)
-
-    def _inventory_viewable(self, user):
-        return not self.inventory or self.inventory.viewable_by(user)
-
-    def viewable_by(self, user):
-        return (
-            self.project.editable_by(user) or
-            self._inventory_editable(user) or
-            (self.initiator == user.id and self.initiator_type == "users") or
-            (self.project.viewable_by(user) & self._inventory_viewable(user))
         )
 
 

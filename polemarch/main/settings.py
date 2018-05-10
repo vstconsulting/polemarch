@@ -100,6 +100,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'polemarch.main.middleware.PolemarchHeadersMiddleware',
 ]
 # Fix for django 1.8-9
 MIDDLEWARE_CLASSES = MIDDLEWARE
@@ -140,7 +141,7 @@ __DB_OPTIONS = { }
 try:
     int_values_types = ["timeout", "connect_timeout", "read_timeout", "write_timeout"]
     for k, v in config.items('database.options'):
-        if k in int_values_types:
+        if k in int_values_types: #nocv
             __DB_OPTIONS[k] = int(float(v))
             continue
         __DB_OPTIONS[k] = v.format(**__kwargs)  # nocv
@@ -215,7 +216,7 @@ REST_FRAMEWORK = {
     ),
     'EXCEPTION_HANDLER': 'polemarch.api.handlers.polemarch_exception_handler',
     'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework.filters.DjangoFilterBackend',
+        'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
@@ -391,15 +392,8 @@ TASKS_HANDLERS = {
 }
 
 ACL = {
-    "DEFAULT_ACL_CLASSES": {
-        "ACLPermissionAbstract": "polemarch.main.models.acl_models.ACLPermissionAbstract",
-        "ACLModel": "polemarch.main.models.acl_models.ACLModel",
-        "ACLPermissionSubclass": "polemarch.main.models.acl_models.ACLPermissionSubclass",
-        "ACLGroupSubclass": "polemarch.main.models.acl_models.ACLGroupSubclass",
-        "ACLQuerySet": "polemarch.main.models.acl_models.ACLQuerySet",
-        "ACLInventoriesQuerySet": "django.db.models.query.QuerySet",
-        "ACLHistoryQuerySet": "polemarch.main.models.acl_models.ACLHistoryQuerySet",
-        "ACLUserGroupsQuerySet": "polemarch.main.models.acl_models.ACLQuerySet",
+    "MODEL_HANDLERS": {
+        "Default": "polemarch.main.acl.handlers.Default"
     }
 }
 

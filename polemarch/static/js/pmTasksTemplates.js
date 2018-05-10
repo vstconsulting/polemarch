@@ -73,6 +73,7 @@ pmTasksTemplates.filed.selectProjectInventoryAndPlaybookForOption.render = funct
 
 pmTasksTemplates.newAutoCompletePlaybook = function()
 {
+    var thisObj=this;
     return new autoComplete({
             selector: '#playbook-autocomplete',
             minChars: 0,
@@ -94,9 +95,9 @@ pmTasksTemplates.newAutoCompletePlaybook = function()
                 term = term.toLowerCase();
 
                 var matches = []
-                for(var i in pmTasks.model.items)
+                for(var i in pmTasks.model.itemslist.results)
                 {
-                    var val = pmTasks.model.items[i]
+                    var val=pmTasks.model.itemslist.results[i];
                     if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
                     {
                         matches.push(val)
@@ -161,7 +162,6 @@ pmTasksTemplates.model.page_list = {
     ],
     actions:[
         {
-            class:'btn btn-warning',
             function:function(item, option_name){ return "spajs.showLoader(pmTemplates.model.kindObjects['"+item.kind+"'].execute("+item.id+" , '"+option_name +"')); return false;"},
             title:'Execute',
             link:function(){ return '#'}
@@ -196,7 +196,13 @@ pmTasksTemplates.model.page_item = {
             link:function(){ return '#'},
             help:'Create new option'
         },
-
+        {
+            class:'btn btn-info',
+            function:function(){ return 'return spajs.openURL(this.href);'},
+            title:'History',
+            link:function(item_id){ return polemarch.opt.host +'/?template/'+this.model.kind+'/'+ item_id + '/history'},
+            help:'Template execution history'
+        },
         {
             class:'btn btn-default copy-btn',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
@@ -238,10 +244,19 @@ pmTasksTemplates.model.page_item = {
                 fast_validator:function(value){ return value != '' && value}
             },
             // @todo дорефакторить поля ввода
-        ],[
+        ],
+        [
             {
                 filed: new pmTasksTemplates.filed.selectProjectInventoryAndPlaybook(),
                 name:'project',
+            },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
             },
         ]
     ],
@@ -270,7 +285,7 @@ pmTasksTemplates.model.page_item_new_option = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(item_id){ return 'spajs.showLoader(pmTasksTemplates.saveOption('+item_id+'));  return false;'},
+            function:function(item_id){ return 'spajs.showLoader(pmTasksTemplates.saveNewOption('+item_id+'));  return false;'},
             title:'Create',
             link:function(){ return '#'},
         }
@@ -297,7 +312,8 @@ pmTasksTemplates.model.page_item_new_option = {
                 value:''
             }
             // @todo дорефакторить поля ввода
-        ],[
+        ],
+        [
             {
                 filed: new pmTasksTemplates.filed.selectProjectInventoryAndPlaybookForNewOption(),
                 name:'project',
@@ -388,12 +404,40 @@ pmTasksTemplates.saveAndExecute = function(item_id)
     return def.promise()
 }
 
-
+/**
+ *Функция открывает страницу для создания новой опции.
+ */
 pmTasksTemplates.setNewOption = function(item_id)
 {
     return spajs.openURL(window.location.href+"/new-option");
 }
 
+/**
+ *Функция сохраняет новую опцию.
+ */
+pmTasksTemplates.saveNewOption = function(item_id)
+{
+    var def = new $.Deferred();
+    var optionName=$('#filed_option_name').val();
+    optionName=optionName.trim();
+    optionName=optionName.replace( /\s/g, "-" );
+    var templateOptionList=this.model.items[item_id].options_list;
+    for (var i=0; i<templateOptionList.length; i++)
+    {
+        if(templateOptionList[i]==optionName)
+        {
+            $.notify("Option with this name already exists", "error");
+            def.reject({text:"Option with this name already exists"});
+            return def.promise();
+        }
+    }
+
+    return pmTasksTemplates.saveOption(item_id);
+}
+
+/**
+ *Функция сохраняет изменения в уже существующей опции.
+ */
 pmTasksTemplates.saveOption = function(item_id)
 {
     var optionName=$('#filed_option_name').val();
@@ -441,7 +485,6 @@ pmTasksTemplates.saveOption = function(item_id)
         dataToAdd['vars']=optionData['vars'];
     }
 
-
     if($.isEmptyObject(dataToAdd))
     {
         $.notify("Option is absolutely the same as the template", "error");
@@ -456,10 +499,16 @@ pmTasksTemplates.saveOption = function(item_id)
         {
             delete dataToAdd1.options[optionName];
         }
+        else
+        {
+            var linkPartArr=window.location.href.split("/");
+            var previousNameOfOption=linkPartArr[linkPartArr.length-1];
+            delete dataToAdd1.options[previousNameOfOption];
+        }
         dataToAdd1.options[optionName]=dataToAdd;
         var thisObj = this;
         spajs.ajax.Call({
-            url: "/api/v1/" + this.model.name + "/" + item_id + "/",
+            url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/",
             type: "PATCH",
             contentType: 'application/json',
             data: JSON.stringify(dataToAdd1),
@@ -481,6 +530,10 @@ pmTasksTemplates.saveOption = function(item_id)
     return def.promise();
 }
 
+/**
+ *Функция сохраняет изменения в уже существующей опции
+ *и запускает выполнение шаблона с этой опцией.
+ */
 pmTasksTemplates.saveAndExecuteOption = function(item_id)
 {
     var def = new $.Deferred();
@@ -497,6 +550,9 @@ pmTasksTemplates.saveAndExecuteOption = function(item_id)
     return def.promise();
 }
 
+/**
+ *Функция удаляет опцию.
+ */
 pmTasksTemplates.removeOption = function(item_id)
 {
     var def = new $.Deferred();
@@ -506,7 +562,7 @@ pmTasksTemplates.removeOption = function(item_id)
     dataToAdd1['options']=pmTasksTemplates.model.items[item_id].options;
     var thisObj = this;
     spajs.ajax.Call({
-        url: "/api/v1/" + this.model.name + "/" + item_id + "/",
+        url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/",
         type: "PATCH",
         contentType: 'application/json',
         data: JSON.stringify(dataToAdd1),
@@ -528,6 +584,78 @@ pmTasksTemplates.removeOption = function(item_id)
     return def.promise();
 }
 
+/**
+ *Функция добавляет на страницу секцию для удаления/добавления опций на страницу шаблона.
+ */
+pmTasksTemplates.showExistingOptionsToEdit = function (item_id) {
+    if(!item_id)
+    {
+        throw "Error in pmTasksTemplates.showExistingOptionsToEdit with item_id = `" + item_id + "`"
+    }
+
+    $("#add_existing_options_to_task_template").remove();
+    $(".content").appendTpl(spajs.just.render('add_existing_options_to_task_template', {item_id:item_id}))
+    var scroll_el = "#add_existing_options_to_task_template";
+    if ($(scroll_el).length != 0)  {
+        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+    }
+    $("#polemarch-model-items-select").select2({ width: '100%' });
+
+}
+
+/**
+ *Функция сохраняет изменения внесенные в секции для удаления/добавления опций на странице шаблона.
+ */
+pmTasksTemplates.setOptionList = function(item_id, option_list)
+{
+    var thisObj=this;
+    if(!item_id)
+    {
+        throw "Error in pmTasksTemplates.setOptionList with item_id = `" + item_id + "`"
+    }
+
+    if(!option_list)
+    {
+       var options={};
+    }
+    else
+    {
+        var options=pmTasksTemplates.model.items[item_id].options;
+        for(var i in options)
+        {
+            var bool=false;
+            for(var j in option_list)
+            {
+                if(i==option_list[j])
+                {
+                    bool=true;
+                }
+            }
+            if(bool==false)
+            {
+                delete options[i];
+            }
+        }
+    }
+    return spajs.ajax.Call({
+        url: "/api/v1/templates/"+item_id+"/",
+        type: "PATCH",
+        contentType:'application/json',
+        data:JSON.stringify({options:options}),
+        success: function(data)
+        {
+           spajs.openURL(window.location.href);
+        },
+        error:function(e)
+        {
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+
+/**
+ *Функция отрисовывает страницу для создания новой опции.
+ */
 pmTasksTemplates.showNewOptionPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
@@ -553,6 +681,9 @@ pmTasksTemplates.showNewOptionPage = function(holder, menuInfo, data)
     return def.promise()
 }
 
+/**
+ *Функция отрисовывает страницу для просмотра/редактирования уже существующей опции.
+ */
 pmTasksTemplates.showOptionPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
@@ -633,6 +764,7 @@ pmTasksTemplates.showModuleWidget = function(holder)
 
 pmTasksTemplates.showItem = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var def = new $.Deferred();
     var thisObj = this;
     var item_id = data.reg[1]
@@ -647,6 +779,7 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
         }
 
         $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
+        pmTasksTemplates.selectProject($("#projects-autocomplete").val());
         def.resolve();
     }).fail(function(e)
     {
@@ -665,6 +798,7 @@ pmTasksTemplates.selectProject = function(project_id){
 
 pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var def = new $.Deferred();
     var thisObj = this;
     $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
@@ -685,7 +819,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
                 var style = "";
                 if(thisObj.model.selectedProject != item.project)
                 {
-                    style = "style='disolay:none'"
+                    style = "style='display:none'"
                 }
                 return '<div class="autocomplete-suggestion playbook-project-' + item.project + ' " '+style+' data-value="' + item.playbook + '" >' + item.playbook + '</div>';
             },
@@ -700,9 +834,9 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
                 term = term.toLowerCase();
 
                 var matches = []
-                for(var i in pmTasks.model.items)
+                for(var i in pmTasks.model.itemslist.results)
                 {
-                    var val = pmTasks.model.items[i]
+                    var val=pmTasks.model.itemslist.results[i];
                     if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
                     {
                         matches.push(val)
@@ -714,6 +848,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
                 }
             }
         });
+        pmTasksTemplates.selectProject($("#projects-autocomplete").val());
 
         def.resolve();
     }).fail(function(e)
@@ -753,9 +888,11 @@ pmTasksTemplates.addItem = function()
         return def.promise();
     }
 
+    data.notes=$("#filed_notes").val();
+
     var thisObj = this;
     spajs.ajax.Call({
-        url: "/api/v1/templates/",
+        url: hostname + "/api/v1/templates/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(data),

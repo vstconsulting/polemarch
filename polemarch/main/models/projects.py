@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 import os
 import logging
-from collections import OrderedDict
-
 import six
 from django.conf import settings
 from django.utils import timezone
@@ -12,11 +10,11 @@ from django.core.validators import ValidationError
 
 from .. import utils
 from . import hosts as hosts_models
-from .vars import AbstractModel, AbstractVarsQuerySet, BManager, models
+from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
 from ..utils import ModelHandlers
 from .base import ManyToManyFieldACL
-from ..tasks import SendHook
+from .hooks import Hook
 
 
 logger = logging.getLogger("polemarch")
@@ -24,6 +22,7 @@ PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
 
 
 class ProjectQuerySet(AbstractVarsQuerySet):
+    use_for_related_fields = True
     handlers = ModelHandlers("REPO_BACKENDS", "'repo_type' variable needed!")
     task_handlers = ModelHandlers("TASKS_HANDLERS", "Unknown execution type!")
 
@@ -34,7 +33,7 @@ class ProjectQuerySet(AbstractVarsQuerySet):
 
 
 class Project(AbstractModel):
-    objects       = BManager.from_queryset(ProjectQuerySet)()
+    objects       = ProjectQuerySet.as_manager()
     handlers      = objects._queryset_class.handlers
     task_handlers = objects._queryset_class.task_handlers
     repository    = models.CharField(max_length=2*1024)
@@ -49,9 +48,24 @@ class Project(AbstractModel):
     class Meta:
         default_related_name = "projects"
 
+    class SyncError(Exception):
+        pass
+
     HIDDEN_VARS = [
         'repo_password',
     ]
+
+    BOOLEAN_VARS = [
+        'repo_sync_on_run'
+    ]
+
+    EXTRA_OPTIONS = {
+        'initiator': 0,
+        'initiator_type': 'project',
+        'executor': None,
+        'save_result': True,
+        'template_option': None
+    }
 
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
@@ -76,20 +90,25 @@ class Project(AbstractModel):
         return self.variables.get(key="repo_type").value
 
     def _get_history(self, kind, mod_name, inventory, **extra):
-        initiator = extra.pop("initiator", 0)
-        initiator_type = extra.pop("initiator_type", "users")
-        save_result = extra.pop("save_result", True)
+        extra_options = dict()
+        for option in self.EXTRA_OPTIONS:
+            extra_options[option] = extra.pop(option, self.EXTRA_OPTIONS[option])
+        options = dict()
+        if extra_options['template_option'] is not None:
+            options['template_option'] = extra_options['template_option']
         command = kind.lower()
         ansible_args = dict(extra)
         utils.AnsibleArgumentsReference().validate_args(command, ansible_args)
-        if not save_result:
+        if not extra_options['save_result']:
             return None, extra
         from .tasks import History
         history_kwargs = dict(
             mode=mod_name, start_time=timezone.now(),
             inventory=inventory, project=self,
             kind=kind, raw_stdout="", execute_args=extra,
-            initiator=initiator, initiator_type=initiator_type,
+            initiator=extra_options['initiator'],
+            initiator_type=extra_options['initiator_type'],
+            executor=extra_options['executor'], hidden=self.hidden, options=options
         )
         if isinstance(inventory, (six.string_types, six.text_type)):
             history_kwargs['inventory'] = None
@@ -115,21 +134,16 @@ class Project(AbstractModel):
         kwargs.update(extra)
         return kwargs
 
-    def _send_hook(self, when, kind, kwargs):
-        msg = OrderedDict(execution_type=kind, when=when)
-        inventory = kwargs['inventory']
-        if isinstance(inventory, hosts_models.Inventory):
-            inventory = inventory.get_hook_data(when)
-        msg['target'] = OrderedDict(
-            name=kwargs['target'],
-            inventory=inventory,
-            project=kwargs['project'].get_hook_data(when)
-        )
-        if kwargs['history'] is not None:
-            msg['history'] = kwargs['history'].get_hook_data(when)
-        else:
-            msg['history'] = None
-        SendHook.delay(when, msg)
+    def hook(self, when, msg):
+        Hook.objects.execute(when, msg)
+
+    def sync_on_execution_handler(self, history):
+        if not self.vars.get('repo_sync_on_run', False):
+            return
+        try:
+            self.sync()
+        except Exception as exc:
+            raise self.SyncError("ERROR on Sync operation: " + str(exc))
 
     def execute(self, kind, *args, **extra):
         kind = kind.upper()
@@ -139,9 +153,7 @@ class Project(AbstractModel):
         kwargs = self._prepare_kw(kind, *args, **extra)
         history = kwargs['history']
         if sync:
-            self._send_hook('on_execution', kind, kwargs)
             task_class(**kwargs)
-            self._send_hook('after_execution', kind, kwargs)
         else:
             task_class.delay(**kwargs)
         return history.id if history is not None else history

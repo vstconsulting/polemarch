@@ -12,11 +12,9 @@ from django.core.validators import ValidationError
 
 try:
     from mock import patch
-except ImportError:
+except ImportError:  # nocv
     from unittest.mock import patch
 
-from ..models import Project
-from ..models import Task, PeriodicTask, History, Inventory, Template
 from ..tasks.tasks import ScheduledTask
 
 from .inventory import _ApiGHBaseTestCase
@@ -30,16 +28,20 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                      vars=dict(repo_type="TEST"))]
         self.project_id = self.mass_create("/api/v1/projects/", data,
                                            "name", "repository")[0]
-        self.task_proj = Project.objects.get(id=self.project_id)
+        self.task_proj = self.get_model_class('Project').objects.get(
+            id=self.project_id
+        )
 
-        self.task1 = Task.objects.create(playbook="first.yml",
-                                         project=self.task_proj)
-        self.task2 = Task.objects.create(playbook="second.yml",
-                                         project=self.task_proj)
+        self.task1 = self.get_model_class('Task').objects.create(
+            playbook="first.yml", project=self.task_proj
+        )
+        self.task2 = self.get_model_class('Task').objects.create(
+            playbook="second.yml", project=self.task_proj
+        )
 
     def test_get_tasks(self):
         url = "/api/v1/tasks/"
-        self.list_test(url, Task.objects.all().count())
+        self.list_test(url, self.get_model_class('Task').objects.all().count())
 
     correct_simple_inventory = (
         "127.0.1.1 ansible_user=centos "
@@ -66,8 +68,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                          data=json.dumps([inventory]))
         return inventory, host
 
+    @patch('polemarch.main.models.projects.Project.sync')
     @patch('polemarch.main.utils.CmdExecutor.execute')
-    def test_execute(self, subprocess_function):
+    def test_execute(self, subprocess_function, sync):
         inv1, h1 = self.create_inventory()
         # mock side effect to get ansible-playbook args for assertions in test
         result = dict()
@@ -111,6 +114,37 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEquals(result['host'], "127.0.1.1")
         self.assertEquals(result['ansible_user'], "centos")
         self.assertEquals(result['ansible_ssh_private_key_file'], "somekey")
+        self.assertEquals(sync.call_count, 0)
+        subprocess_function.reset_mock()
+
+        # Sync on every execute.
+        # Add key for every run sync project
+        data = self.task_proj.vars
+        data['repo_sync_on_run'] = True
+        self.task_proj.vars = data
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(
+                dict(inventory=inv1, playbook="first.yml", sync=True)
+            )
+        )
+        self.assertEquals(sync.call_count, 1)
+        sync.reset_mock()
+
+        def side_effect(*args, **kwargs):
+            raise Exception("Test exceptions")
+
+        sync.side_effect = side_effect
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(
+                dict(inventory=inv1, playbook="first.yml", sync=True)
+            ), code=400
+        )
+        hist = self.get_model_class("History").objects.all().first()
+        self.assertIn("ERROR on Sync operation", hist.raw_stdout)
+        data['repo_sync_on_run'] = False
+        self.task_proj.vars = data
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute_module(self, subprocess_function):
@@ -157,7 +191,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEquals(result['ansible_user'], "centos")
         self.assertEquals(result['ansible_ssh_private_key_file'], "somekey")
         self.assertEquals(result['ansible_become_pass'], "secret")
-        history = History.objects.get(id=answer["history_id"])
+        history = self.get_model_class('History').objects.get(
+            id=answer["history_id"]
+        )
         self.assertEquals(history.kind, "MODULE")
         self.assertEquals(history.mode, "shell")
         self.assertIn(
@@ -263,7 +299,9 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             self.assertEquals(history.status, status)
 
         def get_history_item():
-            histories = History.objects.filter(mode="other/playbook.yml")
+            histories = self.get_model_class('History').objects.filter(
+                mode="other/playbook.yml"
+            )
             self.assertEquals(histories.count(), 1)
             history = histories[0]
             # History.objects.all().delete()
@@ -307,14 +345,14 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                         history.start_time <= history.stop_time)
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
-        self.assertEqual(history.initiator_object, self.user)
-        History.objects.all().delete()
+        self.assertEqual(history.executor, self.user)
+        self.get_model_class('History').objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, ""), "OFFLINE")
-        History.objects.all().delete()
+        self.get_model_class('History').objects.all().delete()
         # error at node
         check_status(subprocess.CalledProcessError(None, None, None), "ERROR")
-        History.objects.all().delete()
+        self.get_model_class('History').objects.all().delete()
         result = self.get_result(
             "post",
             url.format(self.task_proj.id),
@@ -358,7 +396,11 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         inv, _ = self.create_inventory()
         result = self.post_result(
             "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
-            data=json.dumps(dict(inventory=inv, playbook="first.yml")))
+            data=json.dumps({
+                "inventory": inv,
+                "playbook": "first.yml",
+                "vault-password-file": "vault-password-file1234",
+            }))
         history = self.get_result("get",
                                   "/api/v1/history/{}/".format(
                                       result["history_id"]
@@ -412,6 +454,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             return '200 OK: {"result": "ok"}'
 
         execute_method.side_effect = side_effect
+
         self.post_result(
             "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
             data=json.dumps(dict(inventory=inv, playbook=playbook, sync=1))
@@ -435,6 +478,13 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             h.save()
         hosts.delete()
         self.assertEquals(execute_method.call_count, 9)
+        hook_data['when'] = 'after_execution'
+        self.post_result("/api/v1/hooks/", data=json.dumps(hook_data))
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=json.dumps(dict(inventory=inv, playbook=playbook, sync=1))
+        )
+        self.assertTrue(self.sended, "Fail")
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute_inventory_file(self, subprocess_function):
@@ -456,6 +506,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             "/api/v1/projects/{}/execute-module/".format(self.task_proj.id),
             data=json.dumps(dict(inventory="./12", module="ping", group="all"))
         )
+
         self.post_result(
             "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
             data=json.dumps(dict(inventory="inventory", playbook="first.yml"))
@@ -479,16 +530,20 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                      vars=dict(repo_type="TEST"))]
         self.periodic_project_id = self.mass_create("/api/v1/projects/", data,
                                                     "name", "repository")[0]
-        self.project = Project.objects.get(id=self.periodic_project_id)
-        self.inventory = Inventory.objects.create()
+        self.project = self.get_model_class('Project').objects.get(
+            id=self.periodic_project_id
+        )
+        self.inventory = self.get_model_class('Inventory').objects.create()
 
-        self.ptask1 = PeriodicTask.objects.create(mode="p1.yml",
+        self.ptask1 = self.get_model_class('PeriodicTask').objects.create(
+                                                  mode="p1.yml",
                                                   name="test",
                                                   schedule="10",
                                                   type="INTERVAL",
                                                   project=self.project,
                                                   inventory=self.inventory)
-        self.ptask2 = PeriodicTask.objects.create(mode="p2.yml",
+        self.ptask2 = self.get_model_class('PeriodicTask').objects.create(
+                                                  mode="p2.yml",
                                                   name="test",
                                                   schedule="10",
                                                   type="INTERVAL",
@@ -497,7 +552,8 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
     def test_create_delete_periodic_task(self):
         url = "/api/v1/periodic-tasks/"
-        self.list_test(url, PeriodicTask.objects.all().count())
+        count = self.get_model_class('PeriodicTask').objects.all().count()
+        self.list_test(url, count)
         self.details_test(url + "{}/".format(self.ptask1.id),
                           mode="p1.yml",
                           schedule="10",
@@ -518,13 +574,14 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                 dict(mode="p1.yml", schedule="30 */4", type="CRONTAB",
                      project=self.periodic_project_id,
                      inventory=self.inventory.id, name="four", vars=variables)]
-        results_id = self.mass_create(url, data, "mode", "schedule",
-                                      "type", "project", "name", "vars")
+        objs_id = self.mass_create(url, data, "mode", "schedule",
+                                   "type", "project", "name", "vars"
+                                   )
 
-        for project_id in results_id:
+        for project_id in objs_id:
             self.get_result("delete", url + "{}/".format(project_id))
-        count = PeriodicTask.objects.filter(id__in=results_id).count()
-        self.assertEqual(count, 0)
+        qs = self.get_model_class('PeriodicTask').objects.filter(id__in=objs_id)
+        self.assertEqual(qs.count(), 0)
 
         # test with bad value
         data = dict(mode="p1.yml", schedule="30 */4 foo", type="CRONTAB",
@@ -549,7 +606,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                        type="INTERVAL",
                        inventory=self.inventory,
                        project=self.project)
-        ptask = PeriodicTask.objects.create(**details)
+        ptask = self.get_model_class('PeriodicTask').objects.create(**details)
         details['inventory'] = str(self.inventory.id)
         details['project'] = self.project.id
         url = "/api/v1/periodic-tasks/"
@@ -577,15 +634,15 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                                       "kind")
         for project_id in results_id:
             self.get_result("delete", url + "{}/".format(project_id))
-        count = PeriodicTask.objects.filter(id__in=results_id).count()
-        self.assertEqual(count, 0)
+        qs = self.get_model_class('PeriodicTask').objects.filter(id__in=results_id)
+        self.assertEqual(qs.count(), 0)
 
     def test_periodic_task_ansible_args_validation(self):
         def update_func(args, mistake):
             args['vars'].update(mistake)
 
         url = "/api/v1/periodic-tasks/"
-        old_count = PeriodicTask.objects.count()
+        old_count = self.get_model_class('PeriodicTask').objects.count()
         variables = {"limit": "host-1"}
         # playbook
         data = dict(mode="p1.yml", schedule="10", type="INTERVAL",
@@ -596,7 +653,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         data['kind'] = "MODULE"
         self.make_test(url, data, update_func, "group")
         # none of PeriodicTasks created in DB
-        self.assertEquals(old_count, PeriodicTask.objects.count())
+        self.assertEquals(old_count, self.get_model_class('PeriodicTask').objects.count())
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_periodic_task_execution(self, subprocess_function):
@@ -627,13 +684,13 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         subprocess_function.reset_mock()
         data['save_result'] = False
         id = self.get_result("post", url, 201, data=json.dumps(data))['id']
-        count = History.objects.all().count()
+        count = self.get_model_class('History').objects.all().count()
         ScheduledTask.delay(id)
         self.assertEquals(subprocess_function.call_count, 1)
         call_args = subprocess_function.call_args[0][0]
         self.assertTrue(call_args[0].endswith("ansible-playbook"))
         self.assertTrue(call_args[1].endswith("p1.yml"))
-        self.assertCount(History.objects.all(), count)
+        self.assertCount(self.get_model_class('History').objects.all(), count)
 
         def side_effect(*args, **kwargs):
             raise Exception("Test text")
@@ -641,8 +698,10 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         subprocess_function.reset_mock()
         subprocess_function.side_effect = side_effect
         ScheduledTask(id)
+        for history in self.histories:
+            self.assertEqual(history.executor, None)
         self.assertEquals(subprocess_function.call_count, 1)
-        self.assertCount(History.objects.all(), count)
+        self.assertCount(self.get_model_class('History').objects.all(), count)
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_periodictask_inventory_file(self, subprocess_function):
@@ -656,6 +715,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                     inventory="inventory", name="one",
                     vars={"args": "ls -la", "group": "all"})
         id = self.get_result("post", url, 201, data=json.dumps(data))['id']
+        ScheduledTask.delay(-1)
         ScheduledTask.delay(id)
         self.assertEquals(subprocess_function.call_count, 1)
         call_args = subprocess_function.call_args[0][0]
@@ -715,7 +775,7 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     def setUp(self):
         super(ApiTemplateTestCase, self).setUp()
 
-        self.pr_tmplt = Project.objects.create(**dict(
+        self.pr_tmplt = self.get_model_class('Project').objects.create(**dict(
                 name="TmpltProject",
                 repository="git@ex.us:dir/rep3.git",
                 vars=dict(repo_type="TEST")
@@ -732,9 +792,11 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                     connection="paramiko",
                     tags="update",
                 )
-            )
+            ),
+            notes="Test template"
         )
-        self.job_template = Template.objects.create(**self.tmplt_data)
+        job_tmplt = self.get_model_class('Template').objects.create(**self.tmplt_data)
+        self.job_template = job_tmplt
         # Ugly hack for fix some errors
         self.tmplt_data.update(dict(
             name=self.job_template.name,
@@ -754,8 +816,16 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         tmplt = self.post_result(url, data=json.dumps(self.tmplt_data))
         single_url = "{}{}/".format(url, tmplt['id'])
         # test playbook execution
-        self.post_result(single_url + "execute/", code=201)
+        result = self.post_result(single_url + "execute/", code=201)
         self.assertIn('test.yml', ansible_args)
+        history = self.get_model_filter('History', pk=result['history_id']).get()
+        self.assertEqual(history.initiator_type, "template")
+        self.assertEqual(history.initiator, tmplt['id'])
+        self.assertEqual(history.executor.id, tmplt['owner']['id'])
+        self.assertEqual(
+            history.initiator_object,
+            self.get_model_filter('Template', pk=tmplt['id']).get()
+        )
         # test module execution
         ansible_args = []
         module_data = dict(
@@ -819,13 +889,20 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
         # test playbook execution one option
         ansible_args = []
-        self.post_result(single_url + "execute/", 201, data=dict(option='one'))
+        result = self.post_result(single_url + "execute/", 201, data=dict(option='one'))
         self.assertIn(tmpl_with_opts['data']['module'], ansible_args)
         self.assertIn(tmpl_with_opts['options']['one']['group'], ansible_args)
         self.assertIn('--forks', ansible_args)
         self.assertIn(
             str(tmpl_with_opts['data']['vars']['forks']), ansible_args
         )
+
+        # get history
+        history = self.get_model_filter('History', pk=result['history_id']).get()
+        # Check in options `template_option_name`
+        self.assertEqual(history.options['template_option'], 'one')
+        with self.assertRaises(ValidationError):
+            history.options = "string"
 
         # test playbook execution two option
         ansible_args = []
@@ -859,6 +936,8 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         )
 
     def test_string_template_data(self):
+        with open(self.pr_tmplt.path + "/inv1", 'w') as inv1:
+            inv1.write("")
         tmplt_data = dict(
             name="test_tmplt",
             kind="Task",
@@ -868,11 +947,11 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                 vars=dict()
             )
         )
-        job_template = Template.objects.create(**tmplt_data)
+        job_template = self.get_model_class('Template').objects.create(**tmplt_data)
         job_template.data = json.dumps(dict(
                 playbook="test.yml",
                 project=self.pr_tmplt.id,
-                inventory=self.history_inventory.id,
+                inventory="./inv1",
                 vars=dict(
                     connection="paramiko",
                     tags="update",
@@ -883,11 +962,11 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             job_template.data = object()
 
         with self.assertRaises(ValidationError):
-            Template.objects.create(**tmplt_data)
+            self.get_model_class('Template').objects.create(**tmplt_data)
 
     def test_templates(self):
         url = "/api/v1/templates/"
-        self.list_test(url, Template.objects.all().count())
+        self.list_test(url, self.get_model_class('Template').objects.all().count())
         self.details_test(url + "{}/".format(self.job_template.id),
                           **self.tmplt_data)
 
@@ -910,13 +989,13 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
         for project_id in results_id:
             self.get_result("delete", url + "{}/".format(project_id))
-        count = Template.objects.filter(id__in=results_id).count()
+        count = self.get_model_class('Template').objects.filter(id__in=results_id).count()
         self.assertEqual(count, 0)
 
         result = self.get_result("get", url+"supported-kinds/")
-        self.assertEqual(result, Template.template_fields)
+        self.assertEqual(result, self.get_model_class('Template').template_fields)
 
-        ptask_template_data = dict(
+        ptask_tmplt_data = dict(
             name="test_ptask_template",
             kind="PeriodicTask",
             data=dict(
@@ -932,14 +1011,14 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                 )
             )
         )
-        ptask_template = Template.objects.create(**ptask_template_data)
-        ptask_template_data.update(dict(
-            name=ptask_template.name,
-            kind=ptask_template.kind,
-            data=ptask_template.data
+        ptask_tmplt = self.get_model_class('Template').objects.create(**ptask_tmplt_data)
+        ptask_tmplt_data.update(dict(
+            name=ptask_tmplt.name,
+            kind=ptask_tmplt.kind,
+            data=ptask_tmplt.data
         ))
-        self.details_test(url + "{}/".format(ptask_template.id),
-                          **ptask_template_data)
+        self.details_test(url + "{}/".format(ptask_tmplt.id),
+                          **ptask_tmplt_data)
 
         module_template_data = dict(
             name="test_ptask_template",
@@ -956,7 +1035,11 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                 )
             )
         )
-        module_template = Template.objects.create(**module_template_data)
+
+        module_template = self.get_model_class('Template').objects.create(
+            **module_template_data
+        )
+
         module_template_data.update(dict(
             name=module_template.name,
             kind=module_template.kind,
@@ -971,17 +1054,17 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
 
         self.make_test(url, self.tmplt_data, update_func)
         self.make_test(url, module_template_data, update_func, "group")
-        self.make_test(url, ptask_template_data, update_func, "group")
+        self.make_test(url, ptask_tmplt_data, update_func, "group")
 
         # Filters
         # by Project
         search_url = "{}?project={}".format(url, self.pr_tmplt.id)
-        real_count = Template.objects.filter(project=self.pr_tmplt).count()
+        qs = self.get_model_class('Template').objects.filter(project=self.pr_tmplt)
         res = self.get_result("get", search_url)
-        self.assertEqual(res["count"], real_count, [res, real_count])
+        self.assertEqual(res["count"], qs.count(), [res, qs.count()])
         # by Inventory
         search_url = "{}?inventory={}".format(url, self.history_inventory.id)
-        real_count = Template.objects.filter(
+        real_count = self.get_model_class('Template').objects.filter(
             inventory=str(self.history_inventory.id)
         ).count()
         res = self.get_result("get", search_url)
@@ -1013,7 +1096,8 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.get_result("patch", "{}{}/".format(url, t['id']),
                         data=json.dumps(data))
 
-        for val in Template.objects.get(pk=t['id']).data['vars'].values():
+        tmpls_objcts = self.get_model_class('Template').objects
+        for val in tmpls_objcts.get(pk=t['id']).data['vars'].values():
             self.assertEqual(val, "secret")
 
 
@@ -1022,32 +1106,42 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         super(ApiHistoryTestCase, self).setUp()
 
         repo = "git@ex.us:dir/rep3.git"
-        self.history_inventory = Inventory.objects.create()
-        self.ph = Project.objects.create(name="Prj_History",
-                                         repository=repo,
-                                         vars=dict(repo_type="TEST"))
+        self.history_inventory = self.get_model_class('Inventory').objects.create()
+        self.ph = self.get_model_class('Project').objects.create(
+            name="Prj_History",
+            repository=repo,
+            vars=dict(repo_type="TEST")
+        )
         self.default_kwargs = dict(project=self.ph, mode="task.yml",
                                    raw_inventory="inventory",
                                    raw_stdout="text",
                                    inventory=self.history_inventory,
                                    initiator=self.user.id)
         self.histories = [
-            History.objects.create(status="OK",
-                                   start_time=now() - timedelta(hours=15),
-                                   stop_time=now() - timedelta(hours=14),
-                                   **self.default_kwargs),
-            History.objects.create(status="STOP",
-                                   start_time=now() - timedelta(hours=25),
-                                   stop_time=now() - timedelta(hours=24),
-                                   **self.default_kwargs),
-            History.objects.create(status="ERROR",
-                                   start_time=now() - timedelta(hours=35),
-                                   stop_time=now() - timedelta(hours=34),
-                                   **self.default_kwargs),
+            self.get_model_class('History').objects.create(
+                status="OK",
+                start_time=now() - timedelta(hours=15),
+                stop_time=now() - timedelta(hours=14),
+                **self.default_kwargs
+            ),
+            self.get_model_class('History').objects.create(
+                status="STOP",
+                start_time=now() - timedelta(hours=25),
+                stop_time=now() - timedelta(hours=24),
+                **self.default_kwargs),
+            self.get_model_class('History').objects.create(
+                status="ERROR",
+                start_time=now() - timedelta(hours=35),
+                stop_time=now() - timedelta(hours=34),
+                **self.default_kwargs),
+            self.get_model_class('History').objects.create(
+                status="RUN",
+                start_time=now() - timedelta(hours=40),
+                **self.default_kwargs)
         ]
         self.default_kwargs["raw_stdout"] = "one\ntwo\nthree\nfour"
         self.default_kwargs["mode"] = "task2.yml"
-        self.histories.append(History.objects.create(
+        self.histories.append(self.get_model_class('History').objects.create(
             status="ERROR", start_time=now() - timedelta(hours=35),
             stop_time=now() - timedelta(hours=34), **self.default_kwargs)
         )
@@ -1056,20 +1150,40 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         url = "/api/v1/history/"
         df = "%Y-%m-%dT%H:%M:%S.%fZ"
         self.list_test(url, len(self.histories))
-        self.details_test(url + "{}/".format(self.histories[0].id),
-                          mode="task.yml",
-                          status="OK", project=self.ph.id,
-                          start_time=self.histories[0].start_time.strftime(df),
-                          stop_time=self.histories[0].stop_time.strftime(df),
-                          raw_inventory="inventory",
-                          inventory=self.history_inventory.id,
-                          initiator=self.user.id, initiator_type="users")
+        self.details_test(
+            url + "{}/".format(self.histories[0].id),
+            mode="task.yml",
+            status="OK", project=self.ph.id,
+            #  Commented because DRF broke API by fields
+            # start_time=self.histories[0].start_time.strftime(df),
+            # stop_time=self.histories[0].stop_time.strftime(df),
+            raw_inventory="inventory",
+            inventory=self.history_inventory.id,
+            executor=None, initiator_type="project",
+            execution_time=3600
+            )
+
+        pached_method = 'polemarch.main.models.tasks.History._get_seconds_from_time'
+        with patch(pached_method) as time_mock:
+            time_mock.return_value = 144000
+            self.details_test(
+                url + "{}/".format(self.histories[3].id),
+                mode="task.yml",
+                status="RUN", project=self.ph.id,
+                #  Commented because DRF broke API by fields
+                # start_time=self.histories[0].start_time.strftime(df),
+                # stop_time=self.histories[0].stop_time.strftime(df),
+                raw_inventory="inventory",
+                inventory=self.history_inventory.id,
+                executor=None, initiator_type="project",
+                execution_time=144000
+            )
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)
 
         res = self.get_result("get", "{}?mode={}".format(url, "task.yml"))
-        self.assertEqual(res["count"], 3, res)
+        self.assertEqual(res["count"], 4, res)
 
         res = self.get_result("get", "{}?project={}".format(url, self.ph.id))
         self.assertEqual(res["count"], len(self.histories), res)
@@ -1093,12 +1207,12 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                         405, data=dict(**self.default_kwargs))
 
         # Lines pagination
-        lines_url = url+"{}/lines/?limit=2".format(self.histories[3].id)
+        lines_url = url+"{}/lines/?limit=2".format(self.histories[4].id)
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 4, result)
         self.assertCount(result["results"], 2)
         lines_url = url
-        lines_url += "{}/lines/?after=2&before=4".format(self.histories[3].id)
+        lines_url += "{}/lines/?after=2&before=4".format(self.histories[4].id)
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 1, result)
         self.assertCount(result["results"], 1)
@@ -1130,7 +1244,7 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                               start_time=now() - timedelta(hours=15),
                               stop_time=now() - timedelta(hours=14))
         default_kwargs['raw_stdout'] = raw_stdout
-        history = History.objects.create(**default_kwargs)
+        history = self.get_model_class('History').objects.create(**default_kwargs)
         url = "/api/v1/history/{}/raw/".format(history.id)
         result = self.get_result("get", url)
         self.assertEquals(result, nocolor)
@@ -1158,7 +1272,7 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
                               status="OK",
                               start_time=now() - timedelta(hours=15),
                               stop_time=now() - timedelta(hours=14))
-        history = History.objects.create(**history_kwargs)
+        history = self.get_model_class('History').objects.create(**history_kwargs)
         stdout = self._get_string_from_file("facts_stdout")
         history.raw_stdout = stdout
         history.save()

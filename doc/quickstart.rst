@@ -106,13 +106,13 @@ Uploading of backup in MySQL:
 
 Making backup in PostgreSQL:
 
-    .. sourcecode:: postgresql
+    .. sourcecode:: bash
 
        pg_dump dbname > dump.sql
 
 Uploading of backup in PostgreSQL:
 
-    .. sourcecode:: postgresql
+    .. sourcecode:: bash
 
        createdb dbname
        psql dbname < dump.sql

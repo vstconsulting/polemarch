@@ -10,7 +10,7 @@ pmHistory.model.className = "pmHistory"
 pmHistory.cancelTask = function(item_id)
 {
     return spajs.ajax.Call({
-        url: "/api/v1/history/"+item_id+"/cancel/",
+        url: hostname + "/api/v1/history/"+item_id+"/cancel/",
         type: "POST",
         contentType:'application/json',
         success: function(data)
@@ -34,14 +34,18 @@ pmHistory.showSearchResults = function(holder, menuInfo, data)
     if(data.reg && data.reg[2] > 0)
     {
         offset = this.pageSize*(data.reg[2] - 1);
-    } else {
+    }
+    else
+    {
         offset=0;
     }
 
     var search = this.searchStringToObject(decodeURIComponent(data.reg[1]), 'mode')
     return $.when(this.sendSearchQuery(search,limit,offset)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:decodeURIComponent(data.reg[1])}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
     }).fail(function()
     {
         $.notify("", "error");
@@ -68,6 +72,15 @@ pmHistory.search = function(query, options)
 
         return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query), 'mode'), reopen:true});
     }
+    else if(options.initiator_type && options.initiator_type=='template')
+    {
+        if(this.isEmptySearchQuery(query))
+        {
+            return spajs.open({ menuId:'template/' + options.kind + '/' + options.initiator +"/" + this.model.name, reopen:true});
+        }
+
+        return spajs.open({ menuId:'template/' + options.kind + '/' + options.initiator +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query), 'mode'), reopen:true});
+    }
     else if(this.isEmptySearchQuery(query))
     {
         return spajs.open({ menuId:this.model.name, reopen:true});
@@ -76,6 +89,42 @@ pmHistory.search = function(query, options)
     return spajs.open({ menuId:this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
 }
 
+
+/**
+ * Строит страницу со списком объектоа
+ * @param {type} holder
+ * @param {type} menuInfo
+ * @param {type} data
+ * @returns {$.Deferred}
+ */
+pmHistory.showList = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var thisObj = this;
+    var offset = 0
+    var limit = this.pageSize;
+    if (data.reg && data.reg[1] > 0)
+    {
+        offset = this.pageSize * (data.reg[1] - 1);
+    }
+
+    return $.when(this.loadItems(limit, offset)).done(function ()
+    {
+        var tpl = thisObj.model.name + '_list'
+        if (!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_list'
+        }
+
+        $.when($(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, opt: {}}))).done(function()
+        {
+            pmHistory.setTableRowLinkInLink();
+        })
+    }).fail(function ()
+    {
+        $.notify("", "error");
+    })
+}
 
 pmHistory.showListInProjects = function(holder, menuInfo, data)
 {
@@ -90,7 +139,9 @@ pmHistory.showListInProjects = function(holder, menuInfo, data)
 
     return $.when(this.sendSearchQuery({project:project_id}, limit, offset), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:"", project_id:project_id}))
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:"", project_id:project_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
         thisObj.model.selectedCount = $('.multiple-select .selected').length;
     }).fail(function()
     {
@@ -111,7 +162,32 @@ pmHistory.showListInInventory = function(holder, menuInfo, data)
 
     return $.when(this.sendSearchQuery({inventory:inventory_id}, limit, offset), pmInventories.loadItem(inventory_id)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id}))
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:"", inventory_id:inventory_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showListInTemplate = function(holder, menuInfo, data, pmObj)
+{
+    var thisObj = this;
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[2] > 0)
+    {
+        offset = this.pageSize*(data.reg[2] - 1);
+    }
+    var template_id = data.reg[1];
+    //debugger;
+    return $.when(this.sendSearchQuery({initiator_type:"template",initiator:template_id}, limit, offset), pmObj.loadItem(template_id)).done(function()
+    {
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInTemplate', {query:"", pmObj:pmObj, template_id:template_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
+        thisObj.model.selectedCount = $('.multiple-select .selected').length;
     }).fail(function()
     {
         $.notify("", "error");
@@ -122,13 +198,71 @@ pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
 {
     var thisObj = this;
     var project_id = data.reg[1];
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[3] > 0)
+    {
+        offset = this.pageSize*(data.reg[3] - 1);
+    }
 
     var search = this.searchStringToObject(decodeURIComponent(data.reg[2]), 'mode')
     search['project'] = project_id
 
-    return $.when(this.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
+    return $.when(this.sendSearchQuery(search, limit, offset), pmProjects.loadItem(project_id)).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInProjects', {query:decodeURIComponent(data.reg[2]), project_id:project_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showSearchResultsInInventory = function(holder, menuInfo, data)
+{
+    var thisObj = this;
+    var inventory_id = data.reg[1];
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[3] > 0)
+    {
+        offset = this.pageSize*(data.reg[3] - 1);
+    }
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]), 'mode')
+    search['inventory'] = inventory_id
+
+    return $.when(this.sendSearchQuery(search, limit, offset), pmInventories.loadItem(inventory_id)).done(function()
+    {
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInInventory', {query:decodeURIComponent(data.reg[2]), inventory_id:inventory_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showSearchResultsInTemplate = function(holder, menuInfo, data, pmObj)
+{
+    var thisObj = this;
+    var template_id = data.reg[1];
+    var offset = 0
+    var limit = this.pageSize;
+    if(data.reg && data.reg[3] > 0)
+    {
+        offset = this.pageSize*(data.reg[3] - 1);
+    }
+
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]), 'mode');
+    search['initiator_type'] = 'template';
+    search['initiator'] = template_id;
+
+    return $.when(this.sendSearchQuery(search, limit, offset), pmObj.loadItem(template_id)).done(function()
+    {
+        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInTemplate', {query:decodeURIComponent(data.reg[2]), pmObj:pmObj, template_id:template_id}))).done(function(){
+            pmHistory.setTableRowLinkInLink();
+        })
     }).fail(function()
     {
         $.notify("", "error");
@@ -144,12 +278,6 @@ pmHistory.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[1];
     return $.when(this.loadItem(item_id)).done(function()
     {
-        if(pmHistory.model.items[item_id].initiator > 0 )
-        {
-            pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
-        }
-
-
         if (pmHistory.model.items[item_id].inventory != null) {
             var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
             $.when(promiss).done(function () {
@@ -163,8 +291,6 @@ pmHistory.showItem = function(holder, menuInfo, data)
             pmHistory.bindStdoutUpdates(item_id)
         }
 
-
-
     }).fail(function()
     {
         $.notify("", "error");
@@ -174,16 +300,11 @@ pmHistory.showItem = function(holder, menuInfo, data)
 pmHistory.showItemInProjects = function(holder, menuInfo, data)
 {
     var thisObj = this;
-    //console.log(menuInfo, data)
     var project_id = data.reg[1];
     var item_id = data.reg[2];
-    return $.when(this.loadItem(item_id), pmProjects.loadItem(project_id)).done(function()
+    //debugger;
+    return $.when(this.loadItem(item_id)).done(function()
     {
-        if(pmHistory.model.items[item_id].initiator > 0 )
-        {
-            pmUsers.loadItem(pmHistory.model.items[item_id].initiator);
-        }
-
         if (pmHistory.model.items[item_id].inventory != null) {
             var promiss = pmInventories.loadItem(pmHistory.model.items[item_id].inventory);
             $.when(promiss).done(function () {
@@ -199,6 +320,39 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
 
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInProjects', {item_id:item_id, project_id:project_id}))
         pmHistory.bindStdoutUpdates(item_id)
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showItemInInventory = function(holder, menuInfo, data)
+{
+    var thisObj = this;
+    var inventory_id = data.reg[1];
+    var item_id = data.reg[2];
+    return $.when(this.loadItem(item_id), pmInventories.loadItem(inventory_id)).done(function()
+    {
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInInventory', {item_id:item_id, inventory_id:inventory_id}))
+        pmHistory.bindStdoutUpdates(item_id)
+    }).fail(function()
+    {
+        $.notify("", "error");
+    })
+}
+
+pmHistory.showItemInTemplate = function(holder, menuInfo, data, pmObj)
+{
+    var thisObj = this;
+    var template_id = data.reg[1];
+    var item_id = data.reg[2];
+    return $.when(this.loadItem(item_id), pmObj.loadItem(template_id)).done(function()
+    {
+        $.when(pmInventories.loadItem(pmHistory.model.items[item_id].inventory)).done(function(){
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInTemplate', {item_id:item_id, pmObj:pmObj, template_id:template_id}))
+            pmHistory.bindStdoutUpdates(item_id);
+        });
+
     }).fail(function()
     {
         $.notify("", "error");
@@ -263,7 +417,7 @@ pmHistory.bindStdoutUpdates = function(item_id)
 }
 
 /**
- * Обновляет поле модел this.model.items[item_id] и ложит туда пользователя
+ * Загружает данные элемента истории
  */
 pmHistory.loadItem = function(item_id)
 {
@@ -271,7 +425,7 @@ pmHistory.loadItem = function(item_id)
     var thisObj = this;
 
     spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/"+item_id+"/",
+        url: hostname + "/api/v1/"+this.model.name+"/"+item_id+"/",
         type: "GET",
         contentType:'application/json',
         data: "",
@@ -293,15 +447,24 @@ pmHistory.loadItem = function(item_id)
             {
                 promise = pmPeriodicTasks.loadItemsByIds([data.initiator])
             }
-
-            if(data.initiator_type == 'users')
+            else if(data.initiator_type == 'project')
             {
-                promise = pmUsers.loadItemsByIds([data.initiator])
+                promise = pmProjects.loadItemsByIds([data.initiator])
+            }
+            else if(data.initiator_type == 'template')
+            {
+                promise = pmTasksTemplates.loadItemsByIds([data.initiator])
+            }
+
+            var promise2 = undefined;
+            if(data.executor!=null)
+            {
+                pmUsers.loadItem(data.executor);
             }
 
             pmHistory.model.items.justWatch(item_id);
 
-            $.when(pmProjects.loadItem(data.project), promise).always(function(){
+            $.when(pmProjects.loadItem(data.project), promise, promise2).always(function(){
                 def.resolve(data)
             })
         },
@@ -337,7 +500,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
     var def = new $.Deferred();
     var thisObj = this;
     spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/?"+q.join('&'),
+        url: hostname + "/api/v1/"+this.model.name+"/?"+q.join('&'),
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
@@ -352,6 +515,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
             var projects = [];
             var usersIds = [];
             var periodicTasks = [];
+            var templates = [];
 
             for(var i in data.results)
             {
@@ -364,19 +528,29 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
                     projects.push(val.project)
                 }
 
-                if(val.initiator > 0 && val.initiator_type == 'users' && $.inArray(val.initiator, usersIds) == -1)
+                if(val.initiator > 0 && val.initiator_type == 'project' && $.inArray(val.initiator, projects) == -1)
                 {
-                    usersIds.push(val.initiator);
+                    projects.push(val.initiator);
                 }
                 else if(val.initiator > 0 && val.initiator_type == 'scheduler' && $.inArray(val.initiator, periodicTasks) == -1)
                 {
                     periodicTasks.push(val.initiator);
+                }
+                else if(val.initiator > 0 && val.initiator_type == 'template' && $.inArray(val.initiator, templates) == -1)
+                {
+                    templates.push(val.initiator);
+                }
+
+                if(val.executor && !pmUsers.model.items[val.executor] && $.inArray(val.executor, usersIds) == -1)
+                {
+                    usersIds.push(val.executor)
                 }
             }
 
             var users_promise = undefined;
             var projects_promise = undefined;
             var periodicTasks_promise = undefined;
+            var templates_promise = undefined;
 
             if(periodicTasks.length)
             {
@@ -393,7 +567,12 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
                 projects_promise = pmProjects.sendSearchQuery({id:projects.join(',')})
             }
 
-            $.when(users_promise, projects_promise, periodicTasks_promise).done(function(){
+            if(templates.length)
+            {
+                templates_promise = pmTasksTemplates.loadItemsByIds(templates);
+            }
+
+            $.when(users_promise, projects_promise, periodicTasks_promise, templates_promise).done(function(){
                 def.resolve(data)
             })
         },
@@ -418,7 +597,7 @@ pmHistory.ifIncreaseTotalCount = function()
     var def = new $.Deferred();
     var thisObj = this;
     spajs.ajax.Call({
-        url: "/api/v1/history",
+        url: hostname + "/api/v1/history",
         type: "GET",
         contentType:'application/json',
         data: "limit=1&rand="+Math.random(),
@@ -491,7 +670,7 @@ pmHistory.loadItems = function(limit, offset)
     var def = new $.Deferred();
     var thisObj = this;
     spajs.ajax.Call({
-        url: "/api/v1/"+this.model.name+"/",
+        url: hostname + "/api/v1/"+this.model.name+"/",
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
@@ -510,6 +689,7 @@ pmHistory.loadItems = function(limit, offset)
             var projects = [];
             var usersIds = [];
             var periodicTasks = [];
+            var templates = [];
 
             for(var i in data.results)
             {
@@ -523,19 +703,29 @@ pmHistory.loadItems = function(limit, offset)
                     projects.push(val.project)
                 }
 
-                if(val.initiator > 0 && val.initiator_type == 'users' && $.inArray(val.initiator, usersIds) == -1)
+                if(val.initiator > 0 && val.initiator_type == 'project' && $.inArray(val.initiator, projects) == -1)
                 {
-                    usersIds.push(val.initiator);
+                    projects.push(val.initiator);
                 }
                 else if(val.initiator > 0 && val.initiator_type == 'scheduler' && $.inArray(val.initiator, periodicTasks) == -1)
                 {
                     periodicTasks.push(val.initiator);
+                }
+                else if(val.initiator > 0 && val.initiator_type == 'template' && $.inArray(val.initiator, templates) == -1)
+                {
+                    templates.push(val.initiator);
+                }
+
+                if(val.executor && !pmUsers.model.items[val.executor] && $.inArray(val.executor, usersIds) == -1)
+                {
+                    usersIds.push(val.executor)
                 }
             }
 
             var users_promise = undefined;
             var projects_promise = undefined;
             var periodicTasks_promise = undefined;
+            var templates_promise = undefined;
 
             if(periodicTasks.length)
             {
@@ -552,7 +742,12 @@ pmHistory.loadItems = function(limit, offset)
                 projects_promise = pmProjects.sendSearchQuery({id:projects.join(',')})
             }
 
-            $.when(users_promise, projects_promise, periodicTasks_promise).always(function(){
+            if(templates.length)
+            {
+                templates_promise = pmTasksTemplates.loadItemsByIds(templates);
+            }
+
+            $.when(users_promise, projects_promise, periodicTasks_promise, templates_promise).always(function(){
                 def.resolve(data)
             })
         },
@@ -703,7 +898,7 @@ pmHistory.loadLines = function(item_id, opt)
 
     var def = new $.Deferred();
     spajs.ajax.Call({
-        url: "/api/v1/history/"+item_id+"/lines/",
+        url: hostname + "/api/v1/history/"+item_id+"/lines/",
         type: "GET",
         contentType:'application/json',
         data: opt,
@@ -749,11 +944,10 @@ pmHistory.loadLines = function(item_id, opt)
     return def.promise();
 }
 
-/////////////////////////////////
 pmHistory.clearLogs=function(item_id)
 {
     return spajs.ajax.Call({
-        url: "/api/v1/history/"+item_id+"/clear/",
+        url: hostname + "/api/v1/history/"+item_id+"/clear/",
         type: "DELETE",
         contentType:'application/json',
         success: function(data)
@@ -776,7 +970,29 @@ pmHistory.hideClearLogsButton=function()
         $("#clear_logs").slideToggle();
     }
 }
-/////////////////////////////////
+
+pmHistory.setTableRowLinkInLink = function()
+{
+    $('.light-tr').on('click', function(evt) {
+
+        if(!(evt.target.classList.contains('light-tr-none') ||
+                evt.target.classList.contains('ico-on') ||
+                evt.target.classList.contains('ico-off'))
+        )
+        {
+            if(evt.target.hasAttribute('href'))
+            {
+                var href =  evt.target.getAttribute('href');
+            }
+            else
+            {
+                var href =  evt.currentTarget.getAttribute('data-href');
+            }
+            spajs.openURL(href);
+        }
+    });
+}
+
 tabSignal.connect("polemarch.start", function()
 {
     // history
@@ -800,6 +1016,7 @@ tabSignal.connect("polemarch.start", function()
         onClose:function(){return pmHistory.stopUpdates();}
     })
 
+    // history in project
     spajs.addMenu({
         id:"history-item-in-project",
         urlregexp:[/^project\/([0-9]+)\/history\/([0-9]+)$/],
@@ -831,6 +1048,66 @@ tabSignal.connect("polemarch.start", function()
         id:"project-history-search",
         urlregexp:[/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^project\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInProjects(holder, menuInfo, data);}
+    })
+
+    // history in inventory
+    spajs.addMenu({
+        id:"inventory-history",
+        urlregexp:[/^inventory\/([0-9]+)\/history$/, /^inventory\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showListInInventory(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"history-item-in-inventory",
+        urlregexp:[/^inventory\/([0-9]+)\/history\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInInventory(holder, menuInfo, data);},
+        onClose:function(){return pmHistory.stopUpdates();}
+    })
+
+    spajs.addMenu({
+        id:"inventory-history-search",
+        urlregexp:[/^inventory\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^inventory\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInInventory(holder, menuInfo, data);}
+    })
+
+    // history in task template
+    spajs.addMenu({
+        id:"task-template-history",
+        urlregexp:[/^template\/Task\/([0-9]+)\/history$/, /^template\/Task\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showListInTemplate(holder, menuInfo, data, pmTasksTemplates);}
+    })
+
+    spajs.addMenu({
+        id:"history-item-in-task-template",
+        urlregexp:[/^template\/Task\/([0-9]+)\/history\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInTemplate(holder, menuInfo, data, pmTasksTemplates);},
+        onClose:function(){return pmHistory.stopUpdates();}
+    })
+
+    spajs.addMenu({
+        id:"task-template-history-search",
+        urlregexp:[/^template\/Task\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^template\/Task\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInTemplate(holder, menuInfo, data, pmTasksTemplates);}
+    })
+
+    // history in module template
+    spajs.addMenu({
+        id:"module-template-history",
+        urlregexp:[/^template\/Module\/([0-9]+)\/history$/, /^template\/Module\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showListInTemplate(holder, menuInfo, data, pmModuleTemplates);}
+    })
+
+    spajs.addMenu({
+        id:"history-item-in-module-template",
+        urlregexp:[/^template\/Module\/([0-9]+)\/history\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showItemInTemplate(holder, menuInfo, data, pmModuleTemplates);},
+        onClose:function(){return pmHistory.stopUpdates();}
+    })
+
+    spajs.addMenu({
+        id:"module-template-history-search",
+        urlregexp:[/^template\/Module\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^template\/Module\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInTemplate(holder, menuInfo, data, pmModuleTemplates);}
     })
 
 })

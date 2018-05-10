@@ -21,11 +21,22 @@ COMPOSE = docker-compose-testrun.yml
 COMPOSE_ARGS = --abort-on-container-exit
 COMPLEX_TESTS_COMPOSE = docker-compose-tests.yml
 COMPLEX_TESTS_COMPOSE_ARGS = '--abort-on-container-exit --build'
+DEFAULT_PREFIX = /opt
+INSTALL_PREFIX = $(shell if [[ ! -z "${prefix}" ]]; then echo -n $(prefix); else echo -n $(DEFAULT_PREFIX); fi)
+INSTALL_DIR = $(INSTALL_PREFIX)/${NAME}
+INSTALL_BINDIR = $(INSTALL_DIR)/bin
+REQUIREMENTS = -r requirements.txt -r requirements-doc.txt
+TMPDIR := $(shell mktemp -d)
+BUILD_DIR= $(TMPDIR)
+PREBUILD_DIR = $(BUILD_DIR)/$(INSTALL_DIR)
+PREBUILD_BINDIR = $(BUILD_DIR)/$(INSTALL_BINDIR)
+SOURCE_DIR = $(shell pwd)
+
 
 include rpm.mk
 include deb.mk
 
-all: compile
+all: compile clean_prebuild prebuild
 
 
 docs:
@@ -52,11 +63,44 @@ compile: build-clean
 	-rm -rf polemarch/doc/*
 	$(PY) setup.py compile -v
 
+prebuild:
+	# Create virtualenv
+	$(PY) -m virtualenv --no-site-packages $(PREBUILD_DIR)
+	# Install required packages
+	$(PREBUILD_BINDIR)/pip install -U pip
+	$(PREBUILD_BINDIR)/pip install -U dist/$(NAME)-$(VER).tar.gz $(REQUIREMENTS)
+	$(PREBUILD_BINDIR)/pip install -U -r requirements-git.txt
+	# RECORD files are used by wheels for checksum. They contain path names which
+	# match the buildroot and must be removed or the package will fail to build.
+	find $(PREBUILD_DIR) -name "RECORD" -exec rm -rf {} \;
+	# Change the virtualenv path to the target installation direcotry.
+	venvctrl-relocate --source=$(PREBUILD_DIR) --destination=$(INSTALL_DIR)
+	# Remove sources for Clang
+	find $(PREBUILD_DIR)/lib -type f -name "*.c" -print0 | xargs -0 rm -rf
+	# Remove broken link
+	-rm -rf $(PREBUILD_DIR)/local
+	# Install settings
+	-install -Dm 755 $(NAME)/main/settings.ini $(BUILD_DIR)/etc/$(USER)/settings.ini.template
+	# Install systemd services
+	-install -Dm 755 initbin/$(NAME)web.service  $(BUILD_DIR)/etc/systemd/system/$(NAME)web.service
+	-install -Dm 755 initbin/$(NAME)worker.service  $(BUILD_DIR)/etc/systemd/system/$(NAME)worker.service
+	# Install tmpdirs config
+	-install -Dm 755 initbin/$(NAME).conf  $(BUILD_DIR)/etc/tmpfiles.d/$(NAME).conf
+	# Create tmpdirs
+	-mkdir -p $(BUILD_DIR)/var/{log,run,lock}/$(NAME)
+
 install:
-	$(PIP) install dist/$(ARCHIVE) django\>=1.8,\<1.12
+	# Change owner for packages
+	-chown -R $(USER):$(USER) $(PREBUILD_DIR) $(BUILD_DIR)/var/{log,run,lock}/$(NAME) $(BUILD_DIR)/etc/$(USER)
+	# Copy build
+	cp -rf $(BUILD_DIR)/* /
+	$(MAKE) clean_prebuild
 
 uninstall:
-	$(PIP) uninstall $(NAME)
+	-rm -rf $(INSTALL_DIR)
+
+clean_prebuild:
+	-rm -rf $(BUILD_DIR)/*
 
 clean: build-clean
 	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
@@ -79,13 +123,13 @@ fclean: clean
 	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf .tox
 
-rpm: compile
+rpm:
 	echo "$$RPM_SPEC" > polemarch.spec
 	rm -rf ~/rpmbuild
 	mkdir -p ~/rpmbuild/SOURCES/
 	ls -la
-	cp -vf dist/$(ARCHIVE) ~/rpmbuild/SOURCES
 	rpmbuild --verbose -bb polemarch.spec
+	mkdir -p dist
 	cp -v ~/rpmbuild/RPMS/x86_64/*.rpm dist/
 	rm polemarch.spec
 
@@ -108,10 +152,13 @@ deb:
 	chmod +x debian/prerm
 	chmod +x debian/postrm
 	# build
-	dpkg-buildpackage -uc -us
+	dpkg-buildpackage -d -uc -us
 	mv -v ../$(NAME)_$(VER)*.deb dist/
 	# cleanup
 	rm -rf debian
+
+compose_down:
+	docker-compose -f $(COMPOSE) down
 
 compose:
 	docker-compose -f $(COMPOSE) build

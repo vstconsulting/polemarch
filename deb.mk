@@ -42,13 +42,14 @@ export DEBIAN_COPYRIGHT
 
 # paths and executables variables
 BUILDROOT = debian/$(NAME)
-INSTALLDIR = opt/$(NAME)
 define DEBIAN_RULES
 #!/usr/bin/make -f
 # maximum verbosity during deb build
 DH_VERBOSE = 1
 export DH_OPTIONS=-v
 # targets, that we want to override with no actions
+override_dh_auto_build:
+	# don't need becouse all makes in 'override_dh_auto_install' target
 override_dh_auto_test:
 	# don't want to test during package build
 override_dh_strip:
@@ -65,27 +66,7 @@ override_dh_auto_install:
 	mkdir -p $(BUILDROOT)
 	touch $(BUILDROOT)/dummy
 	rm -rf $(BUILDROOT)/*
-	# install our package with all required python dependencies in virtualenv
-	virtualenv --no-site-packages $(BUILDROOT)/$(INSTALLDIR)
-	rm -rf $(BUILDROOT)/$(INSTALLDIR)/local
-	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements-doc.txt
-	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) dist/$(NAME)-$(VER).tar.gz
-	$(BUILDROOT)/$(INSTALLDIR)/bin/pip install $(PIPARGS) -r requirements-git.txt
-	find $(BUILDROOT)/ -name "RECORD" -exec rm -rf {} \;
-	venvctrl-relocate --source=$(BUILDROOT)/$(INSTALLDIR) --destination=/$(INSTALLDIR)
-	find $(BUILDROOT)/$(INSTALLDIR)/lib -type f -name "*.c" -print0 | xargs -0 rm -rf
-	# system folders which is needed for application to work (lob, lock, etc)
-	mkdir -p $(BUILDROOT)/var/log/$(NAME)
-	mkdir -p $(BUILDROOT)/var/run/$(NAME)
-	mkdir -p $(BUILDROOT)/var/lock/$(NAME)
-	mkdir -p $(BUILDROOT)/etc/$(NAME)
-	# systemd services
-	mkdir -p $(BUILDROOT)/etc/systemd/system/
-	mkdir -p $(BUILDROOT)/etc/tmpfiles.d/
-	cp initbin/*.service $(BUILDROOT)/etc/systemd/system/
-	cp initbin/*.conf $(BUILDROOT)/etc/tmpfiles.d/
-	# settings
-	cp $(NAME)/main/settings.ini $(BUILDROOT)/etc/$(NAME)/
+	make BUILD_DIR=$(BUILDROOT)
 %:
 	dh $$@ 
 endef

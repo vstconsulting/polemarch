@@ -5,7 +5,6 @@ from ...wapp import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
 from ..models.utils import AnsibleModule, AnsiblePlaybook
-from ..models.hooks import Hook
 
 logger = logging.getLogger("polemarch")
 
@@ -13,7 +12,7 @@ logger = logging.getLogger("polemarch")
 @task(app, ignore_result=True, default_retry_delay=1,
       max_retries=5, bind=True)
 class RepoTask(BaseTask):
-    accepted_oprations = ["clone", "sync"]
+    accepted_operations = ["clone", "sync"]
 
     class RepoTaskError(TaskError):
         pass
@@ -24,7 +23,7 @@ class RepoTask(BaseTask):
     def __init__(self, app, project, operation="sync", *args, **kwargs):
         super(self.__class__, self).__init__(app, *args, **kwargs)
         self.project, self.operation = project, operation
-        if self.operation not in self.accepted_oprations:
+        if self.operation not in self.accepted_operations:
             raise self.task_class.UnknownRepoOperation(self.operation)
 
     def run(self):
@@ -44,10 +43,9 @@ class ScheduledTask(BaseTask):
     def run(self):
         from ..models import PeriodicTask
         try:
-            task = PeriodicTask.objects.get(id=self.job_id)
+            PeriodicTask.objects.get(id=self.job_id).execute()
         except PeriodicTask.DoesNotExist:
             return
-        task.execute()
 
 
 class _ExecuteAnsible(BaseTask):
@@ -67,14 +65,3 @@ class ExecuteAnsiblePlaybook(_ExecuteAnsible):
 @task(app, ignore_result=True, bind=True)
 class ExecuteAnsibleModule(_ExecuteAnsible):
     ansible_class = AnsibleModule
-
-
-@task(app, ignore_result=True, bind=True)
-class SendHook(BaseTask):
-    def __init__(self, app, when, message, *args, **kwargs):
-        super(self.__class__, self).__init__(app, *args, **kwargs)
-        self.when = when
-        self.message = message
-
-    def run(self):
-        Hook.objects.execute(self.when, self.message)

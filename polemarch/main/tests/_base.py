@@ -80,7 +80,7 @@ class BaseTestCase(TestCase):
                 if (response.status_code != 404 and
                     getattr(response, "rendered_content", False)) \
                 else str(response.content.decode('utf-8'))
-        except ValueError:
+        except ValueError:  # nocv
             return None
 
     def assertCount(self, list, count):
@@ -93,12 +93,13 @@ class BaseTestCase(TestCase):
         :param code: - expected code
         :return: None
         '''
-        err_msg = "{} != {}\n{}".format(
+        err_msg = "{} != {}\n{}\n{}".format(
             resp.status_code, code,
             resp.rendered_content.decode()
             if (resp.status_code != 404 and
                 getattr(resp, "rendered_content", False))
-            else resp.content
+            else resp.content,
+            self.user
         )
         self.assertEqual(resp.status_code, code, err_msg)
 

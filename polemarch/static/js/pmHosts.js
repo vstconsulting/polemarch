@@ -11,9 +11,9 @@ pmHosts.model.page_list = {
         {
             class:'btn btn-primary',
             function:function(){ return "spajs.open({ menuId:'new-"+this.model.page_name+"'}); return false;"},
-            title:'Create', 
-            link:function(){ return '/?new-'+this.model.page_name}, 
-        }, 
+            title:'Create',
+            link:function(){ return '/?new-'+this.model.page_name},
+        },
     ],
     title: "Hosts",
     short_title: "Hosts",
@@ -26,24 +26,23 @@ pmHosts.model.page_list = {
             title:'Type',
             name:'type',
             style:function(item){ return 'style="width: 70px"'},
-            class:function(item){ return 'class="hidden-xs"'}, 
+            class:function(item){ return 'class="hidden-xs"'},
         }
     ],
     actions:[
         {
-            class:'btn btn-danger',
             function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+')); return false;'},
             title:'Delete',
             link:function(){ return '#'}
         }
     ]
 }
-  
-  
+
+
 pmHosts.fileds = [
     [
         {
-            filed: new filedsLib.filed.text(), 
+            filed: new filedsLib.filed.text(),
             title:'Name',
             name:'name',
             placeholder:'Enter host or range name',
@@ -54,11 +53,19 @@ pmHosts.fileds = [
                 {
                     return true;
                 }
-                
-                $.notify("Invalid value in field `name` it mast be valid host or range name", "error"); 
+
+                $.notify("Invalid value in field `name` it mast be valid host or range name", "error");
                 return false;
-            },       
-            fast_validator:function(value){ return this.validateRangeName(value) || this.validateHostName(value)}   
+            },
+            fast_validator:function(value){ return this.validateRangeName(value) || this.validateHostName(value)}
+        },
+    ],
+    [
+        {
+            filed: new filedsLib.filed.textarea(),
+            title:'Notes',
+            name:'notes',
+            placeholder:'Not required field, just for your notes'
         },
     ]
 ]
@@ -73,26 +80,26 @@ pmHosts.model.page_new = {
         }
     ],
     onBeforeSave:function(data)
-    { 
+    {
         if(this.validateHostName(data.name))
         {
             data.type = 'HOST'
         }
         else if(this.validateRangeName(data.name))
-        { 
+        {
             data.type = 'RANGE'
         }
         else
         {
-            $.notify("Error in host or range name", "error"); 
+            $.notify("Error in host or range name", "error");
             return undefined;
         }
-        
+
         data.vars = jsonEditor.jsonEditorGetValues()
         return data;
     },
     onCreate:function(result, status, xhr, callOpt)
-    {   
+    {
         var def = new $.Deferred();
         $.notify("Host created", "success");
 
@@ -136,19 +143,19 @@ pmHosts.model.page_new = {
                 def.resolve()
             })
         }
-  
+
         return def.promise();
     }
 }
- 
+
 pmHosts.model.page_item = {
     buttons:[
         {
             class:'btn btn-primary',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
-            title:'Save', 
-            link:function(){ return '#'}, 
-        }, 
+            title:'Save',
+            link:function(){ return '#'},
+        },
         {
             class:'btn btn-default copy-btn',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
@@ -160,45 +167,45 @@ pmHosts.model.page_item = {
             class:'btn btn-danger danger-right',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
             title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
-            link:function(){ return '#'}, 
+            link:function(){ return '#'},
         },
     ],
     sections:[
-        function(section, item_id){ 
+        function(section, item_id){
             return jsonEditor.editor(this.model.items[item_id].vars, {block:this.model.name});
         }
     ],
-    title: function(item_id){ 
+    title: function(item_id){
         return "Host "+pmHosts.model.items[item_id].justText('name')
     },
-    short_title: function(item_id){ 
+    short_title: function(item_id){
         return "Host "+pmHosts.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
     },
     fileds:pmHosts.fileds,
     onUpdate:function(result)
-    { 
+    {
         return true;
     },
     onBeforeSave:function(data, item_id)
-    { 
+    {
         data.vars = jsonEditor.jsonEditorGetValues()
         if(this.validateHostName(data.name))
         {
             data.type = 'HOST'
         }
         else if(this.validateRangeName(data.name))
-        { 
+        {
             data.type = 'RANGE'
         }
         else
         {
-            $.notify("Error in host or range name", "error"); 
+            $.notify("Error in host or range name", "error");
             return undefined;
         }
         return data;
     },
 }
- 
+
 pmHosts.copyItem = function(item_id)
 {
     var def = new $.Deferred();
@@ -211,11 +218,11 @@ pmHosts.copyItem = function(item_id)
         {
             delete data.id;
             spajs.ajax.Call({
-                url: "/api/v1/"+thisObj.model.name+"/",
+                url: hostname + "/api/v1/"+thisObj.model.name+"/",
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
-                            success: function(data)
+                success: function(data)
                 {
                     thisObj.model.items[data.id] = data
                     def.resolve(data.id)
@@ -229,7 +236,7 @@ pmHosts.copyItem = function(item_id)
         {
             def.reject(e)
         })
-        
+
     }).fail(function(e)
     {
         def.reject(e)
@@ -237,8 +244,8 @@ pmHosts.copyItem = function(item_id)
 
 
     return def.promise();
-} 
- 
+}
+
 
 /*
  * 
@@ -251,41 +258,41 @@ setTimeout(function(){
     name = Math.random()+"-"+Math.random()
     name = name.replace(/\./g, "")
     spajs.ajax.Call({
-            url: "/api/v1/hosts/",
+            url: hostname + "/api/v1/hosts/",
             type: "POST",
             contentType:'application/json',
             data: JSON.stringify({name:name, type:"HOST"}),
                 })
 }, i*400);
 }
- */ 
+ */
 
- tabSignal.connect("polemarch.start", function()
- {
+tabSignal.connect("polemarch.start", function()
+{
     // hosts
     spajs.addMenu({
-        id:"hosts", 
+        id:"hosts",
         urlregexp:[/^hosts$/, /^host$/, /^hosts\/search\/?$/, /^hosts\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showList(holder, menuInfo, data);}
     })
-    
+
     spajs.addMenu({
-        id:"hosts-search", 
+        id:"hosts-search",
         urlregexp:[/^hosts\/search\/([A-z0-9 %\-.:,=]+)$/, /^hosts\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showSearchResults(holder, menuInfo, data);}
     })
-     
+
     spajs.addMenu({
-        id:"host", 
+        id:"host",
         urlregexp:[/^host\/([0-9]+)$/, /^hosts\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showItem(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
-        id:"newHost", 
+        id:"newHost",
         urlregexp:[/^new-host$/, /^([A-z0-9_]+)\/([0-9]+)\/new-host$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showNewItemPage(holder, menuInfo, data);}
-    }) 
- })
- 
- //изменение типа input'a на file при выборе 
+    })
+})
+
+//изменение типа input'a на file при выборе

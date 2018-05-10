@@ -1,17 +1,20 @@
 
 <!DOCTYPE html>
 <html>
+{%- macro css() %}
+    <link rel="stylesheet" href="{{ pathto('_static/' + style, 1) }}" type="text/css" />
+    <link rel="stylesheet" href="{{ pathto('_static/pygments.css', 1) }}" type="text/css" />
+    {%- for css in css_files %}
+      {%- if css|attr("rel") %}
+    <link rel="{{ css.rel }}" href="{{ pathto(css.filename, 1) }}" type="text/css"{% if css.title is not none %} title="{{ css.title }}"{% endif %} />
+      {%- else %}
+    <link rel="stylesheet" href="{{ pathto(css, 1) }}" type="text/css" />
+      {%- endif %}
+    {%- endfor %}
+{%- endmacro %}
+
 {%- macro script() %}
-   <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     'attr: polemarch.__version__',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
     {%- for scriptfile in script_files %}
     <script type="text/javascript" src="{{ pathto(scriptfile, 1) }}"></script>
     {%- endfor %}
@@ -20,19 +23,22 @@
     <script type="text/javascript" src="{{ pathto('_static/js/common.js', 1) }}"></script>
      <script type="text/javascript" src="{{ pathto('_static/js/app.js', 1) }}"></script>
 {%- endmacro %}
-
-{%- block extrahead %}
+<head>
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
    <meta name="robots" content="NONE,NOARCHIVE" />
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
    <title>Polemarch documantation</title>
+    {%- block css %}
+        {{- css() }}
+    {%- endblock %}
    <link rel="shortcut icon" href="{{ pathto('_static/img/logo/favicon.ico', 1) }}" />
-   <link rel="stylesheet" href="{{ pathto('_static/polemarch-style.css', 1) }}" type="text/css" />
     {%- block scripts %}
         {{- script() }}
     {%- endblock %}
-{% endblock %}
+{%- block extrahead %} {% endblock %}
+</head>
+
 
 <body class="hold-transition skin-black-light sidebar-mini">
 <div id="loader-wrapper">
@@ -111,12 +117,14 @@
         </section>
     </div>
 
+    {% block footer %}
     <footer class="main-footer">
          <div class="pull-right hidden-xs">
              &copy; {{ copyright }}
          </div>
         <br>
     </footer>
+    {% endblock %}
 </div>
 
 </body>

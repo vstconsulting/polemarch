@@ -14,8 +14,7 @@ from django.contrib.contenttypes.fields import (GenericForeignKey,
                                                 GenericRelation)
 
 from ..utils import tmp_file
-from .base import BModel, BManager, models
-from .acl import ACLModel, ACLQuerySet
+from .base import ACLModel, BQuerySet, BModel, models
 
 
 logger = logging.getLogger("polemarch")
@@ -32,7 +31,7 @@ class Variable(BModel):
         return "{}={}".format(self.key, self.value)
 
 
-class AbstractVarsQuerySet(ACLQuerySet):
+class AbstractVarsQuerySet(BQuerySet):
     use_for_related_fields = True
 
     @transaction.atomic
@@ -52,7 +51,7 @@ class AbstractVarsQuerySet(ACLQuerySet):
 
 
 class AbstractModel(ACLModel):
-    objects     = BManager.from_queryset(AbstractVarsQuerySet)
+    objects     = AbstractVarsQuerySet.as_manager()
     name        = models.CharField(max_length=512,
                                    default=uuid.uuid1)
     variables   = GenericRelation(Variable, related_query_name="variables",
@@ -66,6 +65,8 @@ class AbstractModel(ACLModel):
         'ansible_ssh_private_key_file',
         'ansible_become_pass',
     ]
+
+    BOOLEAN_VARS = []
 
     def __unicode__(self):  # pragma: no cover
         _vars = " ".join(["{}={}".format(k, v)
@@ -102,7 +103,13 @@ class AbstractModel(ACLModel):
                 output_field=models.IntegerField(),
             ),
         ).order_by("name_sorter", "key")
-        return OrderedDict(qs.values_list('key', 'value'))
+        vars_dict = OrderedDict(qs.values_list('key', 'value'))
+        for bool_var in self.BOOLEAN_VARS:
+            value = vars_dict.get(bool_var, None)
+            if value is None:
+                continue
+            vars_dict[bool_var] = True if value == "True" else False
+        return vars_dict
 
     def get_generated_vars(self):
         tmp = None
