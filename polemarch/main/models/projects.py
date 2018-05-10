@@ -51,6 +51,31 @@ class Project(AbstractModel):
     class SyncError(Exception):
         pass
 
+    class ReadMe(object):
+
+        def __init__(self, project):
+            self.project = project
+            self.content = None
+            self.ext     = None
+            self.set_readme()
+
+        def set_readme(self):
+            md  = None
+            rst = None
+            for file in os.listdir(self.project.path):
+                if file.lower() == 'readme.md':
+                    md = file
+                if file.lower() == 'readme.rst':
+                    rst = file
+            if rst is not None:
+                file = open(self.project.path + '/' + rst)
+                self.content = file.read()
+                self.ext = os.path.splitext(rst)[1]
+            elif md is not None:
+                file = open(self.project.path + '/' + md)
+                self.content = file.read()
+                self.ext = os.path.splitext(md)[1]
+
     HIDDEN_VARS = [
         'repo_password',
     ]
@@ -179,3 +204,18 @@ class Project(AbstractModel):
     @property
     def branch(self):
         return self.repo_class.get_branch_name()
+
+    def __get_readme(self):
+        readme = getattr(self, 'readme', None)
+        if readme is None:
+            self.readme = self.ReadMe(self)
+            return self.readme
+        return readme
+
+    @property
+    def readme_content(self):
+        return self.__get_readme().content
+
+    @property
+    def readme_ext(self):
+        return self.__get_readme().ext
