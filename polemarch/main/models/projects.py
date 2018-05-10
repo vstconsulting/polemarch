@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 import os
 import logging
-from collections import OrderedDict
-
 import six
 from django.conf import settings
 from django.utils import timezone
@@ -16,7 +14,7 @@ from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
 from ..utils import ModelHandlers
 from .base import ManyToManyFieldACL
-from ..tasks import SendHook
+from .hooks import Hook
 
 
 logger = logging.getLogger("polemarch")
@@ -68,15 +66,6 @@ class Project(AbstractModel):
 
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
-
-    def get_vars(self):
-        vars_dict = super(Project, self).get_vars()
-        if 'repo_sync_on_run' in vars_dict:
-            repo_sync_on_run = vars_dict['repo_sync_on_run']
-            vars_dict['repo_sync_on_run'] = (
-                vars_dict['repo_sync_on_run']
-            )
-        return vars_dict
 
     def get_hook_data(self, when):
         data = super(Project, self).get_hook_data(when)
@@ -142,21 +131,8 @@ class Project(AbstractModel):
         kwargs.update(extra)
         return kwargs
 
-    def _send_hook(self, when, kind, kwargs):
-        msg = OrderedDict(execution_type=kind, when=when)
-        inventory = kwargs['inventory']
-        if isinstance(inventory, hosts_models.Inventory):
-            inventory = inventory.get_hook_data(when)
-        msg['target'] = OrderedDict(
-            name=kwargs['target'],
-            inventory=inventory,
-            project=kwargs['project'].get_hook_data(when)
-        )
-        if kwargs['history'] is not None:
-            msg['history'] = kwargs['history'].get_hook_data(when)
-        else:
-            msg['history'] = None
-        SendHook.delay(when, msg)
+    def hook(self, when, msg):
+        Hook.objects.execute(when, msg)
 
     def _sync_before(self, history):
         if not self.vars.get('repo_sync_on_run', False):
@@ -179,7 +155,6 @@ class Project(AbstractModel):
         if sync:
             self._send_hook('on_execution', kind, kwargs)
             task_class(**kwargs)
-            self._send_hook('after_execution', kind, kwargs)
         else:
             task_class.delay(**kwargs)
         return history.id if history is not None else history

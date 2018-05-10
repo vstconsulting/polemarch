@@ -346,12 +346,6 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
         self.assertEqual(history.executor, self.user)
-        history.initiator = 1
-        history.initiator_type = 'template'
-        self.assertEqual(
-            history.initiator_object,
-            self.get_model_class("Template").objects.get(id=history.initiator)
-        )
         self.get_model_class('History').objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, ""), "OFFLINE")
@@ -828,6 +822,10 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEqual(history.initiator_type, "template")
         self.assertEqual(history.initiator, tmplt['id'])
         self.assertEqual(history.executor.id, tmplt['owner']['id'])
+        self.assertEqual(
+            history.initiator_object,
+            self.get_model_filter('Template', pk=tmplt['id']).get()
+        )
         # test module execution
         ansible_args = []
         module_data = dict(
@@ -1165,18 +1163,21 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
             execution_time=3600
             )
 
-        self.details_test(
-            url + "{}/".format(self.histories[3].id),
-            mode="task.yml",
-            status="RUN", project=self.ph.id,
-            #  Commented because DRF broke API by fields
-            # start_time=self.histories[0].start_time.strftime(df),
-            # stop_time=self.histories[0].stop_time.strftime(df),
-            raw_inventory="inventory",
-            inventory=self.history_inventory.id,
-            executor=None, initiator_type="project",
-            execution_time=144000
-        )
+        pached_method = 'polemarch.main.models.tasks.History._get_seconds_from_time'
+        with patch(pached_method) as time_mock:
+            time_mock.return_value = 144000
+            self.details_test(
+                url + "{}/".format(self.histories[3].id),
+                mode="task.yml",
+                status="RUN", project=self.ph.id,
+                #  Commented because DRF broke API by fields
+                # start_time=self.histories[0].start_time.strftime(df),
+                # stop_time=self.histories[0].stop_time.strftime(df),
+                raw_inventory="inventory",
+                inventory=self.history_inventory.id,
+                executor=None, initiator_type="project",
+                execution_time=144000
+            )
 
         result = self.get_result("get", "{}?status={}".format(url, "OK"))
         self.assertEqual(result["count"], 1, result)
