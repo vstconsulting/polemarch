@@ -54,6 +54,10 @@ class Project(AbstractModel):
         'repo_password',
     ]
 
+    BOOLEAN_VARS = [
+        'repo_sync_on_run'
+    ]
+
     EXTRA_OPTIONS = {
         'initiator': 0,
         'initiator_type': 'project',
@@ -64,6 +68,15 @@ class Project(AbstractModel):
 
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
+
+    def get_vars(self):
+        vars_dict = super(Project, self).get_vars()
+        if 'repo_sync_on_run' in vars_dict:
+            repo_sync_on_run = vars_dict['repo_sync_on_run']
+            vars_dict['repo_sync_on_run'] = (
+                vars_dict['repo_sync_on_run']
+            )
+        return vars_dict
 
     def get_hook_data(self, when):
         data = super(Project, self).get_hook_data(when)
@@ -165,7 +178,6 @@ class Project(AbstractModel):
         history = kwargs['history']
         if sync:
             self._send_hook('on_execution', kind, kwargs)
-            self._sync_before(history)
             task_class(**kwargs)
             self._send_hook('after_execution', kind, kwargs)
         else:

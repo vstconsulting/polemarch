@@ -186,6 +186,7 @@ class AnsibleCommand(object):
         self.history.revision = project.revision
         self.history.save()
         self.executor = Executor(self.history)
+        self.project._sync_before(self.history)
 
     def get_args(self, target, extra_args):
         return [self.path_to_ansible, target,
