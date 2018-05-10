@@ -132,6 +132,7 @@ class AnsibleCommand(object):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
+        self.__will_raise_exception = False
 
     def __generate_arg_file(self, value):
         file = tmp_file(value)
@@ -217,9 +218,11 @@ class AnsibleCommand(object):
             self.history.raw_stdout = "{}".format(exception.output)
             self.history.status = self.status_codes.get(exception.returncode,
                                                         default_code)
-        else:
-            self.history.raw_stdout = self.history.raw_stdout + str(exception)
-            self.history.status = default_code
+            return
+        elif isinstance(exception, self.project.SyncError):
+            self.__will_raise_exception = True
+        self.history.raw_stdout = self.history.raw_stdout + str(exception)
+        self.history.status = default_code
 
     def execute(self, target, inventory, history, project, **extra_args):
         try:
@@ -231,6 +234,8 @@ class AnsibleCommand(object):
             self.history.raw_stdout = self.executor.execute(args, self.workdir)
         except Exception as exception:
             self.error_handler(exception)
+            if self.__will_raise_exception:
+                raise
         finally:
             inventory_object = getattr(self, "inventory_object", None)
             inventory_object and inventory_object.close()
