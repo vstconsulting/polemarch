@@ -25,6 +25,6 @@ PyMySQL
 python-memcached
 
 # Ansible required packages
-ansible>=2.1, <=2.4.3
+ansible>=2.1, <=2.5.2
 paramiko<=2.4.0
 pywinrm[kerberos]==0.3.0
