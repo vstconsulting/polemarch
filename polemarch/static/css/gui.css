@@ -734,6 +734,10 @@ table{
 .pm-treeview.hover-li .pm-treeview-menu>li,
 .pm-treeview-active.hover-li .pm-treeview-menu>li{
     display: block;
+}
+
+.pm-treeview.hover-li .pm-treeview-menu>li,
+.sidebar-mini.sidebar-collapse .sidebar-menu> .pm-treeview-active.hover-li .pm-treeview-menu>li{
     box-shadow: 2px 1px 3px rgba(0,0,0,0.1);
 }
 

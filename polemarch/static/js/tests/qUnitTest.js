@@ -1935,7 +1935,7 @@ window.qunitTestsArray.push({
 
         $.when(pmProjects.updateItem(project_id)).done(function()
         {
-            if(pmProjects.model.items[project_id].vars.repo_sync_on_run == "True")
+            if(pmProjects.model.items[project_id].vars.repo_sync_on_run == true)
             {
                 assert.ok(true, 'Успешно update add Item');
                 render(done)
