@@ -162,7 +162,7 @@ class Project(AbstractModel):
     def hook(self, when, msg):
         Hook.objects.execute(when, msg)
 
-    def _sync_before(self, history):
+    def sync_on_execution_handler(self, history):
         if not self.vars.get('repo_sync_on_run', False):
             return
         try:

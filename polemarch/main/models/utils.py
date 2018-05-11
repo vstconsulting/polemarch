@@ -189,10 +189,10 @@ class AnsibleCommand(object):
             self.inventory_object.raw
         )
         self.history.status = "RUN"
+        self.project.sync_on_execution_handler(self.history)
         self.history.revision = project.revision
         self.history.save()
         self.executor = Executor(self.history)
-        self.project._sync_before(self.history)
 
     def _send_hook(self, when):
         msg = OrderedDict(execution_type=self.history.kind, when=when)

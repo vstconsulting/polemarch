@@ -506,7 +506,7 @@ class raise_context(assertRaises):
         with self.__class__(self._excepts, **self._kwargs):
             return func(*args, **kwargs)
         type, value, traceback_obj = sys.exc_info()
-        if type is not None:
+        if type is not None:  # nocv
             logger.debug(traceback.format_exc())
         return type, value, traceback_obj
 
