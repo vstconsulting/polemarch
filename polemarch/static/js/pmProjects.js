@@ -360,7 +360,11 @@ pmProjects.model.page_item = {
             link:function(){ return '#'},
         },
     ],
-    sections:[],
+    sections:[
+        function(section, item_id){
+            return spajs.just.render("project_readme", { item_id: item_id, pmObj: pmProjects})
+        }
+    ],
     /**
      * @param {Integer} item_id Идентификатор редактируемого элемента
      * @returns {String} То что подставится в шаблон на title

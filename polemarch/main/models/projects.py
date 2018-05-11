@@ -15,6 +15,8 @@ from ..exceptions import PMException
 from ..utils import ModelHandlers
 from .base import ManyToManyFieldACL
 from .hooks import Hook
+from docutils.core import publish_parts
+from markdown2 import Markdown
 
 
 logger = logging.getLogger("polemarch")
@@ -60,21 +62,26 @@ class Project(AbstractModel):
             self.set_readme()
 
         def set_readme(self):
-            md  = None
-            rst = None
-            for file in os.listdir(self.project.path):
-                if file.lower() == 'readme.md':
-                    md = file
-                if file.lower() == 'readme.rst':
-                    rst = file
-            if rst is not None:
-                file = open(self.project.path + '/' + rst)
-                self.content = file.read()
-                self.ext = os.path.splitext(rst)[1]
-            elif md is not None:
-                file = open(self.project.path + '/' + md)
-                self.content = file.read()
-                self.ext = os.path.splitext(md)[1]
+            if os.path.exists(self.project.path):
+                md  = None
+                rst = None
+                for file in os.listdir(self.project.path):
+                    if file.lower() == 'readme.md':
+                        md = file
+                    if file.lower() == 'readme.rst':
+                        rst = file
+                if rst is not None:
+                    file = open(self.project.path + '/' + rst)
+                    # self.content = file.read()
+                    self.content = publish_parts(file.read(),
+                                                 writer_name='html')['html_body']
+                    self.ext = os.path.splitext(rst)[1]
+                elif md is not None:
+                    file = open(self.project.path + '/' + md)
+                    markdowner = Markdown()
+                    # self.content = file.read()
+                    self.content = markdowner.convert(file.read())
+                    self.ext = os.path.splitext(md)[1]
 
     HIDDEN_VARS = [
         'repo_password',

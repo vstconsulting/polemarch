@@ -168,16 +168,21 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         delattr(project, 'readme')
 
         with open(project.path+"/readme.md", "w") as f:
-            f.write("# test README.md")
+            f.write("# test README.md \n **bold** \n *italic* \n")
         self.get_result("post", project_url + "sync/", 200)
-        self.assertEqual(project.readme_content, "# test README.md")
+        self.assertEqual(project.readme_content,
+                         "<h1>test README.md</h1>\n\n<p><strong>bold</strong>" +
+                         " \n <em>italic</em> </p>\n")
         self.assertEqual(project.readme_ext, ".md")
         delattr(project, 'readme')
 
         with open(project.path+"/readme.rst", "w") as f:
-            f.write("test README.rst")
+            f.write("test README.rst \n **bold** \n *italic* \n")
         self.get_result("post", project_url + "sync/", 200)
-        self.assertEqual(project.readme_content, "test README.rst")
+        self.assertEqual(project.readme_content,
+                         '<div class="document">\n<dl class="docutils">\n<dt>' +
+                         'test README.rst</dt>\n<dd><strong>bold</strong>\n' +
+                         '<em>italic</em></dd>\n</dl>\n</div>\n')
         self.assertEqual(project.readme_ext, ".rst")
 
         self.get_result("delete", project_url)
