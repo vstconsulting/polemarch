@@ -314,23 +314,25 @@
 
 
 <script type="text/x-just" data-just="project_readme">
-    <% if(pmObj.model.items[item_id].readme_content != null) { %>
-        <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                     <%- capitalizeString(pmObj.model.items[item_id].name) %> readme <br>
-                    <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
-                    </div>
-                </div>
-                <div class="box-body">
-                    <div class="row">
-                        <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
-                            <%= trim(pmObj.model.items[item_id].readme_content) %>
+    <~ pmObj.model.items[item_id].readme_content >
+        <% if(pmObj.model.items[item_id].readme_content != null) { %>
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                         Readme<% if(pmObj.model.items[item_id].readme_ext != null) { %><%= pmObj.model.items[item_id].readme_ext %> <% }  %> <br>
+                        <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
                         </div>
                     </div>
-                </div>
-             </div>
-        </section>
-    <% } %>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="readme_content col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                                <%= trim(pmObj.model.items[item_id].readme_content) %>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+        <% } %>
+    <~>
 </script>

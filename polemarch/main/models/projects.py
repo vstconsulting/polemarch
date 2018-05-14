@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import os
 import logging
 import six
+from docutils.core import publish_parts
+from markdown2 import Markdown
 from django.conf import settings
 from django.utils import timezone
 from django.core.validators import ValidationError
@@ -15,8 +17,6 @@ from ..exceptions import PMException
 from ..utils import ModelHandlers
 from .base import ManyToManyFieldACL
 from .hooks import Hook
-from docutils.core import publish_parts
-from markdown2 import Markdown
 
 
 logger = logging.getLogger("polemarch")
@@ -72,14 +72,12 @@ class Project(AbstractModel):
                         rst = file
                 if rst is not None:
                     file = open(self.project.path + '/' + rst)
-                    # self.content = file.read()
                     self.content = publish_parts(file.read(),
                                                  writer_name='html')['html_body']
                     self.ext = os.path.splitext(rst)[1]
                 elif md is not None:
                     file = open(self.project.path + '/' + md)
                     markdowner = Markdown()
-                    # self.content = file.read()
                     self.content = markdowner.convert(file.read())
                     self.ext = os.path.splitext(md)[1]
 

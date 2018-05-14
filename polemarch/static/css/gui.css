@@ -940,6 +940,32 @@ table{
 }
 
 
+.readme_content {
+    word-wrap: break-word;
+}
+
+.readme_content h1 {
+    font-size: 24px;
+}
+
+.readme_content h2 {
+    font-size: 20px;
+}
+
+.readme_content h3 {
+    font-size: 18px;
+}
+
+@media (min-width: 1200px) {
+    .readme_content img {
+        max-width: 60%;
+        width: auto;
+    }
+}
+
+
+
+
 @media (max-width: 1200px) {
     .hidden-1200 {
         display: none;
