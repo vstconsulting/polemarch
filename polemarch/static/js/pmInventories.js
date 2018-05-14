@@ -1621,14 +1621,22 @@ pmInventories.importInventoriesAndOpen = function(inventory)
     }).promise()
 }
 
-pmInventories.showGroupVarsModal = function(opt)
+pmInventories.showGroupVarsModal = function(item_index)
 {
-    return jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "group"+opt.name)
+    var scroll_el = "#imported_groups";
+    if ($(scroll_el).length != 0)  {
+        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
+    }
+    pmInventories.openEditItemModal('groups', item_index)
 }
 
-pmInventories.showHostVarsModal = function(opt)
+pmInventories.showHostVarsModal = function(item_index)
 {
-    return jsonEditor.jsonEditorScrollTo("ansible_ssh_private_key_file", "host"+opt.name)
+    var scroll_el = "#imported_hosts";
+    if ($(scroll_el).length != 0)  {
+        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
+    }
+    pmInventories.openEditItemModal('hosts', item_index);
 }
 
 pmInventories.showInventoryVarsModal = function(opt)
@@ -1656,11 +1664,7 @@ pmInventories.importInventory = function(inventory)
             if (val.vars.ansible_ssh_private_key_file !== undefined && !/-----BEGIN RSA PRIVATE KEY-----/.test(val.vars.ansible_ssh_private_key_file)) {
                 // <!--Вставка файла -->
                 $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-                //pmInventories.showHostVarsModal({group: 'all', name: val.name});
-                var scroll_el = "#imported_hosts";
-                if ($(scroll_el).length != 0)  {
-                    $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
-                }
+                pmInventories.showHostVarsModal(i);
                 def2.reject()
                 return def2.promise();
             }
@@ -1676,11 +1680,7 @@ pmInventories.importInventory = function(inventory)
             {
                 // <!--Вставка файла -->
                 $.notify("Error in field ansible_ssh_private_key_file invalid value", "error");
-                //pmInventories.showGroupVarsModal({name:i});
-                var scroll_el = "#imported_groups";
-                if ($(scroll_el).length != 0)  {
-                    $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
-                }
+                pmInventories.showGroupVarsModal(i);
                 def2.reject()
                 return def2.promise();
             }
@@ -2195,6 +2195,18 @@ pmInventories.copyItem = function(item_id)
     return def.promise();
 }
 
+
+pmInventories.importedHostsIsEmpty = function(hosts_arr)
+{
+    for (var i in hosts_arr)
+    {
+        if(hosts_arr[i] !== undefined)
+        {
+            return false;
+        }
+    }
+    return true;
+}
 
 
 
