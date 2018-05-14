@@ -815,7 +815,7 @@
                                     class="form-control disabled"
                                     disabled=""
                                     maxlength="255">
-                                    <%= pmHistory.model.items[item_id].justText('execution_time', function(v){ return v ? moment(v*1000).format('HH:mm:ss') : ''; }) %>
+                                    <%= pmHistory.model.items[item_id].justText('execution_time', function(v){ return v ? moment(v*1000).tz('UTC').format('HH:mm:ss') : ''; }) %>
 
                             </div>
                             <div class="help-block"></div>
