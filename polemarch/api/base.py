@@ -57,9 +57,8 @@ class QuerySetMixin(rest_views.APIView):
                 " or override the `get_queryset()` method."
                 % self.__class__.__name__
             )
-            self.queryset = getattr(
-                self.model.objects, 'cleared', self.model.objects.all
-            )()
+            qs = self.model.objects.all()
+            self.queryset = getattr(qs, 'cleared', qs.all)()
         if self.kwargs.get("pk", None) is None:
             self.queryset = self.get_extra_queryset()
         return self._base_get_queryset()

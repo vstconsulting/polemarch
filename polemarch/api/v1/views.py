@@ -278,7 +278,8 @@ class BulkViewSet(rest_views.APIView):
     def get_object(self, item, pk, access="editable"):
         serializer_class = self.get_serializer_class(item)
         model = serializer_class.Meta.model
-        obj = model.objects.cleared().get(pk=pk)
+        qs = model.objects.all()
+        obj = getattr(qs, 'cleared', qs.all)().get(pk=pk)
         if not getattr(obj.acl_handler, access + "_by")(self.request.user):
             raise PermissionDenied(
                 "You don't have permission to this object."
