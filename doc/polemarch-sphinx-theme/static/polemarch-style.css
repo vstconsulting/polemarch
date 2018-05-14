@@ -258,6 +258,17 @@ li.toctree-l1.current>a {
     padding: 12px 5px 12px 10px!important;
 }
 
+/* beginning of styles for badge(label) with versions on Read The Docs */
+.rst-versions {
+    z-index: 3000!important;
+}
+
+.rst-current-version > span:first-child {
+    margin-top: 10px!important;
+}
+
+
+/* end of styles for badge(label) with versions on Read The Docs */
 
 
 @media (max-width: 767px) {
