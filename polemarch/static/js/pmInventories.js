@@ -1623,19 +1623,19 @@ pmInventories.importInventoriesAndOpen = function(inventory)
 
 pmInventories.showGroupVarsModal = function(item_index)
 {
-    var scroll_el = "#imported_groups";
-    if ($(scroll_el).length != 0)  {
-        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
-    }
+    // var scroll_el = "#imported_groups";
+    // if ($(scroll_el).length != 0)  {
+    //     $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
+    // }
     pmInventories.openEditItemModal('groups', item_index)
 }
 
 pmInventories.showHostVarsModal = function(item_index)
 {
-    var scroll_el = "#imported_hosts";
-    if ($(scroll_el).length != 0)  {
-        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
-    }
+    // var scroll_el = "#imported_hosts";
+    // if ($(scroll_el).length != 0)  {
+    //     $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 700);
+    // }
     pmInventories.openEditItemModal('hosts', item_index);
 }
 

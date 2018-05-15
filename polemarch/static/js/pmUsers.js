@@ -367,6 +367,9 @@ pmUsers.model.profile_page = {
     sections:[
         function(){
             return spajs.just.render("WidgetsSettingsFromProfile");
+        },
+        function(){
+            return spajs.just.render("chart_line_settings");
         }
     ],
     onUpdate:function(result)
@@ -640,7 +643,7 @@ pmUsers.showProfile = function (holder, menuInfo, data)
  *Функция, сохраняющая все настройки профиля пользоваетля.
  */
 pmUsers.updateProfile = function (item_id) {
-    return $.when(pmUsers.updateItem(item_id), pmDashboard.saveWigdetsOptionsFromProfile()).done(function ()
+    return $.when(pmUsers.updateItem(item_id), pmDashboard.saveAllDashboardSettingsFromProfile()).done(function ()
     {
         $.notify("Profile was successfully updated", "success");
     }).fail(function ()
