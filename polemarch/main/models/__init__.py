@@ -32,7 +32,6 @@ logger = logging.getLogger('polemarch')
 def send_hook(when, target):
     msg = OrderedDict(when=when)
     msg['target'] = target
-    logger.info('Sending {} hooks...'.format(when))
     Hook.objects.execute(when, msg)
 
 
@@ -234,3 +233,8 @@ def polemarch_hook(instance, **kwargs):
 @receiver(signals.post_save, sender=BaseUser)
 def create_settings_for_user(instance, **kwargs):
     UserSettings.objects.get_or_create(user=instance)
+
+
+@receiver(signals.pre_save, sender=Template)
+def update_ptasks_with_templates(instance, **kwargs):
+    instance.periodic_tasks.all().update(project=instance.project)
