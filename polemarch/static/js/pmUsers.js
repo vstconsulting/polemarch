@@ -643,13 +643,23 @@ pmUsers.showProfile = function (holder, menuInfo, data)
  *Функция, сохраняющая все настройки профиля пользоваетля.
  */
 pmUsers.updateProfile = function (item_id) {
-    return $.when(pmUsers.updateItem(item_id), pmDashboard.saveAllDashboardSettingsFromProfile()).done(function ()
+    var def = new $.Deferred();
+    $.when(pmUsers.updateItem(item_id)).done(function ()
     {
-        $.notify("Profile was successfully updated", "success");
+        $.when(pmDashboard.saveAllDashboardSettingsFromProfile()).done(function()
+        {
+            $.notify("Profile was successfully updated", "success");
+            def.resolve();
+        }).fail(function(){
+            $.notify("Dashboard settings were not updated", "error");
+            def.reject();
+        })
     }).fail(function ()
     {
         $.notify("Profile was not updated", "error");
-    }).promise()
+        def.reject();
+    })
+    return def.promise();
 }
 
 
