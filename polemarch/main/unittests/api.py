@@ -1,6 +1,7 @@
 from ..tests._base import BaseTestCase
 from ...api.v1.serializers import ModelRelatedField
-from ...api.urls import router_v1, v1
+from ...api.urls import router
+from ...api.v1 import views as v1
 
 
 class ModelRelatedFieldTestCase(BaseTestCase):
@@ -10,6 +11,7 @@ class ModelRelatedFieldTestCase(BaseTestCase):
 
 class RoutersTestCase(BaseTestCase):
     def test_uregister(self):
+        router_v1 = router.routers[0][1]
         router_v1.unregister("history")
         for pattern in router_v1.get_urls():
             self.assertIsNone(pattern.regex.search("history/1/"))
