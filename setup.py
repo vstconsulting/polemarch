@@ -56,6 +56,7 @@ ext_list = [
     "polemarch.api.handlers",
     "polemarch.api.permissions",
     "polemarch.api.routers",
+    "polemarch.api.signals",
     "polemarch.api.urls",
     "polemarch.main.models.base",
     "polemarch.main.models.hosts",
