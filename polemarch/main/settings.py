@@ -408,7 +408,7 @@ HOOKS = {
 
 HOOKS_DIR = config.get("main", "hooks_dir", fallback="/tmp")
 
-
+API_URL = 'api'
 API = {
     r'v1': {
         r'users': {'view': 'polemarch.api.v1.views.UserViewSet'},

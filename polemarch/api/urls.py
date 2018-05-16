@@ -9,5 +9,5 @@ router.generate_routers(settings.API)
 
 # Register globals
 urls = [
-    url(r'^api/', include(router.urls)),
+    url(r'^{}/'.format(settings.API_URL), include(router.urls)),
 ]
