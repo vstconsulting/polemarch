@@ -914,6 +914,38 @@ pmTasksTemplates.addItem = function()
 }
 
 
+/**
+ * Функция предназначена для загрузки всех шаблонов(task, module),
+ * привязанных к определенному проекту.
+ * @param number project_id - id of project
+ */
+pmTasksTemplates.loadAllItemsFromProject = function(project_id)
+{
+    var thisObj = this;
+    return spajs.ajax.Call({
+        url: hostname + "/api/v1/" + this.model.name + "/",
+        type: "GET",
+        contentType: 'application/json',
+        data: "project="+project_id,
+        success: function (data)
+        {
+            thisObj.model.itemslist = data
+
+            for (var i in data.results)
+            {
+                var val = thisObj.afterItemLoad(data.results[i])
+                thisObj.model.items.justWatch(val.id);
+                thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
+            }
+        },
+        error: function (e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+        }
+    });
+}
+
 tabSignal.connect("polemarch.start", function()
 {
     // Tasks Templates

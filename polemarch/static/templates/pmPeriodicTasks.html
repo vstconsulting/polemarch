@@ -43,7 +43,7 @@
                                         <div class="ico-off fa  fa-toggle-off"></div>
                                     </th>
                                     <th>Name</th>
-                                    <th style="width: 400px;" class="hidden-sm visible-lg">Playbook</th>
+                                    <th style="width: 400px;" class="hidden-sm visible-lg">Link</th>
                                     <th style="width: 95px;" class="hidden-xs">Kind</th>
                                     <th style="width: 95px;" class="hidden-xs">Type</th>
                                     <th style="width: 95px;" class="hidden-xs">Actions</th>
@@ -62,8 +62,18 @@
                                                     onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('name') %></a>
                                         </td>
                                         <td class="hidden-sm visible-lg">
-                                            <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
-                                                    onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('mode') %></a>
+                                            <% if(pmPeriodicTasks.model.items[valid].kind == "PLAYBOOK" || pmPeriodicTasks.model.items[valid].kind == "MODULE") { %>
+                                                <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
+                                                        onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('mode') %></a>
+                                            <% } else { %>
+                                                    <% if(pmPeriodicTasks.model.items[valid].template_opt == null) { %>
+                                                        <a href="/?template/<%- pmTasksTemplates.model.items[pmPeriodicTasks.model.items[valid].template].kind %>/<%- pmPeriodicTasks.model.items[valid].template %>" class="item-name"
+                                                        onclick="return spajs.openURL(this.href);" ><%= pmTasksTemplates.model.items[pmPeriodicTasks.model.items[valid].template].name %></a>
+                                                    <% } else { %>
+                                                         <a href="/?template/<%- pmTasksTemplates.model.items[pmPeriodicTasks.model.items[valid].template].kind %>/<%- pmPeriodicTasks.model.items[valid].template %>/option/<%- pmPeriodicTasks.model.items[valid].template_opt %>" class="item-name"
+                                                        onclick="return spajs.openURL(this.href);" ><%= pmTasksTemplates.model.items[pmPeriodicTasks.model.items[valid].template].name %> [<%= pmPeriodicTasks.model.items[valid].template_opt %>]</a>
+                                                    <% } %>
+                                            <% } %>
                                         </td>
                                         <td class="hidden-xs">
                                             <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
@@ -172,6 +182,7 @@
                     style="width:100%" >
                 <option value="PLAYBOOK" <% if(pmPeriodicTasks.model.items[item_id].kind == 'PLAYBOOK'){ %>selected<% } %> >Playbook</option>
                 <option value="MODULE" <% if(pmPeriodicTasks.model.items[item_id].kind == 'MODULE'){ %>selected<% } %> >Module</option>
+                <option value="TEMPLATE" <% if(pmPeriodicTasks.model.items[item_id].kind == 'TEMPLATE'){ %>selected<% } %> >Template</option>
             </select>
             <div class="help-block"></div>
         </div> 
@@ -199,6 +210,34 @@
                     args:{value:pmPeriodicTasks.model.items[item_id].args }
                 }) 
             %> 
+        </div>
+
+        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'TEMPLATE' }) %>">
+            <%= pmPeriodicTasks.projectTemplatesAutocompletefiled.render(pmPeriodicTasks, {
+                name:'template',
+                title:'Template',
+                getFiledValue:function(item_id){
+                    if(pmPeriodicTasks.model.items[item_id].template_opt != null)
+                    {
+                        return pmPeriodicTasks.model.items[item_id].template + '/' + pmPeriodicTasks.model.items[item_id].template_opt;
+                    }
+                    else
+                    {
+                        return pmPeriodicTasks.model.items[item_id].template;
+                    }
+                },
+                onchange:function(event){
+                    console.log("onchange", event)
+                    if(/[^0-9]/mg.test(event.value))
+                    {
+                        pmPeriodicTasks.selectInventory()
+                    }
+                    else
+                    {
+                        pmPeriodicTasks.selectInventory(event.value)
+                    }
+                }
+            }, item_id, {}) %>
         </div>
 
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
@@ -355,6 +394,7 @@
                                         style="width:100%" >
                                     <option value="PLAYBOOK" selected >Playbook</option>
                                     <option value="MODULE" >Module</option>
+                                    <option value="TEMPLATE" >Template</option>
                                 </select>
                                 <div class="help-block"></div>
                             </div>
@@ -374,7 +414,25 @@
                                         class="form-control"
                                         maxlength="255">
                                 <div class="help-block"></div>
-                            </div> 
+                            </div>
+
+                            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'TEMPLATE' }) %>">
+                                <%= pmPeriodicTasks.projectTemplatesAutocompletefiled.render(pmPeriodicTasks, {
+                                name:'template',
+                                title:'Template',
+                                onchange:function(event){
+                                    console.log("onchange", event)
+                                    if(/[^0-9]/mg.test(event.value))
+                                    {
+                                        pmPeriodicTasks.selectInventory()
+                                    }
+                                    else
+                                    {
+                                        pmPeriodicTasks.selectInventory(event.value)
+                                    }
+                                }
+                            }, null, {}) %>
+                            </div>
                         </div>
                         
                         <div class="<%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
@@ -441,4 +499,41 @@
         </div>
     </section>
 </script>
- 
+
+
+<!-- Шаблон для автокоплита шаблонов текущего проекта -->
+<script type="text/x-just" data-just="filed_type_projectTemplatesAutocomplete">
+    <% if(item_id){ %>
+        <label class="control-label" >Template from project</label>
+        <select class="form-control select2 inventory-source-value" id="templates-autocomplete" data-placeholder="Select template" style="width:100%"  onchange="if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:this.value})" >
+            <% for(var i in pmTasksTemplates.model.itemslist.results){ var val = pmTasksTemplates.model.itemslist.results[i] %>
+                <option
+                    <% if(pmObj.model.items[item_id].template == val.id && pmObj.model.items[item_id].template_opt == null){ %>  selected  <% } %>
+                    value="<%- val.id %>"><%- val.name %>
+                </option>
+                <% if(val.options_list.length != 0) { %>
+                    <% for (var j in val.options_list) { %>
+                        <option <% if(pmObj.model.items[item_id].template == val.id && pmObj.model.items[item_id].template_opt == val.options_list[j]){ %>  selected  <% } %>
+                            value="<%- val.id %>/<%- val.options_list[j] %>">
+                                <%- val.name %> [<%- val.options_list[j] %>]
+                        </option>
+                    <% } %>
+                <% } %>
+            <% } %>
+        </select>
+        <div class="help-block"></div>
+    <% }else{ %>
+        <label class="control-label" >Template from project</label>
+        <select class="form-control select2 inventory-source-value" id="templates-autocomplete"  data-placeholder="Select template" style="width:100%"  onchange="if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:this.value})">
+            <% for(var i in pmTasksTemplates.model.itemslist.results){ var val = pmTasksTemplates.model.itemslist.results[i] %>
+                <option value="<%- val.id %>"><%- val.name %></option>
+                <% if(val.options_list.length != 0) { %>
+                    <% for (var j in val.options_list) { %>
+                        <option value="<%- val.id %>/<%- val.options_list[j] %>"><%- val.name %> [<%- val.options_list[j] %>]</option>
+                    <% } %>
+                <% } %>
+            <% } %>
+        </select>
+        <div class="help-block"></div>
+    <% } %>
+</script>

@@ -1359,6 +1359,8 @@ Periodic tasks
            "project":7,
            "inventory":8,
            "save_result": true,
+           "template": null,
+           "template_opt": null,
            "enabled": true,
            "vars":{
 
@@ -1372,11 +1374,12 @@ Periodic tasks
    :>json string type: |ptask_type_details|
    :>json string schedule: |ptask_schedule_details|
    :>json string mode: playbook or module to run periodically.
-   :>json string kind: either this task is playbook running (``PLAYBOOK``) or
-     module running (``MODULE``).
+   :>json string kind: |ptask_kind_def|
    :>json number project: id of project, which this task belongs to.
    :>json number inventory: id of inventory for which must execute_playbook playbook.
    :>json boolean save_result: if ``save_result`` is true, the result will be saved.
+   :>json number template: |ptask_template_def|
+   :>json string template_opt: |ptask_template_opt_def|
    :>json boolean enabled: if ``enabled`` is true, the periodic task will be enabled.
    :>json object vars: |ptask_vars_def|
    :>json string url: url to this specific periodic task.
@@ -1384,6 +1387,14 @@ Periodic tasks
 .. |ptask_notes_def| replace:: not required field for some user's notes, for example,
    for what purpose this periodic task was created or something like this.
 
+.. |ptask_kind_def| replace:: ``PLAYBOOK`` (if this task runs playbook), ``MODULE``
+   (if this task runs module) or ``TEMPLATE`` (if this task runs template).
+
+.. |ptask_template_def| replace::  id of template (if kind is ``PLAYBOOK`` or ``MODULE``,
+   this field will be equal to null).
+
+.. |ptask_template_opt_def| replace::  name of template option (if kind is ``PLAYBOOK``
+   or ``MODULE`` of if this periodic task executes template without option, this field will be equal to null).
 
 .. |ptask_details_ref| replace:: **Response JSON Object:** response json
    fields are the same as in :http:get:`/api/v1/periodic-tasks/{id}/`.
@@ -1441,34 +1452,32 @@ Periodic tasks
               {
                  "id":10,
                  "name":"periodic-test",
-                 "type":"INTERVAL",
-                 "schedule":"60",
+                 "type":"CRONTAB",
+                 "schedule":"60* */2 sun,fri 1-15 *",
                  "mode":"collect_data.yml",
                  "kind":"PLAYBOOK",
-                 "project": 12,
+                 "project":7,
                  "inventory":8,
                  "save_result": true,
+                 "template": null,
+                 "template_opt": null,
                  "enabled": true,
-                 "vars":{
-
-                 },
-                 "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/10/?format=json"
+                 "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/10/"
               },
               {
                  "id":11,
                  "name":"periodic-test2",
-                 "type":"CRONTAB",
-                 "schedule":"* */2 sun,fri 1-15 *",
-                 "mode":"do_greatest_evil.yml",
-                 "kind":"PLAYBOOK",
-                 "project": 12,
+                 "type":"INTERVAL",
+                 "schedule":"20",
+                 "mode":"",
+                 "kind":"TEMPLATE",
+                 "project":7,
                  "inventory":8,
                  "save_result": true,
+                 "template": 1,
+                 "template_opt": "some-vars",
                  "enabled": true,
-                 "vars":{
-
-                 },
-                 "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/11/?format=json"
+                 "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/11/"
               }
            ]
         }
@@ -1502,7 +1511,11 @@ Periodic tasks
           "mode": "touch_the_clouds.yml",
           "kind": "PLAYBOOK",
           "project": 7,
-          "inventory": 8
+          "inventory": 8,
+          "save_result": true,
+          "template": null,
+          "template_opt": null,
+          "enabled": true,
           "vars":{
 
            },
@@ -1523,6 +1536,8 @@ Periodic tasks
         "project": 7,
         "inventory": 8,
         "save_result": true,
+        "template": null,
+        "template_opt": null,
         "enabled": true,
         "vars":{
 
@@ -1551,10 +1566,7 @@ Periodic tasks
 
       {
           "type": "INTERVAL",
-          "schedule": "25",
-          "mode": "touch_the_clouds.yml",
-          "project": 7,
-          "inventory": 8
+          "schedule": "60"
       }
 
    Results:
@@ -1566,13 +1578,18 @@ Periodic tasks
         "name":"new-periodic-test",
         "notes":"",
         "type": "INTERVAL",
-        "schedule": "25",
+        "schedule": "60",
         "mode": "touch_the_clouds.yml",
         "kind": "PLAYBOOK",
         "project": 7,
         "inventory": 8,
         "save_result": true,
+        "template": null,
+        "template_opt": null,
         "enabled": true,
+        "vars":{
+
+         },
         "url": "http://127.0.0.1:8080/api/v1/periodic-tasks/14/?format=api"
     }
 
@@ -1594,16 +1611,20 @@ Periodic tasks
 
       {
           "name":"new-periodic-test",
+          "notes":"",
           "type": "INTERVAL",
-          "schedule": "25",
+          "schedule": "60",
           "mode": "touch_the_clouds.yml",
           "kind": "PLAYBOOK",
           "project": 7,
           "inventory": 8,
           "save_result": true,
+          "template": null,
+          "template_opt": null,
           "enabled": true,
-          "vars": {}
+          "vars":{
 
+          }
       }
 
    Results:

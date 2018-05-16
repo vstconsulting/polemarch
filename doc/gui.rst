@@ -527,6 +527,11 @@ As you can see there are 2 sections on this page: "New task" and "Adding new arg
   the ansible module name and Polemarch will suggest you appropriate name values.
   This field is available for kind=module only.
 
+* **template from project** - name of template from this project. This field has autocomplete, so you can just start typing
+  the template name and Polemarch will suggest you appropriate name values. Also it is possible to choose template with some option.
+  Options' name will be shown in square brackets, for example, "template_name [template_option_name]".
+  This field is available for kind=template only.
+
 * **args** - arguments for ansible module. This field is available for kind=module only.
 
 * **type** - type of schedule. It can be either "Interval schedule" or "Cron style schedule".

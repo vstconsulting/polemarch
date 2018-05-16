@@ -9,6 +9,50 @@ pmPeriodicTasks.model.className = "pmPeriodicTasks"
 
 pmPeriodicTasks.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete()
 
+/**
+ * Для ввода шаблона
+ * @type Object
+ */
+pmPeriodicTasks.filed.projectTemplatesAutocomplete = inheritance(filedsLib.filed.simpleText)
+pmPeriodicTasks.filed.projectTemplatesAutocomplete.type = 'projectTemplatesAutocomplete'
+pmPeriodicTasks.filed.projectTemplatesAutocomplete.getValue = function(pmObj, filed)
+{
+    var template = $("#templates-autocomplete").val()
+
+    return template;
+}
+
+/**
+ * Функция для рендера поля
+ * @type Object
+ */
+pmPeriodicTasks.filed.projectTemplatesAutocomplete.render = function(pmObj, filed, item_id, opt)
+{
+    var html = spajs.just.render('filed_type_'+this.type, {pmObj:pmObj, filed:filed, item_id:item_id, filedObj:this, opt:opt})
+    return spajs.just.onInsert(html, function()
+    {
+        $("#templates-autocomplete").select2({ width: '100%' });
+
+        if(filed.onchange && item_id)
+        {
+            filed.onchange({value:filed.getFiledValue.apply(pmObj, [item_id])})
+        }
+        else if(filed.onchange)
+        {
+            if(pmTasksTemplates.model.itemslist.results[0])
+            {
+                filed.onchange({value:pmTasksTemplates.model.itemslist.results[0].id})
+            }
+            else
+            {
+                filed.onchange({value:""})
+            }
+        }
+    });
+}
+
+pmPeriodicTasks.projectTemplatesAutocompletefiled = new pmPeriodicTasks.filed.projectTemplatesAutocomplete();
+
 
 pmPeriodicTasks.copyAndEdit = function(item_id)
 {
@@ -64,7 +108,7 @@ pmPeriodicTasks.copyItem = function(item_id)
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
-                            success: function(data)
+                success: function(data)
                 {
                     thisObj.model.items[data.id] = data
                     def.resolve(data.id)
@@ -157,7 +201,7 @@ pmPeriodicTasks.execute = function(project_id, item_id)
         type: "POST",
         data:JSON.stringify({}),
         contentType:'application/json',
-                success: function(data)
+        success: function(data)
         {
             $.notify("Started", "success");
             if(data && data.history_id)
@@ -234,7 +278,7 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
     }
     var project_id = data.reg[1];
 
-    return $.when(this.searchItems(project_id, 'project'), pmProjects.loadItem(project_id)).done(function()
+    return $.when(this.searchItems(project_id, 'project'), pmProjects.loadItem(project_id), pmTasksTemplates.loadAllItemsFromProject(project_id)).done(function()
     {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_list', {query:"", project_id:project_id}))
     }).fail(function()
@@ -276,7 +320,7 @@ pmPeriodicTasks.showNewItemPage = function(holder, menuInfo, data)
     setActiveMenuLi();
     var project_id = data.reg[1];
     var thisObj = this;
-    return $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
+    return $.when(pmTasks.searchItems(project_id, "project"), pmProjects.loadItem(project_id), pmInventories.loadAllItems(), pmTasksTemplates.loadAllItemsFromProject(project_id)).done(function()
     {
         thisObj.model.newitem = {type:'INTERVAL', kind:'PLAYBOOK'}
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {project_id:project_id}))
@@ -459,7 +503,7 @@ pmPeriodicTasks.model.page_item = {
                 return false;
             }
         }
-        else
+        else if(data.kind == "PLAYBOOK")
         {
             data.mode = $("#periodic-tasks_"+item_id+"_playbook").val()
             if(!data.mode)
@@ -467,6 +511,21 @@ pmPeriodicTasks.model.page_item = {
                 $.notify("Playbook name is empty", "error");
                 return false;
             }
+        }
+        else
+        {
+            var template_val = pmPeriodicTasks.projectTemplatesAutocompletefiled.getValue();
+            var template_val_arr = template_val.split("/");
+            data.template = template_val_arr[0];
+            if(template_val_arr[1] !== undefined)
+            {
+                data.template_opt = template_val_arr[1];
+            }
+            else
+            {
+                data.template_opt = null;
+            }
+
         }
 
         if(data.type == "CRONTAB")
@@ -502,7 +561,8 @@ pmPeriodicTasks.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[2];
     var project_id = data.reg[1];
 
-    $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(), pmProjects.loadItem(project_id)).done(function()
+    $.when(pmPeriodicTasks.loadItem(item_id), pmTasks.loadAllItems(), pmInventories.loadAllItems(),
+        pmProjects.loadItem(project_id), pmTasksTemplates.loadAllItemsFromProject(project_id)).done(function()
     {
         var tpl = thisObj.model.name+'_page'
         if(!spajs.just.isTplExists(tpl))
@@ -606,7 +666,7 @@ pmPeriodicTasks.addItem = function(project_id)
             return def.promise();
         }
     }
-    else
+    else if(data.kind == "PLAYBOOK")
     {
         data.mode = $("#new_periodic-tasks_playbook").val()
         if(!data.mode)
@@ -615,6 +675,21 @@ pmPeriodicTasks.addItem = function(project_id)
             def.reject();
             return def.promise();
         }
+    }
+    else
+    {
+        var template_val = pmPeriodicTasks.projectTemplatesAutocompletefiled.getValue();
+        var template_val_arr = template_val.split("/");
+        data.template = template_val_arr[0];
+        if(template_val_arr[1] !== undefined)
+        {
+            data.template_opt = template_val_arr[1];
+        }
+        else
+        {
+            data.template_opt = null;
+        }
+
     }
 
     if(data.type == "CRONTAB")
@@ -649,7 +724,7 @@ pmPeriodicTasks.addItem = function(project_id)
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(data),
-                success: function(data)
+        success: function(data)
         {
             $.notify("periodic task created", "success");
 
@@ -674,7 +749,7 @@ pmPeriodicTasks.loadItem = function(item_id)
         type: "GET",
         contentType:'application/json',
         data: "",
-                success: function(data)
+        success: function(data)
         {
             if(data.kind == "MODULE")
             {

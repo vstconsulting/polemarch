@@ -316,9 +316,10 @@ class PeriodicTask(AbstractModel):
         else:
             data = self.template.get_data_with_options(self.template_opt)
             data.pop('inventory', None)
+            kind = self.template._exec_types[self.template.kind]
             args = [
-                self.template.kind.upper(),
-                data.pop(self.template.kind.lower()),
+                kind.upper(),
+                data.pop(kind),
                 self.template.inventory_object
             ]
             kwargs.update(data)
