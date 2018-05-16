@@ -68,6 +68,24 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                          data=json.dumps([inventory]))
         return inventory, host
 
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_execute_with_hostlist_comma(self, subprocess_function):
+        def side_effect(call_args, *args, **kwargs):
+            print(call_args, args, kwargs)
+            return "Ok"
+
+        subprocess_function.side_effect = side_effect
+        inventory_hosts = '8.8.8.8,9.9.9.9,10.10.10.10'
+        execute_data = dict(inventory=inventory_hosts, playbook="first.yml", sync=True)
+        execute_data = json.dumps(execute_data)
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=execute_data)
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertEqual(call_args[3], inventory_hosts)
+        subprocess_function.reset_mock()
+
     @patch('polemarch.main.models.projects.Project.sync')
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute(self, subprocess_function, sync):
