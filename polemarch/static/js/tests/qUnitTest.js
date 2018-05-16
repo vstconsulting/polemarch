@@ -706,6 +706,38 @@ window.qunitTestsArray.push({
             render(done)
         })
     });
+
+    syncQUnit.addTest('Открытие profile текущего пользователя', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"profile/"+my_user_id})).done(function()
+        {
+            assert.ok(true, 'Успешно открыто меню profile');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при открытиии меню profile');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Сохранение profile текущего пользователя', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(pmUsers.updateProfile(my_user_id)).done(function()
+        {
+            assert.ok(true, 'Успешно сохранен profile');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при сохранении profile');
+            render(done)
+        })
+    });
 }})
 
 

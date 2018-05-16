@@ -624,7 +624,7 @@ pmUsers.showProfile = function (holder, menuInfo, data)
     var thisObj = this;
     //console.log(menuInfo, data)
 
-    return $.when(pmDashboard.getUserWidgetSettingsFromAPI(), this.loadItem(data.reg[1])).done(function ()
+    return $.when(pmDashboard.getUserDashboardSettingsFromAPI(), this.loadItem(data.reg[1])).done(function ()
     {
         var tpl = "profile_page"
         if (!spajs.just.isTplExists(tpl))
