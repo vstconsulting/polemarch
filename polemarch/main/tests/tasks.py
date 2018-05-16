@@ -703,6 +703,48 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEquals(subprocess_function.call_count, 1)
         self.assertCount(self.get_model_class('History').objects.all(), count)
 
+        # Test with kind - Template
+        tmpl_with_opts = dict(
+            kind="Module",
+            name='Test opts',
+            data=dict(
+                module="shell",
+                group="all",
+                project=self.periodic_project_id,
+                inventory=self.inventory.id,
+                args="ls -la",
+                vars=dict(
+                    forks=8,
+                ),
+            ),
+            options=dict(
+                one=dict(group='test_group'),
+                two=dict(args='pwd', vars=dict(forks=1))
+            )
+        )
+        tmplt_obj = self.get_model_class('Template').objects.create(**tmpl_with_opts)
+        data = dict(
+            kind='TEMPLATE', template=tmplt_obj.id, template_opt='one',
+            schedule="10", type="INTERVAL"
+        )
+        ptask_data = self.get_result("post", url, 201, data=json.dumps(data))
+        self.assertEqual(ptask_data["project"], self.periodic_project_id)
+        subprocess_function.reset_mock()
+        ScheduledTask.delay(ptask_data['id'])
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertIn("shell", call_args)
+        self.assertIn("test_group", call_args)
+
+        # Check update periodic tasks for Templates changes
+        p = self.get_model_class('Project').objects.create(vars=dict(repo_type="MANUAL"))
+        tmplt_data = tmplt_obj.data
+        tmplt_data['project'] = p.id
+        tmplt_obj.data = tmplt_data
+        tmplt_obj.save()
+        ptask_data = self.get_result("get", url+"{}/".format(ptask_data['id']))
+        self.assertEqual(ptask_data["project"], p.id)
+
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_periodictask_inventory_file(self, subprocess_function):
         url = "/api/v1/periodic-tasks/"

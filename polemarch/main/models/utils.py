@@ -205,7 +205,6 @@ class AnsibleCommand(object):
             project=self.project.get_hook_data(when)
         )
         msg['history'] = self.history.get_hook_data(when)
-        logger.info("Sending execution hooks...")
         self.project.hook(when, msg)
 
     def get_args(self, target, extra_args):
