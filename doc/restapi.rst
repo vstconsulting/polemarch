@@ -3255,57 +3255,79 @@ Users
       Host: example.com
       Accept: application/json, text/javascript
 
-        {
-         "pmwTasksTemplatesWidget": {
-           "active": true,
-           "sortNum": 8,
-           "collapse": true
-         },
-         "pmwUsersCounter": {
-           "active": true,
-           "sortNum": 5,
-           "collapse": false
-         },
-         "pmwProjectsCounter": {
-           "active": true,
-           "sortNum": 4,
-           "collapse": false
-         },
-         "pmwHostsCounter": {
-           "active": true,
-           "sortNum": 0,
-           "collapse": false
-         },
-         "pmwInventoriesCounter": {
-           "active": true,
-           "sortNum": 2,
-           "collapse": false
-         },
-         "pmwGroupsCounter": {
-           "active": true,
-           "sortNum": 1,
-           "collapse": false
-         },
-         "pmwChartWidget": {
-           "active": true,
-           "sortNum": 6,
-           "collapse": false
-         },
-         "pmwModulesTemplatesWidget": {
-           "active": true,
-           "sortNum": 9,
-           "collapse": true
-         },
-         "pmwTemplatesCounter": {
-           "active": true,
-           "sortNum": 3,
-           "collapse": false
-         },
-         "pmwAnsibleModuleWidget": {
-           "active": true,
-           "sortNum": 7,
-           "collapse": true
-         }
+      {
+          "chartLineSettings": {
+              "ok": {
+                  "active": true
+              },
+              "all_tasks": {
+                  "active": true
+              },
+              "interrupted": {
+                  "active": true
+              },
+              "delay": {
+                  "active": true
+              },
+              "error": {
+                  "active": true
+              },
+              "offline": {
+                  "active": true
+              }
+          },
+          "widgetSettings": {
+              "pmwTasksTemplatesWidget": {
+                  "active": false,
+                  "sortNum": 8,
+                  "collapse": false
+              },
+              "pmwUsersCounter": {
+                  "active": true,
+                  "sortNum": 5,
+                  "collapse": false
+              },
+              "pmwProjectsCounter": {
+                  "active": true,
+                  "sortNum": 3,
+                  "collapse": false
+              },
+              "pmwHostsCounter": {
+                  "active": true,
+                  "sortNum": 0,
+                  "collapse": false
+              },
+              "pmwInventoriesCounter": {
+                  "active": true,
+                  "sortNum": 2,
+                  "collapse": false
+              },
+              "pmwGroupsCounter": {
+                  "active": true,
+                  "sortNum": 1,
+                  "collapse": false
+              },
+              "pmwChartWidget": {
+                  "active": true,
+                  "sortNum": 6,
+                  "collapse": false
+              },
+              "pmwModulesTemplatesWidget": {
+                  "active": false,
+                  "sortNum": 9,
+                  "collapse": false
+              },
+              "pmwTemplatesCounter": {
+                  "active": true,
+                  "sortNum": 4,
+                  "collapse": false
+              },
+              "pmwAnsibleModuleWidget": {
+                  "active": true,
+                  "sortNum": 7,
+                  "collapse": true
+              }
+          }
       }
 
    Results:
@@ -3313,62 +3335,89 @@ Users
    .. sourcecode:: js
 
         {
-         "pmwTasksTemplatesWidget": {
-           "active": true,
-           "sortNum": 8,
-           "collapse": true
-         },
-         "pmwUsersCounter": {
-           "active": true,
-           "sortNum": 5,
-           "collapse": false
-         },
-         "pmwProjectsCounter": {
-           "active": true,
-           "sortNum": 4,
-           "collapse": false
-         },
-         "pmwHostsCounter": {
-           "active": true,
-           "sortNum": 0,
-           "collapse": false
-         },
-         "pmwInventoriesCounter": {
-           "active": true,
-           "sortNum": 2,
-           "collapse": false
-         },
-         "pmwGroupsCounter": {
-           "active": true,
-           "sortNum": 1,
-           "collapse": false
-         },
-         "pmwChartWidget": {
-           "active": true,
-           "sortNum": 6,
-           "collapse": false
-         },
-         "pmwModulesTemplatesWidget": {
-           "active": true,
-           "sortNum": 9,
-           "collapse": true
-         },
-         "pmwTemplatesCounter": {
-           "active": true,
-           "sortNum": 3,
-           "collapse": false
-         },
-         "pmwAnsibleModuleWidget": {
-           "active": true,
-           "sortNum": 7,
-           "collapse": true
-         }
-      }
+             "chartLineSettings": {
+                 "ok": {
+                     "active": true
+                 },
+                 "all_tasks": {
+                     "active": true
+                 },
+                 "interrupted": {
+                     "active": true
+                 },
+                 "delay": {
+                     "active": true
+                 },
+                 "error": {
+                     "active": true
+                 },
+                 "offline": {
+                     "active": true
+                 }
+             },
+             "widgetSettings": {
+                 "pmwTasksTemplatesWidget": {
+                     "active": false,
+                     "sortNum": 8,
+                     "collapse": false
+                 },
+                 "pmwUsersCounter": {
+                     "active": true,
+                     "sortNum": 5,
+                     "collapse": false
+                 },
+                 "pmwProjectsCounter": {
+                     "active": true,
+                     "sortNum": 3,
+                     "collapse": false
+                 },
+                 "pmwHostsCounter": {
+                     "active": true,
+                     "sortNum": 0,
+                     "collapse": false
+                 },
+                 "pmwInventoriesCounter": {
+                     "active": true,
+                     "sortNum": 2,
+                     "collapse": false
+                 },
+                 "pmwGroupsCounter": {
+                     "active": true,
+                     "sortNum": 1,
+                     "collapse": false
+                 },
+                 "pmwChartWidget": {
+                     "active": true,
+                     "sortNum": 6,
+                     "collapse": false
+                 },
+                 "pmwModulesTemplatesWidget": {
+                     "active": false,
+                     "sortNum": 9,
+                     "collapse": false
+                 },
+                 "pmwTemplatesCounter": {
+                     "active": true,
+                     "sortNum": 4,
+                     "collapse": false
+                 },
+                 "pmwAnsibleModuleWidget": {
+                     "active": true,
+                     "sortNum": 7,
+                     "collapse": true
+                 }
+             }
+        }
 
+   :>json object chartLineSettings: object with Dashboard chart line settings.
+   :>json boolean active: |users_settings_lines_active|
+   :>json object widgetSettings: object with Dashboard widgets settings.
    :>json string pmw{widget_Name}: widget name.
    :>json boolean active: |users_settings_active|
    :>json number sortNum: |users_settings_sortNum|
    :>json boolean collapse: |users_settings_collapse|
+
+.. |users_settings_lines_active| replace:: one of Dashboard chart line settings, if ``active`` is ``true``, this line will be visible on Dashboard.
 
 .. |users_settings_active| replace:: one of widget's settings, if ``active`` is ``true``, this widget will be visible on Dashboard.
 
@@ -3402,58 +3451,83 @@ Users
    .. sourcecode:: js
 
         {
-         "pmwTasksTemplatesWidget": {
-           "active": true,
-           "sortNum": 8,
-           "collapse": true
-         },
-         "pmwUsersCounter": {
-           "active": true,
-           "sortNum": 5,
-           "collapse": false
-         },
-         "pmwProjectsCounter": {
-           "active": true,
-           "sortNum": 4,
-           "collapse": false
-         },
-         "pmwHostsCounter": {
-           "active": true,
-           "sortNum": 0,
-           "collapse": false
-         },
-         "pmwInventoriesCounter": {
-           "active": true,
-           "sortNum": 2,
-           "collapse": false
-         },
-         "pmwGroupsCounter": {
-           "active": true,
-           "sortNum": 1,
-           "collapse": false
-         },
-         "pmwChartWidget": {
-           "active": true,
-           "sortNum": 6,
-           "collapse": false
-         },
-         "pmwModulesTemplatesWidget": {
-           "active": true,
-           "sortNum": 9,
-           "collapse": true
-         },
-         "pmwTemplatesCounter": {
-           "active": true,
-           "sortNum": 3,
-           "collapse": false
-         },
-         "pmwAnsibleModuleWidget": {
-           "active": true,
-           "sortNum": 7,
-           "collapse": true
-         }
-      }
+             "chartLineSettings": {
+                 "ok": {
+                     "active": true
+                 },
+                 "all_tasks": {
+                     "active": true
+                 },
+                 "interrupted": {
+                     "active": true
+                 },
+                 "delay": {
+                     "active": true
+                 },
+                 "error": {
+                     "active": true
+                 },
+                 "offline": {
+                     "active": true
+                 }
+             },
+             "widgetSettings": {
+                 "pmwTasksTemplatesWidget": {
+                     "active": false,
+                     "sortNum": 8,
+                     "collapse": false
+                 },
+                 "pmwUsersCounter": {
+                     "active": true,
+                     "sortNum": 5,
+                     "collapse": false
+                 },
+                 "pmwProjectsCounter": {
+                     "active": true,
+                     "sortNum": 3,
+                     "collapse": false
+                 },
+                 "pmwHostsCounter": {
+                     "active": true,
+                     "sortNum": 0,
+                     "collapse": false
+                 },
+                 "pmwInventoriesCounter": {
+                     "active": true,
+                     "sortNum": 2,
+                     "collapse": false
+                 },
+                 "pmwGroupsCounter": {
+                     "active": true,
+                     "sortNum": 1,
+                     "collapse": false
+                 },
+                 "pmwChartWidget": {
+                     "active": true,
+                     "sortNum": 6,
+                     "collapse": false
+                 },
+                 "pmwModulesTemplatesWidget": {
+                     "active": false,
+                     "sortNum": 9,
+                     "collapse": false
+                 },
+                 "pmwTemplatesCounter": {
+                     "active": true,
+                     "sortNum": 4,
+                     "collapse": false
+                 },
+                 "pmwAnsibleModuleWidget": {
+                     "active": true,
+                     "sortNum": 7,
+                     "collapse": true
+                 }
+             }
+        }
 
+   :>json object chartLineSettings: object with Dashboard chart line settings.
+   :>json boolean active: |users_settings_lines_active|
+   :>json object widgetSettings: object with Dashboard widgets settings.
    :>json string pmw{widget_Name}: widget name.
    :>json boolean active: |users_settings_active|
    :>json number sortNum: |users_settings_sortNum|
