@@ -46,8 +46,9 @@
                                     <th style="width: 400px;" class="hidden-sm visible-lg">Link</th>
                                     <th style="width: 95px;" class="hidden-xs">Kind</th>
                                     <th style="width: 95px;" class="hidden-xs">Type</th>
-                                    <th style="width: 95px;" class="hidden-xs">Actions</th>
-                                    <th style="width: 95px;" class="visible-xs">Actions</th>
+                                    <th style="width: 80px" class="hidden-xs hidden-sm">Active</th>
+                                    <!--<th style="width: 95px;" class="hidden-xs">Actions</th>-->
+                                    <th style="width: 95px;" >Actions</th>
                                 </tr>
                                 <% for(var i in pmPeriodicTasks.model.itemslist.results){ valid = pmPeriodicTasks.model.itemslist.results[i].id; %>
                                     <tr
@@ -83,12 +84,17 @@
                                             <a href="/?project/<%- pmPeriodicTasks.model.items[valid].project %>/periodic-task/<%- valid %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= pmPeriodicTasks.model.items[valid].justText('type') %></a>
                                         </td>
-                                        <td class="hidden-xs">
-                                            <a href="#"
-                                                class="btn btn-danger"
-                                                onclick="spajs.showLoader(pmPeriodicTasks.deleteItem(<%- valid %>)); return false;" >Delete</a>
+                                        <td style="width: 80px" class="hidden-xs hidden-sm pt-enabled pt-enabled-<%- valid %>">
+                                                <% if(pmPeriodicTasks.model.items[valid].enabled) { %>
+                                                    <i class="fa fa-check" style="font-size:20px;"></i>
+                                                <% } %>
                                         </td>
-                                        <td class="visible-xs">
+                                        <!--<td class="hidden-xs">-->
+                                            <!--<a href="#"-->
+                                                <!--class="btn btn-danger"-->
+                                                <!--onclick="spajs.showLoader(pmPeriodicTasks.deleteItem(<%- valid %>)); return false;" >Delete</a>-->
+                                        <!--</td>-->
+                                        <td >
                                             <div class="btn-group" role="group">
                                                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     Actions
@@ -98,6 +104,18 @@
                                                     <li>
                                                         <a href="#"
                                                             onclick="spajs.showLoader(pmPeriodicTasks.deleteItem(<%- valid %>)); return false;" >Delete</a>
+                                                    </li>
+                                                    <li>
+
+                                                            <a href="#" class="change-activation-<%- valid %>"
+                                                                onclick="spajs.showLoader(pmPeriodicTasks.changeItemActivation(<%- valid %>)); return false;" >
+                                                                <% if(pmPeriodicTasks.model.items[valid].enabled) { %>
+                                                                    Deactivate
+                                                                <% } else { %>
+                                                                    Activate
+                                                                <% } %>
+                                                            </a>
+
                                                     </li>
                                                 </ul>
                                             </div>
@@ -152,26 +170,7 @@
  
 <!-- Шаблон полей  Project Inventory и Playbook  -->
 <script type="text/x-just" data-just="filed_type_selectInventoryKindPlaybookGroupModuleAndTime"> 
-    <% if(item_id){ %>  
-        
-        <%= pmPeriodicTasks.inventoriesAutocompletefiled.render(pmPeriodicTasks, {
-            name:'inventory',
-            title:'Inventory',
-            getFiledValue:function(item_id){ 
-                return pmPeriodicTasks.model.items[item_id].inventory;
-            },
-            onchange:function(event){ 
-                console.log("onchange", event) 
-                if(/[^0-9]/mg.test(event.value))
-                {
-                    pmPeriodicTasks.selectInventory()
-                }
-                else
-                {
-                    pmPeriodicTasks.selectInventory(event.value)
-                }
-            }
-        }, item_id, {}) %> 
+    <% if(item_id){ %>
 
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
             <label class="control-label" >Kind</label>
@@ -185,7 +184,7 @@
                 <option value="TEMPLATE" <% if(pmPeriodicTasks.model.items[item_id].kind == 'TEMPLATE'){ %>selected<% } %> >Template</option>
             </select>
             <div class="help-block"></div>
-        </div> 
+        </div>
 
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'PLAYBOOK' }) %>">
             <label class="control-label" >Playbook</label>
@@ -196,7 +195,7 @@
                     class="form-control"
                     maxlength="255">
             <div class="help-block"></div>
-        </div> 
+        </div>
 
         <div class="<%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %> ">
             <~ pmPeriodicTasks.model.selectedInventory>
@@ -208,8 +207,8 @@
             <%= moduleArgsEditor.moduleFileds({
                     module:{value:pmPeriodicTasks.model.items[item_id].mode },
                     args:{value:pmPeriodicTasks.model.items[item_id].args }
-                }) 
-            %> 
+                })
+            %>
         </div>
 
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'TEMPLATE' }) %>">
@@ -240,36 +239,70 @@
             }, item_id, {}) %>
         </div>
 
-        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-            <label class="control-label" >Type</label>
-            <select
-                    onchange="pmPeriodicTasks.model.items[<%- item_id %>].type = this.value;"
-                    id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_type"
-                    class="form-control"
-                    maxlength="255">
-                    <option value="INTERVAL" <% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %>selected<% } %> >Interval schedule</option>
-                    <option value="CRONTAB" <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>selected<% } %> >Cron style schedule</option>
-            </select>
-            <div class="help-block"></div>
-        </div>
+        <~ pmPeriodicTasks.model.items[item_id].kind >
+            <% if (pmPeriodicTasks.model.items[item_id].kind != "TEMPLATE") { %>
+                <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                    <div class="row">
+                        <%= pmPeriodicTasks.inventoriesAutocompletefiled.render(pmPeriodicTasks, {
+                            name:'inventory',
+                            title:'Inventory',
+                            getFiledValue:function(item_id){
+                                return pmPeriodicTasks.model.items[item_id].inventory;
+                            },
+                            onchange:function(event){
+                                console.log("onchange", event)
+                                if(/[^0-9]/mg.test(event.value))
+                                {
+                                    pmPeriodicTasks.selectInventory()
+                                }
+                                else
+                                {
+                                    pmPeriodicTasks.selectInventory(event.value)
+                                }
+                            }
+                        }, item_id, {}) %>
+                    </div>
+                </div>
+            <% } %>
+        <~>
 
-        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'INTERVAL' }) %> ">
-            <label class="control-label" >Interval schedule</label>
-            <div class="input-group">
-                <input type="text"
-                        placeholder="Enter time interval in seconds"
-                        id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_schedule_INTERVAL"
-                        value="<% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %><%- pmPeriodicTasks.model.items[item_id].schedule %><% } %>"
-                        class="form-control"
-                        maxlength="255"
-                        onkeyup="this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+(.)/g, '$1'); $('#interval-schedule-help').html('~ '+Math.floor(this.value/3600*100)/100+'h')"
-                    >
-                <span class="input-group-addon" id="basic-addon2">sec</span>
-            </div>
-            <div class="help-block" id="interval-schedule-help">
-                <% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %>
-                        ~<%- Math.floor(pmPeriodicTasks.model.items[item_id].schedule/3600*100)/100  %>h
-                <% } %>
+
+        <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+            <div class="row">
+
+                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                    <label class="control-label" >Type</label>
+                    <select
+                            onchange="pmPeriodicTasks.model.items[<%- item_id %>].type = this.value;"
+                            id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_type"
+                            class="form-control"
+                            maxlength="255">
+                            <option value="INTERVAL" <% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %>selected<% } %> >Interval schedule</option>
+                            <option value="CRONTAB" <% if(pmPeriodicTasks.model.items[item_id].type == 'CRONTAB'){ %>selected<% } %> >Cron style schedule</option>
+                    </select>
+                    <div class="help-block"></div>
+                </div>
+
+                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('type', 'hide', function(v){ return v != 'INTERVAL' }) %> ">
+                    <label class="control-label" >Interval schedule</label>
+                    <div class="input-group">
+                        <input type="text"
+                                placeholder="Enter time interval in seconds"
+                                id="periodic-tasks_<%- pmPeriodicTasks.model.items[item_id].id %>_schedule_INTERVAL"
+                                value="<% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %><%- pmPeriodicTasks.model.items[item_id].schedule %><% } %>"
+                                class="form-control"
+                                maxlength="255"
+                                onkeyup="this.value = this.value.replace(/[^0-9]/g, '').replace(/^0+(.)/g, '$1'); $('#interval-schedule-help').html('~ '+Math.floor(this.value/3600*100)/100+'h')"
+                            >
+                        <span class="input-group-addon" id="basic-addon2">sec</span>
+                    </div>
+                    <div class="help-block" id="interval-schedule-help">
+                        <% if(pmPeriodicTasks.model.items[item_id].type == 'INTERVAL'){ %>
+                                ~<%- Math.floor(pmPeriodicTasks.model.items[item_id].schedule/3600*100)/100  %>h
+                        <% } %>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -360,27 +393,7 @@
                             </div>
                         </div>
 
-                        <div class="row">
-                           
-                            <%= pmPeriodicTasks.inventoriesAutocompletefiled.render(pmPeriodicTasks, {
-                                name:'inventory',
-                                title:'Inventory',
-                                getFiledValue:function(item_id){ 
-                                    return this.model.items[item_id].data.inventory;
-                                },
-                                onchange:function(event){ 
-                                    console.log("onchange", event) 
-                                    if(/[^0-9]/mg.test(event.value))
-                                    {
-                                        pmPeriodicTasks.selectInventory()
-                                    }
-                                    else
-                                    {
-                                        pmPeriodicTasks.selectInventory(event.value)
-                                    }
-                                }
-                            }, null, {}) %> 
-                        </div>
+
  
                         
                         <div class="row">
@@ -437,7 +450,34 @@
                         
                         <div class="<%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
                             <%= moduleArgsEditor.moduleFileds() %> 
-                        </div> 
+                        </div>
+
+
+                        <~ pmPeriodicTasks.model.newitem.kind >
+                            <% if(pmPeriodicTasks.model.newitem.kind != "TEMPLATE") { %>
+                                <div class="row">
+
+                                    <%= pmPeriodicTasks.inventoriesAutocompletefiled.render(pmPeriodicTasks, {
+                                        name:'inventory',
+                                        title:'Inventory',
+                                        getFiledValue:function(item_id){
+                                            return this.model.items[item_id].data.inventory;
+                                        },
+                                        onchange:function(event){
+                                            console.log("onchange", event)
+                                            if(/[^0-9]/mg.test(event.value))
+                                            {
+                                                pmPeriodicTasks.selectInventory()
+                                            }
+                                            else
+                                            {
+                                                pmPeriodicTasks.selectInventory(event.value)
+                                            }
+                                        }
+                                    }, null, {}) %>
+                                </div>
+                            <% } %>
+                        <~>
  
                         <div class="row">
 

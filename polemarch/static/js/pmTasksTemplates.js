@@ -223,6 +223,9 @@ pmTasksTemplates.model.page_item = {
         },
         function(section, item_id){
             return spajs.just.render("options_section_task_page", {item_id:item_id})
+        },
+        function(section, item_id){
+            return spajs.just.render("linked_periodic_tasks", {pmObj:pmTasksTemplates, item_id:item_id})
         }
     ],
     title: function(item_id){
@@ -768,7 +771,9 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
     var def = new $.Deferred();
     var thisObj = this;
     var item_id = data.reg[1]
-    $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
+    $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id),
+        pmInventories.loadAllItems(), pmTasks.loadAllItems(),
+        pmTasksTemplates.loadLinkedPeriodicTasks(item_id)).done(function()
     {
         thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
 
@@ -937,6 +942,32 @@ pmTasksTemplates.loadAllItemsFromProject = function(project_id)
                 thisObj.model.items.justWatch(val.id);
                 thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
             }
+        },
+        error: function (e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+        }
+    });
+}
+
+/**
+ * Функция предназначена для загрузки всех периодических тасок,
+ * ссылающихся на данный шаблон.
+ * @param number template_id - id of template
+ */
+pmTasksTemplates.loadLinkedPeriodicTasks = function(template_id)
+{
+    var thisObj = this;
+    return spajs.ajax.Call({
+        url: hostname + "/api/v1/periodic-tasks/",
+        type: "GET",
+        contentType: 'application/json',
+        data: "template="+template_id,
+        success: function (data)
+        {
+            thisObj.model.linkedPeriodicTask = [];
+            thisObj.model.linkedPeriodicTasks = data.results;
         },
         error: function (e)
         {

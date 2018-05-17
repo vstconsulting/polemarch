@@ -483,16 +483,8 @@ pmPeriodicTasks.model.page_item = {
         data.project = opt.project_id
 
         data.type = $("#periodic-tasks_"+item_id+"_type").val()
-        data.inventory = pmPeriodicTasks.inventoriesAutocompletefiled.getValue()
 
         data.kind = $("#periodic-tasks_"+item_id+"_kind").val()
-
-        if(!data.inventory)
-        {
-            $.notify("Invalid field `inventory` ", "error");
-            return false;
-        }
-
 
         if(data.kind == "MODULE")
         {
@@ -526,6 +518,17 @@ pmPeriodicTasks.model.page_item = {
                 data.template_opt = null;
             }
 
+        }
+
+        if(data.kind != "TEMPLATE")
+        {
+            data.inventory = pmPeriodicTasks.inventoriesAutocompletefiled.getValue()
+
+            if(!data.inventory)
+            {
+                $.notify("Invalid field `inventory` ", "error");
+                return false;
+            }
         }
 
         if(data.type == "CRONTAB")
@@ -637,7 +640,6 @@ pmPeriodicTasks.addItem = function(project_id)
 
     data.name = $("#new_periodic-tasks_name").val()
     data.type = $("#new_periodic-tasks_type").val()
-    data.inventory = pmPeriodicTasks.inventoriesAutocompletefiled.getValue()
 
     if(!data.name)
     {
@@ -645,14 +647,6 @@ pmPeriodicTasks.addItem = function(project_id)
         def.reject();
         return def.promise();
     }
-
-    if(!data.inventory)
-    {
-        $.notify("Invalid field `inventory` ", "error");
-        def.reject();
-        return def.promise();
-    }
-
 
     data.kind = $("#new_periodic-tasks_kind").val()
 
@@ -690,6 +684,17 @@ pmPeriodicTasks.addItem = function(project_id)
             data.template_opt = null;
         }
 
+    }
+
+    if(data.kind != "TEMPLATE")
+    {
+        data.inventory = pmPeriodicTasks.inventoriesAutocompletefiled.getValue()
+        if(!data.inventory)
+        {
+            $.notify("Invalid field `inventory` ", "error");
+            def.reject();
+            return def.promise();
+        }
     }
 
     if(data.type == "CRONTAB")
@@ -774,6 +779,95 @@ pmPeriodicTasks.loadItem = function(item_id)
             polemarch.showErrors(e)
         }
     });
+}
+
+/**
+ *Данная функция в зависимости от текущего значения свойства enabled
+ *вызывает функцию активации/деактивации periodic task соответственно.
+ */
+pmPeriodicTasks.changeItemActivation = function(item_id) {
+    if(pmPeriodicTasks.model.items[item_id].enabled==true)
+    {
+        return pmPeriodicTasks.deactivateItem(item_id);
+    }
+    else
+    {
+        return pmPeriodicTasks.activateItem(item_id);
+    }
+}
+
+/**
+ *Функция деактивирует periodic task, переводя значение поля enabled из true в false.
+ */
+pmPeriodicTasks.deactivateItem = function(item_id) {
+    var thisObj = this;
+    var def = new $.Deferred();
+    var data = JSON.parse(JSON.stringify(pmPeriodicTasks.model.items[item_id]));
+    data.enabled = false;
+    if(data.kind == "TEMPLATE")
+    {
+        delete data.inventory;
+        delete data.mode;
+    }
+    spajs.ajax.Call({
+        url: hostname + "/api/v1/"+thisObj.model.name+"/"+item_id+"/",
+        type: "PATCH",
+        contentType:'application/json',
+        data: JSON.stringify(data),
+        success: function(data)
+        {
+            $.notify("Periodic task was deactivated", "success");
+            pmPeriodicTasks.model.items[item_id].enabled=!pmPeriodicTasks.model.items[item_id].enabled;
+            var t=$(".change-activation-"+item_id)[0];
+            $(t).html("Activate");
+            var s=$(".pt-enabled-"+item_id)[0];
+            $(s).html("");
+            def.resolve()
+        },
+        error:function(e)
+        {
+            def.reject(e)
+        }
+    });
+
+    return def.promise();
+}
+
+/**
+ *Функция активирует periodic task, переводя значение поля enabled из false в true.
+ */
+pmPeriodicTasks.activateItem = function(item_id) {
+    var thisObj = this;
+    var def = new $.Deferred();
+    var data = JSON.parse(JSON.stringify(pmPeriodicTasks.model.items[item_id]));
+    data.enabled = true;
+    if(data.kind == "TEMPLATE")
+    {
+        delete data.inventory;
+        delete data.mode;
+    }
+    spajs.ajax.Call({
+        url: hostname + "/api/v1/"+thisObj.model.name+"/"+item_id+"/",
+        type: "PATCH",
+        contentType:'application/json',
+        data: JSON.stringify(data),
+        success: function(data)
+        {
+            $.notify("Periodic task was activated", "success");
+            pmPeriodicTasks.model.items[item_id].enabled=!pmPeriodicTasks.model.items[item_id].enabled;
+            var t=$(".change-activation-"+item_id)[0];
+            $(t).html("Deactivate");
+            var s=$(".pt-enabled-"+item_id)[0];
+            $(s).html('<i class="fa fa-check" style="font-size:20px;"></i>');
+            def.resolve()
+        },
+        error:function(e)
+        {
+            def.reject(e)
+        }
+    });
+
+    return def.promise();
 }
 
 tabSignal.connect("polemarch.start", function()

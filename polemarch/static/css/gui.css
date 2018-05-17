@@ -672,7 +672,7 @@ table{
     }
 }
 
-.user-status, .group-children, .all-only, .new_subitem {
+.user-status, .group-children, .all-only, .new_subitem, .pt-enabled {
     font-weight: bold;
     text-align: center;
     vertical-align: middle;

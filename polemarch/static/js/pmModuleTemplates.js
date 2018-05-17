@@ -118,6 +118,9 @@ pmModuleTemplates.model.page_item = {
         },
         function(section, item_id){
             return spajs.just.render("options_section", {item_id:item_id})
+        },
+        function(section, item_id){
+            return spajs.just.render("linked_periodic_tasks", {pmObj:pmModuleTemplates, item_id:item_id})
         }
     ],
     title: function(item_id){
@@ -642,7 +645,8 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
     var item_id = data.reg[1];
     var def = new $.Deferred();
     var thisObj = this;
-    $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems(), pmModuleTemplates.loadItem(item_id)).done(function()
+    $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems(),
+        pmModuleTemplates.loadItem(item_id), pmModuleTemplates.loadLinkedPeriodicTasks(item_id)).done(function()
     {
         $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).always(function()
         {
@@ -757,6 +761,32 @@ pmModuleTemplates.addItem = function()
     });
 
     return def.promise();
+}
+
+/**
+ * Функция предназначена для загрузки всех периодических тасок,
+ * ссылающихся на данный шаблон.
+ * @param number template_id - id of template
+ */
+pmModuleTemplates.loadLinkedPeriodicTasks = function(template_id)
+{
+    var thisObj = this;
+    return spajs.ajax.Call({
+        url: hostname + "/api/v1/periodic-tasks/",
+        type: "GET",
+        contentType: 'application/json',
+        data: "template="+template_id,
+        success: function (data)
+        {
+            thisObj.model.linkedPeriodicTask = [];
+            thisObj.model.linkedPeriodicTasks = data.results;
+        },
+        error: function (e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+        }
+    });
 }
 
 tabSignal.connect("polemarch.start", function()

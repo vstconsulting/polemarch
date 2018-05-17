@@ -241,6 +241,37 @@
     </div>
 </script>
 
+<!-- linked periodic tasks on task template page -->
+<script type="text/x-just" data-just="linked_periodic_tasks">
+    <% if ( pmObj.model.linkedPeriodicTasks !== undefined &&
+     pmObj.model.linkedPeriodicTasks.length != 0) { %>
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    Linked periodic tasks <br>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <% for (var i in pmObj.model.linkedPeriodicTasks) {
+                                var linked = pmObj.model.linkedPeriodicTasks[i]; %>
+                                <% if(linked.template == item_id) { %>
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                        <label class="control-label">Periodic task</label>
+                                        <a href="<%- polemarch.opt.host %>/?project/<%= linked.project %>/periodic-task/<%= linked.id %>" onclick="return spajs.openURL(this.href);">
+                                            <%= linked.name %>
+                                        </a>
+                                    </div>
+                                <% } %>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <% } %>
+</script>
+
 <script type="text/x-just" data-just="templates_new_page">
 <section class="content-header">
         <h1>
