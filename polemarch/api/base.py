@@ -26,7 +26,7 @@ class Response(_ResponseClass):
         return RestResponse(**self._asdict())
 
     @property
-    def resp_dict(self):
+    def resp_dict(self):  # nocv
         return self._asdict()
 
 

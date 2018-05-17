@@ -107,8 +107,12 @@ class AnsibleCommand(object):
 
         def get_from_file(self, inventory):
             self.__file = "{}/{}".format(self.cwd, inventory)
-            with open(self.__file, 'r') as file:
-                return file.read(), []
+            try:
+                with open(self.__file, 'r') as file:
+                    return file.read(), []
+            except IOError:
+                self.__file = inventory
+                return inventory.replace(',', '\n'), []
 
         @property
         def file(self):
@@ -232,6 +236,7 @@ class AnsibleCommand(object):
             args = self.get_args(self.target, extra.args)
             self.history.raw_stdout = self.executor.execute(args, self.workdir)
         except Exception as exception:
+            logger.error(traceback.format_exc())
             self.error_handler(exception)
             if self.__will_raise_exception:
                 raise

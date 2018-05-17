@@ -408,6 +408,28 @@ HOOKS = {
 
 HOOKS_DIR = config.get("main", "hooks_dir", fallback="/tmp")
 
+API_URL = 'api'
+API = {
+    r'v1': {
+        r'users': {'view': 'polemarch.api.v1.views.UserViewSet'},
+        r'teams': {'view': 'polemarch.api.v1.views.TeamViewSet'},
+        r'hosts': {'view': 'polemarch.api.v1.views.HostViewSet'},
+        r'groups': {'view': 'polemarch.api.v1.views.GroupViewSet'},
+        r'inventories': {'view': 'polemarch.api.v1.views.InventoryViewSet'},
+        r'projects': {'view': 'polemarch.api.v1.views.ProjectViewSet'},
+        r'tasks': {'view': 'polemarch.api.v1.views.TaskViewSet'},
+        r'periodic-tasks': {'view': 'polemarch.api.v1.views.PeriodicTaskViewSet'},
+        r'templates': {'view': 'polemarch.api.v1.views.TemplateViewSet'},
+        r'history': {'view': 'polemarch.api.v1.views.HistoryViewSet'},
+        r'ansible': {'view': 'polemarch.api.v1.views.AnsibleViewSet'},
+        r'stats': {'view': 'polemarch.api.v1.views.StatisticViewSet'},
+        r'hooks': {'view': 'polemarch.api.v1.views.HookViewSet'},
+        r'token': {'view': 'polemarch.api.v1.views.TokenView', 'type': 'view'},
+        r'_bulk': {'view': 'polemarch.api.v1.views.BulkViewSet', 'type': 'view'},
+    }
+}
+
+
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     REPO_BACKENDS["TEST"] = {
