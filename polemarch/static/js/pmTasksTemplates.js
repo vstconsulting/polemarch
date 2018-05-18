@@ -186,7 +186,6 @@ pmTasksTemplates.model.page_item = {
             link:function(){ return '#'},
             help:'Save and execute'
         },
-
         {
             class:'btn btn-info',
             function:function(item_id){
@@ -196,15 +195,14 @@ pmTasksTemplates.model.page_item = {
             link:function(){ return '#'},
             help:'Options of this template'
         },
-
         {
             class:'btn btn-info',
             function:function(item_id){
-                return "spajs.showLoader("+this.model.className+".setNewOption("+item_id+")); return false;"
+                return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/periodic-tasks'}); return false;"
             },
-            title:'Create new option',
+            title:'Periodic tasks',
             link:function(){ return '#'},
-            help:'Create new option'
+            help:'Periodic tasks linked to this template'
         },
         {
             class:'btn btn-info',
@@ -230,12 +228,6 @@ pmTasksTemplates.model.page_item = {
     sections:[
         function(section, item_id){
             return jsonEditor.editor(pmTasksTemplates.model.items[item_id].data.vars, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true});
-        },
-        function(section, item_id){
-            return spajs.just.render("options_section_task_page", {item_id:item_id})
-        },
-        function(section, item_id){
-            return spajs.just.render("linked_periodic_tasks", {pmObj:pmTasksTemplates, item_id:item_id})
         }
     ],
     title: function(item_id){
@@ -422,7 +414,6 @@ pmTasksTemplates.saveAndExecute = function(item_id)
  */
 pmTasksTemplates.setNewOption = function(item_id)
 {
-    // return spajs.openURL(window.location.href+"/new-option");
     return spajs.open({ menuId:"template/"+this.model.kind+"/"+item_id+"/new-option"});
 }
 
@@ -586,7 +577,7 @@ pmTasksTemplates.removeOption = function(item_id, option_name)
             $.notify('Option "'+optionName+'" was successfully deleted', "success");
             if(/options/.test(window.location.href) == false)
             {
-                $.when(spajs.open({ menuId:"template/"+thisObj.model.kind+"/"+data.id})).always(function(){
+                $.when(spajs.open({ menuId:"template/"+thisObj.model.kind+"/"+data.id+"/options"})).always(function(){
                     def.resolve();
                 });
             }
@@ -602,75 +593,6 @@ pmTasksTemplates.removeOption = function(item_id, option_name)
         }
     });
     return def.promise();
-}
-
-/**
- *Функция добавляет на страницу секцию для удаления/добавления опций на страницу шаблона.
- */
-pmTasksTemplates.showExistingOptionsToEdit = function (item_id) {
-    if(!item_id)
-    {
-        throw "Error in pmTasksTemplates.showExistingOptionsToEdit with item_id = `" + item_id + "`"
-    }
-
-    $("#add_existing_options_to_task_template").remove();
-    $(".content").appendTpl(spajs.just.render('add_existing_options_to_task_template', {item_id:item_id}))
-    var scroll_el = "#add_existing_options_to_task_template";
-    if ($(scroll_el).length != 0)  {
-        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
-    }
-    $("#polemarch-model-items-select").select2({ width: '100%' });
-
-}
-
-/**
- *Функция сохраняет изменения внесенные в секции для удаления/добавления опций на странице шаблона.
- */
-pmTasksTemplates.setOptionList = function(item_id, option_list)
-{
-    var thisObj=this;
-    if(!item_id)
-    {
-        throw "Error in pmTasksTemplates.setOptionList with item_id = `" + item_id + "`"
-    }
-
-    if(!option_list)
-    {
-        var options={};
-    }
-    else
-    {
-        var options=pmTasksTemplates.model.items[item_id].options;
-        for(var i in options)
-        {
-            var bool=false;
-            for(var j in option_list)
-            {
-                if(i==option_list[j])
-                {
-                    bool=true;
-                }
-            }
-            if(bool==false)
-            {
-                delete options[i];
-            }
-        }
-    }
-    return spajs.ajax.Call({
-        url: "/api/v1/templates/"+item_id+"/",
-        type: "PATCH",
-        contentType:'application/json',
-        data:JSON.stringify({options:options}),
-        success: function(data)
-        {
-            spajs.openURL(window.location.href);
-        },
-        error:function(e)
-        {
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
 }
 
 /**
@@ -983,8 +905,17 @@ pmTasksTemplates.loadLinkedPeriodicTasks = function(template_id)
         data: "template="+template_id,
         success: function (data)
         {
-            thisObj.model.linkedPeriodicTask = [];
-            thisObj.model.linkedPeriodicTasks = data.results;
+            // thisObj.model.linkedPeriodicTask = [];
+            // thisObj.model.linkedPeriodicTasks = data.results;
+            pmPeriodicTasks.model.itemslist = data
+            pmPeriodicTasks.model.items = {}
+
+            for (var i in data.results)
+            {
+                var val = pmPeriodicTasks.afterItemLoad(data.results[i])
+                pmPeriodicTasks.model.items.justWatch(val.id);
+                pmPeriodicTasks.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
+            }
         },
         error: function (e)
         {
@@ -994,7 +925,9 @@ pmTasksTemplates.loadLinkedPeriodicTasks = function(template_id)
     });
 }
 
-/////////////////////////////////////////////////////
+/**
+ * Функция открывает страницу со списком опций шаблона
+ */
 pmTasksTemplates.showOptionsList = function (holder, menuInfo, data)
 {
     setActiveMenuLi();
@@ -1017,7 +950,7 @@ pmTasksTemplates.showOptionsList = function (holder, menuInfo, data)
 }
 
 /**
- * Функция выделяет/снимает выделение со всех доступных для выделения элементов в определенной таблице subitems(hosts/groups).
+ * Функция выделяет/снимает выделение с опций в таблице списка опций.
  * @param {array} elements - массив выделенных элементов
  * @param {boolean} mode - true - добавить выделение, false - снять выделение
  * @param {string} div_id - id блока, в котором находятся данные элементы
@@ -1035,7 +968,8 @@ pmTasksTemplates.toggleSelectAllOptions = function (elements, mode, div_id)
 }
 
 /**
- * Функция выделяет/снимает выделение с одного конкретного элемента в определенной таблице subitems(hosts/groups).
+ * Функция выделяет/снимает выделение с одного конкретного элемента в определенной таблице.
+ * В данном случае в таблице со списком опций.
  * @param {object} thisEl - конкретный элемент
  * @param {string} div_id - id блока, в котором находится данный элемент
  */
@@ -1046,9 +980,11 @@ pmTasksTemplates.toggleSelectOption = function (thisEl, div_id)
 }
 
 /**
- * Функция подсчитывает количество выделенных элементов в определенной таблице subitems(hosts/groups).
- * И запоминает данное число в pmInventories.model.selectedImportedSubItems.
- * В зависимости от нового значения pmInventories.model.selectedImportedSubItems часть кнопок отображается либо скрывается.
+ * Функция подсчитывает количество выделенных элементов в определенной таблице элементов.
+ * И запоминает данное число в pmModuleTemplates.model.selectedOptionsCount,
+ * а сами элементы в pmModuleTemplates.model.selectedOptions.
+ * В зависимости от нового значения pmModuleTemplates.model.selectedOptionsCount
+ * часть кнопок отображается либо скрывается.
  * @param {string} div_id - id блока, в котором находятся данные элементы
  */
 pmTasksTemplates.countSelectedOptions = function (div_id)
@@ -1068,12 +1004,10 @@ pmTasksTemplates.countSelectedOptions = function (div_id)
     if(count==0)
     {
         $($("#"+div_id+" .actions_button")[0]).addClass("hide");
-        $($("#"+div_id+" .unselect_all")[0]).addClass("hide");
     }
     else
     {
         $($("#"+div_id+" .actions_button")[0]).removeClass("hide");
-        $($("#"+div_id+" .unselect_all")[0]).removeClass("hide");
     }
     pmTasksTemplates.model.selectedOptionsCount=count;
 }
@@ -1111,6 +1045,62 @@ pmTasksTemplates.removeSelectedOptions = function(item_id, option_names)
     });
     return def.promise();
 }
+
+/**
+ *Функция открывает список периодических тасок, созданных на основе данного шаблона.
+ */
+pmTasksTemplates.showPeriodicTasksList = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var thisObj = this;
+    var offset = 0
+    var limit = thisObj.pageSize;
+    if (data.reg && data.reg[1] > 0)
+    {
+        offset = thisObj.pageSize * (data.reg[1] - 1);
+    }
+    var template_id = data.reg[1];
+    return $.when(thisObj.loadItem(template_id), thisObj.loadLinkedPeriodicTasks(template_id)).done(function ()
+    {
+        var tpl = 'linked-to-template-periodic-tasks_list';
+        var project_id = thisObj.model.items[template_id].data.project;
+
+        $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, project_id:project_id, item_id:template_id, opt: {}}))
+    }).fail(function ()
+    {
+        $.notify("", "error");
+    })
+}
+
+/**
+ *Функция открывает страницу создания новой периодической таски для шаблона.
+ */
+pmTasksTemplates.showNewPeriodicTaskFromTemplate = function (holder, menuInfo, data)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    var item_id = data.reg[1]
+    $.when(pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems()).done(function()
+    {
+        var project_id = thisObj.model.items[item_id].data.project
+        pmPeriodicTasks.model.newitem = {type:'INTERVAL', kind:'TEMPLATE'}
+        var tpl = 'from-template-periodic-tasks_new_page'
+        if(!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_page'
+        }
+
+        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, project_id:project_id, pmObj:thisObj, opt:{}}))
+        def.resolve();
+    }).fail(function(e)
+    {
+        def.reject(e);
+    })
+
+    return def.promise()
+
+}
+
 
 /////////////////////////////////////////////////////
 
@@ -1157,6 +1147,24 @@ tabSignal.connect("polemarch.start", function()
         id:"task-options",
         urlregexp:[/^template\/Task\/([0-9]+)\/options$/, /^templates\/Task\/([0-9]+)\/options$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showOptionsList(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"task-periodic-tasks",
+        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-tasks/, /^templates\/Task\/([0-9]+)\/periodic-tasks/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showPeriodicTasksList(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"task-new-periodic-task",
+        urlregexp:[/^template\/Task\/([0-9]+)\/new-periodic-task/, /^templates\/Task\/([0-9]+)\/new-periodic-task/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showNewPeriodicTaskFromTemplate(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"task-periodic-task",
+        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/, /^templates\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showPeriodicTaskPageFromTemplate(holder, menuInfo, data);}
     })
 
 })
