@@ -164,6 +164,13 @@ pmProjects.model.page_list = {
             title:'Delete',
             link:function(){ return '#'}
         },
+    ],
+    actionsOnSelected:[
+        {
+            function:function(item){ return 'spajs.showLoader('+this.model.className+'.syncSelectedProjects()); return false;'},
+            title:'Sync all selected',
+            link:function(){ return '#'}
+        }
     ]
 }
 
@@ -724,6 +731,47 @@ pmProjects.renderBranchInput = function(item_id)
 {
     var html=spajs.just.render('branch_input', {item_id:item_id, pmObj:pmProjects});
     return html;
+}
+
+pmProjects.syncSelectedProjects = function()
+{
+    var syncBulk = [];
+    var thisObj = this;
+
+    for (var i in thisObj.model.selectedItems)
+    {
+        if (thisObj.model.selectedItems[i])
+        {
+            syncBulk.push({
+                type: "mod",
+                method: 'post',
+                data_type: 'sync',
+                item: thisObj.model.bulk_name,
+                pk: i
+            })
+        }
+    }
+
+    return $.when(spajs.ajax.Call
+    (
+        {
+            url: hostname + "/api/v1/_bulk/",
+            type: "POST",
+            contentType: 'application/json',
+            data: JSON.stringify(syncBulk)
+        })).done(function (data)
+    {
+        for (var i in syncBulk)
+        {
+            $(".item-" + syncBulk[i].pk).removeClass("selected");
+            thisObj.toggleSelect(syncBulk[i].pk, false);
+            thisObj.model.items[syncBulk[i].pk].status = "WAIT_SYNC";
+        }
+        $.notify("Synchronization of selected projects was started", "success");
+    }).fail(function(){
+        $.notify("Error with synchronization of selected projects", "error");
+    }).promise();
+
 }
 
 tabSignal.connect("polemarch.start", function()
