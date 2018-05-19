@@ -975,3 +975,7 @@ table{
         display: none;
     }
 }
+
+.hide-in-web{ 
+    display: none;
+}
