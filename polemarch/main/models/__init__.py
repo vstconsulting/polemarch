@@ -32,7 +32,8 @@ logger = logging.getLogger('polemarch')
 def send_hook(when, target):
     msg = OrderedDict(when=when)
     msg['target'] = target
-    Hook.objects.execute(when, msg)
+    if 'loaddata' not in sys.argv:
+        Hook.objects.execute(when, msg)
 
 
 @raise_context()

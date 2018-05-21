@@ -197,6 +197,13 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
 LOGIN_REDIRECT_URL = '/'
+LDAP_SERVER = config.get("main", "ldap-server", fallback=None)
+LDAP_DOMAIN = config.get("main", "ldap-default-domain", fallback='')
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'polemarch.main.auth.LdapBackend',
+]
 
 PAGE_LIMIT = config.getint("web", "page_limit", fallback=1000)
 
@@ -304,20 +311,22 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'formatter': 'standard',
             'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
         },
         'file': {
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'class': 'logging.FileHandler',
-            'filename': '/dev/null'
+            'filename': config.get("uwsgi", "log_file", fallback='/dev/null')
         },
     },
     'loggers': {
         'polemarch': {
             'handlers': ['console'],
             'level': LOG_LEVEL,
+            'propagate': True,
         },
     }
 }

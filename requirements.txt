@@ -5,6 +5,7 @@ six
 pyyaml
 sqlalchemy
 django-docs==0.2.1
+python-ldap==3.0.0
 
 # API
 djangorestframework==3.8.2
