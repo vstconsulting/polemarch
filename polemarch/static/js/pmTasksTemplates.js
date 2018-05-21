@@ -1020,7 +1020,7 @@ pmTasksTemplates.removeSelectedOptions = function(item_id, option_names)
     var def = new $.Deferred();
     for(var i in option_names)
     {
-       var optionName=option_names[i];
+        var optionName=option_names[i];
         delete pmTasksTemplates.model.items[item_id].options[optionName];
     }
     var dataToAdd1={options:{}};
@@ -1101,8 +1101,68 @@ pmTasksTemplates.showNewPeriodicTaskFromTemplate = function (holder, menuInfo, d
 
 }
 
+/**
+ * Функция рендерит шаблон для поля поиска на странице списка опций шаблона.
+ */
+pmTasksTemplates.searchFiledForTemplateOptions = function (options)
+{
+    options.className = this.model.className;
+    this.model.searchAdditionalData = options
+    return spajs.just.render('searchFiledForTemplateOptions', {opt: options});
+}
 
-/////////////////////////////////////////////////////
+/**
+ * Функция для поиска опций на странице списка опций шаблона.
+ */
+pmTasksTemplates.searchTemplateOptions = function (query, options)
+{
+    if (this.isEmptySearchQuery(query))
+    {
+        return spajs.open({menuId: 'template/Task/' + options.template_id +'/options', reopen: true});
+    }
+
+    return spajs.open({menuId: 'template/Task/' + options.template_id +'/options' + '/search/' + this.searchObjectToString(trim(query)), reopen: true});
+}
+
+/**
+ * Функция показывает результаты поиска опций шаблона.
+ */
+pmTasksTemplates.showOptionsSearchResult = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var thisObj = this;
+    var template_id = data.reg[1];
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]))
+
+    return $.when(thisObj.loadItem(data.reg[1])).done(function ()
+    {
+        var unvalidSearchOptions = [];
+        for (var i in thisObj.model.items[template_id].options_list)
+        {
+            var option_name = thisObj.model.items[template_id].options_list[i];
+            if(option_name.match(search.name) == null)
+            {
+                unvalidSearchOptions.push(option_name);
+                delete thisObj.model.items[template_id].options_list[i];
+            }
+
+        }
+
+        for(var i in unvalidSearchOptions)
+        {
+            delete thisObj.model.items[template_id].options[unvalidSearchOptions[i]];
+        }
+
+        var tpl = 'template_options_list';
+
+        $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(search.name), pmObj: thisObj, item_id:template_id, opt: {}}))
+    }).fail(function ()
+    {
+        $.notify("", "error");
+    })
+}
+
+
 
 tabSignal.connect("polemarch.start", function()
 {
@@ -1150,6 +1210,15 @@ tabSignal.connect("polemarch.start", function()
     })
 
     spajs.addMenu({
+        id:"task-options-search",
+        urlregexp:[/^template\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^templates\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^template\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^templates\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showOptionsSearchResult(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
         id:"task-periodic-tasks",
         urlregexp:[/^template\/Task\/([0-9]+)\/periodic-tasks/, /^templates\/Task\/([0-9]+)\/periodic-tasks/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showPeriodicTasksList(holder, menuInfo, data);}
@@ -1165,6 +1234,12 @@ tabSignal.connect("polemarch.start", function()
         id:"task-periodic-task",
         urlregexp:[/^template\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/, /^templates\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/],
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showPeriodicTaskPageFromTemplate(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"task-periodic-tasks-search",
+        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)$/, /^template\/Task\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResultsFromTemplate(holder, menuInfo, data);}
     })
 
 })

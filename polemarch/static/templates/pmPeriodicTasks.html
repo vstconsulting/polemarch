@@ -189,7 +189,12 @@
                 <div class="box box-info">
                     <div class="box-header with-border">
                         <div style="float:left;">Periodic tasks</div>
-
+                         <%= pmPeriodicTasks.searchFiled({query:query, project_id:project_id, template_id:item_id, template_kind:pmObj.model.kind}) %>
+                        <% if(pmPeriodicTasks.getTotalPages(pmPeriodicTasks.model.itemslist)){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= pmPeriodicTasks.paginationHtml(pmPeriodicTasks.model.itemslist) %>
+                            </div>
+                        <% } %>
                     </div>
                     <div class="box-body">
                         <table class="table table-bordered multiple-select">

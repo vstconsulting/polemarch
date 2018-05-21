@@ -4022,6 +4022,74 @@ window.qunitTestsArray.push({
         })
     });
 
+    syncQUnit.addTest('Поиск task template options', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Task/9999999999/options/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Task/9999999999/options/search/name');
+            render(done)
+        }).fail(function()
+        {
+
+            assert.ok(true, 'Ошибка при открытиии меню template/Task/9999999999/options/search/name');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Поиск task template periodic tasks', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Task/9999999999/periodic-tasks/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Task/9999999999/periodic-tasks/search/name');
+            render(done)
+        }).fail(function()
+        {
+
+            assert.ok(true, 'Ошибка при открытиии меню template/Task/9999999999/periodic-tasks/search/name');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Поиск module template options', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Module/9999999999/options/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Module/9999999999/options/search/name');
+            render(done)
+        }).fail(function()
+        {
+
+            assert.ok(true, 'Ошибка при открытиии меню template/Module/9999999999/options/search/name');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Поиск module template periodic tasks', function ( assert )
+    {
+        var done = assert.async();
+
+        $.when(spajs.open({ menuId:"template/Module/9999999999/periodic-tasks/search/name"})).done(function()
+        {
+            debugger;
+            assert.ok(false, 'Успешно открыто меню template/Module/9999999999/periodic-tasks/search/name');
+            render(done)
+        }).fail(function()
+        {
+
+            assert.ok(true, 'Ошибка при открытиии меню template/Module/9999999999/periodic-tasks/search/name');
+            render(done)
+        })
+    });
+
     syncQUnit.addTest('Страница ошибки 400 в project history', function ( assert )
     {
         var done = assert.async();

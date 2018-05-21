@@ -914,6 +914,68 @@ pmModuleTemplates.showNewPeriodicTaskFromTemplate = function (holder, menuInfo, 
 }
 
 
+/**
+ * Функция рендерит шаблон для поля поиска на странице списка опций шаблона.
+ */
+pmModuleTemplates.searchFiledForTemplateOptions = function (options)
+{
+    options.className = this.model.className;
+    this.model.searchAdditionalData = options
+    return spajs.just.render('searchFiledForTemplateOptions', {opt: options});
+}
+
+/**
+ * Функция для поиска опций на странице списка опций шаблона.
+ */
+pmModuleTemplates.searchTemplateOptions = function (query, options)
+{
+    if (this.isEmptySearchQuery(query))
+    {
+        return spajs.open({menuId: 'template/Module/' + options.template_id +'/options', reopen: true});
+    }
+
+    return spajs.open({menuId: 'template/Module/' + options.template_id +'/options' + '/search/' + this.searchObjectToString(trim(query)), reopen: true});
+}
+
+/**
+ * Функция показывает результаты поиска опций шаблона.
+ */
+pmModuleTemplates.showOptionsSearchResult = function (holder, menuInfo, data)
+{
+
+    setActiveMenuLi();
+    var thisObj = this;
+    var template_id = data.reg[1];
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]))
+
+    return $.when(thisObj.loadItem(data.reg[1])).done(function ()
+    {
+        var unvalidSearchOptions = [];
+        for (var i in thisObj.model.items[template_id].options_list)
+        {
+            var option_name = thisObj.model.items[template_id].options_list[i];
+            if(option_name.match(search.name) == null)
+            {
+                unvalidSearchOptions.push(option_name);
+                delete thisObj.model.items[template_id].options_list[i];
+            }
+        }
+
+        for(var i in unvalidSearchOptions)
+        {
+            delete thisObj.model.items[template_id].options[unvalidSearchOptions[i]];
+        }
+
+        var tpl = 'template_options_list';
+
+        $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(search.name), pmObj: thisObj, item_id:template_id, opt: {}}))
+    }).fail(function ()
+    {
+        $.notify("", "error");
+    })
+}
+
+
 tabSignal.connect("polemarch.start", function()
 {
     spajs.addMenu({
@@ -932,6 +994,15 @@ tabSignal.connect("polemarch.start", function()
         id:"Module-options",
         urlregexp:[/^template\/Module\/([0-9]+)\/options$/, /^templates\/Module\/([0-9]+)\/options$/],
         onOpen:function(holder, menuInfo, data){return pmModuleTemplates.showOptionsList(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"Module-options-search",
+        urlregexp:[/^template\/Module\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^templates\/Module\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^template\/Module\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^templates\/Module\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmModuleTemplates.showOptionsSearchResult(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
@@ -962,6 +1033,12 @@ tabSignal.connect("polemarch.start", function()
         id:"Module-periodic-task",
         urlregexp:[/^template\/Module\/([0-9]+)\/periodic-task\/([0-9]+)/, /^templates\/Module\/([0-9]+)\/periodic-task\/([0-9]+)/],
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showPeriodicTaskPageFromTemplate(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"Module-periodic-tasks-search",
+        urlregexp:[/^template\/Module\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)$/, /^template\/Module\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResultsFromTemplate(holder, menuInfo, data);}
     })
 
 })

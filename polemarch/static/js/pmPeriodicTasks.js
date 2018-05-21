@@ -313,10 +313,27 @@ pmPeriodicTasks.search = function(query, options)
 {
     if(this.isEmptySearchQuery(query))
     {
-        return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name, reopen:true});
+        if(options.template_kind === undefined)
+        {
+            return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name, reopen:true});
+        }
+        else
+        {
+            return spajs.open({ menuId:'template/'+ options.template_kind+ "/" + options.template_id +"/" + this.model.name, reopen:true});
+        }
+
     }
 
-    return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
+    if(options.template_kind === undefined)
+    {
+        return spajs.open({ menuId:'project/' + options.project_id +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query)), reopen:true});
+
+    }
+    else
+    {
+        return spajs.open({ menuId:'template/'+ options.template_kind+ "/" + options.template_id +"/" + this.model.name + "/search/"+this.searchObjectToString(trim(query)), reopen:true});
+    }
+
 }
 
 pmPeriodicTasks.showSearchResults = function(holder, menuInfo, data)
@@ -846,7 +863,46 @@ pmPeriodicTasks.showPeriodicTaskPageFromTemplate = function(holder, menuInfo, da
     return def.promise()
 }
 
+/**
+ * Функция открывет страницу для отображения результатов поиска периодических тасок,
+ * созданной на основе шаблона, и на которую перешли со страницы этого шаблона.
+ */
+pmPeriodicTasks.showSearchResultsFromTemplate = function(holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var thisObj = this;
+    var template_id = data.reg[1];
 
+
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]))
+    search['template'] = template_id
+
+    return $.when(pmTasksTemplates.loadItem(template_id), pmModuleTemplates.loadItem(template_id)).done(function(){
+        var project_id = pmTasksTemplates.model.items[template_id].data.project;
+        var pmObj = undefined;
+        if(pmTasksTemplates.model.items[template_id].kind == "Task")
+        {
+            pmObj = pmTasksTemplates;
+        }
+        else
+        {
+            pmObj = pmModuleTemplates;
+        }
+
+        return $.when(thisObj.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
+        {
+            $(holder).insertTpl(spajs.just.render('linked-to-template-periodic-tasks_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id, item_id:template_id, pmObj:pmObj}))
+        }).fail(function()
+        {
+            $.notify("", "error");
+        }).promise();
+
+    }).fail(function(){
+        $.notify("Error with loading project data", "error");
+    }).promise();
+
+
+}
 
 /**
  * @return $.Deferred
