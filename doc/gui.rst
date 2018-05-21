@@ -204,6 +204,7 @@ As you can see, the form of new GIT project creation consist of 5 fields:
 After project creation you will the next page:
 
 .. image:: gui_png/test-project.png
+.. image:: gui_png/test-project2.png
 
 As you can see at image above for GIT project
 it is possible to choose a branch to what user want to sync. In this example user will sync
@@ -221,6 +222,11 @@ Also there are 2 new fields:
   SYNC - synchronization is in progress,
   ERROR - synchronization failed,
   OK - project is synchronized.
+
+There is new section on this page:
+
+* **Reame.md** - if project has “readme.md” or “readme.rst” file in it’s project directory,
+  Polemarch will add content of this file to this section.
 
 Also there are several buttons on this page:
 
@@ -438,7 +444,9 @@ But also there are some new buttons here:
 
 * **save and execute** - this button saves all changes you have made on this page and executes this template.
 
-* **create new option** - this button opens the "Create new option" page.
+* **options** - this button opens the page with this template options list.
+
+* **periodic tasks** - this button opens the page with the list of periodic tasks based on this template.
 
 * **history** - this button opens history list of template executions.
 
@@ -452,6 +460,10 @@ Options
 Sometimes your need to keep some similar templates, which are different by only several parameters.
 In this case template options will be extremly useful for you. In every template you can create
 a lot of options which can modify this template by some parameters. Let's look at the example:
+
+.. image:: gui_png/empty-options-list.png
+
+As you can see, now there are no options for this template. Let's create the first one.
 
 .. image:: gui_png/create-new-option.png
 
@@ -513,12 +525,6 @@ As you can see there are 2 sections on this page: "New task" and "Adding new arg
 * **save in history** - if value is true, the fact of task execution will be saved in history records.
   Otherwise, no history records about this periodic task execution will be saved.
 
-* **inventory source** - source of inventory. It can be either "From database" or "From file in project dir".
-
-* **inventory from project / inventory file** - name of inventory.
-
-* **group** - name of group to which this periodic task will be executed.
-
 * **kind** - kind of task: module or playbook.
 
 * **playbook** - name of playbook. This field is available for kind=playbook only.
@@ -532,7 +538,13 @@ As you can see there are 2 sections on this page: "New task" and "Adding new arg
   Options' name will be shown in square brackets, for example, "template_name [template_option_name]".
   This field is available for kind=template only.
 
+* **group** - name of group to which this periodic task will be executed.
+
 * **args** - arguments for ansible module. This field is available for kind=module only.
+
+* **inventory source** - source of inventory. It can be either "From database" or "From file in project dir".
+
+* **inventory from project / inventory file** - name of inventory.
 
 * **type** - type of schedule. It can be either "Interval schedule" or "Cron style schedule".
 
