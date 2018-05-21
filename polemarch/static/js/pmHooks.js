@@ -1,7 +1,7 @@
 var pmHooks = inheritance(pmItems)
 pmHooks.model.name = "hooks"
 pmHooks.model.page_name = "hook"
-pmHooks.model.bulk_name = "hooks"
+pmHooks.model.bulk_name = "hook"
 pmHooks.model.className = "pmHooks"
 
 

@@ -4,7 +4,7 @@ var pmUsers = inheritance(pmItems)
 pmUsers.model.name = "users"
 pmUsers.model.page_name = "user"
 pmUsers.model.className = "pmUsers"
-pmUsers.model.bulk_name = "users"
+pmUsers.model.bulk_name = "user"
 
 pmUsers.model.page_list = {
     buttons:[

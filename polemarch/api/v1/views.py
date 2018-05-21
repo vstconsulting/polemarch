@@ -265,9 +265,9 @@ class BulkViewSet(rest_views.APIView):
         'periodictask': _op_types.keys(),
         'template': _op_types.keys(),
         'history': ['del', "get"],
-        'hooks': _op_types.keys(),
-        'users': _op_types.keys(),
-        'teams': _op_types.keys(),
+        'hook': _op_types.keys(),
+        'user': _op_types.keys(),
+        'team': _op_types.keys(),
     }
     type_to_bulk = {
         "host": "hosts",
