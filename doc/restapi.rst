@@ -873,6 +873,8 @@ Projects
            },
            "revision": "5471aeb916ee7f8754d55f159e532592b995b0ec",
            "branch": "master",
+           "readme_content": null,
+           "readme_ext": null,
            "url":"http://localhost:8080/api/v1/projects/7/"
         }
 
@@ -891,6 +893,8 @@ Projects
    :>json object owner: |project_owner_details|
    :>json string revision: ``GIT`` revision
    :>json string branch: current branch of project, to which project has been synced last time.
+   :>json string readme_content: |project_readme_content_ref|
+   :>json string readme_ext: |project_readme_ext_ref|
    :>json string url: url to this specific inventory.
 
 .. |project_notes_def| replace:: not required field for some user's notes, for example,
@@ -914,7 +918,10 @@ Projects
    could be seen in :http:get:`/api/v1/users/{id}/`.
 .. |project_details_ref| replace:: **Response JSON Object:** response json
    fields are the same as in :http:get:`/api/v1/projects/{id}/`.
-
+.. |project_readme_content_ref| replace:: if project has "readme.md" or "readme.rst" file
+   in it's project directory, this field will contain content of readme file parsed to html
+.. |project_readme_ext_ref| replace:: if project has "readme.md" or "readme.rst" file
+   in it's project directory, this field will contain extension of readme file
 .. http:get:: /api/v1/projects/
 
    Gets list of projects. |pagination_def|
@@ -1029,6 +1036,8 @@ Projects
            },
            "revision": "NO VCS",
            "branch": "NO VCS",
+           "readme_content": null,
+           "readme_ext": null,
            "url":"http://localhost:8080/api/v1/projects/9/"
         }
 
@@ -1088,6 +1097,8 @@ Projects
            },
            "revision": "NO VCS",
            "branch": "NO VCS",
+           "readme_content": null,
+           "readme_ext": null,
            "url":"http://localhost:8080/api/v1/projects/9/"
         }
 
