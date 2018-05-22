@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import sys
 import time
+import logging
 import traceback
 from subprocess import CalledProcessError, Popen, PIPE, STDOUT
 from threading import Thread
@@ -36,12 +37,15 @@ from . import exceptions as ex
 from . import __file__ as file
 
 
+logger = logging.getLogger('polemarch')
+
+
 def import_class(path):
     '''
     Get class from string-path
 
     :param path: -- string containing full python-path
-    :type path: str
+    :type path: str,unicode
     :return: -- return class or module in path
     :rtype: class, module, object
     '''
@@ -501,7 +505,10 @@ class raise_context(assertRaises):
     def execute(self, func, *args, **kwargs):
         with self.__class__(self._excepts, **self._kwargs):
             return func(*args, **kwargs)
-        return sys.exc_info()
+        type, value, traceback_obj = sys.exc_info()
+        if type is not None:  # nocv
+            logger.debug(traceback.format_exc())
+        return type, value, traceback_obj
 
     def __enter__(self):
         return self.execute
@@ -665,7 +672,7 @@ class AnsibleArgumentsReference(object):
     # Excluded args from user calls
     _EXCLUDE_ARGS = [
         # Excluded because we use this differently in code
-        'verbose', 'inventory-file', 'module-name',
+        'verbose', 'inventory-file', 'inventory', 'module-name',
         # Excluded because now we could not send any to worker proccess
         'ask-sudo-pass', 'ask-su-pass', 'ask-pass',
         'ask-vault-pass', 'ask-become-pass',

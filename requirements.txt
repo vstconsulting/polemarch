@@ -5,9 +5,10 @@ six
 pyyaml
 sqlalchemy
 django-docs==0.2.1
+python-ldap==3.0.0
 
 # API
-djangorestframework==3.7.7
+djangorestframework==3.8.2
 django-filter
 django-crispy-forms
 django-celery-beat==1.1.1
@@ -25,6 +26,6 @@ PyMySQL
 python-memcached
 
 # Ansible required packages
-ansible>=2.1, <=2.4.3
+ansible>=2.1, <=2.5.3
 paramiko<=2.4.0
 pywinrm[kerberos]==0.3.0

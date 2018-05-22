@@ -17,10 +17,19 @@
       {% block pmInlineScripts %}
       
         <script type="text/javascript">
+            
+            window.csrf_data = {
+                csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
+                csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}",
+                token: "{{ csrf_token }}"
+            };
+            
             var hostname = '{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}';
             var server_status_types = '{{server_status_types|safe}}';
 
             var polemarch_version = '{{polemarch_version}}';
+
+            var polemarch_logout_url = hostname + '{{logout_url}}';
             
             {% if user.is_authenticated %}
                 var my_user_id = '{{user.id}}' 

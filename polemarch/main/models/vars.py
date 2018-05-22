@@ -66,6 +66,8 @@ class AbstractModel(ACLModel):
         'ansible_become_pass',
     ]
 
+    BOOLEAN_VARS = []
+
     def __unicode__(self):  # pragma: no cover
         _vars = " ".join(["{}={}".format(k, v)
                           for k, v in self.vars.items()])
@@ -101,7 +103,13 @@ class AbstractModel(ACLModel):
                 output_field=models.IntegerField(),
             ),
         ).order_by("name_sorter", "key")
-        return OrderedDict(qs.values_list('key', 'value'))
+        vars_dict = OrderedDict(qs.values_list('key', 'value'))
+        for bool_var in self.BOOLEAN_VARS:
+            value = vars_dict.get(bool_var, None)
+            if value is None:
+                continue
+            vars_dict[bool_var] = True if value == "True" else False
+        return vars_dict
 
     def get_generated_vars(self):
         tmp = None

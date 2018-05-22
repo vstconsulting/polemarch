@@ -5,7 +5,6 @@ import json
 import re
 from collections import OrderedDict
 import six
-from django import dispatch
 from django.contrib.auth.models import User
 from django.db import transaction
 
@@ -16,6 +15,7 @@ from rest_framework.exceptions import PermissionDenied
 from ...main.models import Inventory
 from ...main import models, exceptions as main_exceptions
 from ..base import Response
+from ..signals import api_post_save, api_pre_save
 
 
 # NOTE: we can freely remove that because according to real behaviour all our
@@ -53,10 +53,6 @@ class DictField(serializers.CharField):
             if not isinstance(value, (dict, list))
             else value
         )
-
-
-api_pre_save = dispatch.Signal(providing_args=["instance", "user"])
-api_post_save = dispatch.Signal(providing_args=["instance", "user"])
 
 
 def with_signals(func):
@@ -287,6 +283,7 @@ class HistorySerializer(_SignalSerializer):
                   "initiator",
                   "initiator_type",
                   "executor",
+                  "revision",
                   "options",
                   "url")
 
@@ -485,7 +482,9 @@ class OneTaskSerializer(TaskSerializer):
 class PeriodictaskSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
     schedule = serializers.CharField(allow_blank=True)
-    inventory = serializers.CharField()
+    inventory = serializers.CharField(required=False)
+    project = ModelRelatedField(required=False, model=models.Project)
+    mode = serializers.CharField(required=False)
 
     class Meta:
         model = models.PeriodicTask
@@ -498,9 +497,22 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
                   'project',
                   'inventory',
                   'save_result',
+                  'template',
+                  'template_opt',
                   'enabled',
                   'vars',
                   'url',)
+
+    @transaction.atomic
+    def _do_with_vars(self, *args, **kwargs):
+        kw = kwargs['validated_data']
+        if kw.get('kind', None) == 'TEMPLATE':
+            template = kw.get('template')
+            kw['project'] = template.project
+            kw['inventory'] = ''
+            kw['mode'] = ''
+            kwargs['validated_data'] = kw
+        return super(PeriodictaskSerializer, self)._do_with_vars(*args, **kwargs)
 
     @transaction.atomic
     def permissions(self, request):  # noce
@@ -526,6 +538,8 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'project',
                   'inventory',
                   'save_result',
+                  'template',
+                  'template_opt',
                   'enabled',
                   'vars',
                   'url',)

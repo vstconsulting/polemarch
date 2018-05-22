@@ -2827,6 +2827,13 @@ Hooks
 -----
 
 Polemarch has his own system of hooks.
+Polemarch hooks are synchronous and you can appoint them on different events like "after end task",
+"before start task" and so on.
+
+More information about hooks types and events ou can find here :http:get:`/api/v1/hooks/types/`.
+
+WARNING: You should be accurate with hooks appointment, because the more hooks you have,
+the more time they need for execution and, finally, the more time Ansible needs for task execution.
 
 .. http:get:: /api/v1/hooks/
 

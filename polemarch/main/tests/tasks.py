@@ -68,6 +68,24 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
                          data=json.dumps([inventory]))
         return inventory, host
 
+    @patch('polemarch.main.utils.CmdExecutor.execute')
+    def test_execute_with_hostlist_comma(self, subprocess_function):
+        def side_effect(call_args, *args, **kwargs):
+            # print(call_args, args, kwargs)
+            return "Ok"
+
+        subprocess_function.side_effect = side_effect
+        inventory_hosts = '8.8.8.8,9.9.9.9,10.10.10.10'
+        execute_data = dict(inventory=inventory_hosts, playbook="first.yml", sync=True)
+        execute_data = json.dumps(execute_data)
+        self.post_result(
+            "/api/v1/projects/{}/execute-playbook/".format(self.task_proj.id),
+            data=execute_data)
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertEqual(call_args[3], inventory_hosts)
+        subprocess_function.reset_mock()
+
     @patch('polemarch.main.models.projects.Project.sync')
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute(self, subprocess_function, sync):
@@ -346,12 +364,6 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertTrue(history.stop_time <= end_time and
                         history.stop_time >= history.start_time)
         self.assertEqual(history.executor, self.user)
-        history.initiator = 1
-        history.initiator_type = 'template'
-        self.assertEqual(
-            history.initiator_object,
-            self.get_model_class("Template").objects.get(id=history.initiator)
-        )
         self.get_model_class('History').objects.all().delete()
         # node are offline
         check_status(subprocess.CalledProcessError(4, None, ""), "OFFLINE")
@@ -709,6 +721,48 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEquals(subprocess_function.call_count, 1)
         self.assertCount(self.get_model_class('History').objects.all(), count)
 
+        # Test with kind - Template
+        tmpl_with_opts = dict(
+            kind="Module",
+            name='Test opts',
+            data=dict(
+                module="shell",
+                group="all",
+                project=self.periodic_project_id,
+                inventory=self.inventory.id,
+                args="ls -la",
+                vars=dict(
+                    forks=8,
+                ),
+            ),
+            options=dict(
+                one=dict(group='test_group'),
+                two=dict(args='pwd', vars=dict(forks=1))
+            )
+        )
+        tmplt_obj = self.get_model_class('Template').objects.create(**tmpl_with_opts)
+        data = dict(
+            kind='TEMPLATE', template=tmplt_obj.id, template_opt='one',
+            schedule="10", type="INTERVAL"
+        )
+        ptask_data = self.get_result("post", url, 201, data=json.dumps(data))
+        self.assertEqual(ptask_data["project"], self.periodic_project_id)
+        subprocess_function.reset_mock()
+        ScheduledTask.delay(ptask_data['id'])
+        self.assertEquals(subprocess_function.call_count, 1)
+        call_args = subprocess_function.call_args[0][0]
+        self.assertIn("shell", call_args)
+        self.assertIn("test_group", call_args)
+
+        # Check update periodic tasks for Templates changes
+        p = self.get_model_class('Project').objects.create(vars=dict(repo_type="MANUAL"))
+        tmplt_data = tmplt_obj.data
+        tmplt_data['project'] = p.id
+        tmplt_obj.data = tmplt_data
+        tmplt_obj.save()
+        ptask_data = self.get_result("get", url+"{}/".format(ptask_data['id']))
+        self.assertEqual(ptask_data["project"], p.id)
+
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_periodictask_inventory_file(self, subprocess_function):
         url = "/api/v1/periodic-tasks/"
@@ -828,6 +882,10 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEqual(history.initiator_type, "template")
         self.assertEqual(history.initiator, tmplt['id'])
         self.assertEqual(history.executor.id, tmplt['owner']['id'])
+        self.assertEqual(
+            history.initiator_object,
+            self.get_model_filter('Template', pk=tmplt['id']).get()
+        )
         # test module execution
         ansible_args = []
         module_data = dict(

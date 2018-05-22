@@ -197,6 +197,13 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
 LOGIN_REDIRECT_URL = '/'
+LDAP_SERVER = config.get("main", "ldap-server", fallback=None)
+LDAP_DOMAIN = config.get("main", "ldap-default-domain", fallback='')
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'polemarch.main.auth.LdapBackend',
+]
 
 PAGE_LIMIT = config.getint("web", "page_limit", fallback=1000)
 
@@ -304,20 +311,22 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'formatter': 'standard',
             'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
         },
         'file': {
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'class': 'logging.FileHandler',
-            'filename': '/dev/null'
+            'filename': config.get("uwsgi", "log_file", fallback='/dev/null')
         },
     },
     'loggers': {
         'polemarch': {
             'handlers': ['console'],
             'level': LOG_LEVEL,
+            'propagate': True,
         },
     }
 }
@@ -407,6 +416,28 @@ HOOKS = {
 }
 
 HOOKS_DIR = config.get("main", "hooks_dir", fallback="/tmp")
+
+API_URL = 'api'
+API = {
+    r'v1': {
+        r'users': {'view': 'polemarch.api.v1.views.UserViewSet'},
+        r'teams': {'view': 'polemarch.api.v1.views.TeamViewSet'},
+        r'hosts': {'view': 'polemarch.api.v1.views.HostViewSet'},
+        r'groups': {'view': 'polemarch.api.v1.views.GroupViewSet'},
+        r'inventories': {'view': 'polemarch.api.v1.views.InventoryViewSet'},
+        r'projects': {'view': 'polemarch.api.v1.views.ProjectViewSet'},
+        r'tasks': {'view': 'polemarch.api.v1.views.TaskViewSet'},
+        r'periodic-tasks': {'view': 'polemarch.api.v1.views.PeriodicTaskViewSet'},
+        r'templates': {'view': 'polemarch.api.v1.views.TemplateViewSet'},
+        r'history': {'view': 'polemarch.api.v1.views.HistoryViewSet'},
+        r'ansible': {'view': 'polemarch.api.v1.views.AnsibleViewSet'},
+        r'stats': {'view': 'polemarch.api.v1.views.StatisticViewSet'},
+        r'hooks': {'view': 'polemarch.api.v1.views.HookViewSet'},
+        r'token': {'view': 'polemarch.api.v1.views.TokenView', 'type': 'view'},
+        r'_bulk': {'view': 'polemarch.api.v1.views.BulkViewSet', 'type': 'view'},
+    }
+}
+
 
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True

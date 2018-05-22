@@ -52,100 +52,6 @@ class Task(BModel):
         return str(self.name)  # nocv
 
 
-class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
-    use_for_related_fields = True
-
-
-# noinspection PyTypeChecker
-class PeriodicTask(AbstractModel):
-    objects     = PeriodicTaskQuerySet.as_manager()
-    project        = models.ForeignKey(Project, on_delete=models.CASCADE,
-                                       related_query_name="periodic_tasks")
-    mode           = models.CharField(max_length=256)
-    kind           = models.CharField(max_length=50, default="PLAYBOOK")
-    _inventory     = models.ForeignKey(Inventory, on_delete=models.CASCADE,
-                                       related_query_name="periodic_tasks",
-                                       null=True, blank=True)
-    inventory_file = models.CharField(max_length=2*1024, null=True, blank=True)
-    schedule       = models.CharField(max_length=4*1024)
-    type           = models.CharField(max_length=10)
-    save_result    = models.BooleanField(default=True)
-    enabled        = models.BooleanField(default=True)
-
-    kinds = ["PLAYBOOK", "MODULE"]
-    types = ["CRONTAB", "INTERVAL"]
-    HIDDEN_VARS = [
-        'key-file',
-        'private-key',
-        'vault-password-file',
-        'new-vault-password-file',
-    ]
-
-    class Meta:
-        default_related_name = "periodic_tasks"
-
-    time_types = {
-        'minute': {"max_": 60},
-        'hour': {"max_": 24},
-        'day_of_week': {"max_": 7},
-        'day_of_month': {"max_": 31, "min_": 1},
-        'month_of_year': {"max_": 12, "min_": 1}}
-    time_types_list = [
-        'minute', 'hour', 'day_of_month', 'month_of_year', "day_of_week"
-    ]
-
-    @property
-    def inventory(self):
-        return self._inventory or self.inventory_file
-
-    @inventory.setter
-    def inventory(self, inventory):
-        if isinstance(inventory, Inventory):
-            self._inventory = inventory
-        elif isinstance(inventory, (six.string_types, six.text_type)):
-            try:
-                self._inventory = Inventory.objects.get(pk=int(inventory))
-            except (ValueError, Inventory.DoesNotExist):
-                self.project.check_path(inventory)
-                self.inventory_file = inventory
-
-    @property
-    def crontab_kwargs(self):
-        kwargs, index, fields = dict(), 0, self.schedule.split(" ")
-        for field_name in self.time_types_list:
-            if index < len(fields) and len(fields[index]) > 0:
-                kwargs[field_name] = fields[index]
-            else:
-                kwargs[field_name] = "*"
-            index += 1
-        return kwargs
-
-    def get_vars(self):
-        qs = self.variables.order_by("key")
-        return OrderedDict(qs.values_list('key', 'value'))
-
-    @transaction.atomic()
-    def set_vars(self, variables):
-        command = "playbook"
-        if self.kind == "MODULE":
-            command = "module"
-        AnsibleArgumentsReference().validate_args(command, variables)
-        return super(PeriodicTask, self).set_vars(variables)
-
-    def get_schedule(self):
-        if self.type == "CRONTAB":
-            return crontab(**self.crontab_kwargs)
-        return float(self.schedule)
-
-    def execute(self, sync=True):
-        return self.project.execute(
-            self.kind, self.mode, self.inventory,
-            sync=sync, save_result=self.save_result,
-            initiator=self.id, initiator_type="scheduler",
-            **self.vars
-        )
-
-
 class Template(ACLModel):
     name          = models.CharField(max_length=512)
     kind          = models.CharField(max_length=32)
@@ -194,11 +100,15 @@ class Template(ACLModel):
                 data['inventory'] = self.inventory
         return data
 
-    def execute(self, serializer, user, option=None):
-        # pylint: disable=protected-access
-        tp = self._exec_types.get(self.kind, None)
-        if tp is None:
-            raise UnsupportedMediaType(media_type=self.kind)
+    @property
+    def inventory_object(self):
+        try:
+            return Inventory.objects.get(pk=int(self.data['inventory']))
+        except (ValueError, Inventory.DoesNotExist):  # nocv
+            self.project.check_path(self.data['inventory'])
+            return self.data['inventory']
+
+    def get_data_with_options(self, option, **extra):
         data = self.get_data()
         data.pop("project", None)
         option_data = self.get_option_data(option)
@@ -207,8 +117,16 @@ class Template(ACLModel):
         vars.update(option_vars)
         data.update(option_data)
         data.update(vars)
+        data.update(extra)
+        return data
+
+    def execute(self, serializer, user, option=None, **extra):
+        # pylint: disable=protected-access
+        tp = self._exec_types.get(self.kind, None)
+        if tp is None:
+            raise UnsupportedMediaType(media_type=self.kind)
         return serializer._execution(
-            tp, data, user,
+            tp, self.get_data_with_options(option, **extra), user,
             template=self.id, template_option=option
         )
 
@@ -296,6 +214,115 @@ class Template(ACLModel):
     @property
     def options_list(self):
         return list(self.options.keys())
+
+
+class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
+    use_for_related_fields = True
+
+
+# noinspection PyTypeChecker
+class PeriodicTask(AbstractModel):
+    objects     = PeriodicTaskQuerySet.as_manager()
+    project        = models.ForeignKey(Project, on_delete=models.CASCADE,
+                                       related_query_name="periodic_tasks")
+    mode           = models.CharField(max_length=256)
+    kind           = models.CharField(max_length=50, default="PLAYBOOK")
+    _inventory     = models.ForeignKey(Inventory, on_delete=models.CASCADE,
+                                       related_query_name="periodic_tasks",
+                                       null=True, blank=True)
+    inventory_file = models.CharField(max_length=2*1024, null=True, blank=True)
+    schedule       = models.CharField(max_length=4*1024)
+    type           = models.CharField(max_length=10)
+    save_result    = models.BooleanField(default=True)
+    enabled        = models.BooleanField(default=True)
+    template       = models.ForeignKey(Template, on_delete=models.CASCADE,
+                                       related_query_name="periodic_tasks",
+                                       null=True, blank=True)
+    template_opt   = models.CharField(max_length=256, null=True, blank=True)
+
+    kinds = ["PLAYBOOK", "MODULE", "TEMPLATE"]
+    types = ["CRONTAB", "INTERVAL"]
+    HIDDEN_VARS = [
+        'key-file',
+        'private-key',
+        'vault-password-file',
+        'new-vault-password-file',
+    ]
+
+    class Meta:
+        default_related_name = "periodic_tasks"
+
+    time_types = {
+        'minute': {"max_": 60},
+        'hour': {"max_": 24},
+        'day_of_week': {"max_": 7},
+        'day_of_month': {"max_": 31, "min_": 1},
+        'month_of_year': {"max_": 12, "min_": 1}}
+    time_types_list = [
+        'minute', 'hour', 'day_of_month', 'month_of_year', "day_of_week"
+    ]
+
+    @property
+    def inventory(self):
+        return self._inventory or self.inventory_file
+
+    @inventory.setter
+    def inventory(self, inventory):
+        if isinstance(inventory, Inventory):
+            self._inventory = inventory
+        elif isinstance(inventory, (six.string_types, six.text_type)):
+            try:
+                self._inventory = Inventory.objects.get(pk=int(inventory))
+            except (ValueError, Inventory.DoesNotExist):
+                self.project.check_path(inventory)
+                self.inventory_file = inventory
+
+    @property
+    def crontab_kwargs(self):
+        kwargs, index, fields = dict(), 0, self.schedule.split(" ")
+        for field_name in self.time_types_list:
+            if index < len(fields) and len(fields[index]) > 0:
+                kwargs[field_name] = fields[index]
+            else:
+                kwargs[field_name] = "*"
+            index += 1
+        return kwargs
+
+    def get_vars(self):
+        qs = self.variables.order_by("key")
+        return OrderedDict(qs.values_list('key', 'value'))
+
+    @transaction.atomic()
+    def set_vars(self, variables):
+        command = "playbook"
+        if self.kind == "MODULE":
+            command = "module"
+        AnsibleArgumentsReference().validate_args(command, variables)
+        return super(PeriodicTask, self).set_vars(variables)
+
+    def get_schedule(self):
+        if self.type == "CRONTAB":
+            return crontab(**self.crontab_kwargs)
+        return float(self.schedule)
+
+    def execute(self, sync=True):
+        kwargs = dict(
+            sync=sync, save_result=self.save_result,
+            initiator=self.id, initiator_type="scheduler"
+        )
+        if self.kind != 'TEMPLATE':
+            args = [self.kind, self.mode, self.inventory]
+            kwargs.update(self.vars)
+        else:
+            data = self.template.get_data_with_options(self.template_opt)
+            data.pop('inventory', None)
+            args = [
+                self.template.kind.upper(),
+                data.pop(self.template.kind.lower()),
+                self.template.inventory_object
+            ]
+            kwargs.update(data)
+        return self.project.execute(*args, **kwargs)
 
 
 class HistoryQuerySet(BQuerySet):

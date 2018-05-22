@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.core.validators import ValidationError
 from requests import Response
 from polemarch.main.models import Hook
-from polemarch.main.utils import tmp_file_context, raise_context
+from polemarch.main.utils import raise_context
 
 
 class HooksTestCase(TestCase):
@@ -27,11 +27,14 @@ class HooksTestCase(TestCase):
 
     def check_output_run(self, check_data, *args, **kwargs):
         # pylint: disable=unused-argument
-        self.assertEqual(check_data[0], self.recipients[self.count])
+        rep = str(kwargs['cwd'] or '')
+        rep += '/' if kwargs['cwd'] else ''
+        rep += self.recipients[self.count]
+        self.assertEqual(check_data[0], rep)
         self.assertEqual(check_data[1], 'on_execution')
-        with open(check_data[2], 'r') as file:
-            message = json.load(file)
-            self.assertEqual(message.get('test', None), 'test')
+        message = json.loads(kwargs['input'])
+        self.assertEqual(message.get('test', None), 'test')
+        self.assertTrue(kwargs['universal_newlines'])
         self.count += 1
         return "Ok"
 
@@ -62,9 +65,11 @@ class HooksTestCase(TestCase):
     def check_output_run_http(self, method, url, data, **kwargs):
         # pylint: disable=protected-access, unused-argument
         self.assertEqual(method, "post")
-        with tmp_file_context() as file:
-            file.write(json.dumps(data['payload']))
-            self.check_output_run([url, data['type'], file.name])
+        self.check_output_run(
+            [url, data['type']],
+            cwd='', input=json.dumps(data['payload']),
+            universal_newlines=True
+        )
         the_response = Response()
         the_response.reason = "ok"
         the_response.status_code = 200

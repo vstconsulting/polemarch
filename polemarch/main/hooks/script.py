@@ -1,10 +1,10 @@
+from __future__ import unicode_literals
 import os
 import json
 import traceback
 import logging
 import subprocess
 from .base import BaseHook
-from ..utils import tmp_file_context
 
 
 logger = logging.getLogger("polemarch")
@@ -14,11 +14,17 @@ class Backend(BaseHook):
 
     def _execute(self, script, when, file):
         try:
+            work_dir = self.conf['HOOKS_DIR']
+            script = '{}/{}'.format(work_dir, script)
             return subprocess.check_output(
-                [script, when, file.name], cwd=self.conf['HOOKS_DIR']
+                [script, when],
+                cwd=work_dir, universal_newlines=True, input=file
             )
         except BaseException as err:
-            logger.info(traceback.format_exc())
+            logger.error(traceback.format_exc())
+            logger.error("Details:\nSCRIPT:{}\nWHEN:{}\nCWD:{}\n".format(
+                script, when, self.conf['HOOKS_DIR']
+            ))
             return str(err)
 
     def setup(self, **kwargs):
@@ -34,9 +40,7 @@ class Backend(BaseHook):
 
     def send(self, message, when):
         super(Backend, self).send(message, when)
-        with tmp_file_context() as file:
-            file.write(json.dumps(message))
-            return "\n".join([
-                self._execute(r, when, file)
-                for r in self.conf['recipients'] if r
-            ])
+        return "\n".join([
+            self._execute(r, when, json.dumps(message))
+            for r in self.conf['recipients'] if r
+        ])

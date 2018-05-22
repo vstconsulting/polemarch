@@ -215,8 +215,11 @@ pmHooks.getSupportedTypes = function()
         success: function(data)
         {
             pmHooks.model.supportedTypes = data['types'];
-            pmHooks.model.supportedWhens = data['when'];
+            pmHooks.model.supportedWhens = {};
             pmHooks.model.supportedWhens['null'] = 'Always';
+            for (var i in data['when']) {
+                pmHooks.model.supportedWhens[i] = data['when'][i];
+            }
         },
         error:function(e)
         {

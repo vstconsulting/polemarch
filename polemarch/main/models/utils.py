@@ -4,8 +4,9 @@ from __future__ import unicode_literals
 import re
 import sys
 import logging
+import traceback
 from os.path import dirname
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 
 import six
 from django.utils import timezone
@@ -24,8 +25,9 @@ AnsibleExtra = namedtuple('AnsibleExtraArgs', [
 
 # Classes and methods for support
 class DummyHistory(object):
+    # pylint: disable=unused-argument
     def __init__(self, *args, **kwargs):
-        pass
+        self.mode = kwargs.get('mode', None)
 
     def __setattr__(self, key, value):
         pass
@@ -40,6 +42,9 @@ class DummyHistory(object):
     @raw_stdout.setter
     def raw_stdout(self, value):
         logger.info(value)  # nocv
+
+    def get_hook_data(self, when):
+        return None
 
     def write_line(self, value, number):
         # pylint: disable=unused-argument
@@ -102,8 +107,12 @@ class AnsibleCommand(object):
 
         def get_from_file(self, inventory):
             self.__file = "{}/{}".format(self.cwd, inventory)
-            with open(self.__file, 'r') as file:
-                return file.read(), []
+            try:
+                with open(self.__file, 'r') as file:
+                    return file.read(), []
+            except IOError:
+                self.__file = inventory
+                return inventory.replace(',', '\n'), []
 
         @property
         def file(self):
@@ -127,6 +136,7 @@ class AnsibleCommand(object):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
+        self.__will_raise_exception = False
 
     def __generate_arg_file(self, value):
         file = tmp_file(value)
@@ -183,9 +193,23 @@ class AnsibleCommand(object):
             self.inventory_object.raw
         )
         self.history.status = "RUN"
+        self.project.sync_on_execution_handler(self.history)
         self.history.revision = project.revision
         self.history.save()
         self.executor = Executor(self.history)
+
+    def _send_hook(self, when):
+        msg = OrderedDict(execution_type=self.history.kind, when=when)
+        inventory = self.history.inventory
+        if isinstance(inventory, Inventory):
+            inventory = inventory.get_hook_data(when)
+        msg['target'] = OrderedDict(
+            name=self.history.mode,
+            inventory=inventory,
+            project=self.project.get_hook_data(when)
+        )
+        msg['history'] = self.history.get_hook_data(when)
+        self.project.hook(when, msg)
 
     def get_args(self, target, extra_args):
         return [self.path_to_ansible, target,
@@ -197,27 +221,38 @@ class AnsibleCommand(object):
             self.history.raw_stdout = "{}".format(exception.output)
             self.history.status = self.status_codes.get(exception.returncode,
                                                         default_code)
-        else:
-            self.history.raw_stdout = self.history.raw_stdout + str(exception)
-            self.history.status = default_code
+            return
+        elif isinstance(exception, self.project.SyncError):
+            self.__will_raise_exception = True
+        self.history.raw_stdout = self.history.raw_stdout + str(exception)
+        self.history.status = default_code
 
     def execute(self, target, inventory, history, project, **extra_args):
         try:
             self.prepare(target, inventory, history, project)
+            self._send_hook('on_execution')
             self.history.status = "OK"
             extra = self.__parse_extra_args(**extra_args)
             args = self.get_args(self.target, extra.args)
             self.history.raw_stdout = self.executor.execute(args, self.workdir)
         except Exception as exception:
+            logger.error(traceback.format_exc())
             self.error_handler(exception)
+            if self.__will_raise_exception:
+                raise
         finally:
             inventory_object = getattr(self, "inventory_object", None)
             inventory_object and inventory_object.close()
             self.history.stop_time = timezone.now()
             self.history.save()
+            self._send_hook('after_execution')
 
     def run(self):
-        return self.execute(*self.args, **self.kwargs)
+        try:
+            return self.execute(*self.args, **self.kwargs)
+        except Exception:  # nocv
+            logger.error(traceback.format_exc())
+            raise
 
 
 class AnsiblePlaybook(AnsibleCommand):

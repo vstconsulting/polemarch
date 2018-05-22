@@ -3,12 +3,8 @@ FROM onegreyonewhite/tox:centos
 MAINTAINER sergey.k@vstconsulting.net
 
 # Build and install rpm
-COPY requirements-doc.txt /tmp/requirements-doc.txt
-COPY requirements-git.txt /tmp/requirements-git.txt
-COPY requirements.txt /tmp/requirements.txt
-RUN pip2 install -U -r /tmp/requirements-doc.txt \
-                    -r /tmp/requirements-git.txt \
-                    -r /tmp/requirements.txt
+RUN curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh | tee /usr/bin/wait-for-it.sh && \
+    chmod +x /usr/bin/wait-for-it.sh
 RUN mkdir /tmp/polemarch
 ADD . /tmp/polemarch/
 RUN cd /tmp/polemarch && make rpm

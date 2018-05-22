@@ -3,9 +3,10 @@ from collections import OrderedDict
 
 from django.conf.urls import include, url
 
-from rest_framework import routers
+from rest_framework import routers, permissions
 
 from .base import Response
+from ..main.utils import import_class
 
 
 class _AbstractRouter(routers.DefaultRouter):
@@ -51,6 +52,16 @@ class _AbstractRouter(routers.DefaultRouter):
 
     def unregister(self, prefix):
         self.registry = self._unreg(prefix, self.registry)
+
+    def generate(self, views_list):
+        for prefix, options in views_list.items():
+            args = [prefix, import_class(options['view']), options.get('name', None)]
+            if options.get('type', 'viewset') == 'viewset':
+                self.register(*args)
+            elif options.get('type', 'viewset') == 'view':
+                self.register_view(*args)
+            else:  # nocv
+                raise Exception('Unknown type of view')
 
 
 class APIRouter(_AbstractRouter):
@@ -138,3 +149,10 @@ class MainRouter(_AbstractRouter):
             # any test code can be run
             urls.append(url(prefix, view.as_view()))  # nocv
         return urls
+
+    def generate_routers(self, api):
+        for version, views_list in api.items():
+            router = APIRouter(perms=(permissions.IsAuthenticated,))
+            router.root_view_name = version
+            router.generate(views_list)
+            self.register_router(version+'/', router)
