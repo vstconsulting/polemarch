@@ -69,46 +69,46 @@ pmTasksTemplates.filed.selectProjectInventoryAndPlaybookForOption.render = funct
     })
 }
 
-   // <a href="#" onclick="pmTasksTemplates.exportSelecedToFile(); return false;" >Export all selected templates</a>
+// <a href="#" onclick="pmTasksTemplates.exportSelecedToFile(); return false;" >Export all selected templates</a>
 
 pmTasksTemplates.newAutoCompletePlaybook = function()
 {
     var thisObj=this;
     return new autoComplete({
-            selector: '#playbook-autocomplete',
-            minChars: 0,
-            cache:false,
-            showByClick:false,
-            menuClass:'playbook-autocomplete',
-            renderItem: function(item, search)
-            {
-                return '<div class="autocomplete-suggestion" data-value="' + item.playbook + '" >' + item.playbook + '</div>';
-            },
-            onSelect: function(event, term, item)
-            {
-                $("#playbook-autocomplete").val($(item).text());
-                //console.log('onSelect', term, item);
-                //var value = $(item).attr('data-value');
-            },
-            source: function(term, response)
-            {
-                term = term.toLowerCase();
+        selector: '#playbook-autocomplete',
+        minChars: 0,
+        cache:false,
+        showByClick:false,
+        menuClass:'playbook-autocomplete',
+        renderItem: function(item, search)
+        {
+            return '<div class="autocomplete-suggestion" data-value="' + item.playbook + '" >' + item.playbook + '</div>';
+        },
+        onSelect: function(event, term, item)
+        {
+            $("#playbook-autocomplete").val($(item).text());
+            //console.log('onSelect', term, item);
+            //var value = $(item).attr('data-value');
+        },
+        source: function(term, response)
+        {
+            term = term.toLowerCase();
 
-                var matches = []
-                for(var i in pmTasks.model.itemslist.results)
+            var matches = []
+            for(var i in pmTasks.model.itemslist.results)
+            {
+                var val=pmTasks.model.itemslist.results[i];
+                if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
                 {
-                    var val=pmTasks.model.itemslist.results[i];
-                    if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
-                    {
-                        matches.push(val)
-                    }
-                }
-                if(matches.length)
-                {
-                    response(matches);
+                    matches.push(val)
                 }
             }
-        });
+            if(matches.length)
+            {
+                response(matches);
+            }
+        }
+    });
 }
 
 pmTasksTemplates.model.page_list = {
@@ -186,15 +186,23 @@ pmTasksTemplates.model.page_item = {
             link:function(){ return '#'},
             help:'Save and execute'
         },
-
         {
             class:'btn btn-info',
             function:function(item_id){
-                return "spajs.showLoader("+this.model.className+".setNewOption("+item_id+")); return false;"
+                return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/options'}); return false;"
             },
-            title:'Create new option',
+            title:'Options',
             link:function(){ return '#'},
-            help:'Create new option'
+            help:'Options of this template'
+        },
+        {
+            class:'btn btn-info',
+            function:function(item_id){
+                return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/periodic-tasks'}); return false;"
+            },
+            title:'Periodic tasks',
+            link:function(){ return '#'},
+            help:'Periodic tasks linked to this template'
         },
         {
             class:'btn btn-info',
@@ -220,9 +228,6 @@ pmTasksTemplates.model.page_item = {
     sections:[
         function(section, item_id){
             return jsonEditor.editor(pmTasksTemplates.model.items[item_id].data.vars, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true});
-        },
-        function(section, item_id){
-            return spajs.just.render("options_section_task_page", {item_id:item_id})
         }
     ],
     title: function(item_id){
@@ -345,7 +350,7 @@ pmTasksTemplates.model.page_item_option = {
         {
             class:'btn btn-danger danger-right',
             function:function(item_id){
-                return 'spajs.showLoader(pmTasksTemplates.removeOption('+item_id+'));  return false;'
+                return 'spajs.showLoader(pmTasksTemplates.removeOption('+item_id+', "'+pmTasksTemplates.model.items[item_id].option_name+'"));  return false;'
             },
             title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
             link:function(){ return '#'},
@@ -409,7 +414,7 @@ pmTasksTemplates.saveAndExecute = function(item_id)
  */
 pmTasksTemplates.setNewOption = function(item_id)
 {
-    return spajs.openURL(window.location.href+"/new-option");
+    return spajs.open({ menuId:"template/"+this.model.kind+"/"+item_id+"/new-option"});
 }
 
 /**
@@ -553,10 +558,10 @@ pmTasksTemplates.saveAndExecuteOption = function(item_id)
 /**
  *Функция удаляет опцию.
  */
-pmTasksTemplates.removeOption = function(item_id)
+pmTasksTemplates.removeOption = function(item_id, option_name)
 {
     var def = new $.Deferred();
-    var optionName=pmTasksTemplates.model.items[item_id].option_name;
+    var optionName=option_name;
     delete pmTasksTemplates.model.items[item_id].options[optionName];
     var dataToAdd1={options:{}};
     dataToAdd1['options']=pmTasksTemplates.model.items[item_id].options;
@@ -570,10 +575,16 @@ pmTasksTemplates.removeOption = function(item_id)
         {
             thisObj.model.items[item_id] = data
             $.notify('Option "'+optionName+'" was successfully deleted', "success");
-            $.when(spajs.open({ menuId:"template/"+thisObj.model.kind+"/"+data.id})).always(function(){
+            if(/options/.test(window.location.href) == false)
+            {
+                $.when(spajs.open({ menuId:"template/"+thisObj.model.kind+"/"+data.id+"/options"})).always(function(){
+                    def.resolve();
+                });
+            }
+            else
+            {
                 def.resolve();
-            });
-
+            }
         },
         error: function (e)
         {
@@ -582,75 +593,6 @@ pmTasksTemplates.removeOption = function(item_id)
         }
     });
     return def.promise();
-}
-
-/**
- *Функция добавляет на страницу секцию для удаления/добавления опций на страницу шаблона.
- */
-pmTasksTemplates.showExistingOptionsToEdit = function (item_id) {
-    if(!item_id)
-    {
-        throw "Error in pmTasksTemplates.showExistingOptionsToEdit with item_id = `" + item_id + "`"
-    }
-
-    $("#add_existing_options_to_task_template").remove();
-    $(".content").appendTpl(spajs.just.render('add_existing_options_to_task_template', {item_id:item_id}))
-    var scroll_el = "#add_existing_options_to_task_template";
-    if ($(scroll_el).length != 0)  {
-        $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
-    }
-    $("#polemarch-model-items-select").select2({ width: '100%' });
-
-}
-
-/**
- *Функция сохраняет изменения внесенные в секции для удаления/добавления опций на странице шаблона.
- */
-pmTasksTemplates.setOptionList = function(item_id, option_list)
-{
-    var thisObj=this;
-    if(!item_id)
-    {
-        throw "Error in pmTasksTemplates.setOptionList with item_id = `" + item_id + "`"
-    }
-
-    if(!option_list)
-    {
-       var options={};
-    }
-    else
-    {
-        var options=pmTasksTemplates.model.items[item_id].options;
-        for(var i in options)
-        {
-            var bool=false;
-            for(var j in option_list)
-            {
-                if(i==option_list[j])
-                {
-                    bool=true;
-                }
-            }
-            if(bool==false)
-            {
-                delete options[i];
-            }
-        }
-    }
-    return spajs.ajax.Call({
-        url: "/api/v1/templates/"+item_id+"/",
-        type: "PATCH",
-        contentType:'application/json',
-        data:JSON.stringify({options:options}),
-        success: function(data)
-        {
-           spajs.openURL(window.location.href);
-        },
-        error:function(e)
-        {
-            polemarch.showErrors(e.responseJSON)
-        }
-    });
 }
 
 /**
@@ -663,7 +605,7 @@ pmTasksTemplates.showNewOptionPage = function(holder, menuInfo, data)
     var item_id = data.reg[1]
     $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
-        thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
+        thisObj.model.selectedProject = thisObj.model.items[item_id].data.project
 
         var tpl = 'new_option_page'
         if(!spajs.just.isTplExists(tpl))
@@ -692,33 +634,33 @@ pmTasksTemplates.showOptionPage = function(holder, menuInfo, data)
     var option_name=data.reg[2];
     $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
-        thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project;
+        thisObj.model.selectedProject = thisObj.model.items[item_id].project;
 
         pmTasksTemplates.model.items[item_id].option_name=option_name;
-            pmTasksTemplates.model.items[item_id].dataForOption={};
-            for(var i in pmTasksTemplates.model.items[item_id].data)
+        pmTasksTemplates.model.items[item_id].dataForOption={};
+        for(var i in pmTasksTemplates.model.items[item_id].data)
+        {
+            if(i!='vars')
             {
-                if(i!='vars')
-                {
-                    pmTasksTemplates.model.items[item_id].dataForOption[i]=pmTasksTemplates.model.items[item_id].data[i];
-                }
+                pmTasksTemplates.model.items[item_id].dataForOption[i]=pmTasksTemplates.model.items[item_id].data[i];
             }
-            var optionAPI=pmTasksTemplates.model.items[item_id].options[pmTasksTemplates.model.items[item_id].option_name];
-            for(var i in optionAPI)
+        }
+        var optionAPI=pmTasksTemplates.model.items[item_id].options[pmTasksTemplates.model.items[item_id].option_name];
+        for(var i in optionAPI)
+        {
+            if(pmTasksTemplates.model.items[item_id].dataForOption.hasOwnProperty(i))
             {
-                if(pmTasksTemplates.model.items[item_id].dataForOption.hasOwnProperty(i))
-                {
-                    pmTasksTemplates.model.items[item_id].dataForOption[i]=optionAPI[i];
-                }
+                pmTasksTemplates.model.items[item_id].dataForOption[i]=optionAPI[i];
             }
-            if(optionAPI.hasOwnProperty('vars'))
+        }
+        if(optionAPI.hasOwnProperty('vars'))
+        {
+            pmTasksTemplates.model.items[item_id].dataForOption['vars']={};
+            for(var i in optionAPI['vars'])
             {
-               pmTasksTemplates.model.items[item_id].dataForOption['vars']={};
-               for(var i in optionAPI['vars'])
-               {
-                   pmTasksTemplates.model.items[item_id].dataForOption['vars'][i]=optionAPI['vars'][i];
-               }
+                pmTasksTemplates.model.items[item_id].dataForOption['vars'][i]=optionAPI['vars'][i];
             }
+        }
 
         var tpl = 'module_option_page'
         if(!spajs.just.isTplExists(tpl))
@@ -768,19 +710,25 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
     var def = new $.Deferred();
     var thisObj = this;
     var item_id = data.reg[1]
-    $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
+    $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id),
+        pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
-        thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
-
-        var tpl = thisObj.model.name+'_page'
-        if(!spajs.just.isTplExists(tpl))
+        $.when(pmProjects.loadItem(thisObj.model.items[item_id].data.project)).done(function ()
         {
-            tpl = 'items_page'
-        }
+            thisObj.model.selectedProject = pmTasksTemplates.model.items[item_id].data.project
 
-        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
-        pmTasksTemplates.selectProject($("#projects-autocomplete").val());
-        def.resolve();
+            var tpl = thisObj.model.name+'_page'
+            if(!spajs.just.isTplExists(tpl))
+            {
+                tpl = 'items_page'
+            }
+
+            $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
+            pmTasksTemplates.selectProject($("#projects-autocomplete").val());
+            def.resolve();
+        }).fail(function () {
+            $.notify("Error with loading of project data");
+        });
     }).fail(function(e)
     {
         def.reject(e);
@@ -803,54 +751,112 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
     var thisObj = this;
     $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {}))
-
-        $("#inventories-autocomplete").select2({ width: '100%' });
-        //$("#projects-autocomplete").select2({ width: '100%' });
-
-        new autoComplete({
-            selector: '#playbook-autocomplete',
-            minChars: 0,
-            cache:false,
-            showByClick:false,
-            menuClass:'playbook-autocomplete',
-            renderItem: function(item, search)
+        if(pmProjects.model.itemslist.results.length != 0)
+        {
+            $.when(pmProjects.loadItem(pmProjects.model.itemslist.results[0].id)).done(function()
             {
-                var style = "";
-                if(thisObj.model.selectedProject != item.project)
-                {
-                    style = "style='display:none'"
-                }
-                return '<div class="autocomplete-suggestion playbook-project-' + item.project + ' " '+style+' data-value="' + item.playbook + '" >' + item.playbook + '</div>';
-            },
-            onSelect: function(event, term, item)
-            {
-                $("#playbook-autocomplete").val($(item).text());
-                //console.log('onSelect', term, item);
-                //var value = $(item).attr('data-value');
-            },
-            source: function(term, response)
-            {
-                term = term.toLowerCase();
+                $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {}))
 
-                var matches = []
-                for(var i in pmTasks.model.itemslist.results)
-                {
-                    var val=pmTasks.model.itemslist.results[i];
-                    if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
+                $("#inventories-autocomplete").select2({ width: '100%' });
+                //$("#projects-autocomplete").select2({ width: '100%' });
+
+                new autoComplete({
+                    selector: '#playbook-autocomplete',
+                    minChars: 0,
+                    cache:false,
+                    showByClick:false,
+                    menuClass:'playbook-autocomplete',
+                    renderItem: function(item, search)
                     {
-                        matches.push(val)
+                        var style = "";
+                        if(thisObj.model.selectedProject != item.project)
+                        {
+                            style = "style='display:none'"
+                        }
+                        return '<div class="autocomplete-suggestion playbook-project-' + item.project + ' " '+style+' data-value="' + item.playbook + '" >' + item.playbook + '</div>';
+                    },
+                    onSelect: function(event, term, item)
+                    {
+                        $("#playbook-autocomplete").val($(item).text());
+                        //console.log('onSelect', term, item);
+                        //var value = $(item).attr('data-value');
+                    },
+                    source: function(term, response)
+                    {
+                        term = term.toLowerCase();
+
+                        var matches = []
+                        for(var i in pmTasks.model.itemslist.results)
+                        {
+                            var val=pmTasks.model.itemslist.results[i];
+                            if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
+                            {
+                                matches.push(val)
+                            }
+                        }
+                        if(matches.length)
+                        {
+                            response(matches);
+                        }
+                    }
+                });
+                pmTasksTemplates.selectProject($("#projects-autocomplete").val());
+                def.resolve();
+            }).fail(function(){
+                $.notify("Error with loading of project data");
+            });
+        }
+        else
+        {
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {}))
+
+            $("#inventories-autocomplete").select2({ width: '100%' });
+            //$("#projects-autocomplete").select2({ width: '100%' });
+
+            new autoComplete({
+                selector: '#playbook-autocomplete',
+                minChars: 0,
+                cache:false,
+                showByClick:false,
+                menuClass:'playbook-autocomplete',
+                renderItem: function(item, search)
+                {
+                    var style = "";
+                    if(thisObj.model.selectedProject != item.project)
+                    {
+                        style = "style='display:none'"
+                    }
+                    return '<div class="autocomplete-suggestion playbook-project-' + item.project + ' " '+style+' data-value="' + item.playbook + '" >' + item.playbook + '</div>';
+                },
+                onSelect: function(event, term, item)
+                {
+                    $("#playbook-autocomplete").val($(item).text());
+                    //console.log('onSelect', term, item);
+                    //var value = $(item).attr('data-value');
+                },
+                source: function(term, response)
+                {
+                    term = term.toLowerCase();
+
+                    var matches = []
+                    for(var i in pmTasks.model.itemslist.results)
+                    {
+                        var val=pmTasks.model.itemslist.results[i];
+                        if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
+                        {
+                            matches.push(val)
+                        }
+                    }
+                    if(matches.length)
+                    {
+                        response(matches);
                     }
                 }
-                if(matches.length)
-                {
-                    response(matches);
-                }
-            }
-        });
-        pmTasksTemplates.selectProject($("#projects-autocomplete").val());
+            });
+            pmTasksTemplates.selectProject($("#projects-autocomplete").val());
+            def.resolve();
+        }
 
-        def.resolve();
     }).fail(function(e)
     {
         def.reject(e);
@@ -896,7 +902,7 @@ pmTasksTemplates.addItem = function()
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(data),
-                success: function(data)
+        success: function(data)
         {
             $.notify("template created", "success");
             $.when(spajs.open({ menuId:"template/"+thisObj.model.kind+"/"+data.id})).always(function(){
@@ -912,6 +918,312 @@ pmTasksTemplates.addItem = function()
 
     return def.promise();
 }
+
+
+/**
+ * Функция предназначена для загрузки всех шаблонов(task, module),
+ * привязанных к определенному проекту.
+ * @param number project_id - id of project
+ */
+pmTasksTemplates.loadAllItemsFromProject = function(project_id)
+{
+    var thisObj = this;
+    return spajs.ajax.Call({
+        url: hostname + "/api/v1/" + this.model.name + "/",
+        type: "GET",
+        contentType: 'application/json',
+        data: "project="+project_id,
+        success: function (data)
+        {
+            thisObj.model.itemslist = data
+
+            for (var i in data.results)
+            {
+                var val = thisObj.afterItemLoad(data.results[i])
+                thisObj.model.items.justWatch(val.id);
+                thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
+            }
+        },
+        error: function (e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+        }
+    });
+}
+
+/**
+ * Функция предназначена для загрузки всех периодических тасок,
+ * ссылающихся на данный шаблон.
+ * @param number template_id - id of template
+ */
+pmTasksTemplates.loadLinkedPeriodicTasks = function(template_id)
+{
+    var thisObj = this;
+    return spajs.ajax.Call({
+        url: hostname + "/api/v1/periodic-tasks/",
+        type: "GET",
+        contentType: 'application/json',
+        data: "template="+template_id,
+        success: function (data)
+        {
+            // thisObj.model.linkedPeriodicTask = [];
+            // thisObj.model.linkedPeriodicTasks = data.results;
+            pmPeriodicTasks.model.itemslist = data
+            pmPeriodicTasks.model.items = {}
+
+            for (var i in data.results)
+            {
+                var val = pmPeriodicTasks.afterItemLoad(data.results[i])
+                pmPeriodicTasks.model.items.justWatch(val.id);
+                pmPeriodicTasks.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
+            }
+        },
+        error: function (e)
+        {
+            console.warn(e)
+            polemarch.showErrors(e)
+        }
+    });
+}
+
+/**
+ * Функция открывает страницу со списком опций шаблона
+ */
+pmTasksTemplates.showOptionsList = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var thisObj = this;
+    var offset = 0
+    var limit = thisObj.pageSize;
+    if (data.reg && data.reg[1] > 0)
+    {
+        offset = thisObj.pageSize * (data.reg[1] - 1);
+    }
+    return $.when(thisObj.loadItem(data.reg[1])).done(function ()
+    {
+        var tpl = 'template_options_list'
+
+        $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, item_id:data.reg[1], opt: {}}))
+    }).fail(function ()
+    {
+        $.notify("", "error");
+    })
+}
+
+/**
+ * Функция выделяет/снимает выделение с опций в таблице списка опций.
+ * @param {array} elements - массив выделенных элементов
+ * @param {boolean} mode - true - добавить выделение, false - снять выделение
+ * @param {string} div_id - id блока, в котором находятся данные элементы
+ */
+pmTasksTemplates.toggleSelectAllOptions = function (elements, mode, div_id)
+{
+    for (var i = 0; i < elements.length; i++)
+    {
+        if($(elements[i]).hasClass('item-row'))
+        {
+            $(elements[i]).toggleClass('selected', mode);
+        }
+    }
+    pmTasksTemplates.countSelectedOptions(div_id);
+}
+
+/**
+ * Функция выделяет/снимает выделение с одного конкретного элемента в определенной таблице.
+ * В данном случае в таблице со списком опций.
+ * @param {object} thisEl - конкретный элемент
+ * @param {string} div_id - id блока, в котором находится данный элемент
+ */
+pmTasksTemplates.toggleSelectOption = function (thisEl, div_id)
+{
+    $(thisEl).parent().toggleClass('selected');
+    pmTasksTemplates.countSelectedOptions(div_id);
+}
+
+/**
+ * Функция подсчитывает количество выделенных элементов в определенной таблице элементов.
+ * И запоминает данное число в pmModuleTemplates.model.selectedOptionsCount,
+ * а сами элементы в pmModuleTemplates.model.selectedOptions.
+ * В зависимости от нового значения pmModuleTemplates.model.selectedOptionsCount
+ * часть кнопок отображается либо скрывается.
+ * @param {string} div_id - id блока, в котором находятся данные элементы
+ */
+pmTasksTemplates.countSelectedOptions = function (div_id)
+{
+    var elements=$("#"+div_id+"_table tr");
+    var count=0;
+    pmTasksTemplates.model.selectedOptions = [];
+    for (var i = 0; i < elements.length; i++)
+    {
+        if($(elements[i]).hasClass('item-row') && $(elements[i]).hasClass('selected'))
+        {
+            count+=1;
+            pmTasksTemplates.model.selectedOptions.push($(elements[i]).attr('data-id'));
+        }
+    }
+
+    if(count==0)
+    {
+        $($("#"+div_id+" .actions_button")[0]).addClass("hide");
+    }
+    else
+    {
+        $($("#"+div_id+" .actions_button")[0]).removeClass("hide");
+    }
+    pmTasksTemplates.model.selectedOptionsCount=count;
+}
+
+/**
+ *Функция удаляет все выделенные опции.
+ */
+pmTasksTemplates.removeSelectedOptions = function(item_id, option_names)
+{
+    var def = new $.Deferred();
+    for(var i in option_names)
+    {
+        var optionName=option_names[i];
+        delete pmTasksTemplates.model.items[item_id].options[optionName];
+    }
+    var dataToAdd1={options:{}};
+    dataToAdd1['options']=pmTasksTemplates.model.items[item_id].options;
+    var thisObj = this;
+    spajs.ajax.Call({
+        url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/",
+        type: "PATCH",
+        contentType: 'application/json',
+        data: JSON.stringify(dataToAdd1),
+        success: function (data)
+        {
+            thisObj.model.items[item_id] = data
+            $.notify('Options were successfully deleted', "success");
+            def.resolve();
+        },
+        error: function (e)
+        {
+            def.reject(e)
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+    return def.promise();
+}
+
+/**
+ *Функция открывает список периодических тасок, созданных на основе данного шаблона.
+ */
+pmTasksTemplates.showPeriodicTasksList = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var thisObj = this;
+    var offset = 0
+    var limit = thisObj.pageSize;
+    if (data.reg && data.reg[1] > 0)
+    {
+        offset = thisObj.pageSize * (data.reg[1] - 1);
+    }
+    var template_id = data.reg[1];
+    return $.when(thisObj.loadItem(template_id), thisObj.loadLinkedPeriodicTasks(template_id)).done(function ()
+    {
+        var tpl = 'linked-to-template-periodic-tasks_list';
+        var project_id = thisObj.model.items[template_id].data.project;
+
+        $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, project_id:project_id, item_id:template_id, opt: {}}))
+    }).fail(function ()
+    {
+        $.notify("", "error");
+    })
+}
+
+/**
+ *Функция открывает страницу создания новой периодической таски для шаблона.
+ */
+pmTasksTemplates.showNewPeriodicTaskFromTemplate = function (holder, menuInfo, data)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    var item_id = data.reg[1]
+    $.when(pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems()).done(function()
+    {
+        var project_id = thisObj.model.items[item_id].data.project
+        pmPeriodicTasks.model.newitem = {type:'INTERVAL', kind:'TEMPLATE'}
+        var tpl = 'from-template-periodic-tasks_new_page'
+        if(!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_page'
+        }
+
+        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, project_id:project_id, pmObj:thisObj, opt:{}}))
+        def.resolve();
+    }).fail(function(e)
+    {
+        def.reject(e);
+    })
+
+    return def.promise()
+
+}
+
+/**
+ * Функция рендерит шаблон для поля поиска на странице списка опций шаблона.
+ */
+pmTasksTemplates.searchFiledForTemplateOptions = function (options)
+{
+    options.className = this.model.className;
+    this.model.searchAdditionalData = options
+    return spajs.just.render('searchFiledForTemplateOptions', {opt: options});
+}
+
+/**
+ * Функция для поиска опций на странице списка опций шаблона.
+ */
+pmTasksTemplates.searchTemplateOptions = function (query, options)
+{
+    if (this.isEmptySearchQuery(query))
+    {
+        return spajs.open({menuId: 'template/Task/' + options.template_id +'/options', reopen: true});
+    }
+
+    return spajs.open({menuId: 'template/Task/' + options.template_id +'/options' + '/search/' + this.searchObjectToString(trim(query)), reopen: true});
+}
+
+/**
+ * Функция показывает результаты поиска опций шаблона.
+ */
+pmTasksTemplates.showOptionsSearchResult = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var thisObj = this;
+    var template_id = data.reg[1];
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]))
+
+    return $.when(thisObj.loadItem(data.reg[1])).done(function ()
+    {
+        var unvalidSearchOptions = [];
+        for (var i in thisObj.model.items[template_id].options_list)
+        {
+            var option_name = thisObj.model.items[template_id].options_list[i];
+            if(option_name.match(search.name) == null)
+            {
+                unvalidSearchOptions.push(option_name);
+                delete thisObj.model.items[template_id].options_list[i];
+            }
+
+        }
+
+        for(var i in unvalidSearchOptions)
+        {
+            delete thisObj.model.items[template_id].options[unvalidSearchOptions[i]];
+        }
+
+        var tpl = 'template_options_list';
+
+        $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(search.name), pmObj: thisObj, item_id:template_id, opt: {}}))
+    }).fail(function ()
+    {
+        $.notify("", "error");
+    })
+}
+
 
 
 tabSignal.connect("polemarch.start", function()
@@ -951,6 +1263,45 @@ tabSignal.connect("polemarch.start", function()
         id:"task-option",
         urlregexp:[/^template\/Task\/([0-9]+)\/option\/([A-z0-9 %\-.:,=]+)$/, /^templates\/Task\/([0-9]+)\/option\/([A-z0-9 %\-.:,=]+)$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showOptionPage(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"task-options",
+        urlregexp:[/^template\/Task\/([0-9]+)\/options$/, /^templates\/Task\/([0-9]+)\/options$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showOptionsList(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"task-options-search",
+        urlregexp:[/^template\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^templates\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^template\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^templates\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showOptionsSearchResult(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"task-periodic-tasks",
+        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-tasks/, /^templates\/Task\/([0-9]+)\/periodic-tasks/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showPeriodicTasksList(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"task-new-periodic-task",
+        urlregexp:[/^template\/Task\/([0-9]+)\/new-periodic-task/, /^templates\/Task\/([0-9]+)\/new-periodic-task/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showNewPeriodicTaskFromTemplate(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"task-periodic-task",
+        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/, /^templates\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showPeriodicTaskPageFromTemplate(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"task-periodic-tasks-search",
+        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)$/, /^template\/Task\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResultsFromTemplate(holder, menuInfo, data);}
     })
 
 })

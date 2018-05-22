@@ -944,7 +944,7 @@ pmHistory.loadLines = function(item_id, opt)
     return def.promise();
 }
 
-pmHistory.clearLogs=function(item_id)
+pmHistory.clearOutput = function(item_id)
 {
     return spajs.ajax.Call({
         url: hostname + "/api/v1/history/"+item_id+"/clear/",
@@ -963,12 +963,61 @@ pmHistory.clearLogs=function(item_id)
     });
 }
 
-pmHistory.hideClearLogsButton=function()
+pmHistory.hideClearOutputButton = function()
 {
-    if($('button').is('#clear_logs'))
+    if($('button').is('#clear_output'))
     {
-        $("#clear_logs").slideToggle();
+        $("#clear_output").slideToggle();
     }
+}
+
+pmHistory.clearOutputFromSelected = function()
+{
+    var thisObj = this;
+    var clearOutputBulk = []
+    for (var i in thisObj.model.selectedItems)
+    {
+        if (thisObj.model.selectedItems[i])
+        {
+            clearOutputBulk.push({
+                type: "del",
+                data_type: 'clear',
+                item: thisObj.model.bulk_name,
+                pk: i
+            })
+        }
+    }
+    return spajs.ajax.Call({
+        url: hostname + "/api/v1/_bulk/",
+        type: "POST",
+        contentType:'application/json',
+        data: JSON.stringify(clearOutputBulk),
+        success: function(data)
+        {
+            for (var i in clearOutputBulk)
+            {
+                thisObj.toggleSelect(clearOutputBulk[i].pk, false);
+                pmHistory.model.items[clearOutputBulk[i].pk].stdout={};
+            }
+            for(var i in data)
+            {
+                if(data[i].status == 204)
+                {
+
+                    $.notify(trim(data[i].data['detail']), "success");
+                }
+                else
+                {
+                    $.notify(trim(data[i].data['detail']), "error");
+                }
+
+            }
+        },
+        error:function(e)
+        {
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
 }
 
 pmHistory.setTableRowLinkInLink = function()

@@ -764,6 +764,8 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'owner',
                   'revision',
                   'branch',
+                  'readme_content',
+                  'readme_ext',
                   'url',)
 
     def inventories_operations(self, method, data):

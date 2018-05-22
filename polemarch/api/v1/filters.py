@@ -168,7 +168,8 @@ class PeriodicTaskFilter(_BaseFilter):
                   'mode',
                   'kind',
                   'type',
-                  'project')
+                  'project',
+                  'template')
 
 
 class HistoryLinesFilter(filters.FilterSet):
