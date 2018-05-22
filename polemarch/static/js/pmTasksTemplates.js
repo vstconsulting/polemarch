@@ -605,7 +605,7 @@ pmTasksTemplates.showNewOptionPage = function(holder, menuInfo, data)
     var item_id = data.reg[1]
     $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
-        thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
+        thisObj.model.selectedProject = thisObj.model.items[item_id].data.project
 
         var tpl = 'new_option_page'
         if(!spajs.just.isTplExists(tpl))
@@ -634,7 +634,7 @@ pmTasksTemplates.showOptionPage = function(holder, menuInfo, data)
     var option_name=data.reg[2];
     $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
-        thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project;
+        thisObj.model.selectedProject = thisObj.model.items[item_id].project;
 
         pmTasksTemplates.model.items[item_id].option_name=option_name;
         pmTasksTemplates.model.items[item_id].dataForOption={};
@@ -715,7 +715,7 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
     {
         $.when(pmProjects.loadItem(thisObj.model.items[item_id].data.project)).done(function ()
         {
-            thisObj.model.selectedProject = pmTasksTemplates.model.items[item_id].project
+            thisObj.model.selectedProject = pmTasksTemplates.model.items[item_id].data.project
 
             var tpl = thisObj.model.name+'_page'
             if(!spajs.just.isTplExists(tpl))
