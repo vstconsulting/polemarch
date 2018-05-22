@@ -623,6 +623,10 @@ pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
         {
             $.when(pmProjects.loadItem(pmProjects.model.itemslist.results[0].id)).done(function()
             {
+                //for P+
+                pmModuleTemplates.model.newItem = {};
+                pmModuleTemplates.model.newItem.project = pmProjects.model.itemslist.results[0].id;
+                //
                 $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_module_page', {}))
 
                 $("#inventories-autocomplete").select2({ width: '100%' });
