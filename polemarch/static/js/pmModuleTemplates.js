@@ -619,12 +619,30 @@ pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
     var thisObj = this;
     $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems()).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_module_page', {}))
+        if(pmProjects.model.itemslist.results.length != 0)
+        {
+            $.when(pmProjects.loadItem(pmProjects.model.itemslist.results[0].id)).done(function()
+            {
+                $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_module_page', {}))
 
-        $("#inventories-autocomplete").select2({ width: '100%' });
-        $("#projects-autocomplete").select2({ width: '100%' });
+                $("#inventories-autocomplete").select2({ width: '100%' });
+                $("#projects-autocomplete").select2({ width: '100%' });
 
-        def.resolve();
+                def.resolve();
+            }).fail(function(){
+                $.notify("Error with loading of project data");
+            });
+        }
+        else
+        {
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_module_page', {}))
+
+            $("#inventories-autocomplete").select2({ width: '100%' });
+            $("#projects-autocomplete").select2({ width: '100%' });
+
+            def.resolve();
+        }
+
     }).fail(function(e)
     {
         def.reject(e);
@@ -838,7 +856,7 @@ pmModuleTemplates.removeSelectedOptions = function(item_id, option_names)
     var def = new $.Deferred();
     for(var i in option_names)
     {
-       var optionName=option_names[i];
+        var optionName=option_names[i];
         delete pmModuleTemplates.model.items[item_id].options[optionName];
     }
     var dataToAdd1={options:{}};
