@@ -82,7 +82,7 @@ stages:
   only:
    - master
   script:
-   - make test ENVS=$CI_BUILD_NAME-сщмукфпу
+   - make test ENVS=$CI_BUILD_NAME-coverage
   dependencies:
   - build_zip
   retry: 2
