@@ -85,7 +85,7 @@ polemarch.start = function(options)
     })
 
     //spajs.ajax.setHeader("Authorization", "");
-    spajs.ajax.setHeader("X-CSRFToken", getCookie('csrftoken'));
+    spajs.ajax.setHeader(window.csrf_data.csrfHeaderName, window.csrf_data.token);
 
     setInterval(function()
     {

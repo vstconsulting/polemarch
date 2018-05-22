@@ -5,6 +5,7 @@ six
 pyyaml
 sqlalchemy
 django-docs==0.2.1
+python-ldap==3.0.0
 docutils==0.14
 markdown2==2.3.5
 
