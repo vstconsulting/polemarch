@@ -589,7 +589,7 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
     {
         $.when(pmProjects.loadItem(thisObj.model.items[item_id].data.project)).done(function ()
         {
-            thisObj.model.selectedProject == thisObj.model.items[item_id].project;
+            thisObj.model.selectedProject = thisObj.model.items[item_id].project;
             $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).always(function()
             {
                 var tpl = thisObj.model.name+'_module_page'

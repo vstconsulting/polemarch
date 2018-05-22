@@ -715,7 +715,7 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
     {
         $.when(pmProjects.loadItem(thisObj.model.items[item_id].data.project)).done(function ()
         {
-            thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
+            thisObj.model.selectedProject = pmTasksTemplates.model.items[item_id].project
 
             var tpl = thisObj.model.name+'_page'
             if(!spajs.just.isTplExists(tpl))
