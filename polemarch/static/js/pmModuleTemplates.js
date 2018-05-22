@@ -589,6 +589,7 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
     {
         $.when(pmProjects.loadItem(thisObj.model.items[item_id].data.project)).done(function ()
         {
+            thisObj.model.selectedProject == thisObj.model.items[item_id].project;
             $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).always(function()
             {
                 var tpl = thisObj.model.name+'_module_page'
@@ -624,8 +625,7 @@ pmModuleTemplates.showNewItemPage = function(holder, menuInfo, data)
             $.when(pmProjects.loadItem(pmProjects.model.itemslist.results[0].id)).done(function()
             {
                 //for P+
-                pmModuleTemplates.model.newItem = {};
-                pmModuleTemplates.model.newItem.project = pmProjects.model.itemslist.results[0].id;
+                thisObj.model.selectedProject == pmProjects.model.itemslist.results[0].id;
                 //
                 $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_module_page', {}))
 

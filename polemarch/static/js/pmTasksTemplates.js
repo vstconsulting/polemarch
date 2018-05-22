@@ -711,20 +711,24 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
     var thisObj = this;
     var item_id = data.reg[1]
     $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id),
-        pmInventories.loadAllItems(), pmTasks.loadAllItems(),
-        pmTasksTemplates.loadLinkedPeriodicTasks(item_id)).done(function()
+        pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
-        thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
-
-        var tpl = thisObj.model.name+'_page'
-        if(!spajs.just.isTplExists(tpl))
+        $.when(pmProjects.loadItem(thisObj.model.items[item_id].data.project)).done(function ()
         {
-            tpl = 'items_page'
-        }
+            thisObj.model.selectedProject == pmTasksTemplates.model.items[item_id].project
 
-        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
-        pmTasksTemplates.selectProject($("#projects-autocomplete").val());
-        def.resolve();
+            var tpl = thisObj.model.name+'_page'
+            if(!spajs.just.isTplExists(tpl))
+            {
+                tpl = 'items_page'
+            }
+
+            $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
+            pmTasksTemplates.selectProject($("#projects-autocomplete").val());
+            def.resolve();
+        }).fail(function () {
+            $.notify("Error with loading of project data");
+        });
     }).fail(function(e)
     {
         def.reject(e);
@@ -747,54 +751,112 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
     var thisObj = this;
     $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {}))
-
-        $("#inventories-autocomplete").select2({ width: '100%' });
-        //$("#projects-autocomplete").select2({ width: '100%' });
-
-        new autoComplete({
-            selector: '#playbook-autocomplete',
-            minChars: 0,
-            cache:false,
-            showByClick:false,
-            menuClass:'playbook-autocomplete',
-            renderItem: function(item, search)
+        if(pmProjects.model.itemslist.results.length != 0)
+        {
+            $.when(pmProjects.loadItem(pmProjects.model.itemslist.results[0].id)).done(function()
             {
-                var style = "";
-                if(thisObj.model.selectedProject != item.project)
-                {
-                    style = "style='display:none'"
-                }
-                return '<div class="autocomplete-suggestion playbook-project-' + item.project + ' " '+style+' data-value="' + item.playbook + '" >' + item.playbook + '</div>';
-            },
-            onSelect: function(event, term, item)
-            {
-                $("#playbook-autocomplete").val($(item).text());
-                //console.log('onSelect', term, item);
-                //var value = $(item).attr('data-value');
-            },
-            source: function(term, response)
-            {
-                term = term.toLowerCase();
+                $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {}))
 
-                var matches = []
-                for(var i in pmTasks.model.itemslist.results)
-                {
-                    var val=pmTasks.model.itemslist.results[i];
-                    if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
+                $("#inventories-autocomplete").select2({ width: '100%' });
+                //$("#projects-autocomplete").select2({ width: '100%' });
+
+                new autoComplete({
+                    selector: '#playbook-autocomplete',
+                    minChars: 0,
+                    cache:false,
+                    showByClick:false,
+                    menuClass:'playbook-autocomplete',
+                    renderItem: function(item, search)
                     {
-                        matches.push(val)
+                        var style = "";
+                        if(thisObj.model.selectedProject != item.project)
+                        {
+                            style = "style='display:none'"
+                        }
+                        return '<div class="autocomplete-suggestion playbook-project-' + item.project + ' " '+style+' data-value="' + item.playbook + '" >' + item.playbook + '</div>';
+                    },
+                    onSelect: function(event, term, item)
+                    {
+                        $("#playbook-autocomplete").val($(item).text());
+                        //console.log('onSelect', term, item);
+                        //var value = $(item).attr('data-value');
+                    },
+                    source: function(term, response)
+                    {
+                        term = term.toLowerCase();
+
+                        var matches = []
+                        for(var i in pmTasks.model.itemslist.results)
+                        {
+                            var val=pmTasks.model.itemslist.results[i];
+                            if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
+                            {
+                                matches.push(val)
+                            }
+                        }
+                        if(matches.length)
+                        {
+                            response(matches);
+                        }
+                    }
+                });
+                pmTasksTemplates.selectProject($("#projects-autocomplete").val());
+                def.resolve();
+            }).fail(function(){
+                $.notify("Error with loading of project data");
+            });
+        }
+        else
+        {
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {}))
+
+            $("#inventories-autocomplete").select2({ width: '100%' });
+            //$("#projects-autocomplete").select2({ width: '100%' });
+
+            new autoComplete({
+                selector: '#playbook-autocomplete',
+                minChars: 0,
+                cache:false,
+                showByClick:false,
+                menuClass:'playbook-autocomplete',
+                renderItem: function(item, search)
+                {
+                    var style = "";
+                    if(thisObj.model.selectedProject != item.project)
+                    {
+                        style = "style='display:none'"
+                    }
+                    return '<div class="autocomplete-suggestion playbook-project-' + item.project + ' " '+style+' data-value="' + item.playbook + '" >' + item.playbook + '</div>';
+                },
+                onSelect: function(event, term, item)
+                {
+                    $("#playbook-autocomplete").val($(item).text());
+                    //console.log('onSelect', term, item);
+                    //var value = $(item).attr('data-value');
+                },
+                source: function(term, response)
+                {
+                    term = term.toLowerCase();
+
+                    var matches = []
+                    for(var i in pmTasks.model.itemslist.results)
+                    {
+                        var val=pmTasks.model.itemslist.results[i];
+                        if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
+                        {
+                            matches.push(val)
+                        }
+                    }
+                    if(matches.length)
+                    {
+                        response(matches);
                     }
                 }
-                if(matches.length)
-                {
-                    response(matches);
-                }
-            }
-        });
-        pmTasksTemplates.selectProject($("#projects-autocomplete").val());
+            });
+            pmTasksTemplates.selectProject($("#projects-autocomplete").val());
+            def.resolve();
+        }
 
-        def.resolve();
     }).fail(function(e)
     {
         def.reject(e);
