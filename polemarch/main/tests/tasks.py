@@ -71,7 +71,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute_with_hostlist_comma(self, subprocess_function):
         def side_effect(call_args, *args, **kwargs):
-            print(call_args, args, kwargs)
+            # print(call_args, args, kwargs)
             return "Ok"
 
         subprocess_function.side_effect = side_effect
