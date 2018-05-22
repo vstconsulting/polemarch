@@ -672,7 +672,7 @@ class AnsibleArgumentsReference(object):
     # Excluded args from user calls
     _EXCLUDE_ARGS = [
         # Excluded because we use this differently in code
-        'verbose', 'inventory-file', 'module-name',
+        'verbose', 'inventory-file', 'inventory', 'module-name',
         # Excluded because now we could not send any to worker proccess
         'ask-sudo-pass', 'ask-su-pass', 'ask-pass',
         'ask-vault-pass', 'ask-become-pass',

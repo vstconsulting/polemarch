@@ -5,7 +5,7 @@ from .inventory import _ApiGHBaseTestCase
 
 
 class ApiBulkTestCase(_ApiGHBaseTestCase):
-    def abstract_test_bulk_mod(self, objs, types, item):
+    def abstract_test_bulk_mod(self, objs, types, item, method="PUT"):
         for tp, data in types.items():
             bulk_data = []
             for obj in objs:
@@ -13,7 +13,7 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
                     {
                         "type": "mod", "item": item,
                         'pk': obj.id, "data": data,
-                        "method": "PUT", "data_type": tp
+                        "method": method, "data_type": tp
                     }
                 ]
             self.get_result("post", "/api/v1/_bulk/", 200,
@@ -99,6 +99,18 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
         data = dict(name="proj", repository="rep", vars=dict(repo_type="TEST"))
         new = dict(name="new_project")
         self.abstract_test_bulk(data, new, "/api/v1/projects/", "project")
+        del data['name']
+        projects_data = [dict(name="PrBulk{}".format(i), **data) for i in range(5)]
+        projects_id = self.mass_create("/api/v1/projects/", data=projects_data)
+        bulk_kw = dict(type="mod", item='project', method='post', data_type='sync')
+        bulk_data = [dict(pk=id, **bulk_kw) for id in projects_id]
+        result = self.get_result(
+            "post", "/api/v1/_bulk/", 200, data=json.dumps(bulk_data)
+        )
+        for result_detail in result:
+            self.assertEqual(result_detail['type'], 'mod')
+            self.assertEqual(result_detail['status'], 200)
+            self.assertEqual(result_detail['data']['detail'], 'Sync with rep.')
 
     def test_bulk_periodictasks(self):
         self.get_model_class('PeriodicTask').objects.all().delete()
@@ -154,8 +166,8 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
         self.assertEqual(result[0]['data']['id'], h.id)
         self.assertEqual(result[0]['status'], 200)
         self.assertEqual(result[0]['type'], 'get')
-        self.assertEqual(result[1]['status'], 200)
-        self.assertEqual(result[1]['data']['detail'], "Ok")
+        self.assertEqual(result[1]['status'], 204)
+        self.assertEqual(result[1]['data']['detail'], "")
         self.assertCount(self.get_model_class('History').objects.all(), 0)
         bulk_data = [
             {'type': "mod", 'item': "history", 'pk': h.id},
@@ -167,7 +179,7 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
     def test_bulk_unsupported(self):
         data = dict(username="some_user", password="some_password")
         bulk_data = [
-            {'type': "add", 'item': "user", 'data': data}
+            {'type': "add", 'item': "users", 'data': data}
         ]
         self.get_result("post", "/api/v1/_bulk/", 415,
                         data=json.dumps(bulk_data))

@@ -873,6 +873,8 @@ Projects
            },
            "revision": "5471aeb916ee7f8754d55f159e532592b995b0ec",
            "branch": "master",
+           "readme_content": null,
+           "readme_ext": null,
            "url":"http://localhost:8080/api/v1/projects/7/"
         }
 
@@ -891,6 +893,8 @@ Projects
    :>json object owner: |project_owner_details|
    :>json string revision: ``GIT`` revision
    :>json string branch: current branch of project, to which project has been synced last time.
+   :>json string readme_content: |project_readme_content_ref|
+   :>json string readme_ext: |project_readme_ext_ref|
    :>json string url: url to this specific inventory.
 
 .. |project_notes_def| replace:: not required field for some user's notes, for example,
@@ -914,7 +918,10 @@ Projects
    could be seen in :http:get:`/api/v1/users/{id}/`.
 .. |project_details_ref| replace:: **Response JSON Object:** response json
    fields are the same as in :http:get:`/api/v1/projects/{id}/`.
-
+.. |project_readme_content_ref| replace:: if project has "readme.md" or "readme.rst" file
+   in it's project directory, this field will contain content of readme file parsed to html
+.. |project_readme_ext_ref| replace:: if project has "readme.md" or "readme.rst" file
+   in it's project directory, this field will contain extension of readme file
 .. http:get:: /api/v1/projects/
 
    Gets list of projects. |pagination_def|
@@ -1029,6 +1036,8 @@ Projects
            },
            "revision": "NO VCS",
            "branch": "NO VCS",
+           "readme_content": null,
+           "readme_ext": null,
            "url":"http://localhost:8080/api/v1/projects/9/"
         }
 
@@ -1088,6 +1097,8 @@ Projects
            },
            "revision": "NO VCS",
            "branch": "NO VCS",
+           "readme_content": null,
+           "readme_ext": null,
            "url":"http://localhost:8080/api/v1/projects/9/"
         }
 
@@ -1359,6 +1370,8 @@ Periodic tasks
            "project":7,
            "inventory":8,
            "save_result": true,
+           "template": null,
+           "template_opt": null,
            "enabled": true,
            "vars":{
 
@@ -1372,11 +1385,12 @@ Periodic tasks
    :>json string type: |ptask_type_details|
    :>json string schedule: |ptask_schedule_details|
    :>json string mode: playbook or module to run periodically.
-   :>json string kind: either this task is playbook running (``PLAYBOOK``) or
-     module running (``MODULE``).
+   :>json string kind: |ptask_kind_def|
    :>json number project: id of project, which this task belongs to.
    :>json number inventory: id of inventory for which must execute_playbook playbook.
    :>json boolean save_result: if ``save_result`` is true, the result will be saved.
+   :>json number template: |ptask_template_def|
+   :>json string template_opt: |ptask_template_opt_def|
    :>json boolean enabled: if ``enabled`` is true, the periodic task will be enabled.
    :>json object vars: |ptask_vars_def|
    :>json string url: url to this specific periodic task.
@@ -1384,6 +1398,14 @@ Periodic tasks
 .. |ptask_notes_def| replace:: not required field for some user's notes, for example,
    for what purpose this periodic task was created or something like this.
 
+.. |ptask_kind_def| replace:: ``PLAYBOOK`` (if this task runs playbook), ``MODULE``
+   (if this task runs module) or ``TEMPLATE`` (if this task runs template).
+
+.. |ptask_template_def| replace::  id of template (if kind is ``PLAYBOOK`` or ``MODULE``,
+   this field will be equal to null).
+
+.. |ptask_template_opt_def| replace::  name of template option (if kind is ``PLAYBOOK``
+   or ``MODULE`` of if this periodic task executes template without option, this field will be equal to null).
 
 .. |ptask_details_ref| replace:: **Response JSON Object:** response json
    fields are the same as in :http:get:`/api/v1/periodic-tasks/{id}/`.
@@ -1441,34 +1463,32 @@ Periodic tasks
               {
                  "id":10,
                  "name":"periodic-test",
-                 "type":"INTERVAL",
-                 "schedule":"60",
+                 "type":"CRONTAB",
+                 "schedule":"60* */2 sun,fri 1-15 *",
                  "mode":"collect_data.yml",
                  "kind":"PLAYBOOK",
-                 "project": 12,
+                 "project":7,
                  "inventory":8,
                  "save_result": true,
+                 "template": null,
+                 "template_opt": null,
                  "enabled": true,
-                 "vars":{
-
-                 },
-                 "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/10/?format=json"
+                 "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/10/"
               },
               {
                  "id":11,
                  "name":"periodic-test2",
-                 "type":"CRONTAB",
-                 "schedule":"* */2 sun,fri 1-15 *",
-                 "mode":"do_greatest_evil.yml",
-                 "kind":"PLAYBOOK",
-                 "project": 12,
+                 "type":"INTERVAL",
+                 "schedule":"20",
+                 "mode":"",
+                 "kind":"TEMPLATE",
+                 "project":7,
                  "inventory":8,
                  "save_result": true,
+                 "template": 1,
+                 "template_opt": "some-vars",
                  "enabled": true,
-                 "vars":{
-
-                 },
-                 "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/11/?format=json"
+                 "url":"http://127.0.0.1:8080/api/v1/periodic-tasks/11/"
               }
            ]
         }
@@ -1502,7 +1522,11 @@ Periodic tasks
           "mode": "touch_the_clouds.yml",
           "kind": "PLAYBOOK",
           "project": 7,
-          "inventory": 8
+          "inventory": 8,
+          "save_result": true,
+          "template": null,
+          "template_opt": null,
+          "enabled": true,
           "vars":{
 
            },
@@ -1523,6 +1547,8 @@ Periodic tasks
         "project": 7,
         "inventory": 8,
         "save_result": true,
+        "template": null,
+        "template_opt": null,
         "enabled": true,
         "vars":{
 
@@ -1551,10 +1577,7 @@ Periodic tasks
 
       {
           "type": "INTERVAL",
-          "schedule": "25",
-          "mode": "touch_the_clouds.yml",
-          "project": 7,
-          "inventory": 8
+          "schedule": "60"
       }
 
    Results:
@@ -1566,13 +1589,18 @@ Periodic tasks
         "name":"new-periodic-test",
         "notes":"",
         "type": "INTERVAL",
-        "schedule": "25",
+        "schedule": "60",
         "mode": "touch_the_clouds.yml",
         "kind": "PLAYBOOK",
         "project": 7,
         "inventory": 8,
         "save_result": true,
+        "template": null,
+        "template_opt": null,
         "enabled": true,
+        "vars":{
+
+         },
         "url": "http://127.0.0.1:8080/api/v1/periodic-tasks/14/?format=api"
     }
 
@@ -1594,16 +1622,20 @@ Periodic tasks
 
       {
           "name":"new-periodic-test",
+          "notes":"",
           "type": "INTERVAL",
-          "schedule": "25",
+          "schedule": "60",
           "mode": "touch_the_clouds.yml",
           "kind": "PLAYBOOK",
           "project": 7,
           "inventory": 8,
           "save_result": true,
+          "template": null,
+          "template_opt": null,
           "enabled": true,
-          "vars": {}
+          "vars":{
 
+          }
       }
 
    Results:
@@ -3255,57 +3287,79 @@ Users
       Host: example.com
       Accept: application/json, text/javascript
 
-        {
-         "pmwTasksTemplatesWidget": {
-           "active": true,
-           "sortNum": 8,
-           "collapse": true
-         },
-         "pmwUsersCounter": {
-           "active": true,
-           "sortNum": 5,
-           "collapse": false
-         },
-         "pmwProjectsCounter": {
-           "active": true,
-           "sortNum": 4,
-           "collapse": false
-         },
-         "pmwHostsCounter": {
-           "active": true,
-           "sortNum": 0,
-           "collapse": false
-         },
-         "pmwInventoriesCounter": {
-           "active": true,
-           "sortNum": 2,
-           "collapse": false
-         },
-         "pmwGroupsCounter": {
-           "active": true,
-           "sortNum": 1,
-           "collapse": false
-         },
-         "pmwChartWidget": {
-           "active": true,
-           "sortNum": 6,
-           "collapse": false
-         },
-         "pmwModulesTemplatesWidget": {
-           "active": true,
-           "sortNum": 9,
-           "collapse": true
-         },
-         "pmwTemplatesCounter": {
-           "active": true,
-           "sortNum": 3,
-           "collapse": false
-         },
-         "pmwAnsibleModuleWidget": {
-           "active": true,
-           "sortNum": 7,
-           "collapse": true
-         }
+      {
+          "chartLineSettings": {
+              "ok": {
+                  "active": true
+              },
+              "all_tasks": {
+                  "active": true
+              },
+              "interrupted": {
+                  "active": true
+              },
+              "delay": {
+                  "active": true
+              },
+              "error": {
+                  "active": true
+              },
+              "offline": {
+                  "active": true
+              }
+          },
+          "widgetSettings": {
+              "pmwTasksTemplatesWidget": {
+                  "active": false,
+                  "sortNum": 8,
+                  "collapse": false
+              },
+              "pmwUsersCounter": {
+                  "active": true,
+                  "sortNum": 5,
+                  "collapse": false
+              },
+              "pmwProjectsCounter": {
+                  "active": true,
+                  "sortNum": 3,
+                  "collapse": false
+              },
+              "pmwHostsCounter": {
+                  "active": true,
+                  "sortNum": 0,
+                  "collapse": false
+              },
+              "pmwInventoriesCounter": {
+                  "active": true,
+                  "sortNum": 2,
+                  "collapse": false
+              },
+              "pmwGroupsCounter": {
+                  "active": true,
+                  "sortNum": 1,
+                  "collapse": false
+              },
+              "pmwChartWidget": {
+                  "active": true,
+                  "sortNum": 6,
+                  "collapse": false
+              },
+              "pmwModulesTemplatesWidget": {
+                  "active": false,
+                  "sortNum": 9,
+                  "collapse": false
+              },
+              "pmwTemplatesCounter": {
+                  "active": true,
+                  "sortNum": 4,
+                  "collapse": false
+              },
+              "pmwAnsibleModuleWidget": {
+                  "active": true,
+                  "sortNum": 7,
+                  "collapse": true
+              }
+          }
       }
 
    Results:
@@ -3313,62 +3367,89 @@ Users
    .. sourcecode:: js
 
         {
-         "pmwTasksTemplatesWidget": {
-           "active": true,
-           "sortNum": 8,
-           "collapse": true
-         },
-         "pmwUsersCounter": {
-           "active": true,
-           "sortNum": 5,
-           "collapse": false
-         },
-         "pmwProjectsCounter": {
-           "active": true,
-           "sortNum": 4,
-           "collapse": false
-         },
-         "pmwHostsCounter": {
-           "active": true,
-           "sortNum": 0,
-           "collapse": false
-         },
-         "pmwInventoriesCounter": {
-           "active": true,
-           "sortNum": 2,
-           "collapse": false
-         },
-         "pmwGroupsCounter": {
-           "active": true,
-           "sortNum": 1,
-           "collapse": false
-         },
-         "pmwChartWidget": {
-           "active": true,
-           "sortNum": 6,
-           "collapse": false
-         },
-         "pmwModulesTemplatesWidget": {
-           "active": true,
-           "sortNum": 9,
-           "collapse": true
-         },
-         "pmwTemplatesCounter": {
-           "active": true,
-           "sortNum": 3,
-           "collapse": false
-         },
-         "pmwAnsibleModuleWidget": {
-           "active": true,
-           "sortNum": 7,
-           "collapse": true
-         }
-      }
+             "chartLineSettings": {
+                 "ok": {
+                     "active": true
+                 },
+                 "all_tasks": {
+                     "active": true
+                 },
+                 "interrupted": {
+                     "active": true
+                 },
+                 "delay": {
+                     "active": true
+                 },
+                 "error": {
+                     "active": true
+                 },
+                 "offline": {
+                     "active": true
+                 }
+             },
+             "widgetSettings": {
+                 "pmwTasksTemplatesWidget": {
+                     "active": false,
+                     "sortNum": 8,
+                     "collapse": false
+                 },
+                 "pmwUsersCounter": {
+                     "active": true,
+                     "sortNum": 5,
+                     "collapse": false
+                 },
+                 "pmwProjectsCounter": {
+                     "active": true,
+                     "sortNum": 3,
+                     "collapse": false
+                 },
+                 "pmwHostsCounter": {
+                     "active": true,
+                     "sortNum": 0,
+                     "collapse": false
+                 },
+                 "pmwInventoriesCounter": {
+                     "active": true,
+                     "sortNum": 2,
+                     "collapse": false
+                 },
+                 "pmwGroupsCounter": {
+                     "active": true,
+                     "sortNum": 1,
+                     "collapse": false
+                 },
+                 "pmwChartWidget": {
+                     "active": true,
+                     "sortNum": 6,
+                     "collapse": false
+                 },
+                 "pmwModulesTemplatesWidget": {
+                     "active": false,
+                     "sortNum": 9,
+                     "collapse": false
+                 },
+                 "pmwTemplatesCounter": {
+                     "active": true,
+                     "sortNum": 4,
+                     "collapse": false
+                 },
+                 "pmwAnsibleModuleWidget": {
+                     "active": true,
+                     "sortNum": 7,
+                     "collapse": true
+                 }
+             }
+        }
 
+   :>json object chartLineSettings: object with Dashboard chart line settings.
+   :>json boolean active: |users_settings_lines_active|
+   :>json object widgetSettings: object with Dashboard widgets settings.
    :>json string pmw{widget_Name}: widget name.
    :>json boolean active: |users_settings_active|
    :>json number sortNum: |users_settings_sortNum|
    :>json boolean collapse: |users_settings_collapse|
+
+.. |users_settings_lines_active| replace:: one of Dashboard chart line settings, if ``active`` is ``true``, this line will be visible on Dashboard.
 
 .. |users_settings_active| replace:: one of widget's settings, if ``active`` is ``true``, this widget will be visible on Dashboard.
 
@@ -3402,58 +3483,83 @@ Users
    .. sourcecode:: js
 
         {
-         "pmwTasksTemplatesWidget": {
-           "active": true,
-           "sortNum": 8,
-           "collapse": true
-         },
-         "pmwUsersCounter": {
-           "active": true,
-           "sortNum": 5,
-           "collapse": false
-         },
-         "pmwProjectsCounter": {
-           "active": true,
-           "sortNum": 4,
-           "collapse": false
-         },
-         "pmwHostsCounter": {
-           "active": true,
-           "sortNum": 0,
-           "collapse": false
-         },
-         "pmwInventoriesCounter": {
-           "active": true,
-           "sortNum": 2,
-           "collapse": false
-         },
-         "pmwGroupsCounter": {
-           "active": true,
-           "sortNum": 1,
-           "collapse": false
-         },
-         "pmwChartWidget": {
-           "active": true,
-           "sortNum": 6,
-           "collapse": false
-         },
-         "pmwModulesTemplatesWidget": {
-           "active": true,
-           "sortNum": 9,
-           "collapse": true
-         },
-         "pmwTemplatesCounter": {
-           "active": true,
-           "sortNum": 3,
-           "collapse": false
-         },
-         "pmwAnsibleModuleWidget": {
-           "active": true,
-           "sortNum": 7,
-           "collapse": true
-         }
-      }
+             "chartLineSettings": {
+                 "ok": {
+                     "active": true
+                 },
+                 "all_tasks": {
+                     "active": true
+                 },
+                 "interrupted": {
+                     "active": true
+                 },
+                 "delay": {
+                     "active": true
+                 },
+                 "error": {
+                     "active": true
+                 },
+                 "offline": {
+                     "active": true
+                 }
+             },
+             "widgetSettings": {
+                 "pmwTasksTemplatesWidget": {
+                     "active": false,
+                     "sortNum": 8,
+                     "collapse": false
+                 },
+                 "pmwUsersCounter": {
+                     "active": true,
+                     "sortNum": 5,
+                     "collapse": false
+                 },
+                 "pmwProjectsCounter": {
+                     "active": true,
+                     "sortNum": 3,
+                     "collapse": false
+                 },
+                 "pmwHostsCounter": {
+                     "active": true,
+                     "sortNum": 0,
+                     "collapse": false
+                 },
+                 "pmwInventoriesCounter": {
+                     "active": true,
+                     "sortNum": 2,
+                     "collapse": false
+                 },
+                 "pmwGroupsCounter": {
+                     "active": true,
+                     "sortNum": 1,
+                     "collapse": false
+                 },
+                 "pmwChartWidget": {
+                     "active": true,
+                     "sortNum": 6,
+                     "collapse": false
+                 },
+                 "pmwModulesTemplatesWidget": {
+                     "active": false,
+                     "sortNum": 9,
+                     "collapse": false
+                 },
+                 "pmwTemplatesCounter": {
+                     "active": true,
+                     "sortNum": 4,
+                     "collapse": false
+                 },
+                 "pmwAnsibleModuleWidget": {
+                     "active": true,
+                     "sortNum": 7,
+                     "collapse": true
+                 }
+             }
+        }
 
+   :>json object chartLineSettings: object with Dashboard chart line settings.
+   :>json boolean active: |users_settings_lines_active|
+   :>json object widgetSettings: object with Dashboard widgets settings.
    :>json string pmw{widget_Name}: widget name.
    :>json boolean active: |users_settings_active|
    :>json number sortNum: |users_settings_sortNum|

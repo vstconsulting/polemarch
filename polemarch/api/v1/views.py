@@ -1,8 +1,10 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
+import json
 from collections import OrderedDict
-from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.http import HttpResponse
+from django.conf import settings
+from django.test import Client
 from rest_framework import exceptions as excepts, views as rest_views
 from rest_framework.authtoken import views as token_views
 from rest_framework.decorators import detail_route, list_route
@@ -245,15 +247,15 @@ class HookViewSet(base.ModelViewSetSet):
 
 
 class BulkViewSet(rest_views.APIView):
-    serializer_classes = serializers
+    api_version = 'v1'
     schema = None
 
     _op_types = {
-        "get": "perform_get",
-        "add": "perform_create",
-        "set": "perform_update",
-        "del": "perform_delete",
-        "mod": "perform_modify"
+        "get": "get",
+        "add": "post",
+        "set": "patch",
+        "del": "delete",
+        "mod": "get"
     }
     _allowed_types = {
         'host': _op_types.keys(),
@@ -262,57 +264,23 @@ class BulkViewSet(rest_views.APIView):
         'project': _op_types.keys(),
         'periodictask': _op_types.keys(),
         'template': _op_types.keys(),
-        'history': ['del', "get"]
+        'history': ['del', "get"],
+        'hook': _op_types.keys(),
+        'user': _op_types.keys(),
+        'team': _op_types.keys(),
     }
-
-    def get_serializer_class(self, item):
-        if item not in self._allowed_types:
-            raise excepts.UnsupportedMediaType(media_type=item)  # nocv
-        item = "One{}Serializer".format(item.title())
-        return getattr(self.serializer_classes, item)
-
-    def get_serializer(self, *args, **kwargs):
-        kwargs["context"] = {'request': self.request}
-        return self.get_serializer_class(kwargs.pop("item"))(*args, **kwargs)
-
-    def get_object(self, item, pk, access="editable"):
-        serializer_class = self.get_serializer_class(item)
-        model = serializer_class.Meta.model
-        obj = model.objects.cleared().get(pk=pk)
-        if not getattr(obj.acl_handler, access + "_by")(self.request.user):
-            raise PermissionDenied(
-                "You don't have permission to this object."
-            )  # nocv
-        return obj
-
-    def perform_get(self, item, pk):
-        obj = self.get_object(item, pk, access="viewable")
-        serializer = self.get_serializer(obj, item=item)
-        return base.Response(serializer.data, 200).resp_dict
-
-    def perform_create(self, item, data):
-        serializer = self.get_serializer(data=data, item=item)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return base.Response(serializer.data, 201).resp_dict
-
-    def perform_update(self, item, pk, data):
-        instance = self.get_object(item, pk)
-        serializer = self.get_serializer(instance, data=data, partial=True,
-                                         item=item)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return base.Response(serializer.data, 200).resp_dict
-
-    def perform_delete(self, item, pk):
-        instance = self.get_object(item, pk)
-        instance.delete()
-        return base.Response("Ok", 200).resp_dict
-
-    def perform_modify(self, item, pk, data, method, data_type):
-        serializer = self.get_serializer(self.get_object(item, pk), item=item)
-        operation = getattr(serializer, "{}_operations".format(data_type))
-        return operation(method, data).resp_dict
+    type_to_bulk = {
+        "host": "hosts",
+        "group": "groups",
+        "inventory": "inventories",
+        "project": "projects",
+        "periodictask": "periodic-tasks",
+        "template": "templates",
+        "history": "history",
+        "user": "users",
+        "team": "teams",
+        "hook": "hooks",
+    }
 
     def _check_type(self, op_type, item):
         allowed_types = self._allowed_types.get(item, [])
@@ -321,17 +289,57 @@ class BulkViewSet(rest_views.APIView):
                 media_type=op_type
             )
 
+    def get_url(self, item, pk=None, data_type=None):
+        url = ''
+        if pk is not None:
+            url += "{}/".format(pk)
+        if data_type is not None:
+            url += "{}/".format(data_type)
+        return "/{}/{}/{}/{}".format(
+            settings.API_URL, self.api_version, self.type_to_bulk[item], url
+        )
+
+    def get_method_type(self, op_type, operation):
+        if op_type != 'mod':
+            return self._op_types[op_type]
+        else:
+            return operation.get('method', self._op_types[op_type]).lower()
+
+    def get_operation(self, operation, kwargs):
+        op_type = operation['type']
+        data = operation.get('data', {})
+        if data:
+            kwargs['data'] = json.dumps(data)
+        url = self.get_url(
+            operation['item'],
+            operation.get('pk', None),
+            operation.get('data_type', None)
+        )
+        method = getattr(self.client, self.get_method_type(op_type, operation))
+        return method(url, **kwargs)
+
+    def perform(self, operation):
+        kwargs = dict()
+        kwargs["content_type"] = "application/json"
+        response = self.get_operation(operation, kwargs)
+        if response.status_code != 404 and getattr(response, "rendered_content", False):
+            data = json.loads(response.rendered_content.decode())
+        else:
+            data = dict(detail=str(response.content.decode('utf-8')))
+        return OrderedDict(
+            status=response.status_code, data=data, type=operation['type']
+        )
+
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         operations = request.data
         results = []
+        self.client = Client()
+        self.client.force_login(request.user)
         for operation in operations:
-            op_type = operation.pop("type")
+            op_type = operation.get("type")
             self._check_type(op_type, operation.get("item", None))
-            perf_method = getattr(self, self._op_types[op_type])
-            result = perf_method(**operation)
-            result['type'] = op_type
-            results.append(result)
+            results.append(self.perform(operation))
         return base.Response(results, 200).resp
 
     def get(self, request):

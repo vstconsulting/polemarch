@@ -203,9 +203,9 @@ form.search {
     background-position: center center;
     background-repeat: no-repeat;
     -webkit-background-size:150px 40px;
-	-o-background-size: 150px 40px;
-	-moz-background-size:150px 40px;
-	background-size: 150px 40px;
+    -o-background-size: 150px 40px;
+    -moz-background-size:150px 40px;
+    background-size: 150px 40px;
     display: block;
     width:150px;
     height: 40px;
@@ -221,9 +221,9 @@ form.search {
     background-position: center center;
     background-repeat: no-repeat;
     -webkit-background-size:40px 40px;
-	-o-background-size: 40px 40px;
-	-moz-background-size:40px 40px;
-	background-size: 40px 40px;
+    -o-background-size: 40px 40px;
+    -moz-background-size:40px 40px;
+    background-size: 40px 40px;
     display: block;
     width: 40px;
     height: 40px;
@@ -258,7 +258,54 @@ li.toctree-l1.current>a {
     padding: 12px 5px 12px 10px!important;
 }
 
+/* beginning of styles for badge(label) with versions on Read The Docs */
+.rst-versions {
+    z-index: 3000!important;
+}
 
+.rst-current-version > span:first-child {
+    margin-top: 10px!important;
+}
+
+
+/* end of styles for badge(label) with versions on Read The Docs */
+
+
+/* beginning of styles for Notification field about current version */
+.body {
+    padding-top: 1px;
+}
+
+.body > .warning {
+    background-color: #FCC;
+    border: 1px solid #FAA;
+}
+
+.body > .admonition {
+    padding: 7px;
+    margin-left: 15px;
+    margin-right: 15px;
+    border-radius: 3px;
+    margin-top: 19px;
+}
+
+.body > .admonition {
+
+}
+
+.body > .admonition p.admonition-title {
+    font-weight: normal;
+    font-size: 24px;
+    margin: 0 0 10px 0;
+    padding: 0;
+    line-height: 1;
+}
+
+.body > .admonition p.last {
+    margin-bottom: 0;
+}
+
+/* end of styles for Notification field about current version */
 
 @media (max-width: 767px) {
     .bg-logo-doc {
@@ -268,8 +315,8 @@ li.toctree-l1.current>a {
         background-image: url(img/logo/logo-bw.png);
     }
     .fork-me img {
-         width:112px;
-         height:112px;
+        width:112px;
+        height:112px;
     }
 
     #big-search-input-pm {

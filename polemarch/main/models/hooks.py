@@ -1,7 +1,11 @@
 from __future__ import unicode_literals
+import logging
 import uuid
 from .base import BModel, BQuerySet, models
 from ..utils import ModelHandlers, raise_context
+
+
+logger = logging.getLogger('polemarch')
 
 
 class HookHandlers(ModelHandlers):
@@ -22,6 +26,7 @@ class HookHandlers(ModelHandlers):
 
     @raise_context(AttributeError, exclude=True)
     def handle(self, obj, when, message):
+        logger.debug("Send hook {} triggered by {}.".format(obj.name, when))
         return getattr(self.get_handler(obj), when)(message)
 
     def validate(self, obj):

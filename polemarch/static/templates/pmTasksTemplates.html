@@ -171,74 +171,35 @@
     <% } %>
 </script>
 
-<!--options section on task template page -->
-<script type="text/x-just" data-just="options_section_task_page">
-    <% if ( $.isEmptyObject(pmTasksTemplates.model.items[item_id].options) ) { %>
-
-    <% } else { %>
+<!-- linked periodic tasks on task template page -->
+<script type="text/x-just" data-just="linked_periodic_tasks">
+    <% if ( pmObj.model.linkedPeriodicTasks !== undefined &&
+     pmObj.model.linkedPeriodicTasks.length != 0) { %>
         <section class="col-lg-12">
             <div class="box box-info">
                 <div class="box-header with-border">
-                    Options <br>
+                    Linked periodic tasks <br>
                 </div>
                 <div class="box-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <% for (var i in pmTasksTemplates.model.items[item_id].options) { %>
-                                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                    <label class="control-label">Option</label>
-                                    <a href="<%- polemarch.opt.host %>/?<%- pmTasksTemplates.model.name %>/<%- pmTasksTemplates.model.kind %>/<%= item_id %>/option/<%= i %>" onclick="return spajs.openURL(this.href);">
-                                        <%= i %>
-                                    </a>
-                                </div>
+                            <% for (var i in pmObj.model.linkedPeriodicTasks) {
+                                var linked = pmObj.model.linkedPeriodicTasks[i]; %>
+                                <% if(linked.template == item_id) { %>
+                                    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+                                        <label class="control-label">Periodic task</label>
+                                        <a href="<%- polemarch.opt.host %>/?project/<%= linked.project %>/periodic-task/<%= linked.id %>" onclick="return spajs.openURL(this.href);">
+                                            <%= linked.name %>
+                                        </a>
+                                    </div>
+                                <% } %>
                             <% } %>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-lg-12">
-                            <button type="button" onclick="spajs.showLoader(pmTasksTemplates.showExistingOptionsToEdit(<%= item_id %>)); return false;" class="btn btn-primary hidden-xs">Edit existing options</button>
-                            <button type="button" onclick="spajs.showLoader(pmTasksTemplates.setNewOption(<%= item_id %>)); return false;" class="btn btn-primary hidden-xs">Create new option</button>
-                            <button type="button" onclick="spajs.showLoader(pmTasksTemplates.showExistingOptionsToEdit(<%= item_id %>)); return false;" class="btn btn-primary btn-block visible-xs">Edit existing options</button>
-                            <button type="button" onclick="spajs.showLoader(pmTasksTemplates.setNewOption(<%= item_id %>)); return false;" class="btn btn-primary btn-block visible-xs">Create new option</button>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
     <% } %>
-</script>
-
-<!-- Форма редактирования существующих опций -->
-<script type="text/x-just" data-just="add_existing_options_to_task_template">
-    <div class="row" id="add_existing_options_to_task_template">
-        <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    Edit options<br>
-                </div>
-                <div class="box-body">
-                    <div class="row">
-                        <div class="form-group col-lg-12">
-                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="" >
-                                <% for(var i in pmTasksTemplates.model.items[item_id].options_list){ %>
-                                    <option
-                                        value="<%- pmTasksTemplates.model.items[item_id].options_list[i] %>" selected>
-                                        <%- pmTasksTemplates.model.items[item_id].options_list[i] %>
-                                    </option>
-                                <% } %>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-lg-12">
-                            <button type="button" onclick="$('#add_existing_options_to_task_template').hide(); spajs.showLoader(pmTasksTemplates.setOptionList(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
-                            <button type="button" onclick="$('#add_existing_options_to_task_template').remove(); return false;" class="btn btn-default" >Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
 </script>
 
 <script type="text/x-just" data-just="templates_new_page">
@@ -330,4 +291,179 @@
             <%= jsonEditor.editor({}, {block:'playbook', title1:'Arguments', title2:'Adding new argument', select2:true}) %>
         </div>
     </section>
+</script>
+
+<!-- шаблон страницы списка опций шаблона -->
+<script type="text/x-just" data-just="template_options_list">
+    <section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?template/<%- pmObj.model.kind %>/<%- item_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" >Options for template <%- pmObj.model.items[item_id].name %></span>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?template/<%- pmObj.model.kind %>/<%- item_id %>" onclick="return spajs.openURL(this.href);" ><%- pmObj.model.items[item_id].name.slice(0, 20) %></a></li>
+            <li class="active">Options</li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <button type="button" onclick="spajs.showLoader(<%- pmObj.model.className %>.setNewOption(<%- item_id %>));  return false;" class="btn btn-primary" >Create new option</button>
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info" id="options_list">
+                    <div class="box-header with-border">
+                        <div style="float:left;">Options</div>
+                         <%= pmObj.searchFiledForTemplateOptions({query:query, template_id:item_id}) %>
+
+                    </div>
+                    <div class="box-body">
+                    <~ pmObj.model.items[item_id].options>
+                        <table class="table table-bordered multiple-select" id="options_list_table">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 45px" onclick="$(this).parent().toggleClass('selected'); <%- pmObj.model.className %>.toggleSelectAllOptions($('#options_list tr'), $(this).parent().hasClass('selected'), 'options_list') ;return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
+                                    <th>Name</th>
+                                    <% if(pmObj.model.className == "pmTasksTemplates") { %>
+                                        <th style="width: 95px;" class="hidden-xs">Playbook</th>
+                                    <% } else { %>
+                                        <th style="width: 95px;" class="hidden-xs">Module</th>
+                                        <th style="width: 95px;" class="hidden-xs hidden-1100">Args</th>
+                                        <th style="width: 95px;" class="hidden-xs hidden-1200">Group</th>
+                                    <% } %>
+                                    <th style="width: 350px;" class="hidden-xs hidden-sm">Vars</th>
+                                    <th style="width: 95px;" >Actions</th>
+                                </tr>
+                                <% for(var i in pmObj.model.items[item_id].options){ option = pmObj.model.items[item_id].options[i]; %>
+                                    <tr
+                                        class="item-row item-<%- i %> "
+                                        data-id="<%- i %>" >
+                                        <td class=""  onclick="<%- pmObj.model.className %>.toggleSelectOption(this, 'options_list'); return false;">
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </td>
+                                        <td>
+                                            <a href="/?template/<%- pmObj.model.kind %>/<%- item_id %>/option/<%- i %>" class="item-name"
+                                                    onclick="return spajs.openURL(this.href);" ><%= i %></a>
+                                        </td>
+                                        <% if(pmObj.model.className == "pmTasksTemplates") { %>
+                                            <td class="hidden-xs">
+                                                <a href="/?template/<%- pmObj.model.kind %>/<%- item_id %>/option/<%- i %>" class="item-name"
+                                                        onclick="return spajs.openURL(this.href);" >
+                                                    <% if(option.playbook !== undefined) { %>
+                                                        <%- option.playbook %>
+                                                    <% } else { %>
+                                                        <%- pmObj.model.items[item_id].data.playbook %>
+                                                    <% } %>
+                                                </a>
+                                            </td>
+                                        <% } else { %>
+                                               <td class="hidden-xs">
+                                                   <a href="/?template/<%- pmObj.model.kind %>/<%- item_id %>/option/<%- i %>" class="item-name"
+                                                           onclick="return spajs.openURL(this.href);" >
+                                                       <% if(option.module !== undefined) { %>
+                                                           <%- option.module %>
+                                                       <% } else { %>
+                                                           <%- pmObj.model.items[item_id].data.module %>
+                                                       <% } %>
+                                                   </a>
+                                               </td>
+                                                <td class="hidden-xs hidden-1100">
+                                                       <% if(option.args !== undefined) { %>
+                                                           <%- option.args %>
+                                                       <% } else { %>
+                                                           <%- pmObj.model.items[item_id].data.args %>
+                                                       <% } %>
+                                               </td>
+                                               <td class="hidden-xs hidden-1200">
+                                                       <% if(option.group !== undefined) { %>
+                                                           <%- option.group %>
+                                                       <% } else { %>
+                                                           <%- pmObj.model.items[item_id].data.group %>
+                                                       <% } %>
+                                               </td>
+                                        <% } %>
+                                        <td class="hidden-xs hidden-sm">
+                                            <% if(option.vars !== undefined) { %>
+                                                <ul class="option-vars">
+                                                    <% for(var j in option.vars) { %>
+                                                        <li><b><%- j %></b><% if(option.vars[j] != "") { %>: <%- option.vars[j] %><% } %></li>
+                                                    <% } %>
+                                                </ul>
+                                            <% } %>
+                                        </td>
+                                        <td >
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Actions
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-right">
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- pmObj.model.kind %>'].execute(<%- item_id %>, '<%- i %>')); return false;" >
+                                                            Execute
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#"
+                                                            onclick="spajs.showLoader(<%- pmObj.model.className %>.removeOption(<%- item_id %>, '<%- i %>')); return false;" >Delete</a>
+                                                    </li>
+
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                        <~>
+                    </div>
+                     <div class="box-footer clearfix">
+                        <div class="btn-group hide actions_button" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <~ pmObj.model.selectedOptionsCount>
+                                Actions <%= pmObj.model.selectedOptionsCount %> on items
+                                <~>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="#"
+                                        onclick="spajs.showLoader(<%- pmObj.model.className %>.removeSelectedOptions(<%- item_id %>, <%- pmObj.model.className %>.model.selectedOptions)); return false;" >Delete selected</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+<!-- Поле поиска для страницы списка опций шаблона-->
+<script  type="text/x-just" style="display: none;" data-just="searchFiledForTemplateOptions">
+    <div class="input-group col-lg-2" style="float: right;">
+        <input
+            type="text"
+            id="search-query-input"
+            placeholder="Search by name"
+            class="form-control"
+            maxlength="255"
+            value="<%- opt.query %>"
+            onkeyup="if(event.keyCode == 13) spajs.showLoader(<%- opt.className %>.searchTemplateOptions($('#search-query-input').val(), <%- opt.className %>.model.searchAdditionalData));"
+        >
+        <div class="input-group-addon" onclick="spajs.showLoader(<%- opt.className %>.searchTemplateOptions($('#search-query-input').val(), <%- opt.className %>.model.searchAdditionalData));">
+            <span class="glyphicon glyphicon-search" ></span>
+        </div>
+    </div>
 </script>
