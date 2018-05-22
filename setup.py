@@ -66,7 +66,7 @@ ext_list = [
     "polemarch.main.models.utils",
     "polemarch.main.models.users",
     "polemarch.main.models.vars",
-    "polemarch.main.tasks.tasks",
+    # "polemarch.main.tasks.tasks",
     'polemarch.main.settings',
     'polemarch.main.utils',
     'polemarch.main.hooks.base',

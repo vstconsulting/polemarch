@@ -19,7 +19,7 @@ urlpatterns = [
     url(r'^$', views.GUIView.as_view()),
     url(r'^app$', views.AppGUIView.as_view()),
     url(r'^{}'.format(login_url), views.Login.as_view(), name='login'),
-    url(r'^app-login'.format(login_url), views.AppLogin.as_view(), name='login'),
+    url(r'^app-login', views.AppLogin.as_view(), name='login'),
     url(r'^{}'.format(logout_url), views.Logout.as_view(), {'next_page': '/'}),
     url(r'^admin/', admin.site.urls),
     url(r'^$', admin.site.urls),
