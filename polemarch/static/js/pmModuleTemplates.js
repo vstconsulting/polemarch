@@ -585,19 +585,25 @@ pmModuleTemplates.showItem = function(holder, menuInfo, data)
     var def = new $.Deferred();
     var thisObj = this;
     $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems(),
-        pmModuleTemplates.loadItem(item_id), pmModuleTemplates.loadLinkedPeriodicTasks(item_id)).done(function()
+        pmModuleTemplates.loadItem(item_id)).done(function()
     {
-        $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).always(function()
+        $.when(pmProjects.loadItem(thisObj.model.items[item_id].data.project)).done(function ()
         {
-            var tpl = thisObj.model.name+'_module_page'
-            if(!spajs.just.isTplExists(tpl))
+            $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).always(function()
             {
-                tpl = 'items_page'
-            }
+                var tpl = thisObj.model.name+'_module_page'
+                if(!spajs.just.isTplExists(tpl))
+                {
+                    tpl = 'items_page'
+                }
 
-            $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
-            def.resolve();
+                $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
+                def.resolve();
+            });
+        }).fail(function () {
+            $.notify("Error with loading of project data");
         });
+
     }).fail(function(e)
     {
         def.reject(e);

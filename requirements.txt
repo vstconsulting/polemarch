@@ -1,6 +1,7 @@
 # Main
 configparser==3.5.0
 celery>4.0.3,<=4.1.0
+kombu==4.1.0
 six
 pyyaml
 sqlalchemy
