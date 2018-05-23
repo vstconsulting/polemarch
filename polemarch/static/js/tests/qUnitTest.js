@@ -4509,6 +4509,23 @@ window.qunitTestsArray.push({
         })
     });
 
+    syncQUnit.addTest('Деактивация hook', function ( assert )
+    {
+        var done = assert.async();
+        var item_id=/hook\/([0-9]+)/.exec(window.location.href)[1]
+
+        $.when(pmHooks.changeItemActivation(item_id)).done(function()
+        {
+            assert.ok(true, 'Hook успешно деативирован');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при деактивации hook');
+            render(done)
+        })
+    });
+
     syncQUnit.addTest('Удаление  hook', function ( assert )
     {
         var done = assert.async();

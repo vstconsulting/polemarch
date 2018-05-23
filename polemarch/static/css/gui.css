@@ -672,7 +672,7 @@ table{
     }
 }
 
-.user-status, .group-children, .all-only, .new_subitem, .pt-enabled {
+.user-status, .group-children, .all-only, .new_subitem, .pt-enabled, .hook-enable {
     font-weight: bold;
     text-align: center;
     vertical-align: middle;
@@ -928,6 +928,7 @@ table{
 .recipients_list ul, .option-vars {
     margin-left:15px;
     padding-left: 0px;
+    word-wrap:break-word;
 }
 
 .light-tr:hover {

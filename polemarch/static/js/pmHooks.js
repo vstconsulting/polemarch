@@ -34,12 +34,6 @@ pmHooks.model.page_list = {
             name:'name',
         },
         {
-            title:'Type',
-            name:'type',
-            class:function(item){ return 'class="hidden-xs"'},
-            value:function(item){ return item['type']},
-        },
-        {
             title:'When',
             name: 'when',
             class:function(item){ return 'class="hidden-480"'},
@@ -60,6 +54,37 @@ pmHooks.model.page_list = {
                 recipient_list+="</ul>";
                 return recipient_list;
             },
+        },
+        {
+            title:'Type',
+            name:'type',
+            style:function(item, opt){ return 'style="width: 80px"'},
+            class:function(item){ return 'class="hidden-xs hidden-1100"'},
+            value:function(item){ return item['type']},
+        },
+        {
+            title:'Active',
+            name:'enable',
+            style:function(item, opt){ return 'style="width: 80px"'},
+            class:function(item, opt)
+            {
+                if(!item || !item.id)
+                {
+                    return 'class="hidden-xs hidden-sm hidden-1000"';
+                }
+
+                return 'class="hidden-xs hidden-sm hidden-1000 hook-enable '+'hook-enable-'+item.id+ '"';
+            },
+            value:function(item, filed_name, opt){
+                if(this.model.items[item.id].enable)
+                {
+                    return '<i class="fa fa-check" style="font-size:20px;"></i>'
+                }
+                else
+                {
+                    return '';
+                }
+            }
         }
     ],
     actions:[
@@ -67,7 +92,34 @@ pmHooks.model.page_list = {
             function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+')); return false;'},
             title:'Delete',
             link:function(){ return '#'}
-        }
+        },
+        {
+            class:function(item){return 'change-activation-'+item.id;},
+            function:function(item){ return 'spajs.showLoader('+this.model.className+'.changeItemActivation('+item.id+')); return false;'},
+            title:function(item){
+                if(this.model.items[item.id].enable==true)
+                {
+                    return "Deactivate";
+                }
+                else {
+                    return "Activate";
+                }
+            },
+            link:function(){ return '#'}
+        },
+    ],
+    actionsOnSelected:[
+        {
+            function:function(item){ return 'spajs.showLoader('+this.model.className+'.changeSelectedItemsActivation(true)); return false;'},
+            title:'Activate all selected',
+            link:function(){ return '#'}
+        },
+        {
+            function:function(item){ return 'spajs.showLoader('+this.model.className+'.changeSelectedItemsActivation(false)); return false;'},
+            title:'Deactivate all selected',
+            link:function(){ return '#'}
+        },
+
     ]
 }
 
@@ -78,6 +130,20 @@ pmHooks.model.page_item = {
             function:function(item_id){ return 'spajs.showLoader($.when('+this.model.className+'.updateItem('+item_id+')).done(function() {return spajs.openURL("'+window.location.href+'");}));  return false;'},
             title:'Save',
             link:function(){ return '#'},
+        },
+        {
+            class:function(item_id){return 'btn btn-warning change-activation-'+item_id;},
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.changeItemActivation('+item_id+')); return false;'},
+            title:function(item_id){
+                if(this.model.items[item_id].enable==true)
+                {
+                    return "Deactivate";
+                }
+                else {
+                    return "Activate";
+                }
+            },
+            link:function(){ return '#'}
         },
         {
             class:'btn btn-danger danger-right',
@@ -134,7 +200,7 @@ pmHooks.model.page_item = {
         data['when'] = $('#hook-'+item_id+'-when').val();
         if(data['when'] == "null")
         {
-           data['when'] = null;
+            data['when'] = null;
         }
         data['recipients'] = pmHooks.model.items[item_id].recipients;
         return data
@@ -413,6 +479,113 @@ pmHooks.setRecipients = function(item_id, recipients)
     }
 }
 
+/**
+ *Функция меняет значение свойства enable на противоположное.
+ */
+pmHooks.changeItemActivation = function(item_id)
+{
+    var thisObj = this;
+    var new_enable = !thisObj.model.items[item_id].enable;
+    var dataToPatch = {enable: new_enable};
+    return spajs.ajax.Call({
+        url: hostname + "/api/v1/hooks/"+item_id+"/",
+        type: "PATCH",
+        contentType:'application/json',
+        data:JSON.stringify(dataToPatch),
+        success: function(data)
+        {
+            thisObj.model.items[item_id].enable = new_enable;
+            if(new_enable)
+            {
+                $.notify('Hook "'+thisObj.model.items[item_id].name+'" was activated.', 'success');
+                $($('.change-activation-'+item_id)[0]).html('Deactivate');
+                $($(".hook-enable-"+item_id)[0]).html('<i class="fa fa-check" style="font-size:20px;"></i>');
+            }
+            else
+            {
+                $.notify('Hook "'+thisObj.model.items[item_id].name+'" was deactivated.', 'success');
+                $($('.change-activation-'+item_id)[0]).html('Activate');
+                $($(".hook-enable-"+item_id)[0]).html('');
+            }
+        },
+        error:function(e)
+        {
+            console.warn("Hook "+item_id+" update error - " + JSON.stringify(e));
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+
+/**
+ *Функция меняет значение свойства enable на установленное(mode).
+ */
+pmHooks.changeSelectedItemsActivation = function(mode)
+{
+    var thisObj = this;
+    var bulkUpdate = [];
+    for (var i in thisObj.model.selectedItems)
+    {
+        if (thisObj.model.selectedItems[i])
+        {
+            bulkUpdate.push({
+                type: 'mod',
+                item: thisObj.model.bulk_name,
+                pk: i,
+                method: 'patch',
+                data: {
+                    enable: mode
+                }
+            })
+        }
+    }
+
+    return spajs.ajax.Call({
+        url: hostname + "/api/v1/_bulk/",
+        type: "POST",
+        contentType:'application/json',
+        data:JSON.stringify(bulkUpdate),
+        success: function(data)
+        {
+            for(var i in data)
+            {
+                if(data[i].status == 200)
+                {
+                    thisObj.model.items[data[i].data.id].enable = data[i].data.enable;
+                    if(data[i].data.enable)
+                    {
+                        $.notify('Hook "'+thisObj.model.items[data[i].data.id].name+'" was activated.', 'success');
+                        $($('.change-activation-'+data[i].data.id)[0]).html('Deactivate');
+                        $($(".hook-enable-"+data[i].data.id)[0]).html('<i class="fa fa-check" style="font-size:20px;"></i>');
+                    }
+                    else
+                    {
+                        $.notify('Hook "'+thisObj.model.items[data[i].data.id].name+'" was deactivated.', 'success');
+                        $($('.change-activation-'+data[i].data.id)[0]).html('Activate');
+                        $($(".hook-enable-"+data[i].data.id)[0]).html('');
+                    }
+                }
+                else
+                {
+                    $.notify('Error ' + data[i].status, 'error');
+                }
+            }
+
+            for (var i in bulkUpdate)
+            {
+                $(".item-" + bulkUpdate[i].pk).removeClass("selected");
+                thisObj.toggleSelect(bulkUpdate[i].pk, false);
+            }
+
+            $($(".global-select")[0]).parent().removeClass('selected');
+
+        },
+        error:function(e)
+        {
+            console.warn("Hook "+item_id+" update error - " + JSON.stringify(e));
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
 
 tabSignal.connect("polemarch.start", function()
 {
