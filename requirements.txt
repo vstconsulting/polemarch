@@ -1,5 +1,5 @@
 # Main
-configparser==3.5.0
+vstutils=1.0.0
 celery>4.0.3,<=4.1.0
 kombu==4.1.0
 six
@@ -11,9 +11,6 @@ docutils==0.14
 markdown2==2.3.5
 
 # API
-djangorestframework==3.8.2
-django-filter
-django-crispy-forms
 django-celery-beat==1.1.1
 jsonfield==2.0.2
 uWSGI==2.0.17
