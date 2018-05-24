@@ -55,9 +55,7 @@ ext_list = [
     "polemarch.api.base",
     "polemarch.api.handlers",
     "polemarch.api.permissions",
-    "polemarch.api.routers",
     "polemarch.api.signals",
-    "polemarch.api.urls",
     "polemarch.main.models.base",
     "polemarch.main.models.hosts",
     "polemarch.main.models.hooks",
@@ -66,9 +64,7 @@ ext_list = [
     "polemarch.main.models.utils",
     "polemarch.main.models.users",
     "polemarch.main.models.vars",
-    # "polemarch.main.tasks.tasks",
     'polemarch.main.settings',
-    #'polemarch.main.utils',
     'polemarch.main.hooks.base',
     'polemarch.main.hooks.http',
     'polemarch.main.hooks.script',
@@ -78,7 +74,6 @@ ext_list = [
     'polemarch.main.repo.vcs',
     'polemarch.main.validators',
     'polemarch.main.views',
-    'polemarch.main.context_processors',
 
 ]
 
