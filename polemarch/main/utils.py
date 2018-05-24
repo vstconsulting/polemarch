@@ -32,30 +32,13 @@ from django.utils import translation
 from ansible import modules as ansible_modules, __version__ as ansible_version
 from ansible.cli.adhoc import AdHocCLI
 from ansible.cli.playbook import PlaybookCLI
+from vstutils.utils import import_class
 
 from . import exceptions as ex
 from . import __file__ as file
 
 
 logger = logging.getLogger('polemarch')
-
-
-def import_class(path):
-    '''
-    Get class from string-path
-
-    :param path: -- string containing full python-path
-    :type path: str,unicode
-    :return: -- return class or module in path
-    :rtype: class, module, object
-    '''
-    m_len = path.rfind(".")
-    class_name = path[m_len + 1:len(path)]
-    try:
-        module = __import__(path[0:m_len], globals(), locals(), [class_name])
-        return getattr(module, class_name)
-    except SystemExit:
-        return None  # nocv
 
 
 def project_path():

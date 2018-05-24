@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User as BaseUser
+from vstutils.utils import import_class
 
-from ...main.utils import Paginator, classproperty, import_class
+from ...main.utils import Paginator, classproperty
 
 
 def first_staff_user():
