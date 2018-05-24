@@ -1,5 +1,5 @@
 # Main
-vstutils=1.0.0
+vstutils==1.0.0
 celery>4.0.3,<=4.1.0
 kombu==4.1.0
 six
