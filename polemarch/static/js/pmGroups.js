@@ -227,6 +227,32 @@ pmGroups.model.page_item = {
             link:function(){ return '#'},
         },
         {
+            class:'btn btn-info',
+            function:function(item_id)
+            {
+                if(this.model.items[item_id].children)
+                {
+                    return "spajs.open({ menuId:'" + this.model.page_name + "/" + item_id + "/groups'}); return false";
+                }
+                else
+                {
+                    return "spajs.open({ menuId:'" + this.model.page_name + "/" + item_id + "/hosts'}); return false";
+                }
+            },
+            title:function(item_id)
+            {
+                if(this.model.items[item_id].children)
+                {
+                    return 'Groups';
+                }
+                else
+                {
+                    return 'Hosts';
+                }
+            },
+            link:function(){ return '#'},
+        },
+        {
             class:'btn btn-default copy-btn',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
             title:'<span class="glyphicon glyphicon-duplicate" ></span>',

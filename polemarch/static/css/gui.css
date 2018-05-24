@@ -957,6 +957,10 @@ table{
     font-size: 18px;
 }
 
+.add-existing-item {
+    margin-right: 20px;
+}
+
 @media (min-width: 1200px) {
     .readme_content img {
         max-width: 60%;
@@ -970,6 +974,12 @@ table{
 @media (max-width: 1200px) {
     .hidden-1200 {
         display: none;
+    }
+
+    .add-existing-item {
+        margin-right: 0px;
+        margin-top: 5px;
+        margin-bottom: 5px;
     }
 }
 
@@ -1003,6 +1013,6 @@ table{
     }
 }
 
-.hide-in-web{ 
+.hide-in-web{
     display: none;
 }

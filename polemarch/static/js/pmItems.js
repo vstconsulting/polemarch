@@ -199,11 +199,11 @@ pmItems.searchFiled = function (options)
 pmItems.search = function (query, options)
 {
     if (this.isEmptySearchQuery(query))
-    {       
+    {
         return spajs.open({menuId: this.model.name, reopen: true});
 
     }
-   
+
 
     return spajs.open({menuId: this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
     //this.paginationHtml(this.model.itemslist);
@@ -234,7 +234,7 @@ pmItems.isEmptySearchQuery = function (query)
 pmItems.showSearchResults = function (holder, menuInfo, data)
 {
     var thisObj = this;
-   
+
     var limit = this.pageSize;
 
     if (data.reg && data.reg[2] > 0)
@@ -250,7 +250,7 @@ pmItems.showSearchResults = function (holder, menuInfo, data)
         {
             tpl = 'items_list'
         }
-        
+
         $(holder).insertTpl(spajs.just.render(tpl, {query: decodeURIComponent(data.reg[1]), pmObj: thisObj, opt: {}}))
     }).fail(function ()
     {
@@ -368,17 +368,142 @@ pmItems.showNewItemPage = function (holder, menuInfo, data)
 {
     setActiveMenuLi();
     var def = new $.Deferred();
+    var thisObj = this;
 
-    var tpl = this.model.name + '_new_page'
+    var tpl = this.model.name + '_new_page';
     if (!spajs.just.isTplExists(tpl))
     {
-        tpl = 'items_new_page'
+        tpl = 'items_new_page';
     }
 
-    var text = spajs.just.render(tpl, {parent_item: data.reg[2], parent_type: data.reg[1], pmObj: this, opt: {}})
-    $(holder).insertTpl(text)
+    var parent_item = data.reg[2];
+    var parent_type = data.reg[1];
+    if(parent_type !== undefined && parent_item !== undefined)
+    {
+        var parentObj = undefined;
+        switch(parent_type)
+        {
+            case 'project':
+                parentObj = pmProjects;
+                break;
+            case 'inventory':
+                parentObj = pmInventories;
+                break;
+            case 'group':
+                parentObj = pmGroups;
+                break;
+        }
 
-    def.resolve()
+        $.when(parentObj.loadItem(parent_item)).done(function ()
+        {
+            var text = spajs.just.render(tpl, { pmObj: thisObj, parentObj:parentObj, opt: {parent_item: parent_item, parent_type: parent_type}});
+            $(holder).insertTpl(text);
+
+            def.resolve();
+
+        }).fail(function()
+        {
+            $.notify("", "error");
+
+            def.reject();
+        })
+    }
+    else
+    {
+        var text = spajs.just.render(tpl, {pmObj: thisObj, opt: {parent_item: parent_item, parent_type: parent_type}});
+        $(holder).insertTpl(text);
+
+        def.resolve();
+    }
+
+    return def.promise();
+}
+
+pmItems.showListFromAnotherClass = function(holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var def = new $.Deferred();
+    var thisObj = this;
+    var offset = 0;
+    var limit = thisObj.pageSize;
+    if (data.reg && data.reg[3] > 0)
+    {
+        offset = thisObj.pageSize * (data.reg[3] - 1);
+    }
+    var parent_type = data.reg[1];
+    var parent_item = data.reg[2];
+    var parentObj = undefined;
+    switch(parent_type)
+    {
+        case 'project':
+            parentObj = pmProjects;
+            break;
+        case 'inventory':
+            parentObj = pmInventories;
+            break;
+        case 'group':
+            parentObj = pmGroups;
+            break;
+    }
+
+    $.when(parentObj.loadItem(parent_item), thisObj.loadAllItems()).done(function()
+    {
+        var childrenItems = [];
+        for(var i in parentObj.model.items[parent_item][thisObj.model.name])
+        {
+            childrenItems.push(parentObj.model.items[parent_item][thisObj.model.name][i]);
+        }
+        thisObj.model.itemsForParent = {};
+        thisObj.model.itemslistForParent = {};
+        if(childrenItems.length != 0)
+        {
+
+            thisObj.model.itemslistForParent.count = childrenItems.length;
+            thisObj.model.itemslistForParent.limit = limit;
+            thisObj.model.itemslistForParent.offset = offset;
+            thisObj.model.itemslistForParent.next = null;
+            thisObj.model.itemslistForParent.previos = null;
+            thisObj.model.itemslistForParent.results = [];
+            if(childrenItems.length > limit)
+            {
+                for(var i=offset; i<offset+limit; i++)
+                {
+                    if(childrenItems[i] !== undefined)
+                    {
+                        thisObj.model.itemslistForParent.results.push(childrenItems[i]);
+                        thisObj.model.itemsForParent[childrenItems[i].id] = childrenItems[i];
+                    }
+                }
+            }
+            else
+            {
+                for(var i=0; i<childrenItems.length; i++ )
+                {
+                    thisObj.model.itemslistForParent.results.push(childrenItems[i]);
+                    thisObj.model.itemsForParent[childrenItems[i].id] = childrenItems[i];
+                }
+            }
+        }
+
+        var tpl = thisObj.model.name + '_list_from_another_class';
+        if (!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_list_from_another_class';
+        }
+        var text = spajs.just.render(tpl, {query: "",  pmObj: thisObj, parentObj:parentObj,
+            opt: {parent_item: parent_item, parent_type: parent_type}});
+        $(holder).insertTpl(text);
+        $('#add_existing_item_to_parent').select2({
+            placeholder: true,
+            allowClear: true
+        });
+        def.resolve();
+    }).fail(function()
+    {
+        $.notify("", "error");
+        def.reject();
+    })
+
     return def.promise();
 }
 
@@ -1060,6 +1185,58 @@ pmItems.checkSubItemsAndAdd=function(thisObj, ObjToAdd, data, itemId, itemType, 
     }
 }
 
+pmItems.addExistingChildItemToParent = function(parentObj, parent_item)
+{
+    var childItem_id =+ $("#add_existing_item_to_parent").val();
+    var childItem_type = $("#add_existing_item_to_parent").attr('data-child-type');
+    var def = new $.Deferred();
+    var thisObj = this;
+
+    if(childItem_id == "")
+    {
+        $.notify("Please select on of the " + childItem_type + ".", "error");
+        def.reject();
+    }
+    else
+    {
+        var childIds = [];
+        for(var i in  parentObj.model.items[parent_item][childItem_type])
+        {
+            childIds.push(parentObj.model.items[parent_item][childItem_type][i].id);
+        }
+        childIds.push(childItem_id);
+        spajs.ajax.Call({
+            url: hostname + "/api/v1/" + parentObj.model.name + "/" + parent_item + "/" + childItem_type + "/",
+            type: "PUT",
+            contentType: 'application/json',
+            data: JSON.stringify(childIds),
+            success: function (data)
+            {
+                $.notify(capitalizeString(thisObj.model.page_name) + " " + thisObj.model.items[childItem_id].name
+                    + " was added to " + parentObj.model.page_name + " " + parentObj.model.items[parent_item].name+".", "success");
+                parentObj.model.items[parent_item][childItem_type].push(thisObj.model.items[childItem_id]);
+                thisObj.model.itemsForParent[childItem_id] = thisObj.model.items[childItem_id];
+                thisObj.model.itemslistForParent.results.push(thisObj.model.items[childItem_id]);
+                thisObj.model.itemslistForParent.count+=1;
+
+                $('#add_existing_item_to_parent').select2({
+                    placeholder: true,
+                    allowClear: true
+                });
+
+
+                def.resolve();
+
+            },
+            error: function (e)
+            {
+                def.reject(e)
+                polemarch.showErrors(e.responseJSON)
+            }
+        });
+    }
+    return def.promise();
+}
 
 /*pmItems.getFiledByName = function(fileds, name)
  {
