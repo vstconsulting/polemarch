@@ -2333,6 +2333,24 @@ pmInventories.model.page_item = {
             link:function(item_id){ return polemarch.opt.host + '/?inventory/' + item_id + '/history'},
         },
         {
+            class:'btn btn-info',
+            function:function(item_id)
+            {
+                return "spajs.open({ menuId:'" + this.model.page_name + "/" + item_id + "/groups'}); return false";
+            },
+            title: "Groups",
+            link:function(){ return '#'},
+        },
+        {
+            class:'btn btn-info',
+            function:function(item_id)
+            {
+                return "spajs.open({ menuId:'" + this.model.page_name + "/" + item_id + "/hosts'}); return false";
+            },
+            title: "Hosts",
+            link:function(){ return '#'},
+        },
+        {
             class:'btn btn-default copy-btn',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
             title:'<span class="glyphicon glyphicon-duplicate" ></span>',
@@ -2349,9 +2367,6 @@ pmInventories.model.page_item = {
     sections:[
         function(section, item_id){
             return jsonEditor.editor(this.model.items[item_id].vars, {block:this.model.name});
-        },
-        function(section, item_id){
-            return spajs.just.render("inventories_sub_items", {item_id:item_id})
         }
     ],
     title: function(item_id){
@@ -2393,53 +2408,53 @@ pmInventories.model.page_item = {
     },
 }
 
-/**
- * Показывает форму со списком всех групп.
- * @return $.Deferred
- */
-pmInventories.showAddSubGroupsForm = function(item_id, holder)
-{
-    if(!item_id)
-    {
-        throw "Error in pmInventories.showAddSubGroupsForm with item_id = `" + item_id + "`"
-    }
+// /**
+//  * Показывает форму со списком всех групп.
+//  * @return $.Deferred
+//  */
+// pmInventories.showAddSubGroupsForm = function(item_id, holder)
+// {
+//     if(!item_id)
+//     {
+//         throw "Error in pmInventories.showAddSubGroupsForm with item_id = `" + item_id + "`"
+//     }
+//
+//     return $.when(pmGroups.loadAllItems()).done(function(){
+//         $("#add_existing_item_to_inventory").remove()
+//         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
+//         var scroll_el = "#add_existing_item_to_inventory";
+//         if ($(scroll_el).length != 0)  {
+//             $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+//         }
+//         $("#polemarch-model-items-select").select2({ width: '100%' });
+//     }).fail(function(){
+//
+//     }).promise()
+// }
 
-    return $.when(pmGroups.loadAllItems()).done(function(){
-        $("#add_existing_item_to_inventory").remove()
-        $(".content").appendTpl(spajs.just.render('add_existing_groups_to_inventory', {item_id:item_id}))
-        var scroll_el = "#add_existing_item_to_inventory";
-        if ($(scroll_el).length != 0)  {
-            $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
-        }
-        $("#polemarch-model-items-select").select2({ width: '100%' });
-    }).fail(function(){
-
-    }).promise()
-}
-
-/**
- * Показывает форму со списком всех хостов.
- * @return $.Deferred
- */
-pmInventories.showAddSubHostsForm = function(item_id, holder)
-{
-    if(!item_id)
-    {
-        throw "Error in pmInventories.showAddSubHostsForm with item_id = `" + item_id + "`"
-    }
-
-    return $.when(pmHosts.loadAllItems()).done(function(){
-        $("#add_existing_item_to_inventory").remove()
-        $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_inventory', {item_id:item_id}))
-        var scroll_el = "#add_existing_item_to_inventory";
-        if ($(scroll_el).length != 0) {
-            $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
-        }
-        $("#polemarch-model-items-select").select2({ width: '100%' });
-    }).fail(function(){
-
-    }).promise()
-}
+// /**
+//  * Показывает форму со списком всех хостов.
+//  * @return $.Deferred
+//  */
+// pmInventories.showAddSubHostsForm = function(item_id, holder)
+// {
+//     if(!item_id)
+//     {
+//         throw "Error in pmInventories.showAddSubHostsForm with item_id = `" + item_id + "`"
+//     }
+//
+//     return $.when(pmHosts.loadAllItems()).done(function(){
+//         $("#add_existing_item_to_inventory").remove()
+//         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_inventory', {item_id:item_id}))
+//         var scroll_el = "#add_existing_item_to_inventory";
+//         if ($(scroll_el).length != 0) {
+//             $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+//         }
+//         $("#polemarch-model-items-select").select2({ width: '100%' });
+//     }).fail(function(){
+//
+//     }).promise()
+// }
 
 /**
  * Проверяет принадлежит ли host_id к группе item_id

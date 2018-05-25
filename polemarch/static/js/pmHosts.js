@@ -44,9 +44,7 @@ pmHosts.model.page_list_from_another_class = {
             class:'btn btn-primary',
             function:function(opt){ return "spajs.open({ menuId:'" + opt.parent_type + "/" + opt.parent_item + "/" + this.model.name + "/new-"+this.model.page_name+"'}); return false;"},
             title:'Create',
-            // ?????????//
-            link:function(){ return '/?new-'+this.model.page_name},
-            // ?????????//
+            link:function(){ return '#'},
         }
     ],
     title: "Hosts",
@@ -65,10 +63,17 @@ pmHosts.model.page_list_from_another_class = {
     ],
     actions:[
         {
-            function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+')); return false;'},
-            title:'Delete',
+            function:function(item, opt){ return 'spajs.showLoader('+this.model.className+'.deleteChildFromParent("' + opt.parent_type + '",' + opt.parent_item + ',' + item.id+')); return false;'},
+            title: function(item, opt){return "Delete from " + opt.parent_type;},
             link:function(){ return '#'}
         }
+    ],
+    actionsOnSelected:[
+        {
+            function:function(item, opt){ return 'spajs.showLoader('+this.model.className+'.deleteChildrenFromParent("'  +opt.parent_type + '",' + opt.parent_item + ')); return false;'},
+            title:function(item, opt){return "Delete all selected from " + opt.parent_type;},
+            link:function(){ return '#'}
+        },
     ]
 }
 
@@ -240,6 +245,63 @@ pmHosts.model.page_item = {
     },
 }
 
+pmHosts.model.page_item_from_another_class = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
+            title:'Save',
+            link:function(){ return '#'},
+        },
+        {
+            class:'btn btn-warning',
+            function:function(item_id, opt){ return 'spajs.showLoader('+this.model.className+'.deleteChildFromParent("'+opt.parent_type+'",'+opt.parent_item+','+item_id+','+true+'));  return false;'},
+            title:function(item_id, opt){return 'Remove from parent ' +opt.parent_type; },
+            link:function(){ return '#'},
+        },
+        {
+            class:'btn btn-danger danger-right',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
+            link:function(){ return '#'},
+        },
+    ],
+    sections:[
+        function(section, item_id){
+            return jsonEditor.editor(this.model.items[item_id].vars, {block:this.model.name});
+        }
+    ],
+    title: function(item_id){
+        return "Host "+pmHosts.model.items[item_id].justText('name')
+    },
+    short_title: function(item_id){
+        return "Host "+pmHosts.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
+    },
+    fileds:pmHosts.fileds,
+    onUpdate:function(result)
+    {
+        return true;
+    },
+    onBeforeSave:function(data, item_id)
+    {
+        data.vars = jsonEditor.jsonEditorGetValues()
+        if(this.validateHostName(data.name))
+        {
+            data.type = 'HOST'
+        }
+        else if(this.validateRangeName(data.name))
+        {
+            data.type = 'RANGE'
+        }
+        else
+        {
+            $.notify("Error in host or range name", "error");
+            return undefined;
+        }
+        return data;
+    },
+}
+
 pmHosts.copyItem = function(item_id)
 {
     var def = new $.Deferred();
@@ -324,8 +386,15 @@ tabSignal.connect("polemarch.start", function()
 
     spajs.addMenu({
         id:"newHost",
-        urlregexp:[/^new-host$/, /^([A-z0-9_]+)\/([0-9]+)\/hosts\/new-host$/],
+        urlregexp:[/^new-host$/, /^([A-z0-9_]+)\/([0-9]+)\/new-host$/,
+            /^([A-z0-9_]+)\/([0-9]+)\/hosts\/new-host$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showNewItemPage(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"host-from-another-model",
+        urlregexp:[/^([A-z0-9_]+)\/([0-9]+)\/host\/([0-9]+)$/, /^([A-z0-9_]+)\/([0-9]+)\/hosts\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHosts.showItemFromAnotherClass(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
@@ -333,6 +402,13 @@ tabSignal.connect("polemarch.start", function()
         urlregexp:[/^([A-z0-9_]+)\/([0-9]+)\/hosts$/, /^([A-z0-9_]+)\/([0-9]+)\/host$/,
             /^([A-z0-9_]+)\/([0-9]+)\/hosts\/search\/?$/, /^([A-z0-9_]+)\/([0-9]+)\/hosts\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showListFromAnotherClass(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"some-model-hosts-search",
+        urlregexp:[/^([A-z0-9_]+)\/([0-9]+)\/hosts\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^([A-z0-9_]+)\/([0-9]+)\/hosts\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmHosts.showSearchResultsForParent(holder, menuInfo, data);}
     })
 })
 

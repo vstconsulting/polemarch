@@ -198,16 +198,28 @@ pmItems.searchFiled = function (options)
  */
 pmItems.search = function (query, options)
 {
-    if (this.isEmptySearchQuery(query))
+    if(options.parent_type === undefined && options.parent_item === undefined)
     {
-        return spajs.open({menuId: this.model.name, reopen: true});
+        if (this.isEmptySearchQuery(query))
+        {
+            return spajs.open({menuId: this.model.name, reopen: true});
+        }
 
+        return spajs.open({menuId: this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
+    }
+    else
+    {
+        if (this.isEmptySearchQuery(query))
+        {
+            return spajs.open({menuId: options.parent_type + "/" + options.parent_item + "/" + this.model.name, reopen: true});
+        }
+
+        return spajs.open({menuId: options.parent_type + "/" + options.parent_item + "/" +
+            this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
     }
 
-
-    return spajs.open({menuId: this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
-    //this.paginationHtml(this.model.itemslist);
 }
+
 
 /**
  * Если поисковый запрос пуст то вернёт true
@@ -233,6 +245,7 @@ pmItems.isEmptySearchQuery = function (query)
  */
 pmItems.showSearchResults = function (holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var thisObj = this;
 
     var limit = this.pageSize;
@@ -256,6 +269,114 @@ pmItems.showSearchResults = function (holder, menuInfo, data)
     {
         $.notify("", "error");
     })
+}
+
+/**
+ * Строит страницу результатов поиска по списку дочерних элементов.
+ * @param {type} holder
+ * @param {type} menuInfo
+ * @param {type} data
+ * @returns {$.Deferred}
+ */
+pmItems.showSearchResultsForParent = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var def = new $.Deferred();
+    var thisObj = this;
+    var offset = 0;
+    var limit = thisObj.pageSize;
+    if (data.reg && data.reg[4] > 0)
+    {
+        offset = thisObj.pageSize * (data.reg[4] - 1);
+    }
+    var parent_type = data.reg[1];
+    var parent_item = data.reg[2];
+    var searchQuery = decodeURIComponent(data.reg[3]);
+    var parentObj = undefined;
+    switch(parent_type)
+    {
+        case 'project':
+        case 'projects':
+            parentObj = pmProjects;
+            break;
+        case 'inventory':
+        case 'inventories':
+            parentObj = pmInventories;
+            break;
+        case 'group':
+        case 'groups':
+            parentObj = pmGroups;
+            break;
+    }
+    parent_type = parentObj.model.page_name;
+    $.when(parentObj.loadItem(parent_item), thisObj.loadAllItems()).done(function()
+    {
+        var childrenItems = [];
+        for(var i in parentObj.model.items[parent_item][thisObj.model.name])
+        {
+            childrenItems.push(parentObj.model.items[parent_item][thisObj.model.name][i]);
+        }
+        thisObj.model.itemsForParent = {};
+        thisObj.model.itemslistForParent = {};
+        for(var i in childrenItems)
+        {
+            thisObj.model.itemsForParent[childrenItems[i].id] = childrenItems[i];
+        }
+        var childrenItemsValidToQuery = [];
+        for (var i in childrenItems)
+        {
+            if(childrenItems[i].name.match(searchQuery) != null)
+            {
+                childrenItemsValidToQuery.push(childrenItems[i]);
+            }
+        }
+        thisObj.model.itemslistForParent.count = childrenItemsValidToQuery.length;
+        thisObj.model.itemslistForParent.limit = limit;
+        thisObj.model.itemslistForParent.offset = offset;
+        thisObj.model.itemslistForParent.next = null;
+        thisObj.model.itemslistForParent.previos = null;
+        thisObj.model.itemslistForParent.results = [];
+        if(childrenItemsValidToQuery.length != 0)
+        {
+            if(childrenItemsValidToQuery.length > limit)
+            {
+                for(var i=offset; i<offset+limit; i++)
+                {
+                    if(childrenItemsValidToQuery[i] !== undefined)
+                    {
+                        thisObj.model.itemslistForParent.results.push(childrenItemsValidToQuery[i]);
+                    }
+                }
+            }
+            else
+            {
+                for(var i=0; i<childrenItemsValidToQuery.length; i++ )
+                {
+                    thisObj.model.itemslistForParent.results.push(childrenItemsValidToQuery[i]);
+                }
+            }
+        }
+
+        var tpl = thisObj.model.name + '_list_from_another_class';
+        if (!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_list_from_another_class';
+        }
+        var text = spajs.just.render(tpl, {query: searchQuery,  pmObj: thisObj, parentObj:parentObj,
+            opt: {parent_item: parent_item, parent_type: parent_type}});
+        $(holder).insertTpl(text);
+        $('#add_existing_item_to_parent').select2({
+            placeholder: true,
+            allowClear: true
+        });
+        def.resolve();
+    }).fail(function()
+    {
+        $.notify("", "error");
+        def.reject();
+    })
+
+    return def.promise();
 }
 
 pmItems.copyItem = function (item_id)
@@ -364,6 +485,54 @@ pmItems.showItem = function (holder, menuInfo, data)
     }).promise()
 }
 
+pmItems.showItemFromAnotherClass = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var def = new $.Deferred();
+    var thisObj = this;
+    var parent_type = data.reg[1];
+    var parent_item = data.reg[2];
+    var child_item = data.reg[3];
+    var parentObj = undefined;
+    switch(parent_type)
+    {
+        case 'project':
+        case 'projects':
+            parentObj = pmProjects;
+            break;
+        case 'inventory':
+        case 'inventories':
+            parentObj = pmInventories;
+            break;
+        case 'group':
+        case 'groups':
+            parentObj = pmGroups;
+            break;
+    }
+    parent_type = parentObj.model.page_name;
+    return $.when(thisObj.loadItem(child_item), parentObj.loadItem(parent_item)).done(function ()
+    {
+        thisObj.model.itemsForParent = {};
+        var children = parentObj.model.items[parent_item][thisObj.model.name];
+        for (var i in children)
+        {
+            thisObj.model.itemsForParent[children[i].id] = children[i];
+        }
+
+        var tpl = thisObj.model.name + '_page_from_another_class';
+        if (!spajs.just.isTplExists(tpl))
+        {
+            tpl = 'items_page_from_another_class';
+        }
+
+        $(holder).insertTpl(spajs.just.render(tpl, {item_id: child_item, pmObj: thisObj, parentObj:parentObj,
+            opt: {parent_type:parent_type, parent_item:parent_item}}))
+    }).fail(function ()
+    {
+        $.notify("", "error");
+    }).promise();
+}
+
 pmItems.showNewItemPage = function (holder, menuInfo, data)
 {
     setActiveMenuLi();
@@ -384,15 +553,19 @@ pmItems.showNewItemPage = function (holder, menuInfo, data)
         switch(parent_type)
         {
             case 'project':
+            case 'projects':
                 parentObj = pmProjects;
                 break;
             case 'inventory':
+            case 'inventories':
                 parentObj = pmInventories;
                 break;
             case 'group':
+            case 'groups':
                 parentObj = pmGroups;
                 break;
         }
+        parent_type = parentObj.model.page_name;
 
         $.when(parentObj.loadItem(parent_item)).done(function ()
         {
@@ -436,15 +609,19 @@ pmItems.showListFromAnotherClass = function(holder, menuInfo, data)
     switch(parent_type)
     {
         case 'project':
+        case 'projects':
             parentObj = pmProjects;
             break;
         case 'inventory':
+        case 'inventories':
             parentObj = pmInventories;
             break;
         case 'group':
+        case 'groups':
             parentObj = pmGroups;
             break;
     }
+    parent_type = parentObj.model.page_name;
 
     $.when(parentObj.loadItem(parent_item), thisObj.loadAllItems()).done(function()
     {
@@ -455,15 +632,18 @@ pmItems.showListFromAnotherClass = function(holder, menuInfo, data)
         }
         thisObj.model.itemsForParent = {};
         thisObj.model.itemslistForParent = {};
+        thisObj.model.itemslistForParent.count = childrenItems.length;
+        thisObj.model.itemslistForParent.limit = limit;
+        thisObj.model.itemslistForParent.offset = offset;
+        thisObj.model.itemslistForParent.next = null;
+        thisObj.model.itemslistForParent.previos = null;
+        thisObj.model.itemslistForParent.results = [];
+        for(var i in childrenItems)
+        {
+            thisObj.model.itemsForParent[childrenItems[i].id] = childrenItems[i];
+        }
         if(childrenItems.length != 0)
         {
-
-            thisObj.model.itemslistForParent.count = childrenItems.length;
-            thisObj.model.itemslistForParent.limit = limit;
-            thisObj.model.itemslistForParent.offset = offset;
-            thisObj.model.itemslistForParent.next = null;
-            thisObj.model.itemslistForParent.previos = null;
-            thisObj.model.itemslistForParent.results = [];
             if(childrenItems.length > limit)
             {
                 for(var i=offset; i<offset+limit; i++)
@@ -471,7 +651,6 @@ pmItems.showListFromAnotherClass = function(holder, menuInfo, data)
                     if(childrenItems[i] !== undefined)
                     {
                         thisObj.model.itemslistForParent.results.push(childrenItems[i]);
-                        thisObj.model.itemsForParent[childrenItems[i].id] = childrenItems[i];
                     }
                 }
             }
@@ -480,7 +659,6 @@ pmItems.showListFromAnotherClass = function(holder, menuInfo, data)
                 for(var i=0; i<childrenItems.length; i++ )
                 {
                     thisObj.model.itemslistForParent.results.push(childrenItems[i]);
-                    thisObj.model.itemsForParent[childrenItems[i].id] = childrenItems[i];
                 }
             }
         }
@@ -1185,6 +1363,11 @@ pmItems.checkSubItemsAndAdd=function(thisObj, ObjToAdd, data, itemId, itemType, 
     }
 }
 
+
+/**
+ *Функция добавляет subitem из списка существующих subitems родительскому элементы.
+ *(select2 'Add existing subitem' на странице списка дочерних элементов родителя).
+ */
 pmItems.addExistingChildItemToParent = function(parentObj, parent_item)
 {
     var childItem_id =+ $("#add_existing_item_to_parent").val();
@@ -1212,20 +1395,15 @@ pmItems.addExistingChildItemToParent = function(parentObj, parent_item)
             data: JSON.stringify(childIds),
             success: function (data)
             {
-                $.notify(capitalizeString(thisObj.model.page_name) + " " + thisObj.model.items[childItem_id].name
-                    + " was added to " + parentObj.model.page_name + " " + parentObj.model.items[parent_item].name+".", "success");
-                parentObj.model.items[parent_item][childItem_type].push(thisObj.model.items[childItem_id]);
-                thisObj.model.itemsForParent[childItem_id] = thisObj.model.items[childItem_id];
-                thisObj.model.itemslistForParent.results.push(thisObj.model.items[childItem_id]);
-                thisObj.model.itemslistForParent.count+=1;
-
-                $('#add_existing_item_to_parent').select2({
-                    placeholder: true,
-                    allowClear: true
+                $.when(spajs.open({menuId: window.location.href.split(/[&?]/g)[1], reopen: true})).done(function ()
+                {
+                    $.notify(capitalizeString(thisObj.model.page_name) + " " + thisObj.model.items[childItem_id].name
+                        + " was added to " + parentObj.model.page_name + " " + parentObj.model.items[parent_item].name+".", "success");
+                    def.resolve();
+                }).fail(function ()
+                {
+                    def.reject();
                 });
-
-
-                def.resolve();
 
             },
             error: function (e)
@@ -1236,6 +1414,142 @@ pmItems.addExistingChildItemToParent = function(parentObj, parent_item)
         });
     }
     return def.promise();
+}
+
+
+/**
+ *Функция удаляет элемент из списка дочерних элементов родительского элемента.
+ */
+pmItems.deleteChildFromParent = function (parent_type, parent_item, childItem_id, to_list_strict)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    delete thisObj.model.itemsForParent[childItem_id];
+    var childrenItemsIds = [];
+    for(var i in thisObj.model.itemsForParent)
+    {
+        childrenItemsIds.push(thisObj.model.itemsForParent[i].id)
+    }
+    var parentObj = undefined;
+    switch(parent_type)
+    {
+        case 'project':
+        case 'projects':
+            parentObj = pmProjects;
+            break;
+        case 'inventory':
+        case 'inventories':
+            parentObj = pmInventories;
+            break;
+        case 'group':
+        case 'groups':
+            parentObj = pmGroups;
+            break;
+    }
+    parent_type = parentObj.model.page_name;
+    spajs.ajax.Call({
+        url: hostname + "/api/v1/" + parentObj.model.name + "/" + parent_item + "/" + thisObj.model.name + "/",
+        type: "PUT",
+        contentType: 'application/json',
+        data: JSON.stringify(childrenItemsIds),
+        success: function (data)
+        {
+            var menuStr = undefined;
+            if(to_list_strict)
+            {
+                menuStr = parent_type + "/" + parent_item + "/" + thisObj.model.name;
+            }
+            else
+            {
+                menuStr = window.location.href.split(/[&?]/g)[1];
+            }
+            $.when(spajs.open({menuId: menuStr, reopen: true})).done(function ()
+            {
+                $.notify(capitalizeString(thisObj.model.page_name) + " " + thisObj.model.items[childItem_id].name
+                    + " was deleted from " + parentObj.model.page_name + " " + parentObj.model.items[parent_item].name+".", "success");
+                def.resolve();
+            }).fail(function ()
+            {
+                def.reject();
+            });
+
+        },
+        error: function (e)
+        {
+            def.reject(e)
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+
+/**
+ *Функция удаляет выделенные элементы из списка дочерних элементов родительского элемента.
+ */
+pmItems.deleteChildrenFromParent = function (parent_type, parent_item)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    for(var i in thisObj.model.selectedItems)
+    {
+        if (thisObj.model.selectedItems[i])
+        {
+            delete thisObj.model.itemsForParent[i];
+        }
+    }
+    var childrenItemsIds = [];
+    for(var i in thisObj.model.itemsForParent)
+    {
+        childrenItemsIds.push(thisObj.model.itemsForParent[i].id)
+    }
+    var parentObj = undefined;
+    switch(parent_type)
+    {
+        case 'project':
+        case 'projects':
+            parentObj = pmProjects;
+            break;
+        case 'inventory':
+        case 'inventories':
+            parentObj = pmInventories;
+            break;
+        case 'group':
+        case 'groups':
+            parentObj = pmGroups;
+            break;
+    }
+    parent_type = parentObj.model.page_name;
+    spajs.ajax.Call({
+        url: hostname + "/api/v1/" + parentObj.model.name + "/" + parent_item + "/" + thisObj.model.name + "/",
+        type: "PUT",
+        contentType: 'application/json',
+        data: JSON.stringify(childrenItemsIds),
+        success: function (data)
+        {
+
+            $.when(spajs.open({menuId: window.location.href.split(/[&?]/g)[1], reopen: true})).done(function ()
+            {
+                for(var i in thisObj.model.selectedItems)
+                {
+                    thisObj.model.selectedItems[i] = undefined;
+                }
+                thisObj.model.selectedCount = 0;
+                $.notify("Selected "+ thisObj.model.name + " was deleted from "
+                    + parentObj.model.page_name + " " + parentObj.model.items[parent_item].name+".", "success");
+
+                def.resolve();
+            }).fail(function ()
+            {
+                def.reject();
+
+            });
+
+        },
+        error: function (e)
+        {
+            def.reject(e)
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
 }
 
 /*pmItems.getFiledByName = function(fileds, name)

@@ -961,6 +961,7 @@ table{
     margin-right: 20px;
 }
 
+
 @media (min-width: 1200px) {
     .readme_content img {
         max-width: 60%;
@@ -980,6 +981,11 @@ table{
         margin-right: 0px;
         margin-top: 5px;
         margin-bottom: 5px;
+    }
+
+    .pagination:first-child {
+        margin-right:-20px!important;
+        margin-top: 5px!important;
     }
 }
 

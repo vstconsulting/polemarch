@@ -267,6 +267,10 @@
     <!-- items_list_from_another_class -->
     <section class="content-header">
         <h1>
+            <a href="<% if(pmObj.model.page_item_from_another_class.back_link){ %><%- pmObj.model.page_item_from_another_class.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %><% } %>"
+                onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
             <%- pmObj.model.page_list_from_another_class.title %>
         </h1>
         <ol class="breadcrumb">
@@ -277,7 +281,6 @@
         </ol>
     </section>
 
-    <~ pmObj.model.itemslistForParent.count >
     <section class="content">
         <div class="row">
             <div class="col-lg-12">
@@ -316,7 +319,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        <%= pmObj.searchFiled({query:query}) %>
+                        <%= pmObj.searchFiled({query:query, parent_type: opt.parent_type, parent_item: opt.parent_item}) %>
                         <%= spajs.just.render("add_existing_item_to_parent", {pmObj:pmObj, parentObj:parentObj, parent_item:opt.parent_item}) %>
                         <% if(pmObj.getTotalPages(pmObj.model.itemslistForParent)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
@@ -355,7 +358,7 @@
                                                 <% if(pmObj.model.page_list_from_another_class.fileds[j].class){ %><%= pmObj.model.page_list_from_another_class.fileds[j].class.apply(pmObj, [pmObj.model.itemslistForParent.results[i], opt]) %><% } %>
                                             >
                                                 <% if(!pmObj.model.page_list_from_another_class.fileds[j].value){ %>
-                                                    <a href="/?<%- pmObj.model.page_name %>/<%- pmObj.model.itemslistForParent.results[i].id %>" class="item-name"
+                                                    <a href="/?<%- parentObj.model.page_name %>/<%- opt.parent_item %>/<%- pmObj.model.page_name %>/<%- pmObj.model.itemslistForParent.results[i].id %>" class="item-name"
                                                         onclick="return spajs.openURL(this.href);" ><%- pmObj.model.itemslistForParent.results[i][pmObj.model.page_list_from_another_class.fileds[j].name] %></a>
                                                 <% }else{ %>
                                                     <%= pmObj.model.page_list_from_another_class.fileds[j].value.apply(pmObj, [pmObj.model.itemslistForParent.results[i], pmObj.model.page_list_from_another_class.fileds[j].name, opt]) %>
@@ -423,13 +426,6 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li>
-                                    <a href="#"
-                                        onclick="<%- pmObj.model.className %>.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
-                                </li>
-                                <li>
-                                    <a href="#" onclick="<%- pmObj.model.className %>.deleteSelected(); return false;" >Delete all selected elements</a>
-                                </li>
                                 <% for(var j in pmObj.model.page_list_from_another_class.actionsOnSelected){ %>
                                     <% if(!pmObj.model.page_list_from_another_class.actionsOnSelected[j].title){ %>
                                         <li role="separator" class="divider"></li>
@@ -449,22 +445,23 @@
                             </ul>
                         </div>
 
-                        <% if(!query){ %>
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Select
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="#" onclick="spajs.showLoader(<%- pmObj.model.className %>.toggleSelectEachItem(true)); return false;" >Select all</a>
-                                    </li>
-                                    <li class=" <%- pmObj.model.justNotClass('selectedCount', 'hide') %>" >
-                                        <a href="#" onclick="spajs.showLoader(<%- pmObj.model.className %>.toggleSelectEachItem(false)); return false;" >Unselect all</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        <% } %>
+
+                        <!--<% if(!query){ %>-->
+                            <!--<div class="btn-group" role="group">-->
+                                <!--<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+                                    <!--Select-->
+                                    <!--<span class="caret"></span>-->
+                                <!--</button>-->
+                                <!--<ul class="dropdown-menu">-->
+                                    <!--<li>-->
+                                        <!--<a href="#" onclick="spajs.showLoader(<%- pmObj.model.className %>.toggleSelectEachItem(true)); return false;" >Select all</a>-->
+                                    <!--</li>-->
+                                    <!--<li class=" <%- pmObj.model.justNotClass('selectedCount', 'hide') %>" >-->
+                                        <!--<a href="#" onclick="spajs.showLoader(<%- pmObj.model.className %>.toggleSelectEachItem(false)); return false;" >Unselect all</a>-->
+                                    <!--</li>-->
+                                <!--</ul>-->
+                            <!--</div>-->
+                        <!--<% } %>-->
                         <% if(pmObj.getTotalPages(pmObj.model.itemslistForParent)){ %>
                                 <%= pmObj.paginationHtml(pmObj.model.itemslistForParent) %>
                         <% } %>
@@ -473,7 +470,6 @@
             </section>
         </div>
     </section>
-    <~>
     <!-- /items_list_from_another_class -->
 </script>
  
@@ -700,6 +696,92 @@
         </div>
     </section>
     <!-- /items_page -->
+</script>
+
+<!-- Страница сущности со страницы родительского класса-->
+<script type="text/x-just" data-just="items_page_from_another_class">
+
+    <!-- items_page -->
+    <section class="content-header">
+        <h1>
+            <a href="<% if(pmObj.model.page_item_from_another_class.back_link){ %><%- pmObj.model.page_item_from_another_class.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %>/<%- pmObj.model.name %><% } %>"
+                onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+
+            <span class="h1-header" ><%= pmObj.model.page_item_from_another_class.title.apply(pmObj, [item_id, opt]) %></span>
+
+        </h1>
+         <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%- capitalizeString(parentObj.model.name) %></a></li>
+            <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %>" onclick="return spajs.openURL(this.href);" ><%- parentObj.model.items[opt.parent_item].name %></a></li>
+            <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %>/<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%- capitalizeString(pmObj.model.name) %></a></li>
+            <li class="active"><%- pmObj.model.items[item_id].name %></li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-lg-12">
+                <% if(pmObj.model.page_item_from_another_class.buttons){ %>
+                    <% for(var i in  pmObj.model.page_item_from_another_class.buttons){ %>
+                        <% if(pmObj.model.page_item_from_another_class.buttons[i].tpl){ %>
+                            <%= pmObj.model.page_item_from_another_class.buttons[i].tpl.apply(pmObj, [item_id, opt]) %>
+                        <% }else{ %>
+                            <a
+                                class="top-line-btn <% if(typeof pmObj.model.page_item_from_another_class.buttons[i].class == 'function'){ %>
+                                            <%- pmObj.model.page_item_from_another_class.buttons[i].class.apply(pmObj, [item_id, opt]) %>
+                                       <% }else{ %>
+                                            <%- pmObj.model.page_item_from_another_class.buttons[i].class %>
+                                       <% } %>"
+                                href="<%- pmObj.model.page_item_from_another_class.buttons[i].link.apply(pmObj, [item_id, opt]) %>"
+                                title="<% if(typeof pmObj.model.page_item_from_another_class.buttons[i].help == 'function'){ %>
+                                            <%- pmObj.model.page_item_from_another_class.buttons[i].help.apply(pmObj, [item_id, opt]) %>
+                                       <% }else{ %>
+                                            <%- pmObj.model.page_item_from_another_class.buttons[i].help || '' %>
+                                       <% } %>"
+                                onclick="<%- pmObj.model.page_item_from_another_class.buttons[i].function.apply(pmObj, [item_id, opt]) %>" >
+                                    <% if(typeof pmObj.model.page_item_from_another_class.buttons[i].title == 'function'){ %>
+                                        <%= pmObj.model.page_item_from_another_class.buttons[i].title.apply(pmObj, [item_id, opt]) %>
+                                    <% }else{ %>
+                                        <%= pmObj.model.page_item_from_another_class.buttons[i].title %>
+                                    <% } %>
+                            </a>
+                        <% } %>
+                    <% } %>
+                <% } %>
+            </div>
+        </div>
+        <br>
+
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <%= pmObj.model.page_item_from_another_class.short_title.apply(pmObj, [item_id, opt]) %><br>
+                        <div class="box-tools pull-right">
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <% for(var i in pmObj.model.page_item_from_another_class.fileds){ %>
+                            <div class="row">
+                                <% for(var j in pmObj.model.page_item_from_another_class.fileds[i]){ var filed = pmObj.model.page_item_from_another_class.fileds[i][j]; %>
+                                        <%= filed.filed.render(pmObj, filed, item_id, opt) %>
+                                <% } %>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </section>
+            <% if(pmObj.model.page_item_from_another_class.sections){ %>
+                <% for(var i in pmObj.model.page_item_from_another_class.sections){ %>
+                    <%= pmObj.model.page_item_from_another_class.sections[i].apply(pmObj, [pmObj.model.page_item_from_another_class.sections[i], item_id, opt]) %>
+                <% } %>
+            <% } %>
+        </div>
+    </section>
+    <!-- /items_page_from_another_class -->
 </script>
 
 <script type="text/x-just" data-just="add_existing_item_to_parent">
