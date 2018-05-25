@@ -19,7 +19,6 @@ from django.contrib.auth.models import User
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
 from rest_framework.exceptions import UnsupportedMediaType
-
 from .base import ForeignKeyACL
 
 from ..utils import AnsibleArgumentsReference

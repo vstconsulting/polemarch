@@ -10,10 +10,8 @@ from six import string_types, text_type
 from django.db import transaction
 from django.db.models import Case, When, Value
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import (GenericForeignKey,
-                                                GenericRelation)
-
-from ..utils import tmp_file
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from vstutils.utils import tmp_file
 from .base import ACLModel, BQuerySet, BModel, models
 
 

@@ -1,19 +1,12 @@
-class PMException(Exception):
-    def __init__(self, *args, **kwargs):
-        self.msg = (list(args)[0:1]+[""])[0]
-        super(PMException, self).__init__(*args, **kwargs)
-
-    def __repr__(self):
-        return repr(self.msg)
+from vstutils import exceptions
 
 
-class UnknownTypeException(PMException):
-    _def_message = "Unknown type {}."
+class PMException(exceptions.VSTUtilsException):
+    pass
 
-    def __init__(self, tp, msg=None):
-        self._def_message = msg or self._def_message
-        msg = self._def_message.format(tp)
-        super(UnknownTypeException, self).__init__(msg)
+
+class UnknownTypeException(exceptions.UnknownTypeException):
+    pass
 
 
 class NodeFailedException(PMException):
@@ -29,8 +22,8 @@ class AnsibleNotFoundException(PMException):
 
 
 class DataNotReady(PMException):
-    pass
+    status = exceptions.status.HTTP_424_FAILED_DEPENDENCY
 
 
-class NotApplicable(PMException):
+class NotApplicable(exceptions.NotApplicable):
     pass

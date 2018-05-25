@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from datetime import timedelta
 from django.conf import settings
 from django.test import Client, override_settings
@@ -10,9 +11,8 @@ except ImportError:  # nocv
     from unittest.mock import patch
 
 from fakeldap import MockLDAP
-
-from ..utils import redirect_stdany
-from ._base import BaseTestCase, User, json
+from vstutils.utils import redirect_stdany
+from ._base import BaseTestCase, json
 from .project import ApiProjectsTestCase
 from .bulk import ApiBulkTestCase
 from .inventory import (ApiHostsTestCase, ApiGroupsTestCase,
@@ -34,6 +34,7 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_login(self):
+        User = self.get_model_class('django.contrib.auth.models.User')
         response = self.client.get('/')
         self.assertRedirects(response, self.login_url + '?next=/')
         client = self._login()
@@ -137,6 +138,7 @@ class ApiUsersTestCase(BaseTestCase):
                         code=403, data=json.dumps(userdata))
 
     def test_api_users_password_settings(self):
+        User = self.get_model_class('django.contrib.auth.models.User')
         client = self._login()
         AUTH_PASSWORD_VALIDATORS = settings.AUTH_PASSWORD_VALIDATORS
         AUTH_PASSWORD_VALIDATORS[1]["OPTIONS"]["min_length"] = 5
@@ -164,6 +166,7 @@ class ApiUsersTestCase(BaseTestCase):
         self._logout(client)
 
     def test_api_user_update(self):
+        User = self.get_model_class('django.contrib.auth.models.User')
         client = self._login()
         result = self.result(client.post, "/api/v1/users/", 201,
                              {"username": "test_user3",
@@ -416,6 +419,7 @@ class APITestCase(ApiUsersTestCase,
             count += 1
 
     def test_statistic(self):
+        User = self.get_model_class('django.contrib.auth.models.User')
         url = '/api/v1/stats/'
         self.maxDiff = None
         # Prepare history data

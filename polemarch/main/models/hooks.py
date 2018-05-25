@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 import logging
 import uuid
+from vstutils.utils import raise_context, ModelHandlers
 from .base import BModel, BQuerySet, models
-from ..utils import ModelHandlers, raise_context
 
 
 logger = logging.getLogger('polemarch')
