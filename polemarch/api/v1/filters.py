@@ -1,26 +1,8 @@
 # pylint: disable=import-error
-from django_filters import rest_framework as filters
 from django_filters import (CharFilter, NumberFilter, IsoDateTimeFilter)
 from django.contrib.auth.models import User
+from vstutils.api.filters import extra_filter, name_filter, filters
 from ...main import models
-
-
-def _extra_search(queryset, field, value, stype):
-    vals = field.split("__")
-    field, tp = vals[0], (list(vals)[1:2] + [""])[0]
-    field += "__{}".format(stype)
-    value = value.split(",") if stype == "in" else value
-    if tp.upper() == "NOT":
-        return queryset.exclude(**{field: value})
-    return queryset.filter(**{field: value})
-
-
-def extra_filter(queryset, field, value):
-    return _extra_search(queryset, field, value, "in")
-
-
-def name_filter(queryset, field, value):
-    return _extra_search(queryset, field, value, "contains")
 
 
 def variables_filter(queryset, field, value):

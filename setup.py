@@ -5,10 +5,6 @@ from vstutils.compile import make_setup, load_requirements
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-REQUIRES = load_requirements('requirements.txt', os.getcwd())
-REQUIRES += load_requirements('requirements-doc.txt', os.getcwd())
-REQUIRES_git = load_requirements('requirements-git.txt', os.getcwd())
-
 ext_list = [
     "polemarch.api.v1.filters",
     "polemarch.api.v1.serializers",
@@ -50,8 +46,18 @@ make_setup(
     ext_modules_list=ext_list,
     scripts=['polemarchctl'],
     install_requires=[
-        # "django>=1.11,<=2.0",
-    ] + REQUIRES,
+    ] +
+    load_requirements('requirements.txt', os.getcwd()) +
+    load_requirements('requirements-doc.txt', os.getcwd()),
+    extras_require={
+        'tests': load_requirements('requirements-tests.txt', os.getcwd()),
+    },
     dependency_links=[
-    ] + REQUIRES_git,
+    ] + load_requirements('requirements-git.txt', os.getcwd()),
+    project_urls={
+        "Issue Tracker": "https://gitlab.com/vstconsulting/polemarch/issues",
+        "Documentation": "http://polemarch.readthedocs.io/",
+        "Source Code": "https://gitlab.com/vstconsulting/polemarch",
+        "Releases": "https://github.com/vstconsulting/polemarch/releases",
+    },
 )

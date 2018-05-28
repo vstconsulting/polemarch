@@ -16,23 +16,9 @@ MIDDLEWARE_CLASSES += [
     'polemarch.main.middleware.PolemarchHeadersMiddleware',
 ]
 
-TEMPLATES[0]['DIRS'] += [
-    os.path.join(BASE_DIR, 'api/templates'),
-    os.path.join(BASE_DIR, 'main/templates')
-]
-LDAP_SERVER = config.get("main", "ldap-server", fallback=None)
-LDAP_DOMAIN = config.get("main", "ldap-default-domain", fallback='')
-
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'polemarch.main.auth.LdapBackend',
-]
-
 REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
     "polemarch.api.permissions.ModelPermission",
 ]
-
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 REPO_BACKENDS = {
     "GIT": {
