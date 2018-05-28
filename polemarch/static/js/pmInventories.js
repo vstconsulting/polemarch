@@ -2373,7 +2373,7 @@ pmInventories.model.page_item = {
         return "Inventory "+this.model.items[item_id].justText('name')
     },
     short_title: function(item_id){
-        return "Inventory "+this.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
+        return ""+this.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
     },
     fileds:[
         [

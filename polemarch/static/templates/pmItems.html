@@ -267,18 +267,33 @@
     <!-- items_list_from_another_class -->
     <section class="content-header">
         <h1>
-            <a href="<% if(pmObj.model.page_item_from_another_class.back_link){ %><%- pmObj.model.page_item_from_another_class.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %><% } %>"
+            <a href="<% if(pmObj.model.page_item_from_another_class.back_link){ %><%- pmObj.model.page_item_from_another_class.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- opt.back_link %><% } %>"
                 onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <%- pmObj.model.page_list_from_another_class.title %>
         </h1>
-        <ol class="breadcrumb">
-            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%- capitalizeString(parentObj.model.name) %></a></li>
-            <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %>" onclick="return spajs.openURL(this.href);" ><%- parentObj.model.items[opt.parent_item].name %></a></li>
-            <li class="active"><%- pmObj.model.page_list_from_another_class.short_title %></li>
-        </ol>
+        <% if(pmObj.model.parentObjectsData !== undefined) {
+            var link1 = ""+ polemarch.opt.host+ "/?"; %>
+            <ol class="breadcrumb">
+                 <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+                 <% for(var j in pmObj.model.parentObjectsData) {
+                    var parent1 =  pmObj.model.parentObjectsData[j]; %>
+                    <li><a href="<%- link1 %><%- parent1.parent_type_plural %>" onclick="return spajs.openURL(this.href);" ><%- capitalizeString(parent1.parent_type_plural) %></a></li>
+                    <li><a href="<%- link1 %><%- parent1.parent_type %>/<%- parent1.parent_item %>" onclick="return spajs.openURL(this.href);" ><%- parent1.item_name %></a></li>
+                    <% link1 += "" + parent1.parent_type + "/" + parent1.parent_item + "/" %>
+                 <% } %>
+                 <li class="active"><%- pmObj.model.page_list_from_another_class.short_title %></li>
+            </ol>
+        <% } else { %>
+            <ol class="breadcrumb">
+                <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%- capitalizeString(parentObj.model.name) %></a></li>
+                <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %>" onclick="return spajs.openURL(this.href);" ><%- parentObj.model.items[opt.parent_item].name %></a></li>
+                <li class="active"><%- pmObj.model.page_list_from_another_class.short_title %></li>
+            </ol>
+        <% } %>
+
     </section>
 
     <section class="content">
@@ -530,7 +545,7 @@
                     <span class="glyphicon glyphicon-arrow-left"></span>
                 </a>
             <% } else { %>
-                <a href="<%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %>/<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <a href="<%- polemarch.opt.host %>/?<%- opt.back_link %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                     <span class="glyphicon glyphicon-arrow-left"></span>
                 </a>
             <% } %>
@@ -546,13 +561,29 @@
                 <li class="active"><%- pmObj.model.page_new.short_title %></li>
             </ol>
         <% } else { %>
-             <ol class="breadcrumb">
-                <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-                <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%- capitalizeString(parentObj.model.name) %></a></li>
-                <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %>" onclick="return spajs.openURL(this.href);" ><%- parentObj.model.items[opt.parent_item].name %></a></li>
-                <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %>/<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%- capitalizeString(pmObj.model.name) %></a></li>
-                <li class="active"><%- pmObj.model.page_new.short_title %></li>
-            </ol>
+            <% if(pmObj.model.parentObjectsData !== undefined) {
+                var link1 = ""+ polemarch.opt.host+ "/?"; %>
+                <ol class="breadcrumb">
+                     <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+                     <% var link1 = ""+ polemarch.opt.host+ "/?";
+                        for(var j in pmObj.model.parentObjectsData) {
+                        var parent1 =  pmObj.model.parentObjectsData[j]; %>
+                        <li><a href="<%- link1 %><%- parent1.parent_type_plural %>" onclick="return spajs.openURL(this.href);" ><%- capitalizeString(parent1.parent_type_plural) %></a></li>
+                        <li><a href="<%- link1 %><%- parent1.parent_type %>/<%- parent1.parent_item %>" onclick="return spajs.openURL(this.href);" ><%- parent1.item_name %></a></li>
+                        <% link1 += "" + parent1.parent_type + "/" + parent1.parent_item + "/" %>
+                     <% } %>
+                     <li><a href="<%- link1 %><%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%- capitalizeString(pmObj.model.name) %></a></li>
+                     <li class="active"><%- pmObj.model.page_new.short_title %></li>
+                </ol>
+            <% } else { %>
+                 <ol class="breadcrumb">
+                    <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+                    <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%- capitalizeString(parentObj.model.name) %></a></li>
+                    <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %>" onclick="return spajs.openURL(this.href);" ><%- parentObj.model.items[opt.parent_item].name %></a></li>
+                    <li><a href="<%- polemarch.opt.host %>/?<%- parentObj.model.page_name %>/<%- opt.parent_item %>/<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%- capitalizeString(pmObj.model.name) %></a></li>
+                    <li class="active"><%- pmObj.model.page_new.short_title %></li>
+                </ol>
+            <% } %>
         <% } %>
 
     </section>

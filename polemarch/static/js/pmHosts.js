@@ -42,7 +42,7 @@ pmHosts.model.page_list_from_another_class = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(opt){ return "spajs.open({ menuId:'" + opt.parent_type + "/" + opt.parent_item + "/" + this.model.name + "/new-"+this.model.page_name+"'}); return false;"},
+            function:function(opt){ return "spajs.open({ menuId:'" + opt.link_with_parents + "new-"+this.model.page_name+"'}); return false;"},
             title:'Create',
             link:function(){ return '#'},
         }
@@ -144,10 +144,20 @@ pmHosts.model.page_new = {
 
         if(callOpt.parent_item)
         {
+            var link = window.location.href.split(/[&?]/g)[1];
+            var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+            var link_parts = link.match(pattern);
+            var link_with_parents = "";
+            for(var i in link_parts)
+            {
+                link_with_parents += link_parts[i] +"/";
+            }
+            link_with_parents += this.model.name;
+
             if(callOpt.parent_type == 'group')
             {
                 $.when(pmGroups.addSubHosts(callOpt.parent_item, [result.id])).always(function(){
-                    $.when(spajs.open({ menuId:"group/"+callOpt.parent_item+"/hosts"})).always(function(){
+                    $.when(spajs.open({ menuId:link_with_parents})).always(function(){
                         def.resolve()
                     })
                 })
@@ -155,7 +165,7 @@ pmHosts.model.page_new = {
             else if(callOpt.parent_type == 'inventory')
             {
                 $.when(pmInventories.addSubHosts(callOpt.parent_item, [result.id])).always(function(){
-                    $.when(spajs.open({ menuId:"inventory/"+callOpt.parent_item+"/hosts"})).always(function(){
+                    $.when(spajs.open({ menuId:link_with_parents})).always(function(){
                         def.resolve()
                     })
                 })
@@ -163,7 +173,7 @@ pmHosts.model.page_new = {
             else if(callOpt.parent_type == 'project')
             {
                 $.when(pmProjects.addSubHosts(callOpt.parent_item, [result.id])).always(function(){
-                    $.when(spajs.open({ menuId:"project/"+callOpt.parent_item+"/hosts"})).always(function(){
+                    $.when(spajs.open({ menuId:link_with_parents})).always(function(){
                         def.resolve()
                     })
                 })
@@ -387,7 +397,9 @@ tabSignal.connect("polemarch.start", function()
     spajs.addMenu({
         id:"newHost",
         urlregexp:[/^new-host$/, /^([A-z0-9_]+)\/([0-9]+)\/new-host$/,
-            /^([A-z0-9_]+)\/([0-9]+)\/hosts\/new-host$/],
+            /^([A-z0-9_]+)\/([0-9]+)\/hosts\/new-host$/,
+            /^([A-z0-9_\/]+)\/hosts\/new-host$/
+        ],
         onOpen:function(holder, menuInfo, data){return pmHosts.showNewItemPage(holder, menuInfo, data);}
     })
 
@@ -400,7 +412,9 @@ tabSignal.connect("polemarch.start", function()
     spajs.addMenu({
         id:"some-model-hosts",
         urlregexp:[/^([A-z0-9_]+)\/([0-9]+)\/hosts$/, /^([A-z0-9_]+)\/([0-9]+)\/host$/,
-            /^([A-z0-9_]+)\/([0-9]+)\/hosts\/search\/?$/, /^([A-z0-9_]+)\/([0-9]+)\/hosts\/page\/([0-9]+)$/],
+            /^([A-z0-9_]+)\/([0-9]+)\/hosts\/search\/?$/, /^([A-z0-9_]+)\/([0-9]+)\/hosts\/page\/([0-9]+)$/,
+            /^([A-z0-9_\/]+)\/hosts$/
+        ],
         onOpen:function(holder, menuInfo, data){return pmHosts.showListFromAnotherClass(holder, menuInfo, data);}
     })
 

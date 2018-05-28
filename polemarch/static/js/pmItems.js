@@ -533,6 +533,27 @@ pmItems.showItemFromAnotherClass = function (holder, menuInfo, data)
     }).promise();
 }
 
+pmItems.defineParentPmObject = function(parent_type)
+{
+    var parentObj = undefined;
+    switch(parent_type)
+    {
+        case 'project':
+        case 'projects':
+            parentObj = pmProjects;
+            break;
+        case 'inventory':
+        case 'inventories':
+            parentObj = pmInventories;
+            break;
+        case 'group':
+        case 'groups':
+            parentObj = pmGroups;
+            break;
+    }
+    return parentObj;
+}
+
 pmItems.showNewItemPage = function (holder, menuInfo, data)
 {
     setActiveMenuLi();
@@ -547,34 +568,47 @@ pmItems.showNewItemPage = function (holder, menuInfo, data)
 
     var parent_item = data.reg[2];
     var parent_type = data.reg[1];
-    if(parent_type !== undefined && parent_item !== undefined)
+
+    ///////////////
+    var link = window.location.href.split(/[&?]/g)[1];
+
+    var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+    var link_parts = link.match(pattern);
+    var link_with_parents = "";
+    var parentObjectsArr = [];
+    for(var i in link_parts)
     {
-        var parentObj = undefined;
-        switch(parent_type)
-        {
-            case 'project':
-            case 'projects':
-                parentObj = pmProjects;
-                break;
-            case 'inventory':
-            case 'inventories':
-                parentObj = pmInventories;
-                break;
-            case 'group':
-            case 'groups':
-                parentObj = pmGroups;
-                break;
-        }
-        parent_type = parentObj.model.page_name;
+        var parObj = {};
+        parObj.parent_type = link_parts[i].split("/")[0];
+        parObj.parent_item = link_parts[i].split("/")[1];
+        parentObjectsArr.push(parObj);
+        link_with_parents += link_parts[i] +"/";
+    }
 
-        $.when(parentObj.loadItem(parent_item)).done(function ()
+    link_with_parents += thisObj.model.name +"/";
+    var back_link = link_with_parents.slice(0,-1);
+    //////////
+
+    if(link_parts.length != 0)
+    {
+
+        thisObj.model.parentObjectsData = [];
+        var defArr = thisObj.loadParentsData111(parentObjectsArr);
+
+        $.when.apply($, defArr).done(function ()
         {
-            var text = spajs.just.render(tpl, { pmObj: thisObj, parentObj:parentObj, opt: {parent_item: parent_item, parent_type: parent_type}});
+            var parentObj = thisObj.defineParentPmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_type);
+
+            parent_type = parentObj.model.page_name;
+            parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_item;
+            var text = spajs.just.render(tpl, {pmObj: thisObj, parentObj: parentObj,
+                opt: {parent_item: parent_item, parent_type: parent_type, link_with_parents:link_with_parents,
+                back_link:back_link}
+            });
             $(holder).insertTpl(text);
-
             def.resolve();
 
-        }).fail(function()
+        }).fail(function ()
         {
             $.notify("", "error");
 
@@ -592,6 +626,37 @@ pmItems.showNewItemPage = function (holder, menuInfo, data)
     return def.promise();
 }
 
+pmItems.loadParentsData111 = function (parentObjectsArr)
+{
+    var defArr = [];
+    var thisObj = this;
+    for(var i in parentObjectsArr)
+    {
+        var parentObj111 = thisObj.defineParentPmObject(parentObjectsArr[i].parent_type);
+        var promise = $.when(parentObj111.loadItem(parentObjectsArr[i].parent_item)).done(function(data)
+        {
+            for(var j in defArr)
+            {
+                if(defArr[j] == this)
+                {
+                    parentObj111 = thisObj.defineParentPmObject(parentObjectsArr[j].parent_type);
+                    parentObjectsArr[j].parent_type_plural = parentObj111.model.name;
+                    parentObjectsArr[j].item_name = parentObj111.model.items[parentObjectsArr[j].parent_item].name;
+                    thisObj.model.parentObjectsData[j] = parentObjectsArr[j];
+                }
+            }
+
+        }).fail(function (e)
+        {
+            console.warn(e);
+            polemarch.showErrors(e);
+        }).promise();
+
+        defArr.push(promise);
+    }
+    return defArr;
+}
+
 pmItems.showListFromAnotherClass = function(holder, menuInfo, data)
 {
     setActiveMenuLi();
@@ -605,80 +670,97 @@ pmItems.showListFromAnotherClass = function(holder, menuInfo, data)
     }
     var parent_type = data.reg[1];
     var parent_item = data.reg[2];
-    var parentObj = undefined;
-    switch(parent_type)
-    {
-        case 'project':
-        case 'projects':
-            parentObj = pmProjects;
-            break;
-        case 'inventory':
-        case 'inventories':
-            parentObj = pmInventories;
-            break;
-        case 'group':
-        case 'groups':
-            parentObj = pmGroups;
-            break;
-    }
-    parent_type = parentObj.model.page_name;
+    /////////
+    var link = window.location.href.split(/[&?]/g)[1];
 
-    $.when(parentObj.loadItem(parent_item), thisObj.loadAllItems()).done(function()
+    var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+    var link_parts = link.match(pattern);
+    var link_with_parents = "";
+    var parentObjectsArr = [];
+    for(var i in link_parts)
     {
-        var childrenItems = [];
-        for(var i in parentObj.model.items[parent_item][thisObj.model.name])
+        var parObj = {};
+        parObj.parent_type = link_parts[i].split("/")[0];
+        parObj.parent_item = link_parts[i].split("/")[1];
+        parentObjectsArr.push(parObj);
+        link_with_parents += link_parts[i] +"/";
+    }
+    var back_link = link_with_parents.slice(0,-1);
+    link_with_parents += thisObj.model.name +"/";
+
+    //////////
+    ///
+    thisObj.model.parentObjectsData = [];
+    var defArr = thisObj.loadParentsData111(parentObjectsArr);
+
+    $.when.apply($, defArr).done(function ()
+    {
+        var parentObj = thisObj.defineParentPmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length-1].parent_type);
+        parent_type = parentObj.model.page_name;
+        parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length-1].parent_item;
+
+        $.when(thisObj.loadAllItems()).done(function()
         {
-            childrenItems.push(parentObj.model.items[parent_item][thisObj.model.name][i]);
-        }
-        thisObj.model.itemsForParent = {};
-        thisObj.model.itemslistForParent = {};
-        thisObj.model.itemslistForParent.count = childrenItems.length;
-        thisObj.model.itemslistForParent.limit = limit;
-        thisObj.model.itemslistForParent.offset = offset;
-        thisObj.model.itemslistForParent.next = null;
-        thisObj.model.itemslistForParent.previos = null;
-        thisObj.model.itemslistForParent.results = [];
-        for(var i in childrenItems)
-        {
-            thisObj.model.itemsForParent[childrenItems[i].id] = childrenItems[i];
-        }
-        if(childrenItems.length != 0)
-        {
-            if(childrenItems.length > limit)
+            var childrenItems = [];
+            for(var i in parentObj.model.items[parent_item][thisObj.model.name])
             {
-                for(var i=offset; i<offset+limit; i++)
+                childrenItems.push(parentObj.model.items[parent_item][thisObj.model.name][i]);
+            }
+            thisObj.model.itemsForParent = {};
+            thisObj.model.itemslistForParent = {};
+            thisObj.model.itemslistForParent.count = childrenItems.length;
+            thisObj.model.itemslistForParent.limit = limit;
+            thisObj.model.itemslistForParent.offset = offset;
+            thisObj.model.itemslistForParent.next = null;
+            thisObj.model.itemslistForParent.previos = null;
+            thisObj.model.itemslistForParent.results = [];
+            for(var i in childrenItems)
+            {
+                thisObj.model.itemsForParent[childrenItems[i].id] = childrenItems[i];
+            }
+            if(childrenItems.length != 0)
+            {
+                if(childrenItems.length > limit)
                 {
-                    if(childrenItems[i] !== undefined)
+                    for(var i=offset; i<offset+limit; i++)
+                    {
+                        if(childrenItems[i] !== undefined)
+                        {
+                            thisObj.model.itemslistForParent.results.push(childrenItems[i]);
+                        }
+                    }
+                }
+                else
+                {
+                    for(var i=0; i<childrenItems.length; i++ )
                     {
                         thisObj.model.itemslistForParent.results.push(childrenItems[i]);
                     }
                 }
             }
-            else
-            {
-                for(var i=0; i<childrenItems.length; i++ )
-                {
-                    thisObj.model.itemslistForParent.results.push(childrenItems[i]);
-                }
-            }
-        }
 
-        var tpl = thisObj.model.name + '_list_from_another_class';
-        if (!spajs.just.isTplExists(tpl))
+            var tpl = thisObj.model.name + '_list_from_another_class';
+            if (!spajs.just.isTplExists(tpl))
+            {
+                tpl = 'items_list_from_another_class';
+            }
+            var text = spajs.just.render(tpl, {query: "",  pmObj: thisObj, parentObj:parentObj,
+                opt: {parent_item: parent_item, parent_type: parent_type, link_with_parents:link_with_parents,
+                back_link:back_link}});
+            $(holder).insertTpl(text);
+            $('#add_existing_item_to_parent').select2({
+                placeholder: true,
+                allowClear: true
+            });
+            def.resolve();
+        }).fail(function()
         {
-            tpl = 'items_list_from_another_class';
-        }
-        var text = spajs.just.render(tpl, {query: "",  pmObj: thisObj, parentObj:parentObj,
-            opt: {parent_item: parent_item, parent_type: parent_type}});
-        $(holder).insertTpl(text);
-        $('#add_existing_item_to_parent').select2({
-            placeholder: true,
-            allowClear: true
-        });
-        def.resolve();
-    }).fail(function()
+            $.notify("", "error");
+            def.reject();
+        })
+    }).fail(function ()
     {
-        $.notify("", "error");
+        $.notify("Error", "error");
         def.reject();
     })
 
