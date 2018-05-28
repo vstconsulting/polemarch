@@ -1,3 +1,4 @@
+# pylint: disable=no-name-in-module
 from __future__ import unicode_literals
 
 from django.db import models
