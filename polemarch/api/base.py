@@ -2,6 +2,8 @@ from vstutils.api.base import action
 
 
 class LimitedPermissionMixin(object):
+    POST_WHITE_LIST = []
+
     def get_extra_queryset(self):
         return self.queryset.user_filter(self.request.user)
 

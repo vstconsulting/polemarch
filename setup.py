@@ -44,6 +44,7 @@ if 'develop' in sys.argv:
 make_setup(
     name='polemarch',
     ext_modules_list=ext_list,
+    include_package_data=True,
     scripts=['polemarchctl'],
     install_requires=[
     ] +
