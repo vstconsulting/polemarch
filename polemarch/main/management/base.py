@@ -3,15 +3,14 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import sys
 
-from django.core.management.base import (BaseCommand,
-                                         CommandError as CommandErrorBase)
+from django.core.management.base import BaseCommand, CommandError as CommandErrorBase
 from django.conf import settings
 import django
 import celery
 import ansible
+from vstutils.utils import exception_with_traceback
 
 from ... import __version__
-from ..utils import exception_with_traceback
 
 logger = logging.getLogger("polemarch")
 

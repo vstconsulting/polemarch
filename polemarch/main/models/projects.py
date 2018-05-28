@@ -9,12 +9,12 @@ from markdown2 import Markdown
 from django.conf import settings
 from django.utils import timezone
 from django.core.validators import ValidationError
+from vstutils.utils import ModelHandlers
 
 from .. import utils
 from . import hosts as hosts_models
 from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
-from ..utils import ModelHandlers
 from .base import ManyToManyFieldACL
 from .hooks import Hook
 
