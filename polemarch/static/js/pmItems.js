@@ -709,7 +709,7 @@ pmItems.deleteRows = function (elements)
  */
 pmItems.deleteSelected = function ()
 {
-    if ($.inArray(this.model.bulk_name, ['history', 'host', 'group', 'inventory', 'project', 'periodictask', 'template']) != -1)
+    if ($.inArray(this.model.bulk_name, ['history', 'host', 'group', 'inventory', 'project', 'periodictask', 'template', 'user', 'team', 'hook']) != -1)
     {
         var thisObj = this;
         var deleteBulk = []
@@ -724,7 +724,6 @@ pmItems.deleteSelected = function ()
                 })
             }
         }
-
         return $.when(spajs.ajax.Call({
             url: hostname + "/api/v1/_bulk/",
             type: "POST",

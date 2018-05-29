@@ -4,15 +4,17 @@ from __future__ import unicode_literals
 import os
 import logging
 import six
+from docutils.core import publish_parts
+from markdown2 import Markdown
 from django.conf import settings
 from django.utils import timezone
 from django.core.validators import ValidationError
+from vstutils.utils import ModelHandlers
 
 from .. import utils
 from . import hosts as hosts_models
 from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
-from ..utils import ModelHandlers
 from .base import ManyToManyFieldACL
 from .hooks import Hook
 
@@ -50,6 +52,34 @@ class Project(AbstractModel):
 
     class SyncError(Exception):
         pass
+
+    class ReadMe(object):
+
+        def __init__(self, project):
+            self.project = project
+            self.content = None
+            self.ext     = None
+            self.set_readme()
+
+        def set_readme(self):
+            if os.path.exists(self.project.path):
+                md  = None
+                rst = None
+                for file in os.listdir(self.project.path):
+                    if file.lower() == 'readme.md':
+                        md = file
+                    if file.lower() == 'readme.rst':
+                        rst = file
+                if rst is not None:
+                    file = open(self.project.path + '/' + rst)
+                    self.content = publish_parts(file.read(),
+                                                 writer_name='html')['html_body']
+                    self.ext = os.path.splitext(rst)[1]
+                elif md is not None:
+                    file = open(self.project.path + '/' + md)
+                    markdowner = Markdown()
+                    self.content = markdowner.convert(file.read())
+                    self.ext = os.path.splitext(md)[1]
 
     HIDDEN_VARS = [
         'repo_password',
@@ -179,3 +209,18 @@ class Project(AbstractModel):
     @property
     def branch(self):
         return self.repo_class.get_branch_name()
+
+    def __get_readme(self):
+        readme = getattr(self, 'readme', None)
+        if readme is None:
+            self.readme = self.ReadMe(self)
+            return self.readme
+        return readme
+
+    @property
+    def readme_content(self):
+        return self.__get_readme().content
+
+    @property
+    def readme_ext(self):
+        return self.__get_readme().ext

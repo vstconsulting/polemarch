@@ -141,6 +141,9 @@
                                 <li>
                                     <a href="#" onclick="pmHistory.deleteSelected(); return false;" >Delete all selected elements</a>
                                 </li>
+                                <li>
+                                    <a href="#" onclick="pmHistory.clearOutputFromSelected(); return false;" >Clear output of selected elements</a>
+                                </li>
                             </ul>
                         </div>
                         <% if(!query){ %>
@@ -308,7 +311,10 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="#" onclick="pmHistory.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                    <a href="#" onclick="pmHistory.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete selected elements</a>
+                                </li>
+                                <li>
+                                    <a href="#" onclick="pmHistory.clearOutputFromSelected(); return false;" >Clear output of selected elements</a>
                                 </li>
                             </ul>
                         </div>
@@ -487,7 +493,10 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="#" onclick="pmHistory.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                    <a href="#" onclick="pmHistory.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete selected elements</a>
+                                </li>
+                                <li>
+                                    <a href="#" onclick="pmHistory.clearOutputFromSelected(); return false;" >Clear output of selected elements</a>
                                 </li>
                             </ul>
                         </div>
@@ -658,7 +667,10 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="#" onclick="pmHistory.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete</a>
+                                    <a href="#" onclick="pmHistory.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete selected elements</a>
+                                </li>
+                                <li>
+                                    <a href="#" onclick="pmHistory.clearOutputFromSelected(); return false;" >Clear output of selected elements</a>
                                 </li>
                             </ul>
                         </div>
@@ -725,7 +737,7 @@
                             <~ pmHistory.model.items[item_id].status>
                             <% if(pmHistory.model.items[item_id].status != 'RUN' && pmHistory.model.items[item_id].status != 'DELAY'){ %>
 
-                                    <button type="button"  class="btn btn-default" id="clear_logs" style="margin-right:5px; padding: 3px 9px;" onclick="pmHistory.clearLogs(<%- item_id %>);">
+                                    <button type="button"  class="btn btn-default" id="clear_output" style="margin-right:5px; padding: 3px 9px;" onclick="pmHistory.clearOutput(<%- item_id %>);">
                                         <span class="fa fa-trash" style="font-size:20px;"></span> <span class="hidden-sm hidden-xs" ></span>
                                     </button>
 
@@ -737,7 +749,7 @@
                             <i class="glyphicon glyphicon-resize-small"></i> 
                         </button>
 
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="pmHistory.hideClearLogsButton()"><i class="fa fa-minus"></i> </button>
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="pmHistory.hideClearOutputButton()"><i class="fa fa-minus"></i> </button>
                     </div>
                 </div>
                 <div class="box-body">
@@ -815,7 +827,7 @@
                                     class="form-control disabled"
                                     disabled=""
                                     maxlength="255">
-                                    <%= pmHistory.model.items[item_id].justText('execution_time', function(v){ return v ? moment(v*1000).format('HH:mm:ss') : ''; }) %>
+                                    <%= pmHistory.model.items[item_id].justText('execution_time', function(v){ return v ? moment(v*1000).tz('UTC').format('HH:mm:ss') : ''; }) %>
 
                             </div>
                             <div class="help-block"></div>

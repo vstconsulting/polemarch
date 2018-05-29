@@ -1,17 +1,18 @@
+# pylint: disable=no-name-in-module
 from __future__ import unicode_literals
 
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User as BaseUser
-
-from ...main.utils import Paginator, classproperty, import_class
+from vstutils.utils import import_class, classproperty
+from vstutils.models import BQuerySet as _BQuerySet, BaseModel as _BaseModel
 
 
 def first_staff_user():
     return BaseUser.objects.filter(is_staff=True).first().id
 
 
-class BQuerySet(models.QuerySet):
+class BQuerySet(_BQuerySet):
     use_for_related_fields = True
 
     def __decorator(self, func):  # noce
@@ -36,37 +37,17 @@ class BQuerySet(models.QuerySet):
             else self
         )
 
-    def paged(self, *args, **kwargs):
-        return self.get_paginator(*args, **kwargs).items()
-
-    def get_paginator(self, *args, **kwargs):
-        return Paginator(self, *args, **kwargs)
-
-    def _find(self, field_name, tp_name, *args, **kwargs):  # nocv
-        field = kwargs.get(field_name, None) or (list(args)[0:1]+[None])[0]
-        if field is None:
-            return self
-        if isinstance(field, list):
-            return getattr(self, tp_name)(**{field_name+"__in": field})
-        return getattr(self, tp_name)(**{field_name: field})
-
     def user_filter(self, user, only_leads=False):
         # pylint: disable=unused-argument
         return self.model.acl_handler.user_filter(self, user, only_leads=False)
 
 
-class BaseModel(models.Model):
+class BaseModel(_BaseModel):
+    # pylint: disable=no-member
     objects    = BQuerySet.as_manager()
-
-    def __init__(self, *args, **kwargs):
-        super(BaseModel, self).__init__(*args, **kwargs)
-        self.no_signal = False
 
     class Meta:
         abstract = True
-
-    def __str__(self):
-        return self.__unicode__()
 
     @staticmethod
     def get_acl(cls, obj=None):

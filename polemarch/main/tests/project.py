@@ -150,3 +150,39 @@ class ApiProjectsTestCase(_ApiGHBaseTestCase):
         check_tasks(1)
 
         self.get_result("delete", project_url)
+
+    def test_project_read_me(self):
+        url = "/api/v1/projects/"
+        project_url = "/api/v1/projects/{}/"
+
+        data = dict(name="Manual project", repository="manual",
+                    vars=dict(repo_type="MANUAL"))
+        prj_id = self.mass_create(url, [data], "name", "repository")[0]
+        project = self.get_model_class('Project').objects.get(pk=prj_id)
+        self.assertEqual(project.vars["repo_type"], "MANUAL")
+        self.assertEqual(project.status, "OK")
+        project_url = project_url.format(project.id)
+
+        self.assertEqual(project.readme_content, None)
+        self.assertEqual(project.readme_ext, None)
+        delattr(project, 'readme')
+
+        with open(project.path+"/readme.md", "w") as f:
+            f.write("# test README.md \n **bold** \n *italic* \n")
+        self.get_result("post", project_url + "sync/", 200)
+        self.assertEqual(project.readme_content,
+                         "<h1>test README.md</h1>\n\n<p><strong>bold</strong>" +
+                         " \n <em>italic</em> </p>\n")
+        self.assertEqual(project.readme_ext, ".md")
+        delattr(project, 'readme')
+
+        with open(project.path+"/readme.rst", "w") as f:
+            f.write("test README.rst \n **bold** \n *italic* \n")
+        self.get_result("post", project_url + "sync/", 200)
+        self.assertEqual(project.readme_content,
+                         '<div class="document">\n<dl class="docutils">\n<dt>' +
+                         'test README.rst</dt>\n<dd><strong>bold</strong>\n' +
+                         '<em>italic</em></dd>\n</dl>\n</div>\n')
+        self.assertEqual(project.readme_ext, ".rst")
+
+        self.get_result("delete", project_url)

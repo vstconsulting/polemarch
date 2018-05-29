@@ -1,18 +1,15 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
-import json
 from collections import OrderedDict
-from django.db import transaction
 from django.http import HttpResponse
-from django.conf import settings
-from django.test import Client
-from rest_framework import exceptions as excepts, views as rest_views
+from rest_framework import exceptions as excepts
 from rest_framework.authtoken import views as token_views
-from rest_framework.decorators import detail_route, list_route
+from vstutils.api.permissions import StaffPermission
+from vstutils.api import base, views
+from vstutils.utils import KVExchanger
 
 from . import filters
 from . import serializers
-from .. import base
-from ..permissions import SuperUserPermission, StaffPermission
+from .. import base as polemarch_base
 from ...main import utils
 
 
@@ -26,38 +23,11 @@ class TokenView(token_views.ObtainAuthToken):
         raise excepts.ParseError("Token not found.")
 
 
-class UserViewSet(base.ModelViewSetSet):
-    model = serializers.User
+class UserViewSet(views.UserViewSet):
     serializer_class = serializers.UserSerializer
     serializer_class_one = serializers.OneUserSerializer
-    filter_class = filters.UserFilter
-    permission_classes = (SuperUserPermission,)
 
-    def destroy(self, request, *args, **kwargs):
-        user = self.get_object()
-        if user == request.user:
-            return base.Response("Could not remove youself.", 409).resp
-        else:
-            return super(UserViewSet, self).destroy(request, *args, **kwargs)
-
-    @transaction.atomic
-    def partial_update(self, request, *args, **kwargs):
-        return self.update(request, partial=True)
-
-    @transaction.atomic
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance,
-                                         data=request.data,
-                                         partial=partial)
-        if not serializer.is_valid(raise_exception=False):
-            raise Exception("Invalid data was sended.")
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return base.Response(serializer.data, 200).resp
-
-    @detail_route(methods=["post", "delete", "get"], url_path="settings")
+    @base.action(methods=["post", "delete", "get"], url_path="settings", detail=True)
     def user_settings(self, request, *args, **kwargs):
         obj = self.get_object()
         method = request.method
@@ -67,7 +37,7 @@ class UserViewSet(base.ModelViewSetSet):
         return base.Response(obj.settings.data, 200).resp
 
 
-class TeamViewSet(base.PermissionMixin, base.ModelViewSetSet):
+class TeamViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.UserGroup
     serializer_class = serializers.TeamSerializer
     serializer_class_one = serializers.OneTeamSerializer
@@ -77,7 +47,7 @@ class TeamViewSet(base.PermissionMixin, base.ModelViewSetSet):
         return self.queryset
 
 
-class HostViewSet(base.PermissionMixin, base.ModelViewSetSet):
+class HostViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
     serializer_class_one = serializers.OneHostSerializer
@@ -90,18 +60,18 @@ class _GroupedViewSet(object):
     def _get_result(self, request, operation):
         return operation(request.method, request.data).resp
 
-    @detail_route(methods=["post", "put", "delete", "get"])
+    @base.action(methods=["post", "put", "delete", "get"], detail=True)
     def hosts(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
         return self._get_result(request, serializer.hosts_operations)
 
-    @detail_route(methods=["post", "put", "delete", "get"])
+    @base.action(methods=["post", "put", "delete", "get"], detail=True)
     def groups(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
         return self._get_result(request, serializer.groups_operations)
 
 
-class GroupViewSet(base.PermissionMixin, base.ModelViewSetSet,
+class GroupViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet,
                    _GroupedViewSet):
     model = serializers.models.Group
     serializer_class = serializers.GroupSerializer
@@ -109,7 +79,7 @@ class GroupViewSet(base.PermissionMixin, base.ModelViewSetSet,
     filter_class = filters.GroupFilter
 
 
-class InventoryViewSet(base.PermissionMixin, base.ModelViewSetSet,
+class InventoryViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet,
                        _GroupedViewSet):
     model = serializers.models.Inventory
     serializer_class = serializers.InventorySerializer
@@ -117,7 +87,7 @@ class InventoryViewSet(base.PermissionMixin, base.ModelViewSetSet,
     filter_class = filters.InventoryFilter
 
 
-class ProjectViewSet(base.PermissionMixin, base.ModelViewSetSet,
+class ProjectViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet,
                      _GroupedViewSet):
     model = serializers.models.Project
     serializer_class = serializers.ProjectSerializer
@@ -125,63 +95,63 @@ class ProjectViewSet(base.PermissionMixin, base.ModelViewSetSet,
     filter_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
 
-    @list_route(methods=["get"], url_path="supported-repos")
+    @base.action(methods=["get"], url_path="supported-repos", detail=False)
     def supported_repos(self, request):
         return base.Response(self.model.handlers.keys(), 200).resp
 
-    @detail_route(methods=["post", "put", "delete", "get"])
+    @base.action(methods=["post", "put", "delete", "get"], detail=True)
     def inventories(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
         return self._get_result(request, serializer.inventories_operations)
 
-    @detail_route(methods=["post"])
+    @base.action(methods=["post"], detail=True)
     def sync(self, request, *args, **kwargs):
         return self.get_serializer(self.get_object()).sync().resp
 
-    @detail_route(methods=["post"], url_path="execute-playbook")
+    @base.action(methods=["post"], url_path="execute-playbook", detail=True)
     def execute_playbook(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
         return serializer.execute_playbook(request).resp
 
-    @detail_route(methods=["post"], url_path="execute-module")
+    @base.action(methods=["post"], url_path="execute-module", detail=True)
     def execute_module(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
         return serializer.execute_module(request).resp
 
 
-class TaskViewSet(base.LimitedPermissionMixin, base.ReadOnlyModelViewSet):
+class TaskViewSet(polemarch_base.LimitedPermissionMixin, base.ReadOnlyModelViewSet):
     model = serializers.models.Task
     serializer_class = serializers.TaskSerializer
     serializer_class_one = serializers.OneTaskSerializer
     filter_class = filters.TaskFilter
 
 
-class PeriodicTaskViewSet(base.LimitedPermissionMixin, base.ModelViewSetSet):
+class PeriodicTaskViewSet(polemarch_base.LimitedPermissionMixin, base.ModelViewSetSet):
     model = serializers.models.PeriodicTask
     serializer_class = serializers.PeriodictaskSerializer
     serializer_class_one = serializers.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
     POST_WHITE_LIST = ['execute']
 
-    @detail_route(methods=["post"])
+    @base.action(methods=["post"], detail=True)
     def execute(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
         return serializer.execute().resp
 
 
-class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
+class HistoryViewSet(polemarch_base.LimitedPermissionMixin, base.HistoryModelViewSet):
     model = serializers.models.History
     serializer_class = serializers.HistorySerializer
     serializer_class_one = serializers.OneHistorySerializer
     filter_class = filters.HistoryFilter
     POST_WHITE_LIST = ['cancel']
 
-    @detail_route(methods=["get"])
+    @base.action(methods=["get"], detail=True)
     def raw(self, request, *args, **kwargs):
         result = self.get_serializer(self.get_object()).get_raw(request)
         return HttpResponse(result, content_type="text/plain")
 
-    @detail_route(methods=["get"])
+    @base.action(methods=["get"], detail=True)
     def lines(self, request, *args, **kwargs):
         return self.get_paginated_route_response(
             self.get_object().raw_history_line.order_by("-line_number"),
@@ -189,19 +159,19 @@ class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
             filters.HistoryLinesFilter
         )
 
-    @detail_route(methods=["post"])
+    @base.action(methods=["post"], detail=True)
     def cancel(self, request, *args, **kwargs):
         obj = self.get_object()
-        exch = utils.KVExchanger(utils.CmdExecutor.CANCEL_PREFIX + str(obj.id))
+        exch = KVExchanger(utils.CmdExecutor.CANCEL_PREFIX + str(obj.id))
         exch.send(True, 10)
         return base.Response("Task canceled: {}".format(obj.id), 200).resp
 
-    @detail_route(methods=["get"])
+    @base.action(methods=["get"], detail=True)
     def facts(self, request, *args, **kwargs):
         objs = self.get_serializer(self.get_object()).get_facts(request)
         return base.Response(objs, 200).resp
 
-    @detail_route(methods=["delete"])
+    @base.action(methods=["delete"], detail=True)
     def clear(self, request, *args, **kwargs):
         default_message = "Output trancated.\n"
         obj = self.get_object()
@@ -214,18 +184,18 @@ class HistoryViewSet(base.LimitedPermissionMixin, base.HistoryModelViewSet):
         return base.Response(result, 204).resp
 
 
-class TemplateViewSet(base.PermissionMixin, base.ModelViewSetSet):
+class TemplateViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Template
     serializer_class = serializers.TemplateSerializer
     serializer_class_one = serializers.OneTemplateSerializer
     filter_class = filters.TemplateFilter
     POST_WHITE_LIST = ['execute']
 
-    @list_route(methods=["get"], url_path="supported-kinds")
+    @base.action(methods=["get"], url_path="supported-kinds", detail=False)
     def supported_kinds(self, request):
         return base.Response(self.model.template_fields, 200).resp
 
-    @detail_route(methods=["post"])
+    @base.action(methods=["post"], detail=True)
     def execute(self, request, *args, **kwargs):
         obj = self.get_object()
         return self.get_serializer(obj).execute(request).resp
@@ -237,7 +207,7 @@ class HookViewSet(base.ModelViewSetSet):
     filter_class = filters.HookFilter
     permission_classes = (StaffPermission,)
 
-    @list_route(['get'])
+    @base.action(['get'], detail=False)
     def types(self, request):
         data = dict(
             types=self.model.handlers.list().keys(),
@@ -246,29 +216,7 @@ class HookViewSet(base.ModelViewSetSet):
         return base.Response(data, 200).resp
 
 
-class BulkViewSet(rest_views.APIView):
-    api_version = 'v1'
-    schema = None
-
-    _op_types = {
-        "get": "get",
-        "add": "post",
-        "set": "patch",
-        "del": "delete",
-        "mod": "get"
-    }
-    _allowed_types = {
-        'host': _op_types.keys(),
-        'group': _op_types.keys(),
-        'inventory': _op_types.keys(),
-        'project': _op_types.keys(),
-        'periodictask': _op_types.keys(),
-        'template': _op_types.keys(),
-        'history': ['del', "get"],
-        'hooks': _op_types.keys(),
-        'users': _op_types.keys(),
-        'teams': _op_types.keys(),
-    }
+class BulkViewSet(views.BulkViewSet):
     type_to_bulk = {
         "host": "hosts",
         "group": "groups",
@@ -276,92 +224,24 @@ class BulkViewSet(rest_views.APIView):
         "project": "projects",
         "periodictask": "periodic-tasks",
         "template": "templates",
-        "history": "history",
         "user": "users",
         "team": "teams",
         "hook": "hooks",
     }
-
-    def _check_type(self, op_type, item):
-        allowed_types = self._allowed_types.get(item, [])
-        if op_type not in allowed_types:
-            raise serializers.exceptions.UnsupportedMediaType(
-                media_type=op_type
-            )
-
-    def get_url(self, item, pk=None, data_type=None):
-        url = ''
-        if pk is not None:
-            url += "{}/".format(pk)
-        if data_type is not None:
-            url += "{}/".format(data_type)
-        return "/{}/{}/{}/{}".format(
-            settings.API_URL, self.api_version, self.type_to_bulk[item], url
-        )
-
-    def get_method_type(self, op_type, operation):
-        if op_type != 'mod':
-            return self._op_types[op_type]
-        else:
-            return operation.get('method', self._op_types[op_type]).lower()
-
-    def get_operation(self, operation, kwargs):
-        op_type = operation['type']
-        data = operation.get('data', {})
-        if data:
-            kwargs['data'] = json.dumps(data)
-        url = self.get_url(
-            operation['item'],
-            operation.get('pk', None),
-            operation.get('data_type', None)
-        )
-        method = getattr(self.client, self.get_method_type(op_type, operation))
-        return method(url, **kwargs)
-
-    def perform(self, operation):
-        kwargs = dict()
-        kwargs["content_type"] = "application/json"
-        response = self.get_operation(operation, kwargs)
-        if response.status_code != 404 and getattr(response, "rendered_content", False):
-            data = json.loads(response.rendered_content.decode())
-        else:
-            data = dict(detail=str(response.content.decode('utf-8')))
-        return OrderedDict(
-            status=response.status_code, data=data, type=operation['type']
-        )
-
-    @transaction.atomic
-    def post(self, request, *args, **kwargs):
-        operations = request.data
-        results = []
-        self.client = Client()
-        self.client.force_login(request.user)
-        for operation in operations:
-            op_type = operation.get("type")
-            self._check_type(op_type, operation.get("item", None))
-            results.append(self.perform(operation))
-        return base.Response(results, 200).resp
-
-    def get(self, request):
-        response = {
-            "allowed_types": self._allowed_types,
-            "operations_types": self._op_types.keys(),
-        }
-        return base.Response(response, 200).resp
 
 
 class AnsibleViewSet(base.ListNonModelViewSet):
     # pylint: disable=abstract-method
     base_name = "ansible"
 
-    @list_route(methods=["get"])
+    @base.action(methods=["get"], detail=False)
     def cli_reference(self, request):
         reference = utils.AnsibleArgumentsReference()
         return base.Response(reference.as_gui_dict(
             request.query_params.get("filter", "")
         ), 200).resp
 
-    @list_route(methods=["get"])
+    @base.action(methods=["get"], detail=False)
     def modules(self, request):
         detailed = int(request.query_params.get("detailed", "0"))
         fields = request.query_params.get("fields", "")

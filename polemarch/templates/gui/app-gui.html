@@ -1,0 +1,506 @@
+{% load staticfiles %}
+<!-- app-gui-page -->
+
+<script type="text/x-just" data-just="app-body-gui">
+<div class="hold-transition skin-black-light sidebar-mini {% block bodyclass %}{% endblock %}" style="width: 100%;    height: 100%;">
+    <div id="loader-wrapper">
+        <div id="loader"></div>
+    </div>
+
+    {% block navbar %}
+        <div class="wrapper" >
+            <header class="main-header">
+
+                <!-- Header Navbar: style can be found in header.less -->
+                <nav class="navbar navbar-static-top">
+                    <!-- Sidebar toggle button-->
+                    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                        <span class="sr-only">Toggle navigation</span>
+                    </a>
+
+                    <div class="navbar-custom-menu">
+                        <ul class="nav navbar-nav">
+                            <li><a href='?profile/{{ user.id }}' onclick="return spajs.openURL(this.href);"><i class="glyphicon glyphicon-user"></i> <span>{{user.username}}</span></a></li>
+                            <li class="hide-in-web"><a href="#" onclick="inAppClose()"><i class="glyphicon glyphicon-share"></i> <span>Close</span></a></li>
+                            <li class="hide-in-web"><a href="#" onclick="inAppLogout()"><i class="glyphicon glyphicon-log-out"></i> <span>Logout</span></a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </header>
+            <!-- Left side column. contains the logo and sidebar -->
+            <aside class="main-sidebar">
+                <!-- sidebar: style can be found in sidebar.less -->
+                <section class="sidebar">
+                    <!-- sidebar menu: : style can be found in sidebar.less -->
+                    <ul class="sidebar-menu tree" data-widget="tree">
+                        {% block left_menu %}
+                            {% include "left_menu.html" %}
+                        {% endblock %}
+                    </ul>
+                </section>
+                <!-- /.sidebar -->
+            </aside>
+
+            <!-- Content Wrapper. Contains page content -->
+            <div class="content-wrapper" id='spajs-right-area'>
+                <!-- Main content -->
+                {% block content %}{% endblock %}
+            </div>
+
+            {% block footer %}
+                <footer class="main-footer">
+                    <div class="pull-right" style="float: right;    padding-left: 15px;    display: inline-block;">
+                        <div class="btn-group" role="group">
+                            <a type="button" style="box-shadow:none;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" href="#" onclick="return false;">
+                                <span class="glyphicon glyphicon-question-sign"></span> Help
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-right" style=" bottom:100% !important; top:auto !important; ">
+                                <li>
+                                    <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%20{{polemarch_version}}" target="_blank">Ask question</a>
+                                </li>
+                                <li>
+                                    <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20{{polemarch_version}}" target="_blank">Add bug</a>
+                                </li>
+                                <li>
+                                    <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Feature%20request&issue%5Btitle%5D=" target="_blank">Add feature request</a>
+                                </li>
+                                <li role="separator" class="divider"></li>
+                                <li>
+                                    <a href="https://gitlab.com/vstconsulting/polemarch" target="_blank">Official repository</a>
+                                </li>
+                                <li>
+                                    <a href="http://polemarch.readthedocs.io" target="_blank">Official documentation</a>
+                                </li>
+                                <li>
+                                    <a href="https://gitlab.com/vstconsulting/polemarch/issues" target="_blank">Issues</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                    <div class="pull-right hidden-xs">
+                        <b>Version</b> {{polemarch_version}}
+                    </div>
+
+                    {% if debug %}
+                        <div class="pull-right hidden-xs">
+                            <b><a href="#"
+                                  style="color:#ccc;"
+                                  onclick="loadQUnitTests(); return false;" >Test qUnit</a></b>
+                            &nbsp;&nbsp;&nbsp;
+                        </div>
+                    {% endif %}
+                    <br>
+                </footer>
+            {% endblock %}
+        </div>
+    {% endblock %}
+</div>
+</script>
+
+{% block pmInlineScripts %}
+
+<style>
+
+*::-webkit-scrollbar {
+    width: 0px;
+}
+
+.hide-in-app{
+    display: none !important;
+}
+
+.hide-in-web{
+    display: block;
+}
+
+#LoadingProgressBar {
+    background: #080E1C;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: 2000;
+}
+
+#LoadingProgressBar .loadWrapper {
+  width: 200px;
+  height: 7px;
+  position: absolute;
+  top: 130px;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  background: rgba(0,0,0,.4);
+  border-radius: 7px;
+}
+
+#LoadingProgressBar .loadProgress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 7px;
+  background: #7F529C;
+  height: 100%;
+  width: 100%;
+  transition: all 100ms ease-out;
+}
+
+#LoadingProgressBar .status {
+  position: absolute;
+  top: 110px;
+  left: 50%;
+  transform: translate(-50%, -45%);
+  font-family: 'Ubuntu Mono', monospace;
+  color: #fff;
+}
+
+#LoadingProgressBar .statusCont {
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+#LoadingProgressBar .titleP {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  transform: translate(-50%,25%);
+  font-family: 'Ubuntu Mono', monospace;
+  color: #7F529C;
+  text-transform: uppercase;
+}
+
+
+</style>
+
+
+<div id="LoadingProgressBar">
+    <!-- Title -->
+    <h1 class="titleP">
+        Polemarch
+    </h1>
+
+    <!-- Load Status -->
+    <div class="status">
+      <div class="statusCont" id="LoadingProgressBarCount">
+
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="loadWrapper">
+      <div class="loadProgress"  id="LoadingProgressBarLine"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    window.csrf_data = {
+        csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
+        csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}",
+        token: "{{ csrf_token }}"
+    };
+
+    var hostname = '{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}';
+    var server_status_types = '{{server_status_types|safe}}';
+
+    var polemarch_version = '{{polemarch_version}}';
+
+    var polemarch_logout_url = hostname + '{{logout_url}}';
+
+    {% if user.is_authenticated %}
+        var my_user_id = '{{user.id}}'
+    {% else %}
+        var my_user_id = undefined
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        var is_authenticated = true
+    {% else %}
+        var is_authenticated = false
+    {% endif %}
+
+    {% if user.is_superuser %}
+        var is_superuser = true
+        var is_staff = true
+    {% else %}
+        {% if user.is_staff %}
+            var is_superuser = true
+            var is_staff = true
+        {% else %}
+            var is_superuser = false
+            var is_staff = false
+        {% endif %}
+    {% endif %}
+
+    window.pmStaticPath = "{% static '' %}";
+    window.isDebug = {% if debug %}true{% else %}false{% endif %}
+    window.timeZone = '{{timezone}}';
+
+    window.resourceList = [
+        { type:'js', name: "{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/libs/tabSignal.js' %}?v={{polemarch_version}}"},
+
+        { type:'tpl', name: "{% static '/' %}templates/encryptedCopyModal.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmModuleTemplates.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmTasksTemplates.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmTasksTemplates.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/moduleArgsEditor.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmPeriodicTasks.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmAnsibleModule.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/crontabEditor.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmInventories.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmDashboard.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/jsonEditor.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmProjects.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmHistory.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/filedsLib.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmGroups.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmItems.html?v={{polemarch_version}}"},
+        { type:'tpl', name: "{% static '/' %}templates/pmUsers.html?v={{polemarch_version}}"},
+        //{ type:'tpl', name: "{% static '/' %}templates/pmHosts.html?v={{polemarch_version}}"},
+
+        { type:'js', name: "{% static 'js/libs/notify.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'bootstrap/js/bootstrap.min.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'plugins/fastclick/fastclick.min.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/app.js' %}?v={{polemarch_version}}"},
+
+        { type:'js', name: "{% static 'js/libs/c3/d3.min.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/libs/c3/c3.min.js' %}?v={{polemarch_version}}"},
+
+        { type:'js', name: "{% static 'js/libs/autocomplete.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'plugins/select2/select2.full.min.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{polemarch_version}}"},
+
+        { type:'js', name: "{% static 'js/libs/just.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/libs/just-watch.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/libs/moment.min.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/libs/moment-timezone.min.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/libs/jquery.scrollTo.min.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/libs/spa.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/libs/ansi_up.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/libs/Sortable.min.js' %}?v={{polemarch_version}}"},
+
+        { type:'js', name: "{% static 'js/common.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/polemarch.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/jsonEditor.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/crontabEditor.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/filedsLib.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/encryptedCopyModal.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmItems.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmHosts.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmUsers.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmGroups.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmInventories.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmProjects.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmTasks.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmPeriodicTasks.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmHistory.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmTemplates.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmTasksTemplates.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmModuleTemplates.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmAnsibleModule.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/moduleArgsEditor.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/pmDashboard.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/polemarchForApp.js' %}?v={{polemarch_version}}"},
+
+        { type:'css', name: "{% static 'plugins/select2/select2.min.css' %}?v={{polemarch_version}}"},
+        { type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{polemarch_version}}"},
+        { type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{polemarch_version}}"},
+        { type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{polemarch_version}}"},
+        { type:'css', name: "{% static 'lte/css/AdminLTE.min.css' %}?v={{polemarch_version}}"},
+        { type:'css', name: "{% static 'lte/css/skins/_all-skins.min.css' %}?v={{polemarch_version}}"},
+        { type:'css', name: "{% static 'js/libs/c3/c3.min.css' %}?v={{polemarch_version}}"},
+        { type:'css', name: "{% static 'css/gui.css' %}?v={{polemarch_version}}"},
+        { type:'css', name: "{% static 'css/ansi-colors.css' %}?v={{polemarch_version}}"},
+
+        { type:'event', name: "loading.completed"},
+    ]
+
+var jsLoadingProgress = 0;
+var jsLoadingProgressStep = 0;
+var jsLoadingProgressSumSteps = 0;
+
+var jsToLoad = {}
+
+function addToPage(jsToLoad)
+{
+    indexs = []
+    for(var i in jsToLoad)
+    {
+        if(!indexs[jsToLoad[i].index])
+        {
+            indexs[jsToLoad[i].index] = []
+        }
+
+        indexs[jsToLoad[i].index].push(jsToLoad[i])
+    }
+
+    function compareNumeric(a, b) {
+        if (a[0].index > b[0].index) return 1;
+        if (a[0].index < b[0].index) return -1;
+    }
+
+    indexs = indexs.sort(compareNumeric);
+
+    for(var i in indexs)
+    {
+        for(var j in indexs[i])
+        {
+            var val = indexs[i][j]
+
+            if(val.appended)
+            {
+                continue;
+            }
+
+            if(val.status!= 200)
+            {
+                return;
+            }
+
+            if(val.status == 200)
+            {
+                val.appended = true;
+                try{
+                    console.log("append", val);
+
+                    if(val.type =='tpl')
+                    {
+                        // Надеюсь что к моменту загрузки шаблона js с jquery уже загружены
+                        $("body").append(val.response)
+                    }
+                    else if(val.type =='js')
+                    {
+                        //eval(val.response)
+
+                        var link = document.createElement("script");
+                        link.setAttribute("type", "text/javascript");
+                        //link.setAttribute("href", file);
+                        link.innerHTML = val.response
+                        document.getElementsByTagName("head")[0].appendChild(link);
+                    }
+                    else if(val.type =='css-file')
+                    {
+                        var link = document.createElement("style");
+                        link.setAttribute("rel", "stylesheet");
+                        link.setAttribute("type", "text/css");
+                        link.setAttribute("media", "text/css");
+                        link.rel  = 'stylesheet';
+                        link.type = 'text/css';
+                        link.media = 'all';
+                        link.innerHTML = val.response
+                        document.getElementsByTagName("body")[0].appendChild(link);
+                    }
+                    else if(val.type =='event')
+                    {
+                        tabSignal.emit(val.name)
+                    }
+                }
+                catch (exception)
+                {
+                    console.error("exception", val.url, exception.stack, exception.stack)
+                    console.error(exception.stack)
+                    debugger;
+                }
+            }
+        }
+    }
+}
+
+function loadData(index)
+{
+    if(jsToLoad[index].type == 'event')
+    {
+        jsToLoad[index].status = 200
+        addToPage(jsToLoad)
+        return;
+    }
+
+    if(jsToLoad[index].type == 'css')
+    {
+        var link = document.createElement("link");
+        link.setAttribute("rel", "stylesheet");
+        link.setAttribute("type", "text/css");
+        link.setAttribute("href", jsToLoad[index].url);
+        document.getElementsByTagName("head")[0].appendChild(link);
+        jsToLoad[index].status = 200
+        return;
+    }
+
+    if(!window.loadData_jsLoadingProgressSumSteps)
+    {
+        window.loadData_jsLoadingProgressSumSteps = 0;
+        window.loadData_jsLoadingProgressStep = 0;
+    }
+
+    window.loadData_jsLoadingProgressSumSteps++;
+
+    // Создаём объект запроса
+    var request = new XMLHttpRequest();
+
+    // Задаём функцию, которая будет вызываться при изменении состояния готовности запроса
+    request.onreadystatechange = function ()
+    {
+        // Проверяем состояние готовности и статус запроса
+        if (request.readyState === 4 && request.status === 200)
+        {
+            // Десериализуем полученную JSON строку в объект JavaScript
+            jsToLoad[index].response = request.responseText;
+            window.loadData_jsLoadingProgressStep++
+            setLoadingProgress((window.loadData_jsLoadingProgressStep/window.loadData_jsLoadingProgressSumSteps)*100)
+            jsToLoad[index].status = request.status
+            addToPage(jsToLoad)
+        }
+    }
+
+    // Указываем тип запроса (GET) и адрес, к которому будет выполнятся запрос
+    request.open("GET", jsToLoad[index].url);
+
+    request.send();
+}
+
+function setLoadingProgress(width)
+{
+    var elem = document.getElementById("LoadingProgressBarLine");
+    elem.style.width = Math.ceil(width) + '%';
+
+    var elem = document.getElementById("LoadingProgressBarCount");
+    elem.style.width = Math.ceil(width) + '%';
+    elem.innerHTML = Math.ceil(width) * 1  + '%';
+}
+
+function hideLoadingProgress()
+{
+    $("#LoadingProgressBar").hide();
+}
+
+var cRrrCalls = 0;
+function onReady()
+{
+    //debugger;
+    console.log("onReady")
+    setLoadingProgress(0)
+
+    var index = 0;
+    for(var i in window.resourceList)
+    {
+        index++;
+        window.resourceList[i].url = hostname + window.resourceList[i].name
+        window.resourceList[i].status = 0
+        window.resourceList[i].index = index
+
+        jsToLoad[window.resourceList[i].url] = window.resourceList[i]
+    }
+
+    for(var i in window.jsToLoad)
+    {
+        loadData(i)
+    }
+}
+
+// https://learn.javascript.ru/onload-ondomcontentloaded
+onReady()
+</script>
+
+
+{% endblock %}

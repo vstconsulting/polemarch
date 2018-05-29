@@ -82,7 +82,7 @@ stages:
   only:
    - master
   script:
-   - make test ENVS=$CI_BUILD_NAME-install
+   - make test ENVS=$CI_BUILD_NAME-coverage
   dependencies:
   - build_zip
   retry: 2
@@ -154,7 +154,7 @@ build_zip:
   only:
    - master
   script:
-   - make rpm RELEASE=${CI_BUILD_ID}
+   - make build RELEASE=${CI_BUILD_ID}
   artifacts:
     expire_in: 30 minutes
     paths:

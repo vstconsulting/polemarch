@@ -7,8 +7,8 @@ except ImportError:  # nocv
 from django.test import TestCase
 from django.core.validators import ValidationError
 from requests import Response
+from vstutils.utils import raise_context
 from polemarch.main.models import Hook
-from polemarch.main.utils import raise_context
 
 
 class HooksTestCase(TestCase):

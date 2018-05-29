@@ -1,0 +1,9 @@
+{% autoescape off %}# Hosts {% for host in hosts %}
+{{ host }}{% endfor %}
+
+{% if vars %}# Global vars
+[all:vars]
+{{ vars }}{% endif %}
+
+# Groups {% for group in groups %}
+{{ group }}{% endfor %}{% endautoescape %}
