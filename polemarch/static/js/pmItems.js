@@ -538,7 +538,7 @@ pmItems.showItemFromAnotherClass = function (holder, menuInfo, data)
         if(link_parts[i].split("/")[0] != 'page' && link_parts[i].split("/")[0] != 'search')
         {
             link_with_parents += link_parts[i] +"/";
-            if(link_parts[i].split("/")[0] != thisObj.model.page_name && link_parts[i].split("/")[0] != thisObj.model.name)
+            if(i != link_parts.length -1)
             {
                 back_link += link_parts[i] +"/";
                 parObj.parent_type = link_parts[i].split("/")[0];
