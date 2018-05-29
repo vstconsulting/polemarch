@@ -9,7 +9,7 @@ from vstutils.utils import KVExchanger
 
 from . import filters
 from . import serializers
-from .. import base as polemarch_base
+from ..base import PermissionMixin, LimitedPermissionMixin
 from ...main import utils
 
 
@@ -37,7 +37,7 @@ class UserViewSet(views.UserViewSet):
         return base.Response(obj.settings.data, 200).resp
 
 
-class TeamViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet):
+class TeamViewSet(PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.UserGroup
     serializer_class = serializers.TeamSerializer
     serializer_class_one = serializers.OneTeamSerializer
@@ -47,7 +47,7 @@ class TeamViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet):
         return self.queryset
 
 
-class HostViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet):
+class HostViewSet(PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
     serializer_class_one = serializers.OneHostSerializer
@@ -71,24 +71,21 @@ class _GroupedViewSet(object):
         return self._get_result(request, serializer.groups_operations)
 
 
-class GroupViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet,
-                   _GroupedViewSet):
+class GroupViewSet(PermissionMixin, base.ModelViewSetSet, _GroupedViewSet):
     model = serializers.models.Group
     serializer_class = serializers.GroupSerializer
     serializer_class_one = serializers.OneGroupSerializer
     filter_class = filters.GroupFilter
 
 
-class InventoryViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet,
-                       _GroupedViewSet):
+class InventoryViewSet(base.ModelViewSetSet, _GroupedViewSet):
     model = serializers.models.Inventory
     serializer_class = serializers.InventorySerializer
     serializer_class_one = serializers.OneInventorySerializer
     filter_class = filters.InventoryFilter
 
 
-class ProjectViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet,
-                     _GroupedViewSet):
+class ProjectViewSet(PermissionMixin, base.ModelViewSetSet, _GroupedViewSet):
     model = serializers.models.Project
     serializer_class = serializers.ProjectSerializer
     serializer_class_one = serializers.OneProjectSerializer
@@ -119,14 +116,14 @@ class ProjectViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet,
         return serializer.execute_module(request).resp
 
 
-class TaskViewSet(polemarch_base.LimitedPermissionMixin, base.ReadOnlyModelViewSet):
+class TaskViewSet(LimitedPermissionMixin, base.ReadOnlyModelViewSet):
     model = serializers.models.Task
     serializer_class = serializers.TaskSerializer
     serializer_class_one = serializers.OneTaskSerializer
     filter_class = filters.TaskFilter
 
 
-class PeriodicTaskViewSet(polemarch_base.LimitedPermissionMixin, base.ModelViewSetSet):
+class PeriodicTaskViewSet(LimitedPermissionMixin, base.ModelViewSetSet):
     model = serializers.models.PeriodicTask
     serializer_class = serializers.PeriodictaskSerializer
     serializer_class_one = serializers.OnePeriodictaskSerializer
@@ -139,7 +136,7 @@ class PeriodicTaskViewSet(polemarch_base.LimitedPermissionMixin, base.ModelViewS
         return serializer.execute().resp
 
 
-class HistoryViewSet(polemarch_base.LimitedPermissionMixin, base.HistoryModelViewSet):
+class HistoryViewSet(LimitedPermissionMixin, base.HistoryModelViewSet):
     model = serializers.models.History
     serializer_class = serializers.HistorySerializer
     serializer_class_one = serializers.OneHistorySerializer
@@ -184,7 +181,7 @@ class HistoryViewSet(polemarch_base.LimitedPermissionMixin, base.HistoryModelVie
         return base.Response(result, 204).resp
 
 
-class TemplateViewSet(polemarch_base.PermissionMixin, base.ModelViewSetSet):
+class TemplateViewSet(PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Template
     serializer_class = serializers.TemplateSerializer
     serializer_class_one = serializers.OneTemplateSerializer
