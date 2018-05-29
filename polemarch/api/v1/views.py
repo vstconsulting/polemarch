@@ -78,7 +78,7 @@ class GroupViewSet(PermissionMixin, base.ModelViewSetSet, _GroupedViewSet):
     filter_class = filters.GroupFilter
 
 
-class InventoryViewSet(base.ModelViewSetSet, _GroupedViewSet):
+class InventoryViewSet(PermissionMixin, base.ModelViewSetSet, _GroupedViewSet):
     model = serializers.models.Inventory
     serializer_class = serializers.InventorySerializer
     serializer_class_one = serializers.OneInventorySerializer
