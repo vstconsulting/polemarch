@@ -979,3 +979,14 @@ table{
 .hide-in-web{ 
     display: none;
 }
+
+
+@media (max-width: 767px) {
+    .app-logo{
+        display: none !important;
+    }
+    
+    .main-sidebar {
+        padding-top: 50px !important;
+    }
+}

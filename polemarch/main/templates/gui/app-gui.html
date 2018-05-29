@@ -1,6 +1,27 @@
 {% load staticfiles %}
 <!-- app-gui-page -->
 
+<!DOCTYPE html>
+<html>
+  <head>
+    
+
+      
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NONE,NOARCHIVE" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+      
+
+      <title>Polemarch Dashboard</title>
+
+    
+  </head>
+
+
+    <body class="hold-transition skin-black-light sidebar-mini "> 
+        
+      
 <script type="text/x-just" data-just="app-body-gui">
 <div class="hold-transition skin-black-light sidebar-mini {% block bodyclass %}{% endblock %}" style="width: 100%;    height: 100%;">
     <div id="loader-wrapper">
@@ -10,7 +31,14 @@
     {% block navbar %}
         <div class="wrapper" >
             <header class="main-header">
-
+                <a href="/" class="logo app-logo">
+                    <!-- mini logo for sidebar mini 50x50 pixels -->
+                    <!-- <span class="logo-mini"><b>P</b></span> -->
+                    <span class="logo-mini"><span class="bg-logo-min" style="margin-left: 4px;"></span></span>
+                    <!-- logo for regular state and mobile devices -->
+                    <!-- <span class="logo-lg"><b>P</b>olemarch</span> -->
+                    <span class="logo-lg logo-span"><span class="bg-logo-min"></span> <span class="bg-logo"></span></span>
+                </a>
                 <!-- Header Navbar: style can be found in header.less -->
                 <nav class="navbar navbar-static-top">
                     <!-- Sidebar toggle button-->
@@ -559,20 +587,20 @@ function addToPage(jsToLoad)
                         link.innerHTML = val.response
                         document.getElementsByTagName("head")[0].appendChild(link);
                     }
-                    else if(val.type =='css' && isCordova())
+                    else if(val.type =='css' /*&& isCordova()*/)
                     {
                         var link = document.createElement("style");
                         link.setAttribute("rel", "stylesheet");
                         link.setAttribute("type", "text/css");
-                        link.setAttribute("media", "text/css");
-                        link.setAttribute("media", "text/css");
+                        link.setAttribute("media", "text/css"); 
+                        link.setAttribute("data-url", val.url); 
                         link.rel  = 'stylesheet';
                         link.type = 'text/css';
                         link.media = 'all';
                         
                         //if(isCordova())
                         //{
-                            link.innerHTML = val.response.replace(/\.\.\/fonts/gmi, "./fonts")
+                            link.innerHTML = val.response.replace(/\.\.\/fonts/gmi, hostname + window.pmStaticPath + "fonts")
                         //}
                         //else
                         //{
@@ -607,7 +635,7 @@ function loadData(index)
         return;
     }
 
-    if(jsToLoad[index].type == 'css' && !isCordova())
+    /*if(jsToLoad[index].type == 'css' && !isCordova())
     {
         var link = document.createElement("link");
         link.setAttribute("rel", "stylesheet");
@@ -616,7 +644,7 @@ function loadData(index)
         document.getElementsByTagName("head")[0].appendChild(link);
         jsToLoad[index].status = 200 
         return;
-    } 
+    } */
 
     if(!window.loadData_jsLoadingProgressSumSteps)
     {
@@ -717,4 +745,7 @@ onReady()
 </script>
 
 
+    </body>
+
+</html>
 {% endblock %}
