@@ -119,7 +119,7 @@ pmGroups.model.page_list_from_another_class = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(opt){ return "spajs.open({ menuId:'" + opt.parent_type + "/" + opt.parent_item + "/" + this.model.name + "/new-"+this.model.page_name+"'}); return false;"},
+            function:function(opt){ return "spajs.open({ menuId:'" + opt.link_with_parents + "/" +  this.model.name + "/new-" + this.model.page_name +"'}); return false;"},
             title:'Create',
             link:function(){ return '/?new-'+this.model.page_name},
         },
@@ -231,10 +231,20 @@ pmGroups.model.page_new = {
         $.notify("Group created", "success");
         if(callOpt.parent_item)
         {
+            var link = window.location.href.split(/[&?]/g)[1];
+            var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+            var link_parts = link.match(pattern);
+            var link_with_parents = "";
+            for(var i in link_parts)
+            {
+                link_with_parents += link_parts[i] +"/";
+            }
+            link_with_parents += this.model.name;
+
             if(callOpt.parent_type == 'group')
             {
                 $.when(pmGroups.addSubGroups(callOpt.parent_item, [data.id])).always(function(){
-                    $.when(spajs.open({ menuId:"group/"+callOpt.parent_item+"/groups"})).always(function(){
+                    $.when(spajs.open({ menuId:link_with_parents})).always(function(){
                         def.resolve()
                     })
                 })
@@ -242,7 +252,7 @@ pmGroups.model.page_new = {
             else if(callOpt.parent_type == 'inventory')
             {
                 $.when(pmInventories.addSubGroups(callOpt.parent_item, [data.id])).always(function(){
-                    $.when(spajs.open({ menuId:"inventory/"+callOpt.parent_item+"/groups"})).always(function(){
+                    $.when(spajs.open({ menuId:link_with_parents})).always(function(){
                         def.resolve()
                     })
                 })
@@ -250,7 +260,7 @@ pmGroups.model.page_new = {
             else if(callOpt.parent_type == 'project')
             {
                 $.when(pmProjects.addSubGroups(callOpt.parent_item, [data.id])).always(function(){
-                    $.when(spajs.open({ menuId:"project/"+callOpt.parent_item+"/groups"})).always(function(){
+                    $.when(spajs.open({ menuId:link_with_parents})).always(function(){
                         def.resolve()
                     })
                 })
@@ -374,15 +384,15 @@ pmGroups.model.page_item_from_another_class = {
         },
         {
             class:'btn btn-info',
-            function:function(item_id)
+            function:function(item_id, opt)
             {
                 if(this.model.items[item_id].children)
                 {
-                    return "spajs.open({ menuId:'" + this.model.page_name + "/" + item_id + "/groups'}); return false";
+                    return "spajs.open({ menuId:'" + opt.link_with_parents +  "groups'}); return false";
                 }
                 else
                 {
-                    return "spajs.open({ menuId:'" + this.model.page_name + "/" + item_id + "/hosts'}); return false";
+                    return "spajs.open({ menuId:'" + opt.link_with_parents + "hosts'}); return false";
                 }
             },
             title:function(item_id)
@@ -400,7 +410,7 @@ pmGroups.model.page_item_from_another_class = {
         },
         {
             class:'btn btn-warning',
-            function:function(item_id, opt){ return 'spajs.showLoader('+this.model.className+'.deleteChildFromParent("'+opt.parent_type+'",'+opt.parent_item+','+item_id+','+true+'));  return false;'},
+            function:function(item_id, opt){ return 'spajs.showLoader('+this.model.className+'.deleteChildFromParent("'+opt.parent_type+'",'+opt.parent_item+','+item_id+', "'+opt.back_link+'"));  return false;'},
             title:function(item_id, opt){return 'Remove from parent ' +opt.parent_type; },
             link:function(){ return '#'},
         },
@@ -973,27 +983,28 @@ tabSignal.connect("polemarch.start", function()
 
     spajs.addMenu({
         id:"newGroup",
-        urlregexp:[/^new-group$/, /^([A-z0-9_]+)\/([0-9]+)\/new-group$/, /^([A-z0-9_]+)\/([0-9]+)\/groups\/new-group$/],
+        urlregexp:[/^new-group$/, /^([A-z0-9_]+)\/([0-9]+)\/new-group$/,
+            /^([A-z0-9_]+)\/([0-9]+)\/groups\/new-group$/, /^([A-z0-9_\/]+)\/groups\/new-group/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showNewItemPage(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
         id:"group-from-another-model",
-        urlregexp:[/^([A-z0-9_]+)\/([0-9]+)\/group\/([0-9]+)$/, /^([A-z0-9_]+)\/([0-9]+)\/groups\/([0-9]+)$/],
+        urlregexp:[/^([A-z0-9_\/]+)\/group\/([0-9]+)$/, /^([A-z0-9_\/]+)\/groups\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showItemFromAnotherClass(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
         id:"some-model-groups",
-        urlregexp:[/^([A-z0-9_]+)\/([0-9]+)\/groups$/, /^([A-z0-9_]+)\/([0-9]+)\/group$/,
-            /^([A-z0-9_]+)\/([0-9]+)\/groups\/search\/?$/, /^([A-z0-9_]+)\/([0-9]+)\/groups\/page\/([0-9]+)$/],
+        urlregexp:[/^([A-z0-9_\/]+)\/groups$/, /^([A-z0-9_\/]+)\/groups\/search\/?$/,
+            /^([A-z0-9_\/]+)\/group$/, /^([A-z0-9_\/]+)\/groups\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showListFromAnotherClass(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
         id:"some-model-groups-search",
-        urlregexp:[/^([A-z0-9_]+)\/([0-9]+)\/groups\/search\/([A-z0-9 %\-.:,=]+)$/,
-            /^([A-z0-9_]+)\/([0-9]+)\/groups\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        urlregexp:[/^([A-z0-9_\/]+)\/groups\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^([A-z0-9_\/]+)\/groups\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showSearchResultsForParent(holder, menuInfo, data);}
     })
 
