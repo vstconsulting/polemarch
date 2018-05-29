@@ -6,6 +6,7 @@ variables:
   GET_SOURCES_ATTEMPTS: 3
   ARTIFACT_DOWNLOAD_ATTEMPTS: 3
   RESTORE_CACHE_ATTEMPTS: 3
+  DJANGO_LOG_LEVEL: 'CRITICAL'
 
 cache:
   paths:
@@ -81,7 +82,7 @@ stages:
   only:
    - master
   script:
-   - make test ENVS=$CI_BUILD_NAME-install
+   - make test ENVS=$CI_BUILD_NAME-coverage
   dependencies:
   - build_zip
   retry: 2
@@ -153,7 +154,7 @@ build_zip:
   only:
    - master
   script:
-   - make rpm RELEASE=${CI_BUILD_ID}
+   - make build RELEASE=${CI_BUILD_ID}
   artifacts:
     expire_in: 30 minutes
     paths:

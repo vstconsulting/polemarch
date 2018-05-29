@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block style %}
+    <link rel="shortcut icon" href="{% static 'img/logo/favicon.ico' %}?v={{polemarch_version}}" />
+    <!-- Google Font -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,500,600,700,800,900,300italic,400italic,600italic">
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}?v={{polemarch_version}}">
+
+    <link href="{% static 'auth/main.css' %}" rel="stylesheet">
+    <!--[if lt IE 9]> 
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+{% endblock %}
+
+
+{% block body %}
+<body class="hold-transition login-page">
+  <div class="mobile-index">
+     
+      <div class="mobile-index-body">
+          
+          <div class="mobile-index-body-inner">
+              <img src="{% static 'img/logo/vertical.png' %}?v={{polemarch_version}}" alt="Polemarch logo" class="img-responsive center-block logo-img">
+               <!-- <h1>Polemarch</h1> -->
+                <h2>Manage servers with comfort</h2>
+                
+                <form method="post" action="{% url 'login' %}" class="form-signin">
+                    {% csrf_token %}
+                    <input type="text" name='{{ form.username.name }}' id="{{ form.username.name }}" class="form-control" placeholder="Login" maxlength="254"  required autofocus>
+                    <input type="password" name='{{ form.password.name }}' id="{{ form.password.name }}" class="form-control" placeholder="Password">
+                    <!--<button>Log in</button>-->
+                    <button type="submit">Sign In</button>
+                    <input type="hidden" name="next" value="{{ next }}" />
+                    {% if form.errors %}
+                    {% if form.non_field_errors %}
+                        <ul class='form-errors'>
+                            {% for error in form.non_field_errors %}
+                                <li style='color: red'>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% endif %}
+                </form>
+          </div>
+      </div>
+  </div>
+
+<script src="{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}" type="text/javascript"></script>
+</body>
+{% endblock %} 

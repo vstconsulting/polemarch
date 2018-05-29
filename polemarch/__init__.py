@@ -1,18 +1,21 @@
-from .environment import prepare_environment
+from vstutils.environment import prepare_environment, os
 
-__version__ = "0.1.6"
+default_settings = {
+    # ansible specific environment variables
+    "ANSIBLE_HOST_KEY_CHECKING": 'False',
+    "ANSIBLE_FORCE_COLOR": "true",
+    # celery specific
+    "C_FORCE_ROOT": "true",
+    # django settings module
+    "DJANGO_SETTINGS_MODULE": os.getenv(
+        "DJANGO_SETTINGS_MODULE", 'polemarch.main.settings'
+    ),
+    # VSTUTILS settings
+    "VST_PROJECT": os.getenv("VST_PROJECT", 'polemarch'),
+    "VST_ROOT_URLCONF": os.getenv("VST_ROOT_URLCONF", 'polemarch.main.urls'),
+    "VST_WSGI": os.getenv("VST_WSGI", 'polemarch.main.wsgi')
+}
 
-def _main(**kwargs):
-    # pylint: disable=unused-variable
-    import sys
-    from django.core.management import execute_from_command_line
-    prepare_environment(**kwargs)
-    execute_from_command_line(sys.argv)
+__version__ = "0.1.8"
 
-def get_app(**kwargs):
-    from celery import Celery
-    prepare_environment(**kwargs)
-    celery_app = Celery('polemarch')
-    celery_app.config_from_object('django.conf:settings', namespace='CELERY')
-    celery_app.autodiscover_tasks()
-    return celery_app
+prepare_environment(**default_settings)

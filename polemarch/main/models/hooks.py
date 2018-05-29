@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 import logging
 import uuid
+from vstutils.utils import raise_context, ModelHandlers
 from .base import BModel, BQuerySet, models
-from ..utils import ModelHandlers, raise_context
 
 
 logger = logging.getLogger('polemarch')
@@ -46,6 +46,7 @@ class HooksQuerySet(BQuerySet):
 
 
 class Hook(BModel):
+    # pylint: disable=no-member
     objects = HooksQuerySet.as_manager()
     handlers = HookHandlers("HOOKS", "'type' needed!")
     name       = models.CharField(max_length=512, default=uuid.uuid1)

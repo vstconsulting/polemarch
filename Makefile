@@ -6,7 +6,8 @@ TESTS =
 NAME = polemarch
 USER = $(NAME)
 VER = $(shell $(PY) -c 'import polemarch; print(polemarch.__version__)')
-PIPARGS = --index-url=http://pipc.vst.lan:8001/simple/ --trusted-host pipc.vst.lan
+VSTUTILS = $(shell cat requirements.txt | grep vstutils)
+PIPARGS =
 ARCHIVE = $(NAME)-$(VER).tar.gz
 LICENSE = AGPL-3+
 define DESCRIPTION
@@ -55,12 +56,14 @@ pylint:
 
 build: build-clean
 	-rm -rf dist
+	$(PY) -m pip install $(VSTUTILS)
 	$(PY) setup.py sdist -v
 
 compile: build-clean
 	-rm -rf dist
 	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf polemarch/doc/*
+	$(PY) -m pip install $(VSTUTILS)
 	$(PY) setup.py compile -v
 
 prebuild:
@@ -68,6 +71,7 @@ prebuild:
 	$(PY) -m virtualenv --no-site-packages $(PREBUILD_DIR)
 	# Install required packages
 	$(PREBUILD_BINDIR)/pip install -U pip
+	$(PREBUILD_BINDIR)/pip install -U $(VSTUTILS)
 	$(PREBUILD_BINDIR)/pip install -U dist/$(NAME)-$(VER).tar.gz $(REQUIREMENTS)
 	$(PREBUILD_BINDIR)/pip install -U -r requirements-git.txt
 	# RECORD files are used by wheels for checksum. They contain path names which

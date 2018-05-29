@@ -155,7 +155,7 @@
     <!-- items_page -->
     <section class="content-header">
         <h1>
-            <a href="<% if(pmObj.model.page_item_new_option.back_link){ %><%- pmObj.model.page_item_new_option.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %><% } %>"
+            <a href="<% if(pmObj.model.page_item_new_option.back_link){ %><%- pmObj.model.page_item_new_option.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>/options<% } %>"
                 onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
@@ -236,7 +236,7 @@
     <!-- items_page -->
     <section class="content-header">
         <h1>
-            <a href="<% if(pmObj.model.page_item_option.back_link){ %><%- pmObj.model.page_item_option.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %><% } %>"
+            <a href="<% if(pmObj.model.page_item_option.back_link){ %><%- pmObj.model.page_item_option.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>/options<% } %>"
                 onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
@@ -311,78 +311,6 @@
     <!-- /items_page -->
 </script>
 
-
-
-<!--options section on module template page -->
-<script type="text/x-just" data-just="options_section">
-    <% if ( $.isEmptyObject(pmModuleTemplates.model.items[item_id].options) ) { %>
-
-    <% } else { %>
-        <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    Options <br>
-                </div>
-                <div class="box-body">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <% for (var i in pmModuleTemplates.model.items[item_id].options) { %>
-                                <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                                    <label class="control-label">Option</label>
-                                    <a href="<%- polemarch.opt.host %>/?<%- pmModuleTemplates.model.name %>/<%- pmModuleTemplates.model.kind %>/<%= item_id %>/option/<%= i %>" onclick="return spajs.openURL(this.href);">
-                                        <%= i %>
-                                    </a>
-                                </div>
-                            <% } %>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-lg-12">
-                            <button type="button" onclick="spajs.showLoader(pmModuleTemplates.showExistingOptionsToEdit(<%= item_id %>)); return false;" class="btn btn-primary hidden-xs">Edit existing options</button>
-                            <button type="button" onclick="spajs.showLoader(pmModuleTemplates.setNewOption(<%= item_id %>)); return false;" class="btn btn-primary hidden-xs">Create new option</button>
-                            <button type="button" onclick="spajs.showLoader(pmModuleTemplates.showExistingOptionsToEdit(<%= item_id %>)); return false;" class="btn btn-primary btn-block visible-xs">Edit existing options</button>
-                            <button type="button" onclick="spajs.showLoader(pmModuleTemplates.setNewOption(<%= item_id %>)); return false;" class="btn btn-primary btn-block visible-xs">Create new option</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    <% } %>
-</script>
-
-
-<!-- Форма редактирования существующих опций -->
-<script type="text/x-just" data-just="add_existing_options_to_module_template">
-    <div class="row" id="add_existing_options_to_module_template">
-        <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    Edit options<br>
-                </div>
-                <div class="box-body">
-                    <div class="row">
-                        <div class="form-group col-lg-12">
-                            <select class="form-control select2" id="polemarch-model-items-select" multiple="multiple" data-placeholder="" >
-                                <% for(var i in pmModuleTemplates.model.items[item_id].options_list){ %>
-                                    <option
-                                        value="<%- pmModuleTemplates.model.items[item_id].options_list[i] %>" selected>
-                                        <%- pmModuleTemplates.model.items[item_id].options_list[i] %>
-                                    </option>
-                                <% } %>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-lg-12">
-                            <button type="button" onclick="$('#add_existing_options_to_module_template').hide(); spajs.showLoader(pmModuleTemplates.setOptionList(<%- item_id %>, $('#polemarch-model-items-select').val())); return false;" class="btn btn-primary" >Save</button>
-                            <button type="button" onclick="$('#add_existing_options_to_module_template').remove(); return false;" class="btn btn-default" >Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-</script>
 
 
 <!-- Шаблон полей  Project Inventory и Playbook  для new option page -->

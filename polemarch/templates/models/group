@@ -1,0 +1,7 @@
+{% autoescape off %}[{{group.name}}{% if group.children %}:children{% endif %}]
+{{objects}}
+
+{% if vars %}
+[{{group.name}}:vars]
+{{vars}}
+{% endif %}{% endautoescape %}

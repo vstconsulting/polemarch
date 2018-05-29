@@ -158,6 +158,36 @@ PostgreSQL. Configuration details you can look at
 If you run at Polemarch software at multiple nodes (clusterization), you should
 use some of client-server database (SQLite not suitable) shared for all nodes.
 
+If you use MySQL there are a list of required settings, that you should make for correct
+database work.
+
+Firstly, if you use MySQL and you have set timezone different from "UTC" you should make
+next command:
+
+.. sourcecode:: bash
+
+      mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p mysql
+
+Secondly, for correct MySQL work you should set next options in ``settings.ini`` file:
+
+.. sourcecode:: bash
+
+      [database.options]
+      init_command = SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB, NAMES 'utf8', CHARACTER SET 'utf8', SESSION collation_connection = 'utf8_unicode_ci'
+
+Finally, you should add some options to MySQL configuration:
+
+.. sourcecode:: bash
+
+      [client]
+      default-character-set=utf8
+      init_command = SET collation_connection = @@collation_database
+
+      [mysqld]
+      character-set-server=utf8
+      collation-server=utf8_unicode_ci
+
+
 .. _cache:
 
 Cache settings
