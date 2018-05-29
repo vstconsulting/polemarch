@@ -13,16 +13,3 @@ class ModelPermission(permissions.IsAuthenticated):
         if view.action in view.POST_WHITE_LIST:  # nocv
             return obj.acl_handler.viewable_by(request.user)  # nocv
         return obj.acl_handler.editable_by(request.user)  # noce
-
-
-class SuperUserPermission(ModelPermission):
-    def has_object_permission(self, request, view, obj):
-        if request.user.is_superuser:
-            return True
-        elif request.user == obj:
-            return True
-        return False
-
-
-class StaffPermission(permissions.IsAdminUser):
-    pass

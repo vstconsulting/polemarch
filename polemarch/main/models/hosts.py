@@ -5,12 +5,12 @@ import logging
 
 from django.db import transaction
 from django.db.models import Q
+from vstutils.utils import get_render
 
 from .base import models
 from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
 from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex
-from ..utils import get_render
 from ..validators import validate_hostname, RegexValidator
 
 logger = logging.getLogger("polemarch")

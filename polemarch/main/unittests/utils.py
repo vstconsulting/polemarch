@@ -1,8 +1,7 @@
 from subprocess import CalledProcessError
-
+from vstutils.utils import KVExchanger, tmp_file, ModelHandlers
 from ..tests._base import BaseTestCase
-from ..utils import KVExchanger, model_lock_decorator, Lock, CmdExecutor, \
-    tmp_file, ModelHandlers
+from ..utils import CmdExecutor
 
 try:
     from mock import MagicMock
@@ -33,30 +32,6 @@ class ExecutorTestCase(BaseTestCase):
         executor = Executor(history)
         with self.assertRaises(CalledProcessError):
             executor.execute(['sleep', '5m'], '/')
-
-
-class KVExchangerTestCase(BaseTestCase):
-    def test_kvexchanger(self):
-        KVExchanger("somekey").send(True, 10)
-        KVExchanger("somekey").prolong()
-        self.assertTrue(KVExchanger("somekey").get())
-
-
-class LocksTestCase(BaseTestCase):
-    def test_locks(self):
-        @model_lock_decorator()
-        def method(pk):
-            # pylint: disable=unused-argument
-            pass
-
-        @model_lock_decorator()
-        def method2(pk):
-            method(pk=pk)
-
-        method(pk=123)
-        method(pk=None)
-        with self.assertRaises(Lock.AcquireLockException):
-            method2(pk=123)
 
 
 class CMDExecutorTestCase(BaseTestCase):

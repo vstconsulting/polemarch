@@ -11,10 +11,10 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework import exceptions
 from rest_framework.exceptions import PermissionDenied
+from vstutils.api.base import Response
 
 from ...main.models import Inventory
 from ...main import models, exceptions as main_exceptions
-from ..base import Response
 from ..signals import api_post_save, api_pre_save
 
 
