@@ -1,8 +1,8 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+from vstutils.utils import tmp_file_context, raise_context
 import git
 from ._base import _Base, os
-from ..utils import tmp_file_context, raise_context
 
 
 class _VCS(_Base):  # nocv

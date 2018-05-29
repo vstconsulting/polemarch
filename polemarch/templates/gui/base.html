@@ -1,0 +1,76 @@
+{% extends "gui/base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+  <head>
+      {% block title %}<title>{% if name %}{{ name }} – {% endif %}Polemarch Dashboard</title>{% endblock %}
+  </head>
+  <body>
+
+    {% block logo %}
+        <a href="/" class="logo">
+            <!-- mini logo for sidebar mini 50x50 pixels -->
+            <!-- <span class="logo-mini"><b>P</b></span> -->
+            <span class="logo-mini"><span class="bg-logo-min" style="margin-left: 4px;"></span></span>
+            <!-- logo for regular state and mobile devices -->
+            <!-- <span class="logo-lg"><b>P</b>olemarch</span> -->
+            <span class="logo-lg logo-span"><span class="bg-logo-min"></span> <span class="bg-logo"></span></span>
+        </a>
+    {% endblock %}
+
+    {% block flavicon %}
+        <link rel="shortcut icon" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'img/logo/favicon.ico' %}?v={{gui_version}}" />
+    {% endblock %}
+
+
+    {% block footer %}
+        <footer class="main-footer">
+            <div class="pull-right" style="float: right;    padding-left: 15px;    display: inline-block;">
+                <div class="btn-group" role="group">
+                    <a type="button" style="box-shadow:none;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" href="#" onclick="return false;">
+                        <span class="glyphicon glyphicon-question-sign"></span> Help
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-right" style=" bottom:100% !important; top:auto !important; ">
+                        <li>
+                            <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%20{{polemarch_version}}" target="_blank">Ask question</a>
+                        </li>
+                        <li>
+                            <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20{{polemarch_version}}" target="_blank">Add bug</a>
+                        </li>
+                        <li>
+                            <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Feature%20request&issue%5Btitle%5D=" target="_blank">Add feature request</a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li>
+                            <a href="https://gitlab.com/vstconsulting/polemarch" target="_blank">Official repository</a>
+                        </li>
+                        <li>
+                            <a href="http://polemarch.readthedocs.io" target="_blank">Official documentation</a>
+                        </li>
+                        <li>
+                            <a href="https://gitlab.com/vstconsulting/polemarch/issues" target="_blank">Issues</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+            <div class="pull-right hidden-xs">
+                <b>Version</b> {{polemarch_version}}
+            </div>
+
+            {% if debug %}
+                <div class="pull-right hidden-xs">
+                    <b><a href="#"
+                          style="color:#ccc;"
+                          onclick="loadQUnitTests(); return false;" >Test qUnit</a></b>
+                    &nbsp;&nbsp;&nbsp;
+                </div>
+            {% endif %}
+            <br>
+        </footer>
+    {% endblock %}
+
+    {% block script %}{% endblock %}
+  </body>
+</html>

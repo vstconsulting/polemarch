@@ -11,6 +11,7 @@ from django.db.models import signals
 from django.dispatch import receiver
 from django.core.validators import ValidationError
 from django.conf import settings
+from vstutils.utils import raise_context
 
 from .vars import Variable
 from .hosts import Host, Group, Inventory
@@ -20,7 +21,7 @@ from .tasks import Task, PeriodicTask, History, HistoryLines, Template
 from .hooks import Hook
 from ..validators import RegexValidator
 from ..exceptions import UnknownTypeException
-from ..utils import raise_context, AnsibleArgumentsReference
+from ..utils import AnsibleArgumentsReference
 
 
 logger = logging.getLogger('polemarch')

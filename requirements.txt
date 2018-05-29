@@ -1,20 +1,11 @@
 # Main
-configparser==3.5.0
-celery>4.0.3,<=4.1.0
-kombu==4.1.0
+vstutils[rpc,ldap,doc]==1.0.4
 six
 pyyaml
-sqlalchemy
-django-docs==0.2.1
-python-ldap==3.0.0
 docutils==0.14
 markdown2==2.3.5
 
 # API
-djangorestframework==3.8.2
-django-filter
-django-crispy-forms
-django-celery-beat==1.1.1
 jsonfield==2.0.2
 uWSGI==2.0.17
 
@@ -26,7 +17,6 @@ requests==2.18.4
 
 # additional DB and cache connectors
 PyMySQL
-python-memcached
 
 # Ansible required packages
 ansible>=2.1, <=2.5.3

@@ -10,9 +10,9 @@ from collections import namedtuple, OrderedDict
 
 import six
 from django.utils import timezone
+from vstutils.utils import tmp_file, KVExchanger
 from .hosts import Inventory
-from ...main.utils import (tmp_file, CmdExecutor,
-                           KVExchanger, CalledProcessError)
+from ...main.utils import CmdExecutor, CalledProcessError
 
 
 logger = logging.getLogger("polemarch")

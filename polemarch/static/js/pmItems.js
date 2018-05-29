@@ -198,16 +198,41 @@ pmItems.searchFiled = function (options)
  */
 pmItems.search = function (query, options)
 {
-    if (this.isEmptySearchQuery(query))
-    {       
-        return spajs.open({menuId: this.model.name, reopen: true});
+    if(options.parent_type === undefined && options.parent_item === undefined)
+    {
+        if (this.isEmptySearchQuery(query))
+        {
+            return spajs.open({menuId: this.model.name, reopen: true});
+        }
 
+        return spajs.open({menuId: this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
     }
-   
+    else
+    {
 
-    return spajs.open({menuId: this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
-    //this.paginationHtml(this.model.itemslist);
+        var link = window.location.href.split(/[&?]/g)[1];
+        var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+        var link_parts = link.match(pattern);
+        var link_with_parents = "";
+        for(var i in link_parts)
+        {
+            if(link_parts[i].split("/")[0] != 'page' && link_parts[i].split("/")[0] != 'search')
+            {
+                link_with_parents += link_parts[i]+"/";
+            }
+        }
+
+        if (this.isEmptySearchQuery(query))
+        {
+            return spajs.open({menuId: link_with_parents + this.model.name, reopen: true});
+        }
+
+        return spajs.open({menuId: link_with_parents + this.model.name + "/search/" +
+            this.searchObjectToString(trim(query)), reopen: true});
+    }
+
 }
+
 
 /**
  * Если поисковый запрос пуст то вернёт true
@@ -233,8 +258,9 @@ pmItems.isEmptySearchQuery = function (query)
  */
 pmItems.showSearchResults = function (holder, menuInfo, data)
 {
+    setActiveMenuLi();
     var thisObj = this;
-   
+
     var limit = this.pageSize;
 
     if (data.reg && data.reg[2] > 0)
@@ -250,12 +276,142 @@ pmItems.showSearchResults = function (holder, menuInfo, data)
         {
             tpl = 'items_list'
         }
-        
+
         $(holder).insertTpl(spajs.just.render(tpl, {query: decodeURIComponent(data.reg[1]), pmObj: thisObj, opt: {}}))
     }).fail(function ()
     {
         $.notify("", "error");
     })
+}
+
+/**
+ * Строит страницу результатов поиска по списку дочерних элементов.
+ * @param {type} holder
+ * @param {type} menuInfo
+ * @param {type} data
+ * @returns {$.Deferred}
+ */
+pmItems.showSearchResultsForParent = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var def = new $.Deferred();
+    var thisObj = this;
+
+    var offset = 0;
+    var limit = thisObj.pageSize;
+    var link = window.location.href.split(/[&?]/g)[1];
+    if(/page\/([0-9]+)/.test(link))
+    {
+        var pageNumber = link.split(/page\/([0-9]+)/)[1];
+        offset = thisObj.pageSize * (pageNumber - 1);
+    }
+
+    if(/search\/([A-z0-9 %\-.:,=]+)/.test(link))
+    {
+        var searchQuery = decodeURIComponent(link.split(/search\/([A-z0-9 %\-.:,=]+)/)[1]);
+    }
+
+    var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+    var link_parts = link.match(pattern);
+    var link_with_parents = "";
+    var parentObjectsArr = [];
+    for(var i in link_parts)
+    {
+        var parObj = {};
+        if(link_parts[i].split("/")[0] != 'page' && link_parts[i].split("/")[0] != 'search')
+        {
+            parObj.parent_type = link_parts[i].split("/")[0];
+            parObj.parent_item = link_parts[i].split("/")[1];
+            parentObjectsArr.push(parObj);
+            link_with_parents += link_parts[i] +"/";
+        }
+    }
+    var back_link = link_with_parents.slice(0,-1);
+    link_with_parents = back_link;
+
+    thisObj.model.parentObjectsData = [];
+    var defArr = thisObj.loadAllParentsData(parentObjectsArr);
+
+    $.when.apply($, defArr).done(function ()
+    {
+        var parentObj = thisObj.defineParentPmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_type);
+        var parent_type = parentObj.model.page_name;
+        var parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_item;
+
+        $.when(thisObj.loadAllItems()).done(function()
+        {
+            var childrenItems = [];
+            for(var i in parentObj.model.items[parent_item][thisObj.model.name])
+            {
+                childrenItems.push(parentObj.model.items[parent_item][thisObj.model.name][i]);
+            }
+            thisObj.model.itemsForParent = {};
+            thisObj.model.itemslistForParent = {};
+            for(var i in childrenItems)
+            {
+                thisObj.model.itemsForParent[childrenItems[i].id] = childrenItems[i];
+            }
+            var childrenItemsValidToQuery = [];
+            for (var i in childrenItems)
+            {
+                if(childrenItems[i].name.match(searchQuery) != null)
+                {
+                    childrenItemsValidToQuery.push(childrenItems[i]);
+                }
+            }
+            thisObj.model.itemslistForParent.count = childrenItemsValidToQuery.length;
+            thisObj.model.itemslistForParent.limit = limit;
+            thisObj.model.itemslistForParent.offset = offset;
+            thisObj.model.itemslistForParent.next = null;
+            thisObj.model.itemslistForParent.previos = null;
+            thisObj.model.itemslistForParent.results = [];
+            if(childrenItemsValidToQuery.length != 0)
+            {
+                if(childrenItemsValidToQuery.length > limit)
+                {
+                    for(var i=offset; i<offset+limit; i++)
+                    {
+                        if(childrenItemsValidToQuery[i] !== undefined)
+                        {
+                            thisObj.model.itemslistForParent.results.push(childrenItemsValidToQuery[i]);
+                        }
+                    }
+                }
+                else
+                {
+                    for(var i=0; i<childrenItemsValidToQuery.length; i++ )
+                    {
+                        thisObj.model.itemslistForParent.results.push(childrenItemsValidToQuery[i]);
+                    }
+                }
+            }
+
+            var tpl = thisObj.model.name + '_list_from_another_class';
+            if (!spajs.just.isTplExists(tpl))
+            {
+                tpl = 'items_list_from_another_class';
+            }
+            var text = spajs.just.render(tpl, {query: searchQuery,  pmObj: thisObj, parentObj:parentObj,
+                opt: {parent_item: parent_item, parent_type: parent_type, back_link:back_link, link_with_parents:link_with_parents}});
+            $(holder).insertTpl(text);
+            $('#add_existing_item_to_parent').select2({
+                placeholder: true,
+                allowClear: true
+            });
+            def.resolve();
+        }).fail(function()
+        {
+            $.notify("", "error");
+            def.reject();
+        })
+
+    }).fail(function()
+    {
+        $.notify("Error", "error");
+        def.reject();
+    })
+
+    return def.promise();
 }
 
 pmItems.copyItem = function (item_id)
@@ -364,21 +520,319 @@ pmItems.showItem = function (holder, menuInfo, data)
     }).promise()
 }
 
+pmItems.showItemFromAnotherClass = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var def = new $.Deferred();
+    var thisObj = this;
+
+    var link = window.location.href.split(/[&?]/g)[1];
+    var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+    var link_parts = link.match(pattern);
+    var link_with_parents = "";
+    var back_link = "";
+    var parentObjectsArr = [];
+    for(var i in link_parts)
+    {
+        var parObj = {};
+        if(link_parts[i].split("/")[0] != 'page' && link_parts[i].split("/")[0] != 'search')
+        {
+            link_with_parents += link_parts[i] +"/";
+            if(i != link_parts.length -1)
+            {
+                back_link += link_parts[i] +"/";
+                parObj.parent_type = link_parts[i].split("/")[0];
+                parObj.parent_item = link_parts[i].split("/")[1];
+                parentObjectsArr.push(parObj);
+            }
+            else
+            {
+                var child_item = link_parts[i].split("/")[1];
+            }
+        }
+    }
+    back_link += thisObj.model.name;
+
+    var parent_type = undefined;
+    var parent_item = undefined;
+    thisObj.model.parentObjectsData = [];
+    var defArr = thisObj.loadAllParentsData(parentObjectsArr);
+
+    $.when.apply($, defArr).done(function ()
+    {
+        var parentObj = thisObj.defineParentPmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_type);
+
+        parent_type = parentObj.model.page_name;
+        parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_item;
+
+        $.when(thisObj.loadItem(child_item), parentObj.loadItem(parent_item)).done(function ()
+        {
+            thisObj.model.itemsForParent = {};
+            var children = parentObj.model.items[parent_item][thisObj.model.name];
+            for (var i in children)
+            {
+                thisObj.model.itemsForParent[children[i].id] = children[i];
+            }
+
+            var tpl = thisObj.model.name + '_page_from_another_class';
+            if (!spajs.just.isTplExists(tpl))
+            {
+                tpl = 'items_page_from_another_class';
+            }
+
+            $(holder).insertTpl(spajs.just.render(tpl, {item_id: child_item, pmObj: thisObj, parentObj:parentObj,
+                opt: {parent_type:parent_type, parent_item:parent_item, back_link:back_link, link_with_parents:link_with_parents}}))
+            def.resolve();
+        }).fail(function ()
+        {
+            $.notify("", "error");
+            def.reject();
+        }).promise();
+
+    }).fail(function ()
+    {
+        $.notify("", "error");
+        def.reject();
+    })
+
+    return def.promise();
+}
+
+/**
+ * Функция принимает строку, содержащую в себе название типа родительского pm объекта,
+ * и возвращает соответствующий данному типу pm объект.
+ */
+pmItems.defineParentPmObject = function(parent_type)
+{
+    var parentObj = undefined;
+    switch(parent_type)
+    {
+        case 'project':
+        case 'projects':
+            parentObj = pmProjects;
+            break;
+        case 'inventory':
+        case 'inventories':
+            parentObj = pmInventories;
+            break;
+        case 'group':
+        case 'groups':
+            parentObj = pmGroups;
+            break;
+    }
+    return parentObj;
+}
+
 pmItems.showNewItemPage = function (holder, menuInfo, data)
 {
     setActiveMenuLi();
     var def = new $.Deferred();
+    var thisObj = this;
 
-    var tpl = this.model.name + '_new_page'
+    var tpl = this.model.name + '_new_page';
     if (!spajs.just.isTplExists(tpl))
     {
-        tpl = 'items_new_page'
+        tpl = 'items_new_page';
     }
 
-    var text = spajs.just.render(tpl, {parent_item: data.reg[2], parent_type: data.reg[1], pmObj: this, opt: {}})
-    $(holder).insertTpl(text)
+    var parent_item = undefined;
+    var parent_type = undefined;
 
-    def.resolve()
+    var link = window.location.href.split(/[&?]/g)[1];
+
+    var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+    var link_parts = link.match(pattern);
+    var link_with_parents = "";
+    var parentObjectsArr = [];
+    for(var i in link_parts)
+    {
+        var parObj = {};
+        parObj.parent_type = link_parts[i].split("/")[0];
+        parObj.parent_item = link_parts[i].split("/")[1];
+        parentObjectsArr.push(parObj);
+        link_with_parents += link_parts[i] +"/";
+    }
+
+    link_with_parents += thisObj.model.name +"/";
+    var back_link = link_with_parents.slice(0,-1);
+
+    if(link_parts != null)
+    {
+        thisObj.model.parentObjectsData = [];
+        var defArr = thisObj.loadAllParentsData(parentObjectsArr);
+
+        $.when.apply($, defArr).done(function ()
+        {
+            var parentObj = thisObj.defineParentPmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_type);
+
+            parent_type = parentObj.model.page_name;
+            parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_item;
+            var text = spajs.just.render(tpl, {pmObj: thisObj, parentObj: parentObj,
+                opt: {parent_item: parent_item, parent_type: parent_type, link_with_parents:link_with_parents,
+                    back_link:back_link}
+            });
+            $(holder).insertTpl(text);
+            def.resolve();
+
+        }).fail(function ()
+        {
+            $.notify("", "error");
+            def.reject();
+        })
+    }
+    else
+    {
+        var text = spajs.just.render(tpl, {pmObj: thisObj, opt: {parent_item: parent_item, parent_type: parent_type}});
+        $(holder).insertTpl(text);
+        def.resolve();
+    }
+
+    return def.promise();
+}
+
+/**
+ * Функция принимает строку, содержащую в себе название типа родительского pm объекта,
+ * и возвращает соответствующий данному типу pm объект.
+ */
+pmItems.loadAllParentsData = function (parentObjectsArr)
+{
+    var defArr = [];
+    var thisObj = this;
+    for(var i in parentObjectsArr)
+    {
+        var parentObj = thisObj.defineParentPmObject(parentObjectsArr[i].parent_type);
+        var promise = $.when(parentObj.loadItem(parentObjectsArr[i].parent_item)).done(function(data)
+        {
+            for(var j in defArr)
+            {
+                if(defArr[j] == this)
+                {
+                    parentObj = thisObj.defineParentPmObject(parentObjectsArr[j].parent_type);
+                    parentObjectsArr[j].parent_type_plural = parentObj.model.name;
+                    parentObjectsArr[j].item_name = parentObj.model.items[parentObjectsArr[j].parent_item].name;
+                    thisObj.model.parentObjectsData[j] = parentObjectsArr[j];
+                }
+            }
+
+        }).fail(function (e)
+        {
+            console.warn(e);
+            polemarch.showErrors(e);
+        }).promise();
+
+        defArr.push(promise);
+    }
+    return defArr;
+}
+
+pmItems.showListFromAnotherClass = function(holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var def = new $.Deferred();
+    var thisObj = this;
+
+    var offset = 0;
+    var limit = thisObj.pageSize;
+    var link = window.location.href.split(/[&?]/g)[1];
+    if(/page\/([0-9]+)/.test(link))
+    {
+        var pageNumber = link.split(/page\/([0-9]+)/g)[1];
+        offset = thisObj.pageSize * (pageNumber - 1);
+    }
+    var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+    var link_parts = link.match(pattern);
+    var link_with_parents = "";
+    var parentObjectsArr = [];
+    for(var i in link_parts)
+    {
+        var parObj = {};
+        if(link_parts[i].split("/")[0] != 'page' && link_parts[i].split("/")[0] != 'search')
+        {
+            parObj.parent_type = link_parts[i].split("/")[0];
+            parObj.parent_item = link_parts[i].split("/")[1];
+            parentObjectsArr.push(parObj);
+            link_with_parents += link_parts[i] +"/";
+        }
+    }
+    var back_link = link_with_parents.slice(0,-1);
+    link_with_parents = back_link;
+
+    var parent_type = undefined;
+    var parent_item = undefined;
+    thisObj.model.parentObjectsData = [];
+    var defArr = thisObj.loadAllParentsData(parentObjectsArr);
+
+    $.when.apply($, defArr).done(function ()
+    {
+        var parentObj = thisObj.defineParentPmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length-1].parent_type);
+        parent_type = parentObj.model.page_name;
+        parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length-1].parent_item;
+
+        $.when(thisObj.loadAllItems()).done(function()
+        {
+            var childrenItems = [];
+            for(var i in parentObj.model.items[parent_item][thisObj.model.name])
+            {
+                childrenItems.push(parentObj.model.items[parent_item][thisObj.model.name][i]);
+            }
+            thisObj.model.itemsForParent = {};
+            thisObj.model.itemslistForParent = {};
+            thisObj.model.itemslistForParent.count = childrenItems.length;
+            thisObj.model.itemslistForParent.limit = limit;
+            thisObj.model.itemslistForParent.offset = offset;
+            thisObj.model.itemslistForParent.next = null;
+            thisObj.model.itemslistForParent.previos = null;
+            thisObj.model.itemslistForParent.results = [];
+            for(var i in childrenItems)
+            {
+                thisObj.model.itemsForParent[childrenItems[i].id] = childrenItems[i];
+            }
+            if(childrenItems.length != 0)
+            {
+                if(childrenItems.length > limit)
+                {
+                    for(var i=offset; i<offset+limit; i++)
+                    {
+                        if(childrenItems[i] !== undefined)
+                        {
+                            thisObj.model.itemslistForParent.results.push(childrenItems[i]);
+                        }
+                    }
+                }
+                else
+                {
+                    for(var i=0; i<childrenItems.length; i++ )
+                    {
+                        thisObj.model.itemslistForParent.results.push(childrenItems[i]);
+                    }
+                }
+            }
+
+            var tpl = thisObj.model.name + '_list_from_another_class';
+            if (!spajs.just.isTplExists(tpl))
+            {
+                tpl = 'items_list_from_another_class';
+            }
+            var text = spajs.just.render(tpl, {query: "",  pmObj: thisObj, parentObj:parentObj,
+                opt: {parent_item: parent_item, parent_type: parent_type, link_with_parents:link_with_parents,
+                    back_link:back_link}});
+            $(holder).insertTpl(text);
+            $('#add_existing_item_to_parent').select2({
+                placeholder: true,
+                allowClear: true
+            });
+            def.resolve();
+        }).fail(function()
+        {
+            $.notify("", "error");
+            def.reject();
+        })
+    }).fail(function ()
+    {
+        $.notify("Error", "error");
+        def.reject();
+    })
+
     return def.promise();
 }
 
@@ -636,7 +1090,28 @@ pmItems.deleteItem = function (item_id, force)
     var thisObj = this;
     $.when(this.deleteItemQuery(item_id)).done(function (data)
     {
-        $.when(spajs.open({menuId: thisObj.model.name})).done(function ()
+        if(thisObj.model.parentObjectsData !== undefined)
+        {
+            var link = window.location.href.split(/[&?]/g)[1];
+            var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+            var link_parts = link.match(pattern);
+            var back_link = "";
+
+            for(var i in link_parts)
+            {
+                if(link_parts[i].split("/")[0] != thisObj.model.page_name && link_parts[i].split("/")[0] != thisObj.model.name)
+                {
+                    back_link += link_parts[i] +"/";
+                }
+            }
+            back_link += thisObj.model.name;
+        }
+        else
+        {
+            back_link = thisObj.model.name;
+        }
+
+        $.when(spajs.open({menuId: back_link})).done(function ()
         {
             def.resolve()
         }).fail(function (e) {
@@ -1054,12 +1529,168 @@ pmItems.checkSubItemsAndAdd=function(thisObj, ObjToAdd, data, itemId, itemType, 
             {
                 thisObj.model.items[itemId][itemType].push(ObjToAdd.model.items[itemType_ids[i]]);
             }
-
-
         }
     }
 }
 
+
+/**
+ *Функция добавляет subitem из списка существующих subitems родительскому элементы.
+ *(select2 'Add existing subitem' на странице списка дочерних элементов родителя).
+ */
+pmItems.addExistingChildItemToParent = function(parentObj, parent_item)
+{
+    var childItem_id =+ $("#add_existing_item_to_parent").val();
+    var childItem_type = $("#add_existing_item_to_parent").attr('data-child-type');
+    var def = new $.Deferred();
+    var thisObj = this;
+
+    if(childItem_id == "")
+    {
+        $.notify("Please select on of the " + childItem_type + ".", "error");
+        def.reject();
+    }
+    else
+    {
+        var childIds = [];
+        for(var i in  parentObj.model.items[parent_item][childItem_type])
+        {
+            childIds.push(parentObj.model.items[parent_item][childItem_type][i].id);
+        }
+        childIds.push(childItem_id);
+        spajs.ajax.Call({
+            url: hostname + "/api/v1/" + parentObj.model.name + "/" + parent_item + "/" + childItem_type + "/",
+            type: "PUT",
+            contentType: 'application/json',
+            data: JSON.stringify(childIds),
+            success: function (data)
+            {
+                $.when(spajs.open({menuId: window.location.href.split(/[&?]/g)[1], reopen: true})).done(function ()
+                {
+                    $.notify(capitalizeString(thisObj.model.page_name) + " " + thisObj.model.items[childItem_id].name
+                        + " was added to " + parentObj.model.page_name + " " + parentObj.model.items[parent_item].name+".", "success");
+                    def.resolve();
+                }).fail(function ()
+                {
+                    def.reject();
+                });
+
+            },
+            error: function (e)
+            {
+                def.reject(e)
+                polemarch.showErrors(e.responseJSON)
+            }
+        });
+    }
+    return def.promise();
+}
+
+
+/**
+ *Функция удаляет элемент из списка дочерних элементов родительского элемента.
+ */
+pmItems.deleteChildFromParent = function (parent_type, parent_item, childItem_id, back_link)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    delete thisObj.model.itemsForParent[childItem_id];
+    var childrenItemsIds = [];
+    for(var i in thisObj.model.itemsForParent)
+    {
+        childrenItemsIds.push(thisObj.model.itemsForParent[i].id)
+    }
+    var parentObj = thisObj.defineParentPmObject(parent_type);
+    parent_type = parentObj.model.page_name;
+    spajs.ajax.Call({
+        url: hostname + "/api/v1/" + parentObj.model.name + "/" + parent_item + "/" + thisObj.model.name + "/",
+        type: "PUT",
+        contentType: 'application/json',
+        data: JSON.stringify(childrenItemsIds),
+        success: function (data)
+        {
+            var menuStr = undefined;
+            if(back_link != undefined)
+            {
+                menuStr = back_link;
+            }
+            else
+            {
+                menuStr = window.location.href.split(/[&?]/g)[1];
+            }
+            $.when(spajs.open({menuId: menuStr, reopen: true})).done(function ()
+            {
+                $.notify(capitalizeString(thisObj.model.page_name) + " " + thisObj.model.items[childItem_id].name
+                    + " was deleted from " + parentObj.model.page_name + " " + parentObj.model.items[parent_item].name+".", "success");
+                def.resolve();
+            }).fail(function ()
+            {
+                def.reject();
+            });
+
+        },
+        error: function (e)
+        {
+            def.reject(e)
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
+
+/**
+ *Функция удаляет выделенные элементы из списка дочерних элементов родительского элемента.
+ */
+pmItems.deleteChildrenFromParent = function (parent_type, parent_item)
+{
+    var def = new $.Deferred();
+    var thisObj = this;
+    for(var i in thisObj.model.selectedItems)
+    {
+        if (thisObj.model.selectedItems[i])
+        {
+            delete thisObj.model.itemsForParent[i];
+        }
+    }
+    var childrenItemsIds = [];
+    for(var i in thisObj.model.itemsForParent)
+    {
+        childrenItemsIds.push(thisObj.model.itemsForParent[i].id)
+    }
+    var parentObj = thisObj.defineParentPmObject(parent_type);
+    parent_type = parentObj.model.page_name;
+    spajs.ajax.Call({
+        url: hostname + "/api/v1/" + parentObj.model.name + "/" + parent_item + "/" + thisObj.model.name + "/",
+        type: "PUT",
+        contentType: 'application/json',
+        data: JSON.stringify(childrenItemsIds),
+        success: function (data)
+        {
+
+            $.when(spajs.open({menuId: window.location.href.split(/[&?]/g)[1], reopen: true})).done(function ()
+            {
+                for(var i in thisObj.model.selectedItems)
+                {
+                    thisObj.model.selectedItems[i] = undefined;
+                }
+                thisObj.model.selectedCount = 0;
+                $.notify("Selected "+ thisObj.model.name + " was deleted from "
+                    + parentObj.model.page_name + " " + parentObj.model.items[parent_item].name+".", "success");
+
+                def.resolve();
+            }).fail(function ()
+            {
+                def.reject();
+
+            });
+
+        },
+        error: function (e)
+        {
+            def.reject(e)
+            polemarch.showErrors(e.responseJSON)
+        }
+    });
+}
 
 /*pmItems.getFiledByName = function(fileds, name)
  {

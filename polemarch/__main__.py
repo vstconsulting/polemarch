@@ -1,3 +1,4 @@
-from polemarch import _main
+from vstutils.environment import cmd_execution, sys
+sys.path.append('./')
 
-_main()
+cmd_execution()

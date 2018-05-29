@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 import logging
 import uuid
+from vstutils.utils import raise_context, ModelHandlers
 from .base import BModel, BQuerySet, models
-from ..utils import ModelHandlers, raise_context
 
 
 logger = logging.getLogger('polemarch')
@@ -37,7 +37,9 @@ class HooksQuerySet(BQuerySet):
     use_for_related_fields = True
 
     def when(self, when):
-        return self.filter(models.Q(when=when) | models.Q(when=None))
+        return self.filter(models.Q(enable=True)).filter(
+            models.Q(when=when) | models.Q(when=None)
+        )
 
     def execute(self, when, message):
         for hook in self.when(when):
@@ -46,11 +48,13 @@ class HooksQuerySet(BQuerySet):
 
 
 class Hook(BModel):
+    # pylint: disable=no-member
     objects = HooksQuerySet.as_manager()
     handlers = HookHandlers("HOOKS", "'type' needed!")
     name       = models.CharField(max_length=512, default=uuid.uuid1)
     type       = models.CharField(max_length=32, null=False)
     when       = models.CharField(max_length=32, null=True, default=None)
+    enable     = models.BooleanField(default=True)
     recipients = models.TextField()
 
     @property
