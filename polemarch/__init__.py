@@ -1,4 +1,4 @@
-from vstutils.environment import prepare_environment, os
+from vstutils.environment import prepare_environment, cmd_execution, os
 
 default_settings = {
     # ansible specific environment variables
