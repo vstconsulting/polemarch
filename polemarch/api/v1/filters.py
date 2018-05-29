@@ -1,6 +1,5 @@
 # pylint: disable=import-error
 from django_filters import (CharFilter, NumberFilter, IsoDateTimeFilter)
-from django.contrib.auth.models import User
 from vstutils.api.filters import extra_filter, name_filter, filters
 from ...main import models
 

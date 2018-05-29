@@ -7,12 +7,9 @@ from collections import OrderedDict
 import six
 from django.contrib.auth.models import User
 from django.db import transaction
-
 from rest_framework import serializers
 from rest_framework import exceptions
 from rest_framework.exceptions import PermissionDenied
-from vstutils.api.base import Response
-
 from vstutils.api import serializers as vst_serializers
 from vstutils.api.base import Response
 
