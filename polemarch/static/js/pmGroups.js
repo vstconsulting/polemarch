@@ -115,6 +115,62 @@ pmGroups.model.page_list = {
     ]
 }
 
+pmGroups.model.page_list_from_another_class = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(opt){ return "spajs.open({ menuId:'" + opt.link_with_parents + "/" +  this.model.name + "/new-" + this.model.page_name +"'}); return false;"},
+            title:'Create',
+            link:function(){ return '/?new-'+this.model.page_name},
+        },
+    ],
+    title: "Groups",
+    short_title: "Groups",
+    fileds:[
+        {
+            title:'Name',
+            name:'name',
+        },
+    ],
+    actions:[
+        {
+            function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteChildFromParent('+item.id+'));  return false;'},
+            title:'Delete',
+            link:function(){ return '#'}
+        },
+        {
+            function:function(item){ return '';},
+            title:function(item)
+            {
+                if(item.children)
+                {
+                    return 'Create sub group'
+                }
+
+                return 'Create sub host'
+            },
+            link:function(item)
+            {
+                if(item.children)
+                {
+                    return '/?group/'+item.id+'/new-group'
+                }
+
+                return '/?group/'+item.id+'/new-host'
+            },
+        },
+    ],
+     actionsOnSelected:[
+        {
+            function:function(item, opt){ return 'spajs.showLoader('+this.model.className+'.deleteChildrenFromParent("'  +opt.parent_type + '",' + opt.parent_item + ')); return false;'},
+            title:function(item, opt){return "Delete all selected from " + opt.parent_type;},
+            link:function(){ return '#'}
+        },
+    ]
+}
+
+
+
 pmGroups.validator = function(value)
 {
     if(value && !/[^A-z0-9_.\-]/.test(value))
@@ -173,13 +229,22 @@ pmGroups.model.page_new = {
     {
         var def = new $.Deferred();
         $.notify("Group created", "success");
-
         if(callOpt.parent_item)
         {
+            var link = window.location.href.split(/[&?]/g)[1];
+            var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+            var link_parts = link.match(pattern);
+            var link_with_parents = "";
+            for(var i in link_parts)
+            {
+                link_with_parents += link_parts[i] +"/";
+            }
+            link_with_parents += this.model.name;
+
             if(callOpt.parent_type == 'group')
             {
                 $.when(pmGroups.addSubGroups(callOpt.parent_item, [data.id])).always(function(){
-                    $.when(spajs.open({ menuId:"group/"+callOpt.parent_item})).always(function(){
+                    $.when(spajs.open({ menuId:link_with_parents})).always(function(){
                         def.resolve()
                     })
                 })
@@ -187,7 +252,7 @@ pmGroups.model.page_new = {
             else if(callOpt.parent_type == 'inventory')
             {
                 $.when(pmInventories.addSubGroups(callOpt.parent_item, [data.id])).always(function(){
-                    $.when(spajs.open({ menuId:"inventory/"+callOpt.parent_item})).always(function(){
+                    $.when(spajs.open({ menuId:link_with_parents})).always(function(){
                         def.resolve()
                     })
                 })
@@ -195,7 +260,7 @@ pmGroups.model.page_new = {
             else if(callOpt.parent_type == 'project')
             {
                 $.when(pmProjects.addSubGroups(callOpt.parent_item, [data.id])).always(function(){
-                    $.when(spajs.open({ menuId:"project/"+callOpt.parent_item})).always(function(){
+                    $.when(spajs.open({ menuId:link_with_parents})).always(function(){
                         def.resolve()
                     })
                 })
@@ -227,6 +292,32 @@ pmGroups.model.page_item = {
             link:function(){ return '#'},
         },
         {
+            class:'btn btn-info',
+            function:function(item_id)
+            {
+                if(this.model.items[item_id].children)
+                {
+                    return "spajs.open({ menuId:'" + this.model.page_name + "/" + item_id + "/groups'}); return false";
+                }
+                else
+                {
+                    return "spajs.open({ menuId:'" + this.model.page_name + "/" + item_id + "/hosts'}); return false";
+                }
+            },
+            title:function(item_id)
+            {
+                if(this.model.items[item_id].children)
+                {
+                    return 'Groups';
+                }
+                else
+                {
+                    return 'Hosts';
+                }
+            },
+            link:function(){ return '#'},
+        },
+        {
             class:'btn btn-default copy-btn',
             function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'},
             title:'<span class="glyphicon glyphicon-duplicate" ></span>',
@@ -243,9 +334,6 @@ pmGroups.model.page_item = {
     sections:[
         function(section, item_id){
             return jsonEditor.editor(this.model.items[item_id].vars, {block:this.model.name});
-        },
-        function(section, item_id){
-            return spajs.just.render("groups_sub_items", {item_id:item_id})
         }
     ],
     title: function(item_id){
@@ -285,6 +373,95 @@ pmGroups.model.page_item = {
     },
 }
 
+
+pmGroups.model.page_item_from_another_class = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
+            title:'Save',
+            link:function(){ return '#'},
+        },
+        {
+            class:'btn btn-info',
+            function:function(item_id, opt)
+            {
+                if(this.model.items[item_id].children)
+                {
+                    return "spajs.open({ menuId:'" + opt.link_with_parents +  "groups'}); return false";
+                }
+                else
+                {
+                    return "spajs.open({ menuId:'" + opt.link_with_parents + "hosts'}); return false";
+                }
+            },
+            title:function(item_id)
+            {
+                if(this.model.items[item_id].children)
+                {
+                    return 'Groups';
+                }
+                else
+                {
+                    return 'Hosts';
+                }
+            },
+            link:function(){ return '#'},
+        },
+        {
+            class:'btn btn-warning',
+            function:function(item_id, opt){ return 'spajs.showLoader('+this.model.className+'.deleteChildFromParent("'+opt.parent_type+'",'+opt.parent_item+','+item_id+', "'+opt.back_link+'"));  return false;'},
+            title:function(item_id, opt){return 'Remove from parent ' +opt.parent_type; },
+            link:function(){ return '#'},
+        },
+        {
+            class:'btn btn-danger danger-right',
+            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
+            title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
+            link:function(){ return '#'},
+        },
+    ],
+    sections:[
+        function(section, item_id){
+            return jsonEditor.editor(this.model.items[item_id].vars, {block:this.model.name});
+        }
+    ],
+    title: function(item_id){
+        return "Group "+pmGroups.model.items[item_id].justText('name')
+    },
+    short_title: function(item_id){
+        return ""+pmGroups.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
+    },
+    fileds:[
+        [
+            {
+                filed: new filedsLib.filed.text(),
+                title:'Name',
+                name:'name',
+                placeholder:'Enter group name',
+                validator:pmGroups.validator,
+                fast_validator:pmGroups.fast_validator
+            },
+        ],
+        [
+            {
+                filed: new filedsLib.filed.textarea(),
+                title:'Notes',
+                name:'notes',
+                placeholder:'Not required field, just for your notes'
+            },
+        ]
+    ],
+    onUpdate:function(result)
+    {
+        return true;
+    },
+    onBeforeSave:function(data, item_id)
+    {
+        data.vars = jsonEditor.jsonEditorGetValues()
+        return data;
+    },
+}
 /**
  * @return $.Deferred
  */
@@ -479,54 +656,54 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
     return def.promise();
 }
 
-/**
- * Показывает форму со списком всех групп.
- * @return $.Deferred
- */
-pmGroups.showAddSubGroupsForm = function(item_id)
-{
-    if(!item_id)
-    {
-        throw "Error in pmGroups.showAddSubGroupsForm with item_id = `" + item_id + "`"
-    }
-
-    return $.when(pmGroups.loadAllItems()).done(function(){
-        $("#add_existing_item_to_group").remove()
-        $(".content").appendTpl(spajs.just.render('add_existing_groups_to_group', {item_id:item_id}))
-        var  scroll_el = "#add_existing_item_to_group";
-        if ($(scroll_el).length != 0) {
-            $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
-        }
-        $("#polemarch-model-items-select").select2({ width: '100%' });
-    }).fail(function(){
-
-    }).promise()
-}
-
-/**
- * Показывает форму со списком всех хостов.
- * @return $.Deferred
- */
-pmGroups.showAddSubHostsForm = function(item_id)
-{
-    if(!item_id)
-    {
-        throw "Error in pmGroups.showAddSubHostsForm with item_id = `" + item_id + "`"
-    }
-
-    return $.when(pmHosts.loadAllItems()).done(function(){
-        $("#add_existing_item_to_group").remove()
-        $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_group', {item_id:item_id}))
-        var scroll_el = "#add_existing_item_to_group";
-        if ($(scroll_el).length != 0) {
-            $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
-        }
-        $("#polemarch-model-items-select").select2({ width: '100%' });
-    }).fail(function(){
-
-    }).promise()
-}
-
+// /**
+//  * Показывает форму со списком всех групп.
+//  * @return $.Deferred
+//  */
+// pmGroups.showAddSubGroupsForm = function(item_id)
+// {
+//     if(!item_id)
+//     {
+//         throw "Error in pmGroups.showAddSubGroupsForm with item_id = `" + item_id + "`"
+//     }
+//
+//     return $.when(pmGroups.loadAllItems()).done(function(){
+//         $("#add_existing_item_to_group").remove()
+//         $(".content").appendTpl(spajs.just.render('add_existing_groups_to_group', {item_id:item_id}))
+//         var  scroll_el = "#add_existing_item_to_group";
+//         if ($(scroll_el).length != 0) {
+//             $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+//         }
+//         $("#polemarch-model-items-select").select2({ width: '100%' });
+//     }).fail(function(){
+//
+//     }).promise()
+// }
+//
+// /**
+//  * Показывает форму со списком всех хостов.
+//  * @return $.Deferred
+//  */
+// pmGroups.showAddSubHostsForm = function(item_id)
+// {
+//     if(!item_id)
+//     {
+//         throw "Error in pmGroups.showAddSubHostsForm with item_id = `" + item_id + "`"
+//     }
+//
+//     return $.when(pmHosts.loadAllItems()).done(function(){
+//         $("#add_existing_item_to_group").remove()
+//         $(".content").appendTpl(spajs.just.render('add_existing_hosts_to_group', {item_id:item_id}))
+//         var scroll_el = "#add_existing_item_to_group";
+//         if ($(scroll_el).length != 0) {
+//             $('html, body').animate({ scrollTop: $(scroll_el).offset().top }, 1000);
+//         }
+//         $("#polemarch-model-items-select").select2({ width: '100%' });
+//     }).fail(function(){
+//
+//     }).promise()
+// }
+//
 /**
  * Проверяет принадлежит ли host_id к группе item_id
  * @param {Integer} item_id
@@ -806,8 +983,29 @@ tabSignal.connect("polemarch.start", function()
 
     spajs.addMenu({
         id:"newGroup",
-        urlregexp:[/^new-group$/, /^([A-z0-9_]+)\/([0-9]+)\/new-group$/],
+        urlregexp:[/^new-group$/, /^([A-z0-9_]+)\/([0-9]+)\/new-group$/,
+            /^([A-z0-9_]+)\/([0-9]+)\/groups\/new-group$/, /^([A-z0-9_\/]+)\/groups\/new-group/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showNewItemPage(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"group-from-another-model",
+        urlregexp:[/^([A-z0-9_\/]+)\/group\/([0-9]+)$/, /^([A-z0-9_\/]+)\/groups\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmGroups.showItemFromAnotherClass(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"some-model-groups",
+        urlregexp:[/^([A-z0-9_\/]+)\/groups$/, /^([A-z0-9_\/]+)\/groups\/search\/?$/,
+            /^([A-z0-9_\/]+)\/group$/, /^([A-z0-9_\/]+)\/groups\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmGroups.showListFromAnotherClass(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"some-model-groups-search",
+        urlregexp:[/^([A-z0-9_\/]+)\/groups\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^([A-z0-9_\/]+)\/groups\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmGroups.showSearchResultsForParent(holder, menuInfo, data);}
     })
 
 })
