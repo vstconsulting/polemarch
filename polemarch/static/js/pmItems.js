@@ -1673,7 +1673,7 @@ pmItems.deleteChildrenFromParent = function (parent_type, parent_item)
                     thisObj.model.selectedItems[i] = undefined;
                 }
                 thisObj.model.selectedCount = 0;
-                $.notify("Selected "+ thisObj.model.name + " was deleted from "
+                $.notify("Selected "+ thisObj.model.name + " were deleted from "
                     + parentObj.model.page_name + " " + parentObj.model.items[parent_item].name+".", "success");
 
                 def.resolve();
