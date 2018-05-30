@@ -134,8 +134,8 @@ pmGroups.model.page_list_from_another_class = {
     ],
     actions:[
         {
-            function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteChildFromParent('+item.id+'));  return false;'},
-            title:'Delete',
+            function:function(item, opt){ return 'spajs.showLoader('+this.model.className+'.deleteChildFromParent("'+ opt.parent_type + '",' + opt.parent_item + ',' + item.id+'));  return false;'},
+            title: function(item, opt){return "Delete from " + opt.parent_type;},
             link:function(){ return '#'}
         },
         {
