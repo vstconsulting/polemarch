@@ -290,7 +290,7 @@ function injectQunit()
         }
         syncQUnit.nextTest()
 
-    }, 500)
+    }, 1000)
 }
 
 

@@ -256,3 +256,19 @@ Here placed settings related to web-server used by Polemarch in production
 (logging, PID-file and so on).
 More settings in `uWSGI docs
 <http://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_.
+
+Installation of additional packages to Polemarch
+------------------------------------------------
+If you want to install some additional package to Polemarch from rpm or dep,
+you should run next command:
+
+.. sourcecode:: bash
+
+        sudo -U polemarch /opt/polemarch/bin/pip install package_name
+
+For correct work all requirements for this package should be installed in your system.
+Notice, that after package reinstallation or after package update you should
+set all this requirements again.
+
+If you want to install some additional package from github or gitlab,
+you should just install this package to your system or to your virtual environment.
