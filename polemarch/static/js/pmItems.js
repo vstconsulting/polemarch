@@ -1538,7 +1538,7 @@ pmItems.checkSubItemsAndAdd=function(thisObj, ObjToAdd, data, itemId, itemType, 
  *Функция добавляет subitem из списка существующих subitems родительскому элементы.
  *(select2 'Add existing subitem' на странице списка дочерних элементов родителя).
  */
-pmItems.addExistingChildItemToParent = function(parentObj, parent_item)
+pmItems.addExistingChildItemToParent = function(parent_type, parent_item)
 {
     var childItem_id =+ $("#add_existing_item_to_parent").val();
     var childItem_type = $("#add_existing_item_to_parent").attr('data-child-type');
@@ -1553,6 +1553,7 @@ pmItems.addExistingChildItemToParent = function(parentObj, parent_item)
     else
     {
         var childIds = [];
+        var parentObj = thisObj.defineParentPmObject(parent_type);
         for(var i in  parentObj.model.items[parent_item][childItem_type])
         {
             childIds.push(parentObj.model.items[parent_item][childItem_type][i].id);

@@ -849,7 +849,7 @@
                 <% } %>
             <% } %>
         </select>
-        <div class="input-group-addon" onclick="spajs.showLoader(<%- pmObj.model.className %>.addExistingChildItemToParent(<%- parentObj.model.className %>, <%- parent_item %>));">
+        <div class="input-group-addon" onclick="spajs.showLoader(<%- pmObj.model.className %>.addExistingChildItemToParent('<%- parentObj.model.page_name %>', <%- parent_item %>));">
             <span class="glyphicon glyphicon-plus"></span>
         </div>
     </div>
