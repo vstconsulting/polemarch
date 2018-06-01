@@ -73,29 +73,25 @@ Section "Adding new variable":
 After inventory creation you will see the next page:
 
 .. image:: gui_png/test-inventory.png
-.. image:: gui_png/test-inventory2.png
 
 There are some new buttons here:
 
 * **save** - this button saves all changes you have made on this page.
 * **history** - this button opens history list of inventory executions.
+* **groups** - this button opens subgroups list of this inventory.
+* **hosts** - this button opens subhosts list of this inventory.
 
-As you can see, also new "Sub items" section has appeared. This section has 4 buttons:
-
-* **edit existing groups** - this button gives you an opportunity to add to inventory groups, that are already created,
-  or to delete some groups from this inventory.
-
-* **create new group** - this button gives you an opportunity to create new group and add it to this inventory.
-
-* **edit existing hosts** - this button gives you an opportunity to add to inventory hosts, that are already created,
-  or to delete some hosts from this inventory.
-
-* **create new host** - this button gives you an opportunity to create new host and add it to this inventory.
-
-Let's look how you can create a group.
+Let's look how you can create a group for this inventory.
+To do it, let's click on 'Groups' button.
 
 Groups
 ------
+
+.. image:: gui_png/test-inventory-group-list.png
+
+As you can see, on this page you can either create new group or just add existing one.
+
+Let's click on 'Create' button.
 
 .. image:: gui_png/create-new-group.png
 
@@ -121,21 +117,25 @@ After group creation you will see the next page:
 .. image:: gui_png/test-group.png
 .. image:: gui_png/test-group2.png
 
-As you can see, new "Variables" and "Sub item" sections have appeared.
+As you can see, there are 2 new buttons here:
 
-"Sub item" section has 2 buttons:
+* **hosts** - this button opens subhosts list of this group.
+* **remove from parent group** - this button removes our new host from current
+  group's hosts  list, but does not delete it from system.
 
-* **edit existing hosts** - this button gives you an opportunity to add to inventory hosts, that are already created,
-  or to delete some hosts from this inventory.
-
-* **create new host** - this button gives you an opportunity to create new host and add it to this inventory.
-
+Also new "Variables" section has appeared.
 "Variables" section has a list of variables that user have chosen during group creation.
 
-Let's look how you can create a host.
+Let's look how you can create a host for this group.
 
 Hosts
 -----
+
+.. image:: gui_png/test-group-hosts-list.png
+
+As you can see, on this page you can either create new host or just add existing one.
+
+Let's click on 'Create' button.
 
 .. image:: gui_png/create-new-host.png
 
@@ -158,7 +158,11 @@ After host creation you will see the next page:
 
 .. image:: gui_png/test-host.png
 
-As you can see, new "Variables" section has appeared and it has a list of variables that user have chosen during host creation.
+As you can see, new button 'Remove from parent group' has appeared.
+This button removes our new host from current group's hosts  list, but does not
+delete it from system.
+
+Also new "Variables" section has appeared and it has a list of variables that user have chosen during host creation.
 
 Projects
 --------
@@ -225,7 +229,7 @@ Also there are 2 new fields:
 
 There is new section on this page:
 
-* **Reame.md** - if project has “readme.md” or “readme.rst” file in it’s project directory,
+* **reame.md** - if project has “readme.md” or “readme.rst” file in it’s project directory,
   Polemarch will add content of this file to this section.
 
 Also there are several buttons on this page:
