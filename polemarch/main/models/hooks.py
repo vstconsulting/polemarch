@@ -37,9 +37,7 @@ class HooksQuerySet(BQuerySet):
     use_for_related_fields = True
 
     def when(self, when):
-        return self.filter(models.Q(enable=True)).filter(
-            models.Q(when=when) | models.Q(when=None)
-        )
+        return self.filter(enable=True).filter(models.Q(when=when) | models.Q(when=None))
 
     def execute(self, when, message):
         for hook in self.when(when):

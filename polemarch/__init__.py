@@ -1,4 +1,11 @@
-from vstutils.environment import prepare_environment, cmd_execution, os
+import os
+import warnings
+try:
+    from vstutils.environment import prepare_environment, cmd_execution
+except ImportError:
+    warnings.warn('"vstutils" was not installed', ImportWarning)
+    prepare_environment = lambda *args, **kwargs: ()
+    cmd_execution = prepare_environment
 
 default_settings = {
     # ansible specific environment variables
