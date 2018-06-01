@@ -3230,28 +3230,28 @@ window.qunitTestsArray.push({
         });
 
 
-        syncQUnit.addTest('Сохранение и запуск шаблона', function ( assert )
-        {
-            var done = assert.async();
-
-            $.when(spajs.open({ menuId:"template/Task/"+itemId})).done(function()
-            {
-                $.when(pmTasksTemplates.saveAndExecute(itemId)).done(function()
-                {
-                    assert.ok(true, 'Успешно pmTasksTemplates.saveAndExecute');
-                    render(done)
-                }).fail(function(){
-                    debugger;
-                    assert.ok(false, 'Ошибка при pmTasksTemplates.saveAndExecute');
-                    render(done)
-                })
-            }).fail(function()
-            {
-                debugger;
-                assert.ok(false, 'Ошибка при открытиии меню template/Module/'+itemId);
-                render(done)
-            })
-        });
+        // syncQUnit.addTest('Сохранение и запуск шаблона', function ( assert )
+        // {
+        //     var done = assert.async();
+        //
+        //     $.when(spajs.open({ menuId:"template/Task/"+itemId})).done(function()
+        //     {
+        //         $.when(pmTasksTemplates.saveAndExecute(itemId)).done(function()
+        //         {
+        //             assert.ok(true, 'Успешно pmTasksTemplates.saveAndExecute');
+        //             render(done)
+        //         }).fail(function(){
+        //             debugger;
+        //             assert.ok(false, 'Ошибка при pmTasksTemplates.saveAndExecute');
+        //             render(done)
+        //         })
+        //     }).fail(function()
+        //     {
+        //         debugger;
+        //         assert.ok(false, 'Ошибка при открытиии меню template/Module/'+itemId);
+        //         render(done)
+        //     })
+        // });
 
         // var tt_history_id = undefined;
         // syncQUnit.addTest('Страница списка task template History', function ( assert )
@@ -3825,28 +3825,28 @@ window.qunitTestsArray.push({
             })
         });
 
-        syncQUnit.addTest('Сохранение и запуск шаблона Module', function ( assert )
-        {
-            var done = assert.async();
-
-            $.when(spajs.open({ menuId:"template/Module/"+itemId})).done(function()
-            {
-                $.when(pmModuleTemplates.saveAndExecute(itemId)).done(function()
-                {
-                    assert.ok(true, 'Успешно pmModuleTemplates.saveAndExecute');
-                    render(done)
-                }).fail(function(){
-                    debugger;
-                    assert.ok(false, 'Ошибка при pmModuleTemplates.saveAndExecute');
-                    render(done)
-                })
-            }).fail(function()
-            {
-                debugger;
-                assert.ok(false, 'Ошибка при открытиии меню template/Module/'+itemId);
-                render(done)
-            })
-        });
+        // syncQUnit.addTest('Сохранение и запуск шаблона Module', function ( assert )
+        // {
+        //     var done = assert.async();
+        //
+        //     $.when(spajs.open({ menuId:"template/Module/"+itemId})).done(function()
+        //     {
+        //         $.when(pmModuleTemplates.saveAndExecute(itemId)).done(function()
+        //         {
+        //             assert.ok(true, 'Успешно pmModuleTemplates.saveAndExecute');
+        //             render(done)
+        //         }).fail(function(){
+        //             debugger;
+        //             assert.ok(false, 'Ошибка при pmModuleTemplates.saveAndExecute');
+        //             render(done)
+        //         })
+        //     }).fail(function()
+        //     {
+        //         debugger;
+        //         assert.ok(false, 'Ошибка при открытиии меню template/Module/'+itemId);
+        //         render(done)
+        //     })
+        // });
 
         // var tt_history_id_1 = undefined;
         // syncQUnit.addTest('Страница списка Module template History', function ( assert )
