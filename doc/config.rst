@@ -142,6 +142,29 @@ be useful for troubleshoot problems (logging level etc). Also there is settings
 to change timezone for whole app and directory where Polemarch will store
 ansible projects cloned from repositories.
 
+If you want to use LDAP protocol, you should create next settings in section ``[main]``.
+
+.. sourcecode:: bash
+
+    ldap-server = ldap://server-ip-or-host:port
+    ldap-default-domain = domain.name
+
+ldap-default-domain is optional argument, that is aimed to make user authorization easier
+(without input of domain name).
+
+So in this case authorization logic will be the following:
+
+1. System checks combination of login:password in database;
+
+2. System checks combination of login:password in LDAP:
+
+   * if domain was mentioned, it will be set during authorization
+     (if user enter login without ``user@domain.name`` or without ``DOMAIN\user`` );
+
+   * if authorization was successful and there is user with mentioned login in database,
+     server create session for him.
+
+
 .. _database:
 
 Database settings
