@@ -92,7 +92,7 @@ polemarch.start = function(options)
         var t = new Date();
         polemarch.model.nowTime = t.getTime();
     }, 5001)
-
+    
 
     $("body").touchwipe({
         wipingLeftEnd: function(e)

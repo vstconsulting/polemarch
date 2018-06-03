@@ -300,6 +300,23 @@ div.spinner div.bar12 {
     display: block !important;
 }
 
+.platform-web .for-web{
+    display: block !important;
+}
+
+.platform-web .for-cordova{
+    display: none !important;
+}
+
+.platform-cordova .for-web{
+    display: none !important;
+}
+
+.platform-cordova .for-cordova{
+    display: block !important;
+}
+
+
 .borderless td, .borderless th {
     border: none;
     border-top: none !important;
@@ -1001,12 +1018,7 @@ table{
         display: none;
     }
 }
-
-.hide-in-web{ 
-    display: none;
-}
-
-
+ 
 @media (max-width: 767px) {
     .app-logo{
         display: none !important;

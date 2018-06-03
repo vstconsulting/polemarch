@@ -94,10 +94,10 @@ filedsLib.filed.textarea.getValue = function(pmObj, filed){
 filedsLib.validator.notEmpty = function(value, name)
 {
     if(value != '' && value)
-    { 
+    {
         return true;
     }
-    
-    $.notify("Invalid value in field `"+name+"` it mast be not empty", "error"); 
-    return false; 
+
+    $.notify("Invalid value in field `"+name+"` it mast be not empty", "error");
+    return false;
 }

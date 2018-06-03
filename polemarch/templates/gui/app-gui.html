@@ -49,8 +49,8 @@
                     <div class="navbar-custom-menu">
                         <ul class="nav navbar-nav">
                             <li><a href='?profile/{{ user.id }}' onclick="return spajs.openURL(this.href);"><i class="glyphicon glyphicon-user"></i> <span>{{user.username}}</span></a></li>
-                            <li class="hide-in-web"><a href="#" onclick="inAppClose()"><i class="glyphicon glyphicon-share"></i> <span>Close</span></a></li>
-                            <li class="hide-in-web"><a href="#" onclick="inAppLogout()"><i class="glyphicon glyphicon-log-out"></i> <span>Logout</span></a></li>
+                            <li class="for-web"><a href="#" onclick="inAppClose()"><i class="glyphicon glyphicon-share"></i> <span>Close</span></a></li>
+                            <li class="for-web"><a href="#" onclick="inAppLogout()"><i class="glyphicon glyphicon-log-out"></i> <span>Logout</span></a></li>
                         </ul>
                     </div>
                 </nav>
@@ -137,11 +137,7 @@
 .hide-in-app{
     display: none !important;
 }
-
-.hide-in-web{
-    display: block;
-}
-
+ 
 #LoadingProgressBar {
     background: #080E1C;
     width: 100%;
@@ -233,7 +229,7 @@
 
     var polemarch_version = '{{polemarch_version}}';
 
-    var polemarch_logout_url = hostname + '{{logout_url}}';
+    var gui_logout_url = hostname + '{{logout_url}}';
 
     {% if user.is_authenticated %}
         var my_user_id = '{{user.id}}'
@@ -329,7 +325,7 @@
         { type:'js', name: "{% static 'js/pmAnsibleModule.js' %}?v={{polemarch_version}}"},
         { type:'js', name: "{% static 'js/moduleArgsEditor.js' %}?v={{polemarch_version}}"},
         { type:'js', name: "{% static 'js/pmDashboard.js' %}?v={{polemarch_version}}"},
-        { type:'js', name: "{% static 'js/polemarchForApp.js' %}?v={{polemarch_version}}"},
+        { type:'js', name: "{% static 'js/guiForApp.js' %}?v={{polemarch_version}}"},
 
         { type:'css', name: "{% static 'plugins/select2/select2.min.css' %}?v={{polemarch_version}}"},
         { type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{polemarch_version}}"},
