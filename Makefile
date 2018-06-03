@@ -32,6 +32,7 @@ BUILD_DIR= $(TMPDIR)
 PREBUILD_DIR = $(BUILD_DIR)/$(INSTALL_DIR)
 PREBUILD_BINDIR = $(BUILD_DIR)/$(INSTALL_BINDIR)
 SOURCE_DIR = $(shell pwd)
+localinstall: BUILD_DIR = ''
 
 
 include rpm.mk
@@ -92,6 +93,15 @@ prebuild:
 	-install -Dm 755 initbin/$(NAME).conf  $(BUILD_DIR)/etc/tmpfiles.d/$(NAME).conf
 	# Create tmpdirs
 	-mkdir -p $(BUILD_DIR)/var/{log,run,lock}/$(NAME)
+
+localinstall:
+	$(PY) -m virtualenv --no-site-packages $(INSTALL_DIR)
+	$(INSTALL_BINDIR)/pip install -U pip
+	$(INSTALL_BINDIR)/pip install -U $(VSTUTILS)
+	$(INSTALL_BINDIR)/pip install -U dist/$(NAME)-$(VER).tar.gz $(REQUIREMENTS)
+	$(INSTALL_BINDIR)/pip install -U -r requirements-git.txt
+	find $(INSTALL_DIR)/lib -type f -name "*.c" -print0 | xargs -0 rm -rf
+	$(MAKE) prebuild_deps BUILD_DIR=$(INSTALL_DIR)
 
 install:
 	# Change owner for packages

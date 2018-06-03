@@ -1,6 +1,5 @@
 # pylint: disable=import-error
 from django_filters import (CharFilter, NumberFilter, IsoDateTimeFilter)
-from django.contrib.auth.models import User
 from vstutils.api.filters import extra_filter, name_filter, filters
 from ...main import models
 
@@ -40,22 +39,6 @@ class HookFilter(_BaseFilter):
             'name',
             'type',
         )
-
-
-class UserFilter(filters.FilterSet):
-    id        = CharFilter(method=extra_filter)
-    id__not   = CharFilter(method=extra_filter)
-    username__not = CharFilter(method=name_filter)
-    username      = CharFilter(method=name_filter)
-
-    class Meta:
-        model = User
-        fields = ('id',
-                  'username',
-                  'is_active',
-                  'first_name',
-                  'last_name',
-                  'email',)
 
 
 class _BaseHGIFilter(_BaseFilter):

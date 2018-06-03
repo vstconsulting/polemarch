@@ -302,7 +302,7 @@ pmHistory.showItemInProjects = function(holder, menuInfo, data)
     var thisObj = this;
     var project_id = data.reg[1];
     var item_id = data.reg[2];
-    //debugger;
+
     return $.when(this.loadItem(item_id)).done(function()
     {
         if (pmHistory.model.items[item_id].inventory != null) {

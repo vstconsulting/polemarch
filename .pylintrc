@@ -23,7 +23,7 @@ ignore=CVS,migrations,unittests,tests,settings.py,settings_production.py
 load-plugins=pylint_django
 
 # Use multiple processes to speed up Pylint.
-jobs=2
+jobs=4
 
 # Allow loading of arbitrary C extensions. Extensions are imported into the
 # active Python interpreter and may run arbitrary code.

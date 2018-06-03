@@ -1035,7 +1035,92 @@ window.qunitTestsArray.push({
         })
     });
 
-    syncQUnit.addTest('Обновление группы setSubGroups', function ( assert )
+    // syncQUnit.addTest('Обновление группы setSubGroups', function ( assert )
+    // {
+    //     var done = assert.async();
+    //
+    //     // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+    //     // с адресом http://192.168.0.12:8080/?group-5
+    //     var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+    //
+    //
+    //     assert.ok(!pmGroups.hasGroups(itemId, 99999999999), 'pmGroups.hasGroups() вернула не тот результат');
+    //
+    //     $.when(pmGroups.setSubGroups(itemId, [99999999999])).done(function()
+    //     {
+    //         assert.ok(true, 'Успешно setSubGroups');
+    //         render(done)
+    //     }).fail(function()
+    //     {
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при setSubGroups'); // На сервере такой группы наверное нет
+    //         render(done)
+    //     })
+    // });
+    //
+    // syncQUnit.addTest('Обновление группы setSubHosts', function ( assert )
+    // {
+    //     var done = assert.async();
+    //
+    //     // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+    //     // с адресом http://192.168.0.12:8080/?group-5
+    //     var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+    //
+    //
+    //     assert.ok(!pmGroups.hasHosts(itemId, 99999999999), 'pmGroups.hasHosts() вернула не тот результат');
+    //
+    //     $.when(pmGroups.setSubHosts(itemId, [99999999999])).done(function()
+    //     {
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при setSubHosts');
+    //         render(done)
+    //     }).fail(function(){
+    //         assert.ok(true, 'Успешно setSubHosts'); // Group is children.
+    //         render(done)
+    //     })
+    // });
+
+    // syncQUnit.addTest('pmGroups.showAddSubGroupsForm', function ( assert )
+    // {
+    //     var done = assert.async();
+    //
+    //     // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+    //     // с адресом http://192.168.0.12:8080/?group-5
+    //     var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+    //
+    //     $.when(pmGroups.showAddSubGroupsForm(itemId)).done(function()
+    //     {
+    //         assert.ok(true, 'Успешно showAddSubGroupsForm');
+    //         render(done)
+    //     }).fail(function()
+    //     {
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при showAddSubGroupsForm');
+    //         render(done)
+    //     })
+    // });
+    //
+    // syncQUnit.addTest('pmGroups.showAddSubHostsForm', function ( assert )
+    // {
+    //     var done = assert.async();
+    //
+    //     // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+    //     // с адресом http://192.168.0.12:8080/?group-5
+    //     var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+    //
+    //     $.when(pmGroups.showAddSubHostsForm(itemId)).done(function()
+    //     {
+    //         assert.ok(true, 'Успешно showAddSubHostsForm');
+    //         render(done)
+    //     }).fail(function()
+    //     {
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при showAddSubHostsForm');
+    //         render(done)
+    //     })
+    // });
+
+    syncQUnit.addTest('Открытие страницы списка групп данной группы', function ( assert )
     {
         var done = assert.async();
 
@@ -1043,79 +1128,15 @@ window.qunitTestsArray.push({
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
 
-
-        assert.ok(!pmGroups.hasGroups(itemId, 99999999999), 'pmGroups.hasGroups() вернула не тот результат');
-
-        $.when(pmGroups.setSubGroups(itemId, [99999999999])).done(function()
+        // Открытие пункта меню new-host
+        $.when(spajs.open({ menuId:"group/"+itemId+"/groups"})).done(function()
         {
-            assert.ok(true, 'Успешно setSubGroups');
+            assert.ok(true, 'Успешно открыто меню списка групп данной группы');
             render(done)
         }).fail(function()
         {
             debugger;
-            assert.ok(false, 'Ошибка при setSubGroups'); // На сервере такой группы наверное нет
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Обновление группы setSubHosts', function ( assert )
-    {
-        var done = assert.async();
-
-        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
-        // с адресом http://192.168.0.12:8080/?group-5
-        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
-
-
-        assert.ok(!pmGroups.hasHosts(itemId, 99999999999), 'pmGroups.hasHosts() вернула не тот результат');
-
-        $.when(pmGroups.setSubHosts(itemId, [99999999999])).done(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при setSubHosts');
-            render(done)
-        }).fail(function(){
-            assert.ok(true, 'Успешно setSubHosts'); // Group is children.
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('pmGroups.showAddSubGroupsForm', function ( assert )
-    {
-        var done = assert.async();
-
-        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
-        // с адресом http://192.168.0.12:8080/?group-5
-        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
-
-        $.when(pmGroups.showAddSubGroupsForm(itemId)).done(function()
-        {
-            assert.ok(true, 'Успешно showAddSubGroupsForm');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при showAddSubGroupsForm');
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('pmGroups.showAddSubHostsForm', function ( assert )
-    {
-        var done = assert.async();
-
-        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
-        // с адресом http://192.168.0.12:8080/?group-5
-        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
-
-        $.when(pmGroups.showAddSubHostsForm(itemId)).done(function()
-        {
-            assert.ok(true, 'Успешно showAddSubHostsForm');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при showAddSubHostsForm');
+            assert.ok(false, 'Ошибка при открытиии меню списка групп данной группы');
             render(done)
         })
     });
@@ -1128,8 +1149,7 @@ window.qunitTestsArray.push({
         // с адресом http://192.168.0.12:8080/?group-5
         var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
 
-        // Открытие пункта меню new-host
-        $.when(spajs.open({ menuId:"group/"+itemId+"/new-group"})).done(function()
+        $.when(spajs.open({ menuId:"group/"+itemId+"/groups/new-group"})).done(function()
         {
             assert.ok(true, 'Успешно открыто меню создания подгруппы new-group');
             render(done)
@@ -1164,18 +1184,18 @@ window.qunitTestsArray.push({
         // Отправка формы с данными группы
         $.when(pmGroups.addItem('group', master_group_itemId)).done(function()
         {
-            var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
-            if(master_group_itemId != itemId)
-            {
-                debugger;
-                assert.ok(false, 'Ошибка при добавлении подгруппы ' + master_group_itemId +"!="+ itemId);
-                render(done)
-            }
-            else
-            {
+            // var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+            // if(master_group_itemId != itemId)
+            // {
+            //     debugger;
+            //     assert.ok(false, 'Ошибка при добавлении подгруппы ' + master_group_itemId +"!="+ itemId);
+            //     render(done)
+            // }
+            // else
+            // {
                 assert.ok(true, 'Успешно group sub add Item');
                 render(done)
-            }
+            // }
 
         }).fail(function()
         {
@@ -1185,37 +1205,37 @@ window.qunitTestsArray.push({
         })
     });
 
-    syncQUnit.addTest('Проверка добавления невалидных подгрупп', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmGroups.addSubGroups(itemId, [999999])).done(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
-            render(done)
-        }).fail(function()
-        {
-            assert.ok(true, 'Проверка добавления невалидных подгрупп успешна');
-            render(done)
-        })
-    })
-
-    syncQUnit.addTest('Проверка добавления невалидных хостов', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmGroups.addSubHosts(itemId, [999999])).done(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
-            render(done)
-        }).fail(function()
-        {
-            assert.ok(true, 'Проверка добавления невалидных хостов успешна');
-            render(done)
-        })
-    })
+    // syncQUnit.addTest('Проверка добавления невалидных подгрупп', function ( assert )
+    // {
+    //     var done = assert.async();
+    //     var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+    //     $.when(pmGroups.addSubGroups(itemId, [999999])).done(function()
+    //     {
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
+    //         render(done)
+    //     }).fail(function()
+    //     {
+    //         assert.ok(true, 'Проверка добавления невалидных подгрупп успешна');
+    //         render(done)
+    //     })
+    // })
+    //
+    // syncQUnit.addTest('Проверка добавления невалидных хостов', function ( assert )
+    // {
+    //     var done = assert.async();
+    //     var itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+    //     $.when(pmGroups.addSubHosts(itemId, [999999])).done(function()
+    //     {
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
+    //         render(done)
+    //     }).fail(function()
+    //     {
+    //         assert.ok(true, 'Проверка добавления невалидных хостов успешна');
+    //         render(done)
+    //     })
+    // })
 
     syncQUnit.addTest('Копирование группы', function ( assert )
     {
@@ -1326,48 +1346,48 @@ window.qunitTestsArray.push({
         })
     });
 
-    syncQUnit.addTest('Обновление группы не children', function ( assert )
-    {
-        var done = assert.async();
-
-        // Предполагается что мы от прошлого теста попали на страницу редактирования группы
-        // с адресом http://192.168.0.12:8080/?group-5
-        itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
-
-
-        assert.ok(!pmGroups.hasGroups(itemId, 99999999999), 'pmGroups.hasGroups() вернула не тот результат');
-
-        $.when(pmGroups.setSubGroups(itemId, [99999999999])).done(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при setSubGroups'); // На сервере такой группы наверное нет
-            render(done)
-        }).fail(function(){
-            assert.ok(true, 'Успешно setSubGroups'); // Group is children.
-            render(done)
-        })
-    });
-
-    syncQUnit.addTest('Обновление группы не children', function ( assert )
-    {
-        var done = assert.async();
-        assert.ok(!pmGroups.hasHosts(itemId, 99999999999), 'pmGroups.hasHosts() вернула не тот результат');
-
-        $.when(pmGroups.setSubHosts(itemId, [99999999999])).done(function()
-        {
-            assert.ok(true, 'Успешно setSubHosts'); // Group is children.
-            render(done)
-        }).fail(function(){
-            debugger;
-            assert.ok(false, 'Ошибка при setSubHosts');
-            render(done)
-        })
-    });
+    // syncQUnit.addTest('Обновление группы не children', function ( assert )
+    // {
+    //     var done = assert.async();
+    //
+    //     // Предполагается что мы от прошлого теста попали на страницу редактирования группы
+    //     // с адресом http://192.168.0.12:8080/?group-5
+    //     itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
+    //
+    //
+    //     assert.ok(!pmGroups.hasGroups(itemId, 99999999999), 'pmGroups.hasGroups() вернула не тот результат');
+    //
+    //     $.when(pmGroups.setSubGroups(itemId, [99999999999])).done(function()
+    //     {
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при setSubGroups'); // На сервере такой группы наверное нет
+    //         render(done)
+    //     }).fail(function(){
+    //         assert.ok(true, 'Успешно setSubGroups'); // Group is children.
+    //         render(done)
+    //     })
+    // });
+    //
+    // syncQUnit.addTest('Обновление группы не children', function ( assert )
+    // {
+    //     var done = assert.async();
+    //     assert.ok(!pmGroups.hasHosts(itemId, 99999999999), 'pmGroups.hasHosts() вернула не тот результат');
+    //
+    //     $.when(pmGroups.setSubHosts(itemId, [99999999999])).done(function()
+    //     {
+    //         assert.ok(true, 'Успешно setSubHosts'); // Group is children.
+    //         render(done)
+    //     }).fail(function(){
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при setSubHosts');
+    //         render(done)
+    //     })
+    // });
 
     syncQUnit.addTest('Удаление группы не children', function ( assert )
     {
         var done = assert.async();
-
+        itemId = /group\/([0-9]+)/.exec(window.location.href)[1]
         // Удаление группы.
         $.when(pmGroups.deleteItem(itemId, true)).done(function()
         {
@@ -1486,69 +1506,69 @@ window.qunitTestsArray.push({
         })
     });
 
-    syncQUnit.addTest('Проверка добавления невалидных подгрупп к inventory', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmInventories.addSubGroups(itemId, [999999])).done(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
-            render(done)
-        }).fail(function()
-        {
-            assert.ok(true, 'Проверка добавления невалидных подгрупп успешна');
-            render(done)
-        })
-    })
-
-    syncQUnit.addTest('Проверка showAddSubHostsForm в inventory', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmInventories.showAddSubHostsForm(itemId)).done(function()
-        {
-            assert.ok(true, 'Проверка showAddSubHostsForm успешна');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при showAddSubHostsForm');
-            render(done)
-        })
-    })
-
-    syncQUnit.addTest('Проверка showAddSubGroupsForm в inventory', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmInventories.showAddSubGroupsForm(itemId)).done(function()
-        {
-            assert.ok(true, 'Проверка showAddSubGroupsForm успешна');
-            render(done)
-        }).fail(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при showAddSubGroupsForm');
-            render(done)
-        })
-    })
-
-    syncQUnit.addTest('Проверка добавления невалидных хостов к inventory', function ( assert )
-    {
-        var done = assert.async();
-        var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
-        $.when(pmInventories.addSubHosts(itemId, [999999])).done(function()
-        {
-            debugger;
-            assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
-            render(done)
-        }).fail(function()
-        {
-            assert.ok(true, 'Проверка добавления невалидных хостов успешна');
-            render(done)
-        })
-    })
+    // syncQUnit.addTest('Проверка добавления невалидных подгрупп к inventory', function ( assert )
+    // {
+    //     var done = assert.async();
+    //     var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+    //     $.when(pmInventories.addSubGroups(itemId, [999999])).done(function()
+    //     {
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при добавлении подгруппы 999999 вроде бы нет');
+    //         render(done)
+    //     }).fail(function()
+    //     {
+    //         assert.ok(true, 'Проверка добавления невалидных подгрупп успешна');
+    //         render(done)
+    //     })
+    // })
+    //
+    // syncQUnit.addTest('Проверка showAddSubHostsForm в inventory', function ( assert )
+    // {
+    //     var done = assert.async();
+    //     var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+    //     $.when(pmInventories.showAddSubHostsForm(itemId)).done(function()
+    //     {
+    //         assert.ok(true, 'Проверка showAddSubHostsForm успешна');
+    //         render(done)
+    //     }).fail(function()
+    //     {
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при showAddSubHostsForm');
+    //         render(done)
+    //     })
+    // })
+    //
+    // syncQUnit.addTest('Проверка showAddSubGroupsForm в inventory', function ( assert )
+    // {
+    //     var done = assert.async();
+    //     var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+    //     $.when(pmInventories.showAddSubGroupsForm(itemId)).done(function()
+    //     {
+    //         assert.ok(true, 'Проверка showAddSubGroupsForm успешна');
+    //         render(done)
+    //     }).fail(function()
+    //     {
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при showAddSubGroupsForm');
+    //         render(done)
+    //     })
+    // })
+    //
+    // syncQUnit.addTest('Проверка добавления невалидных хостов к inventory', function ( assert )
+    // {
+    //     var done = assert.async();
+    //     var itemId = /inventory\/([0-9]+)/.exec(window.location.href)[1]
+    //     $.when(pmInventories.addSubHosts(itemId, [999999])).done(function()
+    //     {
+    //         debugger;
+    //         assert.ok(false, 'Ошибка при добавлении хоста 999999 вроде бы нет');
+    //         render(done)
+    //     }).fail(function()
+    //     {
+    //         assert.ok(true, 'Проверка добавления невалидных хостов успешна');
+    //         render(done)
+    //     })
+    // })
 
     var itemId = undefined
     syncQUnit.addTest('Копирование Inventory', function ( assert )
@@ -4505,6 +4525,23 @@ window.qunitTestsArray.push({
         {
             debugger;
             assert.ok(false, 'Ошибка при изменении hook');
+            render(done)
+        })
+    });
+
+    syncQUnit.addTest('Деактивация hook', function ( assert )
+    {
+        var done = assert.async();
+        var item_id=/hook\/([0-9]+)/.exec(window.location.href)[1]
+
+        $.when(pmHooks.changeItemActivation(item_id)).done(function()
+        {
+            assert.ok(true, 'Hook успешно деативирован');
+            render(done)
+        }).fail(function()
+        {
+            debugger;
+            assert.ok(false, 'Ошибка при деактивации hook');
             render(done)
         })
     });

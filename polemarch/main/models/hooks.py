@@ -37,7 +37,7 @@ class HooksQuerySet(BQuerySet):
     use_for_related_fields = True
 
     def when(self, when):
-        return self.filter(models.Q(when=when) | models.Q(when=None))
+        return self.filter(enable=True).filter(models.Q(when=when) | models.Q(when=None))
 
     def execute(self, when, message):
         for hook in self.when(when):
@@ -52,6 +52,7 @@ class Hook(BModel):
     name       = models.CharField(max_length=512, default=uuid.uuid1)
     type       = models.CharField(max_length=32, null=False)
     when       = models.CharField(max_length=32, null=True, default=None)
+    enable     = models.BooleanField(default=True)
     recipients = models.TextField()
 
     @property
