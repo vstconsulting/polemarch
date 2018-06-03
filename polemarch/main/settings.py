@@ -79,7 +79,7 @@ HOOKS_DIR = config.get("main", "hooks_dir", fallback="/tmp")
 
 API_URL = VST_API_URL
 API = {
-    VST_API_VERSION : {
+    VST_API_VERSION: {
         r'users': {'view': 'polemarch.api.v1.views.UserViewSet'},
         r'teams': {'view': 'polemarch.api.v1.views.TeamViewSet'},
         r'hosts': {'view': 'polemarch.api.v1.views.HostViewSet'},

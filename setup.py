@@ -12,9 +12,7 @@ ext_list = [
     "polemarch.api.base",
     "polemarch.api.handlers",
     "polemarch.api.permissions",
-    "polemarch.api.routers",
     "polemarch.api.signals",
-    "polemarch.api.urls",
     "polemarch.main.models.base",
     "polemarch.main.models.hosts",
     "polemarch.main.models.hooks",
@@ -33,19 +31,16 @@ ext_list = [
     'polemarch.main.repo.vcs',
     'polemarch.main.validators',
     'polemarch.main.views',
-    'polemarch.main.context_processors',
 
 ]
 
 if 'develop' in sys.argv:
-    ext_modules = []
     ext_list = []
 
 make_setup(
     name='polemarch',
     ext_modules_list=ext_list,
     include_package_data=True,
-    scripts=['polemarchctl'],
     install_requires=[
     ] +
     load_requirements('requirements.txt', os.getcwd()) +
@@ -60,5 +55,8 @@ make_setup(
         "Documentation": "http://polemarch.readthedocs.io/",
         "Source Code": "https://gitlab.com/vstconsulting/polemarch",
         "Releases": "https://github.com/vstconsulting/polemarch/releases",
+    },
+    entry_points={
+        'console_scripts': ['polemarchctl=polemarch:cmd_execution']
     },
 )

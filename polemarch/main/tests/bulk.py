@@ -178,8 +178,11 @@ class ApiBulkTestCase(_ApiGHBaseTestCase):
 
     def test_bulk_unsupported(self):
         data = dict(username="some_user", password="some_password")
-        bulk_data = [{'type': "add", 'item': "token", 'data': data}]
-        self.get_result("post", "/api/v1/_bulk/", 415, data=json.dumps(bulk_data))
+        bulk_data = [
+            {'type': "add", 'item': "token", 'data': data}
+        ]
+        self.get_result("post", "/api/v1/_bulk/", 415,
+                        data=json.dumps(bulk_data))
 
         result = self.get_result("get", "/api/v1/_bulk/")
         self.assertIn("host", result["allowed_types"])

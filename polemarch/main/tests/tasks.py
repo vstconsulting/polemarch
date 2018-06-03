@@ -504,6 +504,21 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         )
         self.assertTrue(self.sended, "Fail")
 
+        self.get_model_class('Hook').objects.all().delete()
+        hook_data = dict(
+            name="test_enable", type='HTTP', recipients=hook_url, when='on_object_add',
+            enable=False
+        )
+        self.post_result("/api/v1/hooks/", data=json.dumps(hook_data))
+        execute_method.reset_mock()
+        for i in range(range_int):
+            self.get_model_class('Host').objects.create(name="h-{}".format(i))
+        hosts = self.get_model_class('Host').objects.filter(
+            name__in=["h-{}".format(i) for i in range(range_int)]
+        )
+        hosts.delete()
+        self.assertEquals(execute_method.call_count, 0)
+
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute_inventory_file(self, subprocess_function):
 
