@@ -95,7 +95,7 @@ code_style:
   stage: code_standarts
   image: onegreyonewhite/tox:tox
   script:
-   - make test ENVS=flake,pylint
+   - make test ENVS=flake
   only:
     - /^.{0,}issue_.*$/
     - developer
@@ -182,14 +182,14 @@ pep8_checks:
   allow_failure: false
   retry: 2
 
-pylint_checks:
-  stage: code_standarts
-  only:
-   - master
-  script:
-   - make test ENVS=pylint
-  allow_failure: false
-  retry: 2
+# pylint_checks:
+  #stage: code_standarts
+  #only:
+  # - master
+  #script:
+  # - make test ENVS=pylint
+  #allow_failure: false
+  #retry: 2
 
 
 # Realese
