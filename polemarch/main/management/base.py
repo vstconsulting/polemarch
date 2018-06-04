@@ -3,14 +3,12 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import sys
 
-from django.core.management.base import BaseCommand, CommandError as CommandErrorBase
+from django.core.management.base import CommandError as CommandErrorBase
 from django.conf import settings
-import django
 import celery
 import ansible
 from vstutils.utils import exception_with_traceback
-
-from ... import __version__
+from vstutils.management.commands._base import BaseCommand
 
 logger = logging.getLogger("polemarch")
 
@@ -43,26 +41,6 @@ class ServiceCommand(BaseCommand):
         self.LOG_LEVEL = LOG_LEVEL.upper()
 
     def get_version(self):
-        vstr = (
-            u'Polemarch {c}, Django {d.__version__}, '
-            u'Celery {r.__version__}, Ansible {a.__version__}'
-        )
-        return vstr.format(c=__version__, d=django, r=celery, a=ansible)
-
-    def _print(self, info=""):
-        self.stdout.write(str(info))  # nocv
-
-    def _success(self, info=""):  # nocv
-        try:
-            self._print(self.style.SUCCESS(info))
-        except:
-            self._print(self.style.MIGRATE_SUCCESS(info))
-
-    def _info(self, info=""):
-        self._print(self.style.HTTP_INFO(info))  # nocv
-
-    def _error(self, info=""):
-        self._print(self.style.ERROR(info))  # nocv
-
-    def _warning(self, info=""):
-        self._print(self.style.WARNING(info))  # nocv
+        versions = super(ServiceCommand, self).get_version()
+        vstr = (u' Celery={r.__version__} Ansible={a.__version__}')
+        return versions + vstr.format(r=celery, a=ansible)

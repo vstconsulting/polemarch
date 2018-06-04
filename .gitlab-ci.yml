@@ -241,9 +241,12 @@ publish_github:
    - tags
   before_script:
   - npm install -g github-release-cli
-  script:
   - git remote add gitlab https://gitlab-ci-token:${GITLAB_TOKEN}@gitlab.com/vstconsulting/polemarch.git
+  - git remote add github https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/vstconsulting/polemarch.git
+  script:
   - git push gitlab master
   - git push gitlab ${CI_COMMIT_TAG}
+  - git push github master
+  - git push github ${CI_COMMIT_TAG}
   - sleep 10
-  - github-release upload --owner vstconsulting --repo polemarch --tag="${CI_COMMIT_TAG}" --name="${CI_COMMIT_TAG}" --body="${CI_COMMIT_MESSAGE}" "dist/polemarch-${CI_COMMIT_TAG}-0.x86_64.rpm" "dist/polemarch_${CI_COMMIT_TAG}-0_amd64.deb" "dist/polemarch-${CI_COMMIT_TAG}.tar.gz"
+  - npm run github-release upload --owner vstconsulting --repo polemarch --tag="${CI_COMMIT_TAG}" --name="${CI_COMMIT_TAG}" --body="${CI_COMMIT_MESSAGE}" "dist/polemarch-${CI_COMMIT_TAG}-0.x86_64.rpm" "dist/polemarch_${CI_COMMIT_TAG}-0_amd64.deb" "dist/polemarch-${CI_COMMIT_TAG}.tar.gz"

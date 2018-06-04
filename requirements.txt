@@ -1,5 +1,5 @@
 # Main
-vstutils[rpc,ldap,doc,coreapi]==1.0.7
+vstutils[rpc,ldap,doc,coreapi]==1.0.8
 six
 pyyaml
 docutils==0.14

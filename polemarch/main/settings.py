@@ -20,6 +20,15 @@ REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
     "polemarch.api.permissions.ModelPermission",
 ]
 
+AUTH_PASSWORD_VALIDATORS += [
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
 REPO_BACKENDS = {
     "GIT": {
         "BACKEND": "polemarch.main.repo.Git",

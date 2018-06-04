@@ -1,2 +1,2 @@
 # Docs
-vstutils[doc]
+vstcompile[doc]

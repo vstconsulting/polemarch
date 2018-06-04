@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name,no-member
 from vstutils.urls import urlpatterns, url
-from . import views
+from .main import views
 
 urlpatterns += [
     url(r'^app$', views.AppGUIView.as_view()),

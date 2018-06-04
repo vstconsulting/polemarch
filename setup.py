@@ -1,9 +1,20 @@
 import os
 import sys
-from vstutils.compile import make_setup, load_requirements
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+
+try:
+    from vstcompile import load_requirements, make_setup, find_packages
+    has_vstcompile = True
+except ImportError:
+    has_vstcompile = False
+    from setuptools import setup as make_setup, find_packages
+
+    def load_requirements(file_name, folder=os.getcwd()):
+        with open(os.path.join(folder, file_name)) as req_file:
+            return req_file.read().strip().split('\n')
+
 
 ext_list = [
     "polemarch.api.v1.filters",
@@ -37,11 +48,11 @@ ext_list = [
 if 'develop' in sys.argv:
     ext_list = []
 
-make_setup(
+kwargs = dict(
     name='polemarch',
-    ext_modules_list=ext_list,
     include_package_data=True,
     install_requires=[
+        'vstcompile[doc]',
     ] +
     load_requirements('requirements.txt', os.getcwd()) +
     load_requirements('requirements-doc.txt', os.getcwd()),
@@ -60,3 +71,8 @@ make_setup(
         'console_scripts': ['polemarchctl=polemarch:cmd_execution']
     },
 )
+
+if has_vstcompile:
+    kwargs['ext_modules_list'] = ext_list
+
+make_setup(**kwargs)

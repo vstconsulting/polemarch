@@ -4,6 +4,7 @@ omit =
     */main/management/daemon.py
     */*/migrations/*
     */main/wsgi.py
+    */wsgi.py
     */manage.py
     *ihsctl
     *setup.py
