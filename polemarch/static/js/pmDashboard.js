@@ -31,12 +31,6 @@ pmDashboard.statsDataLast=14;
 pmDashboard.statsDataLastQuery=14;
 pmDashboard.statsDataMomentType='day';
 
-if(window.localStorage['selected-chart-period'] && window.localStorage['selected-chart-period-query'] &&  window.localStorage['selected-chart-period-type'])
-{
-    pmDashboard.statsDataLast=window.localStorage['selected-chart-period'];
-    pmDashboard.statsDataLastQuery=window.localStorage['selected-chart-period-query'];
-    pmDashboard.statsDataMomentType=window.localStorage['selected-chart-period-type'];
-}
 
 /**
  * Двумерный массив с описанием списка отображаемых виджетов в каждой строке
@@ -374,7 +368,7 @@ pmDashboard.getUserDashboardSettingsFromAPI = function()
 {
     var userId=window.my_user_id;
     if(pmDashboard.checkNecessityToLoadDashboardSettingsFromApi(pmDashboard.model.defaultWidgets[0], pmDashboard.model.widgets[0]) ||
-    pmDashboard.checkNecessityToLoadDashboardSettingsFromApi(pmDashboard.model.defaultChartLineSettings, pmDashboard.model.ChartLineSettings))
+        pmDashboard.checkNecessityToLoadDashboardSettingsFromApi(pmDashboard.model.defaultChartLineSettings, pmDashboard.model.ChartLineSettings))
     {
         return spajs.ajax.Call({
             url: hostname + "/api/v1/users/" + userId + "/settings/",
@@ -681,30 +675,21 @@ pmDashboard.updateStatsDataLast=function(thisEl)
         case '1095':
             pmDashboard.statsDataLast=3;
             pmDashboard.statsDataMomentType="year";
-            window.localStorage['selected-chart-period']=3;
-            window.localStorage['selected-chart-period-type']="year";
             break;
         case '365':
             pmDashboard.statsDataLast=13;
             pmDashboard.statsDataMomentType="month";
-            window.localStorage['selected-chart-period']=13;
-            window.localStorage['selected-chart-period-type']="month";
             break;
         case '90':
             pmDashboard.statsDataLast=3;
             pmDashboard.statsDataMomentType="month";
-            window.localStorage['selected-chart-period']=3;
-            window.localStorage['selected-chart-period-type']="month";
             break;
         default:
             pmDashboard.statsDataLast=+newLast;
             pmDashboard.statsDataMomentType="day";
-            window.localStorage['selected-chart-period']=+newLast;
-            window.localStorage['selected-chart-period-type']="day";
             break;
     }
     pmDashboard.statsDataLastQuery=+newLast;
-    window.localStorage['selected-chart-period-query']=+newLast;
     pmDashboard.updateData();
 }
 
@@ -773,6 +758,58 @@ pmDashboard.toggleSortable = function(thisButton)
         }
     }
 }
+
+/**
+ * Функция подгружает данные необходимые для отрисовки страницы Dashboard'a
+ * одним bulk запросом.
+ */
+pmDashboard.getDataForDashboardFromBulk = function ()
+{
+    var def = new $.Deferred();
+    var bulkArr = [
+        {
+            type:"get",
+            item: "projects"
+        },
+        {
+            type:"get",
+            item: "inventories"
+        },
+        {
+            type:"get",
+            item: "templates"
+        },
+    ];
+
+    spajs.ajax.Call({
+        url: "/api/v1/_bulk/",
+        type: "POST",
+        contentType: 'application/json',
+        data: JSON.stringify(bulkArr),
+        success: function (data)
+        {
+            for(var i in data)
+            {
+                var pmObj = pmItems.definePmObject(bulkArr[i].item);
+                pmObj.model.itemslist = data[i].data;
+                for(var j in data[i].data.results)
+                {
+                    var val = pmObj.afterItemLoad(data[i].data.results[j])
+                    pmObj.model.items.justWatch(val.id);
+                    pmObj.model.items[val.id] = mergeDeep(pmObj.model.items[val.id], val)
+                }
+            }
+            def.resolve();
+        },
+        error: function (e) {
+            $.notify("Error " + e, "error");
+            def.reject();
+        }
+    })
+
+    return def.promise();
+}
+
 
 
 tabSignal.connect('pmLocalSettings.hideMenu', function(){
@@ -906,7 +943,8 @@ pmDashboard.open  = function(holder, menuInfo, data)
     setActiveMenuLi();
     var thisObj = this;
 
-    return $.when(pmDashboard.getUserDashboardSettingsFromAPI()).always(function()
+    return $.when(pmDashboard.getUserDashboardSettingsFromAPI(),
+        pmDashboard.getDataForDashboardFromBulk()).always(function()
     {
         // Инициализация всех виджетов на странице
         for(var i in pmDashboard.model.widgets)
@@ -920,7 +958,7 @@ pmDashboard.open  = function(holder, menuInfo, data)
             }
         }
 
-        thisObj.updateData()
+        //thisObj.updateData()
         $(holder).insertTpl(spajs.just.render('dashboard_page', {}))
 
         pmwTasksTemplatesWidget.render();

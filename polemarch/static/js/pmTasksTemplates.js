@@ -685,13 +685,13 @@ pmTasksTemplates.showWidget = function(holder, kind)
     var offset = 0
     var limit = this.pageSize;
     var ordering="-id";
-    return $.when(this.sendSearchQuery({kind:kind}, limit, offset, ordering)).done(function()
-    {
+    // return $.when(this.sendSearchQuery({kind:kind}, limit, offset, ordering)).done(function()
+    // {
         $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind}))
-    }).fail(function()
-    {
-        $.notify("", "error");
-    }).promise()
+    // }).fail(function()
+    // {
+    //     $.notify("", "error");
+    // }).promise()
 }
 
 pmTasksTemplates.showTaskWidget = function(holder)
