@@ -134,13 +134,13 @@ pmGroups.model.page_list_from_another_class = {
     ],
     actions:[
         {
-            function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteChildFromParent('+item.id+'));  return false;'},
-            title:'Delete',
+            function:function(item, opt){ return 'spajs.showLoader('+this.model.className+'.deleteChildFromParent("'+ opt.parent_type + '",' + opt.parent_item + ',' + item.id+'));  return false;'},
+            title: function(item, opt){return "Delete from " + opt.parent_type;},
             link:function(){ return '#'}
         },
         {
-            function:function(item){ return '';},
-            title:function(item)
+            function:function(item, opt){ return '';},
+            title:function(item, opt)
             {
                 if(item.children)
                 {
@@ -149,14 +149,14 @@ pmGroups.model.page_list_from_another_class = {
 
                 return 'Create sub host'
             },
-            link:function(item)
+            link:function(item, opt)
             {
                 if(item.children)
                 {
-                    return '/?group/'+item.id+'/new-group'
+                    return '/?' + opt.link_with_parents + "/" + this.model.page_name + "/" + item.id + '/groups/new-group'
                 }
 
-                return '/?group/'+item.id+'/new-host'
+                return '/?' + opt.link_with_parents + "/" + this.model.page_name + "/" + item.id + '/hosts/new-host'
             },
         },
     ],
@@ -984,7 +984,7 @@ tabSignal.connect("polemarch.start", function()
     spajs.addMenu({
         id:"newGroup",
         urlregexp:[/^new-group$/, /^([A-z0-9_]+)\/([0-9]+)\/new-group$/,
-            /^([A-z0-9_]+)\/([0-9]+)\/groups\/new-group$/, /^([A-z0-9_\/]+)\/groups\/new-group/],
+            /^([A-z0-9_]+)\/([0-9]+)\/groups\/new-group$/, /^([A-z0-9_\/]+)\/groups\/new-group$/],
         onOpen:function(holder, menuInfo, data){return pmGroups.showNewItemPage(holder, menuInfo, data);}
     })
 

@@ -45,8 +45,8 @@ pmAnsibleModule.showInProject = function(holder, menuInfo, data)
 
     return $.when(pmProjects.loadItem(project_id), pmInventories.loadAllItems()).done(function()
     {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_run_page', {item_id:project_id})) 
-        $("#inventories-autocomplete").select2({ width: '100%' }); 
+        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_run_page', {item_id:project_id}))
+        $("#inventories-autocomplete").select2({ width: '100%' });
     }).fail(function()
     {
         $.notify("", "error");
@@ -58,28 +58,21 @@ pmAnsibleModule.showInProject = function(holder, menuInfo, data)
  */
 pmAnsibleModule.fastCommandWidget = function(holder)
 {
-    return $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems()).done(function()
-    {
-        $(holder).insertTpl(spajs.just.render('fastcommand_widget', {}))
-        $("#projects-autocomplete").select2({ width: '100%' });
-        $("#inventories-autocomplete").select2({ width: '100%' });
-
-    }).fail(function()
-    {
-        $.notify("", "error");
-    })
+    $(holder).insertTpl(spajs.just.render('fastcommand_widget', {}))
+    $("#projects-autocomplete").select2({ width: '100%' });
+    $("#inventories-autocomplete").select2({ width: '100%' });
 }
 
 pmAnsibleModule.fastCommandWidget_RunBtn = function()
 {
     return pmAnsibleModule.execute(
-                $('#projects-autocomplete').val(),
-                pmModuleTemplates.inventoriesAutocompletefiled.getValue(),
-                pmGroups.getGroupsAutocompleteValue(),
-                'shell',
-                moduleArgsEditor.getModuleArgs(),
-                {}
-            )
+        $('#projects-autocomplete').val(),
+        pmModuleTemplates.inventoriesAutocompletefiled.getValue(),
+        pmGroups.getGroupsAutocompleteValue(),
+        'shell',
+        moduleArgsEditor.getModuleArgs(),
+        {}
+    )
 }
 
 /**
@@ -99,7 +92,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
         def.reject();
         return def.promise();
     }
- 
+
     if(!(project_id/1))
     {
         $.notify("Invalid field `project` ", "error");
@@ -143,7 +136,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
         type: "POST",
         data:JSON.stringify(data),
         contentType:'application/json',
-                success: function(data)
+        success: function(data)
         {
             if(data && data.history_id)
             {

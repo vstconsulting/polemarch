@@ -1,0 +1,23 @@
+.pt-enabled, .hook-enable {
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+    color: #276900;
+}
+
+.add-existing-item {
+    margin-right: 20px;
+}
+
+@media (max-width: 1200px) {
+
+    .add-existing-item {
+        margin-right: 0px;
+        margin-top: 10px;
+    }
+
+    .pagination:first-child {
+        margin-right: -20px!important;
+        margin-top: 10px!important;
+    }
+}

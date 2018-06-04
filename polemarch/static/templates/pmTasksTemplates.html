@@ -53,40 +53,42 @@
                             <th style="width: 105px;" >Actions</th>
                         </tr>
                         <% for(var i in pmTasksTemplates.model.itemslist.results){  val = pmTasksTemplates.model.itemslist.results[i]; %>
-                            <tr
-                                class="item-row item-<%- val.id %>"
-                                data-id="<%- val.id %>" >
-                                <td>
-                                    <a href="/?template/<%- val.kind %>/<%- val.id %>" class="item-name"
-                                            onclick="return spajs.openURL(this.href);" ><%- val.name %></a>
-                                </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            Actions
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-right">
-                                            <li><a href="#" onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- val.kind %>'].execute(<%- val.id %>)); return false;">Execute</a> </li>
+                            <% if(val.kind == kind) { %>
+                                <tr
+                                    class="item-row item-<%- val.id %>"
+                                    data-id="<%- val.id %>" >
+                                    <td>
+                                        <a href="/?template/<%- val.kind %>/<%- val.id %>" class="item-name"
+                                                onclick="return spajs.openURL(this.href);" ><%- val.name %></a>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Actions
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-right">
+                                                <li><a href="#" onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- val.kind %>'].execute(<%- val.id %>)); return false;">Execute</a> </li>
 
-                                            <% if(val.options_list) { %>
-                                                <% if(val.options_list.length!=0) { %>
-                                                    <li role="separator" class="divider"></li>
-                                                <% } %>
-                                                <% for(var k in val.options_list) { %>
-                                                    <li>
-                                                        <a href="#"
-                                                        onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- val.kind %>'].execute(<%- val.id %>, '<%- val.options_list[k] %>')); return false;">
-                                                            Execute with <%= val.options_list[k] %>
-                                                        </a>
-                                                    </li>
+                                                <% if(val.options_list) { %>
+                                                    <% if(val.options_list.length!=0) { %>
+                                                        <li role="separator" class="divider"></li>
                                                     <% } %>
-                                            <% } %>
+                                                    <% for(var k in val.options_list) { %>
+                                                        <li>
+                                                            <a href="#"
+                                                            onclick="spajs.showLoader(pmTemplates.model.kindObjects['<%- val.kind %>'].execute(<%- val.id %>, '<%- val.options_list[k] %>')); return false;">
+                                                                Execute with <%= val.options_list[k] %>
+                                                            </a>
+                                                        </li>
+                                                        <% } %>
+                                                <% } %>
 
-                                        </ul>
-                                    </div>
-                                </td>
-                            </tr>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% } %>
                         <% } %>
                     </tbody>
                 </table>
