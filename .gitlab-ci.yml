@@ -19,6 +19,7 @@ stages:
   - test
   - packaging-test
   - release
+  - publish
 
 
 .branch_tests_template: &branch_tests
@@ -82,7 +83,7 @@ stages:
   only:
    - master
   script:
-   - make test ENVS=$CI_BUILD_NAME-coverage
+   - make test ENVS=$CI_BUILD_NAME-install
   dependencies:
   - build_zip
   retry: 2
@@ -100,12 +101,12 @@ code_style:
     - developer
   retry: 2
 
-py27-django111-coverage:
+py27-django111-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
-py36-django111-coverage:
+py36-django111-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
@@ -227,3 +228,15 @@ release_pypi:
     name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
     paths:
     - dist/
+
+
+publish_github:
+  stage: publish
+  image: onegreyonewhite/tox:ubuntu
+  only:
+   - tags
+  when: manual
+  before_script:
+  - npm install -g github-release-cli
+  script:
+  - github-release upload --owner vstconsulting --repo polemarch --tag="${CI_COMMIT_TAG}" --name="${CI_COMMIT_TAG}" --body="${CI_COMMIT_MESSAGE}" "dist/polemarch-${CI_COMMIT_TAG}-0.x86_64.rpm" "dist/polemarch_${CI_COMMIT_TAG}-0_amd64.deb" "dist/polemarch-${CI_COMMIT_TAG}.tar.gz"

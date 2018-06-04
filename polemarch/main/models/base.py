@@ -31,12 +31,6 @@ class BQuerySet(_BQuerySet):
             super(BQuerySet, self).create, **kwargs
         )
 
-    def cleared(self):
-        return (
-            self.filter(hidden=False) if hasattr(self.model, "hidden")
-            else self
-        )
-
     def user_filter(self, user, only_leads=False):
         # pylint: disable=unused-argument
         return self.model.acl_handler.user_filter(self, user, only_leads=False)
