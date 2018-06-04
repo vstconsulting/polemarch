@@ -211,10 +211,10 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a href="#"
-                                        onclick="<%- pmObj.model.className %>.deleteRows($('.multiple-select .item-row.selected')); return false;" >Delete from this page</a>
+                                        onclick="spajs.showLoader(<%- pmObj.model.className %>.deleteRows($('.multiple-select .item-row.selected'))); return false;" >Delete from this page</a>
                                 </li> 
                                 <li>
-                                    <a href="#" onclick="<%- pmObj.model.className %>.deleteSelected(); return false;" >Delete all selected elements</a>
+                                    <a href="#" onclick="spajs.showLoader(<%- pmObj.model.className %>.deleteSelected()); return false;" >Delete all selected elements</a>
                                 </li>
                                 <% for(var j in pmObj.model.page_list.actionsOnSelected){ %> 
                                     <% if(!pmObj.model.page_list.actionsOnSelected[j].title){ %>
@@ -520,7 +520,7 @@
                             Status: <%- error.status %>
                         </p>
                         <% if(error.error_data == undefined || error.status >= 500){ %> 
-                            <a target="_blank" href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20<%- window.polemarch_version %>">
+                            <a target="_blank" href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20<%- window.gui_version %>">
                                 Follow the link to create a bug report
                             </a> 
                         <% } %>
@@ -849,7 +849,7 @@
                 <% } %>
             <% } %>
         </select>
-        <div class="input-group-addon" onclick="spajs.showLoader(<%- pmObj.model.className %>.addExistingChildItemToParent(<%- parentObj.model.className %>, <%- parent_item %>));">
+        <div class="input-group-addon" onclick="spajs.showLoader(<%- pmObj.model.className %>.addExistingChildItemToParent('<%- parentObj.model.page_name %>', <%- parent_item %>));">
             <span class="glyphicon glyphicon-plus"></span>
         </div>
     </div>
