@@ -223,6 +223,8 @@ release_pypi:
   stage: release
   only:
    - tags
+  before_script:
+  - pip install vstcompile[doc]
   script:
    - python2 setup.py compile
    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
