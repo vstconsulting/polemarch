@@ -3,12 +3,12 @@
 {% load i18n %}
 
 {% block style %}
-    <link rel="shortcut icon" href="{% static 'img/logo/favicon.ico' %}?v={{polemarch_version}}" />
+    <link rel="shortcut icon" href="{% static 'img/logo/favicon.ico' %}?v={{gui_version}}" />
     <!-- Google Font -->
   <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,500,600,700,800,900,300italic,400italic,600italic">
     <!-- Bootstrap 3.3.6 -->
-    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}?v={{polemarch_version}}">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}">
 
     <link href="{% static 'auth/main.css' %}" rel="stylesheet">
     <!--[if lt IE 9]>
@@ -17,6 +17,7 @@
     <![endif]-->
 {% endblock %}
 
+{% block title %}<title>{% if name %}{{ name }} – {% endif %}Polemarch | Log in </title>{% endblock %}
 
 {% block body %}
 <body class="hold-transition login-page">
@@ -25,7 +26,7 @@
       <div class="mobile-index-body">
 
           <div class="mobile-index-body-inner">
-              <img src="{% static 'img/logo/vertical.png' %}?v={{polemarch_version}}" alt="Polemarch logo" class="img-responsive center-block logo-img">
+              <img src="{% static 'img/logo/vertical.png' %}?v={{gui_version}}" alt="Polemarch logo" class="img-responsive center-block logo-img">
                <!-- <h1>Polemarch</h1> -->
                 <h2>Manage servers with comfort</h2>
 

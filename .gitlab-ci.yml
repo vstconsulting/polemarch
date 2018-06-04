@@ -8,9 +8,9 @@ variables:
   RESTORE_CACHE_ATTEMPTS: 3
   DJANGO_LOG_LEVEL: 'CRITICAL'
 
-cache:
-  paths:
-    - .tox/
+#cache:
+#  paths:
+#    - .tox/
 
 
 stages:
@@ -19,6 +19,7 @@ stages:
   - test
   - packaging-test
   - release
+  - publish
 
 
 .branch_tests_template: &branch_tests
@@ -82,7 +83,7 @@ stages:
   only:
    - master
   script:
-   - make test ENVS=$CI_BUILD_NAME-coverage
+   - make test ENVS=$CI_BUILD_NAME-install
   dependencies:
   - build_zip
   retry: 2
@@ -99,13 +100,17 @@ code_style:
     - /^.{0,}issue_.*$/
     - developer
   retry: 2
+  cache:
+    paths:
+      - .tox/
 
-py27-django111-coverage:
+
+py27-django111-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
-py36-django111-coverage:
+py36-django111-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
@@ -156,7 +161,7 @@ build_zip:
   script:
    - make build RELEASE=${CI_BUILD_ID}
   artifacts:
-    expire_in: 30 minutes
+    expire_in: 4 hours
     paths:
     - dist/
   retry: 2
@@ -222,8 +227,23 @@ release_pypi:
    - python2 setup.py compile
    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
   allow_failure: true
-  when: manual
+  # when: manual
   artifacts:
     name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
     paths:
     - dist/
+
+
+publish_github:
+  stage: publish
+  image: onegreyonewhite/tox:ubuntu
+  only:
+   - tags
+  before_script:
+  - npm install -g github-release-cli
+  script:
+  - git remote add gitlab https://gitlab-ci-token:${GITLAB_TOKEN}@gitlab.com/vstconsulting/polemarch.git
+  - git push gitlab master
+  - git push gitlab ${CI_COMMIT_TAG}
+  - sleep 10
+  - github-release upload --owner vstconsulting --repo polemarch --tag="${CI_COMMIT_TAG}" --name="${CI_COMMIT_TAG}" --body="${CI_COMMIT_MESSAGE}" "dist/polemarch-${CI_COMMIT_TAG}-0.x86_64.rpm" "dist/polemarch_${CI_COMMIT_TAG}-0_amd64.deb" "dist/polemarch-${CI_COMMIT_TAG}.tar.gz"

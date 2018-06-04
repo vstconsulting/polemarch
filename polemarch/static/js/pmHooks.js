@@ -191,7 +191,7 @@ pmHooks.model.page_item = {
     },
     onBeforeSave:function(data, item_id)
     {
-        if(pmHooks.model.items[item_id].recipients.length == 0)
+        if(pmHooks.parseRecipientsFromStrToArr(pmHooks.model.items[item_id].recipients).length == 0)
         {
             $.notify("You should add at least one recipient", "error");
             return false;
@@ -240,7 +240,7 @@ pmHooks.model.page_new = {
     ],
     onBeforeSave:function(data)
     {
-        if(pmHooks.model.newItem.recipients.length == 0)
+        if(pmHooks.parseRecipientsFromStrToArr(pmHooks.model.newItem.recipients).length == 0)
         {
             $.notify("You should add at least one recipient", "error");
             return false;
