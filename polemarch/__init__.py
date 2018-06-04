@@ -23,6 +23,6 @@ default_settings = {
     "VST_WSGI": os.getenv("VST_WSGI", 'polemarch.main.wsgi')
 }
 
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 
 prepare_environment(**default_settings)

@@ -2894,6 +2894,7 @@ the more time they need for execution and, finally, the more time Ansible needs 
                "name": "test hook on user add",
                "type": "HTTP",
                "when": "on_user_add",
+               "enable": true,
                "recipients": "http://localhost:8000/hook_trigger"
            },
            {
@@ -2901,6 +2902,7 @@ the more time they need for execution and, finally, the more time Ansible needs 
                "name": "all hooks",
                "type": "HTTP",
                "when": null,
+               "enable": false,
                "recipients": "http://localhost:8000/hook_trigger_another"
            },
            {
@@ -2908,6 +2910,7 @@ the more time they need for execution and, finally, the more time Ansible needs 
                "name": "Script hooks",
                "type": "SCRIPT",
                "when": null,
+               "enable": true,
                "recipients": "test.sh"
            }
        }
@@ -2917,6 +2920,7 @@ the more time they need for execution and, finally, the more time Ansible needs 
    :>json string type: type of hook. For more details look :http:get:`/api/v1/hooks/types/`.
    :>json string when: type of event on which hook will be executed. If ``when`` is ``null``, this hook will be
        executed for every type of event. For more details look :http:get:`/api/v1/hooks/types/`.
+   :>json boolean enable: if this field is true, hook will be executed.
    :>json string recipients: recipients of hook.
 
 .. http:get:: /api/v1/hooks/{id}/
@@ -2942,6 +2946,7 @@ the more time they need for execution and, finally, the more time Ansible needs 
            "name": "test hook on user add",
            "type": "HTTP",
            "when": "on_user_add",
+           "enable": true,
            "recipients": "http://localhost:8000/hook_trigger"
        }
 
@@ -2964,6 +2969,7 @@ the more time they need for execution and, finally, the more time Ansible needs 
           "name": "new hook",
           "type": "SCRIPT",
           "when": "on_execution",
+          "enable": true,
           "recipients": "new-test.sh"
       }
 
@@ -2976,6 +2982,7 @@ the more time they need for execution and, finally, the more time Ansible needs 
           "name": "new hook",
           "type": "SCRIPT",
           "when": "on_execution",
+          "enable": true,
           "recipients": "new-test.sh"
        }
 
