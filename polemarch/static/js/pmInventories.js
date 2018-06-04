@@ -2299,10 +2299,20 @@ pmInventories.model.page_new = {
 
         if(callOpt.parent_item)
         {
+            var link = window.location.href.split(/[&?]/g)[1];
+            var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+            var link_parts = link.match(pattern);
+            var link_with_parents = "";
+            for(var i in link_parts)
+            {
+                link_with_parents += link_parts[i] +"/";
+            }
+            link_with_parents += this.model.name;
+
             if(callOpt.parent_type == 'project')
             {
                 $.when(pmProjects.addSubInventories(callOpt.parent_item, [data.id])).always(function(){
-                    $.when(spajs.open({ menuId:"project/"+callOpt.parent_item})).always(function(){
+                    $.when(spajs.open({ menuId:link_with_parents})).always(function(){
                         def.resolve()
                     })
                 })

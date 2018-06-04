@@ -142,6 +142,29 @@ be useful for troubleshoot problems (logging level etc). Also there is settings
 to change timezone for whole app and directory where Polemarch will store
 ansible projects cloned from repositories.
 
+If you want to use LDAP protocol, you should create next settings in section ``[main]``.
+
+.. sourcecode:: bash
+
+    ldap-server = ldap://server-ip-or-host:port
+    ldap-default-domain = domain.name
+
+ldap-default-domain is optional argument, that is aimed to make user authorization easier
+(without input of domain name).
+
+So in this case authorization logic will be the following:
+
+1. System checks combination of login:password in database;
+
+2. System checks combination of login:password in LDAP:
+
+   * if domain was mentioned, it will be set during authorization
+     (if user enter login without ``user@domain.name`` or without ``DOMAIN\user`` );
+
+   * if authorization was successful and there is user with mentioned login in database,
+     server create session for him.
+
+
 .. _database:
 
 Database settings
@@ -256,3 +279,19 @@ Here placed settings related to web-server used by Polemarch in production
 (logging, PID-file and so on).
 More settings in `uWSGI docs
 <http://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_.
+
+Installation of additional packages to Polemarch
+------------------------------------------------
+If you want to install some additional package to Polemarch from rpm or dep,
+you should run next command:
+
+.. sourcecode:: bash
+
+        sudo -U polemarch /opt/polemarch/bin/pip install package_name
+
+For correct work all requirements for this package should be installed in your system.
+Notice, that after package reinstallation or after package update you should
+set all this requirements again.
+
+If you want to install some additional package from github or gitlab,
+you should just install this package to your system or to your virtual environment.
