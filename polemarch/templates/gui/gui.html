@@ -5,7 +5,7 @@
     <title>{% if name %}{{ name }} – {% endif %}Polemarch Dashboard</title>
 {% endblock %}
 
-{% block gui/logo %}
+{% block gui_logo %}
     <a href="/" class="logo app-logo">
         <!-- mini logo for sidebar mini 50x50 pixels -->
         <!-- <span class="logo-mini"><b>P</b></span> -->
@@ -109,6 +109,7 @@ window.resourceList = [
     { type:'js', name: "{% static 'js/libs/ansi_up.js' %}?v={{gui_version}}"},
     { type:'js', name: "{% static 'js/libs/Sortable.min.js' %}?v={{gui_version}}"},
 
+    { type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
     { type:'js', name: "{% static 'js/common.js' %}?v={{gui_version}}"},
     { type:'js', name: "{% static 'js/polemarch.js' %}?v={{gui_version}}"},
     { type:'js', name: "{% static 'js/jsonEditor.js' %}?v={{gui_version}}"},
