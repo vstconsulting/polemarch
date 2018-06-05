@@ -399,16 +399,16 @@ pmItems.showSearchResultsForParent = function (holder, menuInfo, data)
                 allowClear: true
             });
             def.resolve();
-        }).fail(function()
+        }).fail(function(e)
         {
-            $.notify("", "error");
-            def.reject();
+            polemarch.showErrors(e.responseJSON);
+            def.reject(e);
         })
 
-    }).fail(function()
+    }).fail(function(e)
     {
-        $.notify("Error", "error");
-        def.reject();
+        polemarch.showErrors(e.responseJSON);
+        def.reject(e);
     })
 
     return def.promise();
@@ -583,16 +583,16 @@ pmItems.showItemFromAnotherClass = function (holder, menuInfo, data)
             $(holder).insertTpl(spajs.just.render(tpl, {item_id: child_item, pmObj: thisObj, parentObj:parentObj,
                 opt: {parent_type:parent_type, parent_item:parent_item, back_link:back_link, link_with_parents:link_with_parents}}))
             def.resolve();
-        }).fail(function ()
+        }).fail(function(e)
         {
-            $.notify("", "error");
-            def.reject();
+            polemarch.showErrors(e.responseJSON);
+            def.reject(e);
         }).promise();
 
-    }).fail(function ()
+    }).fail(function(e)
     {
-        $.notify("", "error");
-        def.reject();
+        polemarch.showErrors(e.responseJSON);
+        def.reject(e);
     })
 
     return def.promise();
@@ -686,10 +686,10 @@ pmItems.showNewItemPage = function (holder, menuInfo, data)
             $(holder).insertTpl(text);
             def.resolve();
 
-        }).fail(function ()
+        }).fail(function (e)
         {
-            $.notify("", "error");
-            def.reject();
+            polemarch.showErrors(e.responseJSON);
+            def.reject(e);
         })
     }
     else
@@ -834,15 +834,15 @@ pmItems.showListFromAnotherClass = function(holder, menuInfo, data)
                 allowClear: true
             });
             def.resolve();
-        }).fail(function()
+        }).fail(function(e)
         {
-            $.notify("", "error");
-            def.reject();
+            polemarch.showErrors(e.responseJSON);
+            def.reject(e);
         })
-    }).fail(function ()
+    }).fail(function(e)
     {
-        $.notify("Error", "error");
-        def.reject();
+        polemarch.showErrors(e.responseJSON);
+        def.reject(e);
     })
 
     return def.promise();
