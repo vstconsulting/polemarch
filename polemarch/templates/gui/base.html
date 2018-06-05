@@ -8,10 +8,8 @@
       {% block custom_style %}
          <link rel="stylesheet" href="{% static 'css/polemarch-gui.css' %}?v={{gui_version}}">
       {% endblock %}
-
   </head>
-  <body>
-
+  <body class="{% block bodyclass %}{% endblock %}">
     {% block logo %}
         <a href="/" class="logo">
             <!-- mini logo for sidebar mini 50x50 pixels -->
@@ -24,7 +22,7 @@
     {% endblock %}
 
     {% block flavicon %}
-        <link rel="shortcut icon" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'img/logo/favicon.ico' %}?v={{gui_version}}" />
+        <link rel="shortcut icon" href="{{host_url}}{% static 'img/logo/favicon.ico' %}?v={{gui_version}}" />
     {% endblock %}
 
 
