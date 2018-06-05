@@ -8,11 +8,6 @@ variables:
   RESTORE_CACHE_ATTEMPTS: 3
   DJANGO_LOG_LEVEL: 'CRITICAL'
 
-#cache:
-#  paths:
-#    - .tox/
-
-
 stages:
   - code_standarts
   - build
@@ -21,7 +16,8 @@ stages:
   - release
   - publish
 
-
+# Test templates
+###########################################
 .branch_tests_template: &branch_tests
   stage: test
   image: onegreyonewhite/tox:tox
@@ -38,11 +34,9 @@ stages:
     - htmlcov/
     - dist/
   except:
-    - master
     - GUI
     - tags
   retry: 2
-
 
 .pack_tamplate: &packing-test
   stage: packaging-test
@@ -71,23 +65,9 @@ stages:
     - dist/
   allow_failure: false
   only:
-    # - /^issue_.*$/
     - developer
-    # - master
     - make_bin_packages
   retry: 2
-
-
-.tests_template: &tests_template
-  stage: test
-  only:
-   - master
-  script:
-   - make test ENVS=$CI_BUILD_NAME-install
-  dependencies:
-  - build_zip
-  retry: 2
-
 
 # Branch tests
 ###########################################
@@ -99,11 +79,8 @@ code_style:
   only:
     - /^.{0,}issue_.*$/
     - developer
+    - master
   retry: 2
-  cache:
-    paths:
-      - .tox/
-
 
 py27-django111-install:
   <<: *branch_tests
@@ -151,47 +128,6 @@ default_deb_tests:
    - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
    - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
 
-
-# Master tests
-###########################################
-build_zip:
-  stage: build
-  only:
-   - master
-  script:
-   - make build RELEASE=${CI_BUILD_ID}
-  artifacts:
-    expire_in: 4 hours
-    paths:
-    - dist/
-  retry: 2
-
-py27-django111:
-  <<: *tests_template
-py35-django111:
-  <<: *tests_template
-py36-django111:
-  <<: *tests_template
-
-pep8_checks:
-  stage: code_standarts
-  only:
-   - master
-  script:
-   - make test ENVS=flake
-  allow_failure: false
-  retry: 2
-
-# pylint_checks:
-  #stage: code_standarts
-  #only:
-  # - master
-  #script:
-  # - make test ENVS=pylint
-  #allow_failure: false
-  #retry: 2
-
-
 # Realese
 ###########################################
 release_rpm:
@@ -227,14 +163,19 @@ release_pypi:
   - pip install vstcompile[doc]
   script:
    - python2 setup.py compile
-   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
   allow_failure: true
-  # when: manual
   artifacts:
     name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
     paths:
     - dist/
 
+publish_pypi:
+  stage: publish
+  image: onegreyonewhite/tox:ubuntu
+  only:
+   - tags
+  script:
+  - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
 
 publish_github:
   stage: publish
