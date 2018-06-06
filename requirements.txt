@@ -1,5 +1,5 @@
 # Main
-vstutils[rpc,ldap,doc,coreapi,prod]==1.0.9
+vstutils[rpc,ldap,doc,coreapi,prod]==1.0.11
 pyyaml
 docutils==0.14
 markdown2==2.3.5
