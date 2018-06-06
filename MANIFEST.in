@@ -1,4 +1,3 @@
-include polemarch/README.md
 include polemarch/web.ini
 include README.rst LICENSE LICENSE_NAME
 include polemarch/main/settings.ini

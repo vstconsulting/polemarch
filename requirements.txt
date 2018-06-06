@@ -1,6 +1,5 @@
 # Main
-vstutils[rpc,ldap,doc,coreapi]==1.0.7
-six
+vstutils[rpc,ldap,doc,coreapi,prod]==1.0.11
 pyyaml
 docutils==0.14
 markdown2==2.3.5
@@ -14,9 +13,6 @@ gitpython==2.1.9
 
 # Hooks
 requests==2.18.4
-
-# additional DB and cache connectors
-PyMySQL
 
 # Ansible required packages
 ansible>=2.1, <=2.5.3

@@ -38,7 +38,7 @@ class TaskFilterQuerySet(BQuerySet):
 
 # Block of real models
 class Task(BModel):
-    objects     = TaskFilterQuerySet.as_manager()
+    objects     = models.Manager.from_queryset(TaskFilterQuerySet)()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
                                     related_query_name="tasks")
     name        = models.CharField(max_length=256, default=uuid.uuid1)
@@ -221,7 +221,7 @@ class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
 
 # noinspection PyTypeChecker
 class PeriodicTask(AbstractModel):
-    objects     = PeriodicTaskQuerySet.as_manager()
+    objects     = models.Manager.from_queryset(PeriodicTaskQuerySet)()
     project        = models.ForeignKey(Project, on_delete=models.CASCADE,
                                        related_query_name="periodic_tasks")
     mode           = models.CharField(max_length=256)
@@ -362,7 +362,7 @@ class HistoryQuerySet(BQuerySet):
 
 
 class History(BModel):
-    objects        = HistoryQuerySet.as_manager()
+    objects        = models.Manager.from_queryset(HistoryQuerySet)()
     project        = models.ForeignKey(Project,
                                        on_delete=models.CASCADE,
                                        related_query_name="history",
