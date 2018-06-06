@@ -1,4 +1,4 @@
-# pylint: disable=no-member,invalid-name,broad-except
+# pylint: disable=no-member,invalid-name,broad-except,import-error
 from __future__ import absolute_import, unicode_literals
 import celery
 import ansible
