@@ -10,7 +10,7 @@ from setuptools import find_packages, setup
 from setuptools.extension import Extension
 from setuptools.command.sdist import sdist as _sdist
 try:
-    from Cython.Build import cythonize
+    from Cython.Build import cythonize, build_ext as _build_ext
 except ImportError:
     has_cython = False
 else:
@@ -105,6 +105,8 @@ def make_setup(**opts):
     cmdclass = opts.get('cmdclass', dict())
     if 'compile' not in cmdclass:
         cmdclass.update({"compile": get_compile_command(ext_mod_dict)})
+    if has_cython:
+        cmdclass.update({'build_ext': _build_ext})
     if has_sphinx and 'build_sphinx' not in cmdclass:
         cmdclass['build_sphinx'] = BuildDoc
     opts['cmdclass'] = cmdclass
