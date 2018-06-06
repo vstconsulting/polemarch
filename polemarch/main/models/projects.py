@@ -35,7 +35,7 @@ class ProjectQuerySet(AbstractVarsQuerySet):
 
 
 class Project(AbstractModel):
-    objects       = ProjectQuerySet.as_manager()
+    objects       = models.Manager.from_queryset(ProjectQuerySet)()
     handlers      = objects._queryset_class.handlers
     task_handlers = objects._queryset_class.task_handlers
     repository    = models.CharField(max_length=2*1024)

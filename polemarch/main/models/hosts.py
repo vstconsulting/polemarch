@@ -44,9 +44,8 @@ class HostQuerySet(AbstractVarsQuerySet):
 
 
 class Host(AbstractModel):
-    objects     = HostQuerySet.as_manager()
-    type        = models.CharField(max_length=5,
-                                   default="HOST")
+    objects     = models.Manager.from_queryset(HostQuerySet)()
+    type        = models.CharField(max_length=5, default="HOST")
 
     types = ["HOST", "RANGE"]
 
@@ -108,7 +107,7 @@ class GroupQuerySet(AbstractVarsQuerySet):
 
 class Group(AbstractModel):
     CiclicDependencyError = CiclicDependencyError
-    objects     = GroupQuerySet.as_manager()
+    objects     = models.Manager.from_queryset(GroupQuerySet)()
     hosts       = ManyToManyFieldACL(Host, related_query_name="groups")
     parents     = ManyToManyFieldACLReverse('Group', blank=True, null=True,
                                             related_query_name="childrens")

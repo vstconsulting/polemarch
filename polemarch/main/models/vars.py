@@ -49,9 +49,8 @@ class AbstractVarsQuerySet(BQuerySet):
 
 
 class AbstractModel(ACLModel):
-    objects     = AbstractVarsQuerySet.as_manager()
-    name        = models.CharField(max_length=512,
-                                   default=uuid.uuid1)
+    objects     = models.Manager.from_queryset(AbstractVarsQuerySet)()
+    name        = models.CharField(max_length=512, default=uuid.uuid1)
     variables   = GenericRelation(Variable, related_query_name="variables",
                                   object_id_field="object_id")
 

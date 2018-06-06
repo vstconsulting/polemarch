@@ -278,6 +278,7 @@ ignore-mixin-members=yes
 # and thus existing member attributes cannot be deduced by static analysis. It
 # supports qualified module names, as well as Unix pattern matching.
 ignored-modules=vstutils.urls,vstutils.api.base,vstutils.api.views,vstutils.gui.views,vstutils.api.permissions,vstutils.api.filters,vstutils.middleware,vstutils.environment,vstutils.utils,vstutils.exceptions,vstutils.models
+# ignored-modules=vstutils
 
 # List of class names for which member attributes should not be checked (useful
 # for classes with dynamically set attributes). This supports the use of

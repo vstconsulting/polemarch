@@ -1,68 +1,47 @@
-# pylint: disable=no-member,invalid-name,broad-except
+# pylint: disable=no-member,invalid-name,broad-except,import-error
 from __future__ import absolute_import, unicode_literals
-import logging
-import sys
-
-from django.core.management.base import BaseCommand, CommandError as CommandErrorBase
-from django.conf import settings
-import django
 import celery
 import ansible
-from vstutils.utils import exception_with_traceback
-
-from ... import __version__
-
-logger = logging.getLogger("polemarch")
+from django.utils.six.moves import input
+from vstutils.management.commands._base import BaseCommand as _BaseCommand
 
 
-class CommandError(CommandErrorBase):
-    pass
+class BaseCommand(_BaseCommand):
+
+    def _get_versions(self):
+        versions = super(BaseCommand, self)._get_versions()
+        versions['ansible'] = ansible.__version__
+        versions['celery'] = celery.__version__
+        return versions
 
 
-class ServiceCommand(BaseCommand):
-    requires_system_checks = False
-    keep_base_opts = False
-    stdout, stderr = sys.stdout, sys.stderr
+class ServiceCommand(BaseCommand):  # nocv
+    '''
+    Command class for service utils.
+    '''
+    interactive = False
 
     def add_arguments(self, parser):
         super(ServiceCommand, self).add_arguments(parser)
-        parser.add_argument(
-            '-l', '--log-level',
-            action='store',
-            dest='log-level',
-            default=False,
-            type=str,
-            help='Set logs level [debug|warning|error|critical]')
+        if self.interactive:
+            parser.add_argument(
+                '--noinput', '--no-input',
+                action='store_false', dest='interactive', default=True,
+                help="Do NOT prompt the user for input of any kind.",
+            )
 
-    @exception_with_traceback()
     def handle(self, *args, **options):
-        LOG_LEVEL = settings.LOG_LEVEL
-        if options.get('log-level', False):
-            LOG_LEVEL = options.get('log-level', LOG_LEVEL)
-        logger.setLevel(LOG_LEVEL.upper())
-        self.LOG_LEVEL = LOG_LEVEL.upper()
+        super(ServiceCommand, self).handle(*args, **options)
+        self.interactive_mode = options.pop('interactive', False)
 
-    def get_version(self):
-        vstr = (
-            u'Polemarch {c}, Django {d.__version__}, '
-            u'Celery {r.__version__}, Ansible {a.__version__}'
-        )
-        return vstr.format(c=__version__, d=django, r=celery, a=ansible)
+    def ask_user(self, message, default=None):
+        if getattr(self, 'interactive_mode', False):
+            return input(message)
+        return default
 
-    def _print(self, info=""):
-        self.stdout.write(str(info))  # nocv
-
-    def _success(self, info=""):  # nocv
-        try:
-            self._print(self.style.SUCCESS(info))
-        except:
-            self._print(self.style.MIGRATE_SUCCESS(info))
-
-    def _info(self, info=""):
-        self._print(self.style.HTTP_INFO(info))  # nocv
-
-    def _error(self, info=""):
-        self._print(self.style.ERROR(info))  # nocv
-
-    def _warning(self, info=""):
-        self._print(self.style.WARNING(info))  # nocv
+    def ask_user_bool(self, message, default=True):
+        reply = self.ask_user(message, 'yes' if default else 'no').lower()
+        if reply in ['y', 'yes']:
+            return True
+        elif reply in ['n', 'no']:
+            return False

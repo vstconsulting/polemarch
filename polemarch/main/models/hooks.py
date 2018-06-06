@@ -47,7 +47,7 @@ class HooksQuerySet(BQuerySet):
 
 class Hook(BModel):
     # pylint: disable=no-member
-    objects = HooksQuerySet.as_manager()
+    objects = models.Manager.from_queryset(HooksQuerySet)()
     handlers = HookHandlers("HOOKS", "'type' needed!")
     name       = models.CharField(max_length=512, default=uuid.uuid1)
     type       = models.CharField(max_length=32, null=False)

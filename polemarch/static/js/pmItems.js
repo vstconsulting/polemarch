@@ -334,7 +334,7 @@ pmItems.showSearchResultsForParent = function (holder, menuInfo, data)
 
     $.when.apply($, defArr).done(function ()
     {
-        var parentObj = thisObj.defineParentPmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_type);
+        var parentObj = thisObj.definePmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_type);
         var parent_type = parentObj.model.page_name;
         var parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_item;
 
@@ -399,16 +399,16 @@ pmItems.showSearchResultsForParent = function (holder, menuInfo, data)
                 allowClear: true
             });
             def.resolve();
-        }).fail(function()
+        }).fail(function(e)
         {
-            $.notify("", "error");
-            def.reject();
+            polemarch.showErrors(e.responseJSON);
+            def.reject(e);
         })
 
-    }).fail(function()
+    }).fail(function(e)
     {
-        $.notify("Error", "error");
-        def.reject();
+        polemarch.showErrors(e.responseJSON);
+        def.reject(e);
     })
 
     return def.promise();
@@ -560,7 +560,7 @@ pmItems.showItemFromAnotherClass = function (holder, menuInfo, data)
 
     $.when.apply($, defArr).done(function ()
     {
-        var parentObj = thisObj.defineParentPmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_type);
+        var parentObj = thisObj.definePmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_type);
 
         parent_type = parentObj.model.page_name;
         parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_item;
@@ -583,44 +583,56 @@ pmItems.showItemFromAnotherClass = function (holder, menuInfo, data)
             $(holder).insertTpl(spajs.just.render(tpl, {item_id: child_item, pmObj: thisObj, parentObj:parentObj,
                 opt: {parent_type:parent_type, parent_item:parent_item, back_link:back_link, link_with_parents:link_with_parents}}))
             def.resolve();
-        }).fail(function ()
+        }).fail(function(e)
         {
-            $.notify("", "error");
-            def.reject();
+            polemarch.showErrors(e.responseJSON);
+            def.reject(e);
         }).promise();
 
-    }).fail(function ()
+    }).fail(function(e)
     {
-        $.notify("", "error");
-        def.reject();
+        polemarch.showErrors(e.responseJSON);
+        def.reject(e);
     })
 
     return def.promise();
 }
 
 /**
- * Функция принимает строку, содержащую в себе название типа родительского pm объекта,
+ * Функция принимает строку, содержащую в себе название типа pm объекта,
  * и возвращает соответствующий данному типу pm объект.
  */
-pmItems.defineParentPmObject = function(parent_type)
+pmItems.definePmObject = function(pmObj_type)
 {
-    var parentObj = undefined;
-    switch(parent_type)
+    var pmObj = undefined;
+    switch(pmObj_type)
     {
         case 'project':
         case 'projects':
-            parentObj = pmProjects;
+            pmObj = pmProjects;
             break;
         case 'inventory':
         case 'inventories':
-            parentObj = pmInventories;
+            pmObj = pmInventories;
             break;
         case 'group':
         case 'groups':
-            parentObj = pmGroups;
+            pmObj = pmGroups;
+            break;
+        case 'host':
+        case 'hosts':
+            pmObj = pmHosts;
+            break;
+        case 'template':
+        case 'templates':
+            pmObj = pmTasksTemplates;
+            break;
+        case 'user':
+        case 'users':
+            pmObj = pmUsers;
             break;
     }
-    return parentObj;
+    return pmObj;
 }
 
 pmItems.showNewItemPage = function (holder, menuInfo, data)
@@ -663,7 +675,7 @@ pmItems.showNewItemPage = function (holder, menuInfo, data)
 
         $.when.apply($, defArr).done(function ()
         {
-            var parentObj = thisObj.defineParentPmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_type);
+            var parentObj = thisObj.definePmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_type);
 
             parent_type = parentObj.model.page_name;
             parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_item;
@@ -674,10 +686,10 @@ pmItems.showNewItemPage = function (holder, menuInfo, data)
             $(holder).insertTpl(text);
             def.resolve();
 
-        }).fail(function ()
+        }).fail(function (e)
         {
-            $.notify("", "error");
-            def.reject();
+            polemarch.showErrors(e.responseJSON);
+            def.reject(e);
         })
     }
     else
@@ -700,14 +712,14 @@ pmItems.loadAllParentsData = function (parentObjectsArr)
     var thisObj = this;
     for(var i in parentObjectsArr)
     {
-        var parentObj = thisObj.defineParentPmObject(parentObjectsArr[i].parent_type);
+        var parentObj = thisObj.definePmObject(parentObjectsArr[i].parent_type);
         var promise = $.when(parentObj.loadItem(parentObjectsArr[i].parent_item)).done(function(data)
         {
             for(var j in defArr)
             {
                 if(defArr[j] == this)
                 {
-                    parentObj = thisObj.defineParentPmObject(parentObjectsArr[j].parent_type);
+                    parentObj = thisObj.definePmObject(parentObjectsArr[j].parent_type);
                     parentObjectsArr[j].parent_type_plural = parentObj.model.name;
                     parentObjectsArr[j].item_name = parentObj.model.items[parentObjectsArr[j].parent_item].name;
                     thisObj.model.parentObjectsData[j] = parentObjectsArr[j];
@@ -764,7 +776,7 @@ pmItems.showListFromAnotherClass = function(holder, menuInfo, data)
 
     $.when.apply($, defArr).done(function ()
     {
-        var parentObj = thisObj.defineParentPmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length-1].parent_type);
+        var parentObj = thisObj.definePmObject(thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length-1].parent_type);
         parent_type = parentObj.model.page_name;
         parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length-1].parent_item;
 
@@ -822,15 +834,15 @@ pmItems.showListFromAnotherClass = function(holder, menuInfo, data)
                 allowClear: true
             });
             def.resolve();
-        }).fail(function()
+        }).fail(function(e)
         {
-            $.notify("", "error");
-            def.reject();
+            polemarch.showErrors(e.responseJSON);
+            def.reject(e);
         })
-    }).fail(function ()
+    }).fail(function(e)
     {
-        $.notify("Error", "error");
-        def.reject();
+        polemarch.showErrors(e.responseJSON);
+        def.reject(e);
     })
 
     return def.promise();
@@ -1553,7 +1565,7 @@ pmItems.addExistingChildItemToParent = function(parent_type, parent_item)
     else
     {
         var childIds = [];
-        var parentObj = thisObj.defineParentPmObject(parent_type);
+        var parentObj = thisObj.definePmObject(parent_type);
         for(var i in  parentObj.model.items[parent_item][childItem_type])
         {
             childIds.push(parentObj.model.items[parent_item][childItem_type][i].id);
@@ -1601,7 +1613,7 @@ pmItems.deleteChildFromParent = function (parent_type, parent_item, childItem_id
     {
         childrenItemsIds.push(thisObj.model.itemsForParent[i].id)
     }
-    var parentObj = thisObj.defineParentPmObject(parent_type);
+    var parentObj = thisObj.definePmObject(parent_type);
     parent_type = parentObj.model.page_name;
     spajs.ajax.Call({
         url: hostname + "/api/v1/" + parentObj.model.name + "/" + parent_item + "/" + thisObj.model.name + "/",
@@ -1657,7 +1669,7 @@ pmItems.deleteChildrenFromParent = function (parent_type, parent_item)
     {
         childrenItemsIds.push(thisObj.model.itemsForParent[i].id)
     }
-    var parentObj = thisObj.defineParentPmObject(parent_type);
+    var parentObj = thisObj.definePmObject(parent_type);
     parent_type = parentObj.model.page_name;
     spajs.ajax.Call({
         url: hostname + "/api/v1/" + parentObj.model.name + "/" + parent_item + "/" + thisObj.model.name + "/",
