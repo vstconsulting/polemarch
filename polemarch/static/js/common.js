@@ -1,22 +1,22 @@
 
-var pmLocalSettings = {
+var guiLocalSettings = {
     __settings:{},
     get:function(name){
         return this.__settings[name];
     },
     set:function(name, value){
         this.__settings[name] = value;
-        window.localStorage['pmLocalSettings'] = JSON.stringify(this.__settings)
-        tabSignal.emit('pmLocalSettings.'+name, {type:'set', name:name, value:value})
+        window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings)
+        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
     }
 }
 
 
-if(window.localStorage['pmLocalSettings'])
+if(window.localStorage['guiLocalSettings'])
 {
     try{
-        pmLocalSettings.__settings = window.localStorage['pmLocalSettings'];
-        pmLocalSettings.__settings = JSON.parse(pmLocalSettings.__settings)
+        guiLocalSettings.__settings = window.localStorage['guiLocalSettings'];
+        guiLocalSettings.__settings = JSON.parse(guiLocalSettings.__settings)
 
     }catch (e)
     {
@@ -25,7 +25,7 @@ if(window.localStorage['pmLocalSettings'])
 }
 
 
-if(pmLocalSettings.get('hideMenu'))
+if(guiLocalSettings.get('hideMenu'))
 {
     if(window.innerWidth>767){
         $("body").addClass('sidebar-collapse');

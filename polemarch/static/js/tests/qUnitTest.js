@@ -3916,7 +3916,7 @@ window.qunitTestsArray.push({
 
                 setTimeout(function(){// Ждём завершения всех асинхронных запросов на странице
 
-                    tabSignal.emit('pmLocalSettings.hideMenu', {type:'set', name:'hideMenu', value:false})
+                    tabSignal.emit('guiLocalSettings.hideMenu', {type:'set', name:'hideMenu', value:false})
                     setTimeout(function()
                     {
                         render(done)

@@ -812,7 +812,7 @@ pmDashboard.getDataForDashboardFromBulk = function ()
 
 
 
-tabSignal.connect('pmLocalSettings.hideMenu', function(){
+tabSignal.connect('guiLocalSettings.hideMenu', function(){
 
     setTimeout(function(){
 

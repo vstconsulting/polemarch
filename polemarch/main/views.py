@@ -3,8 +3,8 @@ from vstutils.gui.views import GUIView, Login
 
 
 class AppGUIView(GUIView):
-    template_name = "gui/app-gui.html"
+    template_name = "gui/gui.html"
 
 
 class AppLogin(Login):
-    template_name = 'auth/app-login.html'
+    template_name = 'auth/login.html'

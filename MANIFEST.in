@@ -1,4 +1,4 @@
-include polemarch/web.ini
+include polemarch/web.ini setup.cfg
 include README.rst LICENSE LICENSE_NAME
 include polemarch/main/settings.ini
 include polemarch/main/tests/exemplary_complex_inventory
