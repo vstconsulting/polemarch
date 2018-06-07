@@ -97,7 +97,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             inventory_path = call_args[3]
             with open(inventory_path, 'r') as inventory_file:
                 inventory = inventory_file.read().split('\n')
-                sHst = inventory[1].split(" ")
+                sHst = inventory[2].split(" ")
                 result['host'] = sHst[0]
                 result['ansible_user'] = sHst[1].split("=")[1]
                 result['ansible_become_pass'] = sHst[1].split("=")[1]
@@ -183,7 +183,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             inventory_path = call_args[3]
             with open(inventory_path, 'r') as inventory_file:
                 inventory = inventory_file.read().split('\n')
-                sHst = inventory[1].split(" ")
+                sHst = inventory[2].split(" ")
                 result['host'] = sHst[0]
                 result['ansible_user'] = sHst[1].split("=")[1]
                 result['ansible_become_pass'] = sHst[3].split("=")[1]
@@ -295,8 +295,10 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         inventory = re.sub("ansible_ssh_private_key_file=/.*",
                            "ansible_ssh_private_key_file=PATH",
                            inventory)
-        self.assertEquals(list(map(str.strip, inventory.split("\n"))),
-                          list(map(str.strip, exemplary.split("\n"))))
+        self.assertEqual(
+            list(map(str.strip, inventory.split("\n"))),
+            list(map(str.strip, exemplary.split("\n")))
+        )
 
     @patch('polemarch.main.utils.CmdExecutor.execute')
     def test_execute_error_handling(self, subprocess_function):
