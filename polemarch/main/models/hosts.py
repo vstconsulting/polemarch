@@ -74,8 +74,7 @@ class Host(AbstractModel):
     def toString(self, var_sep=" "):
         hvars, key = self.get_generated_vars()
         key = [key] if key is not None else []
-        return "{} {}".format(self.name,
-                              self.vars_string(hvars, var_sep)), key
+        return "{} {}".format(self.name, self.vars_string(hvars, var_sep)), key
 
 
 class GroupQuerySet(AbstractVarsQuerySet):
@@ -89,20 +88,14 @@ class GroupQuerySet(AbstractVarsQuerySet):
         subs = self.model.objects.filter(**kw)
         subs_id = subs.values_list("id", flat=True)
         if subs_id:
-            accumulated = (
-                accumulated | subs.get_subgroups_id(accumulated, tp)
-            )
+            accumulated = (accumulated | subs.get_subgroups_id(accumulated, tp))
         return accumulated
 
     def get_subgroups(self):
-        subgroups_id = self.get_subgroups_id(tp="parents")
-        subgroups = self.model.objects.filter(id__in=subgroups_id)
-        return subgroups
+        return self.model.objects.filter(id__in=self.get_subgroups_id(tp="parents"))
 
     def get_parents(self):
-        subgroups_id = self.get_subgroups_id(tp="childrens")
-        subgroups = self.model.objects.filter(id__in=subgroups_id)
-        return subgroups
+        return self.model.objects.filter(id__in=self.get_subgroups_id(tp="childrens"))
 
 
 class Group(AbstractModel):
@@ -124,15 +117,13 @@ class Group(AbstractModel):
         hvars, key = self.get_generated_vars()
         keys = [key] if key is not None else []
         if self.children:
-            groups = self.groups.values_list("name",
-                                             flat=True).order_by("name")
+            groups = self.groups.values_list("name", flat=True).order_by("name")
             objects = "\n".join(groups)
         else:
             hosts = self.hosts.all().order_by("name")
             hosts_strings, keys = _get_strings(hosts, keys)
             objects = "\n".join(hosts_strings)
-        data = dict(vars=self.vars_string(hvars, var_sep),
-                    objects=objects, group=self)
+        data = dict(vars=self.vars_string(hvars, var_sep), objects=objects, group=self)
         return get_render("models/group", data), keys
 
 
@@ -150,8 +141,7 @@ class Inventory(AbstractModel):
     def groups_list(self):
         groups_list = self.groups.filter(children=False) | \
                       self.groups.filter(children=True).get_subgroups()
-        groups_list = groups_list.distinct().prefetch_related("variables",
-                                                              "hosts")
+        groups_list = groups_list.distinct().prefetch_related("variables", "hosts")
         return groups_list.order_by("-children", "id")
 
     @property
@@ -163,14 +153,18 @@ class Inventory(AbstractModel):
         keys = [key] if key else list()
         hosts_strings, keys = _get_strings(list(self.hosts_list), keys)
         groups_strings, keys = _get_strings(list(self.groups_list), keys)
-        inv = get_render("models/inventory",
-                         dict(groups=groups_strings, hosts=hosts_strings,
-                              vars=self.vars_string(hvars, "\n")))
+        inv = get_render(
+            "models/inventory",
+            dict(
+                groups=groups_strings,
+                hosts=hosts_strings,
+                vars=self.vars_string(hvars, "\n")
+            )
+        )
         return inv, keys
 
     @property
     def all_hosts(self):
         return Host.objects.filter(
-            Q(groups__in=self.groups_list) |
-            Q(pk__in=self.hosts_list)
+            Q(groups__in=self.groups_list) | Q(pk__in=self.hosts_list)
         )

@@ -1,3 +1,2 @@
-# pylint: disable=invalid-name,no-member
-from vstutils.urls import urlpatterns, url
-from .main import views
+# pylint: disable=unused-import
+from vstutils.urls import urlpatterns  # noqa: F401

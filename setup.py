@@ -132,6 +132,7 @@ ext_list = [
     "polemarch.main.models.utils",
     "polemarch.main.models.users",
     "polemarch.main.models.vars",
+    "polemarch.main.templatetags.inventories",
     'polemarch.main.settings',
     'polemarch.main.hooks.base',
     'polemarch.main.hooks.http',
@@ -141,8 +142,6 @@ ext_list = [
     'polemarch.main.repo.tar',
     'polemarch.main.repo.vcs',
     'polemarch.main.validators',
-    'polemarch.main.views',
-
 ]
 
 if 'develop' in sys.argv:

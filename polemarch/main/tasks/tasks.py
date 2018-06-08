@@ -1,5 +1,6 @@
 # pylint: disable=broad-except,no-member,redefined-outer-name
 import logging
+import traceback
 
 from ...wapp import app
 from ..utils import task, BaseTask
@@ -46,6 +47,9 @@ class ScheduledTask(BaseTask):
             PeriodicTask.objects.get(id=self.job_id).execute()
         except PeriodicTask.DoesNotExist:
             return
+        except Exception:  # nocv
+            logger.error(traceback.format_exc())
+            raise
 
 
 class _ExecuteAnsible(BaseTask):
