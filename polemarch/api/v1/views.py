@@ -94,7 +94,7 @@ class ProjectViewSet(PermissionMixin, base.ModelViewSetSet, _GroupedViewSet):
 
     @base.action(methods=["get"], url_path="supported-repos", detail=False)
     def supported_repos(self, request):
-        return base.Response(self.model.handlers.keys(), 200).resp
+        return base.Response(self.model.repo_handlers.keys(), 200).resp
 
     @base.action(methods=["post", "put", "delete", "get"], detail=True)
     def inventories(self, request, *args, **kwargs):

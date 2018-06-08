@@ -360,15 +360,42 @@ class HistoryQuerySet(BQuerySet):
             year=self._get_history_stats_by(qs, 'year')
         )
 
+    def __check_ansible_args(self, command, ansible_args):
+        AnsibleArgumentsReference().validate_args(command.lower(), dict(ansible_args))
+
+    def __get_extra_options(self, extra, options):
+        return {opt: extra.pop(opt, options[opt]) for opt in options}
+
+    def __get_additional_options(self, extra_options):
+        options = dict()
+        if extra_options['template_option'] is not None:
+            options['template_option'] = extra_options['template_option']
+        return options
+
+    def start(self, project, kind, mod_name, inventory, **extra):
+        extra_options = self.__get_extra_options(extra, project.EXTRA_OPTIONS)
+        self.__check_ansible_args(kind, extra)
+        if not extra_options['save_result']:
+            return None, extra
+        history_kwargs = dict(
+            mode=mod_name, start_time=timezone.now(),
+            inventory=inventory, project=project,
+            kind=kind, raw_stdout="", execute_args=extra,
+            initiator=extra_options['initiator'],
+            initiator_type=extra_options['initiator_type'],
+            executor=extra_options['executor'], hidden=project.hidden,
+            options=self.__get_additional_options(extra_options)
+        )
+        if isinstance(inventory, (six.string_types, six.text_type)):
+            history_kwargs['inventory'] = None
+        return self.create(status="DELAY", **history_kwargs), extra
+
 
 class History(BModel):
     objects        = models.Manager.from_queryset(HistoryQuerySet)()
-    project        = models.ForeignKey(Project,
-                                       on_delete=models.CASCADE,
-                                       related_query_name="history",
-                                       null=True)
-    inventory      = models.ForeignKey(Inventory,
-                                       on_delete=models.CASCADE,
+    project        = models.ForeignKey(Project, on_delete=models.CASCADE,
+                                       related_query_name="history", null=True)
+    inventory      = models.ForeignKey(Inventory, on_delete=models.CASCADE,
                                        related_query_name="history",
                                        blank=True, null=True, default=None)
     mode           = models.CharField(max_length=256)
@@ -384,7 +411,7 @@ class History(BModel):
     # Initiator type should be always as in urls for api
     initiator_type = models.CharField(max_length=50, default="project")
     executor       = models.ForeignKey(User, blank=True, null=True, default=None)
-    json_options        = models.TextField(default="{}")
+    json_options   = models.TextField(default="{}")
 
     def __init__(self, *args, **kwargs):
         execute_args = kwargs.pop('execute_args', None)

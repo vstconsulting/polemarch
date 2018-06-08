@@ -92,14 +92,10 @@ class GroupQuerySet(AbstractVarsQuerySet):
         return accumulated
 
     def get_subgroups(self):
-        subgroups_id = self.get_subgroups_id(tp="parents")
-        subgroups = self.model.objects.filter(id__in=subgroups_id)
-        return subgroups
+        return self.model.objects.filter(id__in=self.get_subgroups_id(tp="parents"))
 
     def get_parents(self):
-        subgroups_id = self.get_subgroups_id(tp="childrens")
-        subgroups = self.model.objects.filter(id__in=subgroups_id)
-        return subgroups
+        return self.model.objects.filter(id__in=self.get_subgroups_id(tp="childrens"))
 
 
 class Group(AbstractModel):

@@ -13,11 +13,10 @@ logger = logging.getLogger("polemarch")
 
 
 class ACLPermission(BModel):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=None,
-                             blank=True, null=True)
-    uagroup = models.ForeignKey('main.UserGroup', on_delete=None, blank=True,
-                                null=True)
-    role = models.CharField(max_length=10)
+    role    = models.CharField(max_length=10)
+    uagroup = models.ForeignKey('main.UserGroup', on_delete=None, blank=True, null=True)
+    user    = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=None,
+                                blank=True, null=True)
 
     @property
     def member(self):  # noce
@@ -61,11 +60,10 @@ class UserGroup(BaseGroup, ACLModel):
 
 
 class UserSettings(BModel):
-    user     = models.OneToOneField(BaseUser,
-                                    on_delete=None,
+    settings = models.TextField(default="{}")
+    user     = models.OneToOneField(BaseUser, on_delete=None,
                                     related_query_name="settings",
                                     related_name="settings")
-    settings = models.TextField(default="{}")
 
     @property
     def data(self):
