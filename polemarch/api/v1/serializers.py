@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 import json
 
-import re
 from collections import OrderedDict
 import six
 from django.contrib.auth.models import User
@@ -262,17 +261,10 @@ class OneHistorySerializer(_SignalSerializer):
                   "url")
 
     def get_raw(self, request):
-        params = request.query_params
-        color = params.get("color", "no")
-        if color == "yes":
-            return self.instance.raw_stdout
-        else:
-            ansi_escape = re.compile(r'\x1b[^m]*m')
-            return ansi_escape.sub('', self.instance.raw_stdout)
+        return self.instance.get_raw(request.query_params.get("color", "no") == "yes")
 
     def get_raw_stdout(self, obj):
-        request = self.context.get('request')
-        return request.build_absolute_uri("raw/")
+        return self.context.get('request').build_absolute_uri("raw/")
 
     def get_facts(self, request):
         return self.instance.facts

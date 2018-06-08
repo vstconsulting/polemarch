@@ -2,7 +2,7 @@
 function inAppLogout()
 {
     return spajs.ajax.Call({
-        url: polemarch_logout_url,
+        url: gui_logout_url,
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify({next:"/app-login"}),

@@ -105,13 +105,11 @@ class ForeignKeyACLReverse(models.ForeignKey,
 
 
 class ACLModel(BModel):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
-                              on_delete=None,
+    notes = models.TextField(default="")
+    acl   = models.ManyToManyField("main.ACLPermission", blank=True, null=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=None,
                               default=first_staff_user,
                               related_name="polemarch_%(class)s_set")
-    acl   = models.ManyToManyField("main.ACLPermission",
-                                   blank=True, null=True)
-    notes = models.TextField(default="")
 
     class Meta:
         abstract = True

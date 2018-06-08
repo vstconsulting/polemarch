@@ -4,14 +4,12 @@ from __future__ import unicode_literals
 import os
 import logging
 import six
-from docutils.core import publish_parts
+from docutils.core import publish_parts as rst_gen
 from markdown2 import Markdown
 from django.conf import settings
-from django.utils import timezone
 from django.core.validators import ValidationError
 from vstutils.utils import ModelHandlers
 
-from .. import utils
 from . import hosts as hosts_models
 from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
@@ -20,12 +18,11 @@ from .hooks import Hook
 
 
 logger = logging.getLogger("polemarch")
-PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
 
 
 class ProjectQuerySet(AbstractVarsQuerySet):
     use_for_related_fields = True
-    handlers = ModelHandlers("REPO_BACKENDS", "'repo_type' variable needed!")
+    repo_handlers = ModelHandlers("REPO_BACKENDS", "'repo_type' variable needed!")
     task_handlers = ModelHandlers("TASKS_HANDLERS", "Unknown execution type!")
 
     def create(self, **kwargs):
@@ -35,17 +32,15 @@ class ProjectQuerySet(AbstractVarsQuerySet):
 
 
 class Project(AbstractModel):
+    PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
     objects       = models.Manager.from_queryset(ProjectQuerySet)()
-    handlers      = objects._queryset_class.handlers
+    repo_handlers = objects._queryset_class.repo_handlers
     task_handlers = objects._queryset_class.task_handlers
     repository    = models.CharField(max_length=2*1024)
     status        = models.CharField(max_length=32, default="NEW")
-    inventories   = ManyToManyFieldACL(hosts_models.Inventory,
-                                       blank=True, null=True)
-    hosts         = ManyToManyFieldACL(hosts_models.Host,
-                                       blank=True, null=True)
-    groups        = ManyToManyFieldACL(hosts_models.Group,
-                                       blank=True, null=True)
+    inventories   = ManyToManyFieldACL(hosts_models.Inventory, blank=True, null=True)
+    hosts         = ManyToManyFieldACL(hosts_models.Host, blank=True, null=True)
+    groups        = ManyToManyFieldACL(hosts_models.Group, blank=True, null=True)
 
     class Meta:
         default_related_name = "projects"
@@ -56,30 +51,32 @@ class Project(AbstractModel):
     class ReadMe(object):
 
         def __init__(self, project):
-            self.project = project
-            self.content = None
-            self.ext     = None
-            self.set_readme()
+            self.path = project.path
+            self.ext = None
+            self.content = self.set_readme()
+
+        def _make_ext(self, file_name):
+            self.ext = os.path.splitext(file_name)[1]
+            self.file_name = self.path + '/' + file_name
+
+        def _make_rst(self, file):
+            return rst_gen(file.read(), writer_name='html')['html_body']
+
+        def _make_md(self, file):
+            return Markdown().convert(file.read())
 
         def set_readme(self):
-            if os.path.exists(self.project.path):
-                md  = None
-                rst = None
-                for file in os.listdir(self.project.path):
-                    if file.lower() == 'readme.md':
-                        md = file
-                    if file.lower() == 'readme.rst':
-                        rst = file
-                if rst is not None:
-                    file = open(self.project.path + '/' + rst)
-                    self.content = publish_parts(file.read(),
-                                                 writer_name='html')['html_body']
-                    self.ext = os.path.splitext(rst)[1]
-                elif md is not None:
-                    file = open(self.project.path + '/' + md)
-                    markdowner = Markdown()
-                    self.content = markdowner.convert(file.read())
-                    self.ext = os.path.splitext(md)[1]
+            if not os.path.exists(self.path):
+                return
+            for file in os.listdir(self.path):
+                if file.lower() == 'readme.md' and self.ext is None:
+                    self._make_ext(file)
+                if file.lower() == 'readme.rst':
+                    self._make_ext(file)
+                    break
+            if self.ext is not None:
+                with open(self.file_name) as fd:
+                    return getattr(self, '_make_{}'.format(str(self.ext)[1:]), str)(fd)
 
     HIDDEN_VARS = [
         'repo_password',
@@ -108,41 +105,16 @@ class Project(AbstractModel):
 
     @property
     def path(self):
-        return "{}/{}".format(PROJECTS_DIR, self.id)
+        return "{}/{}".format(self.PROJECTS_DIR, self.id)
 
     @property
     def repo_class(self):
         repo_type = self.vars.get("repo_type", "Null")
-        return self.handlers(repo_type, self)
+        return self.repo_handlers(repo_type, self)
 
     @property
     def type(self):
         return self.variables.get(key="repo_type").value
-
-    def _get_history(self, kind, mod_name, inventory, **extra):
-        extra_options = dict()
-        for option in self.EXTRA_OPTIONS:
-            extra_options[option] = extra.pop(option, self.EXTRA_OPTIONS[option])
-        options = dict()
-        if extra_options['template_option'] is not None:
-            options['template_option'] = extra_options['template_option']
-        command = kind.lower()
-        ansible_args = dict(extra)
-        utils.AnsibleArgumentsReference().validate_args(command, ansible_args)
-        if not extra_options['save_result']:
-            return None, extra
-        from .tasks import History
-        history_kwargs = dict(
-            mode=mod_name, start_time=timezone.now(),
-            inventory=inventory, project=self,
-            kind=kind, raw_stdout="", execute_args=extra,
-            initiator=extra_options['initiator'],
-            initiator_type=extra_options['initiator_type'],
-            executor=extra_options['executor'], hidden=self.hidden, options=options
-        )
-        if isinstance(inventory, (six.string_types, six.text_type)):
-            history_kwargs['inventory'] = None
-        return History.objects.create(status="DELAY", **history_kwargs), extra
 
     def check_path(self, inventory):
         if not isinstance(inventory, (six.string_types, six.text_type)):
@@ -150,14 +122,13 @@ class Project(AbstractModel):
         path = "{}/{}".format(self.path, inventory)
         path = os.path.abspath(os.path.expanduser(path))
         if self.path not in path:
-            errors = dict(inventory="Inventory should be in project dir.")
-            raise ValidationError(errors)
+            raise ValidationError(dict(inventory="Inventory should be in project dir."))
 
     def _prepare_kw(self, kind, mod_name, inventory, **extra):
         self.check_path(inventory)
         if not mod_name:
             raise PMException("Empty playbook/module name.")
-        history, extra = self._get_history(kind, mod_name, inventory, **extra)
+        history, extra = self.history.start(self, kind, mod_name, inventory, **extra)
         kwargs = dict(
             target=mod_name, inventory=inventory, history=history, project=self
         )
