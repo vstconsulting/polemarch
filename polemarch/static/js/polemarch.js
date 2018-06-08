@@ -22,7 +22,7 @@ function getCookie(name)
 function loadTpl(name)
 {  
     return jQuery.ajax({
-       url: window.pmStaticPath+""+name+".html?v="+window.gui_version,
+       url: window.guiStaticPath+""+name+".html?v="+window.gui_version,
        type: "GET",
        success: function(res)
        {
@@ -92,7 +92,7 @@ polemarch.start = function(options)
         var t = new Date();
         polemarch.model.nowTime = t.getTime();
     }, 5001)
-
+    
 
     $("body").touchwipe({
         wipingLeftEnd: function(e)
@@ -208,15 +208,7 @@ spajs.errorPage = function(holder, menuInfo, data, error_data)
 
 
 tabSignal.connect("loading.completed", function()
-{ 
-    var just = new JUST({
-        root : {
-            'app-body-gui':$("script[data-just=app-body-gui]").html()
-        }
-    });
-    
-    $("body").appendTpl(just.render('app-body-gui', {}))
-            
+{  
     polemarch.start({
         is_superuser:window.is_superuser,
         holder:'#spajs-body'

@@ -1,87 +1,110 @@
 {% extends "gui/base.html" %}
 {% load staticfiles %}
+{% load i18n %}
 
-{% block pmScripts %}
-    <script defer src="{% static 'js/libs/c3/d3.min.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/libs/c3/c3.min.js' %}?v={{gui_version}}"></script>
-
-    <script defer src="{% static 'js/libs/autocomplete.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'plugins/select2/select2.full.min.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"></script>
-
-    <script defer src="{% static 'js/libs/tabSignal.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/libs/just.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/libs/just-watch.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/libs/moment.min.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/libs/moment-timezone.min.js' %}?v={{gui_version}}"></script>
-    <!--<script defer src="{% static 'js/libs/markdown.js' %}?v={{gui_version}}"></script>-->
-    <script defer src="{% static 'js/libs/jquery.scrollTo.min.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/libs/spa.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/libs/ansi_up.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/libs/Sortable.min.js' %}?v={{gui_version}}"></script>
-
-    <script defer src="{% static 'js/common.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/polemarch.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/jsonEditor.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/crontabEditor.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/filedsLib.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/encryptedCopyModal.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmItems.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmHosts.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmUsers.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmGroups.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmInventories.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmProjects.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmTasks.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmPeriodicTasks.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmHistory.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmTemplates.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmTasksTemplates.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmModuleTemplates.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmAnsibleModule.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/moduleArgsEditor.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmDashboard.js' %}?v={{gui_version}}"></script>
-    <script defer src="{% static 'js/pmHooks.js' %}?v={{gui_version}}"></script>
+{% block gui_logo %}
+    <a href="/" class="logo app-logo">
+        <!-- mini logo for sidebar mini 50x50 pixels -->
+        <!-- <span class="logo-mini"><b>P</b></span> -->
+        <span class="logo-mini"><span class="bg-logo-min" style="margin-left: 4px;"></span></span>
+        <!-- logo for regular state and mobile devices -->
+        <!-- <span class="logo-lg"><b>P</b>olemarch</span> -->
+        <span class="logo-lg logo-span"><span class="bg-logo-min"></span> <span class="bg-logo"></span></span>
+    </a>
 {% endblock %}
 
-{% block script %}
-<script> 
-    $(document).ready(function()
-    {
-        var templates = [
-            'templates/encryptedCopyModal',
-            'templates/pmModuleTemplates',
-            'templates/pmTasksTemplates',
-            'templates/pmTasksTemplates',
-            'templates/moduleArgsEditor',
-            'templates/pmPeriodicTasks',
-            'templates/pmAnsibleModule',
-            'templates/crontabEditor',
-            'templates/pmInventories',
-            'templates/pmDashboard',
-            'templates/jsonEditor',
-            'templates/pmProjects',
-            'templates/pmHistory',
-            'templates/filedsLib',
-            'templates/pmGroups',
-            'templates/pmItems',
-            //'templates/pmHosts',
-            'templates/pmUsers',
-            'templates/pmHooks'
-        ]
-        
-        // alert("New-")
-          
-        $.when(loadTplArray(templates)).done(function()
-        {
-            polemarch.start({
-                is_superuser:window.is_superuser,
-                holder:'#spajs-body'
-            })
-        }).fail(function()
-        {
-            $.notify("Error in template loaging", "error");
-        })
-    })
+{% block footer_buttons %}
+    <div class="btn-group" role="group">
+        <a type="button" style="box-shadow:none;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" href="#" onclick="return false;">
+            <span class="glyphicon glyphicon-question-sign"></span> Help
+        </a>
+        <ul class="dropdown-menu dropdown-menu-right" style=" bottom:100% !important; top:auto !important; ">
+            <li>
+                <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%20{{gui_version}}" target="_blank">Ask question</a>
+            </li>
+            <li>
+                <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20{{gui_version}}" target="_blank">Add bug</a>
+            </li>
+            <li>
+                <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Feature%20request&issue%5Btitle%5D=" target="_blank">Add feature request</a>
+            </li>
+            <li role="separator" class="divider"></li>
+            <li>
+                <a href="https://gitlab.com/vstconsulting/polemarch" target="_blank">Official repository</a>
+            </li>
+            <li>
+                <a href="http://polemarch.readthedocs.io" target="_blank">Official documentation</a>
+            </li>
+            <li>
+                <a href="https://gitlab.com/vstconsulting/polemarch/issues" target="_blank">Issues</a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% block common_sciprt %}
+<script type="text/javascript">
+window.resourceList = window.resourceList.concat([
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/encryptedCopyModal.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmModuleTemplates.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmTasksTemplates.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmTasksTemplates.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/moduleArgsEditor.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmPeriodicTasks.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmAnsibleModule.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/crontabEditor.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmInventories.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/jsonEditor.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmProjects.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmHistory.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/filedsLib.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmGroups.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmItems.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmUsers.html?v={{gui_version}}"},
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmHooks.html?v={{gui_version}}"},
+
+    { prioritet:110, type:'js', name: "{% static 'js/libs/c3/d3.min.js' %}?v={{gui_version}}"},
+    { prioritet:110, type:'js', name: "{% static 'js/libs/c3/c3.min.js' %}?v={{gui_version}}"},
+
+    { prioritet:110, type:'js', name: "{% static 'js/libs/autocomplete.js' %}?v={{gui_version}}"},
+    { prioritet:110, type:'js', name: "{% static 'plugins/select2/select2.full.min.js' %}?v={{gui_version}}"},
+    { prioritet:110, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
+
+    { prioritet:50, type:'js', name: "{% static 'js/libs/moment.min.js' %}?v={{gui_version}}"},
+    { prioritet:50, type:'js', name: "{% static 'js/libs/moment-timezone.min.js' %}?v={{gui_version}}"},
+    { prioritet:50, type:'js', name: "{% static 'js/libs/jquery.scrollTo.min.js' %}?v={{gui_version}}"},
+
+    { prioritet:150, type:'js', name: "{% static 'js/libs/ansi_up.js' %}?v={{gui_version}}"},
+    { prioritet:150, type:'js', name: "{% static 'js/libs/Sortable.min.js' %}?v={{gui_version}}"},
+
+    { prioritet:160, type:'js', name: "{% static 'js/common.js' %}?v={{gui_version}}"},
+    { prioritet:170, type:'js', name: "{% static 'js/polemarch.js' %}?v={{gui_version}}"},
+    { prioritet:180, type:'js', name: "{% static 'js/jsonEditor.js' %}?v={{gui_version}}"},
+    { prioritet:180, type:'js', name: "{% static 'js/crontabEditor.js' %}?v={{gui_version}}"},
+    { prioritet:110, type:'js', name: "{% static 'js/filedsLib.js' %}?v={{gui_version}}"},
+    { prioritet:120, type:'js', name: "{% static 'js/encryptedCopyModal.js' %}?v={{gui_version}}"},
+    { prioritet:181, type:'js', name: "{% static 'js/pmItems.js' %}?v={{gui_version}}"},
+    { prioritet:182, type:'js', name: "{% static 'js/pmHosts.js' %}?v={{gui_version}}"},
+    { prioritet:183, type:'js', name: "{% static 'js/pmUsers.js' %}?v={{gui_version}}"},
+    { prioritet:184, type:'js', name: "{% static 'js/pmGroups.js' %}?v={{gui_version}}"},
+    { prioritet:185, type:'js', name: "{% static 'js/pmInventories.js' %}?v={{gui_version}}"},
+    { prioritet:186, type:'js', name: "{% static 'js/pmProjects.js' %}?v={{gui_version}}"},
+    { prioritet:187, type:'js', name: "{% static 'js/pmTasks.js' %}?v={{gui_version}}"},
+    { prioritet:188, type:'js', name: "{% static 'js/pmPeriodicTasks.js' %}?v={{gui_version}}"},
+    { prioritet:189, type:'js', name: "{% static 'js/pmHistory.js' %}?v={{gui_version}}"},
+    { prioritet:190, type:'js', name: "{% static 'js/pmTemplates.js' %}?v={{gui_version}}"},
+    { prioritet:191, type:'js', name: "{% static 'js/pmTasksTemplates.js' %}?v={{gui_version}}"},
+    { prioritet:192, type:'js', name: "{% static 'js/pmModuleTemplates.js' %}?v={{gui_version}}"},
+    { prioritet:193, type:'js', name: "{% static 'js/pmAnsibleModule.js' %}?v={{gui_version}}"},
+    { prioritet:194, type:'js', name: "{% static 'js/moduleArgsEditor.js' %}?v={{gui_version}}"},
+    { prioritet:196, type:'js', name: "{% static 'js/pmHooks.js' %}?v={{gui_version}}"},
+    { prioritet:300, type:'js', name: "{% static 'js/guiForApp.js' %}?v={{gui_version}}"},
+
+    { prioritet:99, type:'css', name: "{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}"},
+    { prioritet:200, type:'css', name: "{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}"},
+     
+    { prioritet:200, type:'css', name: "{% static 'css/polemarch-gui.css' %}?v={{gui_version}}"},
+    { prioritet:200, type:'css', name: "{% static 'css/ansi-colors.css' %}?v={{gui_version}}"},
+])
 </script>
 {% endblock %}
