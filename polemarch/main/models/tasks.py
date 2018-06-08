@@ -5,7 +5,7 @@ import logging
 import uuid
 from collections import OrderedDict
 from datetime import timedelta
-
+from functools import partial
 import json
 
 import re
@@ -54,8 +54,8 @@ class Task(BModel):
 class Template(ACLModel):
     name          = models.CharField(max_length=512)
     kind          = models.CharField(max_length=32)
-    template_data = models.TextField(default="")
-    options_data  = models.TextField(default="")
+    template_data = models.CharField(default="{}", max_length=1*1024*1024)
+    options_data  = models.CharField(default="{}", max_length=1*1024*1024)
     inventory     = models.CharField(max_length=128,
                                      default=None, blank=True, null=True)
     project       = ForeignKeyACL(Project,
@@ -86,10 +86,10 @@ class Template(ACLModel):
         return self.options.get(option, {})
 
     def get_options_data(self):
-        return json.loads(self.options_data or '{}')
+        return json.loads(self.options_data)
 
     def get_data(self):
-        data = json.loads(self.template_data or '{}')
+        data = json.loads(self.template_data)
         if "project" in self.template_fields[self.kind] and self.project:
             data['project'] = self.project.id
         if "inventory" in self.template_fields[self.kind] and self.inventory:
@@ -145,7 +145,7 @@ class Template(ACLModel):
         return new_vars
 
     def keep_encrypted_data(self, new_vars):
-        if not self.template_data:
+        if self.template_data == '{}':
             return new_vars
         return self.__encrypt(new_vars)
 
@@ -392,6 +392,7 @@ class HistoryQuerySet(BQuerySet):
 
 
 class History(BModel):
+    ansi_escape = re.compile(r'\x1b[^m]*m')
     objects        = models.Manager.from_queryset(HistoryQuerySet)()
     project        = models.ForeignKey(Project, on_delete=models.CASCADE,
                                        related_query_name="history", null=True)
@@ -403,15 +404,15 @@ class History(BModel):
     kind           = models.CharField(max_length=50, default="PLAYBOOK")
     start_time     = models.DateTimeField(default=timezone.now)
     stop_time      = models.DateTimeField(blank=True, null=True)
-    raw_args       = models.TextField(default="")
-    json_args      = models.TextField(default="{}")
-    raw_inventory  = models.TextField(default="")
+    raw_args       = models.CharField(default="", max_length=100*1024)
+    json_args      = models.CharField(default="{}", max_length=100*1024)
+    raw_inventory  = models.CharField(default="", max_length=4*1024*1024)
     status         = models.CharField(max_length=50)
     initiator      = models.IntegerField(default=0)
     # Initiator type should be always as in urls for api
     initiator_type = models.CharField(max_length=50, default="project")
     executor       = models.ForeignKey(User, blank=True, null=True, default=None)
-    json_options   = models.TextField(default="{}")
+    json_options   = models.CharField(default="{}", max_length=100*1024)
 
     def __init__(self, *args, **kwargs):
         execute_args = kwargs.pop('execute_args', None)
@@ -498,11 +499,12 @@ class History(BModel):
             raise DataNotReady("Execution still in process.")
         if self.kind != 'MODULE' or self.mode != 'setup':
             raise self.NoFactsAvailableException()
-        qs = self.raw_history_line.all()
-        qs = qs.exclude(Q(line__contains="No config file") |
-                        Q(line__contains="as config file"))
-        data = "\n".join(qs.values_list("line", flat=True)) + "\n"
-        data = re.sub(r'\x1b[^m]*m', '', data)
+        data = self.get_raw(
+            original=False,
+            excludes=(
+                Q(line__contains="No config file") | Q(line__contains="as config file"),
+            )
+        )
         regex = (
             r"^([\S]{1,})\s\|\s([\S]{1,}) \=>"
             r" \{\s([^\r]*?\"[\w]{1,}\"\: .*?\s)\}\s"
@@ -512,36 +514,45 @@ class History(BModel):
         result = "{" + result[:-1] + "}"
         return json.loads(result)
 
+    def get_raw(self, original=True, filters=(), excludes=()):
+        qs = self.raw_history_line.filter(*filters).exclude(*excludes)
+        data = "".join(qs.values_list("line", flat=True))
+        return data if original else self.ansi_escape.sub('', data)
+
     @property
     def raw_stdout(self):
-        return "\n".join(self.raw_history_line
-                         .values_list("line", flat=True))
+        return self.get_raw()
 
     @raw_stdout.setter
     @transaction.atomic
     def raw_stdout(self, lines):
         counter = 0
         del self.raw_stdout
-        for line in lines.split("\n"):
+        lines = lines.split("\n")
+        for line in lines:
             counter += 1
-            self.raw_history_line.create(history=self, line_number=counter,
-                                         line=line)
+            line += '\n' if len(lines) > 1 else ''
+            self.write_line(number=counter, value=line)
 
     @raw_stdout.deleter
     def raw_stdout(self):
         self.raw_history_line.all().delete()
 
-    def write_line(self, value, number):  # nocv
-        self.raw_history_line.create(
-            history=self, line_number=number, line=value
-        )
+    def __bulking_lines(self, value, number):
+        out = six.StringIO(value)
+        for line in iter(partial(out.read, 2 * 1024), ''):
+            yield HistoryLines(history=self, line_number=number, line=line)
+
+    def write_line(self, value, number):
+        self.raw_history_line.bulk_create([
+            line for line in self.__bulking_lines(value, number)
+        ])
 
 
 class HistoryLines(BModel):
-    line         = models.TextField(default="")
+    line         = models.CharField(default="", max_length=2*1024)
     line_number  = models.IntegerField(default=0)
-    history      = models.ForeignKey(History,
-                                     on_delete=models.CASCADE,
+    history      = models.ForeignKey(History, on_delete=models.CASCADE,
                                      related_query_name="raw_history_line")
 
     class Meta:

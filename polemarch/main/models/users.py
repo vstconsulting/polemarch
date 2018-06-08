@@ -60,7 +60,7 @@ class UserGroup(BaseGroup, ACLModel):
 
 
 class UserSettings(BModel):
-    settings = models.TextField(default="{}")
+    settings = models.CharField(default="{}", max_length=1*1024*1024)
     user     = models.OneToOneField(BaseUser, on_delete=None,
                                     related_query_name="settings",
                                     related_name="settings")
