@@ -42,7 +42,7 @@
     </div>
 {% endblock %}
 
-{% block commonScripts %}
+{% block common_sciprt %}
 <script type="text/javascript">
 window.resourceList = window.resourceList.concat([
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/encryptedCopyModal.html?v={{gui_version}}"},
@@ -54,7 +54,6 @@ window.resourceList = window.resourceList.concat([
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmAnsibleModule.html?v={{gui_version}}"},
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/crontabEditor.html?v={{gui_version}}"},
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmInventories.html?v={{gui_version}}"},
-    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/guiDashboard.html?v={{gui_version}}"},
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/jsonEditor.html?v={{gui_version}}"},
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmProjects.html?v={{gui_version}}"},
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmHistory.html?v={{gui_version}}"},
@@ -98,9 +97,8 @@ window.resourceList = window.resourceList.concat([
     { prioritet:192, type:'js', name: "{% static 'js/pmModuleTemplates.js' %}?v={{gui_version}}"},
     { prioritet:193, type:'js', name: "{% static 'js/pmAnsibleModule.js' %}?v={{gui_version}}"},
     { prioritet:194, type:'js', name: "{% static 'js/moduleArgsEditor.js' %}?v={{gui_version}}"},
-    { prioritet:195, type:'js', name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
     { prioritet:196, type:'js', name: "{% static 'js/pmHooks.js' %}?v={{gui_version}}"},
-    { prioritet:197, type:'js', name: "{% static 'js/guiForApp.js' %}?v={{gui_version}}"},
+    { prioritet:300, type:'js', name: "{% static 'js/guiForApp.js' %}?v={{gui_version}}"},
 
     { prioritet:99, type:'css', name: "{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}"},
     { prioritet:200, type:'css', name: "{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}"},
