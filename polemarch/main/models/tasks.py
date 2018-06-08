@@ -54,8 +54,8 @@ class Task(BModel):
 class Template(ACLModel):
     name          = models.CharField(max_length=512)
     kind          = models.CharField(max_length=32)
-    template_data = models.CharField(default="{}", max_length=1*1024*1024)
-    options_data  = models.CharField(default="{}", max_length=1*1024*1024)
+    template_data = models.TextField(default="{}")
+    options_data  = models.TextField(default="{}")
     inventory     = models.CharField(max_length=128,
                                      default=None, blank=True, null=True)
     project       = ForeignKeyACL(Project,
@@ -404,15 +404,15 @@ class History(BModel):
     kind           = models.CharField(max_length=50, default="PLAYBOOK")
     start_time     = models.DateTimeField(default=timezone.now)
     stop_time      = models.DateTimeField(blank=True, null=True)
-    raw_args       = models.CharField(default="", max_length=100*1024)
-    json_args      = models.CharField(default="{}", max_length=100*1024)
-    raw_inventory  = models.CharField(default="", max_length=4*1024*1024)
+    raw_args       = models.TextField(default="")
+    json_args      = models.TextField(default="{}")
+    raw_inventory  = models.TextField(default="")
     status         = models.CharField(max_length=50)
     initiator      = models.IntegerField(default=0)
     # Initiator type should be always as in urls for api
     initiator_type = models.CharField(max_length=50, default="project")
     executor       = models.ForeignKey(User, blank=True, null=True, default=None)
-    json_options   = models.CharField(default="{}", max_length=100*1024)
+    json_options   = models.TextField(default="{}")
 
     def __init__(self, *args, **kwargs):
         execute_args = kwargs.pop('execute_args', None)
@@ -540,7 +540,7 @@ class History(BModel):
 
     def __bulking_lines(self, value, number):
         out = six.StringIO(value)
-        for line in iter(partial(out.read, 2 * 1024), ''):
+        for line in iter(partial(out.read, 2 * 1024 - 100), ''):
             yield HistoryLines(history=self, line_number=number, line=line)
 
     def write_line(self, value, number):
