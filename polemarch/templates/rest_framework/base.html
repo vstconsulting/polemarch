@@ -1,0 +1,19 @@
+{% extends "rest_framework/rest_base.html" %}
+{% load request_static %}
+
+{% block logo %}
+    <a href="/" class="logo app-logo">
+        <!-- mini logo for sidebar mini 50x50 pixels -->
+        <!-- <span class="logo-mini"><b>P</b></span> -->
+        <span class="logo-mini"><span class="bg-logo-min" style="margin-left: 4px;"></span></span>
+        <!-- logo for regular state and mobile devices -->
+        <!-- <span class="logo-lg"><b>P</b>olemarch</span> -->
+        <span class="logo-lg logo-span"><span class="bg-logo-min"></span> <span class="bg-logo"></span></span>
+    </a>
+{% endblock %}
+
+
+{% block bootstrap_theme %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static_path "css/polemarch-gui.css" %}"/>
+{% endblock %}
