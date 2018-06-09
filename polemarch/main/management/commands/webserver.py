@@ -1,10 +1,6 @@
 from vstutils.management.commands import web
-from ..base import ServiceCommand
+from ..base import BaseCommand
 
 
-class Command(ServiceCommand, web.Command):  # nocv
+class Command(BaseCommand, web.Command):
     help = 'Polemarch web-server.'
-
-    def handle(self, *args, **options):
-        ServiceCommand.handle(self, *args, **options)
-        return web.Command.handle(self, *args, **options)

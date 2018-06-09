@@ -84,8 +84,9 @@ class AbstractModel(ACLModel):
             self.variables.create(key=key, value=value)
 
     def vars_string(self, variables, separator=" "):
-        return separator.join(["{}={}".format(key, value)
-                               for key, value in variables.items()])
+        return separator.join([
+            "{}={}".format(key, value) for key, value in variables.items()
+        ])
 
     def get_vars(self):
         qs = self.variables.annotate(

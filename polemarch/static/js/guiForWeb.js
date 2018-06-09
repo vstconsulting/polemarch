@@ -22,7 +22,7 @@ function getCookie(name)
 function loadTpl(name)
 {  
     return jQuery.ajax({
-       url: window.pmStaticPath+""+name+".html?v="+window.gui_version,
+       url: window.guiStaticPath+""+name+".html?v="+window.gui_version,
        type: "GET",
        success: function(res)
        {
@@ -54,7 +54,10 @@ var polemarch = {
 
 }
 
-moment.tz.setDefault(window.timeZone);
+if(window.moment && window.moment.tz)
+{
+    window.moment.tz.setDefault(window.timeZone);
+}
 
 polemarch.opt = {}
 polemarch.opt.holder = undefined
@@ -92,7 +95,7 @@ polemarch.start = function(options)
         var t = new Date();
         polemarch.model.nowTime = t.getTime();
     }, 5001)
-
+    
 
     $("body").touchwipe({
         wipingLeftEnd: function(e)
@@ -114,9 +117,38 @@ polemarch.start = function(options)
         preventDefaultEvents: false
     });
 
+    if(window.cordova)
+    {
+        $("body").addClass('platform-cordova')
+    }
+    else
+    {
+        $("body").addClass('platform-web')
+    }
+
+    tabSignal.emit("webGui.start")
     tabSignal.emit("polemarch.start")
 
-    spajs.openMenuFromUrl()
+    try{
+        $.when(spajs.openMenuFromUrl(undefined, {withoutFailPage:window.location.pathname != "/"})).always(function(){ 
+            hideLoadingProgress();
+            tabSignal.emit("hideLoadingProgress")
+        })
+        
+    }
+    catch (exception)
+    {
+        if(exception.code == 404)
+        {
+            return;
+        }
+        
+        console.error("spajs.openMenuFromUrl exception", exception.stack)
+        hideLoadingProgress();
+        tabSignal.emit("hideLoadingProgress")
+        debugger;
+        //spajs.openURL("");
+    }
 }
  
 polemarch.showErrors = function(res)
@@ -173,17 +205,16 @@ polemarch.showErrors = function(res)
 
 spajs.errorPage = function(holder, menuInfo, data, error_data)
 { 
-    
     var error = {
         error_data:error_data
     }
-    
+
     error.status = "520"
     if(error_data.status)
     {
         error.status = error_data.status
     }
-    
+
     if(error_data.responseJSON)
     {
         error_data = error_data.responseJSON
@@ -201,26 +232,17 @@ spajs.errorPage = function(holder, menuInfo, data, error_data)
             error.text = error_data.detail.toString()
         }
     }
-     
+
     $(holder).insertTpl(spajs.just.render("errorPage", {error:error, data:data, menuInfo:menuInfo}))
 }
 
 
 
 tabSignal.connect("loading.completed", function()
-{ 
-    var just = new JUST({
-        root : {
-            'app-body-gui':$("script[data-just=app-body-gui]").html()
-        }
-    });
-    
-    $("body").appendTpl(just.render('app-body-gui', {}))
-            
+{  
     polemarch.start({
         is_superuser:window.is_superuser,
         holder:'#spajs-body'
     })
     
-    hideLoadingProgress();
 })

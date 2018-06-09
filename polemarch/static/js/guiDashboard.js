@@ -812,7 +812,7 @@ pmDashboard.getDataForDashboardFromBulk = function ()
 
 
 
-tabSignal.connect('pmLocalSettings.hideMenu', function(){
+tabSignal.connect('guiLocalSettings.hideMenu', function(){
 
     setTimeout(function(){
 
@@ -821,6 +821,13 @@ tabSignal.connect('pmLocalSettings.hideMenu', function(){
             pmDashboard.updateData()
         }
     }, 200)
+})
+
+tabSignal.connect('hideLoadingProgress', function(){ 
+    if(spajs.currentOpenMenu && spajs.currentOpenMenu.id == 'home')
+    {
+        pmDashboard.updateData()
+    } 
 })
 
 pmDashboard.updateData = function()

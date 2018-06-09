@@ -81,7 +81,7 @@
                                 href="<%- pmObj.model.page_list.buttons[i].link.apply(pmObj, [opt]) %>"
                                 title="<%- pmObj.model.page_list.buttons[i].help || '' %>"
                                 onclick="<% if(typeof pmObj.model.page_list.buttons[i].onclick == 'function'){ %>
-                                        <%- pmObj.model.className %>.model.page_list.buttons[<%- i %>].onclick.apply(<%- pmObj.model.className %>, [event])
+                                        return <%- pmObj.model.className %>.model.page_list.buttons[<%- i %>].onclick.apply(<%- pmObj.model.className %>, [event])
                                     <% }else{ %>
                                         <%- pmObj.model.page_list.buttons[i].function.apply(pmObj, [opt]) %>
                                     <% } %>" >
@@ -487,54 +487,7 @@
     </section>
     <!-- /items_list_from_another_class -->
 </script>
- 
-<!-- Страница создания сущьности -->
-<script type="text/x-just" data-just="errorPage">
-    <!-- errorPage -->
-    <section class="content-header">
-        <h1> 
-            <span class="h1-header" ><i class="fa fa-warning text-yellow"></i> <%- error.title %></span>
-
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li> 
-            <li class="active"><i class="fa fa-warning text-yellow"></i> <%- error.title %> </li>
-        </ol>
-    </section>
-
-    <section class="content">
-        <div class="row">
-            <div class="col-lg-12">
-                
-            </div>
-        </div>
-        <br>
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        
-                    </div>
-                    <div class="box-body"> 
-                        <p>
-                            Status: <%- error.status %>
-                        </p>
-                        <% if(error.error_data == undefined || error.status >= 500){ %> 
-                            <a target="_blank" href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20<%- window.gui_version %>">
-                                Follow the link to create a bug report
-                            </a> 
-                        <% } %>
-                        <% if(error.text){ %> 
-                            <%- error.text %> 
-                        <% } %> 
-                    </div>
-                </div>
-            </section>
-        </div>
-    </section>
-    <!-- /errorPage -->
-</script>
- 
+  
 <!-- Страница создания сущьности -->
 <script type="text/x-just" data-just="items_new_page">
     <!-- items_new_page -->
