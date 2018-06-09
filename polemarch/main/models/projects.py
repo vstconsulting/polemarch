@@ -128,9 +128,12 @@ class Project(AbstractModel):
         self.check_path(inventory)
         if not mod_name:
             raise PMException("Empty playbook/module name.")
-        history, extra = self.history.start(self, kind, mod_name, inventory, **extra)
+        history, extra = self.history.all().start(
+            self, kind, mod_name, inventory, **extra
+        )
         kwargs = dict(
-            target=mod_name, inventory=inventory, history=history, project=self
+            target=mod_name, inventory=inventory,
+            history=history, project=self
         )
         kwargs.update(extra)
         return kwargs
