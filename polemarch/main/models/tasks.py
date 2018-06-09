@@ -56,10 +56,8 @@ class Template(ACLModel):
     kind          = models.CharField(max_length=32)
     template_data = models.TextField(default="{}")
     options_data  = models.TextField(default="{}")
-    inventory     = models.CharField(max_length=128,
-                                     default=None, blank=True, null=True)
-    project       = ForeignKeyACL(Project,
-                                  on_delete=models.SET_NULL,
+    inventory     = models.CharField(max_length=128, default=None, blank=True, null=True)
+    project       = ForeignKeyACL(Project, on_delete=models.SET_NULL,
                                   default=None, blank=True, null=True)
 
     class Meta:
@@ -86,7 +84,7 @@ class Template(ACLModel):
         return self.options.get(option, {})
 
     def get_options_data(self):
-        return json.loads(self.options_data)
+        return json.loads(self.options_data or '{}')
 
     def get_data(self):
         data = json.loads(self.template_data)
