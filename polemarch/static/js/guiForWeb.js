@@ -54,7 +54,10 @@ var polemarch = {
 
 }
 
-moment.tz.setDefault(window.timeZone);
+if(window.moment && window.moment.tz)
+{
+    window.moment.tz.setDefault(window.timeZone);
+}
 
 polemarch.opt = {}
 polemarch.opt.holder = undefined
@@ -114,9 +117,32 @@ polemarch.start = function(options)
         preventDefaultEvents: false
     });
 
+    if(window.cordova)
+    {
+        $("body").addClass('platform-cordova')
+    }
+    else
+    {
+        $("body").addClass('platform-web')
+    }
+
+    tabSignal.emit("webGui.start")
     tabSignal.emit("polemarch.start")
 
-    spajs.openMenuFromUrl()
+    try{
+        spajs.openMenuFromUrl(undefined, {withoutFailPage:window.location.pathname != "/"})
+    }
+    catch (exception)
+    {
+        if(exception.code == 404)
+        {
+            return;
+        }
+        
+        console.error("spajs.openMenuFromUrl exception", exception.stack)
+        debugger;
+        //spajs.openURL("");
+    }
 }
  
 polemarch.showErrors = function(res)
@@ -173,17 +199,16 @@ polemarch.showErrors = function(res)
 
 spajs.errorPage = function(holder, menuInfo, data, error_data)
 { 
-    
     var error = {
         error_data:error_data
     }
-    
+
     error.status = "520"
     if(error_data.status)
     {
         error.status = error_data.status
     }
-    
+
     if(error_data.responseJSON)
     {
         error_data = error_data.responseJSON
@@ -201,7 +226,7 @@ spajs.errorPage = function(holder, menuInfo, data, error_data)
             error.text = error_data.detail.toString()
         }
     }
-     
+
     $(holder).insertTpl(spajs.just.render("errorPage", {error:error, data:data, menuInfo:menuInfo}))
 }
 
