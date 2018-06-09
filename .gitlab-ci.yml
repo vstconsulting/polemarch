@@ -65,8 +65,7 @@ stages:
     - dist/
   allow_failure: false
   only:
-    - developer
-    - make_bin_packages
+    - master
   retry: 2
 
 # Branch tests
@@ -182,6 +181,8 @@ publish_github:
   image: onegreyonewhite/tox:ubuntu
   only:
    - tags
+  allow_failure: true
+  when: manual
   before_script:
   - npm install -g github-release-cli
   - git remote add gitlab https://gitlab-ci-token:${GITLAB_TOKEN}@gitlab.com/vstconsulting/polemarch.git
@@ -191,5 +192,4 @@ publish_github:
   - git push gitlab ${CI_COMMIT_TAG}
   - git push github master
   - git push github ${CI_COMMIT_TAG}
-  - sleep 10
   - npm run github-release upload --owner vstconsulting --repo polemarch --tag="${CI_COMMIT_TAG}" --name="${CI_COMMIT_TAG}" --body="${CI_COMMIT_MESSAGE}" "dist/polemarch-${CI_COMMIT_TAG}-0.x86_64.rpm" "dist/polemarch_${CI_COMMIT_TAG}-0_amd64.deb" "dist/polemarch-${CI_COMMIT_TAG}.tar.gz"
