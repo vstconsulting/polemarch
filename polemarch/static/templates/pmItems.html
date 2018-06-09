@@ -81,7 +81,7 @@
                                 href="<%- pmObj.model.page_list.buttons[i].link.apply(pmObj, [opt]) %>"
                                 title="<%- pmObj.model.page_list.buttons[i].help || '' %>"
                                 onclick="<% if(typeof pmObj.model.page_list.buttons[i].onclick == 'function'){ %>
-                                        <%- pmObj.model.className %>.model.page_list.buttons[<%- i %>].onclick.apply(<%- pmObj.model.className %>, [event])
+                                        return <%- pmObj.model.className %>.model.page_list.buttons[<%- i %>].onclick.apply(<%- pmObj.model.className %>, [event])
                                     <% }else{ %>
                                         <%- pmObj.model.page_list.buttons[i].function.apply(pmObj, [opt]) %>
                                     <% } %>" >

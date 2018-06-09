@@ -18,7 +18,7 @@
         <a type="button" style="box-shadow:none;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" href="#" onclick="return false;">
             <span class="glyphicon glyphicon-question-sign"></span> Help
         </a>
-        <ul class="dropdown-menu dropdown-menu-right" style=" bottom:100% !important; top:auto !important; ">
+        <ul class="dropdown-menu dropdown-menu-left" style=" bottom:100% !important; top:auto !important; ">
             <li>
                 <a href="https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%20{{gui_version}}" target="_blank">Ask question</a>
             </li>
@@ -78,7 +78,7 @@ window.resourceList = window.resourceList.concat([
     { prioritet:150, type:'js', name: "{% static 'js/libs/Sortable.min.js' %}?v={{gui_version}}"},
 
     { prioritet:160, type:'js', name: "{% static 'js/common.js' %}?v={{gui_version}}"},
-    { prioritet:170, type:'js', name: "{% static 'js/polemarch.js' %}?v={{gui_version}}"},
+    //{ prioritet:170, type:'js', name: "{% static 'js/polemarch.js' %}?v={{gui_version}}"},
     { prioritet:180, type:'js', name: "{% static 'js/jsonEditor.js' %}?v={{gui_version}}"},
     { prioritet:180, type:'js', name: "{% static 'js/crontabEditor.js' %}?v={{gui_version}}"},
     { prioritet:110, type:'js', name: "{% static 'js/filedsLib.js' %}?v={{gui_version}}"},

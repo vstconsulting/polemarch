@@ -17,3 +17,34 @@
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static_path "css/polemarch-gui.css" %}"/>
 {% endblock %}
+
+{% block resource_list %}
+    <!-- jQuery 2.2.3 -->
+    <script src="{% static_path 'js/libs/tabSignal.js' %}?v={{gui_version}}"></script>
+
+    <script>
+        window.resourceList = [
+
+            { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
+
+
+            { prioritet:8, type:'js', name: "{% static 'js/app.js' %}?v={{gui_version}}"},
+            { prioritet:102, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
+            { prioritet:103, type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}"},
+            { prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
+            { prioritet:105, type:'css', name: "{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}"},
+            { prioritet:106, type:'css', name: "{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}"},
+            { prioritet:107, type:'css', name: "{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}"},
+            { prioritet:108, type:'css', name: "{% static 'css/gui.css' %}?v={{gui_version}}"},
+
+            { prioritet:160, type:'js', name: "{% static 'js/common.js' %}?v={{gui_version}}"},
+
+            { prioritet:200, type:'css', name: "{% static 'css/polemarch-gui.css' %}?v={{gui_version}}"},
+        ]
+
+        tabSignal.connect("loading.completed", function()
+        {
+            hideLoadingProgress();
+        })
+    </script>
+{% endblock %}
