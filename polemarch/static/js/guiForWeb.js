@@ -130,7 +130,10 @@ polemarch.start = function(options)
     tabSignal.emit("polemarch.start")
 
     try{
-        spajs.openMenuFromUrl(undefined, {withoutFailPage:window.location.pathname != "/"})
+        $.when(spajs.openMenuFromUrl(undefined, {withoutFailPage:window.location.pathname != "/"})).always(function(){ 
+            hideLoadingProgress();
+        })
+        
     }
     catch (exception)
     {
@@ -140,6 +143,7 @@ polemarch.start = function(options)
         }
         
         console.error("spajs.openMenuFromUrl exception", exception.stack)
+        hideLoadingProgress();
         debugger;
         //spajs.openURL("");
     }
@@ -239,5 +243,4 @@ tabSignal.connect("loading.completed", function()
         holder:'#spajs-body'
     })
     
-    hideLoadingProgress();
 })
