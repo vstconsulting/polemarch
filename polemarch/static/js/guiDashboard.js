@@ -823,6 +823,13 @@ tabSignal.connect('guiLocalSettings.hideMenu', function(){
     }, 200)
 })
 
+tabSignal.connect('hideLoadingProgress', function(){ 
+    if(spajs.currentOpenMenu && spajs.currentOpenMenu.id == 'home')
+    {
+        pmDashboard.updateData()
+    } 
+})
+
 pmDashboard.updateData = function()
 {
     var thisObj = this

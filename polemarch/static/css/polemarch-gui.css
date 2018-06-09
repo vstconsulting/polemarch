@@ -144,3 +144,7 @@
     display: block;
     width:160px;
 }
+
+*::-webkit-scrollbar {
+    width: 0px;
+}
