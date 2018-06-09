@@ -132,6 +132,7 @@ polemarch.start = function(options)
     try{
         $.when(spajs.openMenuFromUrl(undefined, {withoutFailPage:window.location.pathname != "/"})).always(function(){ 
             hideLoadingProgress();
+            tabSignal.emit("hideLoadingProgress")
         })
         
     }
@@ -144,6 +145,7 @@ polemarch.start = function(options)
         
         console.error("spajs.openMenuFromUrl exception", exception.stack)
         hideLoadingProgress();
+        tabSignal.emit("hideLoadingProgress")
         debugger;
         //spajs.openURL("");
     }
