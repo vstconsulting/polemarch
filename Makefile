@@ -1,5 +1,6 @@
-PIP=pip2
-PY=python2
+PY = python2
+PIP = $(PY) -m pip
+PYTHON_BIN = $(shell $(PY) -c 'import sys, os; print(os.path.dirname(sys.executable))')
 LOC_TEST_ENVS = build,py27-django111-coverage,py34-django111-coverage,flake,pylint
 ENVS = $(LOC_TEST_ENVS)
 TESTS =
@@ -80,7 +81,7 @@ prebuild:
 	# match the buildroot and must be removed or the package will fail to build.
 	find $(PREBUILD_DIR) -name "RECORD" -exec rm -rf {} \;
 	# Change the virtualenv path to the target installation direcotry.
-	venvctrl-relocate --source=$(PREBUILD_DIR) --destination=$(INSTALL_DIR)
+	$(PYTHON_BIN)/venvctrl-relocate --source=$(PREBUILD_DIR) --destination=$(INSTALL_DIR)
 	# Remove sources for Clang
 	find $(PREBUILD_DIR)/lib -type f -name "*.c" -print0 | xargs -0 rm -rf
 	# Remove broken link
