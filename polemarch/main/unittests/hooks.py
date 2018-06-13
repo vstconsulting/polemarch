@@ -5,6 +5,7 @@ try:
 except ImportError:  # nocv
     from unittest.mock import patch
 from django.test import TestCase
+from django.conf import settings
 from django.core.validators import ValidationError
 from requests import Response
 from vstutils.utils import raise_context
@@ -14,7 +15,8 @@ from polemarch.main.models import Hook
 class HooksTestCase(TestCase):
     def setUp(self):
         super(HooksTestCase, self).setUp()
-        self.scripts = ['/tmp/test.sh', '/tmp/send.sh']
+        self.scripts = ['test.sh', 'send.sh']
+        self.scripts = ['{}/{}'.format(settings.HOOKS_DIR, s) for s in self.scripts]
         for script in self.scripts:
             with open(script, 'w') as file:
                 file.write("test")

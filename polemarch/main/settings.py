@@ -113,4 +113,6 @@ if "test" in sys.argv:
         "BACKEND": "polemarch.main.tests.repo_backends.Test",
     }
     PROJECTS_DIR = '/tmp/polemarch_projects' + str(PY_VER)
+    HOOKS_DIR = '/tmp/polemarch_hooks' + str(PY_VER)
     os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
+    os.makedirs(HOOKS_DIR) if not os.path.exists(HOOKS_DIR) else None
