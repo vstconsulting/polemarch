@@ -148,7 +148,7 @@ release_deb:
   image: onegreyonewhite/tox:ubuntu
   before_script:
   - virtualenv -p python2 /tmp/build_polemarch | echo 'Already exists.'
-  - /tmp/build_polemarch/bin/pip install cython vstcompile[doc] vstutils
+  - /tmp/build_polemarch/bin/pip install cython vstcompile[doc] vstutils venvctrl
   script:
    - make deb PY=/tmp/build_polemarch/bin/python2
   allow_failure: false
