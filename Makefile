@@ -11,7 +11,7 @@ NAME = $(NAMEBASE)
 VER = $(shell $(PY) -c 'import $(NAME); print($(NAME).__version__)')
 PROJECT_CTL = $(NAME)ctl
 MAIN_APP = main
-VSTUTILS = vstcompile[doc]
+VSTUTILS = vstutils vstcompile[doc]
 PIPARGS = $(shell echo -n "--cache-dir=$$(pwd)/.pip-cache")
 ARCHIVE = $(NAME)-$(VER).tar.gz
 LICENSE = AGPL-3+
@@ -76,7 +76,6 @@ prebuild:
 	$(PY) -m virtualenv --no-site-packages $(PREBUILD_DIR)
 	# Install required packages
 	$(PREBUILD_BINDIR)/pip install -U pip
-	$(PREBUILD_BINDIR)/pip install -U $(VSTUTILS)
 	$(PREBUILD_BINDIR)/pip install -U dist/$(NAME)-$(VER).tar.gz $(REQUIREMENTS)
 	$(PREBUILD_BINDIR)/pip install -U -r requirements-git.txt
 	# RECORD files are used by wheels for checksum. They contain path names which
