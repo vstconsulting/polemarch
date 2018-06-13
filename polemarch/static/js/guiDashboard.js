@@ -965,7 +965,7 @@ pmDashboard.open  = function(holder, menuInfo, data)
             }
         }
 
-        //thisObj.updateData()
+        thisObj.updateData()
         $(holder).insertTpl(spajs.just.render('dashboard_page', {}))
 
         pmwTasksTemplatesWidget.render();

@@ -2,8 +2,8 @@ define RPM_SPEC
 # Macros
 %define name $(NAME)
 %define shortname $(NAME)
-%define file_permissions_user $(USER)
-%define file_permissions_group $(USER)
+%define namebase $(NAMEBASE)
+%define user $(USER)
 %define version $(VER)
 %define release $(RELEASE)
 %define __prelink_undo_cmd %{nil}
@@ -40,19 +40,19 @@ $(DESCRIPTION)
 
 # Blocks
 %files
-%defattr(-,%{file_permissions_user},%{file_permissions_group},-)
+%defattr(-,%{user},%{user},-)
 $(INSTALL_DIR)
-/etc/%{name}
-/var/log/%{name}
-/var/run/%{name}
-/var/lock/%{name}
+/etc/%{namebase}
+/var/log/%{namebase}
+/var/run/%{namebase}
+/var/lock/%{namebase}
 %attr(755,root,root) /etc/systemd/system/%{shortname}web.service
 %attr(755,root,root) /etc/systemd/system/%{shortname}worker.service
-%attr(755,root,root) /etc/tmpfiles.d/%{shortname}.conf
+%attr(755,root,root) /etc/tmpfiles.d/%{namebase}.conf
 
 %pre
-id -u %{file_permissions_user} &>/dev/null || useradd %{file_permissions_user}
-id -g %{file_permissions_group} &>/dev/null || groupadd %{file_permissions_group}
+id -u %{user} || useradd %{user}
+id -g %{user} || groupadd %{user}
 
 %install
 make BUILD_DIR=%{buildroot}
@@ -61,8 +61,7 @@ cd %{buildroot}
 cd -
 
 %post
-# sudo -H -u %{name} /opt/%{name}/bin/%{shortname}ctl migrate
-su - %{name} -c "/opt/%{name}/bin/%{shortname}ctl migrate"
+su - %{user} -c "/opt/%{name}/bin/%{shortname}ctl migrate"
 /usr/bin/systemctl daemon-reload
 /usr/bin/systemctl enable %{shortname}web.service
 /usr/bin/systemctl enable %{shortname}worker.service
