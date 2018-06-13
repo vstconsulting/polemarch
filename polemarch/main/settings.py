@@ -84,7 +84,7 @@ HOOKS = {
     },
 }
 
-HOOKS_DIR = config.get("main", "hooks_dir", fallback="/tmp")
+HOOKS_DIR = config.get("main", "hooks_dir", fallback="/etc/polemarch/hooks/")
 
 API_URL = VST_API_URL
 API = {
