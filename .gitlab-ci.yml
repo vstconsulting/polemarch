@@ -146,11 +146,8 @@ release_deb:
   only:
    - tags
   image: onegreyonewhite/tox:ubuntu
-  before_script:
-  - virtualenv -p python2 /tmp/build_polemarch | echo 'Already exists.'
-  - /tmp/build_polemarch/bin/pip install cython vstcompile[doc] vstutils venvctrl
   script:
-   - make deb PY=/tmp/build_polemarch/bin/python2
+   - make deb RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
   allow_failure: false
   artifacts:
     name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
