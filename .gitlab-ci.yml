@@ -146,8 +146,11 @@ release_deb:
   only:
    - tags
   image: onegreyonewhite/tox:ubuntu
+  before_script:
+  - virtualenv -p python2 /tmp/build_polemarch | echo 'Already exists.'
+  - /tmp/build_polemarch/bin/pip install cython vstcompile[doc] vstutils
   script:
-   - make deb
+   - make deb PY=/tmp/build_polemarch/bin/python2
   allow_failure: false
   artifacts:
     name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
@@ -161,7 +164,7 @@ release_pypi:
   before_script:
   - pip install vstcompile[doc]
   script:
-   - python2 setup.py compile
+   - make compile
   allow_failure: true
   artifacts:
     name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
