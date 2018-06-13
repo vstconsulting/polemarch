@@ -154,7 +154,7 @@ class AnsibleCommand(object):
         extra.pop("verbose", None)
         for key, value in extra.items():
             result = [value, list()]
-            if key == "key-file":
+            if key in ["key-file", "private-key"]:
                 result = self.__parse_key(key, value)
             elif key in ["vault-password-file", "new-vault-password-file"]:
                 result = self.__generate_arg_file(value)
@@ -204,8 +204,7 @@ class AnsibleCommand(object):
         if isinstance(inventory, Inventory):
             inventory = inventory.get_hook_data(when)
         msg['target'] = OrderedDict(
-            name=self.history.mode,
-            inventory=inventory,
+            name=self.history.mode, inventory=inventory,
             project=self.project.get_hook_data(when)
         )
         msg['history'] = self.history.get_hook_data(when)

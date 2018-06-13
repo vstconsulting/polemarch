@@ -176,20 +176,28 @@ publish_pypi:
   script:
   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
 
-publish_github:
+publish_gitlab:
   stage: publish
   image: onegreyonewhite/tox:ubuntu
   only:
    - tags
   allow_failure: true
-  when: manual
+  before_script:
+  - git remote add gitlab_public https://gitlab-ci-token:${GITLAB_TOKEN}@gitlab.com/vstconsulting/polemarch.git
+  script:
+  - git push gitlab_public master
+  - git push gitlab_public ${CI_COMMIT_TAG}
+
+publish_release:
+  stage: publish
+  image: onegreyonewhite/tox:ubuntu
+  only:
+   - tags
+  allow_failure: true
   before_script:
   - npm install -g github-release-cli
-  - git remote add gitlab https://gitlab-ci-token:${GITLAB_TOKEN}@gitlab.com/vstconsulting/polemarch.git
-  - git remote add github https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/vstconsulting/polemarch.git
+  - git remote add github_public https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/vstconsulting/polemarch.git
   script:
-  - git push gitlab master
-  - git push gitlab ${CI_COMMIT_TAG}
-  - git push github master
-  - git push github ${CI_COMMIT_TAG}
+  - git push github_public master
+  - git push github_public ${CI_COMMIT_TAG}
   - npm run github-release upload --owner vstconsulting --repo polemarch --tag="${CI_COMMIT_TAG}" --name="${CI_COMMIT_TAG}" --body="${CI_COMMIT_MESSAGE}" "dist/polemarch-${CI_COMMIT_TAG}-0.x86_64.rpm" "dist/polemarch_${CI_COMMIT_TAG}-0_amd64.deb" "dist/polemarch-${CI_COMMIT_TAG}.tar.gz"

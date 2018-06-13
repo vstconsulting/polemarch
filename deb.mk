@@ -84,15 +84,15 @@ define DEBIAN_POSTINST
 #!/bin/bash
 # change owner of all dirs
 chown -R $(USER):$(USER) /opt/$(NAME)
-chown -R $(USER):$(USER) /var/log/$(NAME)
-chown -R $(USER):$(USER) /var/run/$(NAME)
-chown -R $(USER):$(USER) /var/lock/$(NAME)
+chown -R $(USER):$(USER) /var/log/$(NAMEBASE)
+chown -R $(USER):$(USER) /var/run/$(NAMEBASE)
+chown -R $(USER):$(USER) /var/lock/$(NAMEBASE)
 # making migration and activate services
 # sudo -H -u $(USER) /opt/$(NAME)/bin/polemarchctl migrate
-su - $(USER) -c "/opt/$(NAME)/bin/polemarchctl migrate"
+su - $(USER) -c "/opt/$(NAME)/bin/$(PROJECT_CTL) migrate"
 systemctl daemon-reload
-systemctl enable polemarchweb.service
-systemctl enable polemarchworker.service
+systemctl enable $(NAME)web.service
+systemctl enable $(NAME)worker.service
 endef
 export DEBIAN_POSTINST
 
@@ -101,10 +101,10 @@ define DEBIAN_PRERM
 case "$$1" in
   remove)
     # deactivating services
-    systemctl disable polemarchweb.service > /dev/null 2>&1
-    systemctl disable polemarchworker.service > /dev/null 2>&1
-    service polemarchweb stop >/dev/null 2>&1
-    service polemarchworker stop >/dev/null 2>&1
+    systemctl disable $(NAME)web.service > /dev/null 2>&1
+    systemctl disable $(NAME)worker.service > /dev/null 2>&1
+    service $(NAME)web stop >/dev/null 2>&1
+    service $(NAME)worker stop >/dev/null 2>&1
   ;;
 esac
 # cleaning after yourself

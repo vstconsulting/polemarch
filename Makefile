@@ -1,14 +1,18 @@
-PIP=pip2
-PY=python2
-LOC_TEST_ENVS = build,py27-django111-coverage,py34-django111-coverage,flake,pylint
+PY = python2
+PIP = $(PY) -m pip
+PYTHON_BIN = $(shell $(PY) -c 'import sys, os; print(os.path.dirname(sys.executable))')
+RELOCATE_BIN = $(PYTHON_BIN)/venvctrl-relocate
+LOC_TEST_ENVS = py27-django111-install,py34-django111-install,flake,pylint
 ENVS = $(LOC_TEST_ENVS)
 TESTS =
-NAME = polemarch
-USER = $(NAME)
-VER = $(shell $(PY) -c 'import polemarch; print(polemarch.__version__)')
-VSTUTILS = vstcompile
-# VSTUTILS = $(shell cat requirements.txt | grep vstutils)
-PIPARGS =
+NAMEBASE = polemarch
+USER = $(NAMEBASE)
+NAME = $(NAMEBASE)
+VER = $(shell $(PY) -c 'import $(NAME); print($(NAME).__version__)')
+PROJECT_CTL = $(NAME)ctl
+MAIN_APP = main
+VSTUTILS = vstutils vstcompile[doc]
+PIPARGS = $(shell echo -n "--cache-dir=$$(pwd)/.pip-cache")
 ARCHIVE = $(NAME)-$(VER).tar.gz
 LICENSE = AGPL-3+
 define DESCRIPTION
@@ -19,10 +23,6 @@ export DESCRIPTION
 SUMMARY = Infrastructure Heat Service for orchestration infrastructure by ansible.
 VENDOR = VST Consulting <sergey.k@vstconsulting.net>
 RELEASE = 0
-COMPOSE = docker-compose-testrun.yml
-COMPOSE_ARGS = --abort-on-container-exit
-COMPLEX_TESTS_COMPOSE = docker-compose-tests.yml
-COMPLEX_TESTS_COMPOSE_ARGS = '--abort-on-container-exit --build'
 DEFAULT_PREFIX = /opt
 INSTALL_PREFIX = $(shell if [[ ! -z "${prefix}" ]]; then echo -n $(prefix); else echo -n $(DEFAULT_PREFIX); fi)
 INSTALL_DIR = $(INSTALL_PREFIX)/${NAME}
@@ -33,8 +33,10 @@ BUILD_DIR= $(TMPDIR)
 PREBUILD_DIR = $(BUILD_DIR)/$(INSTALL_DIR)
 PREBUILD_BINDIR = $(BUILD_DIR)/$(INSTALL_BINDIR)
 SOURCE_DIR = $(shell pwd)
-localinstall: BUILD_DIR = ''
-
+COMPOSE = docker-compose-testrun.yml
+COMPOSE_ARGS = --abort-on-container-exit
+COMPLEX_TESTS_COMPOSE = docker-compose-tests.yml
+COMPLEX_TESTS_COMPOSE_ARGS = '--abort-on-container-exit --build'
 
 include rpm.mk
 include deb.mk
@@ -58,14 +60,13 @@ pylint:
 
 build: build-clean
 	-rm -rf dist
-	$(PY) -m pip install $(VSTUTILS)
 	$(PY) setup.py sdist -v
 
 compile: build-clean
 	-rm -rf dist
-	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
+	find ./$(NAME) -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf polemarch/doc/*
-	$(PY) -m pip install $(VSTUTILS)
+	$(PIP) install $(VSTUTILS)
 	$(PY) setup.py compile -v
 
 prebuild:
@@ -73,27 +74,26 @@ prebuild:
 	$(PY) -m virtualenv --no-site-packages $(PREBUILD_DIR)
 	# Install required packages
 	$(PREBUILD_BINDIR)/pip install -U pip
-	$(PREBUILD_BINDIR)/pip install -U $(VSTUTILS)
 	$(PREBUILD_BINDIR)/pip install -U dist/$(NAME)-$(VER).tar.gz $(REQUIREMENTS)
 	$(PREBUILD_BINDIR)/pip install -U -r requirements-git.txt
 	# RECORD files are used by wheels for checksum. They contain path names which
 	# match the buildroot and must be removed or the package will fail to build.
 	find $(PREBUILD_DIR) -name "RECORD" -exec rm -rf {} \;
 	# Change the virtualenv path to the target installation direcotry.
-	venvctrl-relocate --source=$(PREBUILD_DIR) --destination=$(INSTALL_DIR)
+	$(RELOCATE_BIN) --source=$(PREBUILD_DIR) --destination=$(INSTALL_DIR)
 	# Remove sources for Clang
 	find $(PREBUILD_DIR)/lib -type f -name "*.c" -print0 | xargs -0 rm -rf
 	# Remove broken link
 	-rm -rf $(PREBUILD_DIR)/local
 	# Install settings
-	-install -Dm 755 $(NAME)/main/settings.ini $(BUILD_DIR)/etc/$(USER)/settings.ini.template
+	-install -Dm 755 $(NAME)/$(MAIN_APP)/settings.ini $(BUILD_DIR)/etc/$(USER)/settings.ini.template
 	# Install systemd services
 	-install -Dm 755 initbin/$(NAME)web.service  $(BUILD_DIR)/etc/systemd/system/$(NAME)web.service
 	-install -Dm 755 initbin/$(NAME)worker.service  $(BUILD_DIR)/etc/systemd/system/$(NAME)worker.service
 	# Install tmpdirs config
-	-install -Dm 755 initbin/$(NAME).conf  $(BUILD_DIR)/etc/tmpfiles.d/$(NAME).conf
+	-install -Dm 755 initbin/$(NAMEBASE).conf  $(BUILD_DIR)/etc/tmpfiles.d/$(NAMEBASE).conf
 	# Create tmpdirs
-	-mkdir -p $(BUILD_DIR)/var/{log,run,lock}/$(NAME)
+	-mkdir -p $(BUILD_DIR)/var/{log,run,lock}/$(NAMEBASE)
 
 localinstall:
 	$(PY) -m virtualenv --no-site-packages $(INSTALL_DIR)
@@ -106,7 +106,7 @@ localinstall:
 
 install:
 	# Change owner for packages
-	-chown -R $(USER):$(USER) $(PREBUILD_DIR) $(BUILD_DIR)/var/{log,run,lock}/$(NAME) $(BUILD_DIR)/etc/$(USER)
+	-chown -R $(USER):$(USER) $(PREBUILD_DIR) $(BUILD_DIR)/var/{log,run,lock}/$(NAMEBASE) $(BUILD_DIR)/etc/$(USER)
 	# Copy build
 	cp -rf $(BUILD_DIR)/* /
 	$(MAKE) clean_prebuild
@@ -118,7 +118,6 @@ clean_prebuild:
 	-rm -rf $(BUILD_DIR)/*
 
 clean: build-clean
-	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf htmlcov
 	-rm -rf .coverage
 	-rm -rf dist
@@ -126,27 +125,25 @@ clean: build-clean
 	-rm -rf *.egg-info
 
 build-clean:
-	find . -name "*.pyc" -print0 | xargs -0 rm -rf
+	-rm pylint_* || true
+	find ./$(NAME) -name '__pycache__' -print0 | xargs -0 rm -rf
+	find ./$(NAME) -name "*.pyc" -print0 | xargs -0 rm -rf
 	-rm -rf build
 	-rm -rf *.egg-info
-	-rm -rf pylint_*
-
-clean_dist:
-	-rm -rf dist
 
 fclean: clean
-	find ./polemarch -name "*.c" -print0 | xargs -0 rm -rf
+	find ./$(NAME) -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf .tox
 
 rpm:
-	echo "$$RPM_SPEC" > polemarch.spec
+	echo "$$RPM_SPEC" > $(NAME).spec
 	rm -rf ~/rpmbuild
 	mkdir -p ~/rpmbuild/SOURCES/
 	ls -la
-	rpmbuild --verbose -bb polemarch.spec
+	rpmbuild --verbose -bb $(NAME).spec
 	mkdir -p dist
 	cp -v ~/rpmbuild/RPMS/x86_64/*.rpm dist/
-	rm polemarch.spec
+	rm $(NAME).spec
 
 deb:
 	rm -rf debian
@@ -167,7 +164,7 @@ deb:
 	chmod +x debian/prerm
 	chmod +x debian/postrm
 	# build
-	dpkg-buildpackage -d -uc -us
+	dpkg-buildpackage -d -uc -us -j4
 	mv -v ../$(NAME)_$(VER)*.deb dist/
 	# cleanup
 	rm -rf debian
