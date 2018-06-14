@@ -19,12 +19,11 @@ from django.contrib.auth.models import User
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
 from rest_framework.exceptions import UnsupportedMediaType
-from .base import ForeignKeyACL
 
 from ..utils import AnsibleArgumentsReference
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
-from .base import BModel, ACLModel, BQuerySet, models
+from .base import ForeignKeyACL, BModel, ACLModel, BQuerySet, models
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project
 
@@ -505,15 +504,16 @@ class History(BModel):
         )
         regex = (
             r"^([\S]{1,})\s\|\s([\S]{1,}) \=>"
-            r" \{\s([^\r]*?\"[\w]{1,}\"\: .*?\s)\}\s"
+            r" \{\s([^\r]*?\"[\w]{1,}\"\: .*?\s)\}\s{0,1}"
         )
         subst = '"\\1": {\n\t"status": "\\2", \n\\3},'
         result = re.sub(regex, subst, data, 0, re.MULTILINE)
-        result = "{" + result[:-1] + "}"
+        result = "{" + result[:-1] + "\n}"
         return json.loads(result)
 
     def get_raw(self, original=True, filters=(), excludes=()):
         qs = self.raw_history_line.filter(*filters).exclude(*excludes)
+        qs = qs.order_by('line_gnumber', 'line_number')
         data = "".join(qs.values_list("line", flat=True))
         return data if original else self.ansi_escape.sub('', data)
 
@@ -524,37 +524,52 @@ class History(BModel):
     @raw_stdout.setter
     @transaction.atomic
     def raw_stdout(self, lines):
-        counter = 0
         del self.raw_stdout
-        lines = lines.split("\n")
-        for line in lines:
-            counter += 1
-            line += '\n' if len(lines) > 1 else ''
-            self.write_line(number=counter, value=line)
+        self.check_output(lines)
 
     @raw_stdout.deleter
     def raw_stdout(self):
         self.raw_history_line.all().delete()
 
+    def check_output(self, output):
+        raw_count = self.raw_history_line.all().count()
+        lines = re.findall(r'.+\n{0,}', output)
+        counter = 0
+        if raw_count >= len(lines):
+            return
+        lines = lines[raw_count:]
+        for line in lines:
+            counter += 1
+            self.write_line(number=counter, value=line)
+
+    def __create_line(self, gnum, num, val, hidden=False):
+        return HistoryLines(
+            history=self, line_gnumber=gnum, line_number=num, line=val, hidden=hidden
+        )
+
     def __bulking_lines(self, value, number):
         out = six.StringIO(value)
+        nline = 0
         for line in iter(partial(out.read, 2 * 1024 - 100), ''):
-            yield HistoryLines(history=self, line_number=number, line=line)
+            nline += 1
+            yield self.__create_line(number, nline, line)
 
-    def write_line(self, value, number):
+    def write_line(self, value, number, endl=""):
         self.raw_history_line.bulk_create([
-            line for line in self.__bulking_lines(value, number)
+            line for line in self.__bulking_lines('{}{}'.format(value, endl), number)
         ])
 
 
 class HistoryLines(BModel):
     line         = models.CharField(default="", max_length=2*1024)
     line_number  = models.IntegerField(default=0)
+    line_gnumber = models.IntegerField(default=0)
     history      = models.ForeignKey(History, on_delete=models.CASCADE,
                                      related_query_name="raw_history_line")
 
     class Meta:
         default_related_name = "raw_history_line"
+        ordering = ['-line_gnumber', '-line_number']
         index_together = [
             ["history"], ["line_number"],
             ["history", "line_number"]

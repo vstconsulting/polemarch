@@ -274,6 +274,7 @@ class HistoryLinesSerializer(_SignalSerializer):
     class Meta:
         model = models.HistoryLines
         fields = ("line_number",
+                  "line_gnumber",
                   "line",)
 
 

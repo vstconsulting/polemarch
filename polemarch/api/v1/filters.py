@@ -138,13 +138,14 @@ class PeriodicTaskFilter(_BaseFilter):
 
 
 class HistoryLinesFilter(filters.FilterSet):
-    after  = NumberFilter(name="line_number", lookup_expr=('gt'))
-    before = NumberFilter(name="line_number", lookup_expr=('lt'))
+    after  = NumberFilter(name="line_gnumber", lookup_expr=('gt'))
+    before = NumberFilter(name="line_gnumber", lookup_expr=('lt'))
 
     class Meta:
         model = models.HistoryLines
         fields = (
             'line_number',
+            'line_gnumber',
         )
 
 
