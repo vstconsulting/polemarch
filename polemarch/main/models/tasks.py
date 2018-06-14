@@ -547,16 +547,18 @@ class History(BModel):
             history=self, line_gnumber=gnum, line_number=num, line=val, hidden=hidden
         )
 
-    def __bulking_lines(self, value, number):
+    def __bulking_lines(self, value, number, endl):
         out = six.StringIO(value)
         nline = 0
         for line in iter(partial(out.read, 2 * 1024 - 100), ''):
             nline += 1
             yield self.__create_line(number, nline, line)
+        if endl:  # nocv
+            yield self.__create_line(number, nline, endl, hidden=True)
 
     def write_line(self, value, number, endl=""):
         self.raw_history_line.bulk_create([
-            line for line in self.__bulking_lines('{}{}'.format(value, endl), number)
+            line for line in self.__bulking_lines(value, number, endl)
         ])
 
 
