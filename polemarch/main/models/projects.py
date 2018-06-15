@@ -33,7 +33,7 @@ class ProjectQuerySet(AbstractVarsQuerySet):
 
 class Project(AbstractModel):
     PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
-    objects       = models.Manager.from_queryset(ProjectQuerySet)()
+    objects       = ProjectQuerySet.as_manager()
     repo_handlers = objects._queryset_class.repo_handlers
     task_handlers = objects._queryset_class.task_handlers
     repository    = models.CharField(max_length=2*1024)

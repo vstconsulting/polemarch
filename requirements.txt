@@ -1,5 +1,5 @@
 # Main
-vstutils[rpc,ldap,doc,coreapi,prod]==1.1.2
+vstutils[rpc,ldap,doc,coreapi,prod]==1.1.4
 pyyaml
 docutils==0.14
 markdown2==2.3.5
@@ -12,7 +12,7 @@ uWSGI==2.0.17
 gitpython==2.1.10
 
 # Hooks
-requests==2.18.4
+requests==2.19
 
 # Ansible required packages
 ansible>=2.1, <=2.5.4

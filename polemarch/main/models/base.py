@@ -5,14 +5,14 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User as BaseUser
 from vstutils.utils import import_class, classproperty
-from vstutils.models import BQuerySet as _BQuerySet, BaseModel as _BaseModel
+from vstutils.models import BQuerySet as _BQSet, BaseModel as _BM, Manager as _BManager
 
 
 def first_staff_user():
     return BaseUser.objects.filter(is_staff=True).first().id
 
 
-class BQuerySet(_BQuerySet):
+class BQuerySet(_BQSet):
     use_for_related_fields = True
 
     def __decorator(self, func):  # noce
@@ -36,7 +36,13 @@ class BQuerySet(_BQuerySet):
         return self.model.acl_handler.user_filter(self, user, only_leads=False)
 
 
-class BaseModel(_BaseModel):
+class Manager(_BManager.from_queryset(BQuerySet)):
+    '''
+    Polemarch model manager.
+    '''
+
+
+class BaseModel(_BM):
     # pylint: disable=no-member
     objects    = BQuerySet.as_manager()
 

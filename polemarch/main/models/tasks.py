@@ -37,7 +37,7 @@ class TaskFilterQuerySet(BQuerySet):
 
 # Block of real models
 class Task(BModel):
-    objects     = models.Manager.from_queryset(TaskFilterQuerySet)()
+    objects     = TaskFilterQuerySet.as_manager()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
                                     related_query_name="tasks")
     name        = models.CharField(max_length=256, default=uuid.uuid1)
@@ -218,7 +218,7 @@ class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
 
 # noinspection PyTypeChecker
 class PeriodicTask(AbstractModel):
-    objects     = models.Manager.from_queryset(PeriodicTaskQuerySet)()
+    objects     = PeriodicTaskQuerySet.as_manager()
     project        = models.ForeignKey(Project, on_delete=models.CASCADE,
                                        related_query_name="periodic_tasks")
     mode           = models.CharField(max_length=256)
@@ -390,7 +390,7 @@ class HistoryQuerySet(BQuerySet):
 
 class History(BModel):
     ansi_escape = re.compile(r'\x1b[^m]*m')
-    objects        = models.Manager.from_queryset(HistoryQuerySet)()
+    objects        = HistoryQuerySet.as_manager()
     project        = models.ForeignKey(Project, on_delete=models.CASCADE,
                                        related_query_name="history", null=True)
     inventory      = models.ForeignKey(Inventory, on_delete=models.CASCADE,
@@ -537,8 +537,7 @@ class History(BModel):
         counter = 0
         if raw_count >= len(lines):
             return
-        lines = lines[raw_count:]
-        for line in lines:
+        for line in lines[raw_count:]:
             counter += 1
             self.write_line(number=counter, value=line)
 

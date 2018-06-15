@@ -769,15 +769,18 @@ pmDashboard.getDataForDashboardFromBulk = function ()
     var bulkArr = [
         {
             type:"get",
-            item: "projects"
+            item: "projects",
+            filters: "limit=1"
         },
         {
             type:"get",
-            item: "inventories"
+            item: "inventories",
+            filters: "limit=1"
         },
         {
             type:"get",
-            item: "templates"
+            item: "templates",
+            filters: "limit=1"
         },
     ];
 
