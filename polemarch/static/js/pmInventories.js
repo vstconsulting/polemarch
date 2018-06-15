@@ -561,7 +561,7 @@ pmInventories.openChooseMatchingModal = function(subItemType, index)
     }
     return $.when(
         spajs.ajax.Call({
-            url: "/api/v1/_bulk/",
+            url: hostname + "/api/v1/_bulk/",
             type: "POST",
             contentType:'application/json',
             data:JSON.stringify(bulkHosts),
@@ -914,7 +914,7 @@ pmInventories.getAllGroupDataBulk = function()
         })
     }
     spajs.ajax.Call({
-        url: "/api/v1/_bulk/",
+        url: hostname + "/api/v1/_bulk/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(bulkArr),
@@ -949,7 +949,7 @@ pmInventories.getAllHostDataBulk = function()
         })
     }
     spajs.ajax.Call({
-        url: "/api/v1/_bulk/",
+        url: hostname + "/api/v1/_bulk/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(bulkArr),

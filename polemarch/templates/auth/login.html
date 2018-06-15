@@ -3,6 +3,6 @@
 {% load i18n %}
 
 {% block login_logo %}
-    <img src="{% static 'img/logo/vertical.png' %}?v={{gui_version}}" alt="Polemarch logo" class="img-responsive center-block logo-img" style="    margin-bottom: 40px; width: 50%;"> 
+    <img src="{{host_url}}{% static 'img/logo/vertical.png' %}?v={{gui_version}}" alt="Polemarch logo" class="img-responsive center-block logo-img" style="    margin-bottom: 40px; width: 50%;">
 {% endblock %}
-  
+ 

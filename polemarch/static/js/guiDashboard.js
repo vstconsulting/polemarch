@@ -782,7 +782,7 @@ pmDashboard.getDataForDashboardFromBulk = function ()
     ];
 
     spajs.ajax.Call({
-        url: "/api/v1/_bulk/",
+        url: hostname + "/api/v1/_bulk/",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(bulkArr),
