@@ -106,9 +106,7 @@ class _WithPermissionsSerializer(_SignalSerializer):
         )
 
     def __duplicates_check(self, data):  # noce
-        without_role = [
-            frozenset({e['member'], e['member_type']}) for e in data
-        ]
+        without_role = [frozenset({e['member'], e['member_type']}) for e in data]
         if len(without_role) != len(list(set(without_role))):
             raise ValueError("There is duplicates in your permissions set.")
 
