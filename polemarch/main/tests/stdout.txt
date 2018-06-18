@@ -1,0 +1,86 @@
+Using /projects/6/ansible.cfg as config file
+
+PLAY [all] *********************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [git.vst.lan]
+ok: [ci-1]
+ok: [docker-1]
+ok: [ci-2]
+ok: [test.vst.lan]
+
+TASK [lborguetti.system-update : Upgrade all packages] *************************
+skipping: [git.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [docker-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-2] => {"changed": false, "skip_reason": "Conditional result was False"}
+ok: [test.vst.lan] => {"changed": false, "msg": "", "rc": 0, "results": ["Nothing to do here, all packages are up to date"]}
+
+TASK [lborguetti.system-update : Updating cache] *******************************
+skipping: [test.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+changed: [docker-1] => {"cache_update_time": 1526911283, "cache_updated": true, "changed": true}
+changed: [ci-2] => {"cache_update_time": 1526911285, "cache_updated": true, "changed": true}
+changed: [git.vst.lan] => {"cache_update_time": 1526911285, "cache_updated": true, "changed": true}
+changed: [ci-1] => {"cache_update_time": 1526911289, "cache_updated": true, "changed": true}
+
+TASK [lborguetti.system-update : Running dist-upgrade] *************************
+skipping: [test.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+ok: [docker-1] => {"changed": false, "msg": "Reading package lists...\nBuilding dependency tree...\nReading state information...\nCalculating upgrade...\nThe following packages were automatically installed and are no longer required:\n  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic\n  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic\n  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic\nUse 'sudo apt autoremove' to remove them.\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n", "stderr": "", "stderr_lines": [], "stdout": "Reading package lists...\nBuilding dependency tree...\nReading state information...\nCalculating upgrade...\nThe following packages were automatically installed and are no longer required:\n  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic\n  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic\n  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic\nUse 'sudo apt autoremove' to remove them.\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n", "stdout_lines": ["Reading package lists...", "Building dependency tree...", "Reading state information...", "Calculating upgrade...", "The following packages were automatically installed and are no longer required:", "  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic", "  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic", "  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic", "Use 'sudo apt autoremove' to remove them.", "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."]}
+ok: [git.vst.lan] => {"changed": false, "msg": "Reading package lists...\nBuilding dependency tree...\nReading state information...\nCalculating upgrade...\nThe following packages were automatically installed and are no longer required:\n  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic\n  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic\n  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic\nUse 'sudo apt autoremove' to remove them.\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n", "stderr": "", "stderr_lines": [], "stdout": "Reading package lists...\nBuilding dependency tree...\nReading state information...\nCalculating upgrade...\nThe following packages were automatically installed and are no longer required:\n  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic\n  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic\n  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic\nUse 'sudo apt autoremove' to remove them.\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n", "stdout_lines": ["Reading package lists...", "Building dependency tree...", "Reading state information...", "Calculating upgrade...", "The following packages were automatically installed and are no longer required:", "  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic", "  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic", "  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic", "Use 'sudo apt autoremove' to remove them.", "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."]}
+ok: [ci-1] => {"changed": false, "msg": "Reading package lists...\nBuilding dependency tree...\nReading state information...\nCalculating upgrade...\nThe following packages were automatically installed and are no longer required:\n  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic\n  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic\n  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic\nUse 'sudo apt autoremove' to remove them.\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n", "stderr": "", "stderr_lines": [], "stdout": "Reading package lists...\nBuilding dependency tree...\nReading state information...\nCalculating upgrade...\nThe following packages were automatically installed and are no longer required:\n  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic\n  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic\n  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic\nUse 'sudo apt autoremove' to remove them.\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n", "stdout_lines": ["Reading package lists...", "Building dependency tree...", "Reading state information...", "Calculating upgrade...", "The following packages were automatically installed and are no longer required:", "  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic", "  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic", "  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic", "Use 'sudo apt autoremove' to remove them.", "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."]}
+ok: [ci-2] => {"changed": false, "msg": "Reading package lists...\nBuilding dependency tree...\nReading state information...\nCalculating upgrade...\nThe following packages were automatically installed and are no longer required:\n  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic\n  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic\n  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic\nUse 'sudo apt autoremove' to remove them.\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n", "stderr": "", "stderr_lines": [], "stdout": "Reading package lists...\nBuilding dependency tree...\nReading state information...\nCalculating upgrade...\nThe following packages were automatically installed and are no longer required:\n  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic\n  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic\n  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic\nUse 'sudo apt autoremove' to remove them.\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.\n", "stdout_lines": ["Reading package lists...", "Building dependency tree...", "Reading state information...", "Calculating upgrade...", "The following packages were automatically installed and are no longer required:", "  linux-headers-4.4.0-116 linux-headers-4.4.0-116-generic", "  linux-headers-4.4.0-119 linux-headers-4.4.0-119-generic", "  linux-image-4.4.0-116-generic linux-image-4.4.0-119-generic", "Use 'sudo apt autoremove' to remove them.", "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."]}
+
+TASK [lborguetti.system-update : Updating cache] *******************************
+skipping: [git.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [docker-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [test.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-2] => {"changed": false, "skip_reason": "Conditional result was False"}
+
+TASK [lborguetti.system-update : Running dist-upgrade] *************************
+skipping: [git.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [docker-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [test.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-2] => {"changed": false, "skip_reason": "Conditional result was False"}
+
+TASK [geerlingguy.repo-epel : Check if EPEL repo is already configured.] *******
+skipping: [git.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [docker-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-2] => {"changed": false, "skip_reason": "Conditional result was False"}
+ok: [test.vst.lan] => {"changed": false, "stat": {"atime": 1526911247.3436663, "attr_flags": "", "attributes": [], "block_size": 4096, "blocks": 8, "charset": "us-ascii", "checksum": "6acc53a98eddeaef23b9d47b641030212331b257", "ctime": 1523592264.1528413, "dev": 64513, "device_type": 0, "executable": false, "exists": true, "gid": 0, "gr_name": "root", "inode": 8501324, "isblk": false, "ischr": false, "isdir": false, "isfifo": false, "isgid": false, "islnk": false, "isreg": true, "issock": false, "isuid": false, "mimetype": "text/plain", "mode": "0644", "mtime": 1506966248.0, "nlink": 1, "path": "/etc/yum.repos.d/epel.repo", "pw_name": "root", "readable": true, "rgrp": true, "roth": true, "rusr": true, "size": 951, "uid": 0, "version": "18446744072187647754", "wgrp": false, "woth": false, "writeable": true, "wusr": true, "xgrp": false, "xoth": false, "xusr": false}}
+
+TASK [geerlingguy.repo-epel : Install EPEL repo.] ******************************
+skipping: [git.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [docker-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [test.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-2] => {"changed": false, "skip_reason": "Conditional result was False"}
+
+TASK [geerlingguy.repo-epel : Import EPEL GPG key.] ****************************
+skipping: [git.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [docker-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [test.vst.lan] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-1] => {"changed": false, "skip_reason": "Conditional result was False"}
+skipping: [ci-2] => {"changed": false, "skip_reason": "Conditional result was False"}
+
+TASK [onegreyonewhite.package_installer : Install system packages] *************
+included: /projects/6/roles/onegreyonewhite.package_installer/tasks/Debian.yml for git.vst.lan, docker-1, ci-1, ci-2
+included: /projects/6/roles/onegreyonewhite.package_installer/tasks/RedHat.yml for test.vst.lan
+
+TASK [onegreyonewhite.package_installer : Install packages] ********************
+ok: [docker-1] => (item=[u'mc', u'traceroute', u'nano', u'wget', u'htop']) => {"cache_update_time": 1526911283, "cache_updated": false, "changed": false, "item": ["mc", "traceroute", "nano", "wget", "htop"]}
+ok: [ci-1] => (item=[u'mc', u'traceroute', u'nano', u'wget', u'htop']) => {"cache_update_time": 1526911289, "cache_updated": false, "changed": false, "item": ["mc", "traceroute", "nano", "wget", "htop"]}
+ok: [git.vst.lan] => (item=[u'mc', u'traceroute', u'nano', u'wget', u'htop']) => {"cache_update_time": 1526911285, "cache_updated": false, "changed": false, "item": ["mc", "traceroute", "nano", "wget", "htop"]}
+ok: [ci-2] => (item=[u'mc', u'traceroute', u'nano', u'wget', u'htop']) => {"cache_update_time": 1526911285, "cache_updated": false, "changed": false, "item": ["mc", "traceroute", "nano", "wget", "htop"]}
+
+TASK [onegreyonewhite.package_installer : Install packages] ********************
+ok: [test.vst.lan] => (item=[u'mc', u'traceroute', u'nano', u'wget', u'htop']) => {"changed": false, "item": ["mc", "traceroute", "nano", "wget", "htop"], "msg": "", "rc": 0, "results": ["1:mc-4.8.7-11.el7.x86_64 providing mc is already installed", "3:traceroute-2.0.22-2.el7.x86_64 providing traceroute is already installed", "nano-2.3.1-10.el7.x86_64 providing nano is already installed", "wget-1.14-15.el7_4.1.x86_64 providing wget is already installed", "htop-2.1.0-1.el7.x86_64 providing htop is already installed"]}
+
+PLAY RECAP *********************************************************************
+ci-1                       : ok=5    changed=1    unreachable=0    failed=0
+ci-2                       : ok=5    changed=1    unreachable=0    failed=0
+docker-1                   : ok=5    changed=1    unreachable=0    failed=0
+git.vst.lan                : ok=5    changed=1    unreachable=0    failed=0
+test.vst.lan               : ok=5    changed=0    unreachable=0    failed=0

@@ -229,7 +229,7 @@ function render(name, callback)
 function saveReport()
 {
     $("body").html('<div id="qunit">'+$("#qunit").html()+'</div>');
-    $("body").append('<link rel="stylesheet" href="'+window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">')
+    $("body").append('<link rel="stylesheet" href="' + hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">')
     console.log("saveReport")
 }
 
@@ -243,8 +243,8 @@ window.qunitTestsArray = []
  */
 function injectQunit()
 {
-    $("body").append('<link rel="stylesheet" href="'+window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">')
-    $("body").append('<script src="'+ window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.js"></script>')
+    $("body").append('<link rel="stylesheet" href="' + hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">')
+    $("body").append('<script src="'+ hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.js"></script>')
     $("body").append('<div id="qunit"></div><div id="qunit-fixture"></div>')
 
     var intervalId = setInterval(function()

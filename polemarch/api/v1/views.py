@@ -151,7 +151,7 @@ class HistoryViewSet(LimitedPermissionMixin, base.HistoryModelViewSet):
     @base.action(methods=["get"], detail=True)
     def lines(self, request, *args, **kwargs):
         return self.get_paginated_route_response(
-            self.get_object().raw_history_line.order_by("-line_number"),
+            self.get_object().raw_history_line.all().cleared(),
             serializers.HistoryLinesSerializer,
             filters.HistoryLinesFilter
         )

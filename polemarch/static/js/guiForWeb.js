@@ -22,7 +22,7 @@ function getCookie(name)
 function loadTpl(name)
 {  
     return jQuery.ajax({
-       url: window.guiStaticPath+""+name+".html?v="+window.gui_version,
+       url:  hostname + window.guiStaticPath+""+name+".html?v="+window.gui_version,
        type: "GET",
        success: function(res)
        {
@@ -117,7 +117,7 @@ polemarch.start = function(options)
         preventDefaultEvents: false
     });
 
-    if(window.cordova)
+    if(window.cordova || ( window.parent && window.parent.cordova))
     {
         $("body").addClass('platform-cordova')
     }

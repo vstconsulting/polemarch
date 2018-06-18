@@ -33,7 +33,7 @@ class ProjectQuerySet(AbstractVarsQuerySet):
 
 class Project(AbstractModel):
     PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
-    objects       = models.Manager.from_queryset(ProjectQuerySet)()
+    objects       = ProjectQuerySet.as_manager()
     repo_handlers = objects._queryset_class.repo_handlers
     task_handlers = objects._queryset_class.task_handlers
     repository    = models.CharField(max_length=2*1024)
@@ -139,7 +139,7 @@ class Project(AbstractModel):
         return kwargs
 
     def hook(self, when, msg):
-        Hook.objects.execute(when, msg)
+        Hook.objects.all().execute(when, msg)
 
     def sync_on_execution_handler(self, history):
         if not self.vars.get('repo_sync_on_run', False):

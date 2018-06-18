@@ -49,6 +49,11 @@
     </li>
 
     {% if has_docs %}
-        <li id="menu-docs"><a href={% block doc_link %}"docs/index.html"{% endblock %}><i class="fa fa-book"></i> <span class="li-header-span"><i class="li-header-span-i">Documentation</i></span></a></li>
+        <li id="menu-docs">
+            <a href={% block doc_link %}"{{host_url}}/docs/index.html"{% endblock %}
+               onclick="if(window.parent && window.parent.cordova && window.parent.cordova.InAppBrowser) window.parent.cordova.InAppBrowser.open(this.href, '_blank', 'location=yes'); return false;">
+               <i class="fa fa-book"></i> <span class="li-header-span"><i class="li-header-span-i">Documentation</i></span>
+            </a>
+        </li>
     {% endif %}
 {% endblock %}

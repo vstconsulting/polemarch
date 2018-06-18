@@ -47,13 +47,13 @@ class HooksQuerySet(BQuerySet):
 
 class Hook(BModel):
     # pylint: disable=no-member
-    objects = models.Manager.from_queryset(HooksQuerySet)()
+    objects = HooksQuerySet.as_manager()
     handlers = HookHandlers("HOOKS", "'type' needed!")
     name       = models.CharField(max_length=512, default=uuid.uuid1)
     type       = models.CharField(max_length=32, null=False)
     when       = models.CharField(max_length=32, null=True, default=None)
     enable     = models.BooleanField(default=True)
-    recipients = models.CharField(max_length=30*1024)
+    recipients = models.CharField(max_length=20000)
 
     @property
     def reps(self):

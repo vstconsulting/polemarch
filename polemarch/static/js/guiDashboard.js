@@ -769,20 +769,23 @@ pmDashboard.getDataForDashboardFromBulk = function ()
     var bulkArr = [
         {
             type:"get",
-            item: "projects"
+            item: "projects",
+            filters: "limit=1"
         },
         {
             type:"get",
-            item: "inventories"
+            item: "inventories",
+            filters: "limit=1"
         },
         {
             type:"get",
-            item: "templates"
+            item: "templates",
+            filters: "limit=1"
         },
     ];
 
     spajs.ajax.Call({
-        url: "/api/v1/_bulk/",
+        url: hostname + "/api/v1/_bulk/",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(bulkArr),

@@ -791,8 +791,7 @@ pmHistory.Syntax = function(code)
     var html = ansi_up.ansi_to_html(code);
     return html
     // Табуляцию заменяем неразрывными пробелами
-        .replace(/\t/g,
-            '&nbsp;&nbsp;&nbsp;&nbsp;');
+        .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
 }
 
 pmHistory.getLine = function(item_id, line_id)
@@ -915,7 +914,7 @@ pmHistory.loadLines = function(item_id, opt)
             pmHistory.model.items[item_id].stdout_count = data.count;
             for(var i in data.results)
             {
-                var line_number = data.results[i].line_number
+                var line_number = data.results[i].line_gnumber
 
                 if(pmHistory.model.items[item_id].stdout_maxline < line_number)
                 {
@@ -927,7 +926,13 @@ pmHistory.loadLines = function(item_id, opt)
                     pmHistory.model.items[item_id].stdout_minline = line_number;
                 }
 
-                pmHistory.model.items[item_id].stdout[line_number] = {id:line_number, text:data.results[i].line}
+                if(!pmHistory.model.items[item_id].stdout[line_number])
+                {
+                    pmHistory.model.items[item_id].stdout[line_number] = {id:line_number, text:data.results[i].line}
+                }
+                else {
+                    pmHistory.model.items[item_id].stdout[line_number].text = data.results[i].line + pmHistory.model.items[item_id].stdout[line_number].text
+                }
             }
 
             def.resolve()

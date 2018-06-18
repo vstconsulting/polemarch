@@ -1293,7 +1293,7 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         result = self.get_result("get", lines_url)
         self.assertEqual(result["count"], 1, result)
         self.assertCount(result["results"], 1)
-        line_number = result["results"][0]["line_number"]
+        line_number = result["results"][0]["line_gnumber"]
         self.assertEqual(line_number, 3, result)
 
         self.get_result("delete", url + "{}/".format(self.histories[0].id))
@@ -1338,7 +1338,21 @@ class ApiHistoryTestCase(_ApiGHBaseTestCase):
         self.get_result("delete", url)
         url = "/api/v1/history/{}/raw/".format(history.id)
         result = self.get_result("get", url)
-        self.assertEquals(result, "Output trancated.\n\n")
+        self.assertEquals(result, "Output trancated.\n")
+
+    def test_raw_stdout(self):
+        history_kwargs = dict(project=self.ph, mode="setup",
+                              kind="MODULE",
+                              raw_inventory="inventory",
+                              inventory=self.history_inventory,
+                              status="OK",
+                              start_time=now() - timedelta(hours=15),
+                              stop_time=now() - timedelta(hours=14))
+        history = self.get_model_class('History').objects.create(**history_kwargs)
+        stdout = self._get_string_from_file("stdout.txt")
+        history.raw_stdout = stdout
+        self.assertEqual(history.raw_stdout, stdout)
+        history.delete()
 
     def test_history_facts(self):
         history_kwargs = dict(project=self.ph, mode="setup",

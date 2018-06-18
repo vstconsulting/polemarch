@@ -15,4 +15,6 @@ class Manual(_Base):
         return None, None
 
     def make_update(self, options):
+        if not os.path.exists(self.path):  # nocv
+            os.mkdir(self.path)
         return None, None

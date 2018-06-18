@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from subprocess import CalledProcessError
 from vstutils.utils import KVExchanger, tmp_file, ModelHandlers
 from ..tests._base import BaseTestCase
@@ -16,7 +17,7 @@ class ExecutorTestCase(BaseTestCase):
         # test output on `sleep --help`
         output = []
 
-        def add_line(line, line_number):
+        def add_line(line, line_number, endl=''):
             # pylint: disable=unused-argument
             output.append(line)
 
@@ -24,9 +25,9 @@ class ExecutorTestCase(BaseTestCase):
         history.id = 999
         history.write_line = add_line
         executor = Executor(history)
-        executor.execute(['sleep', '--version'], '/')
+        executor.execute(['echo', 'Hello'], '/')
         result = "\n".join(output)
-        self.assertIn("sleep", result)
+        self.assertIn("Hello", result)
         # test interrupt on `sleep 5m`
         KVExchanger(Executor.CANCEL_PREFIX + str(history.id)).send(True, 10)
         executor = Executor(history)
