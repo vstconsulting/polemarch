@@ -1,9 +1,9 @@
 {% extends "gui/base.html" %}
-{% load staticfiles %}
+{% load request_static %}
 {% load i18n %}
 
 {% block flavicon %}
-    <link rel="shortcut icon" href="{% static_path '/' %}/img/logo/favicon.ico">
+    <link rel="shortcut icon" href="{% static_path '/img/logo/favicon.ico' %}">
 {% endblock %}
 
 {% block logo %}
