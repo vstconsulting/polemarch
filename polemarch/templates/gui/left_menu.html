@@ -51,7 +51,7 @@
     {% if has_docs %}
         <li id="menu-docs">
             <a href={% block doc_link %}"{{host_url}}/docs/index.html"{% endblock %}
-               onclick="return openURLInAppBrowser(this.href);">
+               onclick=" return openURLInAppBrowser(this.href); ">
                <i class="fa fa-book"></i> <span class="li-header-span"><i class="li-header-span-i">Documentation</i></span>
             </a>
         </li>
