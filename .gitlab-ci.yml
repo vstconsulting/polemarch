@@ -119,7 +119,7 @@ default_deb_tests:
   image: onegreyonewhite/tox:ubuntu
   script:
    - cat /etc/hosts
-   - make deb RELEASE=${CI_BUILD_ID}
+   - make deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
    - echo "echo 'hello'" > /bin/systemctl
    - sudo apt install ./dist/*.deb -y -q
    - sudo cat test_settings.ini > /etc/polemarch/settings.ini
