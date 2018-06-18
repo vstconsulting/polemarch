@@ -34,7 +34,7 @@ def send_hook(when, target):
     msg = OrderedDict(when=when)
     msg['target'] = target
     if 'loaddata' not in sys.argv:
-        Hook.objects.execute(when, msg)
+        Hook.objects.all().execute(when, msg)
 
 
 @raise_context()

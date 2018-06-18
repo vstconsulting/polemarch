@@ -139,7 +139,7 @@ class Project(AbstractModel):
         return kwargs
 
     def hook(self, when, msg):
-        Hook.objects.execute(when, msg)
+        Hook.objects.all().execute(when, msg)
 
     def sync_on_execution_handler(self, history):
         if not self.vars.get('repo_sync_on_run', False):
