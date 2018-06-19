@@ -351,6 +351,13 @@ pmProjects.model.page_item = {
         {
             class:'btn btn-info',
             function:function(item_id){ return 'return spajs.openURL(this.href);'},
+            title:'<i class="fa fa-clone hidden-sm hidden-xs" aria-hidden="true"></i> Templates',
+            link:function(item_id){ return polemarch.opt.host +'/?project/'+ item_id + '/templates'},
+            help:'Templates'
+        },
+        {
+            class:'btn btn-info',
+            function:function(item_id){ return 'return spajs.openURL(this.href);'},
             title:'<i class="fa fa-history hidden-sm hidden-xs" aria-hidden="true"></i> History',
             link:function(item_id){ return polemarch.opt.host +'/?project/'+ item_id + '/history'},
             help:'history'

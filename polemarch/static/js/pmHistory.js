@@ -74,12 +74,18 @@ pmHistory.search = function(query, options)
     }
     else if(options.initiator_type && options.initiator_type=='template')
     {
+        var project_and_id = "";
+        var link = window.location.href.split(/[&?]/g)[1];
+        if(/project\/([0-9]+)/.test(link))
+        {
+            project_and_id = "project/" + link.split(/project\/([0-9]+)/g)[1] + "/";
+        }
         if(this.isEmptySearchQuery(query))
         {
-            return spajs.open({ menuId:'template/' + options.kind + '/' + options.initiator +"/" + this.model.name, reopen:true});
+            return spajs.open({ menuId:project_and_id + 'template/' + options.kind + '/' + options.initiator +"/" + this.model.name, reopen:true});
         }
 
-        return spajs.open({ menuId:'template/' + options.kind + '/' + options.initiator +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query), 'mode'), reopen:true});
+        return spajs.open({ menuId:project_and_id + 'template/' + options.kind + '/' + options.initiator +"/" + this.model.name+"/search/"+this.searchObjectToString(trim(query), 'mode'), reopen:true});
     }
     else if(this.isEmptySearchQuery(query))
     {
@@ -174,24 +180,64 @@ pmHistory.showListInInventory = function(holder, menuInfo, data)
 pmHistory.showListInTemplate = function(holder, menuInfo, data, pmObj)
 {
     var thisObj = this;
-    var offset = 0
+    var def = new $.Deferred();
+    var offset = 0;
     var limit = this.pageSize;
-    if(data.reg && data.reg[2] > 0)
-    {
-        offset = this.pageSize*(data.reg[2] - 1);
-    }
+    var project_id = undefined;
     var template_id = data.reg[1];
-    //debugger;
-    return $.when(this.sendSearchQuery({initiator_type:"template",initiator:template_id}, limit, offset), pmObj.loadItem(template_id)).done(function()
+    if(/project/.test(window.location.href))
     {
-        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInTemplate', {query:"", pmObj:pmObj, template_id:template_id}))).done(function(){
-            pmHistory.setTableRowLinkInLink();
-        })
-        thisObj.model.selectedCount = $('.multiple-select .selected').length;
-    }).fail(function()
+        if(data.reg && data.reg[3] > 0)
+        {
+            offset = this.pageSize*(data.reg[3] - 1);
+        }
+        project_id = data.reg[1];
+        template_id = data.reg[2];
+    }
+    else
+    {
+        if(data.reg && data.reg[2] > 0)
+        {
+            offset = this.pageSize*(data.reg[2] - 1);
+        }
+    }
+    $.when(this.sendSearchQuery({initiator_type:"template",initiator:template_id}, limit, offset), pmObj.loadItem(template_id)).done(function()
+    {
+        var project_name = undefined;
+        if(project_id !== undefined)
+        {
+            $.when(pmProjects.loadItem(project_id)).done(function ()
+            {
+                project_name = pmProjects.model.items[project_id].name;
+                $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInTemplate', {query:"", pmObj:pmObj, template_id:template_id,
+                    opt:{project_id:project_id, project_name:project_name}}))).done(function(){
+                    pmHistory.setTableRowLinkInLink();
+                })
+                thisObj.model.selectedCount = $('.multiple-select .selected').length;
+                def.resolve();
+
+            }).fail(function (e)
+            {
+                $.notify("", "error");
+                def.reject(e);
+            });
+        }
+        else
+        {
+            $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInTemplate', {query:"", pmObj:pmObj, template_id:template_id,
+                opt:{project_id:project_id, project_name:project_name}}))).done(function(){
+                pmHistory.setTableRowLinkInLink();
+            })
+            thisObj.model.selectedCount = $('.multiple-select .selected').length;
+            def.resolve();
+        }
+    }).fail(function(e)
     {
         $.notify("", "error");
+        def.reject(e);
     })
+
+    return def.promise();
 }
 
 pmHistory.showSearchResultsInProjects = function(holder, menuInfo, data)
@@ -246,27 +292,70 @@ pmHistory.showSearchResultsInInventory = function(holder, menuInfo, data)
 pmHistory.showSearchResultsInTemplate = function(holder, menuInfo, data, pmObj)
 {
     var thisObj = this;
-    var template_id = data.reg[1];
+    var def = new $.Deferred();
     var offset = 0
     var limit = this.pageSize;
-    if(data.reg && data.reg[3] > 0)
+    var project_id = undefined;
+    var search_query = undefined;
+    var template_id = data.reg[1];
+    if(/project/.test(window.location.href))
     {
-        offset = this.pageSize*(data.reg[3] - 1);
+        if(data.reg && data.reg[4] > 0)
+        {
+            offset = this.pageSize*(data.reg[4] - 1);
+        }
+        project_id = data.reg[1];
+        template_id = data.reg[2];
+        search_query = data.reg[3];
+    }
+    else
+    {
+        if(data.reg && data.reg[3] > 0)
+        {
+            offset = this.pageSize*(data.reg[3] - 1);
+        }
+        search_query = data.reg[2];
     }
 
-    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]), 'mode');
+    var search = this.searchStringToObject(decodeURIComponent(search_query), 'mode');
     search['initiator_type'] = 'template';
     search['initiator'] = template_id;
 
-    return $.when(this.sendSearchQuery(search, limit, offset), pmObj.loadItem(template_id)).done(function()
+    $.when(this.sendSearchQuery(search, limit, offset), pmObj.loadItem(template_id)).done(function()
     {
-        $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInTemplate', {query:decodeURIComponent(data.reg[2]), pmObj:pmObj, template_id:template_id}))).done(function(){
-            pmHistory.setTableRowLinkInLink();
-        })
-    }).fail(function()
+        var project_name = undefined;
+        if(project_id !== undefined)
+        {
+            $.when(pmProjects.loadItem(project_id)).done(function ()
+            {
+                project_name = pmProjects.model.items[project_id].name;
+                $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInTemplate', {query:decodeURIComponent(search_query), pmObj:pmObj, template_id:template_id,
+                    opt:{project_id:project_id, project_name:project_name}}))).done(function(){
+                    pmHistory.setTableRowLinkInLink();
+                    def.resolve();
+                })
+            }).fail(function (e)
+            {
+                polemarch.showErrors(e);
+                def.reject(e);
+            });
+        }
+        else
+        {
+            $.when($(holder).insertTpl(spajs.just.render(thisObj.model.name+'_listInTemplate', {query:decodeURIComponent(search_query), pmObj:pmObj, template_id:template_id,
+                opt:{project_id:project_id, project_name:project_name}}))).done(function(){
+                pmHistory.setTableRowLinkInLink();
+                def.resolve();
+            })
+        }
+
+    }).fail(function(e)
     {
         $.notify("", "error");
+        def.reject(e);
     })
+
+    return def.promise();
 }
 
 
@@ -344,19 +433,51 @@ pmHistory.showItemInInventory = function(holder, menuInfo, data)
 pmHistory.showItemInTemplate = function(holder, menuInfo, data, pmObj)
 {
     var thisObj = this;
+    var def = new $.Deferred();
+    var project_id = undefined;
     var template_id = data.reg[1];
     var item_id = data.reg[2];
-    return $.when(this.loadItem(item_id), pmObj.loadItem(template_id)).done(function()
+    if(data.reg[3] !== undefined)
     {
-        $.when(pmInventories.loadItem(pmHistory.model.items[item_id].inventory)).done(function(){
-            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInTemplate', {item_id:item_id, pmObj:pmObj, template_id:template_id}))
-            pmHistory.bindStdoutUpdates(item_id);
-        });
-
-    }).fail(function()
+        project_id = data.reg[1];
+        template_id = data.reg[2];
+        item_id = data.reg[3];
+    }
+    $.when(this.loadItem(item_id), pmObj.loadItem(template_id)).done(function()
     {
-        $.notify("", "error");
+        var project_name = undefined;
+        if(project_id !== undefined)
+        {
+            $.when(pmProjects.loadItem(project_id)).done(function ()
+            {
+                project_name = pmProjects.model.items[project_id].name;
+                $.when(pmInventories.loadItem(pmHistory.model.items[item_id].inventory)).done(function(){
+                    $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInTemplate', {item_id:item_id, pmObj:pmObj, template_id:template_id,
+                        opt:{project_id:project_id, project_name:project_name}}));
+                    pmHistory.bindStdoutUpdates(item_id);
+                    def.resolve();
+                });
+            }).fail(function (e)
+            {
+                polemarch.showErrors(e.responseJSON);
+                def.reject(e);
+            });
+        }
+        else
+        {
+            $.when(pmInventories.loadItem(pmHistory.model.items[item_id].inventory)).done(function(){
+                $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_pageInTemplate', {item_id:item_id, pmObj:pmObj, template_id:template_id,
+                    opt:{project_id:project_id, project_name:project_name}}));
+                pmHistory.bindStdoutUpdates(item_id);
+                def.resolve();
+            });
+        }
+    }).fail(function(e)
+    {
+        polemarch.showErrors(e.responseJSON);
+        def.reject(e);
     })
+    return def.promise();
 }
 
 pmHistory.bindStdoutUpdates = function(item_id)
@@ -1127,20 +1248,24 @@ tabSignal.connect("polemarch.start", function()
     // history in task template
     spajs.addMenu({
         id:"task-template-history",
-        urlregexp:[/^template\/Task\/([0-9]+)\/history$/, /^template\/Task\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        urlregexp:[/^template\/Task\/([0-9]+)\/history$/, /^template\/Task\/([0-9]+)\/history\/page\/([0-9]+)$/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/history$/, /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/history\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showListInTemplate(holder, menuInfo, data, pmTasksTemplates);}
     })
 
     spajs.addMenu({
         id:"history-item-in-task-template",
-        urlregexp:[/^template\/Task\/([0-9]+)\/history\/([0-9]+)$/],
+        urlregexp:[/^template\/Task\/([0-9]+)\/history\/([0-9]+)$/, /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/history\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showItemInTemplate(holder, menuInfo, data, pmTasksTemplates);},
         onClose:function(){return pmHistory.stopUpdates();}
     })
 
     spajs.addMenu({
         id:"task-template-history-search",
-        urlregexp:[/^template\/Task\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^template\/Task\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        urlregexp:[/^template\/Task\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^template\/Task\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInTemplate(holder, menuInfo, data, pmTasksTemplates);}
     })
 

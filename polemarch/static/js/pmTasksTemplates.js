@@ -115,15 +115,55 @@ pmTasksTemplates.model.page_list = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(){ return "spajs.open({ menuId:'template/new-task'}); return false;"},
+            function:function(opt)
+            {
+                if(opt.project_id !== undefined)
+                {
+                    return "spajs.open({ menuId:'" + "project/" + opt.project_id + "/template/new-task'}); return false;"
+                }
+                else
+                {
+                    return "spajs.open({ menuId:'template/new-task'}); return false;"
+                }
+            },
             title:'Create task template',
-            link:function(){ return '/?template/new-task'},
+            link:function(opt)
+            {
+                if(opt.project_id !== undefined)
+                {
+                    return '/?project/' + opt.project_id + '/templates/new-task';
+                }
+                else
+                {
+                    return '/?template/new-task';
+                }
+            },
         },
         {
             class:'btn btn-primary',
-            function:function(){ return "spajs.open({ menuId:'template/new-module'}); return false;"},
+            function:function(opt)
+            {
+                if(opt.project_id !== undefined)
+                {
+                    return "spajs.open({ menuId:'" + "project/" + opt.project_id + "/template/new-module'}); return false;"
+                }
+                else
+                {
+                    return "spajs.open({ menuId:'template/new-module'}); return false;"
+                }
+            },
             title:'Create module template',
-            link:function(){ return '/?template/new-module'},
+            link:function(opt)
+            {
+                if (opt.project_id !== undefined)
+                {
+                    return '/?project/' + opt.project_id + '/templates/new-module';
+                }
+                else
+                {
+                    return '/?template/new-module';
+                }
+            }
         },
     ],
     actionsOnSelected:[
@@ -141,9 +181,16 @@ pmTasksTemplates.model.page_list = {
         {
             title:'Name',
             name:'name',
-            value:function(item)
+            value:function(item, name, opt)
             {
-                return '<a href="/?'+this.model.page_name+'/'+item.kind+'/'+item.id+'" class="item-name" onclick="return spajs.openURL(this.href);" >'+item.name+'</a>';
+                if (opt.project_id !== undefined)
+                {
+                    return '<a href="/?project/'+opt.project_id+'/'+this.model.page_name+'/'+item.kind+'/'+item.id+'" class="item-name" onclick="return spajs.openURL(this.href);" >'+item.name+'</a>';
+                }
+                else
+                {
+                    return '<a href="/?'+this.model.page_name+'/'+item.kind+'/'+item.id+'" class="item-name" onclick="return spajs.openURL(this.href);" >'+item.name+'</a>';
+                }
             }
         },
         {
@@ -170,6 +217,18 @@ pmTasksTemplates.model.page_list = {
 }
 
 pmTasksTemplates.model.page_item = {
+    back_link: function (item_id, opt)
+    {
+        if(opt.project_id !== undefined)
+        {
+            return "?project/" + opt.project_id + "/" + this.model.name;
+
+        }
+        else
+        {
+            return "?" + this.model.name;
+        }
+    },
     buttons:[
         {
             class:'btn btn-primary',
@@ -188,8 +247,16 @@ pmTasksTemplates.model.page_item = {
         },
         {
             class:'btn btn-info',
-            function:function(item_id){
-                return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/options'}); return false;"
+            function:function(item_id, opt)
+            {
+                if(opt.project_id !== undefined)
+                {
+                    return "spajs.open({ menuId:'project/"+opt.project_id+"/template/"+this.model.kind+"/"+item_id+"/options'}); return false;"
+                }
+                else
+                {
+                    return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/options'}); return false;"
+                }
             },
             title:'Options',
             link:function(){ return '#'},
@@ -197,8 +264,16 @@ pmTasksTemplates.model.page_item = {
         },
         {
             class:'btn btn-info',
-            function:function(item_id){
-                return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/periodic-tasks'}); return false;"
+            function:function(item_id, opt)
+            {
+                if(opt.project_id !== undefined)
+                {
+                    return "spajs.open({ menuId:'project/"+opt.project_id+"/template/"+this.model.kind+"/"+item_id+"/periodic-tasks'}); return false;"
+                }
+                else
+                {
+                    return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/periodic-tasks'}); return false;"
+                }
             },
             title:'Periodic tasks',
             link:function(){ return '#'},
@@ -206,9 +281,20 @@ pmTasksTemplates.model.page_item = {
         },
         {
             class:'btn btn-info',
-            function:function(){ return 'return spajs.openURL(this.href);'},
+            function:function(item_id, opt)
+            {
+                if(opt.project_id !== undefined)
+                {
+                    return "spajs.open({ menuId:'project/"+opt.project_id+"/template/"+this.model.kind+"/"+item_id+"/history'}); return false;"
+                }
+                else
+                {
+                    return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/history'}); return false;"
+                }
+
+            },
             title:'History',
-            link:function(item_id){ return polemarch.opt.host +'/?template/'+this.model.kind+'/'+ item_id + '/history'},
+            link:function(){ return '#'},
             help:'Template execution history'
         },
         {
@@ -287,6 +373,17 @@ pmTasksTemplates.model.page_item = {
 
 
 pmTasksTemplates.model.page_item_new_option = {
+    back_link: function (item_id, opt)
+    {
+        if(opt.project_id !== undefined)
+        {
+            return "?project/" + opt.project_id + "/" + this.model.page_name + "/" + this.model.kind + "/" + item_id + "/options";
+        }
+        else
+        {
+            return "?" + this.model.page_name + "/" + this.model.kind + "/" + item_id + "/options";
+        }
+    },
     buttons:[
         {
             class:'btn btn-primary',
@@ -333,6 +430,17 @@ pmTasksTemplates.model.page_item_new_option = {
 
 
 pmTasksTemplates.model.page_item_option = {
+    back_link: function (item_id, opt)
+    {
+        if(opt.project_id !== undefined)
+        {
+            return "?project/" + opt.project_id + "/" +this.model.page_name + "/" +  this.model.kind + "/" + item_id + "/options";
+        }
+        else
+        {
+            return "?" + this.model.page_name + "/" +  this.model.kind + "/" + item_id + "/options";
+        }
+    },
     buttons:[
         {
             class:'btn btn-primary',
@@ -409,13 +517,13 @@ pmTasksTemplates.saveAndExecute = function(item_id)
     return def.promise()
 }
 
-/**
- *Функция открывает страницу для создания новой опции.
- */
-pmTasksTemplates.setNewOption = function(item_id)
-{
-    return spajs.open({ menuId:"template/"+this.model.kind+"/"+item_id+"/new-option"});
-}
+// /**
+//  *Функция открывает страницу для создания новой опции. можно удалить
+//  */
+// pmTasksTemplates.setNewOption = function(item_id)
+// {
+//     return spajs.open({ menuId:'template/'+this.model.kind+'/'+item_id+'/new-option'});
+// }
 
 /**
  *Функция сохраняет новую опцию.
@@ -521,7 +629,13 @@ pmTasksTemplates.saveOption = function(item_id)
             {
                 thisObj.model.items[item_id] = data
                 $.notify('Option "'+optionName+'" was successfully saved', "success");
-                $.when(spajs.open({ menuId:"template/"+thisObj.model.kind+"/"+data.id+"/option/"+optionName})).always(function(){
+                var project_and_id = "";
+                var link = window.location.href.split(/[&?]/g)[1];
+                if(/project\/([0-9]+)/.test(link))
+                {
+                    project_and_id = "project/" + link.split(/project\/([0-9]+)/g)[1] + "/";
+                }
+                $.when(spajs.open({ menuId:project_and_id + "template/"+thisObj.model.kind+"/"+data.id+"/option/"+optionName})).always(function(){
                     def.resolve();
                 });
             },
@@ -575,16 +689,22 @@ pmTasksTemplates.removeOption = function(item_id, option_name)
         {
             thisObj.model.items[item_id] = data
             $.notify('Option "'+optionName+'" was successfully deleted', "success");
-            if(/options/.test(window.location.href) == false)
+            // if(/options/.test(window.location.href) == false)
+            // {
+            var project_and_id = "";
+            var link = window.location.href.split(/[&?]/g)[1];
+            if(/project\/([0-9]+)/.test(link))
             {
-                $.when(spajs.open({ menuId:"template/"+thisObj.model.kind+"/"+data.id+"/options"})).always(function(){
-                    def.resolve();
-                });
+                project_and_id = "project/" + link.split(/project\/([0-9]+)/g)[1] + "/";
             }
-            else
-            {
+            $.when(spajs.open({ menuId:project_and_id + "template/"+thisObj.model.kind+"/"+data.id+"/options"})).always(function(){
                 def.resolve();
-            }
+            });
+            // }
+            // else
+            // {
+            //     def.resolve();
+            // }
         },
         error: function (e)
         {
@@ -602,18 +722,31 @@ pmTasksTemplates.showNewOptionPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
     var thisObj = this;
-    var item_id = data.reg[1]
+    var item_id = undefined;
+    var project_id = undefined;
+    if(data.reg[2] !== undefined)
+    {
+        project_id = data.reg[1];
+        item_id = data.reg[2];
+    }
+    else
+    {
+        item_id = data.reg[1];
+    }
     $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
-        thisObj.model.selectedProject = thisObj.model.items[item_id].data.project
-
+        thisObj.model.selectedProject = thisObj.model.items[item_id].data.project;
+        if(project_id !== undefined && pmProjects.model.items[project_id] !== undefined)
+        {
+            var project_name = pmProjects.model.items[project_id].name;
+        }
         var tpl = 'new_option_page'
         if(!spajs.just.isTplExists(tpl))
         {
             tpl = 'items_page'
         }
 
-        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
+        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{project_id:project_id, project_name:project_name}}))
         def.resolve();
     }).fail(function(e)
     {
@@ -630,11 +763,23 @@ pmTasksTemplates.showOptionPage = function(holder, menuInfo, data)
 {
     var def = new $.Deferred();
     var thisObj = this;
+    var project_id = undefined;
     var item_id = data.reg[1];
     var option_name=data.reg[2];
+    if(data.reg[3] !== undefined)
+    {
+        project_id = data.reg[1];
+        item_id = data.reg[2];
+        option_name = data.reg[3];
+    }
     $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
         thisObj.model.selectedProject = thisObj.model.items[item_id].project;
+        var project_name = undefined;
+        if(project_id !== undefined && pmProjects.model.items[project_id] !== undefined)
+        {
+            project_name = pmProjects.model.items[project_id].name;
+        }
 
         pmTasksTemplates.model.items[item_id].option_name=option_name;
         pmTasksTemplates.model.items[item_id].dataForOption={};
@@ -668,7 +813,7 @@ pmTasksTemplates.showOptionPage = function(holder, menuInfo, data)
             tpl = 'items_page'
         }
 
-        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{}}))
+        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{project_id:project_id, project_name:project_name}}))
         def.resolve();
     }).fail(function(e)
     {
@@ -687,7 +832,7 @@ pmTasksTemplates.showWidget = function(holder, kind)
     var ordering="-id";
     // return $.when(this.sendSearchQuery({kind:kind}, limit, offset, ordering)).done(function()
     // {
-        $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind}))
+    $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_widget', {query:"", kind:kind}))
     // }).fail(function()
     // {
     //     $.notify("", "error");
@@ -737,6 +882,42 @@ pmTasksTemplates.showItem = function(holder, menuInfo, data)
     return def.promise()
 }
 
+pmTasksTemplates.showItemFromProject = function(holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var def = new $.Deferred();
+    var thisObj = this;
+    var project_id = data.reg[1];
+    var item_id = data.reg[2];
+    $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id),
+        pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
+    {
+        $.when(pmProjects.loadItem(project_id)).done(function ()
+        {
+            thisObj.model.selectedProject = pmTasksTemplates.model.items[item_id].data.project;
+            //thisObj.model.parentObjectsData = []; // Для функции pmItems.deleteItem
+
+            var tpl = thisObj.model.name+'_page'
+            if(!spajs.just.isTplExists(tpl))
+            {
+                tpl = 'items_page'
+            }
+
+            $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{project_id:project_id}}))
+            $("#projects-autocomplete").attr("disabled", "disabled");
+            pmTasksTemplates.selectProject($("#projects-autocomplete").val());
+            def.resolve();
+        }).fail(function () {
+            $.notify("Error with loading of project data");
+        });
+    }).fail(function(e)
+    {
+        def.reject(e);
+    })
+
+    return def.promise()
+}
+
 pmTasksTemplates.selectProject = function(project_id){
     console.log("select project", project_id)
     $(".autocomplete-suggestion").hide()
@@ -755,7 +936,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
         {
             $.when(pmProjects.loadItem(pmProjects.model.itemslist.results[0].id)).done(function()
             {
-                $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {}))
+                $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {opt:{}}))
 
                 $("#inventories-autocomplete").select2({ width: '100%' });
                 //$("#projects-autocomplete").select2({ width: '100%' });
@@ -865,6 +1046,28 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
     return def.promise()
 }
 
+pmTasksTemplates.showNewItemPageFromProject = function(holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var def = new $.Deferred();
+    var thisObj = this;
+    var project_id = data.reg[1];
+    $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
+    {
+        $.when(pmProjects.loadItem(project_id)).done(function()
+        {
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {opt:{project_id:project_id}}))
+            def.resolve();
+        }).fail(function(){
+            $.notify("Error with loading of project data");
+        });
+    }).fail(function(e)
+    {
+        def.reject(e);
+    })
+    return def.promise()
+}
+
 /**
  * @return $.Deferred
  * @todo дорефакторить форму создания Task template
@@ -905,7 +1108,13 @@ pmTasksTemplates.addItem = function()
         success: function(data)
         {
             $.notify("template created", "success");
-            $.when(spajs.open({ menuId:"template/"+thisObj.model.kind+"/"+data.id})).always(function(){
+            var project_and_id = "";
+            var link = window.location.href.split(/[&?]/g)[1];
+            if(/project\/([0-9]+)/.test(link))
+            {
+                project_and_id = "project/" + link.split(/project\/([0-9]+)/g)[1] + "/";
+            }
+            $.when(spajs.open({ menuId:project_and_id+"template/"+thisObj.model.kind+"/"+data.id})).always(function(){
                 def.resolve()
             })
         },
@@ -967,8 +1176,6 @@ pmTasksTemplates.loadLinkedPeriodicTasks = function(template_id)
         data: "template="+template_id,
         success: function (data)
         {
-            // thisObj.model.linkedPeriodicTask = [];
-            // thisObj.model.linkedPeriodicTasks = data.results;
             pmPeriodicTasks.model.itemslist = data
             pmPeriodicTasks.model.items = {}
 
@@ -994,21 +1201,42 @@ pmTasksTemplates.showOptionsList = function (holder, menuInfo, data)
 {
     setActiveMenuLi();
     var thisObj = this;
-    var offset = 0
-    var limit = thisObj.pageSize;
-    if (data.reg && data.reg[1] > 0)
+    var def = new $.Deferred();
+    var project_id = undefined;
+    var item_id = data.reg[1];
+    if(data.reg[2] !== undefined)
     {
-        offset = thisObj.pageSize * (data.reg[1] - 1);
+        project_id = data.reg[1];
+        item_id = data.reg[2];
     }
-    return $.when(thisObj.loadItem(data.reg[1])).done(function ()
+    $.when(thisObj.loadItem(item_id)).done(function ()
     {
         var tpl = 'template_options_list'
-
-        $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, item_id:data.reg[1], opt: {}}))
-    }).fail(function ()
+        var project_name = undefined;
+        if(project_id !== undefined)
+        {
+            $.when(pmProjects.loadItem(project_id)).done(function ()
+            {
+                project_name = pmProjects.model.items[project_id].name;
+                $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, item_id:item_id, opt: {project_id:project_id, project_name:project_name}}))
+                def.resolve();
+            }).fail(function (e)
+            {
+                polemarch.showErrors(e);
+                def.reject(e);
+            });
+        }
+        else
+        {
+            $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, item_id:item_id, opt: {project_id:project_id, project_name:project_name}}))
+            def.resolve();
+        }
+    }).fail(function (e)
     {
-        $.notify("", "error");
+        polemarch.showErrors(e);
+        def.reject(e);
     })
+    return def.promise();
 }
 
 /**
@@ -1115,23 +1343,46 @@ pmTasksTemplates.showPeriodicTasksList = function (holder, menuInfo, data)
 {
     setActiveMenuLi();
     var thisObj = this;
-    var offset = 0
-    var limit = thisObj.pageSize;
-    if (data.reg && data.reg[1] > 0)
-    {
-        offset = thisObj.pageSize * (data.reg[1] - 1);
-    }
+    var def = new $.Deferred();
+    var url_project_id = undefined;
     var template_id = data.reg[1];
-    return $.when(thisObj.loadItem(template_id), thisObj.loadLinkedPeriodicTasks(template_id)).done(function ()
+    if(data.reg[2] !== undefined)
+    {
+        url_project_id = data.reg[1];
+        template_id = data.reg[2];
+    }
+    $.when(thisObj.loadItem(template_id), thisObj.loadLinkedPeriodicTasks(template_id)).done(function ()
     {
         var tpl = 'linked-to-template-periodic-tasks_list';
         var project_id = thisObj.model.items[template_id].data.project;
+        var url_project_name = undefined;
+        if(url_project_id !== undefined)
+        {
+            $.when(pmProjects.loadItem(url_project_id)).done(function ()
+            {
+                url_project_name = pmProjects.model.items[url_project_id].name;
+                $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj,
+                    project_id:project_id, item_id:template_id, opt: {project_id:url_project_id, project_name: url_project_name}}))
+                def.resolve();
 
-        $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, project_id:project_id, item_id:template_id, opt: {}}))
-    }).fail(function ()
+            }).fail(function (e)
+            {
+                polemarch.showErrors(e.responseJSON);
+                def.reject(e);
+            });
+        }
+        else
+        {
+            $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj,
+                project_id:project_id, item_id:template_id, opt: {url_project_id:url_project_id, url_project_name: url_project_name}}))
+            def.resolve();
+        }
+    }).fail(function (e)
     {
-        $.notify("", "error");
+        polemarch.showErrors(e.responseJSON);
+        def.reject(e);
     })
+    return def.promise();
 }
 
 /**
@@ -1141,26 +1392,48 @@ pmTasksTemplates.showNewPeriodicTaskFromTemplate = function (holder, menuInfo, d
 {
     var def = new $.Deferred();
     var thisObj = this;
-    var item_id = data.reg[1]
+    var url_project_id = undefined;
+    var item_id = data.reg[1];
+    if(data.reg[2] !== undefined)
+    {
+        url_project_id = data.reg[1];
+        item_id = data.reg[2];
+    }
     $.when(pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems()).done(function()
     {
-        var project_id = thisObj.model.items[item_id].data.project
+        var project_id = thisObj.model.items[item_id].data.project;
+        var url_project_name = undefined;
         pmPeriodicTasks.model.newitem = {type:'INTERVAL', kind:'TEMPLATE'}
-        var tpl = 'from-template-periodic-tasks_new_page'
+        var tpl = 'from-template-periodic-tasks_new_page';
         if(!spajs.just.isTplExists(tpl))
         {
-            tpl = 'items_page'
+            tpl = 'items_page';
         }
-
-        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, project_id:project_id, pmObj:thisObj, opt:{}}))
-        def.resolve();
+        if(url_project_id !== undefined)
+        {
+            $.when(pmProjects.loadItem(url_project_id)).done(function ()
+            {
+                url_project_name = pmProjects.model.items[url_project_id].name;
+                $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, project_id:project_id, pmObj:thisObj, opt:{project_id:url_project_id, project_name:url_project_name}}))
+                def.resolve();
+            }).fail(function (e)
+            {
+                polemarch.showErrors(e.responseJSON);
+                def.reject(e);
+            });
+        }
+        else
+        {
+            $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, project_id:project_id, pmObj:thisObj, opt:{project_id:url_project_id, project_name:url_project_name}}))
+            def.resolve();
+        }
     }).fail(function(e)
     {
+        polemarch.showErrors(e.responseJSON);
         def.reject(e);
     })
 
-    return def.promise()
-
+    return def.promise();
 }
 
 /**
@@ -1178,12 +1451,18 @@ pmTasksTemplates.searchFiledForTemplateOptions = function (options)
  */
 pmTasksTemplates.searchTemplateOptions = function (query, options)
 {
+    var project_and_id = "";
+    var link = window.location.href.split(/[&?]/g)[1];
+    if(/project\/([0-9]+)/.test(link))
+    {
+        project_and_id = "project/" + link.split(/project\/([0-9]+)/g)[1] + "/";
+    }
     if (this.isEmptySearchQuery(query))
     {
-        return spajs.open({menuId: 'template/Task/' + options.template_id +'/options', reopen: true});
+        return spajs.open({menuId: project_and_id + 'template/Task/' + options.template_id +'/options', reopen: true});
     }
 
-    return spajs.open({menuId: 'template/Task/' + options.template_id +'/options' + '/search/' + this.searchObjectToString(trim(query)), reopen: true});
+    return spajs.open({menuId: project_and_id + 'template/Task/' + options.template_id +'/options' + '/search/' + this.searchObjectToString(trim(query)), reopen: true});
 }
 
 /**
@@ -1193,10 +1472,17 @@ pmTasksTemplates.showOptionsSearchResult = function (holder, menuInfo, data)
 {
     setActiveMenuLi();
     var thisObj = this;
+    var def = new $.Deferred();
+    var project_id = undefined;
     var template_id = data.reg[1];
-    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]))
-
-    return $.when(thisObj.loadItem(data.reg[1])).done(function ()
+    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]));
+    if(data.reg[3] !== undefined)
+    {
+        project_id = data.reg[1];
+        template_id = data.reg[2];
+        search = this.searchStringToObject(decodeURIComponent(data.reg[3]));
+    }
+    $.when(thisObj.loadItem(template_id)).done(function ()
     {
         var unvalidSearchOptions = [];
         for (var i in thisObj.model.items[template_id].options_list)
@@ -1216,14 +1502,172 @@ pmTasksTemplates.showOptionsSearchResult = function (holder, menuInfo, data)
         }
 
         var tpl = 'template_options_list';
+        var project_name = undefined;
 
-        $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(search.name), pmObj: thisObj, item_id:template_id, opt: {}}))
-    }).fail(function ()
+        if(project_id !== undefined)
+        {
+            $.when(pmProjects.loadItem(project_id)).done(function ()
+            {
+                project_name = pmProjects.model.items[project_id].name;
+                $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(search.name), pmObj: thisObj, item_id:template_id, opt: {project_id:project_id, project_name:project_name}}))
+                def.resolve();
+            }).fail(function (e)
+            {
+                polemarch.showErrors(e.responseJSON);
+                def.reject(e);
+            })
+        }
+        else
+        {
+            $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(search.name), pmObj: thisObj, item_id:template_id, opt: {project_id:project_id, project_name:project_name}}))
+            def.resolve();
+        }
+
+
+    }).fail(function (e)
     {
-        $.notify("", "error");
+        polemarch.showErrors(e.responseJSON);
+        def.reject(e);
     })
+    return def.promise();
 }
 
+
+pmTasksTemplates.showListForProject = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var thisObj = this;
+    var def = new $.Deferred();
+    var offset = 0
+    var limit = this.pageSize;
+    if (data.reg && data.reg[2] > 0)
+    {
+        offset = this.pageSize * (data.reg[2] - 1);
+    }
+    var project_id = data.reg[1];
+    $.when(pmProjects.loadItem(project_id)).done(function ()
+    {
+        var project_name = pmProjects.model.items[project_id].name;
+        spajs.ajax.Call({
+            url: hostname + "/api/v1/templates/",
+            type: "GET",
+            contentType:'application/json',
+            data:"project="+project_id,
+            success: function(data)
+            {
+                thisObj.model.items = {};
+                thisObj.model.itemslist = {};
+                data.limit = limit
+                data.offset = offset
+                thisObj.model.itemslist = data
+
+                for (var i in data.results)
+                {
+                    var val = thisObj.afterItemLoad(data.results[i])
+                    thisObj.model.items.justWatch(val.id);
+                    thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
+                }
+
+                var tpl = thisObj.model.name + '_list';
+                if (!spajs.just.isTplExists(tpl))
+                {
+                    tpl = 'items_list';
+                }
+
+                $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, opt: {project_id:project_id, project_name:project_name}}))
+                def.resolve();
+            },
+            error:function(e)
+            {
+                polemarch.showErrors(e.responseJSON)
+                def.reject(e)
+            }
+        });
+    }).fail(function (e)
+    {
+        polemarch.showErrors(e.responseJSON)
+        def.reject(e)
+    });
+
+    return def.promise();
+}
+
+pmTasksTemplates.showSearchResultsForProject = function (holder, menuInfo, data)
+{
+    setActiveMenuLi();
+    var thisObj = this;
+    var def = new $.Deferred();
+    var offset = 0
+    var limit = this.pageSize;
+    if (data.reg && data.reg[3] > 0)
+    {
+        offset = this.pageSize * (data.reg[3] - 1);
+    }
+    var project_id = data.reg[1];
+    var search_query = decodeURIComponent(data.reg[2]);
+    $.when(pmProjects.loadItem(project_id)).done(function ()
+    {
+        var project_name = pmProjects.model.items[project_id].name;
+        spajs.ajax.Call({
+            url: hostname + "/api/v1/templates/",
+            type: "GET",
+            contentType:'application/json',
+            data:"project=" + project_id + "&name=" + search_query,
+            success: function(data)
+            {
+                thisObj.model.items = {};
+                thisObj.model.itemslist = {};
+                data.limit = limit
+                data.offset = offset
+                thisObj.model.itemslist = data
+
+                for (var i in data.results)
+                {
+                    var val = thisObj.afterItemLoad(data.results[i])
+                    thisObj.model.items.justWatch(val.id);
+                    thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
+                }
+
+                var tpl = thisObj.model.name + '_list';
+                if (!spajs.just.isTplExists(tpl))
+                {
+                    tpl = 'items_list';
+                }
+
+                $(holder).insertTpl(spajs.just.render(tpl, {query: search_query, pmObj: thisObj, opt: {project_id:project_id, project_name:project_name}}))
+                def.resolve();
+            },
+            error:function(e)
+            {
+                polemarch.showErrors(e.responseJSON);
+                def.reject(e);
+            }
+        });
+    }).fail(function (e)
+    {
+        polemarch.showErrors(e.responseJSON);
+        def.reject(e);
+    });
+
+    return def.promise();
+}
+
+pmTasksTemplates.search = function (query, options)
+{
+    var project_and_id = "";
+    var link = window.location.href.split(/[&?]/g)[1];
+    if(/project\/([0-9]+)/.test(link))
+    {
+        project_and_id = "project/" + link.split(/project\/([0-9]+)/g)[1] + "/";
+    }
+
+    if (this.isEmptySearchQuery(query))
+    {
+        return spajs.open({menuId: project_and_id + this.model.name, reopen: true});
+    }
+
+    return spajs.open({menuId: project_and_id + this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
+}
 
 
 tabSignal.connect("polemarch.start", function()
@@ -1255,19 +1699,22 @@ tabSignal.connect("polemarch.start", function()
 
     spajs.addMenu({
         id:"task-new-option",
-        urlregexp:[/^template\/Task\/([0-9]+)\/new-option$/, /^templates\/Task\/([0-9]+)\/new-option$/],
+        urlregexp:[/^template\/Task\/([0-9]+)\/new-option$/, /^templates\/Task\/([0-9]+)\/new-option$/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/new-option$/, /^project\/([0-9]+)\/templates\/Task\/([0-9]+)\/new-option$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showNewOptionPage(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
         id:"task-option",
-        urlregexp:[/^template\/Task\/([0-9]+)\/option\/([A-z0-9 %\-.:,=]+)$/, /^templates\/Task\/([0-9]+)\/option\/([A-z0-9 %\-.:,=]+)$/],
+        urlregexp:[/^template\/Task\/([0-9]+)\/option\/([A-z0-9 %\-.:,=]+)$/, /^templates\/Task\/([0-9]+)\/option\/([A-z0-9 %\-.:,=]+)$/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/option\/([A-z0-9 %\-.:,=]+)$/, /^project\/([0-9]+)\/templates\/Task\/([0-9]+)\/option\/([A-z0-9 %\-.:,=]+)$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showOptionPage(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
         id:"task-options",
-        urlregexp:[/^template\/Task\/([0-9]+)\/options$/, /^templates\/Task\/([0-9]+)\/options$/],
+        urlregexp:[/^template\/Task\/([0-9]+)\/options$/, /^templates\/Task\/([0-9]+)\/options$/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/options$/, /^project\/([0-9]+)\/templates\/Task\/([0-9]+)\/options$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showOptionsList(holder, menuInfo, data);}
     })
 
@@ -1276,32 +1723,66 @@ tabSignal.connect("polemarch.start", function()
         urlregexp:[/^template\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
             /^templates\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
             /^template\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
-            /^templates\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/],
+            /^templates\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^project\/([0-9]+)\/templates\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^project\/([0-9]+)\/templates\/Task\/([0-9]+)\/options\/search\/([A-z0-9 %\-.:,=]+)$/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showOptionsSearchResult(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
         id:"task-periodic-tasks",
-        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-tasks/, /^templates\/Task\/([0-9]+)\/periodic-tasks/],
+        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-tasks/, /^templates\/Task\/([0-9]+)\/periodic-tasks/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/periodic-tasks/, /^project\/([0-9]+)\/templates\/Task\/([0-9]+)\/periodic-tasks/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showPeriodicTasksList(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
         id:"task-new-periodic-task",
-        urlregexp:[/^template\/Task\/([0-9]+)\/new-periodic-task/, /^templates\/Task\/([0-9]+)\/new-periodic-task/],
+        urlregexp:[/^template\/Task\/([0-9]+)\/new-periodic-task/, /^templates\/Task\/([0-9]+)\/new-periodic-task/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/new-periodic-task/, /^project\/([0-9]+)\/templates\/Task\/([0-9]+)\/new-periodic-task/],
         onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showNewPeriodicTaskFromTemplate(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
         id:"task-periodic-task",
-        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/, /^templates\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/],
+        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/, /^templates\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/, /^project\/([0-9]+)\/templates\/Task\/([0-9]+)\/periodic-task\/([0-9]+)/],
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showPeriodicTaskPageFromTemplate(holder, menuInfo, data);}
     })
 
     spajs.addMenu({
         id:"task-periodic-tasks-search",
-        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)$/, /^template\/Task\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        urlregexp:[/^template\/Task\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^template\/Task\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^project\/([0-9]+)\/template\/Task\/([0-9]+)\/periodic-tasks\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmPeriodicTasks.showSearchResultsFromTemplate(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"templates-of-project",
+        urlregexp:[/^project\/([0-9]+)\/templates$/, /^project\/([0-9]+)\/templates\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showListForProject(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"tasks-search-from-project",
+        urlregexp:[/^project\/([0-9]+)\/templates\/search\/([A-z0-9 %\-.:,=]+)$/, /^project\/([0-9]+)\/templates\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showSearchResultsForProject(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"task-new-for-project",
+        urlregexp:[/^project\/([0-9]+)\/template\/new-task$/, /^project\/([0-9]+)\/templates\/new-task$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showNewItemPageFromProject(holder, menuInfo, data);}
+    })
+
+    spajs.addMenu({
+        id:"Task-item-from-project",
+        urlregexp:[/^project\/([0-9]+)\/template\/Task\/([0-9]+)$/, /^project\/([0-9]+)\/templates\/Task\/([0-9]+)$/],
+        onOpen:function(holder, menuInfo, data){return pmTasksTemplates.showItemFromProject(holder, menuInfo, data);},
     })
 
 })

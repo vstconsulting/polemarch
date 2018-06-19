@@ -207,7 +207,7 @@
 <script type="text/x-just" data-just="templates_new_page">
 <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+            <a href="<%- polemarch.opt.host %>/?<% if(opt.project_id !== undefined) { %>project/<%- opt.project_id %>/templates<% } else { %>templates<% } %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <span class="h1-header" >New template for run playbook</span>
@@ -215,7 +215,13 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+            <% if(opt.project_id !== undefined) { %>
+                <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>" onclick="return spajs.openURL(this.href);" ><%- opt.project_name %></a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>/templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+            <% } else { %>
+                 <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+            <% } %>
             <li class="active">New template</li>
         </ol>
     </section>
@@ -250,10 +256,12 @@
                                 class="form-control select2"
                                 id="projects-autocomplete"
                                 data-placeholder="Select project"
-                                style="width:100%" > 
+                                style="width:100%"
+                                <% if(opt.project_id !== undefined) { %> disabled <% } %> >
                                     <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option
                                             value="<%- pmProjects.model.itemslist.results[i].id %>"
+                                            <% if(opt.project_id !== undefined && pmProjects.model.itemslist.results[i].id == opt.project_id) { %> selected <% } %>
                                             ><%- pmProjects.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
@@ -299,7 +307,7 @@
 <script type="text/x-just" data-just="template_options_list">
     <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?template/<%- pmObj.model.kind %>/<%- item_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+            <a href="<%- polemarch.opt.host %>/?<% if(opt.project_id !== undefined) { %>project/<%- opt.project_id %>/<% } %>template/<%- pmObj.model.kind %>/<%- item_id %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
 
@@ -307,14 +315,22 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?template/<%- pmObj.model.kind %>/<%- item_id %>" onclick="return spajs.openURL(this.href);" ><%- pmObj.model.items[item_id].name.slice(0, 20) %></a></li>
+            <% if(opt.project_id !== undefined) { %>
+                <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>" onclick="return spajs.openURL(this.href);" ><%- opt.project_name %></a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>/templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>/template/<%- pmObj.model.kind %>/<%- item_id %>" onclick="return spajs.openURL(this.href);" ><%- pmObj.model.items[item_id].name.slice(0, 20) %></a></li>
+            <% } else { %>
+                <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?template/<%- pmObj.model.kind %>/<%- item_id %>" onclick="return spajs.openURL(this.href);" ><%- pmObj.model.items[item_id].name.slice(0, 20) %></a></li>
+            <% } %>
             <li class="active">Options</li>
         </ol>
     </section>
 
     <section class="content">
-        <button type="button" onclick="spajs.showLoader(<%- pmObj.model.className %>.setNewOption(<%- item_id %>));  return false;" class="btn btn-primary" >Create new option</button>
+        <!--<button type="button" onclick="spajs.showLoader(<%- pmObj.model.className %>.setNewOption(<%- item_id %>));  return false;" class="btn btn-primary" >Create new option</button>-->
+        <button type="button" onclick="spajs.open({ menuId:'<% if(opt.project_id !== undefined) { %>project/<%- opt.project_id %>/<% } %>template/<%- pmObj.model.kind %>/<%- item_id %>/new-option'});  return false;" class="btn btn-primary" >Create new option</button>
         <br>
         <br>
         <div class="row">
@@ -353,12 +369,12 @@
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </td>
                                         <td>
-                                            <a href="/?template/<%- pmObj.model.kind %>/<%- item_id %>/option/<%- i %>" class="item-name"
+                                            <a href="/?<% if(opt.project_id !== undefined) { %>project/<%- opt.project_id %>/<% } %>template/<%- pmObj.model.kind %>/<%- item_id %>/option/<%- i %>" class="item-name"
                                                     onclick="return spajs.openURL(this.href);" ><%= i %></a>
                                         </td>
                                         <% if(pmObj.model.className == "pmTasksTemplates") { %>
                                             <td class="hidden-xs">
-                                                <a href="/?template/<%- pmObj.model.kind %>/<%- item_id %>/option/<%- i %>" class="item-name"
+                                                <a href="/?<% if(opt.project_id !== undefined) { %>project/<%- opt.project_id %>/<% } %>template/<%- pmObj.model.kind %>/<%- item_id %>/option/<%- i %>" class="item-name"
                                                         onclick="return spajs.openURL(this.href);" >
                                                     <% if(option.playbook !== undefined) { %>
                                                         <%- option.playbook %>
@@ -369,7 +385,7 @@
                                             </td>
                                         <% } else { %>
                                                <td class="hidden-xs">
-                                                   <a href="/?template/<%- pmObj.model.kind %>/<%- item_id %>/option/<%- i %>" class="item-name"
+                                                   <a href="/?<% if(opt.project_id !== undefined) { %>project/<%- opt.project_id %>/<% } %>template/<%- pmObj.model.kind %>/<%- item_id %>/option/<%- i %>" class="item-name"
                                                            onclick="return spajs.openURL(this.href);" >
                                                        <% if(option.module !== undefined) { %>
                                                            <%- option.module %>
