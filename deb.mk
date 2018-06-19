@@ -90,9 +90,9 @@ chown -R $(USER):$(USER) /var/lock/$(NAMEBASE)
 # making migration and activate services
 # sudo -H -u $(USER) /opt/$(NAME)/bin/polemarchctl migrate
 su - $(USER) -c "/opt/$(NAME)/bin/$(PROJECT_CTL) migrate"
-systemctl daemon-reload
-systemctl enable $(NAME)web.service
-systemctl enable $(NAME)worker.service
+systemctl daemon-reload || true
+systemctl enable $(NAME)web.service || true
+systemctl enable $(NAME)worker.service || true
 endef
 export DEBIAN_POSTINST
 

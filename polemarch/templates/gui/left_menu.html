@@ -51,7 +51,7 @@
     {% if has_docs %}
         <li id="menu-docs">
             <a href={% block doc_link %}"{{host_url}}/docs/index.html"{% endblock %}
-               onclick="if(window.parent && window.parent.cordova && window.parent.cordova.InAppBrowser) window.parent.cordova.InAppBrowser.open(this.href, '_blank', 'location=yes'); return false;">
+               onclick=" return openURLInAppBrowser(this.href); ">
                <i class="fa fa-book"></i> <span class="li-header-span"><i class="li-header-span-i">Documentation</i></span>
             </a>
         </li>
