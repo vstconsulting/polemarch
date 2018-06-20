@@ -295,6 +295,49 @@
     </section>
 </script>
 
+
+<script type="text/x-just" data-just="templates_no_projects">
+<section class="content-header">
+        <h1>
+            <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+                <span class="glyphicon glyphicon-arrow-left"></span>
+            </a>
+            <span class="h1-header" >New template for run playbook</span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+            <li class="active">New template</li>
+        </ol>
+    </section>
+
+    <section class="content"> 
+        <br>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Run playbook template
+                    </div>
+                    <div class="box-body">
+ 
+                        <div class="row">
+                            <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                                <h4>You can not create a new template until you have more than one project.</h4>
+                                <a href="<%- polemarch.opt.host %>/?new-project" onclick="return spajs.openURL(this.href);" class="btn btn-primary" >Create a project</a>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+    </section>
+</script>
+
 <!-- шаблон страницы списка опций шаблона -->
 <script type="text/x-just" data-just="template_options_list">
     <section class="content-header">
