@@ -1267,20 +1267,24 @@ tabSignal.connect("polemarch.start", function()
     // history in module template
     spajs.addMenu({
         id:"module-template-history",
-        urlregexp:[/^template\/Module\/([0-9]+)\/history$/, /^template\/Module\/([0-9]+)\/history\/page\/([0-9]+)$/],
+        urlregexp:[/^template\/Module\/([0-9]+)\/history$/, /^template\/Module\/([0-9]+)\/history\/page\/([0-9]+)$/,
+        /^project\/([0-9]+)\/template\/Module\/([0-9]+)\/history$/, /^project\/([0-9]+)\/template\/Module\/([0-9]+)\/history\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showListInTemplate(holder, menuInfo, data, pmModuleTemplates);}
     })
 
     spajs.addMenu({
         id:"history-item-in-module-template",
-        urlregexp:[/^template\/Module\/([0-9]+)\/history\/([0-9]+)$/],
+        urlregexp:[/^template\/Module\/([0-9]+)\/history\/([0-9]+)$/, /^project\/([0-9]+)\/template\/Module\/([0-9]+)\/history\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showItemInTemplate(holder, menuInfo, data, pmModuleTemplates);},
         onClose:function(){return pmHistory.stopUpdates();}
     })
 
     spajs.addMenu({
         id:"module-template-history-search",
-        urlregexp:[/^template\/Module\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,/^template\/Module\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
+        urlregexp:[/^template\/Module\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^template\/Module\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/,
+        /^project\/([0-9]+)\/template\/Module\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)$/,
+            /^project\/([0-9]+)\/template\/Module\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInTemplate(holder, menuInfo, data, pmModuleTemplates);}
     })
 
