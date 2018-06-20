@@ -7,6 +7,15 @@ variables:
   ARTIFACT_DOWNLOAD_ATTEMPTS: 3
   RESTORE_CACHE_ATTEMPTS: 3
   DJANGO_LOG_LEVEL: 'CRITICAL'
+  PUBLISH_REMOTE_NAME: "${CI_JOB_NAME}_public_${CI_COMMIT_TAG}"
+  PUBLISH_REMOTE_USER: ""
+  PUBLISH_REMOTE_TOKEN: ""
+  PUBLISH_REMOTE_AUTH: "${PUBLISH_REMOTE_USER}:${PUBLISH_REMOTE_TOKEN}@"
+  PUBLISH_REMOTE_SERVER: "gitlab.com"
+  PUBLISH_REMOTE_PROJECT: "vstconsulting/polemarch"
+  PUBLISH_REMOTE_PROJECT_SUFFIX: ".git"
+  PUBLISH_REMOTE_URL_SCHEMA: "https://"
+  PUBLISH_REMOTE_URI: "${PUBLISH_REMOTE_URL_SCHEMA}${PUBLISH_REMOTE_AUTH}${PUBLISH_REMOTE_SERVER}/${PUBLISH_REMOTE_PROJECT}${PUBLISH_REMOTE_PROJECT_SUFFIX}"
 
 stages:
   - code_standarts
@@ -67,6 +76,18 @@ stages:
   only:
     - master
   retry: 2
+
+.publish_template: &publishing
+  stage: publish
+  image: onegreyonewhite/tox:ubuntu
+  allow_failure: true
+  only:
+   - tags
+  before_script:
+  - git remote add ${PUBLISH_REMOTE_NAME} ${PUBLISH_REMOTE_URI}
+  script:
+  - git push -f ${PUBLISH_REMOTE_NAME} master
+  - git push -f ${PUBLISH_REMOTE_NAME} ${CI_COMMIT_TAG}
 
 # Branch tests
 ###########################################
@@ -177,27 +198,16 @@ publish_pypi:
   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
 
 publish_gitlab:
-  stage: publish
-  image: onegreyonewhite/tox:ubuntu
-  only:
-   - tags
-  allow_failure: true
-  before_script:
-  - git remote add gitlab_public https://gitlab-ci-token:${GITLAB_TOKEN}@gitlab.com/vstconsulting/polemarch.git
-  script:
-  - git push -f gitlab_public master
-  - git push -f gitlab_public ${CI_COMMIT_TAG}
+  <<: *publishing
+  variables:
+    PUBLISH_REMOTE_USER: "gitlab-ci-token"
+    PUBLISH_REMOTE_TOKEN: "${GITLAB_TOKEN}"
 
 publish_release:
-  stage: publish
-  image: onegreyonewhite/tox:ubuntu
-  only:
-   - tags
-  allow_failure: true
-  before_script:
-  - npm install -g github-release-cli
-  - git remote add github_public https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/vstconsulting/polemarch.git
-  script:
-  - git push -f github_public master
-  - git push -f github_public ${CI_COMMIT_TAG}
-  - npm run github-release upload --owner vstconsulting --repo polemarch --tag="${CI_COMMIT_TAG}" --name="${CI_COMMIT_TAG}" --body="${CI_COMMIT_MESSAGE}" "dist/polemarch-${CI_COMMIT_TAG}-0.x86_64.rpm" "dist/polemarch_${CI_COMMIT_TAG}-0_amd64.deb" "dist/polemarch-${CI_COMMIT_TAG}.tar.gz"
+  <<: *publishing
+  variables:
+    PUBLISH_REMOTE_USER: "${GITHUB_USER}"
+    PUBLISH_REMOTE_TOKEN: "${GITHUB_TOKEN}"
+    PUBLISH_REMOTE_SERVER: 'github.com'
+  after_script:
+  - make test ENVS=release

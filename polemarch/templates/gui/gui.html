@@ -2,10 +2,6 @@
 {% load request_static %}
 {% load i18n %}
 
-{% block flavicon %}
-    <link rel="shortcut icon" href="{% static_path '/img/logo/favicon.ico' %}">
-{% endblock %}
-
 {% block logo %}
     <a href="/" class="logo app-logo">
         <!-- mini logo for sidebar mini 50x50 pixels -->
@@ -111,4 +107,7 @@ window.resourceList = window.resourceList.concat([
     { prioritet:200, type:'css', name: "{% static 'css/ansi-colors.css' %}?v={{gui_version}}"},
 ])
 </script>
+{% endblock %}
+
+{% block script %}
 {% endblock %}
