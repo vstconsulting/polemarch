@@ -2696,6 +2696,269 @@ window.qunitTestsArray.push({
             })
         })
 
+        syncQUnit.addTest('Страница списка шаблонов проекта', function ( assert )
+        {
+            var done = assert.async();
+            var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+            $.when(spajs.open({ menuId:'project/'+itemId+'/templates'})).done(function()
+            {
+                assert.ok(true, 'Страница открылась');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Страница не открылась');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Страница нового task template проекта', function ( assert )
+        {
+            var done = assert.async();
+            var itemId = /project\/([0-9]+)/.exec(window.location.href)[1]
+            $.when(spajs.open({ menuId:'project/'+itemId+'/template/new-task'})).done(function()
+            {
+                assert.ok(true, 'Страница открылась');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Страница не открылась');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Сохранение нового task template проекта', function ( assert )
+        {
+            var done = assert.async();
+            $("#Templates-name").val("task-template-project");
+            $.when(pmTasksTemplates.addItem()).done(function()
+            {
+                assert.ok(true, 'Шаблон успешно создан');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Ошибка при создании шаблона');
+                render(done)
+            })
+        })
+
+        var project_id = undefined;
+        var template_id = undefined;
+        syncQUnit.addTest('Открытие списка опций шаблона задач проекта', function ( assert )
+        {
+            var done = assert.async();
+            project_id = /project\/([0-9]+)/.exec(window.location.href)[1];
+            template_id = /Task\/([0-9]+)/.exec(window.location.href)[1];
+
+            $.when(spajs.open({ menuId:'project/'+project_id+'/template/Task/'+template_id+'/options'})).done(function()
+            {
+                assert.ok(true, 'Страница успешно открыта');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Ошибка при открытии страницы');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Открытие страницы создания новой опции шаблона задач проекта', function ( assert )
+        {
+            var done = assert.async();
+
+            $.when(spajs.open({ menuId:'project/'+project_id+'/template/Task/'+template_id+'/new-option'})).done(function()
+            {
+                assert.ok(true, 'Страница успешно открыта');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Ошибка при открытии страницы');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Сохранение новой опции шаблона задач проекта', function ( assert )
+        {
+            var done = assert.async();
+
+            $('#filed_option_name').val('test-option');
+            $("#new_json_nameprefix").val("become");
+            jsonEditor.jsonEditorAddVar();
+
+            $.when(pmTasksTemplates.saveNewOption(template_id)).done(function()
+            {
+                assert.ok(true, 'Опция успешно создана');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Ошибка при создании опции');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Удаление опции шаблона задач проекта', function ( assert )
+        {
+            var done = assert.async();
+
+            $.when(pmTasksTemplates.removeOption(template_id,'test-option')).done(function()
+            {
+                assert.ok(true, 'Опция успешно удалена');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Ошибка при удалении опции');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Страница списка периодических тасок шаблона проекта', function ( assert )
+        {
+            var done = assert.async();
+            $.when(spajs.open({ menuId:'project/'+project_id+'/template/Task/'+template_id+'/periodic-tasks'})).done(function()
+            {
+                assert.ok(true, 'Страница открылась');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Страница не открылась');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Страница создания новой периодической таски шаблона проекта', function ( assert )
+        {
+            var done = assert.async();
+
+            $.when(spajs.open({ menuId:'project/'+project_id+'/template/Task/'+template_id+'/new-periodic-task'})).done(function()
+            {
+                assert.ok(true, 'Страница открылась');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Страница не открылась');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Создание новой периодической таски шаблона проекта', function ( assert )
+        {
+            var done = assert.async();
+
+            $('#new_periodic-tasks_name').val('new-pt2');
+            $('#new_periodic-tasks_schedule_INTERVAL').val(60);
+
+            $.when(pmPeriodicTasks.addItem(project_id)).done(function()
+            {
+                assert.ok(true, 'Страница открылась');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Страница не открылась');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Удаление периодической таски шаблона проекта', function ( assert )
+        {
+            var done = assert.async();
+            var item_id = /periodic-task\/([0-9]+)/.exec(window.location.href)[1];
+
+            $.when(pmPeriodicTasks.deleteItem(item_id, true)).done(function()
+            {
+                assert.ok(true, 'Периодическая такса успешно удалена');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Ошибка при удалении периодической таски');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Страница истории запусков шаблона проекта', function ( assert )
+        {
+            var done = assert.async();
+            $.when(spajs.open({ menuId:'project/'+project_id+'/template/Task/'+template_id+'/history'})).done(function()
+            {
+                assert.ok(true, 'Страница открылась');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Страница не открылась');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Страница шаблона проекта', function ( assert )
+        {
+            var done = assert.async();
+            $.when(spajs.open({ menuId:'project/'+project_id+'/template/Task/'+template_id})).done(function()
+            {
+                assert.ok(true, 'Страница открылась');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Страница не открылась');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Создание копии шаблона проекта', function ( assert )
+        {
+            var done = assert.async();
+            $.when(pmTasksTemplates.copyAndEdit(template_id,"project/"+project_id+"/template/Task")).done(function()
+            {
+                assert.ok(true, 'Страница открылась');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Страница не открылась');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Удаление копии шаблона проекта', function ( assert )
+        {
+            var done = assert.async();
+            var copy_template_id = /Task\/([0-9]+)/.exec(window.location.href)[1];
+            $.when(pmTasksTemplates.deleteItem(copy_template_id, true, "project/"+project_id+"/template/Task/"+template_id)).done(function()
+            {
+                assert.ok(true, 'Страница открылась');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Страница не открылась');
+                render(done)
+            })
+        })
+
+        syncQUnit.addTest('Удаление шаблона проекта', function ( assert )
+        {
+            var done = assert.async();
+            $.when(pmTasksTemplates.deleteItem(template_id, true, "project/"+project_id+"/templates")).done(function()
+            {
+                assert.ok(true, 'Страница открылась');
+                render(done)
+            }).fail(function()
+            {
+                debugger;
+                assert.ok(false, 'Страница не открылась');
+                render(done)
+            })
+        })
+
         syncQUnit.addTest('Страница списка History', function ( assert )
         {
             var done = assert.async();

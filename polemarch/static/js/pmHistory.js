@@ -74,12 +74,7 @@ pmHistory.search = function(query, options)
     }
     else if(options.initiator_type && options.initiator_type=='template')
     {
-        var project_and_id = "";
-        var link = window.location.href.split(/[&?]/g)[1];
-        if(/project\/([0-9]+)/.test(link))
-        {
-            project_and_id = "project/" + link.split(/project\/([0-9]+)/g)[1] + "/";
-        }
+        var project_and_id = pmTasksTemplates.defineProjectInUrl();
         if(this.isEmptySearchQuery(query))
         {
             return spajs.open({ menuId:project_and_id + 'template/' + options.kind + '/' + options.initiator +"/" + this.model.name, reopen:true});

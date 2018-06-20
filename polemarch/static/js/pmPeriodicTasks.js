@@ -185,12 +185,7 @@ pmPeriodicTasks.deleteItem = function(item_id, force)
                 {
                     var template_kind = "Module";
                 }
-                var project_and_id = "";
-                var link = window.location.href.split(/[&?]/g)[1];
-                if(/project\/([0-9]+)/.test(link))
-                {
-                    project_and_id = "project/" + link.split(/project\/([0-9]+)/g)[1] + "/";
-                }
+                var project_and_id = pmTasksTemplates.defineProjectInUrl();
                 $.when(spajs.open({ menuId: project_and_id+"template/"+template_kind + "/" + template_id + "/periodic-tasks"})).done(function(){
                     def.resolve();
                 }).fail(function(e){
@@ -317,12 +312,7 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
 
 pmPeriodicTasks.search = function(query, options)
 {
-    var project_and_id = "";
-    var link = window.location.href.split(/[&?]/g)[1];
-    if(/project\/([0-9]+)/.test(link))
-    {
-        project_and_id = "project/" + link.split(/project\/([0-9]+)/g)[1] + "/";
-    }
+    var project_and_id = pmTasksTemplates.defineProjectInUrl();
 
     if(this.isEmptySearchQuery(query))
     {
@@ -1077,12 +1067,7 @@ pmPeriodicTasks.addItem = function(project_id)
                 {
                     var template_kind = "Module";
                 }
-                var project_and_id = "";
-                var link = window.location.href.split(/[&?]/g)[1];
-                if(/project\/([0-9]+)/.test(link))
-                {
-                    project_and_id = "project/" + link.split(/project\/([0-9]+)/g)[1] + "/";
-                }
+                var project_and_id = pmTasksTemplates.defineProjectInUrl();
                 $.when(spajs.open({ menuId:project_and_id+"template/"+template_kind+ "/" + data.template +"/periodic-task/"+data.id})).always(function(){
                     def.resolve()
                 })

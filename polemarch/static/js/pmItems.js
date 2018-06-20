@@ -478,13 +478,17 @@ pmItems.importItem = function (data)
     return def.promise();
 }
 
-pmItems.copyAndEdit = function (item_id)
+pmItems.copyAndEdit = function (item_id, back_link)
 {
     var def = new $.Deferred();
     var thisObj = this;
-    return $.when(this.copyItem(item_id)).done(function (newItemId)
+    if(!back_link)
     {
-        $.when(spajs.open({menuId: thisObj.model.page_name + "/" + newItemId})).done(function () {
+        back_link = thisObj.model.page_name;
+    }
+    $.when(this.copyItem(item_id)).done(function (newItemId)
+    {
+        $.when(spajs.open({menuId: back_link+ "/" + newItemId})).done(function () {
             $.notify("Item was duplicate", "success");
             def.resolve()
         }).fail(function (e) {
@@ -1085,8 +1089,10 @@ pmItems.loadItem = function (item_id)
 /**
  * @return $.Deferred
  */
-pmItems.deleteItem = function (item_id, force)
+pmItems.deleteItem = function (item_id, force, back_link)
 {
+    var thisObj = this;
+
     if (!item_id)
     {
         throw "Error in pmItems.deleteItem with item_id = `" + item_id + "`"
@@ -1099,30 +1105,13 @@ pmItems.deleteItem = function (item_id, force)
         return def.promise()
     }
 
-    var thisObj = this;
+    if(!back_link)
+    {
+        back_link = thisObj.model.name;
+    }
+
     $.when(this.deleteItemQuery(item_id)).done(function (data)
     {
-        if(thisObj.model.parentObjectsData !== undefined)
-        {
-            var link = window.location.href.split(/[&?]/g)[1];
-            var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
-            var link_parts = link.match(pattern);
-            var back_link = "";
-
-            for(var i in link_parts)
-            {
-                if(link_parts[i].split("/")[0] != thisObj.model.page_name && link_parts[i].split("/")[0] != thisObj.model.name)
-                {
-                    back_link += link_parts[i] +"/";
-                }
-            }
-            back_link += thisObj.model.name;
-        }
-        else
-        {
-            back_link = thisObj.model.name;
-        }
-
         $.when(spajs.open({menuId: back_link})).done(function ()
         {
             def.resolve()
