@@ -338,8 +338,8 @@ pmItems.showSearchResultsForParent = function (holder, menuInfo, data)
         var parent_type = parentObj.model.page_name;
         var parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_item;
 
-        $.when(thisObj.loadAllItems()).done(function()
-        {
+        //$.when(thisObj.loadAllItems()).done(function()
+        //{
             var childrenItems = [];
             for(var i in parentObj.model.items[parent_item][thisObj.model.name])
             {
@@ -399,11 +399,11 @@ pmItems.showSearchResultsForParent = function (holder, menuInfo, data)
                 allowClear: true
             });
             def.resolve();
-        }).fail(function(e)
-        {
-            polemarch.showErrors(e.responseJSON);
-            def.reject(e);
-        })
+        //}).fail(function(e)
+        //{
+        //    polemarch.showErrors(e.responseJSON);
+        //    def.reject(e);
+        //})
 
     }).fail(function(e)
     {
