@@ -416,7 +416,7 @@ pmGroups.model.page_item_from_another_class = {
         },
         {
             class:'btn btn-danger danger-right',
-            function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'},
+            function:function(item_id, opt){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+', false, "' + opt.back_link + '"));  return false;'},
             title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
             link:function(){ return '#'},
         },

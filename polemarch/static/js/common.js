@@ -1,3 +1,4 @@
+moment.tz.setDefault(window.timeZone);
 
 var guiLocalSettings = {
     __settings:{},
