@@ -368,7 +368,7 @@ pmTasksTemplates.model.page_item = {
     },
 }
 
-pmTasksTemplates.model.page_item_from_another_class = pmTasksTemplates.model.page_item;
+pmTasksTemplates.model.page_item_from_another_class = inheritance(pmTasksTemplates.model.page_item);
 
 pmTasksTemplates.model.page_item_from_another_class['buttons'] = [
     {
@@ -722,6 +722,7 @@ pmTasksTemplates.showOptionPage = function(holder, menuInfo, data)
     }
     $.when(pmProjects.loadAllItems(), pmTasksTemplates.loadItem(item_id), pmInventories.loadAllItems(), pmTasks.loadAllItems()).done(function()
     {
+        thisObj.model.items[item_id].optionsCopyForDelete = JSON.parse(JSON.stringify(thisObj.model.items[item_id].options));
         thisObj.model.selectedProject = thisObj.model.items[item_id].project;
         var project_name = undefined;
         if(project_id !== undefined && pmProjects.model.items[project_id] !== undefined)

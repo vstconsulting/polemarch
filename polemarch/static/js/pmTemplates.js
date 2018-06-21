@@ -322,9 +322,9 @@ pmTemplates.removeOption = function(item_id, option_name)
     var def = new $.Deferred();
     var thisObj = this;
     var optionName=option_name;
-    delete thisObj.model.items[item_id].options[optionName];
+    delete thisObj.model.items[item_id].optionsCopyForDelete[optionName];
     var dataToAdd1={options:{}};
-    dataToAdd1['options']=thisObj.model.items[item_id].options;
+    dataToAdd1['options']=thisObj.model.items[item_id].optionsCopyForDelete;
     spajs.ajax.Call({
         url: hostname + "/api/v1/" + thisObj.model.name + "/" + item_id + "/",
         type: "PATCH",
@@ -332,12 +332,21 @@ pmTemplates.removeOption = function(item_id, option_name)
         data: JSON.stringify(dataToAdd1),
         success: function (data)
         {
-            //thisObj.model.items[item_id] = data
             $.notify('Option "'+optionName+'" was successfully deleted', "success");
-            var project_and_id = thisObj.defineProjectInUrl();
-            $.when(spajs.open({ menuId:project_and_id + "template/"+thisObj.model.kind+"/"+data.id+"/options"})).always(function(){
-                def.resolve();
-            });
+            if(/\/search\//i.test(window.location.href))
+            {
+                $.when(spajs.openURL(window.location.href)).always(function(){
+                    def.resolve();
+                });
+            }
+            else
+            {
+                var project_and_id = thisObj.defineProjectInUrl();
+                $.when(spajs.open({ menuId:project_and_id + "template/"+thisObj.model.kind+"/"+data.id+"/options"})).always(function(){
+                    def.resolve();
+                });
+            }
+
         },
         error: function (e)
         {
@@ -430,6 +439,7 @@ pmTemplates.showOptionsList = function (holder, menuInfo, data)
     }
     $.when(thisObj.loadItem(item_id)).done(function ()
     {
+        thisObj.model.items[item_id].optionsCopyForDelete = JSON.parse(JSON.stringify(thisObj.model.items[item_id].options));
         var tpl = 'template_options_list'
         var project_name = undefined;
         if(project_id !== undefined)
@@ -532,10 +542,10 @@ pmTemplates.removeSelectedOptions = function(item_id, option_names)
     for(var i in option_names)
     {
         var optionName=option_names[i];
-        delete thisObj.model.items[item_id].options[optionName];
+        delete thisObj.model.items[item_id].optionsCopyForDelete[optionName];
     }
     var dataToAdd1={options:{}};
-    dataToAdd1['options']=thisObj.model.items[item_id].options;
+    dataToAdd1['options']=thisObj.model.items[item_id].optionsCopyForDelete;
     spajs.ajax.Call({
         url: hostname + "/api/v1/" + thisObj.model.name + "/" + item_id + "/",
         type: "PATCH",
@@ -543,7 +553,6 @@ pmTemplates.removeSelectedOptions = function(item_id, option_names)
         data: JSON.stringify(dataToAdd1),
         success: function (data)
         {
-            //thisObj.model.items[item_id] = data;
             $.when(spajs.openURL(window.location.href)).done(function ()
             {
                 $.notify('Options were successfully deleted', "success");
@@ -709,6 +718,7 @@ pmTemplates.showOptionsSearchResult = function (holder, menuInfo, data)
     }
     $.when(thisObj.loadItem(template_id)).done(function ()
     {
+        thisObj.model.items[template_id].optionsCopyForDelete = JSON.parse(JSON.stringify(thisObj.model.items[template_id].options));
         var unvalidSearchOptions = [];
         for (var i in thisObj.model.items[template_id].options_list)
         {
@@ -800,16 +810,10 @@ pmTemplates.showListForProject = function (holder, menuInfo, data)
                     thisObj.model.itemsForParent[val.id] = mergeDeep(thisObj.model.itemsForParent[val.id], val)
                 }
 
-                // var tpl = thisObj.model.name + '_list';
-                // if (!spajs.just.isTplExists(tpl))
-                // {
-                //     tpl = 'items_list';
-                // }
-
                 var tpl = 'items_list_from_another_class';
 
                 $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, parentObj:pmProjects, opt: {project_id:project_id, project_name:project_name,
-                  parent_item: project_id, parent_type: pmProjects.model.page_name, back_link: 'project/'+project_id, link_with_parents:'project/'+project_id  }}))
+                        parent_item: project_id, parent_type: pmProjects.model.page_name, back_link: 'project/'+project_id, link_with_parents:'project/'+project_id  }}))
                 def.resolve();
             },
             error:function(e)

@@ -191,7 +191,7 @@ pmModuleTemplates.model.page_item = {
     },
 }
 
-pmModuleTemplates.model.page_item_from_another_class = pmModuleTemplates.model.page_item;
+pmModuleTemplates.model.page_item_from_another_class = inheritance(pmModuleTemplates.model.page_item);
 
 pmModuleTemplates.model.page_item_from_another_class['buttons'] = [
     {
@@ -552,6 +552,7 @@ pmModuleTemplates.showOptionPage = function(holder, menuInfo, data)
     }
     $.when(pmInventories.loadAllItems(), pmProjects.loadAllItems(), pmModuleTemplates.loadItem(item_id)).done(function()
     {
+        thisObj.model.items[item_id].optionsCopyForDelete = JSON.parse(JSON.stringify(thisObj.model.items[item_id].options));
         $.when(pmModuleTemplates.selectInventory(pmModuleTemplates.model.items[item_id].data.inventory)).always(function()
         {
             var project_name = undefined;
