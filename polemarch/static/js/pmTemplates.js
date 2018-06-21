@@ -772,6 +772,14 @@ pmTemplates.showListForProject = function (holder, menuInfo, data)
     $.when(pmProjects.loadItem(project_id)).done(function ()
     {
         var project_name = pmProjects.model.items[project_id].name;
+        thisObj.model.parentObjectsData = [
+            {
+                item_name: project_name,
+                parent_item: project_id,
+                parent_type: pmProjects.model.page_name,
+                parent_type_plural: pmProjects.model.name
+            }
+        ];
         spajs.ajax.Call({
             url: hostname + "/api/v1/templates/",
             type: "GET",
@@ -779,26 +787,29 @@ pmTemplates.showListForProject = function (holder, menuInfo, data)
             data:"project="+project_id,
             success: function(data)
             {
-                thisObj.model.items = {};
-                thisObj.model.itemslist = {};
+                thisObj.model.itemsForParent = {};
+                thisObj.model.itemslistForParent = {};
                 data.limit = limit
                 data.offset = offset
-                thisObj.model.itemslist = data
+                thisObj.model.itemslistForParent = data
 
                 for (var i in data.results)
                 {
                     var val = thisObj.afterItemLoad(data.results[i])
-                    thisObj.model.items.justWatch(val.id);
-                    thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
+                    thisObj.model.itemsForParent.justWatch(val.id);
+                    thisObj.model.itemsForParent[val.id] = mergeDeep(thisObj.model.itemsForParent[val.id], val)
                 }
 
-                var tpl = thisObj.model.name + '_list';
-                if (!spajs.just.isTplExists(tpl))
-                {
-                    tpl = 'items_list';
-                }
+                // var tpl = thisObj.model.name + '_list';
+                // if (!spajs.just.isTplExists(tpl))
+                // {
+                //     tpl = 'items_list';
+                // }
 
-                $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, opt: {project_id:project_id, project_name:project_name}}))
+                var tpl = 'items_list_from_another_class';
+
+                $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, parentObj:pmProjects, opt: {project_id:project_id, project_name:project_name,
+                  parent_item: project_id, parent_type: pmProjects.model.page_name, back_link: 'project/'+project_id, link_with_parents:'project/'+project_id  }}))
                 def.resolve();
             },
             error:function(e)
@@ -832,6 +843,14 @@ pmTemplates.showSearchResultsForProject = function (holder, menuInfo, data)
     $.when(pmProjects.loadItem(project_id)).done(function ()
     {
         var project_name = pmProjects.model.items[project_id].name;
+        thisObj.model.parentObjectsData = [
+            {
+                item_name: project_name,
+                parent_item: project_id,
+                parent_type: pmProjects.model.page_name,
+                parent_type_plural: pmProjects.model.name
+            }
+        ];
         spajs.ajax.Call({
             url: hostname + "/api/v1/templates/",
             type: "GET",
@@ -839,26 +858,23 @@ pmTemplates.showSearchResultsForProject = function (holder, menuInfo, data)
             data:"project=" + project_id + "&name=" + search_query,
             success: function(data)
             {
-                thisObj.model.items = {};
-                thisObj.model.itemslist = {};
+                thisObj.model.itemsForParent = {};
+                thisObj.model.itemslistForParent = {};
                 data.limit = limit
                 data.offset = offset
-                thisObj.model.itemslist = data
+                thisObj.model.itemslistForParent = data
 
                 for (var i in data.results)
                 {
                     var val = thisObj.afterItemLoad(data.results[i])
-                    thisObj.model.items.justWatch(val.id);
-                    thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
+                    thisObj.model.itemsForParent.justWatch(val.id);
+                    thisObj.model.itemsForParent[val.id] = mergeDeep(thisObj.model.itemsForParent[val.id], val)
                 }
 
-                var tpl = thisObj.model.name + '_list';
-                if (!spajs.just.isTplExists(tpl))
-                {
-                    tpl = 'items_list';
-                }
+                var tpl = 'items_list_from_another_class';
 
-                $(holder).insertTpl(spajs.just.render(tpl, {query: search_query, pmObj: thisObj, opt: {project_id:project_id, project_name:project_name}}))
+                $(holder).insertTpl(spajs.just.render(tpl, {query: search_query, pmObj: thisObj, parentObj:pmProjects,
+                    opt: {parent_item: project_id, parent_type: pmProjects.model.page_name, back_link: 'project/'+project_id, link_with_parents:'project/'+project_id  }}))
                 def.resolve();
             },
             error:function(e)

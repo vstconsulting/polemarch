@@ -115,55 +115,15 @@ pmTasksTemplates.model.page_list = {
     buttons:[
         {
             class:'btn btn-primary',
-            function:function(opt)
-            {
-                if(opt.project_id !== undefined)
-                {
-                    return "spajs.open({ menuId:'" + "project/" + opt.project_id + "/template/new-task'}); return false;"
-                }
-                else
-                {
-                    return "spajs.open({ menuId:'template/new-task'}); return false;"
-                }
-            },
+            function:function() {  return "spajs.open({ menuId:'template/new-task'}); return false;" },
             title:'Create task template',
-            link:function(opt)
-            {
-                if(opt.project_id !== undefined)
-                {
-                    return '/?project/' + opt.project_id + '/templates/new-task';
-                }
-                else
-                {
-                    return '/?template/new-task';
-                }
-            },
+            link:function() { return '/?template/new-task'; }
         },
         {
             class:'btn btn-primary',
-            function:function(opt)
-            {
-                if(opt.project_id !== undefined)
-                {
-                    return "spajs.open({ menuId:'" + "project/" + opt.project_id + "/template/new-module'}); return false;"
-                }
-                else
-                {
-                    return "spajs.open({ menuId:'template/new-module'}); return false;"
-                }
-            },
+            function:function() { return "spajs.open({ menuId:'template/new-module'}); return false;" },
             title:'Create module template',
-            link:function(opt)
-            {
-                if (opt.project_id !== undefined)
-                {
-                    return '/?project/' + opt.project_id + '/templates/new-module';
-                }
-                else
-                {
-                    return '/?template/new-module';
-                }
-            }
+            link:function() { return '/?template/new-module'; }
         },
     ],
     actionsOnSelected:[
@@ -181,16 +141,81 @@ pmTasksTemplates.model.page_list = {
         {
             title:'Name',
             name:'name',
+            value:function(item) {
+                return '<a href="/?'+this.model.page_name+'/'+item.kind+'/'+item.id+'" class="item-name" onclick="return spajs.openURL(this.href);" >'+item.name+'</a>'
+            }
+        },
+        {
+            title:'Kind',
+            name:'kind',
+            style:function(item){ return 'style="width: 110px"'},
+            class:function(item)
+            {
+                return 'class="hidden-xs hidden-sm"';
+            },
+            value:function(item)
+            {
+                return item.kind;
+            }
+        }
+    ],
+    actions:[
+        {
+            function:function(item, option_name){ return "spajs.showLoader(pmTemplates.model.kindObjects['"+item.kind+"'].execute("+item.id+" , '"+option_name +"')); return false;"},
+            title:'Execute',
+            link:function(){ return '#'}
+        },
+    ]
+}
+
+pmTasksTemplates.model.page_list_from_another_class = {
+    buttons:[
+        {
+            class:'btn btn-primary',
+            function:function(opt) { return "spajs.open({ menuId:'" + opt.parent_type + "/" + opt.parent_item + "/template/new-task'}); return false;" },
+            title:'Create task template',
+            link:function(opt)
+            { return '/?project/' + opt.parent_item + '/templates/new-task'; },
+        },
+        {
+            class:'btn btn-primary',
+            function:function(opt) {  return "spajs.open({ menuId:'" + opt.parent_type + "/" + opt.parent_item + "/template/new-module'}); return false;"},
+            title:'Create module template',
+            link:function(opt) { return '/?' + opt.parent_type + '/' + opt.parent_item + '/templates/new-module';}
+        },
+    ],
+    actionsOnSelected:[
+        {
+            class:'btn btn-primary',
+            function:function(){ return "spajs.showLoader(pmTasksTemplates.deleteRows($('.multiple-select .item-row.selected'))); return false;"},
+            title:'Delete from this page',
+            link:function(){ return '#'},
+        },
+        {
+            class:'btn btn-primary',
+            function:function(){ return "spajs.showLoader(pmTasksTemplates.deleteSelected()); return false;"},
+            title:'Delete all selected elements',
+            link:function(){ return '#'},
+        },
+        {
+            class:'divider'
+        },
+        {
+            class:'btn btn-primary',
+            function:function(){ return "pmTasksTemplates.exportSelecedToFile(); return false;"},
+            title:'Export all selected templates',
+            link:function(){ return '#'},
+        },
+    ],
+    title: "Templates",
+    short_title: "Templates",
+    fileds:[
+        {
+            title:'Name',
+            name:'name',
             value:function(item, name, opt)
             {
-                if (opt.project_id !== undefined)
-                {
-                    return '<a href="/?project/'+opt.project_id+'/'+this.model.page_name+'/'+item.kind+'/'+item.id+'" class="item-name" onclick="return spajs.openURL(this.href);" >'+item.name+'</a>';
-                }
-                else
-                {
-                    return '<a href="/?'+this.model.page_name+'/'+item.kind+'/'+item.id+'" class="item-name" onclick="return spajs.openURL(this.href);" >'+item.name+'</a>';
-                }
+                return '<a href="/?' + opt.parent_type + '/'+opt.parent_item+'/'+this.model.page_name+'/'+item.kind+'/'+item.id+'" class="item-name" onclick="return spajs.openURL(this.href);" >'+item.name+'</a>';
             }
         },
         {
@@ -217,18 +242,6 @@ pmTasksTemplates.model.page_list = {
 }
 
 pmTasksTemplates.model.page_item = {
-    back_link: function (item_id, opt)
-    {
-        if(opt.project_id !== undefined)
-        {
-            return "?project/" + opt.project_id + "/" + this.model.name;
-
-        }
-        else
-        {
-            return "?" + this.model.name;
-        }
-    },
     buttons:[
         {
             class:'btn btn-primary',
@@ -247,16 +260,9 @@ pmTasksTemplates.model.page_item = {
         },
         {
             class:'btn btn-info',
-            function:function(item_id, opt)
+            function:function(item_id)
             {
-                if(opt.project_id !== undefined)
-                {
-                    return "spajs.open({ menuId:'project/"+opt.project_id+"/template/"+this.model.kind+"/"+item_id+"/options'}); return false;"
-                }
-                else
-                {
-                    return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/options'}); return false;"
-                }
+                return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/options'}); return false;";
             },
             title:'Options',
             link:function(){ return '#'},
@@ -264,16 +270,9 @@ pmTasksTemplates.model.page_item = {
         },
         {
             class:'btn btn-info',
-            function:function(item_id, opt)
+            function:function(item_id)
             {
-                if(opt.project_id !== undefined)
-                {
-                    return "spajs.open({ menuId:'project/"+opt.project_id+"/template/"+this.model.kind+"/"+item_id+"/periodic-tasks'}); return false;"
-                }
-                else
-                {
-                    return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/periodic-tasks'}); return false;"
-                }
+                return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/periodic-tasks'}); return false;";
             },
             title:'Periodic tasks',
             link:function(){ return '#'},
@@ -281,17 +280,9 @@ pmTasksTemplates.model.page_item = {
         },
         {
             class:'btn btn-info',
-            function:function(item_id, opt)
+            function:function(item_id)
             {
-                if(opt.project_id !== undefined)
-                {
-                    return "spajs.open({ menuId:'project/"+opt.project_id+"/template/"+this.model.kind+"/"+item_id+"/history'}); return false;"
-                }
-                else
-                {
-                    return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/history'}); return false;"
-                }
-
+                return "spajs.open({ menuId:'template/"+this.model.kind+"/"+item_id+"/history'}); return false;";
             },
             title:'History',
             link:function(){ return '#'},
@@ -299,16 +290,9 @@ pmTasksTemplates.model.page_item = {
         },
         {
             class:'btn btn-default copy-btn',
-            function:function(item_id, opt)
+            function:function(item_id)
             {
-                if(opt.project_id !== undefined)
-                {
-                    return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+',"project/'+opt.project_id+'/template/'+this.model.kind+'"));  return false;'
-                }
-                else
-                {
-                    return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;'
-                }
+                return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+'));  return false;';
             },
             title:'<span class="glyphicon glyphicon-duplicate" ></span>',
             link:function(){ return '#'},
@@ -318,14 +302,7 @@ pmTasksTemplates.model.page_item = {
             class:'btn btn-danger danger-right',
             function:function(item_id, opt)
             {
-                if(opt.project_id !== undefined)
-                {
-                    return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+', false, "project/'+ opt.project_id +'/templates"));  return false;'
-                }
-                else
-                {
-                    return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;'
-                }
+                return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+'));  return false;';
             },
             title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
             link:function(){ return '#'},
@@ -391,6 +368,73 @@ pmTasksTemplates.model.page_item = {
     },
 }
 
+pmTasksTemplates.model.page_item_from_another_class = pmTasksTemplates.model.page_item;
+
+pmTasksTemplates.model.page_item_from_another_class['buttons'] = [
+    {
+        class:'btn btn-primary',
+        function:function(item_id){ return 'spajs.showLoader('+this.model.className+'.updateItem('+item_id+'));  return false;'},
+        title:'Save',
+        link:function(){ return '#'},
+    },
+    {
+        class:'btn btn-warning',
+        function:function(item_id){
+            return "spajs.showLoader("+this.model.className+".saveAndExecute("+item_id+")); return false;"
+        },
+        title:'Save and execute',
+        link:function(){ return '#'},
+        help:'Save and execute'
+    },
+    {
+        class:'btn btn-info',
+        function:function(item_id, opt) {
+            return "spajs.open({ menuId:'" + opt.parent_type + "/"+opt.parent_item+"/template/"+this.model.kind+"/"+item_id+"/options'}); return false;";
+        },
+        title:'Options',
+        link:function(){ return '#'},
+        help:'Options of this template'
+    },
+    {
+        class:'btn btn-info',
+        function:function(item_id, opt)
+        {
+            return "spajs.open({ menuId:'" + opt.parent_type + "/"+opt.parent_item+"/template/"+this.model.kind+"/"+item_id+"/periodic-tasks'}); return false;"
+        },
+        title:'Periodic tasks',
+        link:function(){ return '#'},
+        help:'Periodic tasks linked to this template'
+    },
+    {
+        class:'btn btn-info',
+        function:function(item_id, opt)
+        {
+            return "spajs.open({ menuId:'" + opt.parent_type + "/"+opt.parent_item+"/template/"+this.model.kind+"/"+item_id+"/history'}); return false;";
+        },
+        title:'History',
+        link:function(){ return '#'},
+        help:'Template execution history'
+    },
+    {
+        class:'btn btn-default copy-btn',
+        function:function(item_id, opt)
+        {
+            return 'spajs.showLoader('+this.model.className+'.copyAndEdit('+item_id+', "' + opt.parent_type + '/'+opt.parent_item+'/template/'+this.model.kind+'"));  return false;'
+        },
+        title:'<span class="glyphicon glyphicon-duplicate" ></span>',
+        link:function(){ return '#'},
+        help:'Copy'
+    },
+    {
+        class:'btn btn-danger danger-right',
+        function:function(item_id, opt)
+        {
+            return 'spajs.showLoader('+this.model.className+'.deleteItem('+item_id+', false, "' + opt.parent_type + '/'+ opt.parent_item +'/templates"));  return false;'
+        },
+        title:'<span class="glyphicon glyphicon-remove" ></span> <span class="hidden-sm hidden-xs" >Remove</span>',
+        link:function(){ return '#'},
+    }
+]
 
 pmTasksTemplates.model.page_item_new_option = {
     back_link: function (item_id, opt)
@@ -805,14 +849,25 @@ pmTasksTemplates.showItemFromProject = function(holder, menuInfo, data)
         $.when(pmProjects.loadItem(project_id)).done(function ()
         {
             thisObj.model.selectedProject = pmTasksTemplates.model.items[item_id].data.project;
-
-            var tpl = thisObj.model.name+'_page'
-            if(!spajs.just.isTplExists(tpl))
+            var project_name = pmProjects.model.items[project_id].name;
+            thisObj.model.parentObjectsData = [
+                {
+                    item_name: project_name,
+                    parent_item: project_id,
+                    parent_type: pmProjects.model.page_name,
+                    parent_type_plural: pmProjects.model.name
+                }
+            ];
+            thisObj.model.itemsForParent = {};
+            thisObj.model.itemsForParent[item_id] = thisObj.model.items[item_id];
+            var tpl = thisObj.model.name + '_page_from_another_class';
+            if (!spajs.just.isTplExists(tpl))
             {
-                tpl = 'items_page'
+                tpl = 'items_page_from_another_class';
             }
 
-            $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{project_id:project_id}}))
+            $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj,
+                opt:{ parent_item: project_id, parent_type: pmProjects.model.page_name, back_link: 'project/'+project_id+'/templates', link_with_parents:'project/'+project_id }}))
             $("#projects-autocomplete").attr("disabled", "disabled");
             pmTasksTemplates.selectProject($("#projects-autocomplete").val());
             def.resolve();
@@ -898,7 +953,7 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
         }
         else
         {
-            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {}))
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {opt:{}}))
 
             $("#inventories-autocomplete").select2({ width: '100%' });
             //$("#projects-autocomplete").select2({ width: '100%' });
@@ -965,7 +1020,8 @@ pmTasksTemplates.showNewItemPageFromProject = function(holder, menuInfo, data)
     {
         $.when(pmProjects.loadItem(project_id)).done(function()
         {
-            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {opt:{project_id:project_id}}))
+            var project_name = pmProjects.model.items[project_id].name;
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {opt:{project_id:project_id, project_name:project_name}}))
             def.resolve();
         }).fail(function(){
             $.notify("Error with loading of project data", "error");
