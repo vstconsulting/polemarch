@@ -152,6 +152,11 @@ pmProjects.model.page_list = {
             link:function(){ return '#'}
         },
         {
+            function:function(item){ return "spajs.open({ menuId:'project/"+item.id+"/templates'}); return false;"},
+            title:'Templates',
+            link:function(){ return '#'}
+        },
+        {
             function:function(item){ return "spajs.open({ menuId:'project/"+item.id+"/history'}); return false;"},
             title:'History',
             link:function(){ return '#'}
@@ -234,6 +239,9 @@ pmProjects.model.page_new = {
          * @returns {String} Текст шаблона для вставки дополнительных блоков в страницу
          */
         // function(){ return ''}
+        function(section){
+            return spajs.just.render("repositoryData", { item_id: undefined, pmObj: pmProjects})
+        }
     ],
     /**
      * Функция вызываемая до сохранения объекта, должна вернуть объект
@@ -376,6 +384,9 @@ pmProjects.model.page_item = {
     ],
     sections:[
         function(section, item_id){
+            return spajs.just.render("repositoryData", { item_id: item_id, pmObj: pmProjects})
+        },
+        function(section, item_id){
             return spajs.just.render("project_readme", { item_id: item_id, pmObj: pmProjects})
         }
     ],
@@ -408,11 +419,6 @@ pmProjects.model.page_item = {
             {
                 filed: new pmProjects.filed.selectRepositoryType(),
                 name:'repository',
-            },
-            {
-                filed: new filedsLib.filed.disabled(),
-                name:'revision',
-                title:'Revision',
             },
             {
                 filed: new filedsLib.filed.disabled(),
@@ -528,6 +534,7 @@ pmProjects.openItem = function(holder, menuInfo, data)
     {
         $.when(pmProjects.showItem(holder, menuInfo, data)) .always(function()
         {
+            pmProjects.model.repository_type = pmProjects.model.items[item_id].vars.repo_type;
             pmProjects.startUpdateProjectItem(item_id)
             def.resolve();
         })
