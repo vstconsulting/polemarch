@@ -954,52 +954,8 @@ pmTasksTemplates.showNewItemPage = function(holder, menuInfo, data)
         }
         else
         {
-            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_new_page', {opt:{}}))
+            $(holder).insertTpl(spajs.just.render(thisObj.model.name+'_no_projects', {}))
 
-            $("#inventories-autocomplete").select2({ width: '100%' });
-            //$("#projects-autocomplete").select2({ width: '100%' });
-
-            new autoComplete({
-                selector: '#playbook-autocomplete',
-                minChars: 0,
-                cache:false,
-                showByClick:false,
-                menuClass:'playbook-autocomplete',
-                renderItem: function(item, search)
-                {
-                    var style = "";
-                    if(thisObj.model.selectedProject != item.project)
-                    {
-                        style = "style='display:none'"
-                    }
-                    return '<div class="autocomplete-suggestion playbook-project-' + item.project + ' " '+style+' data-value="' + item.playbook + '" >' + item.playbook + '</div>';
-                },
-                onSelect: function(event, term, item)
-                {
-                    $("#playbook-autocomplete").val($(item).text());
-                    //console.log('onSelect', term, item);
-                    //var value = $(item).attr('data-value');
-                },
-                source: function(term, response)
-                {
-                    term = term.toLowerCase();
-
-                    var matches = []
-                    for(var i in pmTasks.model.itemslist.results)
-                    {
-                        var val=pmTasks.model.itemslist.results[i];
-                        if(val.name.toLowerCase().indexOf(term) != -1 && thisObj.model.selectedProject == val.project)
-                        {
-                            matches.push(val)
-                        }
-                    }
-                    if(matches.length)
-                    {
-                        response(matches);
-                    }
-                }
-            });
-            pmTasksTemplates.selectProject($("#projects-autocomplete").val());
             def.resolve();
         }
 
