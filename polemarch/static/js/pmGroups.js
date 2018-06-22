@@ -191,6 +191,8 @@ pmGroups.model.page_new = {
     short_title: "New group",
     fileds:[
         [
+            // @todo Refactor  не правильно построена работа с filedsLib.filed.text
+            // По тупому что параметры переданы не в конструктор а лежат рядом
             {
                 filed: new filedsLib.filed.text(),
                 title:'Name',
