@@ -21,6 +21,6 @@ default_settings = {
     "VST_PROJECT": os.getenv("VST_PROJECT", 'polemarch'),
 }
 
-__version__ = "0.1.12"
+__version__ = "0.1.13"
 
 prepare_environment(**default_settings)

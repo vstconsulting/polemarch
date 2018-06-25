@@ -116,7 +116,7 @@ default_rpm_tests:
   <<: *packing-test
   script:
    - cat /etc/hosts
-   - make rpm RELEASE=${CI_BUILD_ID}
+   - tox -e rpm RELEASE=${CI_BUILD_ID}
    - sudo yum install dist/*.rpm -y -q
    - sudo cat test_settings.ini > /etc/polemarch/settings.ini
    - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
@@ -128,7 +128,7 @@ default_oracle_tests:
   image: onegreyonewhite/tox:oracle
   script:
    - cat /etc/hosts
-   - make rpm RELEASE=${CI_BUILD_ID}
+   - tox -e rpm RELEASE=${CI_BUILD_ID}
    - sudo yum install dist/*.rpm -y -q
    - sudo cat test_settings.ini > /etc/polemarch/settings.ini
    - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
@@ -140,7 +140,7 @@ default_deb_tests:
   image: onegreyonewhite/tox:ubuntu
   script:
    - cat /etc/hosts
-   - make deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
+   - tox -e deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
    - echo "echo 'hello'" > /bin/systemctl
    - sudo apt install ./dist/*.deb -y -q
    - sudo cat test_settings.ini > /etc/polemarch/settings.ini
@@ -155,7 +155,8 @@ release_rpm:
   only:
    - tags
   script:
-   - make rpm
+#   - make rpm
+   - make test ENVS=rpm
   allow_failure: false
   artifacts:
     name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
@@ -168,7 +169,8 @@ release_deb:
    - tags
   image: onegreyonewhite/tox:ubuntu
   script:
-   - make deb RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
+   # - make deb RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
+   - make test ENVS=deb
   allow_failure: false
   artifacts:
     name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
@@ -182,7 +184,8 @@ release_pypi:
   before_script:
   - pip install vstcompile[doc]
   script:
-   - make compile
+#   - make compile
+   - make test ENVS=build
   allow_failure: true
   artifacts:
     name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
