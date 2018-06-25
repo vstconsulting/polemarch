@@ -1,16 +1,16 @@
 @import url(bootstrap/css/bootstrap.css);
 @import url(bootstrap/css/bootstrap-theme.css);
-@import url(css/alt/AdminLTE-bootstrap-social.css);
-@import url(css/alt/AdminLTE-fullcalendar.css);
-@import url(css/alt/AdminLTE-select2.css);
-@import url(css/alt/AdminLTE-without-plugins.css);
-@import url(css/AdminLTE.css);
-@import url(css/ansi-colors.css);
-@import url(css/font-awesome.min.css);
-@import url(css/ionicons.min.css);
-@import url(css/skins/_all-skins.css);
-@import url(css/skins/skin-blue.css);
-@import url(css/skins/skin-blue-light.css);
+@import url(lte/css/alt/AdminLTE-bootstrap-social.css);
+@import url(lte/css/alt/AdminLTE-fullcalendar.css);
+@import url(lte/css/alt/AdminLTE-select2.css);
+@import url(lte/css/alt/AdminLTE-without-plugins.css);
+@import url(lte/css/AdminLTE.css);
+/*@import url(lte/css/ansi-colors.css);*/
+@import url(lte/css/font-awesome.min.css);
+@import url(lte/css/ionicons.min.css);
+@import url(lte/css/skins/_all-skins.css);
+@import url(lte/css/skins/skin-blue.css);
+@import url(lte/css/skins/skin-blue-light.css);
 
 .sidebar-menu ul {
     list-style: none;
@@ -122,10 +122,10 @@ img {
     color: #195f91;
 }
 
-.sidebar-collapse .wrapper .main-sidebar .sidebar
-{
-    opacity:0;
-}
+/*.sidebar-collapse .wrapper .main-sidebar .sidebar*/
+/*{*/
+    /*opacity:0;*/
+/*}*/
 
 .sidebar h3, .sidebar p {
     padding-left:15px;
@@ -306,6 +306,54 @@ li.toctree-l1.current>a {
 }
 
 /* end of styles for Notification field about current version */
+
+/* styles for collapsed sidebar */
+.reference.internal .doc-sidebar-icon {
+    display: none;
+}
+
+.sidebar-collapse .reference.internal .doc-sidebar-icon {
+    display: block;
+    padding:5px;
+}
+
+.sidebar-collapse .reference.internal .docs-heading-wrapper {
+    display: none;
+}
+
+.sidebar-collapse .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible {
+    display: block;
+    position: absolute;
+    left: 48px;
+    top: -20px;
+    width: 300px;
+    height: 90px;
+    padding: 20px;
+    padding-left: 0px;
+    z-index: 2000;
+}
+
+.sidebar-collapse .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible .docs-heading  {
+    display: block;
+    width: 280px;
+    height: 50px;
+    background-color: #fcfcfc;
+    padding: 12px 5px 12px 20px;
+}
+
+.sidebar-collapse .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible:hover .docs-heading {
+  background-color: #E0E0E0;
+}
+
+.sidebar-collapse .toctree-l1 ul {
+    display: none;
+}
+
+.sidebar-collapse #searchbox, h3, p {
+    display: none;
+}
+
+/* end of styles for collapsed sidebar */
 
 @media (max-width: 767px) {
     .bg-logo-doc {
