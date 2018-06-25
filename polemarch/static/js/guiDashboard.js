@@ -779,8 +779,7 @@ pmDashboard.getDataForDashboardFromBulk = function ()
         },
         {
             type:"get",
-            item: "templates",
-            filters: "limit=1"
+            item: "templates"
         },
     ];
 
