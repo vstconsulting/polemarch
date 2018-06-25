@@ -55,7 +55,7 @@
 <script type="text/x-just" data-just="templates_new_module_page">
 <section class="content-header">
         <h1>
-            <a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
+            <a href="<%- polemarch.opt.host %>/?<% if(opt.project_id !== undefined) { %>project/<%- opt.project_id %>/templates<% } else { %>templates<% } %>" onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
             <span class="h1-header" >New template for run module</span>
@@ -63,8 +63,14 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
-            <li class="active">New module template</li>
+            <% if(opt.project_id !== undefined) { %>
+                <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>" onclick="return spajs.openURL(this.href);" ><%- opt.project_name %></a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>/templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+            <% } else { %>
+                 <li><a href="<%- polemarch.opt.host %>/?templates" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+            <% } %>
+            <li class="active">New template</li>
         </ol>
     </section>
 
@@ -94,10 +100,12 @@
 
                             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                 <label class="control-label" >Project</label>
-                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%" > 
+                                <select class="form-control select2" id="projects-autocomplete" data-placeholder="Select project" style="width:100%"
+                                <% if(opt.project_id !== undefined) { %> disabled <% } %>>
                                     <% for(var i in pmProjects.model.itemslist.results){ %>
                                         <option 
                                             value="<%- pmProjects.model.itemslist.results[i].id %>"
+                                            <% if(opt.project_id !== undefined && pmProjects.model.itemslist.results[i].id == opt.project_id) { %> selected <% } %>
                                             ><%- pmProjects.model.itemslist.results[i].name %></option>
                                     <% } %>
                                 </select>
@@ -151,8 +159,6 @@
 
 <!-- new option page -->
 <script type="text/x-just" data-just="new_option_page">
-
-    <!-- items_page -->
     <section class="content-header">
         <h1>
             <a href="<% if(pmObj.model.page_item_new_option.back_link){ %><%- pmObj.model.page_item_new_option.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>/options<% } %>"
@@ -165,8 +171,17 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%= pmObj.model.page_list.short_title %></a></li>
-            <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>" onclick="return spajs.openURL(this.href);" ><%= pmObj.model.page_item.short_title.apply(pmObj, [item_id, opt]) %></a></li>
+            <% if(opt.project_id !== undefined) { %>
+                <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>" onclick="return spajs.openURL(this.href);" ><%- opt.project_name %></a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>/<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>/<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>" onclick="return spajs.openURL(this.href);" ><%= pmObj.model.page_item.short_title.apply(pmObj, [item_id, opt]) %></a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>/<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>/options" onclick="return spajs.openURL(this.href);" >Options</a></li>
+            <% } else { %>
+                <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>" onclick="return spajs.openURL(this.href);" ><%= pmObj.model.page_item.short_title.apply(pmObj, [item_id, opt]) %></a></li>
+                <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>/options" onclick="return spajs.openURL(this.href);" >Options</a></li>
+            <% } %>
             <li class="active">New option</li>
         </ol>
     </section>
@@ -227,13 +242,10 @@
             <% } %>
         </div>
     </section>
-    <!-- /items_page -->
 </script>
 
 <!-- option page -->
 <script type="text/x-just" data-just="module_option_page">
-
-    <!-- items_page -->
     <section class="content-header">
         <h1>
             <a href="<% if(pmObj.model.page_item_option.back_link){ %><%- pmObj.model.page_item_option.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>/options<% } %>"
@@ -246,8 +258,17 @@
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" ><%= pmObj.model.page_list.short_title %></a></li>
-            <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>" onclick="return spajs.openURL(this.href);" ><%= pmObj.model.page_item.short_title.apply(pmObj, [item_id, opt]) %></a></li>
+            <% if(opt.project_id !== undefined) { %>
+                <li><a href="<%- polemarch.opt.host %>/?projects" onclick="return spajs.openURL(this.href);" >Projects</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>" onclick="return spajs.openURL(this.href);" ><%- opt.project_name %></a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>/<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>/<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>" onclick="return spajs.openURL(this.href);" ><%= pmObj.model.page_item.short_title.apply(pmObj, [item_id, opt]) %></a></li>
+                <li><a href="<%- polemarch.opt.host %>/?project/<%- opt.project_id %>/<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>/options" onclick="return spajs.openURL(this.href);" >Options</a></li>
+            <% } else { %>
+                <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>" onclick="return spajs.openURL(this.href);" >Templates</a></li>
+                <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>" onclick="return spajs.openURL(this.href);" ><%= pmObj.model.page_item.short_title.apply(pmObj, [item_id, opt]) %></a></li>
+                <li><a href="<%- polemarch.opt.host %>/?<%- pmObj.model.name %>/<%- pmObj.model.kind %>/<%= item_id %>/options" onclick="return spajs.openURL(this.href);" >Options</a></li>
+            <% } %>
             <li class="active"><%= pmObj.model.page_item_option.short_title.apply(pmObj, [item_id, opt]) %></li>
         </ol>
     </section>
@@ -308,7 +329,6 @@
             <% } %>
         </div>
     </section>
-    <!-- /items_page -->
 </script>
 
 

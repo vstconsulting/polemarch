@@ -6,7 +6,7 @@ import sys
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup, Command
 from setuptools.extension import Extension
 from setuptools.command.sdist import sdist as _sdist
 try:
@@ -90,6 +90,48 @@ class _Compile(_sdist):
         return _sdist.run(self)
 
 
+class GithubRelease(Command):
+    '''
+    Make release on github via githubrelease
+    '''
+    description = 'Make release on github via githubrelease'
+
+    user_options = [
+        ('body=', 'b', 'Body message.'),
+        ('assets=', 'a', 'Release assets patterns.'),
+        ('repo=', 'r', 'Repository for release.'),
+        ('release=', 'R', 'Release version.'),
+        ('dry-run=', 'd', 'Dry run.'),
+        ('publish=', 'p', 'Publish release or just create draft.'),
+    ]
+
+    def initialize_options(self):
+        self.body = None or os.getenv('CI_COMMIT_DESCRIPTION', None)
+        self.assets = None
+        self.repo = None
+        self.dry_run = False
+        self.publish = False
+        self.release = None or self.distribution.metadata.version
+
+    def finalize_options(self):
+        if self.repo is None:
+            raise Exception("Parameter --repo is missing")
+        if self.release is None:
+            raise Exception("Parameter --release is missing")
+        self._gh_args = (self.repo, self.release)
+        self._gh_kwargs = dict(
+            publish=self.publish, name=self.release, dry_run=self.dry_run
+        )
+        if self.assets:
+            self._gh_kwargs['asset_pattern'] = self.assets.format(release=self.release)
+        if self.body:
+            self._gh_kwargs['body'] = self.body
+
+    def run(self):
+        from github_release import gh_release_create
+        gh_release_create(*self._gh_args, **self._gh_kwargs)
+
+
 def get_compile_command(extensions_dict=None):
     extensions_dict = extensions_dict or dict()
     compile_class = _Compile
@@ -109,6 +151,7 @@ def make_setup(**opts):
         cmdclass.update({'build_ext': _build_ext})
     if has_sphinx and 'build_sphinx' not in cmdclass:
         cmdclass['build_sphinx'] = BuildDoc
+    cmdclass['githubrelease'] = GithubRelease
     opts['cmdclass'] = cmdclass
     setup(**opts)
 
@@ -166,6 +209,7 @@ kwargs = dict(
         "Documentation": "http://polemarch.readthedocs.io/",
         "Source Code": "https://gitlab.com/vstconsulting/polemarch",
         "Releases": "https://github.com/vstconsulting/polemarch/releases",
+        "Docker": "https://hub.docker.com/r/vstconsulting/polemarch/",
     },
     entry_points={
         'console_scripts': ['polemarchctl=polemarch:cmd_execution']

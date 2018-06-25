@@ -197,7 +197,7 @@ pmItems.searchFiled = function (options)
  * @returns {$.Deferred}
  */
 pmItems.search = function (query, options)
-{
+{ 
     if(options.parent_type === undefined && options.parent_item === undefined)
     {
         if (this.isEmptySearchQuery(query))
@@ -208,8 +208,7 @@ pmItems.search = function (query, options)
         return spajs.open({menuId: this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
     }
     else
-    {
-
+    { 
         var link = window.location.href.split(/[&?]/g)[1];
         var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
         var link_parts = link.match(pattern);
@@ -258,6 +257,7 @@ pmItems.isEmptySearchQuery = function (query)
  */
 pmItems.showSearchResults = function (holder, menuInfo, data)
 {
+    // @todo Refactor  убрать все вызовы setActiveMenuLi в систему событий
     setActiveMenuLi();
     var thisObj = this;
 
@@ -293,7 +293,8 @@ pmItems.showSearchResults = function (holder, menuInfo, data)
  */
 pmItems.showSearchResultsForParent = function (holder, menuInfo, data)
 {
-    setActiveMenuLi();
+    // @todo Refactor  убрать все вызовы setActiveMenuLi в систему событий
+    setActiveMenuLi(); 
     var def = new $.Deferred();
     var thisObj = this;
 
@@ -338,8 +339,8 @@ pmItems.showSearchResultsForParent = function (holder, menuInfo, data)
         var parent_type = parentObj.model.page_name;
         var parent_item = thisObj.model.parentObjectsData[thisObj.model.parentObjectsData.length - 1].parent_item;
 
-        $.when(thisObj.loadAllItems()).done(function()
-        {
+        //$.when(thisObj.loadAllItems()).done(function()
+        //{ 
             var childrenItems = [];
             for(var i in parentObj.model.items[parent_item][thisObj.model.name])
             {
@@ -391,19 +392,30 @@ pmItems.showSearchResultsForParent = function (holder, menuInfo, data)
             {
                 tpl = 'items_list_from_another_class';
             }
-            var text = spajs.just.render(tpl, {query: searchQuery,  pmObj: thisObj, parentObj:parentObj,
-                opt: {parent_item: parent_item, parent_type: parent_type, back_link:back_link, link_with_parents:link_with_parents}});
+            var text = spajs.just.render(tpl, {
+                                                query: searchQuery,
+                                                pmObj: thisObj,
+                                                parentObj:parentObj,
+                                                opt: {
+                                                    parent_item: parent_item,
+                                                    parent_type: parent_type,
+                                                    back_link:back_link,
+                                                    link_with_parents:link_with_parents
+                                                }
+                                            });
+
             $(holder).insertTpl(text);
             $('#add_existing_item_to_parent').select2({
                 placeholder: true,
                 allowClear: true
             });
+            
             def.resolve();
-        }).fail(function(e)
-        {
-            polemarch.showErrors(e.responseJSON);
-            def.reject(e);
-        })
+        //}).fail(function(e)
+        //{
+        //    polemarch.showErrors(e.responseJSON);
+        //    def.reject(e);
+        //})
 
     }).fail(function(e)
     {
@@ -478,13 +490,17 @@ pmItems.importItem = function (data)
     return def.promise();
 }
 
-pmItems.copyAndEdit = function (item_id)
+pmItems.copyAndEdit = function (item_id, back_link)
 {
     var def = new $.Deferred();
     var thisObj = this;
-    return $.when(this.copyItem(item_id)).done(function (newItemId)
+    if(!back_link)
     {
-        $.when(spajs.open({menuId: thisObj.model.page_name + "/" + newItemId})).done(function () {
+        back_link = thisObj.model.page_name;
+    }
+    $.when(this.copyItem(item_id)).done(function (newItemId)
+    {
+        $.when(spajs.open({menuId: back_link+ "/" + newItemId})).done(function () {
             $.notify("Item was duplicate", "success");
             def.resolve()
         }).fail(function (e) {
@@ -1085,8 +1101,10 @@ pmItems.loadItem = function (item_id)
 /**
  * @return $.Deferred
  */
-pmItems.deleteItem = function (item_id, force)
+pmItems.deleteItem = function (item_id, force, back_link)
 {
+    var thisObj = this;
+
     if (!item_id)
     {
         throw "Error in pmItems.deleteItem with item_id = `" + item_id + "`"
@@ -1099,30 +1117,13 @@ pmItems.deleteItem = function (item_id, force)
         return def.promise()
     }
 
-    var thisObj = this;
+    if(!back_link)
+    {
+        back_link = thisObj.model.name;
+    }
+
     $.when(this.deleteItemQuery(item_id)).done(function (data)
     {
-        if(thisObj.model.parentObjectsData !== undefined)
-        {
-            var link = window.location.href.split(/[&?]/g)[1];
-            var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
-            var link_parts = link.match(pattern);
-            var back_link = "";
-
-            for(var i in link_parts)
-            {
-                if(link_parts[i].split("/")[0] != thisObj.model.page_name && link_parts[i].split("/")[0] != thisObj.model.name)
-                {
-                    back_link += link_parts[i] +"/";
-                }
-            }
-            back_link += thisObj.model.name;
-        }
-        else
-        {
-            back_link = thisObj.model.name;
-        }
-
         $.when(spajs.open({menuId: back_link})).done(function ()
         {
             def.resolve()

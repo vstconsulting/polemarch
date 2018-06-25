@@ -185,8 +185,9 @@ pmPeriodicTasks.deleteItem = function(item_id, force)
                 {
                     var template_kind = "Module";
                 }
-                $.when(spajs.open({ menuId:"template/"+template_kind + "/" + template_id + "/periodic-tasks"})).done(function(){
-                    def.resolve()
+                var project_and_id = pmTasksTemplates.defineProjectInUrl();
+                $.when(spajs.open({ menuId: project_and_id+"template/"+template_kind + "/" + template_id + "/periodic-tasks"})).done(function(){
+                    def.resolve();
                 }).fail(function(e){
                     def.reject(e);
                     polemarch.showErrors(e.responseJSON)
@@ -311,6 +312,8 @@ pmPeriodicTasks.showList = function(holder, menuInfo, data)
 
 pmPeriodicTasks.search = function(query, options)
 {
+    var project_and_id = pmTasksTemplates.defineProjectInUrl();
+
     if(this.isEmptySearchQuery(query))
     {
         if(options.template_kind === undefined)
@@ -319,7 +322,7 @@ pmPeriodicTasks.search = function(query, options)
         }
         else
         {
-            return spajs.open({ menuId:'template/'+ options.template_kind+ "/" + options.template_id +"/" + this.model.name, reopen:true});
+            return spajs.open({ menuId:project_and_id + 'template/'+ options.template_kind+ "/" + options.template_id +"/" + this.model.name, reopen:true});
         }
 
     }
@@ -331,7 +334,7 @@ pmPeriodicTasks.search = function(query, options)
     }
     else
     {
-        return spajs.open({ menuId:'template/'+ options.template_kind+ "/" + options.template_id +"/" + this.model.name + "/search/"+this.searchObjectToString(trim(query)), reopen:true});
+        return spajs.open({ menuId:project_and_id + 'template/'+ options.template_kind+ "/" + options.template_id +"/" + this.model.name + "/search/"+this.searchObjectToString(trim(query)), reopen:true});
     }
 
 }
@@ -632,7 +635,14 @@ pmPeriodicTasks.model.page_item_from_template = {
         return "Periodic task "+this.model.items[item_id].justText('name')
     },
     back_link: function(item_id, opt){
-        return  polemarch.opt.host + "/?template/" + opt.template_kind + "/" + opt.template_id + "/" + this.model.name;
+        if(opt.url_project_id === undefined)
+        {
+            return  polemarch.opt.host + "/?template/" + opt.template_kind + "/" + opt.template_id + "/" + this.model.name;
+        }
+        else
+        {
+            return  polemarch.opt.host + "/?project/" + opt.url_project_id + "/template/" + opt.template_kind + "/" + opt.template_id + "/" + this.model.name;
+        }
     },
     short_title: function(item_id){
         return this.model.items[item_id].justText('name', function(v){return v.slice(0, 20)})
@@ -838,9 +848,15 @@ pmPeriodicTasks.showPeriodicTaskPageFromTemplate = function(holder, menuInfo, da
     setActiveMenuLi();
     var def = new $.Deferred();
     var thisObj = this;
+    var url_project_id = undefined;
     var item_id = data.reg[2];
     var template_id = data.reg[1];
-
+    if(data.reg[3] !== undefined)
+    {
+        url_project_id = data.reg[1];
+        template_id = data.reg[2];
+        item_id = data.reg[3];
+    }
     $.when(pmPeriodicTasks.loadItem(item_id),
         pmInventories.loadAllItems(), pmTasksTemplates.loadItem(template_id)).done(function()
     {
@@ -848,15 +864,35 @@ pmPeriodicTasks.showPeriodicTaskPageFromTemplate = function(holder, menuInfo, da
         var tpl = 'periodic-task-from-template-page'
         var project_id =   pmTasksTemplates.model.items[template_id].data.project;
         var template_kind = pmTasksTemplates.model.items[template_id].kind;
+        var url_project_name = undefined;
 
-        $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj, opt:{project_id:project_id, template_id:template_id, template_kind:template_kind}}))
-        pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory)
-
-        def.resolve();
-
+        if(url_project_id !== undefined)
+        {
+            $.when(pmProjects.loadItem(url_project_id)).done(function ()
+            {
+                url_project_name = pmProjects.model.items[url_project_id].name;
+                $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj,
+                    opt:{project_id:project_id, template_id:template_id, template_kind:template_kind,
+                        url_project_id:url_project_id, url_project_name:url_project_name}}));
+                pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory);
+                def.resolve();
+            }).fail(function (e)
+            {
+                polemarch.showErrors(e.responseJSON);
+                def.reject(e);
+            });
+        }
+        else
+        {
+            $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, pmObj:thisObj,
+                opt:{project_id:project_id, template_id:template_id, template_kind:template_kind,
+                    url_project_id:url_project_id, url_project_name:url_project_name}}));
+            pmPeriodicTasks.selectInventory(pmPeriodicTasks.model.items[item_id].inventory);
+            def.resolve();
+        }
     }).fail(function(e)
     {
-        $.notify("", "error");
+        polemarch.showErrors(e.responseJSON);
         def.reject(e);
     })
 
@@ -871,12 +907,17 @@ pmPeriodicTasks.showSearchResultsFromTemplate = function(holder, menuInfo, data)
 {
     setActiveMenuLi();
     var thisObj = this;
+    var url_project_id = undefined;
     var template_id = data.reg[1];
-
-
-    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]))
+    var search_query = decodeURIComponent(data.reg[2]);
+    if(data.reg[3] !== undefined)
+    {
+        url_project_id = data.reg[1];
+        template_id = data.reg[2];
+        search_query = decodeURIComponent(data.reg[3]);
+    }
+    var search = this.searchStringToObject(search_query);
     search['template'] = template_id
-
     return $.when(pmTasksTemplates.loadItem(template_id), pmModuleTemplates.loadItem(template_id)).done(function(){
         var project_id = pmTasksTemplates.model.items[template_id].data.project;
         var pmObj = undefined;
@@ -888,10 +929,11 @@ pmPeriodicTasks.showSearchResultsFromTemplate = function(holder, menuInfo, data)
         {
             pmObj = pmModuleTemplates;
         }
-
         return $.when(thisObj.sendSearchQuery(search), pmProjects.loadItem(project_id)).done(function()
         {
-            $(holder).insertTpl(spajs.just.render('linked-to-template-periodic-tasks_list', {query:decodeURIComponent(data.reg[2]), project_id:project_id, item_id:template_id, pmObj:pmObj}))
+            var url_project_name = pmProjects.model.items[project_id].name;
+            $(holder).insertTpl(spajs.just.render('linked-to-template-periodic-tasks_list', {query:search_query,
+                project_id:project_id, item_id:template_id, pmObj:pmObj, opt:{project_id:url_project_id, project_name: url_project_name}}))
         }).fail(function()
         {
             $.notify("", "error");
@@ -1025,7 +1067,8 @@ pmPeriodicTasks.addItem = function(project_id)
                 {
                     var template_kind = "Module";
                 }
-                $.when(spajs.open({ menuId:"template/"+template_kind+ "/" + data.template +"/periodic-task/"+data.id})).always(function(){
+                var project_and_id = pmTasksTemplates.defineProjectInUrl();
+                $.when(spajs.open({ menuId:project_and_id+"template/"+template_kind+ "/" + data.template +"/periodic-task/"+data.id})).always(function(){
                     def.resolve()
                 })
             }
