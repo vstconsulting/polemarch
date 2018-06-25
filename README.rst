@@ -5,6 +5,9 @@ Polemarch
    :target: http://polemarch.readthedocs.io/en/stable/?badge=stable
    :alt: Documentation Status
 
+.. image:: https://badge.fury.io/py/polemarch.svg
+    :target: https://badge.fury.io/py/polemarch
+
 **Polemarch** is service for orchestration infrastructure by ansible.
 Simply WEB gui for orchestration infrastructure by ansible playbooks.
 
