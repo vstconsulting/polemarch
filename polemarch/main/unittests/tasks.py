@@ -1,19 +1,4 @@
-# import json
-#
-# import re
-#
-# from datetime import timedelta
-#
-# import subprocess
-#
-# from django.conf import settings
-# from django.utils.timezone import now
 from django.core.validators import ValidationError
-
-# try:
-#     from mock import patch
-# except ImportError:  # nocv
-#     from unittest.mock import patch
 from django.test import TestCase
 from ..tasks.exceptions import TaskError
 from ..tasks import RepoTask

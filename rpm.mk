@@ -8,9 +8,7 @@ define RPM_SPEC
 %define release $(RELEASE)
 %define __prelink_undo_cmd %{nil}
 %define _binaries_in_noarch_packages_terminate_build   0
-# %{?version: %{?version: %{error: version}}}
 %define unmangled_version %{version}
-# %{?release: %{?release: %{error: release}}}
 # Globals
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$$!!g')
 

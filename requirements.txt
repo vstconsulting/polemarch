@@ -1,5 +1,5 @@
 # Main
-vstutils[rpc,ldap,doc,coreapi,prod]==1.1.6
+vstutils[rpc,ldap,doc,coreapi,prod]==1.1.7
 pyyaml
 docutils==0.14
 markdown2==2.3.5
@@ -12,9 +12,10 @@ uWSGI==2.0.17
 gitpython==2.1.10
 
 # Hooks
-requests==2.19
+requests==2.19.1
 
 # Ansible required packages
 ansible>=2.1, <=2.5.4
 paramiko<=2.4.0
 pywinrm[kerberos]==0.3.0
+github3.py==1.0.0a4

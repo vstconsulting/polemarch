@@ -11,7 +11,8 @@ NAME = $(NAMEBASE)
 VER = $(shell $(PY) -c 'import $(NAME); print($(NAME).__version__)')
 PROJECT_CTL = $(NAME)ctl
 MAIN_APP = main
-VSTUTILS = vstutils vstcompile[doc]
+VSTUTILS_REQ = $(shell cat requirements.txt | grep vstutils | sed 's/\[.*\]/[doc]/')
+VSTUTILS = $(VSTUTILS_REQ)
 PIPARGS = $(shell echo -n "--cache-dir=$$(pwd)/.pip-cache")
 ARCHIVE = $(NAME)-$(VER).tar.gz
 LICENSE = AGPL-3+
@@ -29,6 +30,7 @@ INSTALL_DIR = $(INSTALL_PREFIX)/${NAME}
 INSTALL_BINDIR = $(INSTALL_DIR)/bin
 REQUIREMENTS = -r requirements.txt -r requirements-doc.txt
 TMPDIR := $(shell mktemp -d)
+RPM_BUILD = /tmp/rpmbuild_$(NAME)_$(VER)_$(RELEASE)
 BUILD_DIR= $(TMPDIR)
 PREBUILD_DIR = $(BUILD_DIR)/$(INSTALL_DIR)
 PREBUILD_BINDIR = $(BUILD_DIR)/$(INSTALL_BINDIR)
@@ -37,6 +39,24 @@ COMPOSE = docker-compose-testrun.yml
 COMPOSE_ARGS = --abort-on-container-exit
 COMPLEX_TESTS_COMPOSE = docker-compose-tests.yml
 COMPLEX_TESTS_COMPOSE_ARGS = '--abort-on-container-exit --build'
+define VARS_STR
+PY=$(PY)
+PIP=$(PIP)
+PYTHON_BIN=$(PYTHON_BIN)
+RELOCATE_BIN=$(RELOCATE_BIN)
+NAMEBASE=$(NAMEBASE)
+USER=$(USER)
+NAME=$(NAME)
+VER=$(VER)
+RELEASE=$(RELEASE)
+PROJECT_CTL=$(PROJECT_CTL)
+MAIN_APP=$(MAIN_APP)
+VSTUTILS=$(VSTUTILS)
+BUILD_DIR=$(BUILD_DIR)
+RPM_BUILD=$(RPM_BUILD)
+INSTALL_DIR=$(INSTALL_DIR)
+endef
+export VARS_STR
 
 include rpm.mk
 include deb.mk
@@ -44,7 +64,11 @@ include deb.mk
 all: compile clean_prebuild prebuild
 
 
-docs:
+print_vars:
+	echo "$$VARS_STR"
+	which $(PY)
+
+docs: print_vars
 	-rm -rf doc/_build
 	mkdir -p doc/_static
 	$(PY) setup.py build_sphinx --build-dir doc/_build -W
@@ -58,18 +82,18 @@ flake:
 pylint:
 	tox -e pylint
 
-build: build-clean
+build: build-clean print_vars
 	-rm -rf dist
 	$(PY) setup.py sdist -v
 
-compile: build-clean
+compile: build-clean print_vars
 	-rm -rf dist
 	find ./$(NAME) -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf polemarch/doc/*
-	$(PIP) install $(VSTUTILS)
+	$(PIP) install -U $(VSTUTILS)
 	$(PY) setup.py compile -v
 
-prebuild:
+prebuild: print_vars
 	# Create virtualenv
 	$(PY) -m virtualenv --no-site-packages $(PREBUILD_DIR)
 	# Install required packages
@@ -95,7 +119,7 @@ prebuild:
 	# Create tmpdirs
 	-mkdir -p $(BUILD_DIR)/var/{log,run,lock}/$(NAMEBASE)
 
-localinstall:
+localinstall: print_vars
 	$(PY) -m virtualenv --no-site-packages $(INSTALL_DIR)
 	$(INSTALL_BINDIR)/pip install -U pip
 	$(INSTALL_BINDIR)/pip install -U $(VSTUTILS)
@@ -135,17 +159,17 @@ fclean: clean
 	find ./$(NAME) -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf .tox
 
-rpm:
+rpm: print_vars
 	echo "$$RPM_SPEC" > $(NAME).spec
-	rm -rf ~/rpmbuild
-	mkdir -p ~/rpmbuild/SOURCES/
+	rm -rf $(RPM_BUILD)
+	mkdir -p $(RPM_BUILD)/SOURCES/
 	ls -la
-	rpmbuild --verbose -bb $(NAME).spec
+	rpmbuild --verbose -bb $(NAME).spec --define "_rpmdir ${RPM_BUILD}" --define "_topdir ${RPM_BUILD}"
 	mkdir -p dist
-	cp -v ~/rpmbuild/RPMS/x86_64/*.rpm dist/
-	rm $(NAME).spec
+	cp -v $(RPM_BUILD)/x86_64/*.rpm dist/
+	rm -rf $(NAME).spec $(RPM_BUILD)
 
-deb:
+deb: print_vars
 	rm -rf debian
 	mkdir debian
 	# create needed files
