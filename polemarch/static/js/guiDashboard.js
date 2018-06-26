@@ -779,7 +779,13 @@ pmDashboard.getDataForDashboardFromBulk = function ()
         },
         {
             type:"get",
-            item: "templates"
+            item: "templates",
+            filters: "limit=10&kind=Task"
+        },
+        {
+            type:"get",
+            item: "templates",
+            filters: "limit=10&kind=Module"
         },
     ];
 
@@ -790,10 +796,22 @@ pmDashboard.getDataForDashboardFromBulk = function ()
         data: JSON.stringify(bulkArr),
         success: function (data)
         {
+            var usedTypes = {};
             for(var i in data)
             {
                 var pmObj = pmItems.definePmObject(bulkArr[i].item);
-                pmObj.model.itemslist = data[i].data;
+                if(usedTypes[bulkArr[i].item] === undefined)
+                {
+                    pmObj.model.itemslist = data[i].data;
+                    usedTypes[bulkArr[i].item] = 1;
+                }
+                else
+                {
+                    usedTypes[bulkArr[i].item] += 1;
+                    pmObj.model.itemslist.count += data[i].data.count;
+                    pmObj.model.itemslist.results = pmObj.model.itemslist.results.concat(data[i].data.results);
+                }
+
                 for(var j in data[i].data.results)
                 {
                     var val = pmObj.afterItemLoad(data[i].data.results[j])
