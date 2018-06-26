@@ -124,7 +124,7 @@ img {
 
 /*.sidebar-collapse .wrapper .main-sidebar .sidebar*/
 /*{*/
-    /*opacity:0;*/
+/*opacity:0;*/
 /*}*/
 
 .sidebar h3, .sidebar p {
@@ -250,7 +250,7 @@ form.search {
 }
 
 li.toctree-l1.current {
-    border-left: 5px solid #00c0ef;
+    border-left: 5px solid #00c0ef!important;
     background-color: #EEEEEE;
 }
 
@@ -308,48 +308,65 @@ li.toctree-l1.current>a {
 /* end of styles for Notification field about current version */
 
 /* styles for collapsed sidebar */
-.reference.internal .doc-sidebar-icon {
+.sidebar-menu .reference.internal .doc-sidebar-icon {
     display: none;
 }
 
-.sidebar-collapse .reference.internal .doc-sidebar-icon {
+.sidebar-collapse .sidebar-menu li.toctree-l1 {
+    border-left: 5px solid #fcfcfc;
+}
+
+.sidebar-collapse .sidebar-menu li.toctree-l1:hover {
+    border-color: #E0E0E0;
+}
+
+.sidebar-collapse .sidebar-menu ul li a
+{
+    padding: 12px 5px 12px 10px;
+}
+
+.sidebar-collapse .sidebar-menu .reference.internal .doc-sidebar-icon {
     display: block;
     padding:5px;
 }
 
-.sidebar-collapse .reference.internal .docs-heading-wrapper {
+.sidebar-collapse .sidebar-menu .reference.internal .docs-heading-wrapper {
     display: none;
 }
 
-.sidebar-collapse .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible {
+.sidebar-collapse .sidebar-menu .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible {
     display: block;
     position: absolute;
-    left: 48px;
+    left: 46px;
     top: -20px;
-    width: 300px;
+    width: 250px;
     height: 90px;
     padding: 20px;
     padding-left: 0px;
     z-index: 2000;
 }
 
-.sidebar-collapse .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible .docs-heading  {
+.sidebar-collapse .sidebar-menu .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible .docs-heading  {
     display: block;
-    width: 280px;
-    height: 50px;
+    width: 230px;
+    min-height: 49px;
     background-color: #fcfcfc;
-    padding: 12px 5px 12px 20px;
+    padding: 12px 5px 12px 15px;
+    border-bottom-right-radius: 4px;
+    border-top-right-radius: 4px;
+    box-shadow: 2px 0px 3px rgba(0,0,0,0.1);
 }
 
-.sidebar-collapse .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible:hover .docs-heading {
-  background-color: #E0E0E0;
+
+.sidebar-collapse .sidebar-menu .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible:hover .docs-heading {
+    background-color: #E0E0E0;
 }
 
-.sidebar-collapse .toctree-l1 ul {
+.sidebar-collapse .sidebar-menu .toctree-l1 ul {
     display: none;
 }
 
-.sidebar-collapse #searchbox, h3, p {
+.sidebar-collapse #searchbox, .sidebar-collapse .main-sidebar h3, .sidebar-collapse .main-sidebar p {
     display: none;
 }
 
