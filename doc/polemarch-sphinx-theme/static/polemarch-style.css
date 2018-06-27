@@ -365,24 +365,25 @@ li.toctree-l1.current>a {
     display: none;
 }
 
-.sidebar-collapse:not(.sidebar-open) #searchbox, .sidebar-collapse .main-sidebar h3, .sidebar-collapse .main-sidebar p {
+.sidebar-collapse:not(.sidebar-open) #searchbox,
+.sidebar-collapse:not(.sidebar-open) .main-sidebar h3,
+.sidebar-collapse:not(.sidebar-open) .main-sidebar p {
     display: none;
 }
 
 /* end of styles for collapsed sidebar */
 
 @media (max-width: 767px) {
-    .main-header .logo {
-        display: none;
-    }
 
+    .bg-logo-doc {
+    background-image: url(img/logo/horizontal-bw.png);
+    }
+    .bg-logo-min-doc {
+    background-image: url(img/logo/logo-bw.png);
+    }
     .fork-me img {
-        width:102px;
-        height:102px;
-    }
-
-    .main-sidebar, .left-side {
-         padding-top: 50px;
+    width:112px;
+    height:112px;
     }
 
     #big-search-input-pm {
