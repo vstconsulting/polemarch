@@ -15,6 +15,7 @@ omit =
     polemarch/wapp.py
     polemarch/main/management/commands/webserver.py
     polemarch/main/tests/repos.py
+    polemarch/api/v1/*
     *celery_beat_scheduler.py
 
 [report]
