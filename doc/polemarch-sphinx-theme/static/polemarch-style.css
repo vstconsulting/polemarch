@@ -5,7 +5,6 @@
 @import url(lte/css/alt/AdminLTE-select2.css);
 @import url(lte/css/alt/AdminLTE-without-plugins.css);
 @import url(lte/css/AdminLTE.css);
-/*@import url(lte/css/ansi-colors.css);*/
 @import url(lte/css/font-awesome.min.css);
 @import url(lte/css/ionicons.min.css);
 @import url(lte/css/skins/_all-skins.css);
@@ -312,29 +311,29 @@ li.toctree-l1.current>a {
     display: none;
 }
 
-.sidebar-collapse .sidebar-menu li.toctree-l1 {
+.sidebar-collapse:not(.sidebar-open) .sidebar-menu li.toctree-l1 {
     border-left: 5px solid #fcfcfc;
 }
 
-.sidebar-collapse .sidebar-menu li.toctree-l1:hover {
+.sidebar-collapse:not(.sidebar-open) .sidebar-menu li.toctree-l1:hover {
     border-color: #E0E0E0;
 }
 
-.sidebar-collapse .sidebar-menu ul li a
+.sidebar-collapse:not(.sidebar-open) .sidebar-menu ul li a
 {
     padding: 12px 5px 12px 10px;
 }
 
-.sidebar-collapse .sidebar-menu .reference.internal .doc-sidebar-icon {
+.sidebar-collapse:not(.sidebar-open) .sidebar-menu .reference.internal .doc-sidebar-icon {
     display: block;
     padding:5px;
 }
 
-.sidebar-collapse .sidebar-menu .reference.internal .docs-heading-wrapper {
+.sidebar-collapse:not(.sidebar-open) .sidebar-menu .reference.internal .docs-heading-wrapper {
     display: none;
 }
 
-.sidebar-collapse .sidebar-menu .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible {
+.sidebar-collapse:not(.sidebar-open) .sidebar-menu .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible {
     display: block;
     position: absolute;
     left: 46px;
@@ -346,7 +345,7 @@ li.toctree-l1.current>a {
     z-index: 2000;
 }
 
-.sidebar-collapse .sidebar-menu .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible .docs-heading  {
+.sidebar-collapse:not(.sidebar-open) .sidebar-menu .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible .docs-heading  {
     display: block;
     width: 230px;
     min-height: 49px;
@@ -358,30 +357,32 @@ li.toctree-l1.current>a {
 }
 
 
-.sidebar-collapse .sidebar-menu .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible:hover .docs-heading {
+.sidebar-collapse:not(.sidebar-open) .sidebar-menu .reference.internal .docs-heading-wrapper.docs-heading-wrapper-visible:hover .docs-heading {
     background-color: #E0E0E0;
 }
 
-.sidebar-collapse .sidebar-menu .toctree-l1 ul {
+.sidebar-collapse:not(.sidebar-open) .sidebar-menu .toctree-l1 ul {
     display: none;
 }
 
-.sidebar-collapse #searchbox, .sidebar-collapse .main-sidebar h3, .sidebar-collapse .main-sidebar p {
+.sidebar-collapse:not(.sidebar-open) #searchbox, .sidebar-collapse .main-sidebar h3, .sidebar-collapse .main-sidebar p {
     display: none;
 }
 
 /* end of styles for collapsed sidebar */
 
 @media (max-width: 767px) {
-    .bg-logo-doc {
-        background-image: url(img/logo/horizontal-bw.png);
+    .main-header .logo {
+        display: none;
     }
-    .bg-logo-min-doc {
-        background-image: url(img/logo/logo-bw.png);
-    }
+
     .fork-me img {
-        width:112px;
-        height:112px;
+        width:102px;
+        height:102px;
+    }
+
+    .main-sidebar, .left-side {
+         padding-top: 50px;
     }
 
     #big-search-input-pm {

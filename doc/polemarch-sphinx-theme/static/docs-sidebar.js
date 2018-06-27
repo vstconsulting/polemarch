@@ -53,4 +53,26 @@ $( document ).ready(function() {
             }
         }
     }
+
+
+    window.onresize=function ()
+    {
+        if(window.innerWidth>767)
+        {
+            if(guiLocalSettings.get('hideMenu'))
+            {
+                $("body").addClass('sidebar-collapse');
+            }
+            if ($("body").hasClass('sidebar-open'))
+            {
+                $("body").removeClass('sidebar-open');
+            }
+        }
+        else
+        {
+            if ($("body").hasClass('sidebar-collapse')){
+                $("body").removeClass('sidebar-collapse');
+            }
+        }
+    }
 });
