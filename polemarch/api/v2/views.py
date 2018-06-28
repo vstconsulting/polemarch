@@ -13,7 +13,7 @@ from ..base import PermissionMixin, LimitedPermissionMixin
 from ...main import utils
 
 
-class _VariableMixin(base.ModelViewSetSet):
+class _VarsMixin(base.ModelViewSetSet):
     var_serializer_class = serializers.VariableSerializer
     var_filter_class = filters.VariableFilter
 
@@ -58,7 +58,7 @@ class TeamViewSet(PermissionMixin, base.ModelViewSetSet):
         return self.queryset
 
 
-class HostViewSet(_VariableMixin, PermissionMixin, base.ModelViewSetSet):
+class HostViewSet(_VarsMixin, PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
     serializer_class_one = serializers.OneHostSerializer
@@ -66,32 +66,41 @@ class HostViewSet(_VariableMixin, PermissionMixin, base.ModelViewSetSet):
 
 
 class _GroupMixin(base.ModelViewSetSet):
-    hosts_serializer_class = HostViewSet.serializer_class
 
-    @base.nested_action('hosts', 'id')
-    def hosts(self, request):
+    @base.nested_action('host', 'id', manager_name='hosts', allow_append=True)
+    def host(self, request):
         return self.dispatch_route_instance(
             (HostViewSet.serializer_class, HostViewSet.serializer_class_one),
             HostViewSet.filter_class, request
         )
 
+    @base.nested_action('group', 'id', manager_name='groups',  allow_append=True)
+    def group(self, request):
+        return self.dispatch_route_instance(
+            (GroupViewSet.serializer_class, GroupViewSet.serializer_class_one),
+            GroupViewSet.filter_class, request
+        )
 
-class GroupViewSet(_VariableMixin, PermissionMixin, base.ModelViewSetSet):
+
+class GroupViewSet(_VarsMixin, _GroupMixin, PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Group
     serializer_class = serializers.GroupSerializer
     serializer_class_one = serializers.OneGroupSerializer
     filter_class = filters.GroupFilter
 
+    def nested_allow_check(self):
+        if not self.nested_parent_object.children and self.nested_name == 'group':
+            raise excepts.ValidationError("Group is not children.")
+        if self.nested_parent_object.children and self.nested_name == 'host':
+            raise excepts.ValidationError("Group is children.")
+
+
+class InventoryViewSet(_VarsMixin, _GroupMixin, PermissionMixin, base.ModelViewSetSet):
+    model = serializers.models.Inventory
+    serializer_class = serializers.InventorySerializer
+    serializer_class_one = serializers.OneInventorySerializer
+    filter_class = filters.InventoryFilter
+
 
 class BulkViewSet(views.BulkViewSet):
-    type_to_bulk = {
-        "host": "hosts",
-        "group": "groups",
-        "inventory": "inventories",
-        "project": "projects",
-        "periodictask": "periodic-tasks",
-        "template": "templates",
-        "user": "users",
-        "team": "teams",
-        "hook": "hooks",
-    }
+    pass

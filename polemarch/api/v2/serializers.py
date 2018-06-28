@@ -305,6 +305,12 @@ class VariableSerializer(_SignalSerializer):
             'value',
         )
 
+    def to_representation(self, instance):
+        result = super(VariableSerializer, self).to_representation(instance)
+        if instance.key in instance.content_object.HIDDEN_VARS:
+            result['value'] = "[~~ENCRYPTED~~]"
+        return result
+
 
 class _WithVariablesSerializer(_WithPermissionsSerializer):
     operations = dict(DELETE="remove",
@@ -348,7 +354,8 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
         return self._do_with_vars("create", validated_data=validated_data)
 
     def update(self, instance, validated_data):
-        if "children" in validated_data:
+        children_instance = getattr(instance, "children", False)
+        if validated_data.get("children", children_instance) != children_instance:
             raise exceptions.ValidationError("Children not allowed to update.")
         return self._do_with_vars(
             "update", instance, validated_data=validated_data
@@ -588,19 +595,16 @@ class _InventoryOperations(_WithVariablesSerializer):
 ###################################
 
 class GroupSerializer(_WithVariablesSerializer):
-    vars = DictField(required=False, write_only=True)
 
     class Meta:
         model = models.Group
         fields = ('id',
                   'name',
-                  'vars',
                   'children',
                   'url',)
 
 
 class OneGroupSerializer(GroupSerializer, _InventoryOperations):
-    vars   = DictField(required=False)
     hosts  = HostSerializer(read_only=True, many=True)
     groups = GroupSerializer(read_only=True, many=True)
     owner = UserSerializer(read_only=True)
@@ -613,7 +617,6 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
                   'notes',
                   'hosts',
                   "groups",
-                  'vars',
                   'children',
                   'owner',
                   'url',)

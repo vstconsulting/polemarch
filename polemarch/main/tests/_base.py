@@ -81,13 +81,15 @@ class BaseTestCase(VSTBaseTestCase):
             for key in current:
                 self.assertEquals(current[key], details[key])
 
-    def _get_bulk_mod(self, item, index, data):
+    def get_mod_bulk(self, item, pk, data, mtype='variables', method="POST", filter=''):
         return {
-            'type': "mod", 'item': item,
-            'pk': "<{}[data][id]>".format(index),
-            "method": 'POST', "data_type": 'variables',
-            'data': data
+            'type': "mod", 'item': item, 'pk': pk,
+            "method": method.upper(), "data_type": mtype,
+            'data': data,
         }
+
+    def _get_bulk_mod(self, item, index, data, mtype='variables'):
+        return self.get_mod_bulk(item, "<{}[data][id]>".format(index), data, mtype)
 
     def make_bulk(self, data):
         return self.get_result(
