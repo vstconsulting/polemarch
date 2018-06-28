@@ -58,14 +58,14 @@ class TeamViewSet(PermissionMixin, base.ModelViewSetSet):
         return self.queryset
 
 
-class HostViewSet(_VarsMixin, PermissionMixin, base.ModelViewSetSet):
+class HostViewSet(_VarsMixin, PermissionMixin):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
     serializer_class_one = serializers.OneHostSerializer
     filter_class = filters.HostFilter
 
 
-class _GroupMixin(base.ModelViewSetSet):
+class _GroupMixin(_VarsMixin):
 
     @base.nested_action('host', 'id', manager_name='hosts', allow_append=True)
     def host(self, request):
@@ -74,7 +74,7 @@ class _GroupMixin(base.ModelViewSetSet):
             HostViewSet.filter_class, request
         )
 
-    @base.nested_action('group', 'id', manager_name='groups',  allow_append=True)
+    @base.nested_action('group', 'id', manager_name='groups', allow_append=True)
     def group(self, request):
         return self.dispatch_route_instance(
             (GroupViewSet.serializer_class, GroupViewSet.serializer_class_one),
@@ -82,7 +82,7 @@ class _GroupMixin(base.ModelViewSetSet):
         )
 
 
-class GroupViewSet(_VarsMixin, _GroupMixin, PermissionMixin, base.ModelViewSetSet):
+class GroupViewSet(_GroupMixin, PermissionMixin):
     model = serializers.models.Group
     serializer_class = serializers.GroupSerializer
     serializer_class_one = serializers.OneGroupSerializer
@@ -95,11 +95,44 @@ class GroupViewSet(_VarsMixin, _GroupMixin, PermissionMixin, base.ModelViewSetSe
             raise excepts.ValidationError("Group is children.")
 
 
-class InventoryViewSet(_VarsMixin, _GroupMixin, PermissionMixin, base.ModelViewSetSet):
+class InventoryViewSet(_GroupMixin, PermissionMixin):
     model = serializers.models.Inventory
     serializer_class = serializers.InventorySerializer
     serializer_class_one = serializers.OneInventorySerializer
     filter_class = filters.InventoryFilter
+
+
+class ProjectViewSet(_GroupMixin, PermissionMixin):
+    model = serializers.models.Project
+    serializer_class = serializers.ProjectSerializer
+    serializer_class_one = serializers.OneProjectSerializer
+    filter_class = filters.ProjectFilter
+    POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
+
+    @base.nested_action('inventory', 'id', manager_name='inventories', allow_append=True)
+    def inventory(self, request):
+        return self.dispatch_route_instance(
+            (InventoryViewSet.serializer_class, InventoryViewSet.serializer_class_one),
+            InventoryViewSet.filter_class, request
+        )
+
+    @base.action(methods=["get"], url_path="supported-repos", detail=False)
+    def supported_repos(self, request):
+        return base.Response(self.model.repo_handlers.keys(), 200).resp
+
+    @base.action(methods=["post"], detail=True)
+    def sync(self, request, *args, **kwargs):
+        return self.get_serializer(self.get_object()).sync().resp
+
+    @base.action(methods=["post"], url_path="execute-playbook", detail=True)
+    def execute_playbook(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.execute_playbook(request).resp
+
+    @base.action(methods=["post"], url_path="execute-module", detail=True)
+    def execute_module(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.execute_module(request).resp
 
 
 class BulkViewSet(views.BulkViewSet):

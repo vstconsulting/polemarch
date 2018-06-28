@@ -23,6 +23,7 @@ from .tasks import (ApiTasksTestCase,
 from .ansible import ApiAnsibleTestCase
 from .repo_backends import RepoBackendsTestCase
 from .hosts import InventoriesTestCase
+from .executions import ProjectTestCase
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -295,7 +296,7 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertCount(self.get_result("get", settings_url), 0)
 
 
-class APITestCase(ApiUsersTestCase, InventoriesTestCase):
+class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
         self.history_inventory = self.get_model_class('Inventory').objects.create()

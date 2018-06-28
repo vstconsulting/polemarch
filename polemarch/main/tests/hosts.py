@@ -1,7 +1,18 @@
-from ._base import BaseTestCase, json
+from ._base import BaseTestCase
 
 
 class InvBaseTestCase(BaseTestCase):
+    def setUp(self):
+        super(InvBaseTestCase, self).setUp()
+        self.hosts_data = [
+            dict(name="test1", variables=dict(ansible_port="222", ansible_user="one")),
+            dict(name="test2", variables=dict(ansible_port="221", ansible_user="one")),
+            dict(name="test3", variables=dict(ansible_port='222', ansible_user="one")),
+            dict(name="test4", variables=dict(ansible_port='221', ansible_user="rh")),
+            dict(name="test5", variables=dict(ansible_port='222', ansible_user="rh")),
+            dict(name="test6", variables=dict(ansible_port='221', ansible_user="rh"))
+        ]
+
     def _filter_test(self, base_url, variables, count):
         filter_url = "{}?".format(base_url)
         for key, value in variables.items():
@@ -87,18 +98,11 @@ class InvBaseTestCase(BaseTestCase):
         self.assertEqual(result[4]['status'], 204, result[4])
         self.assertTrue(self.get_model_filter(child_name, pk=id).exists())
 
+    def get_inv_bulk(self, item, op='add', **kwargs):
+        return self.get_bulk(item, kwargs, op)
+
 
 class InventoriesTestCase(InvBaseTestCase):
-    def setUp(self):
-        super(InventoriesTestCase, self).setUp()
-        self.hosts_data = [
-            dict(name="test1", variables=dict(ansible_port="222", ansible_user="one")),
-            dict(name="test2", variables=dict(ansible_port="221", ansible_user="one")),
-            dict(name="test3", variables=dict(ansible_port='222', ansible_user="one")),
-            dict(name="test4", variables=dict(ansible_port='221', ansible_user="rh")),
-            dict(name="test5", variables=dict(ansible_port='222', ansible_user="rh")),
-            dict(name="test6", variables=dict(ansible_port='221', ansible_user="rh"))
-        ]
 
     def test_hosts(self):
         self._check_with_vars(
@@ -140,3 +144,74 @@ class InventoriesTestCase(InvBaseTestCase):
             'Inventory', dict(name='inventory'),
             'Host', dict(name='inv-host'),
         )
+        hostlocl_v = dict(ansible_user='centos', ansible_ssh_private_key_file='PATH')
+        groups1_v = dict(ansible_user='ubuntu', ansible_ssh_pass='mypass')
+        complex_inventory_v = dict(
+            ansible_ssh_private_key_file="PATH", custom_var1='hello_world'
+        )
+        bulk_data = [
+            # Create hosts
+            self.get_inv_bulk('host', name='127.0.1.1'),
+            self.get_inv_bulk('host', name='127.0.1.[3:4]', type="RANGE"),
+            self.get_inv_bulk('host', name='127.0.1.[5:6]', type="RANGE"),
+            self.get_inv_bulk('host', name='hostlocl'),
+            # Create groups
+            self.get_inv_bulk('group', name='hosts1'),
+            self.get_inv_bulk('group', name='hosts2'),
+            self.get_inv_bulk('group', name='groups1', children=True),
+            self.get_inv_bulk('group', name='groups2', children=True),
+            self.get_inv_bulk('group', name='groups3', children=True),
+            # Create inventory
+            self.get_inv_bulk('inventory', name='complex_inventory'),
+        ]
+        # Set vars
+        bulk_data += [
+            self.get_mod_bulk('host', "<3[data][id]>", dict(key=k, value=v))
+            for k, v in hostlocl_v.items()
+        ]
+        bulk_data += [
+            self.get_mod_bulk('group', "<6[data][id]>", dict(key=k, value=v))
+            for k, v in groups1_v.items()
+        ]
+        bulk_data += [
+            self.get_mod_bulk('inventory', "<9[data][id]>", dict(key=k, value=v))
+            for k, v in complex_inventory_v.items()
+        ]
+        # Add children
+        bulk_data += [
+            # to hosts1
+            self.get_mod_bulk(
+                'group', "<4[data][id]>", dict(id="<0[data][id]>"), 'host',
+            ),
+            self.get_mod_bulk(
+                'group', "<4[data][id]>", dict(id="<3[data][id]>"), 'host',
+            ),
+            # to hosts2
+            self.get_mod_bulk(
+                'group', "<5[data][id]>", dict(id="<1[data][id]>"), 'host',
+            ),
+            self.get_mod_bulk(
+                'group', "<5[data][id]>", dict(id="<2[data][id]>"), 'host',
+            ),
+            # to groups1
+            self.get_mod_bulk(
+                'group', "<6[data][id]>", dict(id="<7[data][id]>"), 'group',
+            ),
+            self.get_mod_bulk(
+                'group', "<6[data][id]>", dict(id="<8[data][id]>"), 'group',
+            ),
+            # to groups2
+            self.get_mod_bulk(
+                'group', "<7[data][id]>", dict(id="<8[data][id]>"), 'group',
+            ),
+            # to groups3
+            self.get_mod_bulk(
+                'group', "<8[data][id]>", dict(id="<4[data][id]>"), 'group',
+            ),
+            self.get_mod_bulk(
+                'group', "<8[data][id]>", dict(id="<5[data][id]>"), 'group',
+            ),
+        ]
+        result = self.make_bulk(bulk_data)
+        for res in result:
+            self.assertEqual(res['status'], 201, res)

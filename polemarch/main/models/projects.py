@@ -25,11 +25,6 @@ class ProjectQuerySet(AbstractVarsQuerySet):
     repo_handlers = ModelHandlers("REPO_BACKENDS", "'repo_type' variable needed!")
     task_handlers = ModelHandlers("TASKS_HANDLERS", "Unknown execution type!")
 
-    def create(self, **kwargs):
-        project = super(ProjectQuerySet, self).create(**kwargs)
-        project.start_repo_task("clone")
-        return project
-
 
 class Project(AbstractModel):
     PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
@@ -109,7 +104,7 @@ class Project(AbstractModel):
 
     @property
     def repo_class(self):
-        repo_type = self.vars.get("repo_type", "Null")
+        repo_type = self.vars.get("repo_type", "MANUAL")
         return self.repo_handlers(repo_type, self)
 
     @property
