@@ -367,7 +367,7 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
     def to_representation(self, instance, hidden_vars=None):
         rep = super(_WithVariablesSerializer, self).to_representation(instance)
         hv = hidden_vars
-        hv = instance.HIDDEN_VARS if hv is None else hv
+        hv = getattr(instance, 'HIDDEN_VARS', []) if hv is None else hv
         vars = self.get_vars(rep)
         if vars is not None:
             for mask_key in hv:
@@ -406,13 +406,12 @@ class TaskSerializer(_WithVariablesSerializer):
         fields = ('id',
                   'name',
                   'playbook',
-                  'project',
-                  'url',)
+                  'project',)
 
-    def to_representation(self, instance):
-        return super(TaskSerializer, self).to_representation(
-            instance, hidden_vars=[]
-        )
+    # def to_representation(self, instance):
+    #     return super(TaskSerializer, self).to_representation(
+    #         instance, hidden_vars=[]
+    #     )
 
 
 class OneTaskSerializer(TaskSerializer):
@@ -744,8 +743,10 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
             kind, str(data.pop(kind)), inventory,
             initiator=obj_id, initiator_type=init_type, executor=user, **data
         )
-        rdata = dict(detail="Started at inventory {}.".format(inventory),
-                     history_id=history_id, executor=user.id)
+        rdata = dict(
+            detail="Started at inventory {}.".format(inventory),
+            history_id=history_id, executor=user.id
+        )
         return Response(rdata, 201)
 
     def execute_playbook(self, request):

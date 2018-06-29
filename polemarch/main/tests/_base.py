@@ -9,6 +9,7 @@ from ...main import models
 
 class BaseTestCase(VSTBaseTestCase):
     models = models
+    tests_path = os.path.dirname(os.path.abspath(__file__))
 
     def _settings(self, item, default=None):
         return getattr(settings, item, default)

@@ -116,6 +116,12 @@ class ProjectViewSet(_GroupMixin, PermissionMixin):
             InventoryViewSet.filter_class, request
         )
 
+    @base.nested_action('playbook', 'id', manager_name='tasks', allow_append=True)
+    def playbooks(self, request):
+        return self.dispatch_route_instance(
+            serializers.TaskSerializer, filters.TaskFilter, request
+        )
+
     @base.action(methods=["get"], url_path="supported-repos", detail=False)
     def supported_repos(self, request):
         return base.Response(self.model.repo_handlers.keys(), 200).resp
