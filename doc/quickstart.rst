@@ -7,23 +7,61 @@ Install from PyPI
 
 #. Install dependencies:
 
-   * pip (```python-pip``` on Ubuntu)
+   Required packages on Ubuntu/Debian:
 
-   * virtualenv(```python-vertualenv``` on Ubuntu)
+   * pip (```python-pip```)
 
-   * ffi (```libffi6``` on Ubuntu)
+   * virtualenv (```python-virtualenv```)
 
-   * ssl (```libssl-dev``` on Ubuntu)
+   * python-dev (```python-dev```)
 
-   * SASL (```libsasl2-dev``` on Ubuntu)
+   * GCC (```gcc```)
 
-   * LDAP (```libldap2-dev``` on Ubuntu)
+   * FFI library (```libffi-dev```)
 
-   Optional package:
+   * Headers and development libraries for MIT Kerberos (```libkrb5-dev```)
 
-   * ```sshpass``` to get working ssh password auth during playbook execution
+   * ffi (```libffi6```)
 
-   * ```git``` to get working git import
+   * ssl (```libssl-dev```)
+
+   * YAML (```libyaml-dev```)
+
+   * SASL (```libsasl2-dev```)
+
+   * LDAP (```libldap2-dev```)
+
+   * python 2.7 (```libpython2.7```)
+
+
+   Optional package on Ubuntu/Debian:
+
+   * SSHPass(```sshpass```) to get working ssh password auth during playbook execution
+
+   * GIT (```git```) to get working git import
+
+
+   Required packages on Red Hat/CentOS :
+
+   * python (```python```)
+
+   * OpenSSL (```openssl-devel```)
+
+   * YAML (```libyaml-devel```)
+
+   * virtualenv (```python-virtualenv```)
+
+   * Kerberos (```krb5-devel```)
+
+   * Libs for Kerberos (```krb5-libs```)
+
+   * Open LDAP (```openldap-devel```)
+
+
+   Optional package on Red Hat/CentOS:
+
+   * GIT (```git```) to get working git import
+
 
 #. Create virtualenv and activate it**:
 
