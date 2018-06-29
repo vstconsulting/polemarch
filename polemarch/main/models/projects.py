@@ -109,7 +109,10 @@ class Project(AbstractModel):
 
     @property
     def type(self):
-        return self.variables.get(key="repo_type").value
+        try:
+            return self.variables.get(key="repo_type").value
+        except self.variables.model.DoesNotExist:
+            return 'MANUAL'
 
     def check_path(self, inventory):
         if not isinstance(inventory, (six.string_types, six.text_type)):

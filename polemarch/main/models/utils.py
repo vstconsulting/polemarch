@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import re
 import sys
 import logging
@@ -107,6 +108,8 @@ class AnsibleCommand(object):
         def get_from_file(self, inventory):
             self.__file = "{}/{}".format(self.cwd, inventory)
             try:
+                if not os.path.exists(self.__file):
+                    raise IOError('No file {}'.format(self.__file))
                 with open(self.__file, 'r') as file:
                     return file.read(), []
             except IOError:

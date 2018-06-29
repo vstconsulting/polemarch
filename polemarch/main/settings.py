@@ -99,7 +99,7 @@ API = {
         r'task': {'view': 'polemarch.api.v1.views.TaskViewSet'},
         r'periodic-task': {'view': 'polemarch.api.v1.views.PeriodicTaskViewSet'},
         r'template': {'view': 'polemarch.api.v1.views.TemplateViewSet'},
-        r'history': {'view': 'polemarch.api.v1.views.HistoryViewSet', "op_types": ['get', 'del']},
+        r'history': {'view': 'polemarch.api.v1.views.HistoryViewSet', "op_types": ['get', 'del', 'mod']},
         r'ansible': {'view': 'polemarch.api.v1.views.AnsibleViewSet', 'op_types': ['get']},
         r'stats': {'view': 'polemarch.api.v1.views.StatisticViewSet', 'op_types': ['get']},
         r'hook': {'view': 'polemarch.api.v1.views.HookViewSet'},
@@ -110,9 +110,6 @@ API = {
 
 
 if "test" in sys.argv:
-    REPO_BACKENDS["TEST"] = {
-        "BACKEND": "polemarch.main.tests.repo_backends.Test",
-    }
     PROJECTS_DIR = '/tmp/polemarch_projects' + str(PY_VER)
     HOOKS_DIR = '/tmp/polemarch_hooks' + str(PY_VER)
     os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None

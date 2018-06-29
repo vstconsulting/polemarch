@@ -21,7 +21,6 @@ from .tasks import (ApiTasksTestCase,
                     ApiTemplateTestCase,
                     ApiHistoryTestCase)
 from .ansible import ApiAnsibleTestCase
-from .repo_backends import RepoBackendsTestCase
 from .hosts import InventoriesTestCase
 from .executions import ProjectTestCase
 

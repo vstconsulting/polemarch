@@ -10,7 +10,7 @@ class Tar(_ArchiveRepo):
         moved = False
         try:
             shutil.move(path, path + ".bak")
-            moved = False
+            moved = True
         except IOError:
             pass
         try:

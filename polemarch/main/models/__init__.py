@@ -57,6 +57,15 @@ def send_polemarch_models(when, instance, **kwargs):
 #####################################
 # SIGNALS
 #####################################
+@receiver(signals.pre_save, sender=Variable)
+def remove_existed(instance, **kwargs):
+    Variable.objects.filter(
+        object_id=instance.object_id,
+        content_type=instance.content_type,
+        key=instance.key
+    ).delete()
+
+
 @receiver(signals.pre_save, sender=Group)
 def validate_group_name(instance, **kwargs):
     validate_name = RegexValidator(

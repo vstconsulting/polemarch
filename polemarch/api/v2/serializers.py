@@ -406,7 +406,8 @@ class TaskSerializer(_WithVariablesSerializer):
         fields = ('id',
                   'name',
                   'playbook',
-                  'project',)
+                  'project',
+                  'url',)
 
     # def to_representation(self, instance):
     #     return super(TaskSerializer, self).to_representation(
@@ -687,6 +688,7 @@ class ProjectSerializer(_InventoryOperations):
 
 
 class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
+    repository  = serializers.CharField(default='MANUAL')
     vars        = DictField(required=False)
     hosts       = HostSerializer(read_only=True, many=True)
     groups      = GroupSerializer(read_only=True, many=True)
