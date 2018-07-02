@@ -400,22 +400,16 @@ class OneHostSerializer(HostSerializer):
                   'url',)
 
 
-class TaskSerializer(_WithVariablesSerializer):
+class PlaybookSerializer(_WithVariablesSerializer):
     class Meta:
         model = models.Task
         fields = ('id',
                   'name',
                   'playbook',
-                  'project',
                   'url',)
 
-    # def to_representation(self, instance):
-    #     return super(TaskSerializer, self).to_representation(
-    #         instance, hidden_vars=[]
-    #     )
 
-
-class OneTaskSerializer(TaskSerializer):
+class OnePlaybookSerializer(PlaybookSerializer):
     project = ModelRelatedField(read_only=True)
     playbook = serializers.CharField(read_only=True)
 
@@ -424,7 +418,6 @@ class OneTaskSerializer(TaskSerializer):
         fields = ('id',
                   'name',
                   'playbook',
-                  'project',
                   'url',)
 
 

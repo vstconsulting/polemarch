@@ -11,93 +11,19 @@ class BaseTestCase(VSTBaseTestCase):
     models = models
     tests_path = os.path.dirname(os.path.abspath(__file__))
 
-    def _settings(self, item, default=None):
-        return getattr(settings, item, default)
-
-    def get_url(self, item=None, pk=None, sub=None):
-        url = '/{}/{}/'.format(
-            self._settings('VST_API_URL'), self._settings('VST_API_VERSION')
-        )
-        url += "{}/".format(item) if item else ''
-        url += "{}/".format(pk) if pk else ''
-        url += '{}/'.format(sub) if sub else ''
-        return url
-
     def _get_string_from_file(self, name):
         file_path = os.path.dirname(os.path.abspath(__file__))
         file_path += "/" + name
         with open(file_path, 'r') as inventory_file:
             return inventory_file.read()
 
-    def abstract_test_bulk_mod(self, objs, types, item, method="PUT"):
-        for tp, data in types.items():
-            bulk_data = []
-            for obj in objs:
-                bulk_data += [
-                    {
-                        "type": "mod", "item": item,
-                        'pk': obj.id, "data": data,
-                        "method": method, "data_type": tp
-                    }
-                ]
-            self.get_result(
-                "post", self.get_url('_bulk'), 200, data=json.dumps(bulk_data)
-            )
-
-    def abstract_test_bulk(self, single_data, new_single_data, url,
-                           item):
-        data = [single_data, single_data]
-        to_delete = self.mass_create(url, data, *single_data.keys())
-        to_edit = self.mass_create(url, data, *single_data.keys())
-        bulk_data = []
-        bulk_data += [
-            {'type': "add", 'item': item, 'data': single_data},
-            {'type': "add", 'item': item, 'data': single_data},
-        ]
-        bulk_data += [
-            {'type': "del", 'item': item, 'pk': to_delete[0]},
-            {'type': "del", 'item': item, 'pk': to_delete[1]},
-        ]
-        bulk_data += [
-            {'type': "set", 'item': item, 'pk': to_edit[0],
-             'data': new_single_data},
-            {'type': "set", 'item': item, 'pk': to_edit[1],
-             'data': new_single_data},
-        ]
-        self.get_result("post", self.get_url('_bulk'), 200, data=json.dumps(bulk_data))
-        results = self.get_result("get", url)
-        self.assertTrue(isinstance(results, dict))
-        self.assertEqual(results["count"], 4)
-        for el in results["results"]:
-            details = self.get_result("get", "{}{}/".format(url, el["id"]))
-            # deleted
-            self.assertNotIn(details['id'], to_delete)
-            if details['id'] not in to_edit:
-                # added
-                current = single_data.copy()
-            else:
-                # changed
-                current = single_data.copy()
-                current.update(new_single_data)
-            for key in current:
-                self.assertEquals(current[key], details[key])
-
-    def get_bulk(self, item, data, type, **kwargs):
-        return dict(type=type, item=item, data=data, **kwargs)
-
-    def get_mod_bulk(self, item, pk, data, mtype='variables', method="POST", filters=''):
-        return self.get_bulk(
-            item, data, 'mod',
-            pk=pk, data_type=mtype, method=method.upper(), filters=filters
+    def get_mod_bulk(self, item, pk, data, mtype="variables", *args, **kwargs):
+        return super(BaseTestCase, self).get_mod_bulk(
+            item, pk, data, mtype, *args, **kwargs
         )
 
     def _get_bulk_mod(self, item, index, data, mtype='variables'):
         return self.get_mod_bulk(item, "<{}[data][id]>".format(index), data, mtype)
-
-    def make_bulk(self, data):
-        return self.get_result(
-            "post", self.get_url('_bulk'), 200, data=json.dumps(data)
-        )
 
     def mass_create_bulk(self, item, data):
         bulk_data = list()

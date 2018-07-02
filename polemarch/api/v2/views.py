@@ -13,23 +13,17 @@ from ..base import PermissionMixin, LimitedPermissionMixin
 from ...main import utils
 
 
+class __VarsViewSet(base.ModelViewSetSet):
+    model = serializers.models.Variable
+    serializer_class = serializers.VariableSerializer
+    filter_class = filters.VariableFilter
+
+
+@base.nested_view('variables', 'id', view=__VarsViewSet)
 class _VarsMixin(base.ModelViewSetSet):
-    var_serializer_class = serializers.VariableSerializer
-    var_filter_class = filters.VariableFilter
-
-    @base.nested_action('variables', 'id',
-                        serializer_class=serializers.VariableSerializer)
-    def variables_detail(self, request):
-        return self.dispatch_route_instance(
-            self.var_serializer_class, self.var_filter_class, request
-        )
-
-    @base.nested_action('variables',
-                        serializer_class=serializers.VariableSerializer)
-    def variables_list(self, request):
-        return self.dispatch_route_instance(
-            self.var_serializer_class, self.var_filter_class, request
-        )
+    '''
+    Instance variables view.
+    '''
 
 
 class TokenView(token_views.ObtainAuthToken):
@@ -73,54 +67,26 @@ class HostViewSet(_VarsMixin, PermissionMixin):
     filter_class = filters.HostFilter
 
 
-class _GroupMixin(_VarsMixin):
-
-    @base.nested_action(
-        'host', 'id', manager_name='hosts', allow_append=True,
-        serializer_class=serializers.OneHostSerializer
-    )
-    def host_detail(self, request):
-        return self.dispatch_route_instance(
-            (HostViewSet.serializer_class, HostViewSet.serializer_class_one),
-            HostViewSet.filter_class, request
-        )
-
-    @base.nested_action(
-        'group', 'id', manager_name='groups', allow_append=True,
-        serializer_class=serializers.OneGroupSerializer
-    )
-    def group_detail(self, request):
-        return self.dispatch_route_instance(
-            (GroupViewSet.serializer_class, GroupViewSet.serializer_class_one),
-            GroupViewSet.filter_class, request
-        )
-
-    @base.nested_action(
-        'host', manager_name='hosts', allow_append=True,
-        serializer_class=serializers.HostSerializer
-    )
-    def host_list(self, request):
-        return self.dispatch_route_instance(
-            (HostViewSet.serializer_class, HostViewSet.serializer_class_one),
-            HostViewSet.filter_class, request
-        )
-
-    @base.nested_action(
-        'group', manager_name='groups', allow_append=True,
-        serializer_class=serializers.GroupSerializer
-    )
-    def group_list(self, request):
-        return self.dispatch_route_instance(
-            serializers.GroupSerializer,
-            GroupViewSet.filter_class, request
-        )
-
-
-class GroupViewSet(_GroupMixin, PermissionMixin):
+class _BaseGroupViewSet(_VarsMixin):
     model = serializers.models.Group
     serializer_class = serializers.GroupSerializer
     serializer_class_one = serializers.OneGroupSerializer
     filter_class = filters.GroupFilter
+
+
+@base.nested_view(
+    'host', 'id', manager_name='hosts', allow_append=True, view=HostViewSet
+)
+@base.nested_view(
+    'group', 'id', manager_name='groups', allow_append=True, view=_BaseGroupViewSet
+)
+class _GroupMixin(_VarsMixin):
+    '''
+    Instance with groups and hosts.
+    '''
+
+
+class GroupViewSet(_BaseGroupViewSet, _GroupMixin, PermissionMixin):
 
     def nested_allow_check(self):
         if not self.nested_parent_object.children and self.nested_name == 'group':
@@ -136,38 +102,27 @@ class InventoryViewSet(_GroupMixin, PermissionMixin):
     filter_class = filters.InventoryFilter
 
 
+class __PlaybookViewSet(base.ModelViewSetSet):
+    model = serializers.models.Task
+    serializer_class = serializers.PlaybookSerializer
+    serializer_class_one = serializers.OnePlaybookSerializer
+    filter_class = filters.TaskFilter
+
+
+@base.nested_view(
+    'inventory', 'id', manager_name='inventories', allow_append=True,
+    view=InventoryViewSet
+)
+@base.nested_view(
+    'playbook', 'id', manager_name='tasks', allow_append=True,
+    view=__PlaybookViewSet, methods=['get']
+)
 class ProjectViewSet(_GroupMixin, PermissionMixin):
     model = serializers.models.Project
     serializer_class = serializers.ProjectSerializer
     serializer_class_one = serializers.OneProjectSerializer
     filter_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
-
-    @base.nested_action(
-        'inventory', manager_name='inventories', allow_append=True,
-        serializer_class=serializers.InventorySerializer
-    )
-    def inventory_list(self, request):
-        return self.dispatch_route_instance(
-            (InventoryViewSet.serializer_class, InventoryViewSet.serializer_class_one),
-            InventoryViewSet.filter_class, request
-        )
-
-    @base.nested_action(
-        'inventory', 'id', manager_name='inventories', allow_append=True,
-        serializer_class=serializers.OneInventorySerializer
-    )
-    def inventory_detail(self, request):
-        return self.dispatch_route_instance(
-            (InventoryViewSet.serializer_class, InventoryViewSet.serializer_class_one),
-            InventoryViewSet.filter_class, request
-        )
-
-    @base.nested_action('playbook', 'id', manager_name='tasks', allow_append=True)
-    def playbooks(self, request):
-        return self.dispatch_route_instance(
-            serializers.TaskSerializer, filters.TaskFilter, request
-        )
 
     @base.action(methods=["get"], url_path="supported-repos", detail=False)
     def supported_repos(self, request):

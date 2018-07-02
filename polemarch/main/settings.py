@@ -96,7 +96,6 @@ API = {
         r'group': {'view': 'polemarch.api.v2.views.GroupViewSet'},
         r'inventory': {'view': 'polemarch.api.v2.views.InventoryViewSet'},
         r'project': {'view': 'polemarch.api.v2.views.ProjectViewSet'},
-        r'task': {'view': 'polemarch.api.v1.views.TaskViewSet'},
         r'periodic-task': {'view': 'polemarch.api.v1.views.PeriodicTaskViewSet'},
         r'template': {'view': 'polemarch.api.v1.views.TemplateViewSet'},
         r'history': {'view': 'polemarch.api.v1.views.HistoryViewSet', "op_types": ['get', 'del', 'mod']},
