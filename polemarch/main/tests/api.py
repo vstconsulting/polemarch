@@ -12,15 +12,12 @@ except ImportError:  # nocv
 
 from vstutils.utils import redirect_stdany
 from ._base import BaseTestCase, json
-from .project import ApiProjectsTestCase
-from .bulk import ApiBulkTestCase
-from .inventory import (ApiHostsTestCase, ApiGroupsTestCase,
-                        ApiInventoriesTestCase)
-from .tasks import (ApiTasksTestCase,
-                    ApiPeriodicTasksTestCase,
-                    ApiTemplateTestCase,
-                    ApiHistoryTestCase)
-from .ansible import ApiAnsibleTestCase
+# from .project import ApiProjectsTestCase
+# from .tasks import (ApiTasksTestCase,
+#                     ApiPeriodicTasksTestCase,
+#                     ApiTemplateTestCase,
+#                     ApiHistoryTestCase)
+# from .ansible import ApiAnsibleTestCase
 from .hosts import InventoriesTestCase
 from .executions import ProjectTestCase
 
@@ -317,8 +314,6 @@ class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase):
         self.assertTrue(result.get('group', False))
         self.assertTrue(result.get('inventory', False))
         self.assertTrue(result.get('project', False))
-        self.assertTrue(result.get('task', False))
-        self.assertTrue(result.get('periodic-task', False))
         self.assertTrue(result.get('history', False))
         self.assertTrue(result.get('bulk', False))
         self.assertTrue(result.get('token', False))
@@ -403,3 +398,26 @@ class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase):
         self.assertEqual(result['users'], self.get_count(User))
         # Check history counts
         self._check_stats_history(data['day'], result['jobs']['day'])
+
+    def test_bulk_unsupported(self):
+        data = dict(username="some_user", password="some_password")
+        bulk_data = [
+            {'type': "add", 'item': "token", 'data': data}
+        ]
+        self.get_result("post", self.get_url('_bulk'), 415, data=json.dumps(bulk_data))
+        self.get_result("put", self.get_url('_bulk'), 200, data=json.dumps(bulk_data))
+
+        result = self.get_result("get", self.get_url('_bulk'))
+        self.assertIn("host", result["allowed_types"])
+        self.assertIn("group", result["allowed_types"])
+        self.assertIn("inventory", result["allowed_types"])
+        self.assertIn("project", result["allowed_types"])
+        self.assertIn("template", result["allowed_types"])
+        self.assertIn("hook", result["allowed_types"])
+        self.assertIn("user", result["allowed_types"])
+        self.assertIn("team", result["allowed_types"])
+        self.assertIn("add", result["operations_types"])
+        self.assertIn("set", result["operations_types"])
+        self.assertIn("del", result["operations_types"])
+        self.assertIn("mod", result["operations_types"])
+

@@ -106,7 +106,7 @@ class BaseExecutionsTestCase(BaseTestCase):
         bulk_data += [
             self.get_mod_bulk('project', prj['id'], _exec, 'execute-playbook'),
         ] if execute else []
-        results = self.make_bulk(bulk_data)
+        results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[1]['data']['count'], playbook_count)
@@ -288,18 +288,17 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 'raw', 'get'
             ),
         ]
-        result = self.make_bulk(bulk_data)
-        for res in result[:-4]+result[-3:-2]:
-            self.assertEqual(res['status'], 201 or 200, res)
-        inventory_data = result[9]['data']
+        results = self.make_bulk(bulk_data, 'put')
+        for result in results[:-4]+results[-3:-2]:
+            self.assertEqual(result['status'], 201 or 200, result)
+        inventory_data = results[9]['data']
         self.assertEqual(inventory_data['name'], 'complex_inventory')
         # Check history
-        history = result[-2]['data']
-        raw = result[-1]['data']
+        history = results[-2]['data']
         self.assertEqual(history['revision'], "NO VCS")
         self.assertEqual(history['mode'], _exec['module'])
         self.assertEqual(history['kind'], 'MODULE')
-        self.assertEqual(history['inventory'], result[9]['data']['id'])
+        self.assertEqual(history['inventory'], results[9]['data']['id'])
         self.assertEqual(history['status'], "OK")
         etalon = self._get_string_from_file('exemplary_complex_inventory')
         etalon = etalon.replace('PATH', '[~~ENCRYPTED~~]')
@@ -308,3 +307,28 @@ class ProjectTestCase(BaseExecutionsTestCase):
             list(map(str.strip, str(history['raw_inventory']).split("\n"))),
             list(map(str.strip, etalon.split("\n")))
         )
+        # Check all_hosts
+        self.mass_create_bulk('host', [
+            dict(name='complex{}'.format(i)) for i in range(3)
+        ])
+        bulk_data = [
+            self.get_mod_bulk(
+                'inventory', results[9]['data']['id'], {}, 'all_hosts', 'get',
+            ),
+            self.get_mod_bulk(
+                'inventory', results[9]['data']['id'], {}, 'all_hosts', 'post',
+            ),
+            self.get_mod_bulk(
+                'inventory', results[9]['data']['id'], {}, 'all_groups', 'get',
+            ),
+            self.get_mod_bulk(
+                'inventory', results[9]['data']['id'], {}, 'all_groups', 'post',
+            ),
+        ]
+        new_results = self.make_bulk(bulk_data, 'put')
+        self.assertEqual(new_results[0]['status'], 200)
+        self.assertEqual(new_results[0]['data']['count'], 4)
+        self.assertEqual(new_results[1]['status'], 405)
+        self.assertEqual(new_results[2]['status'], 200)
+        self.assertEqual(new_results[2]['data']['count'], 5)
+        self.assertEqual(new_results[3]['status'], 405)

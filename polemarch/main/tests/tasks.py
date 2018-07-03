@@ -17,11 +17,11 @@ except ImportError:  # nocv
 
 from ..tasks.tasks import ScheduledTask
 
-from .inventory import _ApiGHBaseTestCase
-from ._base import AnsibleArgsValidationTest
+# from .inventory import _ApiGHBaseTestCase
+from ._base import AnsibleArgsValidationTest, BaseTestCase
 
 
-class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
+class ApiTasksTestCase(AnsibleArgsValidationTest):
     def setUp(self):
         super(ApiTasksTestCase, self).setUp()
         data = [dict(name="Prj1", repository="git@ex.us:dir/rep3.git",
@@ -556,7 +556,7 @@ class ApiTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEquals(subprocess_function.call_count, 2)
 
 
-class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
+class ApiPeriodicTasksTestCase(AnsibleArgsValidationTest):
     def setUp(self):
         super(ApiPeriodicTasksTestCase, self).setUp()
 
@@ -848,7 +848,7 @@ class ApiPeriodicTasksTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
         self.assertEquals(execute.call_count, 1)
 
 
-class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
+class ApiTemplateTestCase(AnsibleArgsValidationTest):
     def setUp(self):
         super(ApiTemplateTestCase, self).setUp()
 
@@ -1178,7 +1178,7 @@ class ApiTemplateTestCase(_ApiGHBaseTestCase, AnsibleArgsValidationTest):
             self.assertEqual(val, "secret")
 
 
-class ApiHistoryTestCase(_ApiGHBaseTestCase):
+class ApiHistoryTestCase(BaseTestCase):
     def setUp(self):
         super(ApiHistoryTestCase, self).setUp()
 

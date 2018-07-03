@@ -405,20 +405,17 @@ class PlaybookSerializer(_WithVariablesSerializer):
         model = models.Task
         fields = ('id',
                   'name',
-                  'playbook',
-                  'url',)
+                  'playbook',)
 
 
 class OnePlaybookSerializer(PlaybookSerializer):
-    project = ModelRelatedField(read_only=True)
     playbook = serializers.CharField(read_only=True)
 
     class Meta:
         model = models.Task
         fields = ('id',
                   'name',
-                  'playbook',
-                  'url',)
+                  'playbook',)
 
 
 class PeriodictaskSerializer(_WithVariablesSerializer):

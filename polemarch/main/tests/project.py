@@ -2,10 +2,11 @@ import logging
 import json
 import sys
 import os
-from .inventory import _ApiGHBaseTestCase
+from ._base import BaseTestCase
+# from .inventory import _ApiGHBaseTestCase
 
 
-class ApiProjectsTestCase(_ApiGHBaseTestCase):
+class ApiProjectsTestCase(BaseTestCase):
     def setUp(self):
         super(ApiProjectsTestCase, self).setUp()
         self.prj1 = self.get_model_class('Project').objects.create(

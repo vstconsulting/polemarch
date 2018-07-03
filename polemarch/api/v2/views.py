@@ -95,6 +95,10 @@ class GroupViewSet(_BaseGroupViewSet, _GroupMixin, PermissionMixin):
             raise excepts.ValidationError("Group is children.")
 
 
+@base.nested_view(
+    'all_groups', 'id', manager_name='groups_list', methods=['get'], view=GroupViewSet
+)
+@base.nested_view('all_hosts', 'id', methods=['get'], view=HostViewSet)
 class InventoryViewSet(_GroupMixin, PermissionMixin):
     model = serializers.models.Inventory
     serializer_class = serializers.InventorySerializer
@@ -103,10 +107,25 @@ class InventoryViewSet(_GroupMixin, PermissionMixin):
 
 
 class __PlaybookViewSet(base.ModelViewSetSet):
+    lookup_field = 'id'
     model = serializers.models.Task
     serializer_class = serializers.PlaybookSerializer
     serializer_class_one = serializers.OnePlaybookSerializer
     filter_class = filters.TaskFilter
+
+
+class __PeriodicTaskViewSet(LimitedPermissionMixin, base.ModelViewSetSet):
+    lookup_field = 'id'
+    model = serializers.models.PeriodicTask
+    serializer_class = serializers.PeriodictaskSerializer
+    serializer_class_one = serializers.OnePeriodictaskSerializer
+    filter_class = filters.PeriodicTaskFilter
+    POST_WHITE_LIST = ['execute']
+
+    @base.action(methods=["post"], detail=True)
+    def execute(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object())
+        return serializer.execute().resp
 
 
 @base.nested_view(
@@ -116,6 +135,10 @@ class __PlaybookViewSet(base.ModelViewSetSet):
 @base.nested_view(
     'playbook', 'id', manager_name='tasks', allow_append=True,
     view=__PlaybookViewSet, methods=['get']
+)
+@base.nested_view(
+    'periodic_tasks', 'id', manager_name='periodic_tasks', allow_append=True,
+    view=__PlaybookViewSet
 )
 class ProjectViewSet(_GroupMixin, PermissionMixin):
     model = serializers.models.Project
