@@ -3,6 +3,8 @@ import shutil
 import uuid
 import six
 import git
+from datetime import timedelta
+from django.utils.timezone import now
 from ._base import BaseTestCase, os
 
 
@@ -128,6 +130,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
     def wip_manual(self, project_data):
         files = self.generate_playbook(self.get_project_dir(**project_data))
+        self.make_test_periodic_task(project_data)
         return dict(playbook_count=len(files), execute=True)
 
     def wip_git(self, project_data):
@@ -144,10 +147,88 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.make_bulk([
             self.get_mod_bulk('project', project_data['id'], new_branch_var)
         ])
-        project_data = self.sync_project(project_data['id'])
-        self.assertEqual(project_data['revision'], self.revisions[-1])
-        self.assertEqual(project_data['branch'], 'master')
+        repo_autosync_var = dict(key='repo_sync_on_run', value='True')
+        self.make_bulk([
+            self.get_mod_bulk('project', project_data['id'], repo_autosync_var)
+        ])
         return dict(playbook_count=len(self.revisions), execute=True)
+
+    def make_test_periodic_task(self, project_data):
+        # Check periodic tasks
+        variables = {"syntax-check": None, "limit": "host-1"}
+        # Check correct values
+        ptasks_data = [
+            dict(
+                mode="test-1.yml", schedule="10", type="INTERVAL",
+                project=project_data['id'],
+                inventory='localhost', name="one", vars=variables
+            ),
+            dict(
+                mode="test-1.yml",
+                schedule="* */2 1-15 * sun,fri",
+                type="CRONTAB", project=project_data['id'],
+                inventory='localhost', name="two", vars=variables
+            ),
+            dict(
+                mode="test-1.yml", schedule="", type="CRONTAB",
+                project=project_data['id'],
+                inventory='localhost', name="thre", vars=variables
+            ),
+            dict(
+                mode="test-1.yml", schedule="30 */4", type="CRONTAB",
+                project=project_data['id'],
+                inventory='localhost', name="four", vars=variables
+            ),
+            dict(
+                mode="shell", schedule="10", type="INTERVAL",
+                project=project_data['id'],
+                kind="MODULE", name="one", vars=variables,
+                inventory='localhost'
+            )
+        ]
+        results = self.make_bulk([
+            self.get_mod_bulk('project', project_data['id'], data, 'periodic_task')
+            for data in ptasks_data
+        ])
+        for result in results:
+            self.assertEqual(result['status'], 201)
+        # Check incorrect values
+        incorrect_ptasks_data = [
+            dict(
+                mode="test-1.yml", schedule="30 */4 foo", type="CRONTAB",
+                project=project_data['id'], inventory='localhost'
+            ),
+            dict(
+                mode="test-1.yml", schedule="30 */4", type="crontab",
+                project=project_data['id'], inventory='localhost',
+                name="four", vars=variables
+            ),
+            dict(
+                mode="test-1.yml", schedule="30 */4", type="CRONTAB",
+                project=project_data['id'], inventory='localhost',
+                name="four", vars=dict(incorrect_var='blablavar')
+            ),
+            dict(
+                mode="test-1.yml", schedule="30 */4", type="CRONTAB",
+                project=project_data['id'], inventory='localhost',
+                name="four", kind="MODULE", vars=dict(forks='3423kldf')
+            )
+        ]
+        results = self.make_bulk([
+            self.get_mod_bulk('project', project_data['id'], data, 'periodic_task')
+            for data in incorrect_ptasks_data
+        ], 'put')
+        self.assertEqual(results[0]['status'], 400)
+        self.assertIn(
+            "Invalid weekday literal", results[0]['data']['detail']['schedule'][0]
+        )
+        self.assertEqual(results[1]['status'], 415)
+        self.assertEqual(results[2]['status'], 400)
+        self.assertIn("Incorrect argument", results[2]['data']["detail"]['playbook'][0])
+        self.assertIn('incorrect_var', results[2]['data']["detail"]['argument'][0])
+        self.assertEqual(results[3]['status'], 400)
+        self.assertIn("Incorrect argument", results[3]['data']["detail"]['module'][0])
+        self.assertIn('forks', results[3]['data']["detail"]['argument'][0])
 
     def test_project_manual(self):
         self.project_workflow('MANUAL', execute=True)
@@ -271,7 +352,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         # Execute actions
         _exec = dict(
             connection="local", inventory="<9[data][id]>",
-            module="ping", group="all", args=""
+            module="ping", group="all", args="", forks=1
         )
         bulk_data += [
             self.get_mod_bulk(
@@ -285,7 +366,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             ),
             self.get_mod_bulk(
                 'history', "<{}[data][history_id]>".format(len(bulk_data)+1), {},
-                'raw', 'get'
+                'raw', 'get', filters='color=yes'
             ),
         ]
         results = self.make_bulk(bulk_data, 'put')
@@ -307,6 +388,24 @@ class ProjectTestCase(BaseExecutionsTestCase):
             list(map(str.strip, str(history['raw_inventory']).split("\n"))),
             list(map(str.strip, etalon.split("\n")))
         )
+        # Check clear output
+        bulk_data = [
+            self.get_mod_bulk(
+                'history', history['id'], {}, 'raw', 'get',
+            ),
+            self.get_mod_bulk(
+                'history', history['id'], {}, 'clear', 'delete',
+            ),
+            self.get_mod_bulk(
+                'project', history['project'], {},
+                'history/{}/raw'.format(history['id']), 'get',
+            ),
+        ]
+        new_results = self.make_bulk(bulk_data)
+        self.assertEqual(new_results[0]['status'], 200)
+        self.assertEqual(new_results[1]['status'], 204)
+        self.assertEqual(new_results[2]['status'], 200)
+        self.assertEqual(new_results[2]['data']['detail'], "Output trancated.\n")
         # Check all_hosts
         self.mass_create_bulk('host', [
             dict(name='complex{}'.format(i)) for i in range(3)
@@ -332,3 +431,41 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(new_results[2]['status'], 200)
         self.assertEqual(new_results[2]['data']['count'], 5)
         self.assertEqual(new_results[3]['status'], 405)
+
+
+    def test_history_facts(self):
+        history_kwargs = dict(project=None, mode="setup",
+                              kind="MODULE",
+                              raw_inventory="inventory",
+                              raw_stdout="text",
+                              inventory=None,
+                              status="OK",
+                              start_time=now() - timedelta(hours=15),
+                              stop_time=now() - timedelta(hours=14))
+        history = self.get_model_class('History').objects.create(**history_kwargs)
+        stdout = self._get_string_from_file("facts_stdout")
+        history.raw_stdout = stdout
+        history.save()
+        url = self.get_url('history', history.id, 'facts')
+        parsed = self.get_result("get", url)
+        self.assertCount(parsed, 6)
+        self.assertEquals(parsed['172.16.1.31']['status'], 'SUCCESS')
+        self.assertEquals(parsed['test.vst.lan']['status'], 'SUCCESS')
+        self.assertEquals(parsed['172.16.1.29']['status'], 'SUCCESS')
+        self.assertEquals(parsed['172.16.1.32']['status'], 'FAILED!')
+        self.assertEquals(parsed['172.16.1.30']['status'], 'UNREACHABLE!')
+        self.assertEquals(parsed['172.16.1.31']['ansible_facts']
+                          ['ansible_memfree_mb'], 736)
+        self.assertCount(
+            parsed['test.vst.lan']['ansible_facts']["ansible_devices"], 2
+        )
+        self.assertIn('No route to host',
+                      parsed['172.16.1.30']['msg'])
+        for status in ['RUN', 'DELAY']:
+            history.status = status
+            history.save()
+            self.get_result("get", url, code=424)
+        history.status = "OK"
+        history.kind = "PLAYBOOK"
+        history.save()
+        self.get_result("get", url, code=404)

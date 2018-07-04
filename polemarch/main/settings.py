@@ -90,19 +90,19 @@ API_URL = VST_API_URL
 VST_API_VERSION = 'v2'
 API = {
     VST_API_VERSION: {
+        r'token': {'view': 'polemarch.api.v2.views.TokenView', 'type': 'view'},
+        r'_bulk': {'view': 'polemarch.api.v2.views.BulkViewSet', 'type': 'view'},
         r'user': {'view': 'polemarch.api.v2.views.UserViewSet'},
         r'team': {'view': 'polemarch.api.v2.views.TeamViewSet'},
         r'host': {'view': 'polemarch.api.v2.views.HostViewSet'},
         r'group': {'view': 'polemarch.api.v2.views.GroupViewSet'},
         r'inventory': {'view': 'polemarch.api.v2.views.InventoryViewSet'},
         r'project': {'view': 'polemarch.api.v2.views.ProjectViewSet'},
+        r'history': {'view': 'polemarch.api.v2.views.HistoryViewSet', "op_types": ['get', 'del', 'mod']},
         r'template': {'view': 'polemarch.api.v1.views.TemplateViewSet'},
-        r'history': {'view': 'polemarch.api.v1.views.HistoryViewSet', "op_types": ['get', 'del', 'mod']},
         r'ansible': {'view': 'polemarch.api.v1.views.AnsibleViewSet', 'op_types': ['get']},
         r'stats': {'view': 'polemarch.api.v1.views.StatisticViewSet', 'op_types': ['get']},
         r'hook': {'view': 'polemarch.api.v1.views.HookViewSet'},
-        r'token': {'view': 'polemarch.api.v2.views.TokenView', 'type': 'view'},
-        r'_bulk': {'view': 'polemarch.api.v2.views.BulkViewSet', 'type': 'view'},
     }
 }
 

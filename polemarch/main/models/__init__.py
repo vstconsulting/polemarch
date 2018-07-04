@@ -91,8 +91,7 @@ def check_circular_deps(instance, action, pk_set, *args, **kw):
 
 @receiver(signals.pre_save, sender=PeriodicTask)
 def validate_types(instance, **kwargs):
-    if instance.kind not in instance.kinds or \
-                    instance.type not in instance.types:
+    if (instance.kind not in instance.kinds) or (instance.type not in instance.types):
         raise UnknownTypeException(instance.kind, "Unknown kind {}.")
 
 

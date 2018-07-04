@@ -75,6 +75,10 @@ def with_signals(func):
 
 
 # Serializers
+class EmptySerializer(serializers.Serializer):
+    pass
+
+
 class _SignalSerializer(serializers.ModelSerializer):
     @with_signals
     def create(self, validated_data):
@@ -422,7 +426,6 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
     vars = DictField(required=False, write_only=True)
     schedule = serializers.CharField(allow_blank=True)
     inventory = serializers.CharField(required=False)
-    project = ModelRelatedField(required=False, model=models.Project)
     mode = serializers.CharField(required=False)
 
     class Meta:
@@ -433,14 +436,12 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
                   'schedule',
                   'mode',
                   'kind',
-                  'project',
                   'inventory',
                   'save_result',
                   'template',
                   'template_opt',
                   'enabled',
-                  'vars',
-                  'url',)
+                  'vars',)
 
     @transaction.atomic
     def _do_with_vars(self, *args, **kwargs):
@@ -462,6 +463,7 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
+    project = ModelRelatedField(required=False, model=models.Project)
     vars = DictField(required=False)
     notes = serializers.CharField(required=False, allow_blank=True)
 
@@ -480,8 +482,7 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'template',
                   'template_opt',
                   'enabled',
-                  'vars',
-                  'url',)
+                  'vars',)
 
     def execute(self):
         inventory = self.instance.inventory

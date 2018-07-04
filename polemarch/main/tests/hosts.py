@@ -22,10 +22,8 @@ class InvBaseTestCase(BaseTestCase):
         self.assertEqual(result["count"], count, result)
 
     def _filter_vars(self, base_url, variables, count):
-        filter_url = "{}?variables={}".format(base_url, variables)
-        result = self.get_result("get", filter_url)
-        self.assertTrue(isinstance(result, dict))
-        self.assertEqual(result["count"], count, result)
+        filter_str = ['{}:{}'.format(k, v) for k, v in variables.items()]
+        self._filter_test(base_url, dict(variables=','.join(filter_str)), count)
 
     def _check_vars(self, api_name, id, data):
         result = self.get_result('get', self.get_url(api_name, id, 'variables'))
@@ -60,8 +58,7 @@ class InvBaseTestCase(BaseTestCase):
             obj = hosts.get(name=dt['name'])
             self._check_vars(api_name, obj.id, dt['variables'])
 
-        filter_str = ['{}:{}'.format(k, v) for k, v in kw.items()]
-        self._filter_vars(url, ','.join(filter_str), hosts.var_filter(**kw).count())
+        self._filter_vars(url, kw, hosts.var_filter(**kw).count())
         self._check_hidden(model_name, api_name, bulk_name)
 
     def _check_dependent(self, model_name, data, child_name, child_data, **kwargs):

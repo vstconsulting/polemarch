@@ -60,6 +60,51 @@ class TeamViewSet(PermissionMixin, base.ModelViewSetSet):
         return self.queryset
 
 
+class HistoryViewSet(LimitedPermissionMixin, base.HistoryModelViewSet):
+    model = serializers.models.History
+    serializer_class = serializers.HistorySerializer
+    serializer_class_one = serializers.OneHistorySerializer
+    filter_class = filters.HistoryFilter
+    POST_WHITE_LIST = ['cancel']
+
+    @base.action(methods=["get"], detail=True)
+    def raw(self, request, *args, **kwargs):
+        result = self.get_serializer(self.get_object()).get_raw(request)
+        return HttpResponse(result, content_type="text/plain")
+
+    @base.action(methods=["get"], detail=True)
+    def lines(self, request, *args, **kwargs):
+        return self.get_paginated_route_response(
+            self.get_object().raw_history_line.all().cleared(),
+            serializers.HistoryLinesSerializer,
+            filters.HistoryLinesFilter
+        )
+
+    @base.action(methods=["post"], detail=True)
+    def cancel(self, request, *args, **kwargs):
+        obj = self.get_object()
+        exch = KVExchanger(utils.CmdExecutor.CANCEL_PREFIX + str(obj.id))
+        exch.send(True, 10)
+        return base.Response("Task canceled: {}".format(obj.id), 200).resp
+
+    @base.action(methods=["get"], detail=True)
+    def facts(self, request, *args, **kwargs):
+        objs = self.get_serializer(self.get_object()).get_facts(request)
+        return base.Response(objs, 200).resp
+
+    @base.action(methods=["delete"], detail=True)
+    def clear(self, request, *args, **kwargs):
+        default_message = "Output trancated.\n"
+        obj = self.get_object()
+        if obj.status in ["RUN", "DELAY"] or obj.raw_stdout == default_message:
+            raise excepts.NotAcceptable(
+                "Job is running or already trancated"
+            )
+        obj.raw_stdout = default_message
+        result = self.get_serializer(obj).get_raw(request)
+        return base.Response(result, 204).resp
+
+
 class HostViewSet(_VarsMixin, PermissionMixin):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
@@ -114,7 +159,7 @@ class __PlaybookViewSet(base.ModelViewSetSet):
     filter_class = filters.TaskFilter
 
 
-class __PeriodicTaskViewSet(LimitedPermissionMixin, base.ModelViewSetSet):
+class __PeriodicTaskViewSet(_VarsMixin, LimitedPermissionMixin):
     lookup_field = 'id'
     model = serializers.models.PeriodicTask
     serializer_class = serializers.PeriodictaskSerializer
@@ -137,8 +182,12 @@ class __PeriodicTaskViewSet(LimitedPermissionMixin, base.ModelViewSetSet):
     view=__PlaybookViewSet, methods=['get']
 )
 @base.nested_view(
-    'periodic_tasks', 'id', manager_name='periodic_tasks', allow_append=True,
-    view=__PlaybookViewSet
+    'periodic_task', 'id', manager_name='periodic_tasks', allow_append=True,
+    view=__PeriodicTaskViewSet, subs=['execute']
+)
+@base.nested_view(
+    'history', 'id', manager_name='history',
+    view=HistoryViewSet, subs=['raw', 'lines', 'cancel', 'facts', 'clear']
 )
 class ProjectViewSet(_GroupMixin, PermissionMixin):
     model = serializers.models.Project
@@ -147,11 +196,16 @@ class ProjectViewSet(_GroupMixin, PermissionMixin):
     filter_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
 
-    @base.action(methods=["get"], url_path="supported-repos", detail=False)
+    @base.action(
+        methods=["get"], url_path="supported-repos",
+        detail=False, serializer_class=serializers.EmptySerializer
+    )
     def supported_repos(self, request):
         return base.Response(self.model.repo_handlers.keys(), 200).resp
 
-    @base.action(methods=["post"], detail=True)
+    @base.action(
+        methods=["post"], detail=True, serializer_class=serializers.EmptySerializer
+    )
     def sync(self, request, *args, **kwargs):
         return self.get_serializer(self.get_object()).sync().resp
 

@@ -11,11 +11,14 @@ class BaseTestCase(VSTBaseTestCase):
     models = models
     tests_path = os.path.dirname(os.path.abspath(__file__))
 
-    def _get_string_from_file(self, name):
+    def get_test_filepath(self, name):
         file_path = os.path.dirname(os.path.abspath(__file__))
         file_path += "/" + name
-        with open(file_path, 'r') as inventory_file:
-            return inventory_file.read()
+        return file_path
+
+    def _get_string_from_file(self, name):
+        with open(self.get_test_filepath(name), 'r') as fd:
+            return fd.read()
 
     def get_mod_bulk(self, item, pk, data, mtype="variables", *args, **kwargs):
         return super(BaseTestCase, self).get_mod_bulk(

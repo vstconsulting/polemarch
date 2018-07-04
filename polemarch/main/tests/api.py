@@ -12,12 +12,6 @@ except ImportError:  # nocv
 
 from vstutils.utils import redirect_stdany
 from ._base import BaseTestCase, json
-# from .project import ApiProjectsTestCase
-# from .tasks import (ApiTasksTestCase,
-#                     ApiPeriodicTasksTestCase,
-#                     ApiTemplateTestCase,
-#                     ApiHistoryTestCase)
-# from .ansible import ApiAnsibleTestCase
 from .hosts import InventoriesTestCase
 from .executions import ProjectTestCase
 
