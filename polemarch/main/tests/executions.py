@@ -6,6 +6,7 @@ import git
 from datetime import timedelta
 from django.utils.timezone import now
 from ._base import BaseTestCase, os
+from ..tasks import ScheduledTask
 
 
 test_playbook_content = '''
@@ -130,6 +131,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
     def wip_manual(self, project_data):
         files = self.generate_playbook(self.get_project_dir(**project_data))
+        self.make_test_templates(project_data)
         self.make_test_periodic_task(project_data)
         return dict(playbook_count=len(files), execute=True)
 
@@ -153,43 +155,122 @@ class ProjectTestCase(BaseExecutionsTestCase):
         ])
         return dict(playbook_count=len(self.revisions), execute=True)
 
+    def make_test_templates(self, project_data):
+        pk = project_data['id']
+        template_module = dict(
+            kind="Module",
+            name='Test module template',
+            data=dict(
+                module="ping",
+                group="all",
+                project=pk,
+                inventory='localhost',
+                args="",
+                vars=dict(
+                    forks=8,
+                ),
+            ),
+            options=dict(
+                one=dict(module='shell', args='uname'),
+                two=dict(vars=dict(forks=1))
+            )
+        )
+        template_playbook = dict(
+            kind="Task",
+            name='Test playbook template',
+            data=dict(
+                playbook="test-0.yml",
+                project=pk,
+                inventory='localhost',
+                vars=dict(
+                    forks=8,
+                ),
+            ),
+            options=dict(
+                tree=dict(limit='localhost'),
+                four=dict(vars=dict(forks=1))
+            )
+        )
+        m_opts = dict(option='one')
+        p_opts = dict(option='four')
+        bulk_data = [
+            self.get_mod_bulk('project', pk, template_module, 'template'),
+            self.get_mod_bulk('project', pk, template_playbook, 'template'),
+            self.get_mod_bulk('project', pk, {}, 'template/<0[data][id]>/execute'),
+            self.get_mod_bulk('project', pk, {}, 'template/<1[data][id]>/execute'),
+            self.get_mod_bulk('project', pk, m_opts, 'template/<0[data][id]>/execute'),
+            self.get_mod_bulk('project', pk, p_opts, 'template/<1[data][id]>/execute'),
+        ]
+        results = self.make_bulk(bulk_data)
+        for result in results:
+            self.assertEqual(result['status'], 201)
+
+        results = self.get_result(
+            'get', self.get_url('project', project_data['id'], 'history') + '?limit=4'
+        )
+        self.assertEqual(results['results'][-1]['status'], 'OK')
+        self.assertEqual(results['results'][-1]['kind'], 'MODULE')
+        self.assertEqual(results['results'][-1]['initiator_type'], 'template')
+        self.assertEqual(results['results'][-1]['mode'], 'ping')
+        self.assertEqual(results['results'][-2]['status'], 'OK')
+        self.assertEqual(results['results'][-2]['kind'], 'PLAYBOOK')
+        self.assertEqual(results['results'][-2]['initiator_type'], 'template')
+        self.assertEqual(results['results'][-2]['mode'], 'test-0.yml')
+        self.assertEqual(results['results'][-3]['status'], 'OK')
+        self.assertEqual(results['results'][-3]['kind'], 'MODULE')
+        self.assertEqual(results['results'][-3]['initiator_type'], 'template')
+        self.assertEqual(results['results'][-3]['options']['template_option'], 'one')
+        self.assertEqual(results['results'][-4]['status'], 'OK')
+        self.assertEqual(results['results'][-4]['kind'], 'PLAYBOOK')
+        self.assertEqual(results['results'][-4]['initiator_type'], 'template')
+        self.assertEqual(results['results'][-4]['options']['template_option'], 'four')
+
     def make_test_periodic_task(self, project_data):
         # Check periodic tasks
-        variables = {"syntax-check": None, "limit": "host-1"}
         # Check correct values
         ptasks_data = [
             dict(
                 mode="test-1.yml", schedule="10", type="INTERVAL",
                 project=project_data['id'],
-                inventory='localhost', name="one", vars=variables
+                inventory='localhost', name="one"
             ),
             dict(
                 mode="test-1.yml",
                 schedule="* */2 1-15 * sun,fri",
                 type="CRONTAB", project=project_data['id'],
-                inventory='localhost', name="two", vars=variables
+                inventory='localhost', name="two"
             ),
             dict(
                 mode="test-1.yml", schedule="", type="CRONTAB",
                 project=project_data['id'],
-                inventory='localhost', name="thre", vars=variables
+                inventory='localhost', name="thre"
             ),
             dict(
                 mode="test-1.yml", schedule="30 */4", type="CRONTAB",
                 project=project_data['id'],
-                inventory='localhost', name="four", vars=variables
+                inventory='localhost', name="four"
             ),
             dict(
-                mode="shell", schedule="10", type="INTERVAL",
+                mode="ping", schedule="10", type="INTERVAL",
                 project=project_data['id'],
-                kind="MODULE", name="one", vars=variables,
-                inventory='localhost'
+                kind="MODULE", name="one", inventory='localhost'
             )
         ]
-        results = self.make_bulk([
+        bulk_data = [
             self.get_mod_bulk('project', project_data['id'], data, 'periodic_task')
             for data in ptasks_data
-        ])
+        ]
+        bulk_data += [
+            self.get_mod_bulk(
+                'project', project_data['id'], dict(key='connection', value='local'),
+                'periodic_task/<0[data][id]>/variables'
+            ),
+            self.get_mod_bulk(
+                'project', project_data['id'], dict(key='forks', value='5'),
+                'periodic_task/<0[data][id]>/variables'
+            ),
+        ]
+        results = self.make_bulk(bulk_data)
         for result in results:
             self.assertEqual(result['status'], 201)
         # Check incorrect values
@@ -201,23 +282,24 @@ class ProjectTestCase(BaseExecutionsTestCase):
             dict(
                 mode="test-1.yml", schedule="30 */4", type="crontab",
                 project=project_data['id'], inventory='localhost',
-                name="four", vars=variables
+                name="four"
             ),
-            dict(
-                mode="test-1.yml", schedule="30 */4", type="CRONTAB",
-                project=project_data['id'], inventory='localhost',
-                name="four", vars=dict(incorrect_var='blablavar')
-            ),
-            dict(
-                mode="test-1.yml", schedule="30 */4", type="CRONTAB",
-                project=project_data['id'], inventory='localhost',
-                name="four", kind="MODULE", vars=dict(forks='3423kldf')
-            )
         ]
-        results = self.make_bulk([
+        bulk_data = [
             self.get_mod_bulk('project', project_data['id'], data, 'periodic_task')
             for data in incorrect_ptasks_data
-        ], 'put')
+        ]
+        bulk_data += [
+            self.get_mod_bulk(
+                'project', project_data['id'], dict(key='incorrect_var', value='blabla'),
+                'periodic_task/{}/variables'.format(results[0]['data']['id'])
+            ),
+            self.get_mod_bulk(
+                'project', project_data['id'], dict(key='forks', value='3423kldf'),
+                'periodic_task/{}/variables'.format(results[4]['data']['id'])
+            ),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 400)
         self.assertIn(
             "Invalid weekday literal", results[0]['data']['detail']['schedule'][0]
@@ -229,6 +311,50 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results[3]['status'], 400)
         self.assertIn("Incorrect argument", results[3]['data']["detail"]['module'][0])
         self.assertIn('forks', results[3]['data']["detail"]['argument'][0])
+
+        # Try to execute now
+        data = dict(
+            mode="test-0.yml", schedule="10", type="INTERVAL", name="one",
+            project=project_data['id'], inventory='localhost'
+        )
+        results = self.make_bulk([
+            self.get_mod_bulk('project', project_data['id'], data, 'periodic_task'),
+            self.get_mod_bulk(
+                'project', project_data['id'], data,
+                'periodic_task/<0[data][id]>/execute',
+                'post'
+            ),
+            self.get_mod_bulk(
+                'project', project_data['id'], {}, 'history/<1[data][history_id]>', 'get'
+            ),
+        ], 'put')
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[1]['data']['detail'], "Started at inventory localhost.")
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['data']['status'], "OK")
+        # Just exec
+        ScheduledTask.delay(results[0]['data']['id'])
+        # Except on execution
+        with self.patch('polemarch.main.utils.CmdExecutor.execute') as _exec:
+            def _exec_error(*args, **kwargs):
+                raise Exception("Some error")
+
+            _exec.side_effect = _exec_error
+            ScheduledTask.delay(results[0]['data']['id'])
+            self.assertEquals(_exec.call_count, 1)
+            _exec.reset_mock()
+
+        # No task
+        with self.patch('polemarch.main.utils.CmdExecutor.execute') as _exec:
+            ScheduledTask.delay(999)
+            self.assertEquals(_exec.call_count, 0)
+
+        results = self.get_result(
+            'get', self.get_url('project', project_data['id'], 'history') + '?limit=2'
+        )
+        self.assertEqual(results['results'][-1]['status'], 'OK')
+        self.assertEqual(results['results'][-2]['status'], 'ERROR')
 
     def test_project_manual(self):
         self.project_workflow('MANUAL', execute=True)
@@ -256,8 +382,12 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
         # Test project
         self.revisions = [first_revision, second_revision]
-        self.project_workflow('GIT', repository=self.repo_dir, execute=True)
-        self.project_workflow('GIT', repository=self.repo_dir, repo_branch='new_branch')
+        self.project_workflow(
+            'GIT', repository=self.repo_dir, repo_password='', execute=True
+        )
+        self.project_workflow(
+            'GIT', repository=self.repo_dir, repo_branch='new_branch', repo_key='key'
+        )
 
     def test_complex(self):
         hostlocl_v = dict(ansible_user='centos', ansible_ssh_private_key_file='PATH')
@@ -362,7 +492,8 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 'project', "<10[data][id]>", _exec, 'execute-module',
             ),
             self.get_bulk(
-                'history', {}, 'get', pk="<{}[data][history_id]>".format(len(bulk_data)+1)
+                'history', {}, 'get',
+                pk="<{}[data][history_id]>".format(len(bulk_data)+1)
             ),
             self.get_mod_bulk(
                 'history', "<{}[data][history_id]>".format(len(bulk_data)+1), {},

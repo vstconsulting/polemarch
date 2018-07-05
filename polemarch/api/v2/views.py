@@ -19,11 +19,8 @@ class __VarsViewSet(base.ModelViewSetSet):
     filter_class = filters.VariableFilter
 
 
-@base.nested_view('variables', 'id', view=__VarsViewSet)
-class _VarsMixin(base.ModelViewSetSet):
-    '''
-    Instance variables view.
-    '''
+class __ProjectVarsViewSet(__VarsViewSet):
+    serializer_class = serializers.ProjectVariableSerializer
 
 
 class TokenView(token_views.ObtainAuthToken):
@@ -60,6 +57,13 @@ class TeamViewSet(PermissionMixin, base.ModelViewSetSet):
         return self.queryset
 
 
+class __HistoryLineViewSet(base.ModelViewSetSet):
+    model = serializers.models.HistoryLines
+    serializer_class = serializers.HistoryLinesSerializer
+    filter_class = filters.HistoryLinesFilter
+
+
+@base.nested_view('lines', manager_name='raw_history_line', view=__HistoryLineViewSet)
 class HistoryViewSet(LimitedPermissionMixin, base.HistoryModelViewSet):
     model = serializers.models.History
     serializer_class = serializers.HistorySerializer
@@ -71,14 +75,6 @@ class HistoryViewSet(LimitedPermissionMixin, base.HistoryModelViewSet):
     def raw(self, request, *args, **kwargs):
         result = self.get_serializer(self.get_object()).get_raw(request)
         return HttpResponse(result, content_type="text/plain")
-
-    @base.action(methods=["get"], detail=True)
-    def lines(self, request, *args, **kwargs):
-        return self.get_paginated_route_response(
-            self.get_object().raw_history_line.all().cleared(),
-            serializers.HistoryLinesSerializer,
-            filters.HistoryLinesFilter
-        )
 
     @base.action(methods=["post"], detail=True)
     def cancel(self, request, *args, **kwargs):
@@ -105,14 +101,16 @@ class HistoryViewSet(LimitedPermissionMixin, base.HistoryModelViewSet):
         return base.Response(result, 204).resp
 
 
-class HostViewSet(_VarsMixin, PermissionMixin):
+@base.nested_view('variables', 'id', view=__VarsViewSet)
+class HostViewSet(PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.Host
     serializer_class = serializers.HostSerializer
     serializer_class_one = serializers.OneHostSerializer
     filter_class = filters.HostFilter
 
 
-class _BaseGroupViewSet(_VarsMixin):
+@base.nested_view('variables', 'id', view=__VarsViewSet)
+class _BaseGroupViewSet(base.ModelViewSetSet):
     model = serializers.models.Group
     serializer_class = serializers.GroupSerializer
     serializer_class_one = serializers.OneGroupSerializer
@@ -125,7 +123,7 @@ class _BaseGroupViewSet(_VarsMixin):
 @base.nested_view(
     'group', 'id', manager_name='groups', allow_append=True, view=_BaseGroupViewSet
 )
-class _GroupMixin(_VarsMixin):
+class _GroupMixin(base.ModelViewSetSet):
     '''
     Instance with groups and hosts.
     '''
@@ -141,9 +139,11 @@ class GroupViewSet(_BaseGroupViewSet, _GroupMixin, PermissionMixin):
 
 
 @base.nested_view(
-    'all_groups', 'id', manager_name='groups_list', methods=['get'], view=GroupViewSet
+    'all_groups', 'id', manager_name='groups_list', methods=['get'], view=GroupViewSet,
+    subs=None
 )
-@base.nested_view('all_hosts', 'id', methods=['get'], view=HostViewSet)
+@base.nested_view('all_hosts', 'id', methods=['get'], view=HostViewSet, subs=None)
+@base.nested_view('variables', 'id', view=__VarsViewSet)
 class InventoryViewSet(_GroupMixin, PermissionMixin):
     model = serializers.models.Inventory
     serializer_class = serializers.InventorySerializer
@@ -159,7 +159,8 @@ class __PlaybookViewSet(base.ModelViewSetSet):
     filter_class = filters.TaskFilter
 
 
-class __PeriodicTaskViewSet(_VarsMixin, LimitedPermissionMixin):
+@base.nested_view('variables', 'id', view=__VarsViewSet)
+class __PeriodicTaskViewSet(base.ModelViewSetSet, LimitedPermissionMixin):
     lookup_field = 'id'
     model = serializers.models.PeriodicTask
     serializer_class = serializers.PeriodictaskSerializer
@@ -173,6 +174,22 @@ class __PeriodicTaskViewSet(_VarsMixin, LimitedPermissionMixin):
         return serializer.execute().resp
 
 
+class __TemplateViewSet(base.ModelViewSetSet):
+    model = serializers.models.Template
+    serializer_class = serializers.TemplateSerializer
+    serializer_class_one = serializers.OneTemplateSerializer
+    filter_class = filters.TemplateFilter
+    POST_WHITE_LIST = ['execute']
+
+    @base.action(
+        methods=["post"], detail=True,
+        serializer_class=serializers.TemplateExecuteSerializer
+    )
+    def execute(self, request, *args, **kwargs):
+        obj = self.get_object()
+        return self.get_serializer(obj).execute(request).resp
+
+
 @base.nested_view(
     'inventory', 'id', manager_name='inventories', allow_append=True,
     view=InventoryViewSet
@@ -183,25 +200,17 @@ class __PeriodicTaskViewSet(_VarsMixin, LimitedPermissionMixin):
 )
 @base.nested_view(
     'periodic_task', 'id', manager_name='periodic_tasks', allow_append=True,
-    view=__PeriodicTaskViewSet, subs=['execute']
+    view=__PeriodicTaskViewSet
 )
-@base.nested_view(
-    'history', 'id', manager_name='history',
-    view=HistoryViewSet, subs=['raw', 'lines', 'cancel', 'facts', 'clear']
-)
+@base.nested_view('template', 'id', manager_name='template_set', view=__TemplateViewSet)
+@base.nested_view('history', 'id', manager_name='history', view=HistoryViewSet)
+@base.nested_view('variables', 'id', view=__ProjectVarsViewSet)
 class ProjectViewSet(_GroupMixin, PermissionMixin):
     model = serializers.models.Project
     serializer_class = serializers.ProjectSerializer
     serializer_class_one = serializers.OneProjectSerializer
     filter_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
-
-    @base.action(
-        methods=["get"], url_path="supported-repos",
-        detail=False, serializer_class=serializers.EmptySerializer
-    )
-    def supported_repos(self, request):
-        return base.Response(self.model.repo_handlers.keys(), 200).resp
 
     @base.action(
         methods=["post"], detail=True, serializer_class=serializers.EmptySerializer

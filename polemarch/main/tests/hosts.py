@@ -102,6 +102,24 @@ class InventoriesTestCase(InvBaseTestCase):
         self._check_with_vars(
             'Host', self.hosts_data, ansible_port='222', ansible_user='one'
         )
+        bulk_data = [
+            self.get_bulk('host', dict(name='some-valid'), 'add'),
+            self.get_bulk('host', dict(name='some^invalid'), 'add'),
+            self.get_mod_bulk(
+                'host', "<0[data][id]>", dict(key='ansible_host', value='valid')
+            ),
+            self.get_mod_bulk(
+                'host', "<0[data][id]>", dict(key='ansible_host', value='^invalid')
+            ),
+            self.get_bulk('host', dict(name='some^invalid', type="RANGE"), 'add'),
+            self.get_bulk('host', dict(name='host', type="UNKNOWN"), 'add'),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[2]['status'], 201)
+        self.assertEqual(results[1]['status'], 400)
+        self.assertEqual(results[3]['status'], 400)
+        self.assertEqual(results[4]['status'], 400)
 
     def test_groups(self):
         self._check_with_vars(
@@ -125,6 +143,43 @@ class InventoriesTestCase(InvBaseTestCase):
             'Host', dict(name='hchild'),
             should_fail=True
         )
+        # Check ciclic dependency
+        bulk_data = [
+            self.get_bulk('group', dict(name="cicl-{}".format(i), children=True), 'add')
+            for i in range(4)
+        ]
+        bulk_data += [
+            self.get_mod_bulk(
+                'group', '<0[data][id]>', dict(id='<{}[data][id]>'.format(i)), 'group'
+            )
+            for i in range(1,4)
+        ]
+        results = self.make_bulk(bulk_data)
+        for result in results:
+            self.assertEqual(result['status'], 201)
+
+        bulk_data = [
+            self.get_mod_bulk(
+                'group', results[0]['data']['id'],
+                dict(id=results[0]['data']['id']), 'group'
+            ),
+            self.get_mod_bulk(
+                'group', results[1]['data']['id'],
+                dict(id=results[0]['data']['id']), 'group'
+            ),
+            self.get_mod_bulk(
+                'group', results[2]['data']['id'],
+                dict(id=results[0]['data']['id']), 'group'
+            ),
+            self.get_mod_bulk(
+                'group', results[3]['data']['id'],
+                dict(id=results[0]['data']['id']), 'group'
+            ),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+        for result in results:
+            self.assertEqual(result['status'], 400)
+            self.assertEqual(result['data']['error_type'], "CiclicDependencyError")
 
     def test_inventories(self):
         self._check_with_vars(

@@ -36,6 +36,7 @@ class ModelRelatedField(serializers.PrimaryKeyRelatedField):
 
 
 class DictField(serializers.CharField):
+
     def to_internal_value(self, data):
         return (
             data
@@ -301,6 +302,8 @@ class HookSerializer(serializers.ModelSerializer):
 
 
 class VariableSerializer(_SignalSerializer):
+    value = serializers.CharField(default="", allow_blank=True)
+
     class Meta:
         model = models.Variable
         fields = (
@@ -311,9 +314,20 @@ class VariableSerializer(_SignalSerializer):
 
     def to_representation(self, instance):
         result = super(VariableSerializer, self).to_representation(instance)
-        if instance.key in instance.content_object.HIDDEN_VARS:
+        if instance.key in getattr(instance.content_object, 'HIDDEN_VARS', []):
             result['value'] = "[~~ENCRYPTED~~]"
         return result
+
+
+class ProjectVariableSerializer(VariableSerializer):
+    project_keys = OrderedDict(
+        repo_type='Types of repo. Default="MANUAL".',
+        repo_sync_on_run="Sync project by every execution.",
+        repo_branch="[Only for GIT repos] Checkout branch on sync.",
+        repo_password="[Only for GIT repos] Password to fetch access.",
+        repo_key="[Only for GIT repos] Key to fetch access.",
+    )
+    key = serializers.ChoiceField(choices=tuple(project_keys.items()))
 
 
 class _WithVariablesSerializer(_WithPermissionsSerializer):
@@ -423,7 +437,6 @@ class OnePlaybookSerializer(PlaybookSerializer):
 
 
 class PeriodictaskSerializer(_WithVariablesSerializer):
-    vars = DictField(required=False, write_only=True)
     schedule = serializers.CharField(allow_blank=True)
     inventory = serializers.CharField(required=False)
     mode = serializers.CharField(required=False)
@@ -440,8 +453,7 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
                   'save_result',
                   'template',
                   'template_opt',
-                  'enabled',
-                  'vars',)
+                  'enabled',)
 
     @transaction.atomic
     def _do_with_vars(self, *args, **kwargs):
@@ -464,7 +476,6 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
     project = ModelRelatedField(required=False, model=models.Project)
-    vars = DictField(required=False)
     notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
@@ -481,8 +492,7 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'save_result',
                   'template',
                   'template_opt',
-                  'enabled',
-                  'vars',)
+                  'enabled',)
 
     def execute(self):
         inventory = self.instance.inventory
@@ -492,8 +502,28 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
         return Response(rdata, 201)
 
 
+class DataSerializer(serializers.Serializer):
+
+    def to_internal_value(self, data):
+        return (
+            data
+            if (
+                isinstance(data, (six.string_types, six.text_type)) or
+                isinstance(data, (dict, list))
+            )
+            else self.fail("Unknown type.")
+        )
+
+    def to_representation(self, value):
+        return (
+            json.loads(value)
+            if not isinstance(value, (dict, list))
+            else value
+        )
+
+
 class TemplateSerializer(_WithVariablesSerializer):
-    data = DictField(required=True, write_only=True)
+    data = DataSerializer(required=True, write_only=True)
     options = DictField(write_only=True)
     options_list = DictField(read_only=True)
 
@@ -545,7 +575,7 @@ class TemplateSerializer(_WithVariablesSerializer):
 
 
 class OneTemplateSerializer(TemplateSerializer):
-    data = DictField(required=True)
+    data = DataSerializer(required=True)
     owner = UserSerializer(read_only=True)
     options = DictField(required=False)
     options_list = DictField(read_only=True)
@@ -569,6 +599,13 @@ class OneTemplateSerializer(TemplateSerializer):
         return self.instance.execute(
             serializer, request.user, request.data.get('option', None)
         )
+
+
+class TemplateExecuteSerializer(serializers.Serializer):
+    option = serializers.CharField(
+        help_text='Option name from template options.',
+        min_length=0, allow_blank=True
+    )
 
 
 ###################################

@@ -36,7 +36,6 @@ class TemplateFilter(_BaseFilter):
             'id',
             'name',
             'kind',
-            'project',
             'inventory'
         )
 

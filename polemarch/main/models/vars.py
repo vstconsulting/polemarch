@@ -18,7 +18,30 @@ from .base import ACLModel, BQuerySet, BModel, models
 logger = logging.getLogger("polemarch")
 
 
+class VariablesQuerySet(BQuerySet):
+    use_for_related_fields = True
+
+    def sort_by_key(self):
+        return self.annotate(
+            name_sorter=Case(
+                When(key="ansible_host", then=Value(0)),
+                When(key="ansible_port", then=Value(1)),
+                When(key="ansible_user", then=Value(2)),
+                When(key="ansible_connection", then=Value(3)),
+                When(key="ansible_ssh_pass", then=Value(4)),
+                When(key="ansible_ssh_private_key_file", then=Value(5)),
+                When(key__startswith="ansible_", then=Value(6)),
+                default=100,
+                output_field=models.IntegerField(),
+            ),
+        ).order_by("name_sorter", "key")
+
+    def cleared(self):
+        return super(VariablesQuerySet, self).cleared().sort_by_key()
+
+
 class Variable(BModel):
+    objects = VariablesQuerySet.as_manager()
     content_type   = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id      = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
@@ -89,19 +112,8 @@ class AbstractModel(ACLModel):
         ])
 
     def get_vars(self):
-        qs = self.variables.annotate(
-            name_sorter=Case(
-                When(key="ansible_host", then=Value(0)),
-                When(key="ansible_port", then=Value(1)),
-                When(key="ansible_user", then=Value(2)),
-                When(key="ansible_ssh_pass", then=Value(3)),
-                When(key="ansible_ssh_private_key_file", then=Value(4)),
-                When(key__startswith="ansible_", then=Value(5)),
-                default=100,
-                output_field=models.IntegerField(),
-            ),
-        ).order_by("name_sorter", "key")
-        vars_dict = OrderedDict(qs.values_list('key', 'value'))
+        qs = self.variables.all().sort_by_key().values_list('key', 'value')
+        vars_dict = OrderedDict(qs)
         for bool_var in self.BOOLEAN_VARS:
             value = vars_dict.get(bool_var, None)
             if value is None:

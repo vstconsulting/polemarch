@@ -406,7 +406,6 @@ class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase):
         self.assertIn("group", result["allowed_types"])
         self.assertIn("inventory", result["allowed_types"])
         self.assertIn("project", result["allowed_types"])
-        self.assertIn("template", result["allowed_types"])
         self.assertIn("hook", result["allowed_types"])
         self.assertIn("user", result["allowed_types"])
         self.assertIn("team", result["allowed_types"])

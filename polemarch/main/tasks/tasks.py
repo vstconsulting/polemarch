@@ -10,8 +10,7 @@ from ..models.utils import AnsibleModule, AnsiblePlaybook
 logger = logging.getLogger("polemarch")
 
 
-@task(app, ignore_result=True, default_retry_delay=1,
-      max_retries=5, bind=True)
+@task(app, ignore_result=True, default_retry_delay=1, max_retries=5, bind=True)
 class RepoTask(BaseTask):
     accepted_operations = ["clone", "sync"]
 

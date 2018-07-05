@@ -55,14 +55,3 @@ class AnsibleArgsValidationTest(BaseTestCase):
         ("sudo", "makaka"),
         ("group", "bugaga"),
     ]
-
-    def make_test(self, url, required_args, update_func, exception=None):
-        for arg, val in self._MISTAKES:
-            if exception == arg:
-                continue
-            args = copy.deepcopy(required_args)
-            update_func(args, {arg: val})
-            result = self.get_result("post", url, 400, data=json.dumps(args))
-            tp = "playbook" if "playbook" in result['detail'] else "module"
-            self.assertIn("Incorrect argument", result["detail"][tp][0])
-            self.assertIn(arg, result["detail"]['argument'][0])

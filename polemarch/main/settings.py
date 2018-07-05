@@ -99,7 +99,7 @@ API = {
         r'inventory': {'view': 'polemarch.api.v2.views.InventoryViewSet'},
         r'project': {'view': 'polemarch.api.v2.views.ProjectViewSet'},
         r'history': {'view': 'polemarch.api.v2.views.HistoryViewSet', "op_types": ['get', 'del', 'mod']},
-        r'template': {'view': 'polemarch.api.v1.views.TemplateViewSet'},
+        # r'template': {'view': 'polemarch.api.v1.views.TemplateViewSet'},
         r'ansible': {'view': 'polemarch.api.v1.views.AnsibleViewSet', 'op_types': ['get']},
         r'stats': {'view': 'polemarch.api.v1.views.StatisticViewSet', 'op_types': ['get']},
         r'hook': {'view': 'polemarch.api.v1.views.HookViewSet'},
