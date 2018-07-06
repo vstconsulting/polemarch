@@ -233,5 +233,12 @@ class ProjectViewSet(_GroupMixin, PermissionMixin):
         return serializer.execute_module(request).resp
 
 
+class HookViewSet(base.ModelViewSetSet):
+    model = serializers.models.Hook
+    serializer_class = serializers.HookSerializer
+    filter_class = filters.HookFilter
+    permission_classes = (StaffPermission,)
+
+
 class BulkViewSet(views.BulkViewSet):
     pass

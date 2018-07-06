@@ -57,7 +57,7 @@ def send_polemarch_models(when, instance, **kwargs):
 #####################################
 # SIGNALS
 #####################################
-@receiver(signals.pre_save, sender=Variable)
+@receiver(signals.post_save, sender=Variable)
 def remove_existed(instance, **kwargs):
     if 'loaddata' in sys.argv:  # nocv
         return
@@ -65,7 +65,7 @@ def remove_existed(instance, **kwargs):
         object_id=instance.object_id,
         content_type=instance.content_type,
         key=instance.key
-    ).delete()
+    ).exclude(pk=instance.id).delete()
 
 
 @receiver(signals.pre_save, sender=Variable)
@@ -241,15 +241,22 @@ def user_add_hook(instance, **kwargs):
     send_user_hook(when, instance) if when else None
 
 
+@receiver([signals.post_save, signals.post_delete], sender=Variable)
 @receiver([signals.post_save, signals.post_delete], sender=Project)
 @receiver([signals.post_save, signals.post_delete], sender=PeriodicTask)
+@receiver([signals.post_save, signals.post_delete], sender=Template)
 @receiver([signals.post_save, signals.post_delete], sender=Inventory)
 @receiver([signals.post_save, signals.post_delete], sender=Group)
 @receiver([signals.post_save, signals.post_delete], sender=Host)
 def polemarch_hook(instance, **kwargs):
     created = kwargs.get('created', None)
     when = "on_object_add"
-    if created is None:
+    if isinstance(instance, Variable):
+        instance = instance.content_object
+        if instance is None:
+            return
+        when = "on_object_upd"
+    elif created is None:
         when = "on_object_del"
     elif not created:
         when = "on_object_upd"

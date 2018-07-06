@@ -285,6 +285,14 @@ class HistoryLinesSerializer(_SignalSerializer):
 
 
 class HookSerializer(serializers.ModelSerializer):
+    when = serializers.ChoiceField(
+        choices=tuple(models.Hook.handlers.when_types_names.items()),
+        required=False, allow_blank=True, default=None
+    )
+    type = serializers.ChoiceField(
+        choices=[(type, type) for type in models.Hook.handlers.list()]
+    )
+
     class Meta:
         model = models.Hook
         fields = (

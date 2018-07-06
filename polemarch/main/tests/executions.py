@@ -19,6 +19,10 @@ test_playbook_content = '''
 '''
 
 
+class Object(object):
+    pass
+
+
 class BaseExecutionsTestCase(BaseTestCase):
     def setUp(self):
         super(BaseExecutionsTestCase, self).setUp()
@@ -553,7 +557,27 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 'raw', 'get', filters='color=yes'
             ),
         ]
-        results = self.make_bulk(bulk_data, 'put')
+        # additionaly test hooks
+        self.hook_model.objects.all().delete()
+        hook_urls = ['localhost:64000', 'localhost:64001']
+        recipients = ' | '.join(hook_urls)
+        data = [
+            dict(type='HTTP', recipients=recipients, when='on_execution'),
+            dict(type='HTTP', recipients=recipients, when='after_execution'),
+        ]
+        self.generate_hooks(hook_urls)
+        self.mass_create_bulk('hook', data)
+        response = Object()
+        response.status_code = 200
+        response.reason = None
+        response.text = "OK"
+        ##
+        with self.patch('requests.post') as mock:
+            iterations = 2 * len(hook_urls)
+            mock.side_effect = [response] * iterations
+            results = self.make_bulk(bulk_data, 'put')
+            self.assertEqual(mock.call_count, iterations)
+            self.hook_model.objects.all().delete()
         for result in results[:-4]+results[-3:-2]:
             self.assertEqual(result['status'], 201 or 200, result)
         inventory_data = results[9]['data']
