@@ -289,12 +289,6 @@ class ApiUsersTestCase(BaseTestCase):
 class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
-        self.history_inventory = self.get_model_class('Inventory').objects.create()
-        self.ph = self.get_model_class('Project').objects.create(
-            name="Prj_History",
-            repository='',
-            vars=dict(repo_type="MANUAL")
-        )
 
     def test_api_versions_list(self):
         result = self.get_result("get", "/api/")
@@ -318,10 +312,11 @@ class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase):
         self.get_result('get', url)
 
     def _generate_history(self, days_ago, count, status="OK"):
+        ph = self.get_model_class('Project').objects.create(name="Stats", repository='')
+        history_inventory = self.get_model_class('Inventory').objects.create()
         default_kwargs = dict(
-            project=self.ph, mode="task.yml", raw_inventory="inventory",
-            raw_stdout="text", inventory=self.history_inventory,
-            initiator=self.user.id
+            project=ph, mode="task.yml", raw_inventory="inventory",
+            raw_stdout="text", inventory=history_inventory, initiator=self.user.id
         )
         start_time = now() - timedelta(days=days_ago, hours=1)
         stop_time = now() - timedelta(days=days_ago)

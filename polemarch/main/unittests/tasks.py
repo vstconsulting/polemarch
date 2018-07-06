@@ -23,39 +23,6 @@ class TasksTestCase(TestCase):
             self.testHistory.execute_args = "something"
 
 
-class ApiTemplateUnitTestCase(AnsibleArgsValidationTest):
-    def setUp(self):
-        super(ApiTemplateUnitTestCase, self).setUp()
-
-        self.pr_tmplt = self.get_model_class('Project').objects.create(**dict(
-            name="TmpltProject",
-            repository="git@ex.us:dir/rep3.git",
-            vars=dict(repo_type="TEST")
-        )
-                                               )
-        self.tmplt_data = dict(
-            name="test_tmplt",
-            kind="Task",
-            data=dict(
-                playbook="test.yml",
-                somekey="somevalue",
-                project=1,
-                inventory=2,
-                vars=dict(
-                    connection="paramiko",
-                    tags="update",
-                )
-            )
-        )
-
-        with self.assertRaises(ValidationError):
-            self.get_model_class('Template').objects.create(**self.tmplt_data)
-
-    def test_setup(self):
-        self.setUp()
-        self.assertRaises(ValidationError)
-
-
 class TestTaskError(TestCase):
 
     def test_init_task_error(self):

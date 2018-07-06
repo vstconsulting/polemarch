@@ -281,6 +281,25 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(
             result['detail'], "Task canceled: {}".format(results['results'][-2]['id'])
         )
+        # Check Templates without inventory
+        invalid_template = dict(template_playbook)
+        del invalid_template['data']['inventory']
+        del invalid_template['data']['project']
+        invalid_type_template = dict(template_playbook)
+        invalid_type_template['kind'] = 'UnknownKind'
+        bulk_data = [
+            self.get_mod_bulk('project', pk, invalid_template, 'template'),
+            self.get_mod_bulk('project', pk, invalid_type_template, 'template'),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+        self.assertEqual(results[0]['status'], 400)
+        self.assertEqual(
+            results[0]['data']['detail']['inventory'], ["Inventory have to set."]
+        )
+        self.assertEqual(
+            results[0]['data']['detail']['project'], ["Project have to set."]
+        )
+        self.assertEqual(results[1]['status'], 400)
 
     def make_test_periodic_task(self, project_data):
         # Check periodic tasks

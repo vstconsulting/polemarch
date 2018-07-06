@@ -104,7 +104,8 @@ def check_circular_deps(instance, action, pk_set, *args, **kw):
 @receiver(signals.pre_save, sender=PeriodicTask)
 def validate_types(instance, **kwargs):
     if (instance.kind not in instance.kinds) or (instance.type not in instance.types):
-        raise UnknownTypeException(instance.kind, "Unknown kind {}.")
+        # Deprecated, because moved to serializers
+        raise UnknownTypeException(instance.kind, "Unknown kind {}.")  # nocv
 
 
 @receiver(signals.pre_save, sender=PeriodicTask)
@@ -118,7 +119,8 @@ def validate_crontab(instance, **kwargs):
 
 @receiver(signals.pre_save, sender=Host)
 def validate_type_and_name(instance, **kwargs):
-    if instance.type not in instance.types:
+    if instance.type not in instance.types:  # nocv
+        # Deprecated, because moved to serializers
         raise UnknownTypeException(instance.type)
     if instance.type == 'HOST':
         validate_hostname(instance.name)
@@ -127,7 +129,8 @@ def validate_type_and_name(instance, **kwargs):
 
 
 @receiver(signals.pre_save, sender=Template)
-def validate_template_keys(instance, **kwargs):
+def validate_template_keys(instance, **kwargs):  # nocv
+    # Deprecated, because moved to serializers
     if instance.kind not in instance.template_fields.keys():
         raise UnknownTypeException(instance.kind)
     errors = {}
@@ -160,8 +163,6 @@ def validate_template_args(instance, **kwargs):
     command = "playbook"
     ansible_args = dict(instance.data['vars'])
     if instance.kind == "Module":
-        command = "module"
-    if instance.kind == "PeriodicTask" and instance.data["kind"] == "MODULE":
         command = "module"
     AnsibleArgumentsReference().validate_args(command, ansible_args)
     for _, data in dict(instance.options).items():
