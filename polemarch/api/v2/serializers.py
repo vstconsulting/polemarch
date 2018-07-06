@@ -89,21 +89,17 @@ class _SignalSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         return super(_SignalSerializer, self).update(instance, validated_data)
 
-    def to_internal_value(self, data):
-        variables = data.pop("variables", None)
-        instance = super(_SignalSerializer, self).to_internal_value(data)
-        if variables:
-            instance['vars'] = variables
-        return instance
+    # Depracated
+    # def to_internal_value(self, data):
+    #     variables = data.pop("variables", None)
+    #     instance = super(_SignalSerializer, self).to_internal_value(data)
+    #     if variables:
+    #         instance['vars'] = variables
+    #     return instance
 
 
 class _WithPermissionsSerializer(_SignalSerializer):
     perms_msg = "You do not have permission to perform this action."
-
-    def _get_objects(self, model, objs_id):
-        user = self.context['request'].user
-        qs = model.objects.all().user_filter(user)
-        return list(qs.filter(id__in=objs_id))
 
     def create(self, validated_data):
         validated_data["owner"] = self.current_user()
@@ -331,42 +327,11 @@ class ProjectVariableSerializer(VariableSerializer):
 
 
 class _WithVariablesSerializer(_WithPermissionsSerializer):
-    operations = dict(DELETE="remove",
-                      POST="add",
-                      PUT="set",
-                      GET="all")
-
-    def get_operation(self, method, data, attr):
-        tp = getattr(self.instance, attr)
-        obj_list = self._get_objects(tp.model, data)
-        return self._operate(method, data, attr, obj_list)
-
-    def _response(self, total, found, code=200):
-        data = dict(total=len(total))
-        data["operated"] = len(found)
-        data["not_found"] = data["total"] - data["operated"]
-        found_ids = [item.id for item in found]
-        data["failed_list"] = [i for i in total if i not in found_ids]
-        return Response(data, status=code)
-
     @transaction.atomic
     def _do_with_vars(self, method_name, *args, **kwargs):
         method = getattr(super(_WithVariablesSerializer, self), method_name)
         instance = method(*args, **kwargs)
         return instance
-
-    @transaction.atomic()
-    def _operate(self, method, data, attr, obj_list):
-        action = self.operations[method]
-        tp = getattr(self.instance, attr)
-        if action == "all":
-            answer = tp.values_list("id", flat=True)
-            return Response(answer, status=200)
-        elif action == "set":
-            getattr(tp, "clear")()
-            action = "add"
-        getattr(tp, action)(*obj_list)
-        return self._response(data, obj_list)
 
     def create(self, validated_data):
         return self._do_with_vars("create", validated_data=validated_data)
@@ -437,6 +402,16 @@ class OnePlaybookSerializer(PlaybookSerializer):
 
 
 class PeriodictaskSerializer(_WithVariablesSerializer):
+    kind = serializers.ChoiceField(
+        choices=[(k, k) for k in models.PeriodicTask.kinds],
+        required=False,
+        default=models.PeriodicTask.kinds[0]
+    )
+    type = serializers.ChoiceField(
+        choices=[(k, k) for k in models.PeriodicTask.types],
+        required=False,
+        default=models.PeriodicTask.types[0]
+    )
     schedule = serializers.CharField(allow_blank=True)
     inventory = serializers.CharField(required=False)
     mode = serializers.CharField(required=False)
@@ -496,9 +471,10 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
 
     def execute(self):
         inventory = self.instance.inventory
-        history_id = self.instance.execute(sync=False)
-        rdata = dict(detail="Started at inventory {}.".format(inventory),
-                     history_id=history_id)
+        rdata = dict(
+            detail="Started at inventory {}.".format(inventory),
+            history_id=self.instance.execute(sync=False)
+        )
         return Response(rdata, 201)
 
 
@@ -524,8 +500,8 @@ class DataSerializer(serializers.Serializer):
 
 class TemplateSerializer(_WithVariablesSerializer):
     data = DataSerializer(required=True, write_only=True)
-    options = DictField(write_only=True)
-    options_list = DictField(read_only=True)
+    options = DataSerializer(write_only=True)
+    options_list = serializers.ListField(read_only=True)
 
     class Meta:
         model = models.Template
@@ -541,7 +517,7 @@ class TemplateSerializer(_WithVariablesSerializer):
     def get_vars(self, representation):
         try:
             return representation['data']['vars']
-        except KeyError:
+        except KeyError:  # nocv
             return None
 
     def set_opts_vars(self, rep, hidden_vars):
@@ -561,24 +537,20 @@ class TemplateSerializer(_WithVariablesSerializer):
 
     def to_representation(self, instance):
         data = OrderedDict()
-        if instance.kind in ["Task", "PeriodicTask", "Module"]:
+        if instance.kind in ["Task", "Module"]:
             hidden_vars = models.PeriodicTask.HIDDEN_VARS
             data = super(TemplateSerializer, self).to_representation(
                 instance, hidden_vars=hidden_vars
             )
             self.repr_options(instance, data, hidden_vars)
-        elif instance.kind in ["Host", "Group"]:
-            data = super(TemplateSerializer, self).to_representation(
-                instance, hidden_vars=models.Inventory.HIDDEN_VARS
-            )
         return data
 
 
 class OneTemplateSerializer(TemplateSerializer):
     data = DataSerializer(required=True)
     owner = UserSerializer(read_only=True)
-    options = DictField(required=False)
-    options_list = DictField(read_only=True)
+    options = DataSerializer(required=False)
+    options_list = serializers.ListField(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
@@ -612,12 +584,7 @@ class TemplateExecuteSerializer(serializers.Serializer):
 # Subclasses for operations
 # with hosts and groups
 class _InventoryOperations(_WithVariablesSerializer):
-
-    def hosts_operations(self, method, data):
-        return self.get_operation(method, data, attr="hosts")
-
-    def groups_operations(self, method, data):
-        return self.get_operation(method, data, attr="groups")
+    pass
 
 
 ###################################
@@ -652,30 +619,17 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
     class ValidationException(exceptions.ValidationError):
         status_code = 409
 
-    def hosts_operations(self, method, data):
-        if self.instance.children:
-            raise self.ValidationException("Group is children.")
-        return super(OneGroupSerializer, self).hosts_operations(method, data)
-
-    def groups_operations(self, method, data):
-        if not self.instance.children:
-            raise self.ValidationException("Group is not children.")
-        return super(OneGroupSerializer, self).groups_operations(method, data)
-
 
 class InventorySerializer(_WithVariablesSerializer):
-    vars = DictField(required=False, write_only=True)
 
     class Meta:
         model = models.Inventory
         fields = ('id',
                   'name',
-                  'vars',
                   'url',)
 
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
-    vars   = DictField(required=False)
     all_hosts  = HostSerializer(read_only=True, many=True)
     hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
     groups = GroupSerializer(read_only=True, many=True, source="groups_list")
@@ -690,7 +644,6 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
                   'hosts',
                   'all_hosts',
                   "groups",
-                  'vars',
                   'owner',
                   'url',)
 
@@ -698,7 +651,6 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
 class ProjectSerializer(_InventoryOperations):
     status = serializers.CharField(read_only=True)
     type   = serializers.CharField(read_only=True)
-    vars   = DictField(required=False, write_only=True)
 
     class Meta:
         model = models.Project
@@ -706,7 +658,6 @@ class ProjectSerializer(_InventoryOperations):
                   'name',
                   'status',
                   'type',
-                  'vars',
                   'url',)
 
     @transaction.atomic
@@ -717,7 +668,6 @@ class ProjectSerializer(_InventoryOperations):
 
 class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     repository  = serializers.CharField(default='MANUAL')
-    vars        = DictField(required=False)
     hosts       = HostSerializer(read_only=True, many=True)
     groups      = GroupSerializer(read_only=True, many=True)
     inventories = InventorySerializer(read_only=True, many=True)
@@ -734,16 +684,12 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'hosts',
                   "groups",
                   'inventories',
-                  'vars',
                   'owner',
                   'revision',
                   'branch',
                   'readme_content',
                   'readme_ext',
                   'url',)
-
-    def inventories_operations(self, method, data):
-        return self.get_operation(method, data, attr="inventories")
 
     @transaction.atomic()
     def sync(self):
@@ -788,7 +734,15 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
 
 class PermissionsSerializer(_SignalSerializer):
     member = serializers.IntegerField()
-    member_type = serializers.CharField()
+    member_type = serializers.ChoiceField(choices=(
+        ('user', 'user'),
+        ('team', 'team'),
+    ))
+    role = serializers.ChoiceField(choices=(
+        ('MASTER', 'Full controlled'),
+        ('EDITOR', 'Write and edit'),
+        ('EXECUTOR', 'Read and execute'),
+    ))
 
     class Meta:
         model = models.ACLPermission

@@ -66,14 +66,11 @@ class Template(ACLModel):
 
     template_fields = {}
     template_fields["Task"] = ["playbook", "vars", "inventory", "project"]
-    template_fields["PeriodicTask"] = ["type", "name", "schedule", "inventory",
-                                       "kind", "mode", "project", "vars"]
-    template_fields["Module"] = ["inventory", "module", "group", "args",
-                                 "vars", "project"]
-    template_fields["Host"] = ["name", "vars"]
-    template_fields["Group"] = template_fields["Host"] + ["children"]
+    template_fields["Module"] = [
+        "inventory", "module", "group", "args", "vars", "project"
+    ]
 
-    excepted_execution_fields = ['inventory', 'project']
+    excepted_execution_fields = []
     _exec_types = {
         "Task": "playbook",
         "Module": "module",
@@ -178,7 +175,7 @@ class Template(ACLModel):
                 self.inventory = Inventory.objects.get(pk=int(inventory_id)).id
             except (ValueError, TypeError, Inventory.DoesNotExist):
                 self.inventory = inventory_id
-        data['vars'] = self.keep_encrypted_data(data['vars'])
+        data['vars'] = self.keep_encrypted_data(data.get('vars', None))
         self.template_data = json.dumps(data)
 
     @property

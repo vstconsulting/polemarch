@@ -37,7 +37,10 @@ class UserViewSet(views.UserViewSet):
     serializer_class = serializers.UserSerializer
     serializer_class_one = serializers.OneUserSerializer
 
-    @base.action(methods=["post", "delete", "get"], url_path="settings", detail=True)
+    @base.action(
+        ["post", "delete", "get"], url_path="settings",
+        detail=True, serializer_class=serializers.DataSerializer
+    )
     def user_settings(self, request, *args, **kwargs):
         obj = self.get_object()
         method = request.method
@@ -71,28 +74,28 @@ class HistoryViewSet(LimitedPermissionMixin, base.HistoryModelViewSet):
     filter_class = filters.HistoryFilter
     POST_WHITE_LIST = ['cancel']
 
-    @base.action(methods=["get"], detail=True)
+    @base.action(["get"], detail=True, serializer_class=serializers.DataSerializer)
     def raw(self, request, *args, **kwargs):
         result = self.get_serializer(self.get_object()).get_raw(request)
         return HttpResponse(result, content_type="text/plain")
 
-    @base.action(methods=["post"], detail=True)
+    @base.action(["post"], detail=True, serializer_class=serializers.DataSerializer)
     def cancel(self, request, *args, **kwargs):
         obj = self.get_object()
         exch = KVExchanger(utils.CmdExecutor.CANCEL_PREFIX + str(obj.id))
-        exch.send(True, 10)
+        exch.send(True, 60)
         return base.Response("Task canceled: {}".format(obj.id), 200).resp
 
-    @base.action(methods=["get"], detail=True)
+    @base.action(["get"], detail=True, serializer_class=serializers.DataSerializer)
     def facts(self, request, *args, **kwargs):
         objs = self.get_serializer(self.get_object()).get_facts(request)
         return base.Response(objs, 200).resp
 
-    @base.action(methods=["delete"], detail=True)
+    @base.action(["delete"], detail=True, serializer_class=serializers.DataSerializer)
     def clear(self, request, *args, **kwargs):
         default_message = "Output trancated.\n"
         obj = self.get_object()
-        if obj.status in ["RUN", "DELAY"] or obj.raw_stdout == default_message:
+        if obj.status in ["RUN", "DELAY"] or obj.raw_stdout == default_message:  # nocv
             raise excepts.NotAcceptable(
                 "Job is running or already trancated"
             )
@@ -132,10 +135,11 @@ class _GroupMixin(base.ModelViewSetSet):
 class GroupViewSet(_BaseGroupViewSet, _GroupMixin, PermissionMixin):
 
     def nested_allow_check(self):
+        exception = _BaseGroupViewSet.serializer_class_one.ValidationException
         if not self.nested_parent_object.children and self.nested_name == 'group':
-            raise excepts.ValidationError("Group is not children.")
+            raise exception("Group is not children.")
         if self.nested_parent_object.children and self.nested_name == 'host':
-            raise excepts.ValidationError("Group is children.")
+            raise exception("Group is children.")
 
 
 @base.nested_view(

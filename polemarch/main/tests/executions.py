@@ -187,10 +187,11 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 ),
             ),
             options=dict(
-                tree=dict(limit='localhost'),
+                tree=dict(vars=dict(limit='localhost')),
                 four=dict(vars=dict(forks=1))
             )
         )
+        template_playbook['options']['tree']['vars']['private-key'] = 'PATH'
         m_opts = dict(option='one')
         p_opts = dict(option='four')
         bulk_data = [
@@ -200,11 +201,20 @@ class ProjectTestCase(BaseExecutionsTestCase):
             self.get_mod_bulk('project', pk, {}, 'template/<1[data][id]>/execute'),
             self.get_mod_bulk('project', pk, m_opts, 'template/<0[data][id]>/execute'),
             self.get_mod_bulk('project', pk, p_opts, 'template/<1[data][id]>/execute'),
+            self.get_mod_bulk('project', pk, {}, 'template/<1[data][id]>', 'get'),
         ]
         results = self.make_bulk(bulk_data)
         for result in results:
+            if result['status'] == 200:
+                self.assertEqual(
+                    result['data']['options']['tree']['vars']['private-key'],
+                    '[~~ENCRYPTED~~]'
+                )
+                continue
             self.assertEqual(result['status'], 201)
 
+        tmplt_mod = results[0]['data']
+        tmplt_play = results[1]['data']
         results = self.get_result(
             'get', self.get_url('project', project_data['id'], 'history') + '?limit=4'
         )
@@ -224,6 +234,49 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results['results'][-4]['kind'], 'PLAYBOOK')
         self.assertEqual(results['results'][-4]['initiator_type'], 'template')
         self.assertEqual(results['results'][-4]['options']['template_option'], 'four')
+
+        # Templates in periodic tasks
+        ptask_data = [
+            dict(
+                kind='TEMPLATE', template=tmplt_mod['id'], template_opt='one',
+                schedule="10", type="INTERVAL"
+            ),
+            dict(
+                kind='TEMPLATE', template=tmplt_play['id'], template_opt='four',
+                schedule="10", type="INTERVAL"
+            ),
+        ]
+        bulk_data = [
+            self.get_mod_bulk('project', pk, data, 'periodic_task')
+            for data in ptask_data
+        ]
+        results = self.make_bulk(bulk_data)
+        for result in results:
+            self.assertEqual(result['status'], 201)
+            ScheduledTask.delay(result['data']['id'])
+        results = self.get_result(
+            'get', self.get_url('project', project_data['id'], 'history') + '?limit=2'
+        )
+        self.assertEqual(results['results'][-1]['status'], 'OK')
+        self.assertEqual(results['results'][-1]['kind'], 'MODULE')
+        self.assertEqual(results['results'][-1]['initiator_type'], 'scheduler')
+        self.assertEqual(results['results'][-1]['mode'], 'shell')
+        self.assertEqual(results['results'][-2]['status'], 'OK')
+        self.assertEqual(results['results'][-2]['kind'], 'PLAYBOOK')
+        self.assertEqual(results['results'][-2]['initiator_type'], 'scheduler')
+        self.assertEqual(results['results'][-2]['mode'], 'test-0.yml')
+
+        # Try to send cencel message
+        result = self.get_result(
+            'post', self.get_url(
+                'project', project_data['id'],
+                'history/{}/cancel'.format(results['results'][-2]['id'])
+            ),
+            code=200
+        )
+        self.assertEqual(
+            result['detail'], "Task canceled: {}".format(results['results'][-2]['id'])
+        )
 
     def make_test_periodic_task(self, project_data):
         # Check periodic tasks
@@ -304,7 +357,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertIn(
             "Invalid weekday literal", results[0]['data']['detail']['schedule'][0]
         )
-        self.assertEqual(results[1]['status'], 415)
+        self.assertEqual(results[1]['status'], 400)
         self.assertEqual(results[2]['status'], 400)
         self.assertIn("Incorrect argument", results[2]['data']["detail"]['playbook'][0])
         self.assertIn('incorrect_var', results[2]['data']["detail"]['argument'][0])

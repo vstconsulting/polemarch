@@ -1,4 +1,4 @@
-from ._base import BaseTestCase
+from ._base import BaseTestCase, json
 
 
 class InvBaseTestCase(BaseTestCase):
@@ -84,7 +84,7 @@ class InvBaseTestCase(BaseTestCase):
         result = self.make_bulk(bulk_data)
         if should_fail:
             for res in result:
-                self.assertEqual(res['status'], 400)
+                self.assertEqual(res['status'], 409 or 400)
             return
         self.assertEqual(result[0]['status'], 201, result[0])
         self.assertEqual(result[1]['status'], 200, result[1])
@@ -176,10 +176,17 @@ class InventoriesTestCase(InvBaseTestCase):
                 dict(id=results[0]['data']['id']), 'group'
             ),
         ]
+        group_id = results[0]['data']['id']
         results = self.make_bulk(bulk_data, 'put')
         for result in results:
             self.assertEqual(result['status'], 400)
             self.assertEqual(result['data']['error_type'], "CiclicDependencyError")
+
+        # Check update children
+        self.get_result(
+            'patch', self.get_url('group', group_id), 400,
+            data=json.dumps(dict(children=False))
+        )
 
     def test_inventories(self):
         self._check_with_vars(
