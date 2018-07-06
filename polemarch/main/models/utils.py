@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import re
 import sys
 import logging
@@ -99,6 +100,7 @@ class AnsibleCommand(object):
             self.cwd = cwd
             self.__file = None
             self.hidden_vars = Inventory.HIDDEN_VARS
+            self.is_file = True
             if isinstance(inventory, (six.string_types, six.text_type)):
                 self.raw, self.keys = self.get_from_file(inventory)
             else:
@@ -107,10 +109,13 @@ class AnsibleCommand(object):
         def get_from_file(self, inventory):
             self.__file = "{}/{}".format(self.cwd, inventory)
             try:
+                if not os.path.exists(self.__file):
+                    raise IOError('No file {}'.format(self.__file))
                 with open(self.__file, 'r') as file:
                     return file.read(), []
             except IOError:
                 self.__file = inventory
+                self.is_file = False
                 return inventory.replace(',', '\n'), []
 
         @property
@@ -209,9 +214,16 @@ class AnsibleCommand(object):
         msg['history'] = self.history.get_hook_data(when)
         self.project.hook(when, msg)
 
+    def get_inventory_arg(self, target, extra_args):
+        return [target, '-i', self.inventory_object.file_name]
+
     def get_args(self, target, extra_args):
-        return [self.path_to_ansible, target,
-                '-i', self.inventory_object.file_name, '-v'] + extra_args
+        return (
+            [self.path_to_ansible] +
+            self.get_inventory_arg(target, extra_args) +
+            [ '-v' ] +
+            extra_args
+        )
 
     def error_handler(self, exception):
         default_code = self.status_codes["other"]
@@ -265,6 +277,11 @@ class AnsibleModule(AnsibleCommand):
         if not kwargs.get('args', None):
             kwargs.pop('args', None)
         super(AnsibleModule, self).__init__(*pargs, **kwargs)
+
+    def get_inventory_arg(self, target, extra_args):
+        if not self.inventory_object.is_file:
+            return [self.inventory_object.file]
+        return super(AnsibleModule, self).get_inventory_arg(target, extra_args)
 
     def execute(self, group, *args, **extra_args):
         return super(AnsibleModule, self).execute(group, *args, **extra_args)

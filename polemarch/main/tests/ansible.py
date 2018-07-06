@@ -1,8 +1,8 @@
-from .inventory import _ApiGHBaseTestCase
+from ._base import BaseTestCase
 from ..utils import AnsibleModules
 
 
-class ApiAnsibleTestCase(_ApiGHBaseTestCase):
+class ApiAnsibleTestCase(BaseTestCase):
     def test_ansible(self):
         url = "/api/v1/ansible/"
         result = self.get_result("get", url)

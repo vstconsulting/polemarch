@@ -49,6 +49,11 @@ class Host(AbstractModel):
 
     types = ["HOST", "RANGE"]
 
+    range_validator = RegexValidator(
+        regex=r'^[a-zA-Z0-9\-\._\[\]\:]*$',
+        message='Name must be Alphanumeric'
+    )
+
     class Meta:
         default_related_name = "hosts"
 

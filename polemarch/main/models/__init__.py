@@ -19,7 +19,7 @@ from .projects import Project
 from .users import BaseUser, UserGroup, ACLPermission, UserSettings
 from .tasks import Task, PeriodicTask, History, HistoryLines, Template
 from .hooks import Hook
-from ..validators import RegexValidator
+from ..validators import RegexValidator, validate_hostname
 from ..exceptions import UnknownTypeException
 from ..utils import AnsibleArgumentsReference
 
@@ -57,6 +57,30 @@ def send_polemarch_models(when, instance, **kwargs):
 #####################################
 # SIGNALS
 #####################################
+@receiver(signals.pre_save, sender=Variable)
+def remove_existed(instance, **kwargs):
+    if 'loaddata' in sys.argv:  # nocv
+        return
+    Variable.objects.filter(
+        object_id=instance.object_id,
+        content_type=instance.content_type,
+        key=instance.key
+    ).delete()
+
+
+@receiver(signals.pre_save, sender=Variable)
+def check_variables_values(instance, *args, **kw):
+    if 'loaddata' in sys.argv:  # nocv
+        return
+    content_object = instance.content_object
+    if isinstance(content_object, PeriodicTask):
+        cmd = "module" if content_object.kind == "MODULE" else "playbook"
+        AnsibleArgumentsReference().validate_args(cmd, {instance.key: instance.value})
+    elif isinstance(content_object, Host):
+        if instance.key == 'ansible_host':
+            validate_hostname(instance.value)
+
+
 @receiver(signals.pre_save, sender=Group)
 def validate_group_name(instance, **kwargs):
     validate_name = RegexValidator(
@@ -68,22 +92,18 @@ def validate_group_name(instance, **kwargs):
 
 @receiver(signals.m2m_changed, sender=Group.parents.through)
 def check_circular_deps(instance, action, pk_set, *args, **kw):
-    if action in ["pre_add", "post_add"] and 'loaddata' not in sys.argv:
+    if (action in ["pre_add", "post_add"]) and ('loaddata' not in sys.argv):
         if instance.id in pk_set:
-            raise instance.CiclicDependencyError("The group can "
-                                                 "not refer to itself.")
+            raise instance.CiclicDependencyError("The group can not refer to itself.")
         parents = instance.parents.all().get_parents()
         childrens = instance.groups.all().get_subgroups()
-        if instance in (parents | childrens) or \
-                parents.filter(id__in=pk_set).count():
-            raise instance.CiclicDependencyError("The group has a "
-                                                 "dependence on itself.")
+        if instance in (parents | childrens) or parents.filter(id__in=pk_set).count():
+            raise instance.CiclicDependencyError("The group has a dependence on itself.")
 
 
 @receiver(signals.pre_save, sender=PeriodicTask)
 def validate_types(instance, **kwargs):
-    if instance.kind not in instance.kinds or \
-                    instance.type not in instance.types:
+    if (instance.kind not in instance.kinds) or (instance.type not in instance.types):
         raise UnknownTypeException(instance.kind, "Unknown kind {}.")
 
 
@@ -97,9 +117,13 @@ def validate_crontab(instance, **kwargs):
 
 
 @receiver(signals.pre_save, sender=Host)
-def validate_type(instance, **kwargs):
+def validate_type_and_name(instance, **kwargs):
     if instance.type not in instance.types:
         raise UnknownTypeException(instance.type)
+    if instance.type == 'HOST':
+        validate_hostname(instance.name)
+    if instance.type == "RANGE":
+        instance.range_validator(instance.name)
 
 
 @receiver(signals.pre_save, sender=Template)

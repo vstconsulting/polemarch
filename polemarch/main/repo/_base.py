@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import logging
+import traceback
 
 from six.moves.urllib.request import urlretrieve
 from django.db import transaction
@@ -51,6 +52,7 @@ class _Base(object):
                 self._set_status("OK")
                 self._update_tasks(self._get_files(result[0]))
         except Exception as err:
+            logger.info(traceback.format_exc())
             logger.error("Project[{}] sync error:\n{}".format(self.proj, err))
             self._set_status("ERROR")
             raise

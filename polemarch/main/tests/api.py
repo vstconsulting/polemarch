@@ -12,16 +12,8 @@ except ImportError:  # nocv
 
 from vstutils.utils import redirect_stdany
 from ._base import BaseTestCase, json
-from .project import ApiProjectsTestCase
-from .bulk import ApiBulkTestCase
-from .inventory import (ApiHostsTestCase, ApiGroupsTestCase,
-                        ApiInventoriesTestCase)
-from .tasks import (ApiTasksTestCase,
-                    ApiPeriodicTasksTestCase,
-                    ApiTemplateTestCase,
-                    ApiHistoryTestCase)
-from .ansible import ApiAnsibleTestCase
-from .repo_backends import RepoBackendsTestCase
+from .hosts import InventoriesTestCase
+from .executions import ProjectTestCase
 
 
 class ApiUsersTestCase(BaseTestCase):
@@ -32,16 +24,16 @@ class ApiUsersTestCase(BaseTestCase):
         client = self._login()
         response = self.client.get('/login/')
         self.assertRedirects(response, "/")
-        self.result(client.delete, '/api/v1/token/', 400)
+        self.result(client.delete, self.get_url('token'), 400)
         self._logout(client)
         data = dict(username="sometestuser",
                     email="admin@test.lan",
                     password="testpass")
         User.objects.create_superuser(**data)
         data.pop("email", None)
-        data["next"] = "/api/"
+        data["next"] = "/{}/".format(self._settings('VST_API_URL'))
         response = self.client.post('/login/', data=data)
-        self.assertRedirects(response, "/api/")
+        self.assertRedirects(response, "/{}/".format(self._settings('VST_API_URL')))
         response = self.client.post("/logout/")
         self.assertEqual(response.status_code, 302)
         response = self.client.get('/')
@@ -50,19 +42,19 @@ class ApiUsersTestCase(BaseTestCase):
         client = Client()
         data = {'username': self.user.data['username'],
                 'password': self.user.data['password']}
-        result = self.result(client.post, '/api/v1/token/', data=data)
+        result = self.result(client.post, self.get_url('token'), data=data)
         self.assertIn("token", result)
         headers = dict(
             HTTP_AUTHORIZATION="Token {}".format(result['token']),
             content_type="application/json"
         )
-        response = client.get('/api/v1/', **headers)
+        response = client.get(self.get_url(), **headers)
         self.assertEqual(response.status_code, 200)
-        response = client.get('/api/v1/')
+        response = client.get(self.get_url())
         self.assertNotEqual(response.status_code, 200)
-        result = self.result(client.delete, '/api/v1/token/', 204, **headers)
+        result = self.result(client.delete, self.get_url('token'), 204, **headers)
         self.assertIn("detail", result)
-        response = client.get('/api/v1/', **headers)
+        response = client.get(self.get_url(), **headers)
         self.assertNotEqual(response.status_code, 200)
 
     def test_is_active(self):
@@ -76,11 +68,11 @@ class ApiUsersTestCase(BaseTestCase):
                         "last_name": "user_l_name",
                         "email": "test@domain.lan"
                         }
-            self.result(client.post, "/api/v1/users/", 400, userdata)
+            self.result(client.post, self.get_url('user'), 400, userdata)
         passwd = 'eadgbe'
         userdata = dict(username="testuser4", password=make_password(passwd),
                         raw_password=True, is_active=False)
-        self.result(client.post, "/api/v1/users/", 201, userdata)
+        self.result(client.post, self.get_url('user'), 201, userdata)
         client = Client()
         data = {'username': userdata['username'],
                 'password': userdata['password']}
@@ -90,15 +82,15 @@ class ApiUsersTestCase(BaseTestCase):
 
     def test_api_users_get(self):
         client = self._login()
-        result = self.result(client.get, "/api/v1/users/")
+        result = self.result(client.get, self.get_url('user'))
         self.assertEqual(result['count'], 2, result)
         self._logout(client)
 
     def test_nonoprivileged_userwork_restriction(self):
         self.change_identity()
-        selfurl = "/api/v1/users/{}/".format(self.user.id)
+        selfurl = self.get_url('user', self.user.id)
         self.get_result("patch", selfurl, 200)
-        url = "/api/v1/users/"
+        url = self.get_url('user')
         self.change_identity(is_super_user=True)
         olduser = self.user
         self.change_identity()
@@ -108,7 +100,7 @@ class ApiUsersTestCase(BaseTestCase):
                         raw_password=True, is_active=False)
         self.get_result("post", url, code=403, data=userdata)
         # can't modify other users
-        self.get_result("patch", "{}{}/".format(url, olduser.id),
+        self.get_result("patch", self.get_url('user', olduser.id),
                         code=403, data=json.dumps(userdata))
 
     def test_api_users_password_settings(self):
@@ -124,17 +116,17 @@ class ApiUsersTestCase(BaseTestCase):
                         "last_name": "user_l_name",
                         "email": "test@domain.lan"
                         }
-            self.result(client.post, "/api/v1/users/", 400, userdata)
+            self.result(client.post, self.get_url('user'), 400, userdata)
         passwd = 'eadgbe'
         userdata = dict(username="testuser3", password=make_password(passwd),
                         raw_password=True, is_active=True)
-        self.result(client.post, "/api/v1/users/", 201, userdata)
+        self.result(client.post, self.get_url('user'), 201, userdata)
         user = User.objects.get(username=userdata['username'])
         self.assertEqual(user.password, userdata['password'])
         self.assertTrue(user.check_password(passwd))
         user.delete()
         userdata.update({"raw_password": False, "password": passwd})
-        self.result(client.post, "/api/v1/users/", 201, userdata)
+        self.result(client.post, self.get_url('user'), 201, userdata)
         user = User.objects.get(username=userdata['username'])
         self.assertTrue(user.check_password(userdata['password']))
         self._logout(client)
@@ -142,7 +134,7 @@ class ApiUsersTestCase(BaseTestCase):
     def test_api_user_update(self):
         User = self.get_model_class('django.contrib.auth.models.User')
         client = self._login()
-        result = self.result(client.post, "/api/v1/users/", 201,
+        result = self.result(client.post, self.get_url('user'), 201,
                              {"username": "test_user3",
                               "password": "eadgbe",
                               "is_active": True,
@@ -151,7 +143,7 @@ class ApiUsersTestCase(BaseTestCase):
                               "email": "test@domain.lan"
                               })
         id = str(result['id'])
-        url = "/api/v1/users/{}/".format(id)
+        url = self.get_url('user', id)
         data = json.dumps({'last_name': 'some_new_last_name',
                            'password': "eadgbe123",
                            'email': "test@mail.com"})
@@ -173,7 +165,7 @@ class ApiUsersTestCase(BaseTestCase):
                                    'password': "eadgbe123"})
         self.assertTrue(response)
         admin = User.objects.get(username="admin")
-        self.result(client.patch, "/api/v1/users/{}/".format(admin.id), 403,
+        self.result(client.patch, self.get_url('user', admin.id), 403,
                     json.dumps(dict(last_name="some_last")),
                     content_type="application/json")
         self._logout(client)
@@ -187,8 +179,8 @@ class ApiUsersTestCase(BaseTestCase):
                 "last_name": "user_l_name",
                 "email": "test@domain.lan"
                 }
-        self.result(client.post, "/api/v1/users/", 201, data)
-        self.result(client.post, "/api/v1/users/", 409, data)
+        self.result(client.post, self.get_url('user'), 201, data)
+        self.result(client.post, self.get_url('user'), 409, data)
         self._logout(client)
 
     @patch('polemarch.main.hooks.http.Backend._execute')
@@ -206,7 +198,7 @@ class ApiUsersTestCase(BaseTestCase):
         for w in ['on_user_add', 'on_user_upd', 'on_user_del']:
             hd = dict(**hook_data)
             hd['when'] = w
-            self.post_result("/api/v1/hooks/", data=json.dumps(hd))
+            self.post_result(self.get_url('hook'), data=json.dumps(hd))
 
         def side_effect_method(url, when, message):
             self.assertEqual(url, hook_url)
@@ -219,10 +211,10 @@ class ApiUsersTestCase(BaseTestCase):
             return '200 OK: {"result": "ok"}'
 
         client = self._login()
-        self.result(client.get, "/api/v1/users/")
+        self.result(client.get, self.get_url('user'))
         execute_method.reset_mock()
         execute_method.side_effect = side_effect_method
-        result = self.result(client.post, "/api/v1/users/", 201, user_data)
+        result = self.result(client.post, self.get_url('user'), 201, user_data)
         self.assertEquals(execute_method.call_count, 2)
         execute_method.reset_mock()
         self.assertTrue(self.sended, "Raised on sending.")
@@ -230,8 +222,7 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertEqual(result["first_name"], "user_f_name")
         self.assertEqual(result["last_name"], "user_l_name")
         self.assertEqual(result["email"], "test@domain.lan")
-        id = str(result['id'])
-        url = "/api/v1/users/{}/".format(id)
+        url = self.get_url('user', str(result['id']))
         self.assertRCode(client.get(url), 200)
         result = self.result(
             client.patch, url,
@@ -243,12 +234,12 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertRCode(client.delete(url), 204)
         self.assertEquals(execute_method.call_count, 1)
         idself = self.user.id
-        url = "/api/v1/users/{}/".format(idself)
+        url = self.get_url('user', idself)
         self.assertRCode(client.delete(url), 409)
         self._logout(client)
 
     def test_api_groups(self):
-        url = '/api/v1/teams/'
+        url = self.get_url('team')
         range_groups = 10
         for i in range(range_groups):
             self.get_model_class('UserGroup').objects.create(
@@ -256,20 +247,17 @@ class ApiUsersTestCase(BaseTestCase):
             )
         self.list_test(url, range_groups)
         ug = self.get_model_class('UserGroup').objects.all().last()
-        self.details_test(
-            url + "{}/".format(ug.id),
-            name=ug.name, id=ug.id
-        )
+        self.details_test(self.get_url('team', ug.id), name=ug.name, id=ug.id)
         data = [
             dict(name="test_group_{}".format(i))
             for i in range(range_groups, range_groups+10)
         ]
         results_id = self.mass_create(url, data, "name")
         for team_id in results_id:
-            self.get_result("delete", url + "{}/".format(team_id))
+            self.get_result("delete", self.get_url('team', team_id))
         self.list_test(url, range_groups)
         # Test users in groups
-        url_ug = "{}{}/".format(url, ug.id)
+        url_ug = self.get_url('team', ug.id)
         self.get_result("patch", url_ug, data=json.dumps({
             "users_list": [self.user.id]
         }))
@@ -285,53 +273,48 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertCount(result["users"], 0)
 
     def test_users_localsettings(self):
-        user_url = "/api/v1/users/{}/".format(self.user.id)
-        result = self.get_result("get", user_url)
+        result = self.get_result("get", self.get_url('user', self.user.id))
         self.assertEqual(result["username"], self.user.username)
         data = {"some": True}
-        result = self.get_result(
-            "post", "{}settings/".format(user_url), 200, data=json.dumps(data)
-        )
+        settings_url = self.get_url('user', self.user.id, 'settings')
+        result = self.get_result("post", settings_url, 200, data=json.dumps(data))
         self.assertEqual(result, data)
-        result = self.get_result("get", "{}settings/".format(user_url))
+        result = self.get_result("get", settings_url)
         self.assertEqual(result, data)
-        result = self.get_result("delete", "{}settings/".format(user_url), 200)
+        result = self.get_result("delete", settings_url, 200)
         self.assertEqual(result, {})
-        self.assertCount(
-            self.get_result("get", "{}settings/".format(user_url)), 0
-        )
+        self.assertCount(self.get_result("get", settings_url), 0)
 
 
-class APITestCase(ApiUsersTestCase,
-                  ApiHostsTestCase, ApiGroupsTestCase,
-                  ApiInventoriesTestCase, ApiProjectsTestCase,
-                  ApiTasksTestCase, ApiPeriodicTasksTestCase,
-                  ApiBulkTestCase, ApiTemplateTestCase, ApiHistoryTestCase,
-                  ApiAnsibleTestCase, RepoBackendsTestCase):
+class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
+        self.history_inventory = self.get_model_class('Inventory').objects.create()
+        self.ph = self.get_model_class('Project').objects.create(
+            name="Prj_History",
+            repository='',
+            vars=dict(repo_type="MANUAL")
+        )
 
     def test_api_versions_list(self):
         result = self.get_result("get", "/api/")
         self.assertEqual(len(result), 1)
-        self.assertTrue(result.get('v1', False))
+        self.assertTrue(result.get(self._settings('VST_API_VERSION'), False))
 
     def test_api_v1_list(self):
-        result = self.get_result('get', "/api/v1/")
-        self.assertTrue(result.get('users', False))
-        self.assertTrue(result.get('hosts', False))
-        self.assertTrue(result.get('groups', False))
-        self.assertTrue(result.get('inventories', False))
-        self.assertTrue(result.get('projects', False))
-        self.assertTrue(result.get('tasks', False))
-        self.assertTrue(result.get('periodic-tasks', False))
+        result = self.get_result('get', self.get_url())
+        self.assertTrue(result.get('user', False))
+        self.assertTrue(result.get('host', False))
+        self.assertTrue(result.get('group', False))
+        self.assertTrue(result.get('inventory', False))
+        self.assertTrue(result.get('project', False))
         self.assertTrue(result.get('history', False))
         self.assertTrue(result.get('bulk', False))
         self.assertTrue(result.get('token', False))
 
     def test_api_router(self):
         result = self.get_result('get', "/api/?format=json")
-        url = result['v1'].replace("http://testserver", "")
+        url = result[self._settings('VST_API_VERSION')].replace("http://testserver", "")
         self.get_result('get', url)
 
     def _generate_history(self, days_ago, count, status="OK"):
@@ -394,7 +377,7 @@ class APITestCase(ApiUsersTestCase,
 
     def test_statistic(self):
         User = self.get_model_class('django.contrib.auth.models.User')
-        url = '/api/v1/stats/'
+        url = self.get_url('stats')
         self.maxDiff = None
         # Prepare history data
         data = self._prepare_statisic()
@@ -409,3 +392,25 @@ class APITestCase(ApiUsersTestCase,
         self.assertEqual(result['users'], self.get_count(User))
         # Check history counts
         self._check_stats_history(data['day'], result['jobs']['day'])
+
+    def test_bulk_unsupported(self):
+        data = dict(username="some_user", password="some_password")
+        bulk_data = [
+            {'type': "add", 'item': "token", 'data': data}
+        ]
+        self.get_result("post", self.get_url('_bulk'), 415, data=json.dumps(bulk_data))
+        self.get_result("put", self.get_url('_bulk'), 200, data=json.dumps(bulk_data))
+
+        result = self.get_result("get", self.get_url('_bulk'))
+        self.assertIn("host", result["allowed_types"])
+        self.assertIn("group", result["allowed_types"])
+        self.assertIn("inventory", result["allowed_types"])
+        self.assertIn("project", result["allowed_types"])
+        self.assertIn("hook", result["allowed_types"])
+        self.assertIn("user", result["allowed_types"])
+        self.assertIn("team", result["allowed_types"])
+        self.assertIn("add", result["operations_types"])
+        self.assertIn("set", result["operations_types"])
+        self.assertIn("del", result["operations_types"])
+        self.assertIn("mod", result["operations_types"])
+

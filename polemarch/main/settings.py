@@ -87,31 +87,27 @@ HOOKS = {
 HOOKS_DIR = config.get("main", "hooks_dir", fallback="/etc/polemarch/hooks/")
 
 API_URL = VST_API_URL
+VST_API_VERSION = 'v2'
 API = {
     VST_API_VERSION: {
-        r'users': {'view': 'polemarch.api.v1.views.UserViewSet'},
-        r'teams': {'view': 'polemarch.api.v1.views.TeamViewSet'},
-        r'hosts': {'view': 'polemarch.api.v1.views.HostViewSet'},
-        r'groups': {'view': 'polemarch.api.v1.views.GroupViewSet'},
-        r'inventories': {'view': 'polemarch.api.v1.views.InventoryViewSet'},
-        r'projects': {'view': 'polemarch.api.v1.views.ProjectViewSet'},
-        r'tasks': {'view': 'polemarch.api.v1.views.TaskViewSet'},
-        r'periodic-tasks': {'view': 'polemarch.api.v1.views.PeriodicTaskViewSet'},
-        r'templates': {'view': 'polemarch.api.v1.views.TemplateViewSet'},
-        r'history': {'view': 'polemarch.api.v1.views.HistoryViewSet', "op_types": ['get', 'del']},
+        r'token': {'view': 'polemarch.api.v2.views.TokenView', 'type': 'view'},
+        r'_bulk': {'view': 'polemarch.api.v2.views.BulkViewSet', 'type': 'view'},
+        r'user': {'view': 'polemarch.api.v2.views.UserViewSet'},
+        r'team': {'view': 'polemarch.api.v2.views.TeamViewSet'},
+        r'host': {'view': 'polemarch.api.v2.views.HostViewSet'},
+        r'group': {'view': 'polemarch.api.v2.views.GroupViewSet'},
+        r'inventory': {'view': 'polemarch.api.v2.views.InventoryViewSet'},
+        r'project': {'view': 'polemarch.api.v2.views.ProjectViewSet'},
+        r'history': {'view': 'polemarch.api.v2.views.HistoryViewSet', "op_types": ['get', 'del', 'mod']},
+        # r'template': {'view': 'polemarch.api.v1.views.TemplateViewSet'},
         r'ansible': {'view': 'polemarch.api.v1.views.AnsibleViewSet', 'op_types': ['get']},
         r'stats': {'view': 'polemarch.api.v1.views.StatisticViewSet', 'op_types': ['get']},
-        r'hooks': {'view': 'polemarch.api.v1.views.HookViewSet'},
-        r'token': {'view': 'polemarch.api.v1.views.TokenView', 'type': 'view'},
-        r'_bulk': {'view': 'polemarch.api.v1.views.BulkViewSet', 'type': 'view'},
+        r'hook': {'view': 'polemarch.api.v1.views.HookViewSet'},
     }
 }
 
 
 if "test" in sys.argv:
-    REPO_BACKENDS["TEST"] = {
-        "BACKEND": "polemarch.main.tests.repo_backends.Test",
-    }
     PROJECTS_DIR = '/tmp/polemarch_projects' + str(PY_VER)
     HOOKS_DIR = '/tmp/polemarch_hooks' + str(PY_VER)
     os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None

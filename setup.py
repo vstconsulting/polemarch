@@ -209,6 +209,7 @@ kwargs = dict(
         "Documentation": "http://polemarch.readthedocs.io/",
         "Source Code": "https://gitlab.com/vstconsulting/polemarch",
         "Releases": "https://github.com/vstconsulting/polemarch/releases",
+        "Docker": "https://hub.docker.com/r/vstconsulting/polemarch/",
     },
     entry_points={
         'console_scripts': ['polemarchctl=polemarch:cmd_execution']
