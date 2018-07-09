@@ -25,10 +25,10 @@ class _Base(object):
         self.proj.set_status(status)
 
     def _set_tasks_list(self, playbooks_names):
-        self.proj.tasks.all().delete()
+        self.proj.playbook.all().delete()
         for playbook in playbooks_names:
             name = playbook.split(".yml")[0]
-            self.proj.tasks.create(
+            self.proj.playbook.create(
                 name=name, playbook=playbook, hidden=self.proj.hidden
             )
 

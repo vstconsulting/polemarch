@@ -153,6 +153,10 @@ class Inventory(AbstractModel):
         return inv, keys
 
     @property
+    def all_groups(self):
+        return self.groups_list
+
+    @property
     def all_hosts(self):
         return Host.objects.filter(
             Q(groups__in=self.groups_list) | Q(pk__in=self.hosts_list)

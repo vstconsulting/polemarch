@@ -150,10 +150,7 @@ class GroupViewSet(_BaseGroupViewSet, _GroupMixin, PermissionMixin):
             raise exception("Group is children.")
 
 
-@base.nested_view(
-    'all_groups', 'id', manager_name='groups_list', methods=['get'], view=GroupViewSet,
-    subs=None
-)
+@base.nested_view('all_groups', 'id', methods=['get'], view=GroupViewSet, subs=None)
 @base.nested_view('all_hosts', 'id', methods=['get'], view=HostViewSet, subs=None)
 @base.nested_view('variables', 'id', view=__VarsViewSet)
 class InventoryViewSet(_GroupMixin, PermissionMixin):
@@ -163,7 +160,7 @@ class InventoryViewSet(_GroupMixin, PermissionMixin):
     filter_class = filters.InventoryFilter
 
 
-class __PlaybookViewSet(base.ModelViewSetSet):
+class __PlaybookViewSet(base.ReadOnlyModelViewSet):
     lookup_field = 'id'
     model = serializers.models.Task
     serializer_class = serializers.PlaybookSerializer
@@ -199,9 +196,7 @@ class __TemplateViewSet(base.ModelViewSetSet):
     filter_class = filters.TemplateFilter
     POST_WHITE_LIST = ['execute']
 
-    @base.action(
-        ["post"], detail=yes, serializer_class=serializers.TemplateExecuteSerializer
-    )
+    @base.action(["post"], detail=yes, serializer_class=serializers.TemplateExecSerializer)
     def execute(self, request, *args, **kwargs):
         obj = self.get_object()
         return self.get_serializer(obj).execute(request).resp
@@ -226,18 +221,12 @@ class __TemplateViewSet(base.ModelViewSetSet):
     }
 ))
 @base.nested_view(
-    'inventory', 'id', manager_name='inventories', allow_append=yes,
-    view=InventoryViewSet
+    'inventory', 'id', manager_name='inventories',
+    allow_append=yes, view=InventoryViewSet
 )
-@base.nested_view(
-    'playbook', 'id', manager_name='tasks', allow_append=yes,
-    view=__PlaybookViewSet, methods=['get']
-)
-@base.nested_view(
-    'periodic_task', 'id', manager_name='periodic_tasks', allow_append=yes,
-    view=__PeriodicTaskViewSet
-)
-@base.nested_view('template', 'id', manager_name='template_set', view=__TemplateViewSet)
+@base.nested_view('periodic_task', 'id', allow_append=yes, view=__PeriodicTaskViewSet)
+@base.nested_view('playbook', 'id', view=__PlaybookViewSet, methods=['get'])
+@base.nested_view('template', 'id', manager_name='template', view=__TemplateViewSet)
 @base.nested_view('history', 'id', manager_name='history', view=HistoryViewSet)
 @base.nested_view('variables', 'id', view=__ProjectVarsViewSet)
 class ProjectViewSet(_GroupMixin, PermissionMixin):

@@ -167,7 +167,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
             data=dict(
                 module="ping",
                 group="all",
-                project=pk,
                 inventory='localhost',
                 args="",
                 vars=dict(
@@ -184,7 +183,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
             name='Test playbook template',
             data=dict(
                 playbook="test-0.yml",
-                project=pk,
                 inventory='localhost',
                 vars=dict(
                     forks=8,
@@ -284,7 +282,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
         # Check Templates without inventory
         invalid_template = dict(template_playbook)
         del invalid_template['data']['inventory']
-        del invalid_template['data']['project']
         invalid_type_template = dict(template_playbook)
         invalid_type_template['kind'] = 'UnknownKind'
         bulk_data = [
@@ -296,9 +293,9 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(
             results[0]['data']['detail']['inventory'], ["Inventory have to set."]
         )
-        self.assertEqual(
-            results[0]['data']['detail']['project'], ["Project have to set."]
-        )
+        # self.assertEqual(
+        #     results[0]['data']['detail']['project'], ["Project have to set."]
+        # )
         self.assertEqual(results[1]['status'], 400)
 
     def make_test_periodic_task(self, project_data):

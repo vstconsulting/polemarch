@@ -15,9 +15,9 @@ from vstutils.utils import raise_context
 
 from .vars import Variable
 from .hosts import Host, Group, Inventory
-from .projects import Project
+from .projects import Project, Task, Module
 from .users import BaseUser, UserGroup, ACLPermission, UserSettings
-from .tasks import Task, PeriodicTask, History, HistoryLines, Template
+from .tasks import PeriodicTask, History, HistoryLines, Template
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname
 from ..exceptions import UnknownTypeException
@@ -150,8 +150,6 @@ def validate_template_executes(instance, **kwargs):
     errors = {}
     if "inventory" not in instance.data.keys():
         errors["inventory"] = "Inventory have to set."
-    if "project" not in instance.data.keys():
-        errors["project"] = "Project have to set."
     if errors:
         raise ValidationError(errors)
 
@@ -271,4 +269,4 @@ def create_settings_for_user(instance, **kwargs):
 
 @receiver(signals.pre_save, sender=Template)
 def update_ptasks_with_templates(instance, **kwargs):
-    instance.periodic_tasks.all().update(project=instance.project)
+    instance.periodic_task.all().update(project=instance.project)

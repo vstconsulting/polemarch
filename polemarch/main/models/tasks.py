@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import logging
-import uuid
 from collections import OrderedDict
 from datetime import timedelta
 from functools import partial
@@ -31,25 +30,7 @@ from .projects import Project
 logger = logging.getLogger("polemarch")
 
 
-class TaskFilterQuerySet(BQuerySet):
-    use_for_related_fields = True
-
-
 # Block of real models
-class Task(BModel):
-    objects     = TaskFilterQuerySet.as_manager()
-    project     = models.ForeignKey(Project, on_delete=models.CASCADE,
-                                    related_query_name="tasks")
-    name        = models.CharField(max_length=256, default=uuid.uuid1)
-    playbook    = models.CharField(max_length=256)
-
-    class Meta:
-        default_related_name = "tasks"
-
-    def __unicode__(self):
-        return str(self.name)  # nocv
-
-
 class Template(ACLModel):
     name          = models.CharField(max_length=512)
     kind          = models.CharField(max_length=32)
@@ -60,6 +41,7 @@ class Template(ACLModel):
                                   default=None, blank=True, null=True)
 
     class Meta:
+        default_related_name = 'template'
         index_together = [
             ["id", "name", "kind", "inventory", "project"]
         ]
@@ -165,7 +147,7 @@ class Template(ACLModel):
         data = self._convert_to_data(value)
         project_id = data.pop('project', None)
         inventory_id = data.pop('inventory', None)
-        if "project" in self.template_fields[self.kind]:
+        if project_id and "project" in self.template_fields[self.kind]:
             self.project = (
                 Project.objects.get(pk=project_id) if project_id
                 else project_id
@@ -209,7 +191,7 @@ class Template(ACLModel):
         return list(self.options.keys())
 
 
-class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
+class PeriodicTaskQuerySet(AbstractVarsQuerySet):
     use_for_related_fields = True
 
 
@@ -217,11 +199,11 @@ class PeriodicTaskQuerySet(TaskFilterQuerySet, AbstractVarsQuerySet):
 class PeriodicTask(AbstractModel):
     objects     = PeriodicTaskQuerySet.as_manager()
     project        = models.ForeignKey(Project, on_delete=models.CASCADE,
-                                       related_query_name="periodic_tasks")
+                                       related_query_name="periodic_task")
     mode           = models.CharField(max_length=256)
     kind           = models.CharField(max_length=50, default="PLAYBOOK")
     _inventory     = models.ForeignKey(Inventory, on_delete=models.CASCADE,
-                                       related_query_name="periodic_tasks",
+                                       related_query_name="periodic_task",
                                        null=True, blank=True)
     inventory_file = models.CharField(max_length=2*1024, null=True, blank=True)
     schedule       = models.CharField(max_length=4*1024)
@@ -229,7 +211,7 @@ class PeriodicTask(AbstractModel):
     save_result    = models.BooleanField(default=True)
     enabled        = models.BooleanField(default=True)
     template       = models.ForeignKey(Template, on_delete=models.CASCADE,
-                                       related_query_name="periodic_tasks",
+                                       related_query_name="periodic_task",
                                        null=True, blank=True)
     template_opt   = models.CharField(max_length=256, null=True, blank=True)
 
@@ -243,7 +225,7 @@ class PeriodicTask(AbstractModel):
     ]
 
     class Meta:
-        default_related_name = "periodic_tasks"
+        default_related_name = "periodic_task"
 
     time_types = {
         'minute': {"max_": 60},

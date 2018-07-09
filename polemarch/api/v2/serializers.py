@@ -580,7 +580,7 @@ class OneTemplateSerializer(TemplateSerializer):
         )
 
 
-class TemplateExecuteSerializer(serializers.Serializer):
+class TemplateExecSerializer(serializers.Serializer):
     option = serializers.CharField(
         help_text='Option name from template options.',
         min_length=0, allow_blank=True,
