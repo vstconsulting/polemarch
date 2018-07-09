@@ -28,7 +28,6 @@ class InvBaseTestCase(BaseTestCase):
     def _check_vars(self, api_name, id, data):
         result = self.get_result('get', self.get_url(api_name, id, 'variables'))
         self.assertCount(data, result['count'])
-        vars_id = []
         for var in result['results']:
             self.assertEqual(var['value'], data[var['key']])
 

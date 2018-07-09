@@ -202,7 +202,6 @@ class OneTeamSerializer(TeamSerializer):
 
 class OneUserSerializer(UserSerializer):
     groups = TeamSerializer(read_only=True, many=True)
-    raw_password = serializers.HiddenField(default=False, initial=False)
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -210,7 +209,6 @@ class OneUserSerializer(UserSerializer):
         fields = ('id',
                   'username',
                   'password',
-                  'raw_password',
                   'is_active',
                   'is_staff',
                   'first_name',
@@ -815,3 +813,38 @@ class AnsiblePlaybookSerializer(_AnsibleSerializer):
 
 class AnsibleModuleSerializer(_AnsibleSerializer):
     module = serializers.CharField(required=True)
+
+
+class BaseDashboardJobSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    sum = serializers.IntegerField()
+    all = serializers.IntegerField()
+
+
+class DayDashboardJobSerializer(BaseDashboardJobSerializer):
+    day = serializers.DateTimeField()
+
+
+class MonthDashboardJobSerializer(BaseDashboardJobSerializer):
+    month = serializers.DateTimeField()
+
+
+class YearDashboardJobSerializer(BaseDashboardJobSerializer):
+    year = serializers.DateTimeField()
+
+
+class DashboardJobsSerializer(serializers.Serializer):
+    day = DayDashboardJobSerializer(many=True)
+    month = MonthDashboardJobSerializer(many=True)
+    year = YearDashboardJobSerializer(many=True)
+
+
+class DashboardStatisticSerializer(serializers.Serializer):
+    projects = serializers.IntegerField()
+    templates = serializers.IntegerField()
+    inventories = serializers.IntegerField()
+    groups = serializers.IntegerField()
+    hosts = serializers.IntegerField()
+    teams = serializers.IntegerField()
+    users = serializers.IntegerField()
+    jobs = DashboardJobsSerializer()

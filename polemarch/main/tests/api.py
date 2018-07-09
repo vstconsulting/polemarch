@@ -224,7 +224,7 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertEqual(result["email"], "test@domain.lan")
         url = self.get_url('user', str(result['id']))
         self.assertRCode(client.get(url), 200)
-        result = self.result(
+        self.result(
             client.patch, url,
             data=json.dumps({'last_name': 'tttt'}),
             content_type="application/json"
@@ -271,6 +271,28 @@ class ApiUsersTestCase(BaseTestCase):
         }))
         result = self.get_result("get", url_ug)
         self.assertCount(result["users"], 0)
+
+        # Add users to Team
+        bulk_data = [
+            self.get_bulk('team', dict(name='test_team'), 'add'),
+            self.get_bulk('user', dict(username='test_user', password='123'), 'add'),
+            self.get_mod_bulk(
+                'team', '<0[data][id]>', dict(username='te', password='123'), 'user'
+            ),
+            self.get_mod_bulk(
+                'team', '<0[data][id]>', dict(id='<1[data][id]>'), 'user'
+            ),
+        ]
+        results = self.make_bulk(bulk_data)
+        for result in results:
+            self.assertEqual(result['status'], 201)
+
+        result = self.get_result(
+            'get', self.get_url('team', results[0]['data']['id'], 'user')
+        )
+        self.assertEqual(result['count'], 2)
+        self.assertEqual(result['results'][0]['username'], 'te')
+        self.assertEqual(result['results'][1]['username'], 'test_user')
 
     def test_users_localsettings(self):
         result = self.get_result("get", self.get_url('user', self.user.id))

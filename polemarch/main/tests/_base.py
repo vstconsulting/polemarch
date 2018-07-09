@@ -28,7 +28,7 @@ class BaseTestCase(VSTBaseTestCase):
             if os.path.exists(hook_path):
                 try:
                     os.remove(hook_path)
-                except:
+                except:  # nocv
                     pass
 
     def create_hook(self, hook):
