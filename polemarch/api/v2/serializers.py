@@ -1,16 +1,15 @@
 # pylint: disable=no-member,unused-argument
 from __future__ import unicode_literals
 import json
-
 from collections import OrderedDict
 import six
 from django.contrib.auth.models import User
 from django.db import transaction
-from rest_framework import serializers
-from rest_framework import exceptions
+from rest_framework import serializers, exceptions, status
 from rest_framework.exceptions import PermissionDenied
 from vstutils.api import serializers as vst_serializers
 from vstutils.api.base import Response
+from ...main.utils import AnsibleArgumentsReference
 
 from ...main.models import Inventory
 from ...main import models, exceptions as main_exceptions
@@ -80,6 +79,15 @@ class EmptySerializer(serializers.Serializer):
     pass
 
 
+class ActionResponseSerializer(serializers.Serializer):
+    detail = serializers.CharField()
+
+
+class ExecuteResponseSerializer(ActionResponseSerializer):
+    history_id = serializers.IntegerField(default=None, allow_null=True)
+    executor = serializers.IntegerField(default=None, allow_null=True)
+
+
 class _SignalSerializer(serializers.ModelSerializer):
     @with_signals
     def create(self, validated_data):
@@ -88,14 +96,6 @@ class _SignalSerializer(serializers.ModelSerializer):
     @with_signals
     def update(self, instance, validated_data):
         return super(_SignalSerializer, self).update(instance, validated_data)
-
-    # Depracated
-    # def to_internal_value(self, data):
-    #     variables = data.pop("variables", None)
-    #     instance = super(_SignalSerializer, self).to_internal_value(data)
-    #     if variables:
-    #         instance['vars'] = variables
-    #     return instance
 
 
 class _WithPermissionsSerializer(_SignalSerializer):
@@ -142,17 +142,17 @@ class _WithPermissionsSerializer(_SignalSerializer):
         elif request.method == "PUT":
             self.instance.acl.clear()
             self.__permission_set(request.data, False)
-        return Response(self.__get_all_permission_serializer().data, 200)
+        return Response(self.__get_all_permission_serializer().data, status.HTTP_200_OK)
 
     def _change_owner(self, request):  # noce
         if not self.instance.acl_handler.owned_by(self.current_user()):
             raise PermissionDenied(self.perms_msg)
         self.instance.acl_handler.set_owner(User.objects.get(pk=request.data))
-        return Response("Owner changed", 200)
+        return Response("Owner changed", status.HTTP_200_OK)
 
     def owner(self, request):  # noce
         if request.method == "GET":
-            return Response(self.instance.owner.id, 200)
+            return Response(self.instance.owner.id, status.HTTP_200_OK)
         elif request.method == "PUT":
             return self._change_owner(request)
 
@@ -479,11 +479,12 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
 
     def execute(self):
         inventory = self.instance.inventory
-        rdata = dict(
+        rdata = ExecuteResponseSerializer(data=dict(
             detail="Started at inventory {}.".format(inventory),
             history_id=self.instance.execute(sync=False)
-        )
-        return Response(rdata, 201)
+        ))
+        rdata.is_valid(True)
+        return Response(rdata.data, status.HTTP_201_CREATED)
 
 
 class DataSerializer(serializers.Serializer):
@@ -584,7 +585,8 @@ class OneTemplateSerializer(TemplateSerializer):
 class TemplateExecuteSerializer(serializers.Serializer):
     option = serializers.CharField(
         help_text='Option name from template options.',
-        min_length=0, allow_blank=True
+        min_length=0, allow_blank=True,
+        required=False
     )
 
 
@@ -702,8 +704,11 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     @transaction.atomic()
     def sync(self):
         self.instance.start_repo_task("sync")
-        data = dict(detail="Sync with {}.".format(self.instance.repository))
-        return Response(data, 200)
+        serializer = ActionResponseSerializer(
+            data=dict(detail="Sync with {}.".format(self.instance.repository))
+        )
+        serializer.is_valid(True)
+        return Response(serializer.data, status.HTTP_200_OK)
 
     def _execution(self, kind, data, user, **kwargs):
         template = kwargs.pop("template", None)
@@ -727,11 +732,12 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
             kind, str(data.pop(kind)), inventory,
             initiator=obj_id, initiator_type=init_type, executor=user, **data
         )
-        rdata = dict(
+        rdata = ExecuteResponseSerializer(data=dict(
             detail="Started at inventory {}.".format(inventory),
             history_id=history_id, executor=user.id
-        )
-        return Response(rdata, 201)
+        ))
+        rdata.is_valid(raise_exception=True)
+        return Response(rdata.data, status.HTTP_201_CREATED)
 
     def execute_playbook(self, request):
         return self._execution("playbook", dict(request.data), request.user)
@@ -757,3 +763,55 @@ class PermissionsSerializer(_SignalSerializer):
         fields = ("member",
                   "role",
                   "member_type")
+
+
+ansible_reference = AnsibleArgumentsReference()
+
+
+def generate_fileds(ansible_type):
+    if ansible_type is None:
+        return OrderedDict()
+
+    fields = OrderedDict()
+
+    for ref, settings in ansible_reference.raw_dict[ansible_type].items():
+        ref_type = settings.get('type', None)
+        kwargs = dict(help_text=settings.get('help', ''), required=False)
+        if ref_type is None:
+            field = serializers.BooleanField
+            kwargs['default'] = False
+        elif ref_type == 'int':
+            field = serializers.IntegerField
+        elif ref_type == 'string' or 'choice':
+            field = serializers.CharField
+        else:  # nocv
+            continue
+        field_name = ref.replace('-', '_')
+        fields[field_name] = field(**kwargs)
+
+    return fields
+
+
+class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
+    @staticmethod
+    def __new__(cls, name, bases, attrs):
+        ansible_type = None
+        if isinstance(attrs.get('playbook', None), serializers.CharField):
+            ansible_type = 'playbook'
+        elif isinstance(attrs.get('module', None), serializers.CharField):
+            ansible_type = 'module'
+        attrs.update(generate_fileds(ansible_type))
+        return super(AnsibleSerializerMetaclass, cls).__new__(cls, name, bases, attrs)
+
+
+@six.add_metaclass(AnsibleSerializerMetaclass)
+class _AnsibleSerializer(serializers.Serializer):
+    pass
+
+
+class AnsiblePlaybookSerializer(_AnsibleSerializer):
+    playbook = serializers.CharField(required=True)
+
+
+class AnsibleModuleSerializer(_AnsibleSerializer):
+    module = serializers.CharField(required=True)

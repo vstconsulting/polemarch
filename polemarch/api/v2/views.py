@@ -1,8 +1,10 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 from collections import OrderedDict
 from django.http import HttpResponse
+from django.utils.decorators import method_decorator
 from rest_framework import exceptions as excepts
 from rest_framework.authtoken import views as token_views
+from drf_yasg.utils import swagger_auto_schema
 from vstutils.api.permissions import StaffPermission
 from vstutils.api import base, views
 from vstutils.utils import KVExchanger
@@ -50,6 +52,7 @@ class UserViewSet(views.UserViewSet):
         return base.Response(obj.settings.data, 200).resp
 
 
+@base.nested_view('users', 'id', allow_append=True, view=UserViewSet)
 class TeamViewSet(PermissionMixin, base.ModelViewSetSet):
     model = serializers.models.UserGroup
     serializer_class = serializers.TeamSerializer
@@ -178,6 +181,12 @@ class __PeriodicTaskViewSet(base.ModelViewSetSet, LimitedPermissionMixin):
         return serializer.execute().resp
 
 
+@method_decorator(name='execute', decorator=swagger_auto_schema(
+    operation_description='Execute template.',
+    responses={
+        201: serializers.ExecuteResponseSerializer(),
+    }
+))
 class __TemplateViewSet(base.ModelViewSetSet):
     model = serializers.models.Template
     serializer_class = serializers.TemplateSerializer
@@ -194,6 +203,24 @@ class __TemplateViewSet(base.ModelViewSetSet):
         return self.get_serializer(obj).execute(request).resp
 
 
+@method_decorator(name='execute_module', decorator=swagger_auto_schema(
+    operation_description='Execute ansible module.',
+    responses={
+        201: serializers.ExecuteResponseSerializer(),
+    }
+))
+@method_decorator(name='execute_playbook', decorator=swagger_auto_schema(
+    operation_description='Execute ansible module.',
+    responses={
+        201: serializers.ExecuteResponseSerializer(),
+    }
+))
+@method_decorator(name='sync', decorator=swagger_auto_schema(
+    operation_description='Sync project repository.',
+    responses={
+        200: serializers.ActionResponseSerializer(),
+    }
+))
 @base.nested_view(
     'inventory', 'id', manager_name='inventories', allow_append=True,
     view=InventoryViewSet
@@ -222,12 +249,18 @@ class ProjectViewSet(_GroupMixin, PermissionMixin):
     def sync(self, request, *args, **kwargs):
         return self.get_serializer(self.get_object()).sync().resp
 
-    @base.action(methods=["post"], url_path="execute-playbook", detail=True)
+    @base.action(
+        ["post"], url_path="execute-playbook", detail=True,
+        serializer_class=serializers.AnsiblePlaybookSerializer
+    )
     def execute_playbook(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
         return serializer.execute_playbook(request).resp
 
-    @base.action(methods=["post"], url_path="execute-module", detail=True)
+    @base.action(
+        ["post"], url_path="execute-module", detail=True,
+        serializer_class=serializers.AnsibleModuleSerializer
+    )
     def execute_module(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
         return serializer.execute_module(request).resp
