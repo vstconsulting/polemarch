@@ -19,6 +19,10 @@ test_playbook_content = '''
 '''
 
 
+class Object(object):
+    pass
+
+
 class BaseExecutionsTestCase(BaseTestCase):
     def setUp(self):
         super(BaseExecutionsTestCase, self).setUp()
@@ -163,7 +167,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
             data=dict(
                 module="ping",
                 group="all",
-                project=pk,
                 inventory='localhost',
                 args="",
                 vars=dict(
@@ -180,7 +183,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
             name='Test playbook template',
             data=dict(
                 playbook="test-0.yml",
-                project=pk,
                 inventory='localhost',
                 vars=dict(
                     forks=8,
@@ -277,6 +279,24 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(
             result['detail'], "Task canceled: {}".format(results['results'][-2]['id'])
         )
+        # Check Templates without inventory
+        invalid_template = dict(template_playbook)
+        del invalid_template['data']['inventory']
+        invalid_type_template = dict(template_playbook)
+        invalid_type_template['kind'] = 'UnknownKind'
+        bulk_data = [
+            self.get_mod_bulk('project', pk, invalid_template, 'template'),
+            self.get_mod_bulk('project', pk, invalid_type_template, 'template'),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+        self.assertEqual(results[0]['status'], 400)
+        self.assertEqual(
+            results[0]['data']['detail']['inventory'], ["Inventory have to set."]
+        )
+        # self.assertEqual(
+        #     results[0]['data']['detail']['project'], ["Project have to set."]
+        # )
+        self.assertEqual(results[1]['status'], 400)
 
     def make_test_periodic_task(self, project_data):
         # Check periodic tasks
@@ -553,7 +573,27 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 'raw', 'get', filters='color=yes'
             ),
         ]
-        results = self.make_bulk(bulk_data, 'put')
+        # additionaly test hooks
+        self.hook_model.objects.all().delete()
+        hook_urls = ['localhost:64000', 'localhost:64001']
+        recipients = ' | '.join(hook_urls)
+        data = [
+            dict(type='HTTP', recipients=recipients, when='on_execution'),
+            dict(type='HTTP', recipients=recipients, when='after_execution'),
+        ]
+        self.generate_hooks(hook_urls)
+        self.mass_create_bulk('hook', data)
+        response = Object()
+        response.status_code = 200
+        response.reason = None
+        response.text = "OK"
+        ##
+        with self.patch('requests.post') as mock:
+            iterations = 2 * len(hook_urls)
+            mock.side_effect = [response] * iterations
+            results = self.make_bulk(bulk_data, 'put')
+            self.assertEqual(mock.call_count, iterations)
+            self.hook_model.objects.all().delete()
         for result in results[:-4]+results[-3:-2]:
             self.assertEqual(result['status'], 201 or 200, result)
         inventory_data = results[9]['data']

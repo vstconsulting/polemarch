@@ -15,9 +15,9 @@ from vstutils.utils import raise_context
 
 from .vars import Variable
 from .hosts import Host, Group, Inventory
-from .projects import Project
+from .projects import Project, Task, Module
 from .users import BaseUser, UserGroup, ACLPermission, UserSettings
-from .tasks import Task, PeriodicTask, History, HistoryLines, Template
+from .tasks import PeriodicTask, History, HistoryLines, Template
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname
 from ..exceptions import UnknownTypeException
@@ -57,7 +57,7 @@ def send_polemarch_models(when, instance, **kwargs):
 #####################################
 # SIGNALS
 #####################################
-@receiver(signals.pre_save, sender=Variable)
+@receiver(signals.post_save, sender=Variable)
 def remove_existed(instance, **kwargs):
     if 'loaddata' in sys.argv:  # nocv
         return
@@ -65,7 +65,7 @@ def remove_existed(instance, **kwargs):
         object_id=instance.object_id,
         content_type=instance.content_type,
         key=instance.key
-    ).delete()
+    ).exclude(pk=instance.id).delete()
 
 
 @receiver(signals.pre_save, sender=Variable)
@@ -104,7 +104,8 @@ def check_circular_deps(instance, action, pk_set, *args, **kw):
 @receiver(signals.pre_save, sender=PeriodicTask)
 def validate_types(instance, **kwargs):
     if (instance.kind not in instance.kinds) or (instance.type not in instance.types):
-        raise UnknownTypeException(instance.kind, "Unknown kind {}.")
+        # Deprecated, because moved to serializers
+        raise UnknownTypeException(instance.kind, "Unknown kind {}.")  # nocv
 
 
 @receiver(signals.pre_save, sender=PeriodicTask)
@@ -118,7 +119,8 @@ def validate_crontab(instance, **kwargs):
 
 @receiver(signals.pre_save, sender=Host)
 def validate_type_and_name(instance, **kwargs):
-    if instance.type not in instance.types:
+    if instance.type not in instance.types:  # nocv
+        # Deprecated, because moved to serializers
         raise UnknownTypeException(instance.type)
     if instance.type == 'HOST':
         validate_hostname(instance.name)
@@ -127,7 +129,8 @@ def validate_type_and_name(instance, **kwargs):
 
 
 @receiver(signals.pre_save, sender=Template)
-def validate_template_keys(instance, **kwargs):
+def validate_template_keys(instance, **kwargs):  # nocv
+    # Deprecated, because moved to serializers
     if instance.kind not in instance.template_fields.keys():
         raise UnknownTypeException(instance.kind)
     errors = {}
@@ -147,8 +150,6 @@ def validate_template_executes(instance, **kwargs):
     errors = {}
     if "inventory" not in instance.data.keys():
         errors["inventory"] = "Inventory have to set."
-    if "project" not in instance.data.keys():
-        errors["project"] = "Project have to set."
     if errors:
         raise ValidationError(errors)
 
@@ -160,8 +161,6 @@ def validate_template_args(instance, **kwargs):
     command = "playbook"
     ansible_args = dict(instance.data['vars'])
     if instance.kind == "Module":
-        command = "module"
-    if instance.kind == "PeriodicTask" and instance.data["kind"] == "MODULE":
         command = "module"
     AnsibleArgumentsReference().validate_args(command, ansible_args)
     for _, data in dict(instance.options).items():
@@ -241,15 +240,22 @@ def user_add_hook(instance, **kwargs):
     send_user_hook(when, instance) if when else None
 
 
+@receiver([signals.post_save, signals.post_delete], sender=Variable)
 @receiver([signals.post_save, signals.post_delete], sender=Project)
 @receiver([signals.post_save, signals.post_delete], sender=PeriodicTask)
+@receiver([signals.post_save, signals.post_delete], sender=Template)
 @receiver([signals.post_save, signals.post_delete], sender=Inventory)
 @receiver([signals.post_save, signals.post_delete], sender=Group)
 @receiver([signals.post_save, signals.post_delete], sender=Host)
 def polemarch_hook(instance, **kwargs):
     created = kwargs.get('created', None)
     when = "on_object_add"
-    if created is None:
+    if isinstance(instance, Variable):
+        instance = instance.content_object
+        if instance is None:
+            return
+        when = "on_object_upd"
+    elif created is None:
         when = "on_object_del"
     elif not created:
         when = "on_object_upd"
@@ -263,4 +269,4 @@ def create_settings_for_user(instance, **kwargs):
 
 @receiver(signals.pre_save, sender=Template)
 def update_ptasks_with_templates(instance, **kwargs):
-    instance.periodic_tasks.all().update(project=instance.project)
+    instance.periodic_task.all().update(project=instance.project)

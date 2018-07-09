@@ -2,14 +2,46 @@ import json  # noqa: F401
 
 import copy
 import os
-from django.conf import settings
 from vstutils.tests import BaseTestCase as VSTBaseTestCase
 from ...main import models
+
+hook_data = '''
+echo "OK"
+'''
 
 
 class BaseTestCase(VSTBaseTestCase):
     models = models
     tests_path = os.path.dirname(os.path.abspath(__file__))
+
+    def setUp(self):
+        super(BaseTestCase, self).setUp()
+        self.hooks_dir = self._settings('HOOKS_DIR')
+        self.hooks = []
+        self.hook_model = self.get_model_class('Hook')
+        self.hook_types = self.hook_model.handlers.when_types_names
+
+    def tearDown(self):
+        super(BaseTestCase, self).tearDown()
+        for hook in self.hooks:
+            hook_path = self.get_hook_path(hook)
+            if os.path.exists(hook_path):
+                try:
+                    os.remove(hook_path)
+                except:  # nocv
+                    pass
+
+    def create_hook(self, hook):
+        with open(self.get_hook_path(hook), 'w') as hook_fd:
+            hook_fd.write(hook_data)
+        self.hooks.append(hook)
+
+    def generate_hooks(self, hooks):
+        for hook in hooks:
+            self.create_hook(hook)
+
+    def get_hook_path(self, hook):
+        return "{}/{}".format(self.hooks_dir, hook)
 
     def get_test_filepath(self, name):
         file_path = os.path.dirname(os.path.abspath(__file__))

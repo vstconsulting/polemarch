@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import logging
+import collections
 import uuid
 from vstutils.utils import raise_context, ModelHandlers
 from .base import BModel, BQuerySet, models
@@ -9,7 +10,7 @@ logger = logging.getLogger('polemarch')
 
 
 class HookHandlers(ModelHandlers):
-    when_types_names = dict(
+    when_types_names = collections.OrderedDict(
         on_execution="Before start task",
         after_execution="After end task",
         on_user_add="When new user register",
@@ -19,7 +20,7 @@ class HookHandlers(ModelHandlers):
         on_object_upd="When Polemarch object was updated",
         on_object_del="When Polemarch object was removed",
     )
-    when_types = when_types_names.keys()
+    when_types = tuple(when_types_names.keys())
 
     def get_handler(self, obj):
         return self[obj.type](obj, self.when_types, **self.opts(obj.type))

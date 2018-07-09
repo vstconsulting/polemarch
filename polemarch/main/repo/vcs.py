@@ -51,9 +51,10 @@ class Git(_VCS):
 
     def get_branch_name(self):
         # pylint: disable=broad-except
+        reponame = "waiting..."
         with raise_context():
-            return self.get_repo().active_branch.name
-        return "waiting..."
+            reponame = self.get_repo().active_branch.name
+        return reponame
 
     def make_clone(self, env):
         kw = dict(**self.options.get("CLONE_KWARGS", dict()))

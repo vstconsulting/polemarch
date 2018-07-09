@@ -2,18 +2,23 @@
 from __future__ import unicode_literals
 
 import os
+import json
 import logging
+import collections
+import uuid
 import six
 from docutils.core import publish_parts as rst_gen
 from markdown2 import Markdown
 from django.conf import settings
+from django.db.models import Q
 from django.core.validators import ValidationError
 from vstutils.utils import ModelHandlers
 
 from . import hosts as hosts_models
 from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
-from .base import ManyToManyFieldACL
+from ..utils import AnsibleModules
+from .base import ManyToManyFieldACL, BQuerySet, BModel
 from .hooks import Hook
 
 
@@ -174,6 +179,9 @@ class Project(AbstractModel):
     def sync(self, *args, **kwargs):
         return self.repo_class.get()
 
+    def sync_modules(self):
+        Module.create_from_ansible(self)
+
     @property
     def revision(self):
         return self.repo_class.revision()
@@ -181,6 +189,10 @@ class Project(AbstractModel):
     @property
     def branch(self):
         return self.repo_class.get_branch_name()
+
+    @property
+    def module(self):
+        return Module.objects.filter(Q(project=self)|Q(project=None))
 
     def __get_readme(self):
         readme = getattr(self, 'readme', None)
@@ -196,3 +208,66 @@ class Project(AbstractModel):
     @property
     def readme_ext(self):
         return self.__get_readme().ext
+
+
+class TaskFilterQuerySet(BQuerySet):
+    use_for_related_fields = True
+
+
+class Task(BModel):
+    objects     = TaskFilterQuerySet.as_manager()
+    project     = models.ForeignKey(Project, on_delete=models.CASCADE,
+                                    related_query_name="playbook")
+    name        = models.CharField(max_length=256, default=uuid.uuid1)
+    playbook    = models.CharField(max_length=256)
+
+    class Meta:
+        default_related_name = "playbook"
+
+    def __unicode__(self):
+        return str(self.name)  # nocv
+
+
+class ModulesQuerySet(BQuerySet):
+    use_for_related_fields = True
+
+
+class Module(BModel):
+    objects = ModulesQuerySet.as_manager()
+    path        = models.CharField(max_length=1024)
+    _data       = models.CharField(max_length=4096, default='{}')
+    project     = models.ForeignKey(Project,
+                                    on_delete=models.CASCADE,
+                                    related_query_name="modules",
+                                    null=True, blank=True, default=None)
+
+    class Meta:
+        default_related_name = "modules"
+
+    def __unicode__(self):
+        return str(self.name)  # nocv
+
+    @property
+    def name(self):
+        return self.path.split('.')[-1]
+
+    @property
+    def data(self):
+        return json.loads(self._data or '{}')
+
+    @data.setter
+    def data(self, value):
+        if isinstance(value, (dict, collections.OrderedDict)):
+            self._data = json.dumps(value)
+        elif isinstance(value, six.string_types):
+            self._data = json.dumps(json.loads(value))
+        else:
+            raise ValidationError({'data': 'Unknown data type.'})
+
+    @classmethod
+    def create_from_ansible(cls, project=None):
+        for module in AnsibleModules(detailed=True).all():
+            cls.objects.update_or_create(
+                path=module['path'], project=project,
+                defaults=dict(_data=json.dumps(module['data']))
+            )

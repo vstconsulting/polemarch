@@ -60,22 +60,6 @@ class Host(AbstractModel):
     def __unicode__(self):
         return "{}".format(self.name)  # nocv
 
-    @transaction.atomic()
-    def set_vars(self, variables):
-        # Moved it from triggers because in trigger variables are always empty.
-        # They saved later of trigger execution.
-        if variables.get("ansible_host", False):
-            validate_hostname(variables.get("ansible_host"))
-        elif self.type == "HOST":
-            validate_hostname(self.name)
-        elif self.type == "RANGE":
-            validate_name = RegexValidator(
-                regex=r'^[a-zA-Z0-9\-\._\[\]\:]*$',
-                message='Name must be Alphanumeric'
-            )
-            validate_name(self.name)
-        return super(Host, self).set_vars(variables)
-
     def toString(self, var_sep=" "):
         hvars, key = self.get_generated_vars()
         key = [key] if key is not None else []
@@ -167,6 +151,10 @@ class Inventory(AbstractModel):
             )
         )
         return inv, keys
+
+    @property
+    def all_groups(self):
+        return self.groups_list
 
     @property
     def all_hosts(self):

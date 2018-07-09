@@ -28,7 +28,6 @@ class InvBaseTestCase(BaseTestCase):
     def _check_vars(self, api_name, id, data):
         result = self.get_result('get', self.get_url(api_name, id, 'variables'))
         self.assertCount(data, result['count'])
-        vars_id = []
         for var in result['results']:
             self.assertEqual(var['value'], data[var['key']])
 
@@ -99,6 +98,7 @@ class InvBaseTestCase(BaseTestCase):
 class InventoriesTestCase(InvBaseTestCase):
 
     def test_hosts(self):
+
         self._check_with_vars(
             'Host', self.hosts_data, ansible_port='222', ansible_user='one'
         )
@@ -113,13 +113,32 @@ class InventoriesTestCase(InvBaseTestCase):
             ),
             self.get_bulk('host', dict(name='some^invalid', type="RANGE"), 'add'),
             self.get_bulk('host', dict(name='host', type="UNKNOWN"), 'add'),
+            self.get_bulk('host', {}, 'del', pk="<0[data][id]>"),
         ]
-        results = self.make_bulk(bulk_data, 'put')
+        # additionaly test hooks
+        self.hook_model.objects.all().delete()
+        scripts = ['one.sh', 'two.sh']
+        recipients = ' | '.join(scripts)
+        data = [
+            dict(type='SCRIPT', recipients=recipients, when='on_object_add'),
+            dict(type='SCRIPT', recipients=recipients, when='on_object_upd'),
+            dict(type='SCRIPT', recipients=recipients, when='on_object_del'),
+        ]
+        self.generate_hooks(scripts)
+        self.mass_create_bulk('hook', data)
+        ##
+        with self.patch('subprocess.check_output') as mock:
+            iterations = 3 * len(scripts)
+            mock.side_effect = [''] * iterations
+            results = self.make_bulk(bulk_data, 'put')
+            self.assertEqual(mock.call_count, iterations)
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[2]['status'], 201)
+        self.assertEqual(results[6]['status'], 204)
         self.assertEqual(results[1]['status'], 400)
         self.assertEqual(results[3]['status'], 400)
         self.assertEqual(results[4]['status'], 400)
+        self.assertEqual(results[5]['status'], 400)
 
     def test_groups(self):
         self._check_with_vars(

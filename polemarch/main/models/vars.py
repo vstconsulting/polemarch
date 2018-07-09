@@ -55,15 +55,6 @@ class Variable(BModel):
 class AbstractVarsQuerySet(BQuerySet):
     use_for_related_fields = True
 
-    @transaction.atomic
-    def create(self, **kwargs):
-        variables = kwargs.pop("vars", {})
-        obj = super(AbstractVarsQuerySet, self).create(**kwargs)
-        if isinstance(variables, (string_types, text_type)):
-            variables = json.loads(variables)
-        obj.vars = variables
-        return obj
-
     def var_filter(self, **kwargs):
         qs = self
         for key, value in kwargs.items():
@@ -97,15 +88,6 @@ class AbstractModel(ACLModel):
         # pylint: disable=unused-argument
         return OrderedDict(id=self.id, name=self.name)
 
-    @transaction.atomic()
-    def set_vars(self, variables):
-        encr = "[~~ENCRYPTED~~]"
-        encrypted_vars = {k: v for k, v in variables.items() if v == encr}
-        other_vars = {k: v for k, v in variables.items() if v != encr}
-        self.variables.exclude(key__in=encrypted_vars.keys()).delete()
-        for key, value in other_vars.items():
-            self.variables.create(key=key, value=value)
-
     def vars_string(self, variables, separator=" "):
         return separator.join([
             "{}={}".format(key, value) for key, value in variables.items()
@@ -133,14 +115,6 @@ class AbstractModel(ACLModel):
     @property
     def vars(self):
         return self.get_vars()
-
-    @vars.setter
-    def vars(self, value):
-        self.set_vars(value)
-
-    @vars.deleter
-    def vars(self):
-        self.variables.all().delete()  # nocv
 
     @property
     def have_vars(self):
