@@ -656,7 +656,7 @@ pmProjects.syncRepo = function(item_id)
     }
 
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/projects/"+item_id+"/sync/",
+        url: hostname + "/api/v2/project"+item_id+"/sync/",
         type: "POST",
         contentType:'application/json',
         success: function(data)
@@ -679,7 +679,7 @@ pmProjects.syncRepoFromProjectPage = function(item_id)
     pmProjects.startUpdateProjectItem(item_id);
 
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/projects/"+item_id+"/sync/",
+        url: hostname + "/api/v2/project"+item_id+"/sync/",
         type: "POST",
         contentType:'application/json',
         success: function(data)
@@ -701,7 +701,7 @@ pmProjects.syncRepoFromProjectPage = function(item_id)
 pmProjects.supportedRepos = function()
 {
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/projects/supported-repos/",
+        url: hostname + "/api/v2/projectsupported-repos/",
         type: "GET",
         contentType:'application/json',
         success: function(data)
@@ -769,7 +769,7 @@ pmProjects.syncSelectedProjects = function()
     return $.when(spajs.ajax.Call
     (
         {
-            url: hostname + "/api/v1/_bulk/",
+            url: hostname + "/api/v2/_bulk/",
             type: "POST",
             contentType: 'application/json',
             data: JSON.stringify(syncBulk)

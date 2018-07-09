@@ -240,11 +240,6 @@ spajs.errorPage = function(holder, menuInfo, data, error_data)
 
 tabSignal.connect("loading.completed", function()
 {
-    polemarch.start({
-        is_superuser:window.is_superuser,
-        holder:'#spajs-body'
-    })
-
     window.api = new guiApi()
     $.when(window.api.init()).done(function(){
 
@@ -253,12 +248,21 @@ tabSignal.connect("loading.completed", function()
         {
             var val = window.api.openapi.definitions[key]
 
+            console.log("Фабрика", key);
+            
+            if(/^One/.test(key))
+            {
+                // Не формируем фабрики для объектов One...
+                continue;
+            }
+            
             window["api"+key] = ormItemFactory(window.api, {
                 bulk_name:key.toLowerCase(),
                 fileds:val.properties
             })
         }
 
+        /*
         // Переопределили метод render
         window.apiHost.one.render = function(){ alert("?!")}
 
@@ -278,16 +282,91 @@ tabSignal.connect("loading.completed", function()
             // Сохранили
             host1.save()
         })
+        */
 
         window.gui_pages = []
         for(var i in window.api.openapi.paths)
         {
             var val = window.api.openapi.paths[i]
-            
+            lastval = val;
+            lastkey = i;
+            if(!val.get )
+            {
+                // это экшен
+            }
+            else if(/\{[A-z_\-]+\}\/$/.test(i))
+            {
+                // это один элемент
+            }
+            else
+            {
+                // это список
+
+                var pageMainBlockType;
+                try{
+                    pageMainBlockType = val.post.responses[201].schema.$ref.match(/\/([A-z0-9]+)$/)
+                }catch (exception) { 
+                    try{
+                        pageMainBlockType = val.put.responses[201].schema.$ref.match(/\/([A-z0-9]+)$/)
+                    }catch (exception) { 
+                        try{
+                            pageMainBlockType = val.get.responses[200].schema.$ref.match(/\/([A-z0-9]+)$/)
+                        }catch (exception) {
+                            console.error("Нет схемы у "+i)
+                            debugger; 
+                        }
+                    }
+                }
+
+                if(!pageMainBlockType || !pageMainBlockType[1])
+                {
+                    continue;
+                }
+                
+                pageMainBlockType = window["api" + pageMainBlockType[1] ]
+                if(!pageMainBlockType)
+                {
+                    continue;
+                }
+                
+                var regexp = i
+                regexp = regexp.replace(/^\//, "");
+                regexp = regexp.replace(/\/$/, ""); 
+                regexp = regexp.replace(/\//g, "\\/")
+                regexp = regexp.replace(/\{([A-z0-9]+)\}/igm, "([A-z0-9]+)");
+                regexp = "^"+regexp+"$"
+                
+                console.log("regexp", regexp);
+                
+                // Создали страницу
+                var page = new guiPage();
+                page.registerURL([new RegExp(regexp)]);
+                
+                // Настроили страницу
+                page.blocks.push({
+                    id:'itemList',
+                    level: (regexp.match(/\//g) || []).length,  // Уровень вложености меню (по идее там где 1 покажем в меню с лева)
+                    prioritet:0,
+                    render:function(menuInfo, data)
+                    {
+                        // Создали список хостов
+                        pageItem = new pageMainBlockType.list()
+
+                        // Определили фильтр
+                        // pageItem.search("name=abc", 10, 5, 'desc')
+                        
+                        return pageItem.render();
+                    }
+                })
+               //  debugger;
+         //  break;     
+            }
+
+            /*
             var page = new guiPage();
-            
-            // Настроили страницу 
-            
+
+            // Настроили страницу
+
             if(val.post)
             {
                 page.blocks.push({
@@ -295,30 +374,54 @@ tabSignal.connect("loading.completed", function()
                     name:'post-btn',
                     render:function(menuInfo, data)
                     {
-                        // Кнопка для перехода на создание нового хоста 
+                        // Кнопка для перехода на создание нового хоста
                     }
                 })
-                
+
             }
-            
+
             if(val.get)
             {
                 if(val.get.parameters)
                 {
                     // Настройки формы поиска и фильтрации
                 }
-                
+
                 page.blocks.push({
                     priority:1,
                     name:'post-btn',
                     render:function(menuInfo, data)
                     {
-                        // Кнопка для перехода на создание нового хоста 
+                        // Кнопка для перехода на создание нового хоста
                     }
                 })
             }
-            
+
             page.blocks.push(function(menuInfo, data)
+            {
+                // Создали список хостов
+                hosts = new window.apiHost.list()
+
+                // Определили фильтр
+                hosts.search("name=abc", 10, 5, 'desc')
+                return hosts.render();
+            })
+            */
+
+
+
+
+
+            window.gui_pages.push(page)
+        }
+
+
+        /* 
+            // Создали страницу
+            hostListPage = new guiPage();
+
+            // Настроили страницу
+            hostListPage.blocks.push(function(menuInfo, data)
                 {
                     // Создали список хостов
                     hosts = new window.apiHost.list()
@@ -329,36 +432,18 @@ tabSignal.connect("loading.completed", function()
                 })
 
 
+            setTimeout(function(){
 
+                // Отрисовали страницу
+                hostListPage.render("#spajs-right-area")
+            }, 200)
+        */
 
-            
-            window.gui_pages.push(page)
-        }
-        
-        
-        
-        
-        // Создали страницу 
-        hostListPage = new guiPage();
+        polemarch.start({
+            is_superuser:window.is_superuser,
+            holder:'#spajs-body'
+        })
 
-        // Настроили страницу 
-        hostListPage.blocks.push(function(menuInfo, data)
-            {
-                // Создали список хостов
-                hosts = new window.apiHost.list()
-
-                // Определили фильтр
-                hosts.search("name=abc", 10, 5, 'desc')
-                return hosts.render();
-            })
-
-
-        setTimeout(function(){
-            
-            // Отрисовали страницу
-            hostListPage.render("#spajs-right-area") 
-        }, 200)
-        
     })
 
 
@@ -369,8 +454,28 @@ tabSignal.connect("loading.completed", function()
 function guiBlock()
 {
     this.render = function(menuInfo, data){
-        
+
     }
+}
+
+/**
+ * Для сортировки блоков
+ * @param {Number} a
+ * @param {Number} b
+ * @returns {Number}
+ */
+function compareBlocks(a, b)
+{
+    if (!a[0].prioritet && a[0].prioritet !== 0) a[0].prioritet = 999;
+    if (!b[0].prioritet && b[0].prioritet !== 0) b[0].prioritet = 999;
+
+    if (a[0].prioritet > b[0].prioritet) return 1;
+    if (a[0].prioritet < b[0].prioritet) return -1;
+    return 0
+
+
+    if (a[0].index > b[0].index) return 1;
+    if (a[0].index < b[0].index) return -1;
 }
 
 /**
@@ -400,7 +505,7 @@ function guiPage()
      */
     var renderOneBlock = function(block, menuInfo, data)
     {
-        var res = block.item(menuInfo, data);
+        var res = block.item.render(menuInfo, data);
         if(typeof res == "string")
         {
             $(block.id).insertTpl(res)
@@ -421,16 +526,20 @@ function guiPage()
             thisObj.renderFail(block, error)
         })
     }
-
+ 
+    /**
+     * Отрисовывает страницу состоящею из отдельно загружающихся блоков 
+     * @returns {undefined}
+     */
     this.render = function(holder, menuInfo, data)
-    {  
+    {
         var blocks = []
         var blocksHtml = "";
 
         for(var i in thisObj.blocks)
         {
             var id = "block_"+i+"_"+Math.floor(Math.random()*10000000)
-            
+
             var val = {
                 item:thisObj.blocks[i],
                 id:"#"+id
@@ -441,22 +550,24 @@ function guiPage()
 
         $(holder).insertTpl(blocksHtml)
 
+        blocks = blocks.sort(compareBlocks);
+        
         for(var i in blocks)
         {
             renderOneBlock(blocks[i], menuInfo, data)
         }
 
-        return true;
+        return;
     }
-    
+
     /**
      * Регистрирует урл страницы для показа её при заходе на конкретный урл.
      * @param {type} urlregexp
      * @returns {undefined}
      */
     this.registerURL = function(urlregexp)
-    { 
-        this.urlregexp = urlregexp; 
+    {
+        this.urlregexp = urlregexp;
         spajs.addMenu({
             urlregexp:urlregexp,
             onOpen:function(holder, menuInfo, data)
@@ -482,7 +593,7 @@ function guiApi()
         var def = new $.Deferred();
 
         spajs.ajax.Call({
-            url: hostname + "/api/v1/openapi/?format=openapi",
+            url: hostname + "/api/v2/openapi/?format=openapi",
             type: "GET",
             contentType:'application/json',
             data: "",
@@ -510,6 +621,10 @@ function guiApi()
     }
     reinit_query_data()
 
+    /**
+     * Балк запрос к апи который в себе содержит накопленные с разных подсистем запросы
+     * @returns {promise}
+     */
     var real_query = function(query_data)
     {
         var this_query_data = mergeDeep({}, query_data)
@@ -600,6 +715,10 @@ function guiApi()
 function ormItemFactory(api, view)
 {
     return {
+        /**
+         * Фабрика объектов сущьности
+         * @returns {ormItemFactory.guiForWebAnonym$5}
+         */
         one:function(){
 
             /**
@@ -642,15 +761,19 @@ function ormItemFactory(api, view)
 
             return this;
         },
+        /**
+         * Фабрика объектов списка сущьностей
+         * @returns {ormItemFactory.guiForWebAnonym$6}
+         */
         list:function()
-        { 
+        {
             /**
              * Описание полей из апи
              */
             this.view = view
 
             this.state = {
-                search_filters:undefined
+                search_filters:{}
             }
 
             this.model = {
@@ -670,10 +793,15 @@ function ormItemFactory(api, view)
              */
             this.real_search = function ()
             {
-                var query    = this.state.search_filters.query;
-                var limit    = this.state.search_filters.limit;
-                var offset   = this.state.search_filters.offset;
-                var ordering = this.state.search_filters.ordering;
+                var query    = {};
+                var limit    = 999;
+                var offset   = 0;
+                var ordering = "";
+                 
+                query    = this.state.search_filters.query;
+                limit    = this.state.search_filters.limit;
+                offset   = this.state.search_filters.offset;
+                ordering = this.state.search_filters.ordering;
 
                 var thisObj = this;
                 if (!limit)
@@ -716,7 +844,7 @@ function ormItemFactory(api, view)
                     item: this.view.bulk_name,
                     filters:q.join("&")
                 })
-                
+
                 $.when(def).done(function(data){
                     thisObj.model.data = data.data
                 })

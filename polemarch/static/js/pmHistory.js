@@ -10,7 +10,7 @@ pmHistory.model.className = "pmHistory"
 pmHistory.cancelTask = function(item_id)
 {
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/history/"+item_id+"/cancel/",
+        url: hostname + "/api/v2/history/"+item_id+"/cancel/",
         type: "POST",
         contentType:'application/json',
         success: function(data)
@@ -541,7 +541,7 @@ pmHistory.loadItem = function(item_id)
     var thisObj = this;
 
     spajs.ajax.Call({
-        url: hostname + "/api/v1/"+this.model.name+"/"+item_id+"/",
+        url: hostname + "/api/v2/"+this.model.name+"/"+item_id+"/",
         type: "GET",
         contentType:'application/json',
         data: "",
@@ -616,7 +616,7 @@ pmHistory.sendSearchQuery = function(query, limit, offset)
     var def = new $.Deferred();
     var thisObj = this;
     spajs.ajax.Call({
-        url: hostname + "/api/v1/"+this.model.name+"/?"+q.join('&'),
+        url: hostname + "/api/v2/"+this.model.name+"/?"+q.join('&'),
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
@@ -713,7 +713,7 @@ pmHistory.ifIncreaseTotalCount = function()
     var def = new $.Deferred();
     var thisObj = this;
     spajs.ajax.Call({
-        url: hostname + "/api/v1/history",
+        url: hostname + "/api/v2/history",
         type: "GET",
         contentType:'application/json',
         data: "limit=1&rand="+Math.random(),
@@ -786,7 +786,7 @@ pmHistory.loadItems = function(limit, offset)
     var def = new $.Deferred();
     var thisObj = this;
     spajs.ajax.Call({
-        url: hostname + "/api/v1/"+this.model.name+"/",
+        url: hostname + "/api/v2/"+this.model.name+"/",
         type: "GET",
         contentType:'application/json',
         data: "limit="+encodeURIComponent(limit)+"&offset="+encodeURIComponent(offset),
@@ -1013,7 +1013,7 @@ pmHistory.loadLines = function(item_id, opt)
 
     var def = new $.Deferred();
     spajs.ajax.Call({
-        url: hostname + "/api/v1/history/"+item_id+"/lines/",
+        url: hostname + "/api/v2/history/"+item_id+"/lines/",
         type: "GET",
         contentType:'application/json',
         data: opt,
@@ -1068,7 +1068,7 @@ pmHistory.loadLines = function(item_id, opt)
 pmHistory.clearOutput = function(item_id)
 {
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/history/"+item_id+"/clear/",
+        url: hostname + "/api/v2/history/"+item_id+"/clear/",
         type: "DELETE",
         contentType:'application/json',
         success: function(data)
@@ -1109,7 +1109,7 @@ pmHistory.clearOutputFromSelected = function()
         }
     }
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/_bulk/",
+        url: hostname + "/api/v2/_bulk/",
         type: "POST",
         contentType:'application/json',
         data: JSON.stringify(clearOutputBulk),

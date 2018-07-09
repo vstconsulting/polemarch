@@ -406,7 +406,7 @@ pmUsers.copyItem = function(item_id)
         $.when(encryptedCopyModal.replace(data)).done(function(data)
         {
             spajs.ajax.Call({
-                url: hostname + "/api/v1/"+thisObj.model.name+"/",
+                url: hostname + "/api/v2/"+thisObj.model.name+"/",
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
@@ -461,7 +461,7 @@ pmUsers.deactivateItem = function(item_id, force) {
     }
     var data={ "is_active": false }
     spajs.ajax.Call({
-        url: hostname + "/api/v1/"+thisObj.model.name+"/"+item_id+"/",
+        url: hostname + "/api/v2/"+thisObj.model.name+"/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data: JSON.stringify(data),
@@ -503,7 +503,7 @@ pmUsers.activateItem = function(item_id, force) {
     var def = new $.Deferred();
     var data={ "is_active": true }
     spajs.ajax.Call({
-        url: hostname + "/api/v1/"+thisObj.model.name+"/"+item_id+"/",
+        url: hostname + "/api/v2/"+thisObj.model.name+"/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data: JSON.stringify(data),
@@ -580,7 +580,7 @@ pmUsers.changePassword = function(item_id)
     {
         var data={"password": newPassword1};
         spajs.ajax.Call({
-            url: hostname + "/api/v1/"+thisObj.model.name+"/"+item_id+"/",
+            url: hostname + "/api/v2/"+thisObj.model.name+"/"+item_id+"/",
             type: "PATCH",
             contentType:'application/json',
             data: JSON.stringify(data),

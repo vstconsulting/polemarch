@@ -324,7 +324,7 @@ pmHosts.copyItem = function(item_id)
         {
             delete data.id;
             spajs.ajax.Call({
-                url: hostname + "/api/v1/"+thisObj.model.name+"/",
+                url: hostname + "/api/v2/"+thisObj.model.name+"/",
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
@@ -364,7 +364,7 @@ setTimeout(function(){
     name = Math.random()+"-"+Math.random()
     name = name.replace(/\./g, "")
     spajs.ajax.Call({
-            url: hostname + "/api/v1/hosts/",
+            url: hostname + "/api/v2/hosts/",
             type: "POST",
             contentType:'application/json',
             data: JSON.stringify({name:name, type:"HOST"}),

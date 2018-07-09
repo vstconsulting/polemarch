@@ -156,7 +156,7 @@ function startTest()
 
         console.log("Тест формы авторизации шаг 2");
         spajs.ajax.Call({
-            url: hostname + "/api/v1/users/",
+            url: hostname + "/api/v2/users/",
             type: "GET",
             contentType:'application/json',
             data: "",

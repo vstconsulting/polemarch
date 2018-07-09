@@ -371,7 +371,7 @@ pmDashboard.getUserDashboardSettingsFromAPI = function()
         pmDashboard.checkNecessityToLoadDashboardSettingsFromApi(pmDashboard.model.defaultChartLineSettings, pmDashboard.model.ChartLineSettings))
     {
         return spajs.ajax.Call({
-            url: hostname + "/api/v1/users/" + userId + "/settings/",
+            url: hostname + "/api/v2/users/" + userId + "/settings/",
             type: "GET",
             contentType: 'application/json',
             success: function (data)
@@ -426,7 +426,7 @@ pmDashboard.putUserDashboardSettingsToAPI = function()
         chartLineSettings[objName]={active: pmDashboard.model.ChartLineSettings[i].active};
     }
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/users/" + userId + "/settings/",
+        url: hostname + "/api/v2/users/" + userId + "/settings/",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify({widgetSettings:widgetSettings, chartLineSettings:chartLineSettings}),
@@ -639,7 +639,7 @@ pmDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
 }
 
 /**
- * Функция, отправляющая запрос /api/v1/stats/,
+ * Функция, отправляющая запрос /api/v2/stats/,
  * который дает нам информацию для виджетов класса pmwItemsCounter,
  * а также для графика на странице Dashboard.
  */
@@ -648,7 +648,7 @@ pmDashboard.loadStats=function()
     var limit=1;
     var thisObj = this;
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/stats/?last="+pmDashboard.statsDataLastQuery,
+        url: hostname + "/api/v2/stats/?last="+pmDashboard.statsDataLastQuery,
         type: "GET",
         contentType: 'application/json',
         data: "limit=" + encodeURIComponent(limit)+"&rand="+Math.random(),
@@ -666,7 +666,7 @@ pmDashboard.loadStats=function()
 
 /**
  *Функция вызывается, когда происходит изменение периода на графике(пользователь выбрал другой option в select).
- *Функция обновляет значения переменных, которые в дальнейшем используются для запроса к api/v1/stats и отрисовки графика.
+ *Функция обновляет значения переменных, которые в дальнейшем используются для запроса к api/v2/stats и отрисовки графика.
  */
 pmDashboard.updateStatsDataLast=function(thisEl)
 {
@@ -785,7 +785,7 @@ pmDashboard.getDataForDashboardFromBulk = function ()
     ];
 
     spajs.ajax.Call({
-        url: hostname + "/api/v1/_bulk/",
+        url: hostname + "/api/v2/_bulk/",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(bulkArr),

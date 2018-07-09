@@ -275,7 +275,7 @@ pmHooks.model.page_new = {
 pmHooks.getSupportedTypes = function()
 {
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/hooks/types/",
+        url: hostname + "/api/v2/hooks/types/",
         type: "GET",
         contentType:'application/json',
         success: function(data)
@@ -462,7 +462,7 @@ pmHooks.setRecipients = function(item_id, recipients)
     else
     {
         return spajs.ajax.Call({
-            url: hostname + "/api/v1/hooks/"+item_id+"/",
+            url: hostname + "/api/v2/hooks/"+item_id+"/",
             type: "PATCH",
             contentType:'application/json',
             data:JSON.stringify({recipients:pmHooks.parseRecipientsFromArrToStr(recipients)}),
@@ -488,7 +488,7 @@ pmHooks.changeItemActivation = function(item_id)
     var new_enable = !thisObj.model.items[item_id].enable;
     var dataToPatch = {enable: new_enable};
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/hooks/"+item_id+"/",
+        url: hostname + "/api/v2/hooks/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data:JSON.stringify(dataToPatch),
@@ -540,7 +540,7 @@ pmHooks.changeSelectedItemsActivation = function(mode)
     }
 
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/_bulk/",
+        url: hostname + "/api/v2/_bulk/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(bulkUpdate),
