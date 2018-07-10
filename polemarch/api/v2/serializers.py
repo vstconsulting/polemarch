@@ -4,6 +4,7 @@ import json
 from collections import OrderedDict
 import six
 from django.contrib.auth.models import User
+from django.utils.functional import cached_property
 from django.db import transaction
 from rest_framework import serializers, exceptions, status
 from rest_framework.exceptions import PermissionDenied
@@ -56,7 +57,7 @@ class DictField(serializers.CharField):
 
 class DataSerializer(serializers.Serializer):
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data):  # nocv
         return (
             data
             if (
@@ -109,6 +110,24 @@ class ExecuteResponseSerializer(ActionResponseSerializer):
 
 
 class _SignalSerializer(serializers.ModelSerializer):
+    @cached_property
+    def _writable_fields(self):
+        writable_fields = super(_SignalSerializer, self)._writable_fields
+        fields = []
+        for field in writable_fields:
+            if not isinstance(field, DataSerializer):
+                fields.append(field)
+                continue
+            field_object = serializers.DictField()
+            attrs = [
+                'field_name', 'source_attrs', 'source', 'read_only', 'required',
+                'write_only', 'default'
+            ]
+            for attr in attrs:
+                setattr(field_object, attr, getattr(field, attr, None))
+            fields.append(field_object)
+        return fields
+
     @with_signals
     def create(self, validated_data):
         return super(_SignalSerializer, self).create(validated_data)

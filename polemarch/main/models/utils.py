@@ -49,7 +49,10 @@ class DummyHistory(object):
 
     def write_line(self, value, number, endl=''):
         # pylint: disable=unused-argument
-        logger.info(value)  # nocv
+        logger.info(value)
+
+    def check_output(self, output):
+        pass
 
     def save(self):
         pass
@@ -157,6 +160,7 @@ class AnsibleCommand(object):
         extra_args, files = list(), list()
         extra.pop("verbose", None)
         for key, value in extra.items():
+            key = key.replace('_', '-')
             result = [value, list()]
             if key in ["key-file", "private-key"]:
                 result = self.__parse_key(key, value)

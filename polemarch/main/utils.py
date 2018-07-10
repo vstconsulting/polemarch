@@ -237,6 +237,7 @@ class AnsibleArgumentsReference(object):
         return cmd_result
 
     def is_valid_value(self, command, argument, value):
+        argument = argument.replace('_', '-')
         mtype = self.raw_dict[command][argument]["type"]
         if mtype == 'int':
             int(value)

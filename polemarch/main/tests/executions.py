@@ -156,6 +156,10 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
     def wip_manual(self, project_data):
         files = self.generate_playbook(self.get_project_dir(**project_data))
+        # Create test ssh-key
+        path = self.get_project_dir(**project_data)
+        with open(self.get_file_path('key.pem', path), 'w') as key:
+            key.write('BEGIN RSA PRIVATE KEY')
         self.make_test_templates(project_data)
         self.make_test_periodic_task(project_data)
         self.make_test_readme(project_data)
@@ -212,10 +216,11 @@ class ProjectTestCase(BaseExecutionsTestCase):
             ),
             options=dict(
                 tree=dict(vars=dict(limit='localhost')),
-                four=dict(vars=dict(forks=1))
+                four=dict(vars={'forks': 1, 'private_key': './key.pem'})
             )
         )
         template_playbook['options']['tree']['vars']['private-key'] = 'PATH'
+        template_playbook['data']['vars']['private-key'] = './key.pem'
         m_opts = dict(option='one')
         p_opts = dict(option='four')
         bulk_data = [
@@ -239,6 +244,17 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
         tmplt_mod = results[0]['data']
         tmplt_play = results[1]['data']
+        # Check update keys
+        check_update = self.make_bulk([
+            self.get_mod_bulk(
+                'project', pk, dict(data=tmplt_play['data']),
+                'template/{}'.format(tmplt_play['id']), 'patch'
+            ),
+        ])[0]
+        self.assertEqual(check_update['status'], 200)
+        self.assertEqual(
+            check_update['data']['data']['vars']['private-key'], '[~~ENCRYPTED~~]'
+        )
         results = self.get_result(
             'get', self.get_url('project', project_data['id'], 'history') + '?limit=4'
         )
@@ -302,13 +318,20 @@ class ProjectTestCase(BaseExecutionsTestCase):
             result['detail'], "Task canceled: {}".format(results['results'][-2]['id'])
         )
         # Check Templates without inventory
-        invalid_template = dict(template_playbook)
-        del invalid_template['data']['inventory']
-        invalid_type_template = dict(template_playbook)
+        invalid_type_template = dict(**template_playbook)
         invalid_type_template['kind'] = 'UnknownKind'
+        invalid_options_template = dict(**template_playbook)
+        invalid_options_template['options'] = 'options'
+        invalid_override_template = dict(**template_playbook)
+        invalid_override_template['options'] = dict(test=dict(inventory='some_ovveride'))
+        invalid_template = dict(**template_playbook)
+        invalid_template['data'] = dict(**template_playbook['data'])
+        del invalid_template['data']['inventory']
         bulk_data = [
             self.get_mod_bulk('project', pk, invalid_template, 'template'),
             self.get_mod_bulk('project', pk, invalid_type_template, 'template'),
+            self.get_mod_bulk('project', pk, invalid_options_template, 'template'),
+            self.get_mod_bulk('project', pk, invalid_override_template, 'template'),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 400)
@@ -316,6 +339,12 @@ class ProjectTestCase(BaseExecutionsTestCase):
             results[0]['data']['detail']['inventory'], ["Inventory have to set."]
         )
         self.assertEqual(results[1]['status'], 400)
+        self.assertEqual(results[2]['status'], 400)
+        self.assertEqual(results[3]['status'], 400)
+        self.assertEqual(
+            results[3]['data']['detail']['options'],
+            ["Disallowed to override inventory."]
+        )
 
     def make_test_periodic_task(self, project_data):
         # Check periodic tasks
@@ -409,6 +438,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             mode="test-0.yml", schedule="10", type="INTERVAL", name="one",
             project=project_data['id'], inventory='localhost'
         )
+        inv = self.get_model_filter('Inventory').create()
         results = self.make_bulk([
             self.get_mod_bulk('project', project_data['id'], data, 'periodic_task'),
             self.get_mod_bulk(
@@ -419,18 +449,35 @@ class ProjectTestCase(BaseExecutionsTestCase):
             self.get_mod_bulk(
                 'project', project_data['id'], {}, 'history/<1[data][history_id]>', 'get'
             ),
+            self.get_mod_bulk(
+                'project', project_data['id'], dict(save_result=False),
+                'periodic_task/<0[data][id]>', 'patch'
+            ),
+            self.get_mod_bulk(
+                'project', project_data['id'], data,
+                'periodic_task/<0[data][id]>/execute',
+                'post'
+            ),
+            self.get_mod_bulk(
+                'project', project_data['id'], dict(save_result=True),
+                'periodic_task/<0[data][id]>', 'patch'
+            ),
         ], 'put')
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual(results[1]['data']['detail'], "Started at inventory localhost.")
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['status'], "OK")
+        self.assertEqual(results[3]['status'], 200)
+        self.assertEqual(results[4]['status'], 201)
+        self.assertEqual(results[4]['data']['history_id'], None)
+        self.assertEqual(results[5]['status'], 200)
         # Just exec
         ScheduledTask.delay(results[0]['data']['id'])
         # Except on execution
         with self.patch('polemarch.main.utils.CmdExecutor.execute') as _exec:
             def _exec_error(*args, **kwargs):
-                raise Exception("Some error")
+                raise Exception("It is not error. Just test execution.")
 
             _exec.side_effect = _exec_error
             ScheduledTask.delay(results[0]['data']['id'])

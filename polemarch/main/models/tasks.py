@@ -47,12 +47,12 @@ class Template(ACLModel):
         ]
 
     template_fields = {}
-    template_fields["Task"] = ["playbook", "vars", "inventory", "project"]
+    template_fields["Task"] = ["playbook", "vars", "inventory"]
     template_fields["Module"] = [
-        "inventory", "module", "group", "args", "vars", "project"
+        "inventory", "module", "group", "args", "vars"
     ]
 
-    excepted_execution_fields = []
+    excepted_execution_fields = ['inventory']
     _exec_types = {
         "Task": "playbook",
         "Module": "module",
@@ -145,13 +145,7 @@ class Template(ACLModel):
 
     def set_data(self, value):
         data = self._convert_to_data(value)
-        project_id = data.pop('project', None)
         inventory_id = data.pop('inventory', None)
-        if project_id and "project" in self.template_fields[self.kind]:
-            self.project = (
-                Project.objects.get(pk=project_id) if project_id
-                else project_id
-            )
         if "inventory" in self.template_fields[self.kind]:
             try:
                 self.inventory = Inventory.objects.get(pk=int(inventory_id)).id
@@ -219,9 +213,13 @@ class PeriodicTask(AbstractModel):
     types = ["CRONTAB", "INTERVAL"]
     HIDDEN_VARS = [
         'key-file',
+        'key_file',
         'private-key',
+        'private_key',
         'vault-password-file',
+        'vault_password_file',
         'new-vault-password-file',
+        'new_vault_password_file',
     ]
 
     class Meta:
@@ -244,7 +242,7 @@ class PeriodicTask(AbstractModel):
     @inventory.setter
     def inventory(self, inventory):
         if isinstance(inventory, Inventory):
-            self._inventory = inventory
+            self._inventory = inventory  # nocv
         elif isinstance(inventory, (six.string_types, six.text_type)):
             try:
                 self._inventory = Inventory.objects.get(pk=int(inventory))
@@ -266,14 +264,6 @@ class PeriodicTask(AbstractModel):
     def get_vars(self):
         qs = self.variables.order_by("key")
         return OrderedDict(qs.values_list('key', 'value'))
-
-    @transaction.atomic()
-    def set_vars(self, variables):
-        command = "playbook"
-        if self.kind == "MODULE":
-            command = "module"
-        AnsibleArgumentsReference().validate_args(command, variables)
-        return super(PeriodicTask, self).set_vars(variables)
 
     def get_schedule(self):
         if self.type == "CRONTAB":
@@ -429,7 +419,7 @@ class History(BModel):
     @property
     def execution_time(self):
         if self.stop_time is None:
-            return self._get_seconds_from_time(now() - self.start_time)
+            return self._get_seconds_from_time(now() - self.start_time)  # nocv
         else:
             return self._get_seconds_from_time(self.stop_time - self.start_time)
 
@@ -455,7 +445,7 @@ class History(BModel):
     @options.setter
     def options(self, value):
         if not isinstance(value, dict):
-            raise ValidationError(dict(args="Should be a dict."))
+            raise ValidationError(dict(args="Should be a dict."))  # nocv
         self.json_options = json.dumps(value)
 
     @property
