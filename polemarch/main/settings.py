@@ -69,6 +69,8 @@ TASKS_HANDLERS = {
     },
 }
 
+CLONE_RETRY = config.getint('rpc', 'clone_retry_count', fallback=5)
+
 ACL = {
     "MODEL_HANDLERS": {
         "Default": "polemarch.main.acl.handlers.Default"
@@ -106,6 +108,7 @@ API = {
 
 
 if "test" in sys.argv:
+    CLONE_RETRY = 0
     PROJECTS_DIR = '/tmp/polemarch_projects' + str(PY_VER)
     HOOKS_DIR = '/tmp/polemarch_hooks' + str(PY_VER)
     os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None

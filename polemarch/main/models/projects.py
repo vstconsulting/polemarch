@@ -172,11 +172,16 @@ class Project(AbstractModel):
         self.save()
 
     def start_repo_task(self, operation='sync'):
+        if self.status == 'NEW':
+            operation = 'clone'
         self.set_status("WAIT_SYNC")
         return self.task_handlers.backend("REPO").delay(self, operation)
 
     def sync(self, *args, **kwargs):
         return self.repo_class.get()
+
+    def clone(self, *args, **kwargs):
+        return self.repo_class.clone()
 
     @property
     def revision(self):

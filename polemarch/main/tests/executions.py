@@ -156,8 +156,10 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
     def wip_manual(self, project_data):
         files = self.generate_playbook(self.get_project_dir(**project_data))
-        # Create test ssh-key
         path = self.get_project_dir(**project_data)
+        self.get_model_filter('Project', pk=project_data['id']).get().set_status('NEW')
+        self.sync_project(**project_data)
+        # Create test ssh-key
         with open(self.get_file_path('key.pem', path), 'w') as key:
             key.write('BEGIN RSA PRIVATE KEY')
         self.make_test_templates(project_data)
@@ -536,6 +538,31 @@ class ProjectTestCase(BaseExecutionsTestCase):
             self.project_workflow(
                 'TAR', repository='http://localhost:8000/test_repo.tar.gz', execute=True
             )
+            download.reset_mock()
+
+            # try error
+            def over_download(*args, **kwargs):
+                raise Exception("It is not error. Just test")
+
+            result = self.mass_create_bulk('project', [
+                dict(
+                    name=str(uuid.uuid1()),
+                    repository='http://localhost:8000/test_repo.tar.gz',
+                    variables=dict(repo_type="TAR")
+                )
+            ])
+            project_data = result[0]['data']
+            self.sync_project(**project_data)
+
+            with self.patch('tarfile.open') as extract:
+                extract.side_effect = over_download
+                results = self.make_bulk([
+                    self.get_bulk('project', {}, 'get', pk=project_data['id']),
+                    self.get_mod_bulk('project', '<0[data][id]>', {}, 'sync'),
+                    self.get_bulk('project', {}, 'get', pk=project_data['id']),
+                ], 'put')
+                project_data = results[2]['data']
+                self.assertEqual(project_data['status'], 'ERROR')
 
     def test_project_git(self):
         # Prepare repo
@@ -559,6 +586,24 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.project_workflow(
             'GIT', repository=self.repo_dir, repo_branch='new_branch', repo_key='key'
         )
+
+        # Test invalid repo
+        result = self.mass_create_bulk('project', [
+            dict(
+                name=str(uuid.uuid1()), repository='/tmp/not_git_path',
+                variables=dict(repo_type="GIT")
+            )
+        ])
+        project_data = result[0]['data']
+        results = self.make_bulk([
+            self.get_bulk('project', {}, 'get', pk=project_data['id']),
+            self.get_mod_bulk('project', '<0[data][id]>', {}, 'sync'),
+            self.get_bulk('project', {}, 'get', pk=project_data['id']),
+        ], 'put')
+        project_data = results[2]['data']
+        self.assertEqual(project_data['status'], 'ERROR')
+        self.assertEqual(project_data['revision'], 'ERROR')
+        self.assertEqual(project_data['branch'], 'waiting...')
 
     def test_complex(self):
         hostlocl_v = dict(ansible_user='centos', ansible_ssh_private_key_file='PATH')

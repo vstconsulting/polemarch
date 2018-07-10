@@ -74,7 +74,7 @@ class Git(_VCS):
             if branch and repo.active_branch.name != branch:
                 self.delete()
                 raise git.NoSuchPathError
-        except (git.NoSuchPathError, git.InvalidGitRepositoryError):
+        except git.NoSuchPathError:
             repo = self.make_clone(env)[0]
         return repo
 
