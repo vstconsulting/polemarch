@@ -168,6 +168,15 @@ class __PlaybookViewSet(base.ReadOnlyModelViewSet):
     filter_class = filters.TaskFilter
 
 
+
+class __ModuleViewSet(base.ReadOnlyModelViewSet):
+    lookup_field = 'id'
+    model = serializers.models.Module
+    serializer_class = serializers.ModuleSerializer
+    serializer_class_one = serializers.OneModuleSerializer
+    filter_class = filters.ModuleFilter
+
+
 @base.nested_view('variables', 'id', view=__VarsViewSet)
 class __PeriodicTaskViewSet(base.ModelViewSetSet, LimitedPermissionMixin):
     lookup_field = 'id'
@@ -175,7 +184,6 @@ class __PeriodicTaskViewSet(base.ModelViewSetSet, LimitedPermissionMixin):
     serializer_class = serializers.PeriodictaskSerializer
     serializer_class_one = serializers.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
-    POST_WHITE_LIST = ['execute']
 
     @base.action(methods=["post"], detail=yes)
     def execute(self, request, *args, **kwargs):
@@ -226,6 +234,7 @@ class __TemplateViewSet(base.ModelViewSetSet):
 )
 @base.nested_view('periodic_task', 'id', allow_append=yes, view=__PeriodicTaskViewSet)
 @base.nested_view('playbook', 'id', view=__PlaybookViewSet, methods=['get'])
+@base.nested_view('module', 'id', view=__ModuleViewSet, methods=['get'])
 @base.nested_view('template', 'id', manager_name='template', view=__TemplateViewSet)
 @base.nested_view('history', 'id', manager_name='history', view=HistoryViewSet)
 @base.nested_view('variables', 'id', view=__ProjectVarsViewSet)

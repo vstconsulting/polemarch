@@ -377,7 +377,7 @@ class AnsibleModules(Modules):
         fields = fields.split(',') if fields else self.default_fields
         self.fields = [field.strip() for field in fields if field.strip()]
 
-    def _get_mod_info(self, key, sub):
+    def get_mod_info(self, key, sub="DOCUMENTATION"):
         try:
             path = "{}.{}.{}".format(self.mod.__name__, key, sub)
             return import_class(path)
@@ -393,7 +393,7 @@ class AnsibleModules(Modules):
         return doc_data
 
     def _get_info(self, key):
-        data = self._get_mod_info(key, "DOCUMENTATION")
+        data = self.get_mod_info(key)
         if isinstance(data, BaseException) or data is None:
             return None
         if not self.detailed:

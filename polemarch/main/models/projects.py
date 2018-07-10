@@ -13,6 +13,11 @@ from django.conf import settings
 from django.db.models import Q
 from django.core.validators import ValidationError
 from vstutils.utils import ModelHandlers
+from yaml import load, dump
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
 
 from . import hosts as hosts_models
 from .vars import AbstractModel, AbstractVarsQuerySet, models
@@ -179,9 +184,6 @@ class Project(AbstractModel):
     def sync(self, *args, **kwargs):
         return self.repo_class.get()
 
-    def sync_modules(self):
-        Module.create_from_ansible(self)
-
     @property
     def revision(self):
         return self.repo_class.revision()
@@ -249,25 +251,8 @@ class Module(BModel):
 
     @property
     def name(self):
-        return self.path.split('.')[-1]
+        return self.data.get('module', None) or self.path.split('.')[-1]
 
     @property
     def data(self):
-        return json.loads(self._data or '{}')
-
-    @data.setter
-    def data(self, value):
-        if isinstance(value, (dict, collections.OrderedDict)):
-            self._data = json.dumps(value)
-        elif isinstance(value, six.string_types):
-            self._data = json.dumps(json.loads(value))
-        else:
-            raise ValidationError({'data': 'Unknown data type.'})
-
-    @classmethod
-    def create_from_ansible(cls, project=None):
-        for module in AnsibleModules(detailed=True).all():
-            cls.objects.update_or_create(
-                path=module['path'], project=project,
-                defaults=dict(_data=json.dumps(module['data']))
-            )
+        return load(self._data, Loader=Loader)

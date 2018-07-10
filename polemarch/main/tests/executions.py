@@ -79,6 +79,7 @@ class BaseExecutionsTestCase(BaseTestCase):
             kwargs = getattr(self, 'wip_{}'.format(repo_type.lower()), str)(project_data)
             kwargs = kwargs if not isinstance(kwargs, six.string_types) else dict()
             self.playbook_tests(project_data, **kwargs)
+            self.module_tests(project_data)
         finally:
             self.remove_project(**project_data)
 
@@ -120,6 +121,26 @@ class BaseExecutionsTestCase(BaseTestCase):
         if not execute:
             return
         self.assertEqual(results[2]['status'], 201)
+
+    def module_tests(self, prj):
+        bulk_data = [
+            self.get_mod_bulk(
+                'project', prj['id'], {}, 'module', 'get', filters='limit=20'
+            ),
+            self.get_mod_bulk(
+                'project', prj['id'], {}, 'module', 'get', filters='path=redis'
+            ),
+            self.get_mod_bulk(
+                'project', prj['id'], {}, 'module/<1[data][results][0][id]>', 'get'
+            ),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+        for result in results:
+            self.assertEqual(result['status'], 200)
+        self.assertTrue(results[0]['data']['count'] > 1000)
+        self.assertEqual(results[1]['data']['count'], 1)
+        self.assertEqual(results[1]['data']['results'][0]['name'], 'redis')
+        self.assertEqual(results[2]['data']['data']['module'], 'redis')
 
     def get_complex_bulk(self, item, op='add', **kwargs):
         return self.get_bulk(item, kwargs, op)

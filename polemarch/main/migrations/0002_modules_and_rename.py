@@ -10,9 +10,10 @@ from polemarch.main.utils import AnsibleModules
 
 def sync_modules(apps, schema_editor):
     Module = apps.get_registered_model('main', 'Module')
+    modules = AnsibleModules(detailed=False)
     Module.objects.bulk_create([
-        Module(path=module['path'], project=None, _data=json.dumps(module['data']))
-        for module in AnsibleModules(detailed=True).all()
+        Module(path=module, project=None, _data=modules.get_mod_info(module))
+        for module in modules.all()
     ])
 
 

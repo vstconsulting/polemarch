@@ -54,6 +54,26 @@ class DictField(serializers.CharField):
         )
 
 
+class DataSerializer(serializers.Serializer):
+
+    def to_internal_value(self, data):
+        return (
+            data
+            if (
+                isinstance(data, (six.string_types, six.text_type)) or
+                isinstance(data, (dict, list))
+            )
+            else self.fail("Unknown type.")
+        )
+
+    def to_representation(self, value):
+        return (
+            json.loads(value)
+            if not isinstance(value, (dict, list))
+            else value
+        )
+
+
 def with_signals(func):
     '''
     Decorator for send api_pre_save and api_post_save signals from serializers.
@@ -407,6 +427,29 @@ class OnePlaybookSerializer(PlaybookSerializer):
                   'playbook',)
 
 
+class ModuleSerializer(vst_serializers.VSTSerializer):
+    class Meta:
+        model = models.Module
+        fields = (
+            'id',
+            'path',
+            'name',
+        )
+
+
+class OneModuleSerializer(ModuleSerializer):
+    data = DataSerializer()
+
+    class Meta:
+        model = models.Module
+        fields = (
+            'id',
+            'path',
+            'name',
+            'data',
+        )
+
+
 class PeriodictaskSerializer(_WithVariablesSerializer):
     kind = serializers.ChoiceField(
         choices=[(k, k) for k in models.PeriodicTask.kinds],
@@ -483,26 +526,6 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
         ))
         rdata.is_valid(True)
         return Response(rdata.data, status.HTTP_201_CREATED)
-
-
-class DataSerializer(serializers.Serializer):
-
-    def to_internal_value(self, data):
-        return (
-            data
-            if (
-                isinstance(data, (six.string_types, six.text_type)) or
-                isinstance(data, (dict, list))
-            )
-            else self.fail("Unknown type.")
-        )
-
-    def to_representation(self, value):
-        return (
-            json.loads(value)
-            if not isinstance(value, (dict, list))
-            else value
-        )
 
 
 class TemplateSerializer(_WithVariablesSerializer):
