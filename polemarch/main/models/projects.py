@@ -2,9 +2,7 @@
 from __future__ import unicode_literals
 
 import os
-import json
 import logging
-import collections
 import uuid
 import six
 from docutils.core import publish_parts as rst_gen
@@ -13,16 +11,15 @@ from django.conf import settings
 from django.db.models import Q
 from django.core.validators import ValidationError
 from vstutils.utils import ModelHandlers
-from yaml import load, dump
+from yaml import load
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
-except ImportError:
+except ImportError:  # nocv
     from yaml import Loader, Dumper
 
 from . import hosts as hosts_models
 from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
-from ..utils import AnsibleModules
 from .base import ManyToManyFieldACL, BQuerySet, BModel
 from .hooks import Hook
 
@@ -50,7 +47,7 @@ class Project(AbstractModel):
     class Meta:
         default_related_name = "projects"
 
-    class SyncError(Exception):
+    class SyncError(PMException):
         pass
 
     class ReadMe(object):
@@ -129,12 +126,12 @@ class Project(AbstractModel):
             return
         path = "{}/{}".format(self.path, inventory)
         path = os.path.abspath(os.path.expanduser(path))
-        if self.path not in path:
+        if self.path not in path:  # nocv
             raise ValidationError(dict(inventory="Inventory should be in project dir."))
 
     def _prepare_kw(self, kind, mod_name, inventory, **extra):
         self.check_path(inventory)
-        if not mod_name:
+        if not mod_name:  # nocv
             raise PMException("Empty playbook/module name.")
         history, extra = self.history.all().start(
             self, kind, mod_name, inventory, **extra
@@ -154,7 +151,7 @@ class Project(AbstractModel):
             return
         try:
             self.sync()
-        except Exception as exc:
+        except Exception as exc:  # nocv
             raise self.SyncError("ERROR on Sync operation: " + str(exc))
 
     def execute(self, kind, *args, **extra):
@@ -177,9 +174,6 @@ class Project(AbstractModel):
     def start_repo_task(self, operation='sync'):
         self.set_status("WAIT_SYNC")
         return self.task_handlers.backend("REPO").delay(self, operation)
-
-    def clone(self, *args, **kwargs):
-        return self.repo_class.clone()
 
     def sync(self, *args, **kwargs):
         return self.repo_class.get()

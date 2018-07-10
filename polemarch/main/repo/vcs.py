@@ -74,7 +74,7 @@ class Git(_VCS):
             if branch and repo.active_branch.name != branch:
                 self.delete()
                 raise git.NoSuchPathError
-        except git.NoSuchPathError:
+        except (git.NoSuchPathError, git.InvalidGitRepositoryError):
             repo = self.make_clone(env)[0]
         return repo
 
@@ -84,6 +84,8 @@ class Git(_VCS):
 
     def get_revision(self, *args, **kwargs):
         # pylint: disable=unused-argument
+        if self.proj.status == 'NEW':
+            return 'NOT_SYNCED'
         repo = self.get_repo()
         return repo.head.object.hexsha
 

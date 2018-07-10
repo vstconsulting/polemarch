@@ -158,6 +158,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         files = self.generate_playbook(self.get_project_dir(**project_data))
         self.make_test_templates(project_data)
         self.make_test_periodic_task(project_data)
+        self.make_test_readme(project_data)
         return dict(playbook_count=len(files), execute=True)
 
     def wip_git(self, project_data):
@@ -314,9 +315,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(
             results[0]['data']['detail']['inventory'], ["Inventory have to set."]
         )
-        # self.assertEqual(
-        #     results[0]['data']['detail']['project'], ["Project have to set."]
-        # )
         self.assertEqual(results[1]['status'], 400)
 
     def make_test_periodic_task(self, project_data):
@@ -449,6 +447,38 @@ class ProjectTestCase(BaseExecutionsTestCase):
         )
         self.assertEqual(results['results'][-1]['status'], 'OK')
         self.assertEqual(results['results'][-2]['status'], 'ERROR')
+
+    def make_test_readme(self, project_data):
+        project = self.get_model_filter("Project", pk=project_data['id']).get()
+        def get_bulk_readme():
+            bulk_data = [
+                self.get_mod_bulk('project', project_data['id'], {}, 'sync', 'post'),
+                self.get_bulk('project', {}, 'get', pk=project_data['id']),
+            ]
+            results = self.make_bulk(bulk_data)
+            self.assertEqual(results[0]['status'], 200)
+            self.assertEqual(results[1]['status'], 200)
+            return results[1]['data']
+
+        with open(project.path+"/readme.md", "w") as f:
+            f.write("# test README.md \n **bold** \n *italic* \n")
+
+        self.assertEqual(get_bulk_readme()['readme_ext'], '.md')
+        self.assertEqual(
+            get_bulk_readme()['readme_content'],
+            "<h1>test README.md</h1>\n\n<p><strong>bold</strong>" +
+            " \n <em>italic</em> </p>\n"
+        )
+        with open(project.path+"/readme.rst", "w") as f:
+            f.write("test README.rst \n **bold** \n *italic* \n")
+
+        self.assertEqual(get_bulk_readme()['readme_ext'], '.rst')
+        self.assertEqual(
+            get_bulk_readme()['readme_content'],
+            '<div class="document">\n<dl class="docutils">\n<dt>' +
+            'test README.rst</dt>\n<dd><strong>bold</strong>\n' +
+            '<em>italic</em></dd>\n</dl>\n</div>\n'
+        )
 
     def test_project_manual(self):
         self.project_workflow('MANUAL', execute=True)
