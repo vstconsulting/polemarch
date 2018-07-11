@@ -183,6 +183,7 @@ class _WithPermissionsSerializer(_SignalSerializer):
 
 
 class UserSerializer(vst_serializers.UserSerializer):
+    is_staff = serializers.HiddenField(default=True)
 
     @with_signals
     def create(self, data):
@@ -192,6 +193,10 @@ class UserSerializer(vst_serializers.UserSerializer):
     def update(self, instance, validated_data):
         return super(UserSerializer, self).update(instance, validated_data)
 
+
+class OneOwnerSerializer(UserSerializer):
+    class Meta(vst_serializers.OneUserSerializer.Meta):
+        pass
 
 
 class TeamSerializer(_WithPermissionsSerializer):
@@ -218,26 +223,6 @@ class OneTeamSerializer(TeamSerializer):
             "owner",
             'url',
         )
-
-
-class OneUserSerializer(UserSerializer):
-    groups = TeamSerializer(read_only=True, many=True)
-    password = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = User
-        fields = ('id',
-                  'username',
-                  'password',
-                  'is_active',
-                  'is_staff',
-                  'first_name',
-                  'last_name',
-                  'email',
-                  'groups',
-                  'url',)
-        read_only_fields = ('is_superuser',
-                            'date_joined',)
 
 
 class HistorySerializer(_SignalSerializer):

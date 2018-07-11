@@ -77,7 +77,7 @@ class Template(ACLModel):
     def inventory_object(self):
         try:
             return self.project.inventories.get(pk=int(self.data['inventory']))
-        except (ValueError, Inventory.DoesNotExist):  # nocv
+        except (ValueError, Inventory.DoesNotExist):
             self.project.check_path(self.data['inventory'])
             return self.data['inventory']
 

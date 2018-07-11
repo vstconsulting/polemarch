@@ -44,7 +44,7 @@ class TokenView(token_views.ObtainAuthToken):
 
 class UserViewSet(views.UserViewSet):
     serializer_class = sers.UserSerializer
-    serializer_class_one = sers.OneUserSerializer
+    serializer_class_one = sers.OneOwnerSerializer
 
     @base.action(
         ["post", "delete", "get"], url_path="settings",
@@ -171,7 +171,6 @@ class __PlaybookViewSet(base.ReadOnlyModelViewSet):
     serializer_class = sers.PlaybookSerializer
     serializer_class_one = sers.OnePlaybookSerializer
     filter_class = filters.TaskFilter
-
 
 
 class __ModuleViewSet(base.ReadOnlyModelViewSet):
