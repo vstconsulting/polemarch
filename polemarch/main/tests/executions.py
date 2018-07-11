@@ -293,6 +293,25 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results['results'][-4]['options']['template_option'], 'four')
 
         # Templates in periodic tasks
+        data = dict(
+            mode="test-1.yml", schedule="10", type="INTERVAL",
+            project=project_data['id'],
+            inventory='localhost,', name="one"
+        )
+        new_data = dict(kind='TEMPLATE', template=tmplt_mod['id'], template_opt='one')
+        bulk_data = [
+            self.get_mod_bulk('project', pk, data, 'periodic_task'),
+            self.get_mod_bulk(
+                'project', pk, new_data, 'periodic_task/<0[data][id]>', 'patch'
+            ),
+        ]
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[1]['data']['kind'], 'TEMPLATE')
+        self.assertEqual(results[1]['data']['inventory'], '')
+        self.assertEqual(results[1]['data']['mode'], '')
+        # Create new periodic_tasks
         ptask_data = [
             dict(
                 kind='TEMPLATE', template=tmplt_mod['id'], template_opt='one',

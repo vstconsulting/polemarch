@@ -66,8 +66,6 @@ class Template(ACLModel):
 
     def get_data(self):
         data = json.loads(self.template_data)
-        if "project" in self.template_fields[self.kind] and self.project:
-            data['project'] = self.project.id
         if "inventory" in self.template_fields[self.kind] and self.inventory:
             try:
                 data['inventory'] = int(self.inventory)
@@ -85,7 +83,6 @@ class Template(ACLModel):
 
     def get_data_with_options(self, option, **extra):
         data = self.get_data()
-        data.pop("project", None)
         option_data = self.get_option_data(option)
         option_vars = option_data.pop("vars", {})
         vars = data.pop("vars", {})
@@ -99,7 +96,7 @@ class Template(ACLModel):
         # pylint: disable=protected-access
         tp = self._exec_types.get(self.kind, None)
         if tp is None:
-            raise UnsupportedMediaType(media_type=self.kind)
+            raise UnsupportedMediaType(media_type=self.kind)  # nocv
         return serializer._execution(
             tp, self.get_data_with_options(option, **extra), user,
             template=self.id, template_option=option
@@ -107,11 +104,11 @@ class Template(ACLModel):
 
     def _convert_to_data(self, value):
         if isinstance(value, (six.string_types, six.text_type)):
-            return json.loads(value)
+            return json.loads(value)  # nocv
         elif isinstance(value, (dict, OrderedDict, list)):
             return value
         else:
-            raise ValueError("Unknown data type set.")
+            raise ValueError("Unknown data type set.")  # nocv
 
     def __encrypt(self, new_vars, data_name='data'):
         old_vars = getattr(self, data_name).get('vars', {})

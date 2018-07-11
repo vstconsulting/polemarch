@@ -513,8 +513,6 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
     def _do_with_vars(self, *args, **kwargs):
         kw = kwargs['validated_data']
         if kw.get('kind', None) == 'TEMPLATE':
-            template = kw.get('template')
-            kw['project'] = template.project
             kw['inventory'] = ''
             kw['mode'] = ''
             kwargs['validated_data'] = kw
