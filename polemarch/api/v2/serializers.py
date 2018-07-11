@@ -55,6 +55,17 @@ class DictField(serializers.CharField):
         )
 
 
+class MultiTypeField(serializers.CharField):
+    def to_internal_value(self, data):
+        return data
+
+    def to_representation(self, value):
+        return (
+            value if not isinstance(value, six.class_types)
+            else str(value)
+        )
+
+
 class DataSerializer(serializers.Serializer):
 
     def to_internal_value(self, data):  # nocv
@@ -343,7 +354,7 @@ class HookSerializer(serializers.ModelSerializer):
 
 
 class VariableSerializer(_SignalSerializer):
-    value = serializers.CharField(default="", allow_blank=True)
+    value = MultiTypeField(default="", allow_blank=True)
 
     class Meta:
         model = models.Variable

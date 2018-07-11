@@ -31,7 +31,8 @@ class DummyHistory(object):
         self.mode = kwargs.get('mode', None)
 
     def __setattr__(self, key, value):
-        pass
+        if key == 'raw_args':
+            logger.info(value)
 
     def __getattr__(self, item):
         return None  # nocv
@@ -101,7 +102,7 @@ class AnsibleCommand(object):
     class Inventory(object):
         def __init__(self, inventory, cwd="/tmp"):
             self.cwd = cwd
-            self.__file = None
+            self._file = None
             self.hidden_vars = Inventory.HIDDEN_VARS
             self.is_file = True
             if isinstance(inventory, (six.string_types, six.text_type)):
@@ -110,21 +111,19 @@ class AnsibleCommand(object):
                 self.raw, self.keys = inventory.get_inventory()
 
         def get_from_file(self, inventory):
-            self.__file = "{}/{}".format(self.cwd, inventory)
+            self._file = "{}/{}".format(self.cwd, inventory)
             try:
-                if not os.path.exists(self.__file):
-                    raise IOError('No file {}'.format(self.__file))
-                with open(self.__file, 'r') as file:
+                with open(self._file, 'r') as file:
                     return file.read(), []
             except IOError:
-                self.__file = inventory
+                self._file = inventory
                 self.is_file = False
                 return inventory.replace(',', '\n'), []
 
         @property
         def file(self):
-            self.__file = self.__file or tmp_file(self.raw)
-            return self.__file
+            self._file = self._file or tmp_file(self.raw)
+            return self._file
 
         @property
         def file_name(self):
@@ -138,7 +137,7 @@ class AnsibleCommand(object):
             for key_file in self.keys:
                 key_file.close()
             if not isinstance(self.file, (six.string_types, six.text_type)):
-                self.__file.close()
+                self._file.close()
 
     def __init__(self, *args, **kwargs):
         self.args = args
@@ -165,7 +164,7 @@ class AnsibleCommand(object):
             if key in ["key-file", "private-key"]:
                 result = self.__parse_key(key, value)
             elif key in ["vault-password-file", "new-vault-password-file"]:
-                result = self.__generate_arg_file(value)
+                result = self.__generate_arg_file(value)  # nocv
             value = result[0]
             files = files + result[1]
             extra_args.append("--{}".format(key))
@@ -196,12 +195,12 @@ class AnsibleCommand(object):
         project.check_path(inventory)
         self.target, self.project = target, project
         self.history = history if history else DummyHistory()
+        self.history.status = "RUN"
+        self.project.sync_on_execution_handler(self.history)
         self.inventory_object = self.Inventory(inventory, cwd=self.workdir)
         self.history.raw_inventory = self.hide_passwords(
             self.inventory_object.raw
         )
-        self.history.status = "RUN"
-        self.project.sync_on_execution_handler(self.history)
         self.history.revision = project.revision
         self.history.save()
         self.executor = Executor(self.history)
@@ -231,10 +230,11 @@ class AnsibleCommand(object):
 
     def error_handler(self, exception):
         default_code = self.status_codes["other"]
-        if isinstance(exception, CalledProcessError):
+        if isinstance(exception, CalledProcessError):  # nocv
             self.history.raw_stdout = "{}".format(exception.output)
-            self.history.status = self.status_codes.get(exception.returncode,
-                                                        default_code)
+            self.history.status = self.status_codes.get(
+                exception.returncode, default_code
+            )
             return
         elif isinstance(exception, self.project.SyncError):
             self.__will_raise_exception = True

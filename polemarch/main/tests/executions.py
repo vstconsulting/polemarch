@@ -13,6 +13,8 @@ test_playbook_content = '''
 ---
 - hosts: all
   gather_facts: False
+  vars:
+    ansible_connection: local
   tasks:
     - name: Some local task
       command: uname
@@ -104,6 +106,19 @@ class BaseExecutionsTestCase(BaseTestCase):
             self.get_mod_bulk('project', id, {}, 'sync', 'post'),
             self.get_mod_bulk('project', id, {}, 'playbook', 'get'),
         ]
+
+    def project_execute(self, project_data, exec_data=None, type='playbook'):
+        exec_data = exec_data or dict(
+            playbook='main.yml', inventory='inventory.ini', save_result=False
+        )
+        return self.make_bulk([
+            self.get_mod_bulk(
+                'project', project_data['id'], exec_data, 'execute-{}'.format(type)
+            ),
+            self.get_mod_bulk(
+                'project', project_data['id'], {}, 'history/<0[data][history_id]>', 'get'
+            ),
+        ], 'put')
 
     def playbook_tests(self, prj, playbook_count=1, execute=None, inventory="localhost"):
         _exec = dict(
@@ -438,7 +453,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         # Try to execute now
         data = dict(
             mode="test-0.yml", schedule="10", type="INTERVAL", name="one",
-            project=project_data['id'], inventory='localhost'
+            project=project_data['id'], inventory='localhost,'
         )
         inv = self.get_model_filter('Inventory').create()
         results = self.make_bulk([
@@ -467,7 +482,9 @@ class ProjectTestCase(BaseExecutionsTestCase):
         ], 'put')
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 201)
-        self.assertEqual(results[1]['data']['detail'], "Started at inventory localhost.")
+        self.assertEqual(
+            results[1]['data']['detail'], "Started at inventory localhost,."
+        )
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['status'], "OK")
         self.assertEqual(results[3]['status'], 200)
@@ -548,21 +565,39 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 dict(
                     name=str(uuid.uuid1()),
                     repository='http://localhost:8000/test_repo.tar.gz',
-                    variables=dict(repo_type="TAR")
+                    variables=dict(repo_type="TAR", repo_sync_on_run=True)
                 )
             ])
             project_data = result[0]['data']
-            self.sync_project(**project_data)
+            self.project_execute(project_data)
 
             with self.patch('tarfile.open') as extract:
                 extract.side_effect = over_download
+                _ex_module = dict(
+                    module='ping', group='all',
+                    inventory='192.168.254.255', become_method='sudo'
+                )
+                _ex_playbook = dict(
+                    playbook='unknown.yml', inventory='192.168.254.255',
+                    private_key='BEGIN RSA PRIVATE KEY'
+                )
+                unsync = dict(key='repo_sync_on_run', value=False)
+                pk = project_data['id']
                 results = self.make_bulk([
+                    self.get_bulk('project', {}, 'get', pk=pk),
+                    self.get_mod_bulk('project', pk, {}, 'sync'),
                     self.get_bulk('project', {}, 'get', pk=project_data['id']),
-                    self.get_mod_bulk('project', '<0[data][id]>', {}, 'sync'),
-                    self.get_bulk('project', {}, 'get', pk=project_data['id']),
+                    self.get_mod_bulk('project', pk, _ex_module, 'execute-module'),
+                    self.get_mod_bulk('project', pk, unsync, 'variables'),
+                    self.get_mod_bulk('project', pk, _ex_playbook, 'execute-playbook'),
+                    self.get_mod_bulk(
+                        'project', pk, {}, 'history', method='get', filters='limit=2'
+                    ),
                 ], 'put')
                 project_data = results[2]['data']
                 self.assertEqual(project_data['status'], 'ERROR')
+                self.assertEqual(results[-1]['data']['results'][-1]['status'], 'ERROR')
+                self.assertEqual(results[-1]['data']['results'][-2]['status'], 'ERROR')
 
     def test_project_git(self):
         # Prepare repo

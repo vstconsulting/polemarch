@@ -30,7 +30,7 @@ class RepoTask(BaseTask):
     def run(self):
         try:
             result = getattr(self.project, self.operation)()
-            logger.info(result)
+            logger.debug(result)
         except Exception as error:
             self.app.retry(exc=error)
 
