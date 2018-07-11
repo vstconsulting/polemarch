@@ -30,6 +30,98 @@ class BaseExecutionsTestCase(BaseTestCase):
         super(BaseExecutionsTestCase, self).setUp()
         self.path = self._settings('PROJECTS_DIR', '/tmp/unknown')
 
+    def get_complex_data(self):
+        hostlocl_v = dict(ansible_user='centos', ansible_ssh_private_key_file='PATH')
+        groups1_v = dict(ansible_user='ubuntu', ansible_ssh_pass='mypass')
+        complex_inventory_v = dict(
+            ansible_ssh_private_key_file="PATH", custom_var1='hello_world'
+        )
+        bulk_data = [
+            # Create hosts
+            self.get_complex_bulk('host', name='127.0.1.1'),
+            self.get_complex_bulk('host', name='127.0.1.[3:4]', type="RANGE"),
+            self.get_complex_bulk('host', name='127.0.1.[5:6]', type="RANGE"),
+            self.get_complex_bulk('host', name='hostlocl'),
+            # Create groups
+            self.get_complex_bulk('group', name='hosts1'),
+            self.get_complex_bulk('group', name='hosts2'),
+            self.get_complex_bulk('group', name='groups1', children=True),
+            self.get_complex_bulk('group', name='groups2', children=True),
+            self.get_complex_bulk('group', name='groups3', children=True),
+            # Create inventory
+            self.get_complex_bulk('inventory', name='complex_inventory'),
+        ]
+        # Create manual project
+        bulk_data += [
+            self.get_complex_bulk('project', name="complex", repository='MANUAL')
+        ]
+        # Set vars
+        bulk_data += [
+            self.get_mod_bulk('host', "<3[data][id]>", dict(key=k, value=v))
+            for k, v in hostlocl_v.items()
+        ]
+        bulk_data += [
+            self.get_mod_bulk('group', "<6[data][id]>", dict(key=k, value=v))
+            for k, v in groups1_v.items()
+        ]
+        bulk_data += [
+            self.get_mod_bulk('inventory', "<9[data][id]>", dict(key=k, value=v))
+            for k, v in complex_inventory_v.items()
+        ]
+        # Add children
+        bulk_data += [
+            # to hosts1
+            self.get_mod_bulk(
+                'group', "<4[data][id]>", dict(id="<0[data][id]>"), 'host',
+            ),
+            self.get_mod_bulk(
+                'group', "<4[data][id]>", dict(id="<3[data][id]>"), 'host',
+            ),
+            # to hosts2
+            self.get_mod_bulk(
+                'group', "<5[data][id]>", dict(id="<1[data][id]>"), 'host',
+            ),
+            self.get_mod_bulk(
+                'group', "<5[data][id]>", dict(id="<2[data][id]>"), 'host',
+            ),
+            # to groups1
+            self.get_mod_bulk(
+                'group', "<6[data][id]>", dict(id="<7[data][id]>"), 'group',
+            ),
+            self.get_mod_bulk(
+                'group', "<6[data][id]>", dict(id="<8[data][id]>"), 'group',
+            ),
+            # to groups2
+            self.get_mod_bulk(
+                'group', "<7[data][id]>", dict(id="<8[data][id]>"), 'group',
+            ),
+            # to groups3
+            self.get_mod_bulk(
+                'group', "<8[data][id]>", dict(id="<4[data][id]>"), 'group',
+            ),
+            self.get_mod_bulk(
+                'group', "<8[data][id]>", dict(id="<5[data][id]>"), 'group',
+            ),
+            # to inventory
+            self.get_mod_bulk(
+                'inventory', "<9[data][id]>", dict(id="<6[data][id]>"), 'group',
+            ),
+            self.get_mod_bulk(
+                'inventory', "<9[data][id]>", dict(id="<0[data][id]>"), 'host',
+            ),
+            self.get_mod_bulk(
+                'inventory', "<9[data][id]>", dict(id="<1[data][id]>"), 'host',
+            ),
+            self.get_mod_bulk(
+                'inventory', "<9[data][id]>", dict(id="<3[data][id]>"), 'host',
+            ),
+            # to project
+            self.get_mod_bulk(
+                'project', "<10[data][id]>", dict(id="<9[data][id]>"), 'inventory'
+            ),
+        ]
+        return bulk_data
+
     def get_project_dir(self, id, **kwargs):
         return '{}/{}'.format(self.path, id)
 
@@ -675,95 +767,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(project_data['branch'], 'waiting...')
 
     def test_complex(self):
-        hostlocl_v = dict(ansible_user='centos', ansible_ssh_private_key_file='PATH')
-        groups1_v = dict(ansible_user='ubuntu', ansible_ssh_pass='mypass')
-        complex_inventory_v = dict(
-            ansible_ssh_private_key_file="PATH", custom_var1='hello_world'
-        )
-        bulk_data = [
-            # Create hosts
-            self.get_complex_bulk('host', name='127.0.1.1'),
-            self.get_complex_bulk('host', name='127.0.1.[3:4]', type="RANGE"),
-            self.get_complex_bulk('host', name='127.0.1.[5:6]', type="RANGE"),
-            self.get_complex_bulk('host', name='hostlocl'),
-            # Create groups
-            self.get_complex_bulk('group', name='hosts1'),
-            self.get_complex_bulk('group', name='hosts2'),
-            self.get_complex_bulk('group', name='groups1', children=True),
-            self.get_complex_bulk('group', name='groups2', children=True),
-            self.get_complex_bulk('group', name='groups3', children=True),
-            # Create inventory
-            self.get_complex_bulk('inventory', name='complex_inventory'),
-        ]
-        # Create manual project
-        bulk_data += [
-            self.get_complex_bulk('project', name="complex", repository='MANUAL')
-        ]
-        # Set vars
-        bulk_data += [
-            self.get_mod_bulk('host', "<3[data][id]>", dict(key=k, value=v))
-            for k, v in hostlocl_v.items()
-        ]
-        bulk_data += [
-            self.get_mod_bulk('group', "<6[data][id]>", dict(key=k, value=v))
-            for k, v in groups1_v.items()
-        ]
-        bulk_data += [
-            self.get_mod_bulk('inventory', "<9[data][id]>", dict(key=k, value=v))
-            for k, v in complex_inventory_v.items()
-        ]
-        # Add children
-        bulk_data += [
-            # to hosts1
-            self.get_mod_bulk(
-                'group', "<4[data][id]>", dict(id="<0[data][id]>"), 'host',
-            ),
-            self.get_mod_bulk(
-                'group', "<4[data][id]>", dict(id="<3[data][id]>"), 'host',
-            ),
-            # to hosts2
-            self.get_mod_bulk(
-                'group', "<5[data][id]>", dict(id="<1[data][id]>"), 'host',
-            ),
-            self.get_mod_bulk(
-                'group', "<5[data][id]>", dict(id="<2[data][id]>"), 'host',
-            ),
-            # to groups1
-            self.get_mod_bulk(
-                'group', "<6[data][id]>", dict(id="<7[data][id]>"), 'group',
-            ),
-            self.get_mod_bulk(
-                'group', "<6[data][id]>", dict(id="<8[data][id]>"), 'group',
-            ),
-            # to groups2
-            self.get_mod_bulk(
-                'group', "<7[data][id]>", dict(id="<8[data][id]>"), 'group',
-            ),
-            # to groups3
-            self.get_mod_bulk(
-                'group', "<8[data][id]>", dict(id="<4[data][id]>"), 'group',
-            ),
-            self.get_mod_bulk(
-                'group', "<8[data][id]>", dict(id="<5[data][id]>"), 'group',
-            ),
-            # to inventory
-            self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<6[data][id]>"), 'group',
-            ),
-            self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<0[data][id]>"), 'host',
-            ),
-            self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<1[data][id]>"), 'host',
-            ),
-            self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<3[data][id]>"), 'host',
-            ),
-            # to project
-            self.get_mod_bulk(
-                'project', "<10[data][id]>", dict(id="<9[data][id]>"), 'inventory'
-            ),
-        ]
+        bulk_data = self.get_complex_data()
         # Execute actions
         _exec = dict(
             connection="local", inventory="<9[data][id]>",
