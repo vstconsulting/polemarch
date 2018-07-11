@@ -76,7 +76,7 @@ class Template(ACLModel):
     @property
     def inventory_object(self):
         try:
-            return Inventory.objects.get(pk=int(self.data['inventory']))
+            return self.project.inventories.get(pk=int(self.data['inventory']))
         except (ValueError, Inventory.DoesNotExist):  # nocv
             self.project.check_path(self.data['inventory'])
             return self.data['inventory']
@@ -145,7 +145,7 @@ class Template(ACLModel):
         inventory_id = data.pop('inventory', None)
         if "inventory" in self.template_fields[self.kind]:
             try:
-                self.inventory = Inventory.objects.get(pk=int(inventory_id)).id
+                self.inventory = self.project.inventories.get(pk=int(inventory_id)).id
             except (ValueError, TypeError, Inventory.DoesNotExist):
                 self.inventory = inventory_id
         data['vars'] = self.keep_encrypted_data(data.get('vars', None))
@@ -242,7 +242,7 @@ class PeriodicTask(AbstractModel):
             self._inventory = inventory  # nocv
         elif isinstance(inventory, (six.string_types, six.text_type)):
             try:
-                self._inventory = Inventory.objects.get(pk=int(inventory))
+                self._inventory = self.project.inventories.get(pk=int(inventory))
             except (ValueError, Inventory.DoesNotExist):
                 self.project.check_path(inventory)
                 self.inventory_file = inventory

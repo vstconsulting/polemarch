@@ -80,6 +80,7 @@ class BaseExecutionsTestCase(BaseTestCase):
                 return
             kwargs = getattr(self, 'wip_{}'.format(repo_type.lower()), str)(project_data)
             kwargs = kwargs if not isinstance(kwargs, six.string_types) else dict()
+            self.change_owner(project_data)
             self.playbook_tests(project_data, **kwargs)
             self.module_tests(project_data)
         finally:
@@ -106,6 +107,21 @@ class BaseExecutionsTestCase(BaseTestCase):
             self.get_mod_bulk('project', id, {}, 'sync', 'post'),
             self.get_mod_bulk('project', id, {}, 'playbook', 'get'),
         ]
+
+    def change_owner(self, project_data):
+        new_owner = self._create_user(False)
+        pk = project_data['id']
+        bulk_data = [
+            self.get_mod_bulk('project', pk, dict(user_id=new_owner.id), 'set_owner'),
+            self.get_bulk('project', {}, 'get', pk=pk),
+            self.get_mod_bulk('project', pk, dict(user_id=self.user.id), 'set_owner'),
+            self.get_bulk('project', {}, 'get', pk=pk),
+        ]
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[2]['status'], 201)
+        self.assertEqual(results[1]['data']['owner']['id'], new_owner.id)
+        self.assertEqual(results[3]['data']['owner']['id'], self.user.id)
 
     def project_execute(self, project_data, exec_data=None, type='playbook'):
         exec_data = exec_data or dict(
@@ -474,7 +490,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
             mode="test-0.yml", schedule="10", type="INTERVAL", name="one",
             project=project_data['id'], inventory='localhost,'
         )
-        inv = self.get_model_filter('Inventory').create()
         results = self.make_bulk([
             self.get_mod_bulk('project', project_data['id'], data, 'periodic_task'),
             self.get_mod_bulk(
