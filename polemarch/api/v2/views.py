@@ -9,13 +9,29 @@ from vstutils.api.permissions import StaffPermission
 from vstutils.api import base, views
 from vstutils.utils import KVExchanger
 
-from .permissions import PermissionMixin
 from . import filters
 from . import serializers as sers
 from ...main import utils
 
 yes = True
 no = False
+
+
+class OwnedView(base.ModelViewSetSet):
+    POST_WHITE_LIST = []
+
+    @base.action(methods=["post"], detail=True, serializer_class=sers.SetOwnerSerializer)
+    def set_owner(self, request, pk=None):
+        '''
+        Change instance owner.
+        '''
+        # pylint: disable=unused-argument
+        serializer = sers.SetOwnerSerializer(
+            self.get_object(), data=request.data, context=self.get_serializer_context()
+        )
+        serializer.is_valid(True)
+        serializer.save()
+        return base.Response(serializer.data, status.HTTP_201_CREATED).resp
 
 
 class __VarsViewSet(base.ModelViewSetSet):
@@ -60,17 +76,14 @@ class UserViewSet(views.UserViewSet):
 
 
 @base.nested_view('user', 'id', allow_append=yes, manager_name='users', view=UserViewSet)
-class TeamViewSet(PermissionMixin, base.ModelViewSetSet):
+class TeamViewSet(OwnedView):
     model = sers.models.UserGroup
     serializer_class = sers.TeamSerializer
     serializer_class_one = sers.OneTeamSerializer
     filter_class = filters.TeamFilter
 
-    def get_extra_queryset(self):
-        return self.queryset
 
-
-class __HistoryLineViewSet(base.ModelViewSetSet):
+class __HistoryLineViewSet(base.ReadOnlyModelViewSet):
     schema = None
     model = sers.models.HistoryLines
     serializer_class = sers.HistoryLinesSerializer
@@ -118,7 +131,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
 
 
 @base.nested_view('variables', 'id', view=__VarsViewSet)
-class HostViewSet(PermissionMixin, base.ModelViewSetSet):
+class HostViewSet(OwnedView):
     model = sers.models.Host
     serializer_class = sers.HostSerializer
     serializer_class_one = sers.OneHostSerializer
@@ -139,7 +152,7 @@ class _BaseGroupViewSet(base.ModelViewSetSet):
 @base.nested_view(
     'group', 'id', manager_name='groups', allow_append=yes, view=_BaseGroupViewSet
 )
-class _GroupMixin(PermissionMixin, base.ModelViewSetSet):
+class _GroupMixin(OwnedView):
     '''
     Instance with groups and hosts.
     '''

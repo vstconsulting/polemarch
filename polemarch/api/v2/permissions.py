@@ -1,24 +1,14 @@
-from vstutils.api.base import action
-from .serializers import SetOwnerSerializer, Response, status
+from rest_framework import permissions
 
 
-class LimitedPermissionMixin(object):
-    POST_WHITE_LIST = []
+class ModelPermission(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        return super(ModelPermission, self).has_permission(request, view)
 
-    def get_extra_queryset(self):
-        return self.queryset.user_filter(self.request.user)
+    def get_user_permission(self, request, view, obj):  # nocv
+        return False
 
-
-class PermissionMixin(LimitedPermissionMixin):
-    @action(methods=["post"], detail=True, serializer_class=SetOwnerSerializer)
-    def set_owner(self, request, pk=None):
-        '''
-        Change instance owner.
-        '''
-        # pylint: disable=unused-argument
-        serializer = SetOwnerSerializer(
-            self.get_object(), data=request.data, context=self.get_serializer_context()
-        )
-        serializer.is_valid(True)
-        serializer.save()
-        return Response(serializer.data, status.HTTP_201_CREATED).resp
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_staff:
+            return True
+        return self.get_user_permission(request, view, obj)  # nocv

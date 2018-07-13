@@ -30,7 +30,7 @@ class Default(object):
     def viewable_by(self, user):
         return True
 
-    def user_filter(self, qs, user, only_leads=False):
+    def user_filter(self, qs, user, role=None):
         return qs
 
     def qs_create(self, original_method, **kwargs):

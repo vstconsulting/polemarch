@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import tempfile
 import shutil
 import uuid
@@ -30,7 +31,72 @@ class BaseExecutionsTestCase(BaseTestCase):
         super(BaseExecutionsTestCase, self).setUp()
         self.path = self._settings('PROJECTS_DIR', '/tmp/unknown')
 
-    def get_complex_data(self):
+    @property
+    def template_module(self):
+        return dict(
+            kind="Module",
+            name='Test module template',
+            data=dict(
+                module="ping",
+                group="all",
+                inventory='localhost',
+                args="",
+                vars=dict(
+                    forks=8,
+                    connection='local'
+                ),
+            ),
+            options=dict(
+                one=dict(module='shell', args='uname'),
+                two=dict(vars=dict(forks=1))
+            )
+        )
+
+    @property
+    def template_playbook(self):
+        return dict(
+            kind="Task",
+            name='Test playbook template',
+            data=dict(
+                playbook="test-0.yml",
+                inventory='localhost',
+                vars=dict(
+                    forks=8,
+                    connection='local'
+                ),
+            ),
+            options=dict(
+                tree=dict(vars=dict(limit='localhost')),
+                four=dict(vars={'forks': 1, 'private_key': './key.pem'})
+            )
+        )
+
+    def get_periodic_task_data(self, pk, template_id):
+        periodic_template = dict(
+            kind='TEMPLATE', template=template_id, schedule="10", type="INTERVAL",
+        )
+        return [
+            self.get_mod_bulk('project', pk, periodic_template, 'periodic_task'),
+        ]
+
+    def get_templates_data(self, bulk_data, pk, inventory='localhost,'):
+        template_module = self.template_module
+        template_module['data']['inventory'] = inventory
+        template_playbook = self.template_playbook
+        template_playbook['data']['inventory'] = inventory
+        count_bulk = len(bulk_data)
+        template_module_index = count_bulk
+        return (
+            bulk_data + [
+                self.get_mod_bulk('project', pk, template_module, 'template'),
+                self.get_mod_bulk('project', pk, template_playbook, 'template'),
+            ] +
+            self.get_periodic_task_data(
+                pk, '<{}[data][id]>'.format(template_module_index)
+            )
+        )
+
+    def get_complex_data(self, with_subs=False):
         hostlocl_v = dict(ansible_user='centos', ansible_ssh_private_key_file='PATH')
         groups1_v = dict(ansible_user='ubuntu', ansible_ssh_pass='mypass')
         complex_inventory_v = dict(
@@ -120,7 +186,68 @@ class BaseExecutionsTestCase(BaseTestCase):
                 'project', "<10[data][id]>", dict(id="<9[data][id]>"), 'inventory'
             ),
         ]
+        bulk_data = (
+            self.get_templates_data(bulk_data, "<10[data][id]>", "<9[data][id]>")
+            if with_subs else bulk_data
+        )
+        # Execute actions
+        _exec = dict(
+            connection="local", inventory="<9[data][id]>",
+            module="ping", group="all", args="", forks=1
+        )
+        bulk_data += [
+            self.get_mod_bulk(
+                'project', "<10[data][id]>", _exec, 'sync',
+            ),
+            self.get_mod_bulk(
+                'project', "<10[data][id]>", _exec, 'execute-module',
+            ),
+            self.get_bulk(
+                'history', {}, 'get',
+                pk="<{}[data][history_id]>".format(len(bulk_data) + 1)
+            ),
+            self.get_mod_bulk(
+                'history', "<{}[data][history_id]>".format(len(bulk_data) + 1), {},
+                'raw', 'get', filters='color=yes'
+            ),
+        ]
         return bulk_data
+
+    def get_access_deps(self):
+        return self.get_complex_data(with_subs=True)
+
+    def generate_subs(self):
+        # Create project and dependences
+        results = self.make_bulk(self.get_access_deps())
+        objects = OrderedDict(
+            host=[], group=[], inventory=[],
+            project=[], template=[], periodic_task=[], history=[]
+        )
+        hard_subitems = ['template', 'periodic_task']
+        for result in results:
+            if result['type'] == 'add':
+                self.assertEqual(result['status'], 201)
+                objects[result['item']].append(result['data'])
+            if result['type'] == 'mod' and result['subitem'] in hard_subitems:
+                self.assertEqual(result['status'], 201)
+                objects[result['subitem']].append(result['data'])
+            if result['type'] == 'get' and result['item'] == 'history':
+                self.assertEqual(result['status'], 200)
+                history = result['data']
+                self.assertEqual(history['revision'], "NO VCS")
+                self.assertEqual(history['mode'], 'ping')
+                self.assertEqual(history['kind'], 'MODULE')
+                self.assertEqual(history['inventory'], objects['inventory'][0]['id'])
+                self.assertEqual(history['status'], "OK")
+                etalon = self._get_string_from_file('exemplary_complex_inventory')
+                etalon = etalon.replace('PATH', '[~~ENCRYPTED~~]')
+                etalon = etalon.replace('mypass', '[~~ENCRYPTED~~]')
+                self.assertEqual(
+                    list(map(str.strip, str(history['raw_inventory']).split("\n"))),
+                    list(map(str.strip, etalon.split("\n")))
+                )
+                objects[result['item']].append(history)
+        return objects
 
     def get_project_dir(self, id, **kwargs):
         return '{}/{}'.format(self.path, id)
@@ -312,38 +439,8 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
     def make_test_templates(self, project_data):
         pk = project_data['id']
-        template_module = dict(
-            kind="Module",
-            name='Test module template',
-            data=dict(
-                module="ping",
-                group="all",
-                inventory='localhost',
-                args="",
-                vars=dict(
-                    forks=8,
-                ),
-            ),
-            options=dict(
-                one=dict(module='shell', args='uname'),
-                two=dict(vars=dict(forks=1))
-            )
-        )
-        template_playbook = dict(
-            kind="Task",
-            name='Test playbook template',
-            data=dict(
-                playbook="test-0.yml",
-                inventory='localhost',
-                vars=dict(
-                    forks=8,
-                ),
-            ),
-            options=dict(
-                tree=dict(vars=dict(limit='localhost')),
-                four=dict(vars={'forks': 1, 'private_key': './key.pem'})
-            )
-        )
+        template_module = self.template_module
+        template_playbook = self.template_playbook
         template_playbook['options']['tree']['vars']['private-key'] = 'PATH'
         template_playbook['data']['vars']['private-key'] = './key.pem'
         m_opts = dict(option='one')
@@ -768,27 +865,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
     def test_complex(self):
         bulk_data = self.get_complex_data()
-        # Execute actions
-        _exec = dict(
-            connection="local", inventory="<9[data][id]>",
-            module="ping", group="all", args="", forks=1
-        )
-        bulk_data += [
-            self.get_mod_bulk(
-                'project', "<10[data][id]>", _exec, 'sync',
-            ),
-            self.get_mod_bulk(
-                'project', "<10[data][id]>", _exec, 'execute-module',
-            ),
-            self.get_bulk(
-                'history', {}, 'get',
-                pk="<{}[data][history_id]>".format(len(bulk_data)+1)
-            ),
-            self.get_mod_bulk(
-                'history', "<{}[data][history_id]>".format(len(bulk_data)+1), {},
-                'raw', 'get', filters='color=yes'
-            ),
-        ]
         # additionaly test hooks
         self.hook_model.objects.all().delete()
         hook_urls = ['localhost:64000', 'localhost:64001']
@@ -807,38 +883,21 @@ class ProjectTestCase(BaseExecutionsTestCase):
         with self.patch('requests.post') as mock:
             iterations = 2 * len(hook_urls)
             mock.side_effect = [response] * iterations
-            results = self.make_bulk(bulk_data, 'put')
+            # results = self.make_bulk(bulk_data, 'put')
+            subs = self.generate_subs()
             self.assertEqual(mock.call_count, iterations)
             self.hook_model.objects.all().delete()
-        for result in results[:-4]+results[-3:-2]:
-            self.assertEqual(result['status'], 201 or 200, result)
-        inventory_data = results[9]['data']
-        self.assertEqual(inventory_data['name'], 'complex_inventory')
-        # Check history
-        history = results[-2]['data']
-        self.assertEqual(history['revision'], "NO VCS")
-        self.assertEqual(history['mode'], _exec['module'])
-        self.assertEqual(history['kind'], 'MODULE')
-        self.assertEqual(history['inventory'], results[9]['data']['id'])
-        self.assertEqual(history['status'], "OK")
-        etalon = self._get_string_from_file('exemplary_complex_inventory')
-        etalon = etalon.replace('PATH', '[~~ENCRYPTED~~]')
-        etalon = etalon.replace('mypass', '[~~ENCRYPTED~~]')
-        self.assertEqual(
-            list(map(str.strip, str(history['raw_inventory']).split("\n"))),
-            list(map(str.strip, etalon.split("\n")))
-        )
         # Check clear output
         bulk_data = [
             self.get_mod_bulk(
-                'history', history['id'], {}, 'raw', 'get',
+                'history', subs['history'][0]['id'], {}, 'raw', 'get',
             ),
             self.get_mod_bulk(
-                'history', history['id'], {}, 'clear', 'delete',
+                'history', subs['history'][0]['id'], {}, 'clear', 'delete',
             ),
             self.get_mod_bulk(
-                'project', history['project'], {},
-                'history/{}/raw'.format(history['id']), 'get',
+                'project', subs['history'][0]['project'], {},
+                'history/{}/raw'.format(subs['history'][0]['id']), 'get',
             ),
         ]
         new_results = self.make_bulk(bulk_data)
@@ -852,16 +911,16 @@ class ProjectTestCase(BaseExecutionsTestCase):
         ])
         bulk_data = [
             self.get_mod_bulk(
-                'inventory', results[9]['data']['id'], {}, 'all_hosts', 'get',
+                'inventory', subs['inventory'][0]['id'], {}, 'all_hosts', 'get',
             ),
             self.get_mod_bulk(
-                'inventory', results[9]['data']['id'], {}, 'all_hosts', 'post',
+                'inventory', subs['inventory'][0]['id'], {}, 'all_hosts', 'post',
             ),
             self.get_mod_bulk(
-                'inventory', results[9]['data']['id'], {}, 'all_groups', 'get',
+                'inventory', subs['inventory'][0]['id'], {}, 'all_groups', 'get',
             ),
             self.get_mod_bulk(
-                'inventory', results[9]['data']['id'], {}, 'all_groups', 'post',
+                'inventory', subs['inventory'][0]['id'], {}, 'all_groups', 'post',
             ),
         ]
         new_results = self.make_bulk(bulk_data, 'put')

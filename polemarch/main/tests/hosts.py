@@ -80,7 +80,7 @@ class InvBaseTestCase(BaseTestCase):
             self.get_mod_bulk(bulk_name, pk, child, child_suburl, 'put'),
             self.get_mod_bulk(bulk_name, pk, {}, child_suburl, 'delete'),
         ]
-        result = self.make_bulk(bulk_data)
+        result = self.make_bulk(bulk_data, 'put')
         if should_fail:
             for res in result:
                 self.assertEqual(res['status'], 409 or 400)

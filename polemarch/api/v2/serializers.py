@@ -605,8 +605,6 @@ class GroupSerializer(_WithVariablesSerializer):
 
 
 class OneGroupSerializer(GroupSerializer, _InventoryOperations):
-    hosts  = HostSerializer(read_only=True, many=True)
-    groups = GroupSerializer(read_only=True, many=True)
     owner = UserSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
@@ -615,8 +613,6 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
         fields = ('id',
                   'name',
                   'notes',
-                  'hosts',
-                  "groups",
                   'children',
                   'owner',
                   'url',)
@@ -727,25 +723,6 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
 
     def execute_module(self, request):
         return self._execution("module", dict(request.data), request.user)
-
-
-class PermissionsSerializer(_SignalSerializer):
-    member = serializers.IntegerField()
-    member_type = serializers.ChoiceField(choices=(
-        ('user', 'user'),
-        ('team', 'team'),
-    ))
-    role = serializers.ChoiceField(choices=(
-        ('MASTER', 'Full controlled'),
-        ('EDITOR', 'Write and edit'),
-        ('EXECUTOR', 'Read and execute'),
-    ))
-
-    class Meta:
-        model = models.ACLPermission
-        fields = ("member",
-                  "role",
-                  "member_type")
 
 
 ansible_reference = AnsibleArgumentsReference()
