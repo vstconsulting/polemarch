@@ -221,7 +221,8 @@ class BaseExecutionsTestCase(BaseTestCase):
         results = self.make_bulk(self.get_access_deps())
         objects = OrderedDict(
             host=[], group=[], inventory=[],
-            project=[], template=[], periodic_task=[], history=[]
+            project=[], template=[], periodic_task=[], history=[],
+            team=[]
         )
         hard_subitems = ['template', 'periodic_task']
         for result in results:
