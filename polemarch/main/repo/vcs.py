@@ -84,6 +84,8 @@ class Git(_VCS):
 
     def get_revision(self, *args, **kwargs):
         # pylint: disable=unused-argument
+        if self.proj.status == 'NEW':
+            return 'NOT_SYNCED'
         repo = self.get_repo()
         return repo.head.object.hexsha
 

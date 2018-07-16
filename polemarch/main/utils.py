@@ -218,14 +218,14 @@ class AnsibleArgumentsReference(object):
             "playbook": PlaybookCLI(args=["", "none.yml"])
         }
 
-    def _cli_to_gui_type(self, argument, type_name):
+    def _cli_to_gui_type(self, argument, type_name):  # nocv
         if argument in self._GUI_TYPES_CONVERSION_DIFFERENT:
             return self._GUI_TYPES_CONVERSION_DIFFERENT[argument]
         if argument is not None and argument.endswith("-file"):
             return "textfile"
         return self._GUI_TYPES_CONVERSION[type_name]
 
-    def _as_gui_dict_command(self, args):
+    def _as_gui_dict_command(self, args):  # nocv
         cmd_result = {}
         for arg, info in args.items():
             if arg in self._HIDDEN_ARGS:
@@ -237,10 +237,11 @@ class AnsibleArgumentsReference(object):
         return cmd_result
 
     def is_valid_value(self, command, argument, value):
+        argument = argument.replace('_', '-')
         mtype = self.raw_dict[command][argument]["type"]
         if mtype == 'int':
             int(value)
-        elif mtype is None and value not in [None, ""]:
+        elif mtype is None and value not in [None, ""]:  # nocv
             raise AssertionError("This argument shouldn't have value")
         return True
 
@@ -254,7 +255,7 @@ class AnsibleArgumentsReference(object):
                 'argument': argument
             })
 
-    def as_gui_dict(self, wanted=""):
+    def as_gui_dict(self, wanted=""):  # nocv
         result = {}
         for cmd, args in self.raw_dict.items():
             if wanted == "" or cmd == wanted:
@@ -339,7 +340,7 @@ class Modules(object):
         return _modules_list
 
     def _filter(self, query):
-        if self._key_filter == query:
+        if self._key_filter == query:  # nocv
             return self._get_mod_list()
         self.clean()
         self._key_filter = query
@@ -377,14 +378,14 @@ class AnsibleModules(Modules):
         fields = fields.split(',') if fields else self.default_fields
         self.fields = [field.strip() for field in fields if field.strip()]
 
-    def _get_mod_info(self, key, sub):
+    def get_mod_info(self, key, sub="DOCUMENTATION"):
         try:
             path = "{}.{}.{}".format(self.mod.__name__, key, sub)
             return import_class(path)
         except BaseException as exception_object:
             return exception_object
 
-    def __get_detail_info_from_cache(self, key, data):
+    def __get_detail_info_from_cache(self, key, data):  # nocv
         cache_key = "cache_ansible_{}_{}".format(ansible_version, key)
         doc_data = self.cache.get(cache_key, None)
         if doc_data is None:  # nocv
@@ -392,15 +393,18 @@ class AnsibleModules(Modules):
             self.cache.set(cache_key, doc_data, 86400*7)
         return doc_data
 
-    def _get_info(self, key):
-        data = self._get_mod_info(key, "DOCUMENTATION")
-        if isinstance(data, BaseException) or data is None:
-            return None
-        if not self.detailed:
-            return key
+    def __old_get_info(self, key, data):  # nocv
         result = OrderedDict(path=key)
         doc_data = self.__get_detail_info_from_cache(key, data)
         result["data"] = OrderedDict()
         for field in self.fields:
             result["data"][field] = doc_data.get(field, None)
         return result
+
+    def _get_info(self, key):
+        data = self.get_mod_info(key)
+        if isinstance(data, BaseException) or data is None:
+            return None
+        if not self.detailed:
+            return key
+        return self.__old_get_info(key, data)  # nocv

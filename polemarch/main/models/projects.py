@@ -2,9 +2,7 @@
 from __future__ import unicode_literals
 
 import os
-import json
 import logging
-import collections
 import uuid
 import six
 from docutils.core import publish_parts as rst_gen
@@ -13,11 +11,15 @@ from django.conf import settings
 from django.db.models import Q
 from django.core.validators import ValidationError
 from vstutils.utils import ModelHandlers
+from yaml import load
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:  # nocv
+    from yaml import Loader, Dumper
 
 from . import hosts as hosts_models
 from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
-from ..utils import AnsibleModules
 from .base import ManyToManyFieldACL, BQuerySet, BModel
 from .hooks import Hook
 
@@ -45,7 +47,7 @@ class Project(AbstractModel):
     class Meta:
         default_related_name = "projects"
 
-    class SyncError(Exception):
+    class SyncError(PMException):
         pass
 
     class ReadMe(object):
@@ -124,12 +126,12 @@ class Project(AbstractModel):
             return
         path = "{}/{}".format(self.path, inventory)
         path = os.path.abspath(os.path.expanduser(path))
-        if self.path not in path:
+        if self.path not in path:  # nocv
             raise ValidationError(dict(inventory="Inventory should be in project dir."))
 
     def _prepare_kw(self, kind, mod_name, inventory, **extra):
         self.check_path(inventory)
-        if not mod_name:
+        if not mod_name:  # nocv
             raise PMException("Empty playbook/module name.")
         history, extra = self.history.all().start(
             self, kind, mod_name, inventory, **extra
@@ -149,7 +151,7 @@ class Project(AbstractModel):
             return
         try:
             self.sync()
-        except Exception as exc:
+        except Exception as exc:  # nocv
             raise self.SyncError("ERROR on Sync operation: " + str(exc))
 
     def execute(self, kind, *args, **extra):
@@ -170,17 +172,16 @@ class Project(AbstractModel):
         self.save()
 
     def start_repo_task(self, operation='sync'):
+        if self.status == 'NEW':
+            operation = 'clone'
         self.set_status("WAIT_SYNC")
         return self.task_handlers.backend("REPO").delay(self, operation)
-
-    def clone(self, *args, **kwargs):
-        return self.repo_class.clone()
 
     def sync(self, *args, **kwargs):
         return self.repo_class.get()
 
-    def sync_modules(self):
-        Module.create_from_ansible(self)
+    def clone(self, *args, **kwargs):
+        return self.repo_class.clone()
 
     @property
     def revision(self):
@@ -249,25 +250,8 @@ class Module(BModel):
 
     @property
     def name(self):
-        return self.path.split('.')[-1]
+        return self.data.get('module', None) or self.path.split('.')[-1]
 
     @property
     def data(self):
-        return json.loads(self._data or '{}')
-
-    @data.setter
-    def data(self, value):
-        if isinstance(value, (dict, collections.OrderedDict)):
-            self._data = json.dumps(value)
-        elif isinstance(value, six.string_types):
-            self._data = json.dumps(json.loads(value))
-        else:
-            raise ValidationError({'data': 'Unknown data type.'})
-
-    @classmethod
-    def create_from_ansible(cls, project=None):
-        for module in AnsibleModules(detailed=True).all():
-            cls.objects.update_or_create(
-                path=module['path'], project=project,
-                defaults=dict(_data=json.dumps(module['data']))
-            )
+        return load(self._data, Loader=Loader)

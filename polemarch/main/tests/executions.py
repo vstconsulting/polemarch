@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import tempfile
 import shutil
 import uuid
@@ -13,6 +14,8 @@ test_playbook_content = '''
 ---
 - hosts: all
   gather_facts: False
+  vars:
+    ansible_connection: local
   tasks:
     - name: Some local task
       command: uname
@@ -27,6 +30,224 @@ class BaseExecutionsTestCase(BaseTestCase):
     def setUp(self):
         super(BaseExecutionsTestCase, self).setUp()
         self.path = self._settings('PROJECTS_DIR', '/tmp/unknown')
+
+    @property
+    def template_module(self):
+        return dict(
+            kind="Module",
+            name='Test module template',
+            data=dict(
+                module="ping",
+                group="all",
+                inventory='localhost',
+                args="",
+                vars=dict(
+                    forks=8,
+                    connection='local'
+                ),
+            ),
+            options=dict(
+                one=dict(module='shell', args='uname'),
+                two=dict(vars=dict(forks=1))
+            )
+        )
+
+    @property
+    def template_playbook(self):
+        return dict(
+            kind="Task",
+            name='Test playbook template',
+            data=dict(
+                playbook="test-0.yml",
+                inventory='localhost',
+                vars=dict(
+                    forks=8,
+                    connection='local'
+                ),
+            ),
+            options=dict(
+                tree=dict(vars=dict(limit='localhost')),
+                four=dict(vars={'forks': 1, 'private_key': './key.pem'})
+            )
+        )
+
+    def get_periodic_task_data(self, pk, template_id):
+        periodic_template = dict(
+            kind='TEMPLATE', template=template_id, schedule="10", type="INTERVAL",
+        )
+        return [
+            self.get_mod_bulk('project', pk, periodic_template, 'periodic_task'),
+        ]
+
+    def get_templates_data(self, bulk_data, pk, inventory='localhost,'):
+        template_module = self.template_module
+        template_module['data']['inventory'] = inventory
+        template_playbook = self.template_playbook
+        template_playbook['data']['inventory'] = inventory
+        count_bulk = len(bulk_data)
+        template_module_index = count_bulk
+        return (
+            bulk_data + [
+                self.get_mod_bulk('project', pk, template_module, 'template'),
+                self.get_mod_bulk('project', pk, template_playbook, 'template'),
+            ] +
+            self.get_periodic_task_data(
+                pk, '<{}[data][id]>'.format(template_module_index)
+            )
+        )
+
+    def get_complex_data(self, with_subs=False):
+        hostlocl_v = dict(ansible_user='centos', ansible_ssh_private_key_file='PATH')
+        groups1_v = dict(ansible_user='ubuntu', ansible_ssh_pass='mypass')
+        complex_inventory_v = dict(
+            ansible_ssh_private_key_file="PATH", custom_var1='hello_world'
+        )
+        bulk_data = [
+            # Create hosts
+            self.get_complex_bulk('host', name='127.0.1.1'),
+            self.get_complex_bulk('host', name='127.0.1.[3:4]', type="RANGE"),
+            self.get_complex_bulk('host', name='127.0.1.[5:6]', type="RANGE"),
+            self.get_complex_bulk('host', name='hostlocl'),
+            # Create groups
+            self.get_complex_bulk('group', name='hosts1'),
+            self.get_complex_bulk('group', name='hosts2'),
+            self.get_complex_bulk('group', name='groups1', children=True),
+            self.get_complex_bulk('group', name='groups2', children=True),
+            self.get_complex_bulk('group', name='groups3', children=True),
+            # Create inventory
+            self.get_complex_bulk('inventory', name='complex_inventory'),
+        ]
+        # Create manual project
+        bulk_data += [
+            self.get_complex_bulk('project', name="complex", repository='MANUAL')
+        ]
+        # Set vars
+        bulk_data += [
+            self.get_mod_bulk('host', "<3[data][id]>", dict(key=k, value=v))
+            for k, v in hostlocl_v.items()
+        ]
+        bulk_data += [
+            self.get_mod_bulk('group', "<6[data][id]>", dict(key=k, value=v))
+            for k, v in groups1_v.items()
+        ]
+        bulk_data += [
+            self.get_mod_bulk('inventory', "<9[data][id]>", dict(key=k, value=v))
+            for k, v in complex_inventory_v.items()
+        ]
+        # Add children
+        bulk_data += [
+            # to hosts1
+            self.get_mod_bulk(
+                'group', "<4[data][id]>", dict(id="<0[data][id]>"), 'host',
+            ),
+            self.get_mod_bulk(
+                'group', "<4[data][id]>", dict(id="<3[data][id]>"), 'host',
+            ),
+            # to hosts2
+            self.get_mod_bulk(
+                'group', "<5[data][id]>", dict(id="<1[data][id]>"), 'host',
+            ),
+            self.get_mod_bulk(
+                'group', "<5[data][id]>", dict(id="<2[data][id]>"), 'host',
+            ),
+            # to groups1
+            self.get_mod_bulk(
+                'group', "<6[data][id]>", dict(id="<7[data][id]>"), 'group',
+            ),
+            self.get_mod_bulk(
+                'group', "<6[data][id]>", dict(id="<8[data][id]>"), 'group',
+            ),
+            # to groups2
+            self.get_mod_bulk(
+                'group', "<7[data][id]>", dict(id="<8[data][id]>"), 'group',
+            ),
+            # to groups3
+            self.get_mod_bulk(
+                'group', "<8[data][id]>", dict(id="<4[data][id]>"), 'group',
+            ),
+            self.get_mod_bulk(
+                'group', "<8[data][id]>", dict(id="<5[data][id]>"), 'group',
+            ),
+            # to inventory
+            self.get_mod_bulk(
+                'inventory', "<9[data][id]>", dict(id="<6[data][id]>"), 'group',
+            ),
+            self.get_mod_bulk(
+                'inventory', "<9[data][id]>", dict(id="<0[data][id]>"), 'host',
+            ),
+            self.get_mod_bulk(
+                'inventory', "<9[data][id]>", dict(id="<1[data][id]>"), 'host',
+            ),
+            self.get_mod_bulk(
+                'inventory', "<9[data][id]>", dict(id="<3[data][id]>"), 'host',
+            ),
+            # to project
+            self.get_mod_bulk(
+                'project', "<10[data][id]>", dict(id="<9[data][id]>"), 'inventory'
+            ),
+        ]
+        bulk_data = (
+            self.get_templates_data(bulk_data, "<10[data][id]>", "<9[data][id]>")
+            if with_subs else bulk_data
+        )
+        # Execute actions
+        _exec = dict(
+            connection="local", inventory="<9[data][id]>",
+            module="ping", group="all", args="", forks=1
+        )
+        bulk_data += [
+            self.get_mod_bulk(
+                'project', "<10[data][id]>", _exec, 'sync',
+            ),
+            self.get_mod_bulk(
+                'project', "<10[data][id]>", _exec, 'execute-module',
+            ),
+            self.get_bulk(
+                'history', {}, 'get',
+                pk="<{}[data][history_id]>".format(len(bulk_data) + 1)
+            ),
+            self.get_mod_bulk(
+                'history', "<{}[data][history_id]>".format(len(bulk_data) + 1), {},
+                'raw', 'get', filters='color=yes'
+            ),
+        ]
+        return bulk_data
+
+    def get_access_deps(self):
+        return self.get_complex_data(with_subs=True)
+
+    def generate_subs(self):
+        # Create project and dependences
+        results = self.make_bulk(self.get_access_deps())
+        objects = OrderedDict(
+            host=[], group=[], inventory=[],
+            project=[], template=[], periodic_task=[], history=[]
+        )
+        hard_subitems = ['template', 'periodic_task']
+        for result in results:
+            if result['type'] == 'add':
+                self.assertEqual(result['status'], 201)
+                objects[result['item']].append(result['data'])
+            if result['type'] == 'mod' and result['subitem'] in hard_subitems:
+                self.assertEqual(result['status'], 201)
+                objects[result['subitem']].append(result['data'])
+            if result['type'] == 'get' and result['item'] == 'history':
+                self.assertEqual(result['status'], 200)
+                history = result['data']
+                self.assertEqual(history['revision'], "NO VCS")
+                self.assertEqual(history['mode'], 'ping')
+                self.assertEqual(history['kind'], 'MODULE')
+                self.assertEqual(history['inventory'], objects['inventory'][0]['id'])
+                self.assertEqual(history['status'], "OK")
+                etalon = self._get_string_from_file('exemplary_complex_inventory')
+                etalon = etalon.replace('PATH', '[~~ENCRYPTED~~]')
+                etalon = etalon.replace('mypass', '[~~ENCRYPTED~~]')
+                self.assertEqual(
+                    list(map(str.strip, str(history['raw_inventory']).split("\n"))),
+                    list(map(str.strip, etalon.split("\n")))
+                )
+                objects[result['item']].append(history)
+        return objects
 
     def get_project_dir(self, id, **kwargs):
         return '{}/{}'.format(self.path, id)
@@ -78,7 +299,9 @@ class BaseExecutionsTestCase(BaseTestCase):
                 return
             kwargs = getattr(self, 'wip_{}'.format(repo_type.lower()), str)(project_data)
             kwargs = kwargs if not isinstance(kwargs, six.string_types) else dict()
+            self.change_owner(project_data)
             self.playbook_tests(project_data, **kwargs)
+            self.module_tests(project_data)
         finally:
             self.remove_project(**project_data)
 
@@ -104,6 +327,34 @@ class BaseExecutionsTestCase(BaseTestCase):
             self.get_mod_bulk('project', id, {}, 'playbook', 'get'),
         ]
 
+    def change_owner(self, project_data):
+        new_owner = self._create_user(False)
+        pk = project_data['id']
+        bulk_data = [
+            self.get_mod_bulk('project', pk, dict(user_id=new_owner.id), 'set_owner'),
+            self.get_bulk('project', {}, 'get', pk=pk),
+            self.get_mod_bulk('project', pk, dict(user_id=self.user.id), 'set_owner'),
+            self.get_bulk('project', {}, 'get', pk=pk),
+        ]
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[2]['status'], 201)
+        self.assertEqual(results[1]['data']['owner']['id'], new_owner.id)
+        self.assertEqual(results[3]['data']['owner']['id'], self.user.id)
+
+    def project_execute(self, project_data, exec_data=None, type='playbook'):
+        exec_data = exec_data or dict(
+            playbook='main.yml', inventory='inventory.ini', save_result=False
+        )
+        return self.make_bulk([
+            self.get_mod_bulk(
+                'project', project_data['id'], exec_data, 'execute-{}'.format(type)
+            ),
+            self.get_mod_bulk(
+                'project', project_data['id'], {}, 'history/<0[data][history_id]>', 'get'
+            ),
+        ], 'put')
+
     def playbook_tests(self, prj, playbook_count=1, execute=None, inventory="localhost"):
         _exec = dict(
             connection="local", limit="docker",
@@ -121,6 +372,26 @@ class BaseExecutionsTestCase(BaseTestCase):
             return
         self.assertEqual(results[2]['status'], 201)
 
+    def module_tests(self, prj):
+        bulk_data = [
+            self.get_mod_bulk(
+                'project', prj['id'], {}, 'module', 'get', filters='limit=20'
+            ),
+            self.get_mod_bulk(
+                'project', prj['id'], {}, 'module', 'get', filters='path=redis'
+            ),
+            self.get_mod_bulk(
+                'project', prj['id'], {}, 'module/<1[data][results][0][id]>', 'get'
+            ),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+        for result in results:
+            self.assertEqual(result['status'], 200)
+        self.assertTrue(results[0]['data']['count'] > 1000)
+        self.assertEqual(results[1]['data']['count'], 1)
+        self.assertEqual(results[1]['data']['results'][0]['name'], 'redis')
+        self.assertEqual(results[2]['data']['data']['module'], 'redis')
+
     def get_complex_bulk(self, item, op='add', **kwargs):
         return self.get_bulk(item, kwargs, op)
 
@@ -135,8 +406,15 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
     def wip_manual(self, project_data):
         files = self.generate_playbook(self.get_project_dir(**project_data))
+        path = self.get_project_dir(**project_data)
+        self.get_model_filter('Project', pk=project_data['id']).get().set_status('NEW')
+        self.sync_project(**project_data)
+        # Create test ssh-key
+        with open(self.get_file_path('key.pem', path), 'w') as key:
+            key.write('BEGIN RSA PRIVATE KEY')
         self.make_test_templates(project_data)
         self.make_test_periodic_task(project_data)
+        self.make_test_readme(project_data)
         return dict(playbook_count=len(files), execute=True)
 
     def wip_git(self, project_data):
@@ -161,39 +439,10 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
     def make_test_templates(self, project_data):
         pk = project_data['id']
-        template_module = dict(
-            kind="Module",
-            name='Test module template',
-            data=dict(
-                module="ping",
-                group="all",
-                inventory='localhost',
-                args="",
-                vars=dict(
-                    forks=8,
-                ),
-            ),
-            options=dict(
-                one=dict(module='shell', args='uname'),
-                two=dict(vars=dict(forks=1))
-            )
-        )
-        template_playbook = dict(
-            kind="Task",
-            name='Test playbook template',
-            data=dict(
-                playbook="test-0.yml",
-                inventory='localhost',
-                vars=dict(
-                    forks=8,
-                ),
-            ),
-            options=dict(
-                tree=dict(vars=dict(limit='localhost')),
-                four=dict(vars=dict(forks=1))
-            )
-        )
+        template_module = self.template_module
+        template_playbook = self.template_playbook
         template_playbook['options']['tree']['vars']['private-key'] = 'PATH'
+        template_playbook['data']['vars']['private-key'] = './key.pem'
         m_opts = dict(option='one')
         p_opts = dict(option='four')
         bulk_data = [
@@ -217,6 +466,17 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
         tmplt_mod = results[0]['data']
         tmplt_play = results[1]['data']
+        # Check update keys
+        check_update = self.make_bulk([
+            self.get_mod_bulk(
+                'project', pk, dict(data=tmplt_play['data']),
+                'template/{}'.format(tmplt_play['id']), 'patch'
+            ),
+        ])[0]
+        self.assertEqual(check_update['status'], 200)
+        self.assertEqual(
+            check_update['data']['data']['vars']['private-key'], '[~~ENCRYPTED~~]'
+        )
         results = self.get_result(
             'get', self.get_url('project', project_data['id'], 'history') + '?limit=4'
         )
@@ -238,6 +498,25 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results['results'][-4]['options']['template_option'], 'four')
 
         # Templates in periodic tasks
+        data = dict(
+            mode="test-1.yml", schedule="10", type="INTERVAL",
+            project=project_data['id'],
+            inventory='localhost,', name="one"
+        )
+        new_data = dict(kind='TEMPLATE', template=tmplt_mod['id'], template_opt='one')
+        bulk_data = [
+            self.get_mod_bulk('project', pk, data, 'periodic_task'),
+            self.get_mod_bulk(
+                'project', pk, new_data, 'periodic_task/<0[data][id]>', 'patch'
+            ),
+        ]
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[1]['data']['kind'], 'TEMPLATE')
+        self.assertEqual(results[1]['data']['inventory'], '')
+        self.assertEqual(results[1]['data']['mode'], '')
+        # Create new periodic_tasks
         ptask_data = [
             dict(
                 kind='TEMPLATE', template=tmplt_mod['id'], template_opt='one',
@@ -280,23 +559,33 @@ class ProjectTestCase(BaseExecutionsTestCase):
             result['detail'], "Task canceled: {}".format(results['results'][-2]['id'])
         )
         # Check Templates without inventory
-        invalid_template = dict(template_playbook)
-        del invalid_template['data']['inventory']
-        invalid_type_template = dict(template_playbook)
+        invalid_type_template = dict(**template_playbook)
         invalid_type_template['kind'] = 'UnknownKind'
+        invalid_options_template = dict(**template_playbook)
+        invalid_options_template['options'] = 'options'
+        invalid_override_template = dict(**template_playbook)
+        invalid_override_template['options'] = dict(test=dict(inventory='some_ovveride'))
+        invalid_template = dict(**template_playbook)
+        invalid_template['data'] = dict(**template_playbook['data'])
+        del invalid_template['data']['inventory']
         bulk_data = [
             self.get_mod_bulk('project', pk, invalid_template, 'template'),
             self.get_mod_bulk('project', pk, invalid_type_template, 'template'),
+            self.get_mod_bulk('project', pk, invalid_options_template, 'template'),
+            self.get_mod_bulk('project', pk, invalid_override_template, 'template'),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 400)
         self.assertEqual(
             results[0]['data']['detail']['inventory'], ["Inventory have to set."]
         )
-        # self.assertEqual(
-        #     results[0]['data']['detail']['project'], ["Project have to set."]
-        # )
         self.assertEqual(results[1]['status'], 400)
+        self.assertEqual(results[2]['status'], 400)
+        self.assertEqual(results[3]['status'], 400)
+        self.assertEqual(
+            results[3]['data']['detail']['options'],
+            ["Disallowed to override inventory."]
+        )
 
     def make_test_periodic_task(self, project_data):
         # Check periodic tasks
@@ -388,7 +677,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         # Try to execute now
         data = dict(
             mode="test-0.yml", schedule="10", type="INTERVAL", name="one",
-            project=project_data['id'], inventory='localhost'
+            project=project_data['id'], inventory='localhost,'
         )
         results = self.make_bulk([
             self.get_mod_bulk('project', project_data['id'], data, 'periodic_task'),
@@ -400,18 +689,37 @@ class ProjectTestCase(BaseExecutionsTestCase):
             self.get_mod_bulk(
                 'project', project_data['id'], {}, 'history/<1[data][history_id]>', 'get'
             ),
+            self.get_mod_bulk(
+                'project', project_data['id'], dict(save_result=False),
+                'periodic_task/<0[data][id]>', 'patch'
+            ),
+            self.get_mod_bulk(
+                'project', project_data['id'], data,
+                'periodic_task/<0[data][id]>/execute',
+                'post'
+            ),
+            self.get_mod_bulk(
+                'project', project_data['id'], dict(save_result=True),
+                'periodic_task/<0[data][id]>', 'patch'
+            ),
         ], 'put')
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 201)
-        self.assertEqual(results[1]['data']['detail'], "Started at inventory localhost.")
+        self.assertEqual(
+            results[1]['data']['detail'], "Started at inventory localhost,."
+        )
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['status'], "OK")
+        self.assertEqual(results[3]['status'], 200)
+        self.assertEqual(results[4]['status'], 201)
+        self.assertEqual(results[4]['data']['history_id'], None)
+        self.assertEqual(results[5]['status'], 200)
         # Just exec
         ScheduledTask.delay(results[0]['data']['id'])
         # Except on execution
         with self.patch('polemarch.main.utils.CmdExecutor.execute') as _exec:
             def _exec_error(*args, **kwargs):
-                raise Exception("Some error")
+                raise Exception("It is not error. Just test execution.")
 
             _exec.side_effect = _exec_error
             ScheduledTask.delay(results[0]['data']['id'])
@@ -429,6 +737,38 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results['results'][-1]['status'], 'OK')
         self.assertEqual(results['results'][-2]['status'], 'ERROR')
 
+    def make_test_readme(self, project_data):
+        project = self.get_model_filter("Project", pk=project_data['id']).get()
+        def get_bulk_readme():
+            bulk_data = [
+                self.get_mod_bulk('project', project_data['id'], {}, 'sync', 'post'),
+                self.get_bulk('project', {}, 'get', pk=project_data['id']),
+            ]
+            results = self.make_bulk(bulk_data)
+            self.assertEqual(results[0]['status'], 200)
+            self.assertEqual(results[1]['status'], 200)
+            return results[1]['data']
+
+        with open(project.path+"/readme.md", "w") as f:
+            f.write("# test README.md \n **bold** \n *italic* \n")
+
+        self.assertEqual(get_bulk_readme()['readme_ext'], '.md')
+        self.assertEqual(
+            get_bulk_readme()['readme_content'],
+            "<h1>test README.md</h1>\n\n<p><strong>bold</strong>" +
+            " \n <em>italic</em> </p>\n"
+        )
+        with open(project.path+"/readme.rst", "w") as f:
+            f.write("test README.rst \n **bold** \n *italic* \n")
+
+        self.assertEqual(get_bulk_readme()['readme_ext'], '.rst')
+        self.assertEqual(
+            get_bulk_readme()['readme_content'],
+            '<div class="document">\n<dl class="docutils">\n<dt>' +
+            'test README.rst</dt>\n<dd><strong>bold</strong>\n' +
+            '<em>italic</em></dd>\n</dl>\n</div>\n'
+        )
+
     def test_project_manual(self):
         self.project_workflow('MANUAL', execute=True)
 
@@ -438,6 +778,49 @@ class ProjectTestCase(BaseExecutionsTestCase):
             self.project_workflow(
                 'TAR', repository='http://localhost:8000/test_repo.tar.gz', execute=True
             )
+            download.reset_mock()
+
+            # try error
+            def over_download(*args, **kwargs):
+                raise Exception("It is not error. Just test")
+
+            result = self.mass_create_bulk('project', [
+                dict(
+                    name=str(uuid.uuid1()),
+                    repository='http://localhost:8000/test_repo.tar.gz',
+                    variables=dict(repo_type="TAR", repo_sync_on_run=True)
+                )
+            ])
+            project_data = result[0]['data']
+            self.project_execute(project_data)
+
+            with self.patch('tarfile.open') as extract:
+                extract.side_effect = over_download
+                _ex_module = dict(
+                    module='ping', group='all',
+                    inventory='192.168.254.255', become_method='sudo'
+                )
+                _ex_playbook = dict(
+                    playbook='unknown.yml', inventory='192.168.254.255',
+                    private_key='BEGIN RSA PRIVATE KEY'
+                )
+                unsync = dict(key='repo_sync_on_run', value=False)
+                pk = project_data['id']
+                results = self.make_bulk([
+                    self.get_bulk('project', {}, 'get', pk=pk),
+                    self.get_mod_bulk('project', pk, {}, 'sync'),
+                    self.get_bulk('project', {}, 'get', pk=project_data['id']),
+                    self.get_mod_bulk('project', pk, _ex_module, 'execute-module'),
+                    self.get_mod_bulk('project', pk, unsync, 'variables'),
+                    self.get_mod_bulk('project', pk, _ex_playbook, 'execute-playbook'),
+                    self.get_mod_bulk(
+                        'project', pk, {}, 'history', method='get', filters='limit=2'
+                    ),
+                ], 'put')
+                project_data = results[2]['data']
+                self.assertEqual(project_data['status'], 'ERROR')
+                self.assertEqual(results[-1]['data']['results'][-1]['status'], 'ERROR')
+                self.assertEqual(results[-1]['data']['results'][-2]['status'], 'ERROR')
 
     def test_project_git(self):
         # Prepare repo
@@ -462,117 +845,26 @@ class ProjectTestCase(BaseExecutionsTestCase):
             'GIT', repository=self.repo_dir, repo_branch='new_branch', repo_key='key'
         )
 
+        # Test invalid repo
+        result = self.mass_create_bulk('project', [
+            dict(
+                name=str(uuid.uuid1()), repository='/tmp/not_git_path',
+                variables=dict(repo_type="GIT")
+            )
+        ])
+        project_data = result[0]['data']
+        results = self.make_bulk([
+            self.get_bulk('project', {}, 'get', pk=project_data['id']),
+            self.get_mod_bulk('project', '<0[data][id]>', {}, 'sync'),
+            self.get_bulk('project', {}, 'get', pk=project_data['id']),
+        ], 'put')
+        project_data = results[2]['data']
+        self.assertEqual(project_data['status'], 'ERROR')
+        self.assertEqual(project_data['revision'], 'ERROR')
+        self.assertEqual(project_data['branch'], 'waiting...')
+
     def test_complex(self):
-        hostlocl_v = dict(ansible_user='centos', ansible_ssh_private_key_file='PATH')
-        groups1_v = dict(ansible_user='ubuntu', ansible_ssh_pass='mypass')
-        complex_inventory_v = dict(
-            ansible_ssh_private_key_file="PATH", custom_var1='hello_world'
-        )
-        bulk_data = [
-            # Create hosts
-            self.get_complex_bulk('host', name='127.0.1.1'),
-            self.get_complex_bulk('host', name='127.0.1.[3:4]', type="RANGE"),
-            self.get_complex_bulk('host', name='127.0.1.[5:6]', type="RANGE"),
-            self.get_complex_bulk('host', name='hostlocl'),
-            # Create groups
-            self.get_complex_bulk('group', name='hosts1'),
-            self.get_complex_bulk('group', name='hosts2'),
-            self.get_complex_bulk('group', name='groups1', children=True),
-            self.get_complex_bulk('group', name='groups2', children=True),
-            self.get_complex_bulk('group', name='groups3', children=True),
-            # Create inventory
-            self.get_complex_bulk('inventory', name='complex_inventory'),
-        ]
-        # Create manual project
-        bulk_data += [
-            self.get_complex_bulk('project', name="complex", repository='MANUAL')
-        ]
-        # Set vars
-        bulk_data += [
-            self.get_mod_bulk('host', "<3[data][id]>", dict(key=k, value=v))
-            for k, v in hostlocl_v.items()
-        ]
-        bulk_data += [
-            self.get_mod_bulk('group', "<6[data][id]>", dict(key=k, value=v))
-            for k, v in groups1_v.items()
-        ]
-        bulk_data += [
-            self.get_mod_bulk('inventory', "<9[data][id]>", dict(key=k, value=v))
-            for k, v in complex_inventory_v.items()
-        ]
-        # Add children
-        bulk_data += [
-            # to hosts1
-            self.get_mod_bulk(
-                'group', "<4[data][id]>", dict(id="<0[data][id]>"), 'host',
-            ),
-            self.get_mod_bulk(
-                'group', "<4[data][id]>", dict(id="<3[data][id]>"), 'host',
-            ),
-            # to hosts2
-            self.get_mod_bulk(
-                'group', "<5[data][id]>", dict(id="<1[data][id]>"), 'host',
-            ),
-            self.get_mod_bulk(
-                'group', "<5[data][id]>", dict(id="<2[data][id]>"), 'host',
-            ),
-            # to groups1
-            self.get_mod_bulk(
-                'group', "<6[data][id]>", dict(id="<7[data][id]>"), 'group',
-            ),
-            self.get_mod_bulk(
-                'group', "<6[data][id]>", dict(id="<8[data][id]>"), 'group',
-            ),
-            # to groups2
-            self.get_mod_bulk(
-                'group', "<7[data][id]>", dict(id="<8[data][id]>"), 'group',
-            ),
-            # to groups3
-            self.get_mod_bulk(
-                'group', "<8[data][id]>", dict(id="<4[data][id]>"), 'group',
-            ),
-            self.get_mod_bulk(
-                'group', "<8[data][id]>", dict(id="<5[data][id]>"), 'group',
-            ),
-            # to inventory
-            self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<6[data][id]>"), 'group',
-            ),
-            self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<0[data][id]>"), 'host',
-            ),
-            self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<1[data][id]>"), 'host',
-            ),
-            self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<3[data][id]>"), 'host',
-            ),
-            # to project
-            self.get_mod_bulk(
-                'project', "<10[data][id]>", dict(id="<9[data][id]>"), 'inventory'
-            ),
-        ]
-        # Execute actions
-        _exec = dict(
-            connection="local", inventory="<9[data][id]>",
-            module="ping", group="all", args="", forks=1
-        )
-        bulk_data += [
-            self.get_mod_bulk(
-                'project', "<10[data][id]>", _exec, 'sync',
-            ),
-            self.get_mod_bulk(
-                'project', "<10[data][id]>", _exec, 'execute-module',
-            ),
-            self.get_bulk(
-                'history', {}, 'get',
-                pk="<{}[data][history_id]>".format(len(bulk_data)+1)
-            ),
-            self.get_mod_bulk(
-                'history', "<{}[data][history_id]>".format(len(bulk_data)+1), {},
-                'raw', 'get', filters='color=yes'
-            ),
-        ]
+        bulk_data = self.get_complex_data()
         # additionaly test hooks
         self.hook_model.objects.all().delete()
         hook_urls = ['localhost:64000', 'localhost:64001']
@@ -591,38 +883,21 @@ class ProjectTestCase(BaseExecutionsTestCase):
         with self.patch('requests.post') as mock:
             iterations = 2 * len(hook_urls)
             mock.side_effect = [response] * iterations
-            results = self.make_bulk(bulk_data, 'put')
+            # results = self.make_bulk(bulk_data, 'put')
+            subs = self.generate_subs()
             self.assertEqual(mock.call_count, iterations)
             self.hook_model.objects.all().delete()
-        for result in results[:-4]+results[-3:-2]:
-            self.assertEqual(result['status'], 201 or 200, result)
-        inventory_data = results[9]['data']
-        self.assertEqual(inventory_data['name'], 'complex_inventory')
-        # Check history
-        history = results[-2]['data']
-        self.assertEqual(history['revision'], "NO VCS")
-        self.assertEqual(history['mode'], _exec['module'])
-        self.assertEqual(history['kind'], 'MODULE')
-        self.assertEqual(history['inventory'], results[9]['data']['id'])
-        self.assertEqual(history['status'], "OK")
-        etalon = self._get_string_from_file('exemplary_complex_inventory')
-        etalon = etalon.replace('PATH', '[~~ENCRYPTED~~]')
-        etalon = etalon.replace('mypass', '[~~ENCRYPTED~~]')
-        self.assertEqual(
-            list(map(str.strip, str(history['raw_inventory']).split("\n"))),
-            list(map(str.strip, etalon.split("\n")))
-        )
         # Check clear output
         bulk_data = [
             self.get_mod_bulk(
-                'history', history['id'], {}, 'raw', 'get',
+                'history', subs['history'][0]['id'], {}, 'raw', 'get',
             ),
             self.get_mod_bulk(
-                'history', history['id'], {}, 'clear', 'delete',
+                'history', subs['history'][0]['id'], {}, 'clear', 'delete',
             ),
             self.get_mod_bulk(
-                'project', history['project'], {},
-                'history/{}/raw'.format(history['id']), 'get',
+                'project', subs['history'][0]['project'], {},
+                'history/{}/raw'.format(subs['history'][0]['id']), 'get',
             ),
         ]
         new_results = self.make_bulk(bulk_data)
@@ -636,16 +911,16 @@ class ProjectTestCase(BaseExecutionsTestCase):
         ])
         bulk_data = [
             self.get_mod_bulk(
-                'inventory', results[9]['data']['id'], {}, 'all_hosts', 'get',
+                'inventory', subs['inventory'][0]['id'], {}, 'all_hosts', 'get',
             ),
             self.get_mod_bulk(
-                'inventory', results[9]['data']['id'], {}, 'all_hosts', 'post',
+                'inventory', subs['inventory'][0]['id'], {}, 'all_hosts', 'post',
             ),
             self.get_mod_bulk(
-                'inventory', results[9]['data']['id'], {}, 'all_groups', 'get',
+                'inventory', subs['inventory'][0]['id'], {}, 'all_groups', 'get',
             ),
             self.get_mod_bulk(
-                'inventory', results[9]['data']['id'], {}, 'all_groups', 'post',
+                'inventory', subs['inventory'][0]['id'], {}, 'all_groups', 'post',
             ),
         ]
         new_results = self.make_bulk(bulk_data, 'put')

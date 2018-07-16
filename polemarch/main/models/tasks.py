@@ -47,12 +47,12 @@ class Template(ACLModel):
         ]
 
     template_fields = {}
-    template_fields["Task"] = ["playbook", "vars", "inventory", "project"]
+    template_fields["Task"] = ["playbook", "vars", "inventory"]
     template_fields["Module"] = [
-        "inventory", "module", "group", "args", "vars", "project"
+        "inventory", "module", "group", "args", "vars"
     ]
 
-    excepted_execution_fields = []
+    excepted_execution_fields = ['inventory']
     _exec_types = {
         "Task": "playbook",
         "Module": "module",
@@ -66,8 +66,6 @@ class Template(ACLModel):
 
     def get_data(self):
         data = json.loads(self.template_data)
-        if "project" in self.template_fields[self.kind] and self.project:
-            data['project'] = self.project.id
         if "inventory" in self.template_fields[self.kind] and self.inventory:
             try:
                 data['inventory'] = int(self.inventory)
@@ -78,14 +76,13 @@ class Template(ACLModel):
     @property
     def inventory_object(self):
         try:
-            return Inventory.objects.get(pk=int(self.data['inventory']))
-        except (ValueError, Inventory.DoesNotExist):  # nocv
+            return self.project.inventories.get(pk=int(self.data['inventory']))
+        except (ValueError, Inventory.DoesNotExist):
             self.project.check_path(self.data['inventory'])
             return self.data['inventory']
 
     def get_data_with_options(self, option, **extra):
         data = self.get_data()
-        data.pop("project", None)
         option_data = self.get_option_data(option)
         option_vars = option_data.pop("vars", {})
         vars = data.pop("vars", {})
@@ -99,7 +96,7 @@ class Template(ACLModel):
         # pylint: disable=protected-access
         tp = self._exec_types.get(self.kind, None)
         if tp is None:
-            raise UnsupportedMediaType(media_type=self.kind)
+            raise UnsupportedMediaType(media_type=self.kind)  # nocv
         return serializer._execution(
             tp, self.get_data_with_options(option, **extra), user,
             template=self.id, template_option=option
@@ -107,11 +104,11 @@ class Template(ACLModel):
 
     def _convert_to_data(self, value):
         if isinstance(value, (six.string_types, six.text_type)):
-            return json.loads(value)
+            return json.loads(value)  # nocv
         elif isinstance(value, (dict, OrderedDict, list)):
             return value
         else:
-            raise ValueError("Unknown data type set.")
+            raise ValueError("Unknown data type set.")  # nocv
 
     def __encrypt(self, new_vars, data_name='data'):
         old_vars = getattr(self, data_name).get('vars', {})
@@ -145,16 +142,10 @@ class Template(ACLModel):
 
     def set_data(self, value):
         data = self._convert_to_data(value)
-        project_id = data.pop('project', None)
         inventory_id = data.pop('inventory', None)
-        if project_id and "project" in self.template_fields[self.kind]:
-            self.project = (
-                Project.objects.get(pk=project_id) if project_id
-                else project_id
-            )
         if "inventory" in self.template_fields[self.kind]:
             try:
-                self.inventory = Inventory.objects.get(pk=int(inventory_id)).id
+                self.inventory = self.project.inventories.get(pk=int(inventory_id)).id
             except (ValueError, TypeError, Inventory.DoesNotExist):
                 self.inventory = inventory_id
         data['vars'] = self.keep_encrypted_data(data.get('vars', None))
@@ -219,9 +210,13 @@ class PeriodicTask(AbstractModel):
     types = ["CRONTAB", "INTERVAL"]
     HIDDEN_VARS = [
         'key-file',
+        'key_file',
         'private-key',
+        'private_key',
         'vault-password-file',
+        'vault_password_file',
         'new-vault-password-file',
+        'new_vault_password_file',
     ]
 
     class Meta:
@@ -244,10 +239,10 @@ class PeriodicTask(AbstractModel):
     @inventory.setter
     def inventory(self, inventory):
         if isinstance(inventory, Inventory):
-            self._inventory = inventory
+            self._inventory = inventory  # nocv
         elif isinstance(inventory, (six.string_types, six.text_type)):
             try:
-                self._inventory = Inventory.objects.get(pk=int(inventory))
+                self._inventory = self.project.inventories.get(pk=int(inventory))
             except (ValueError, Inventory.DoesNotExist):
                 self.project.check_path(inventory)
                 self.inventory_file = inventory
@@ -266,14 +261,6 @@ class PeriodicTask(AbstractModel):
     def get_vars(self):
         qs = self.variables.order_by("key")
         return OrderedDict(qs.values_list('key', 'value'))
-
-    @transaction.atomic()
-    def set_vars(self, variables):
-        command = "playbook"
-        if self.kind == "MODULE":
-            command = "module"
-        AnsibleArgumentsReference().validate_args(command, variables)
-        return super(PeriodicTask, self).set_vars(variables)
 
     def get_schedule(self):
         if self.type == "CRONTAB":
@@ -429,7 +416,7 @@ class History(BModel):
     @property
     def execution_time(self):
         if self.stop_time is None:
-            return self._get_seconds_from_time(now() - self.start_time)
+            return self._get_seconds_from_time(now() - self.start_time)  # nocv
         else:
             return self._get_seconds_from_time(self.stop_time - self.start_time)
 
@@ -455,7 +442,7 @@ class History(BModel):
     @options.setter
     def options(self, value):
         if not isinstance(value, dict):
-            raise ValidationError(dict(args="Should be a dict."))
+            raise ValidationError(dict(args="Should be a dict."))  # nocv
         self.json_options = json.dumps(value)
 
     @property

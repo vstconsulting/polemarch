@@ -4,6 +4,7 @@ import json
 from collections import OrderedDict
 import six
 from django.contrib.auth.models import User
+from django.utils.functional import cached_property
 from django.db import transaction
 from rest_framework import serializers, exceptions, status
 from rest_framework.exceptions import PermissionDenied
@@ -12,7 +13,7 @@ from vstutils.api.base import Response
 from ...main.utils import AnsibleArgumentsReference
 
 from ...main.models import Inventory
-from ...main import models, exceptions as main_exceptions
+from ...main import models
 from ..signals import api_post_save, api_pre_save
 
 
@@ -36,7 +37,38 @@ class ModelRelatedField(serializers.PrimaryKeyRelatedField):
 
 class DictField(serializers.CharField):
 
+    def to_internal_value(self, data):  # nocv
+        return (
+            data
+            if (
+                isinstance(data, (six.string_types, six.text_type)) or
+                isinstance(data, (dict, list))
+            )
+            else self.fail("Unknown type.")
+        )
+
+    def to_representation(self, value):  # nocv
+        return (
+            json.loads(value)
+            if not isinstance(value, (dict, list))
+            else value
+        )
+
+
+class MultiTypeField(serializers.CharField):
     def to_internal_value(self, data):
+        return data
+
+    def to_representation(self, value):
+        return (
+            value if not isinstance(value, six.class_types)
+            else str(value)
+        )
+
+
+class DataSerializer(serializers.Serializer):
+
+    def to_internal_value(self, data):  # nocv
         return (
             data
             if (
@@ -88,7 +120,48 @@ class ExecuteResponseSerializer(ActionResponseSerializer):
     executor = serializers.IntegerField(default=None, allow_null=True)
 
 
+class SetOwnerSerializer(DataSerializer):
+    user_id = serializers.IntegerField(required=True)
+
+    def update(self, instance, validated_data):
+        if not self.instance.acl_handler.owned_by(self.current_user()):  # noce
+            raise PermissionDenied(self.perms_msg)
+        user = self.get_user(validated_data)
+        self.instance.acl_handler.set_owner(user)
+        return user
+
+    def get_user(self, validated_data):
+        return User.objects.get(**validated_data)
+
+    def current_user(self):
+        return self.context['request'].user
+
+    def to_representation(self, value):
+        return dict(user_id=value.id)
+
+    def to_internal_value(self, data):
+        return dict(pk=data['user_id'])
+
+
 class _SignalSerializer(serializers.ModelSerializer):
+    @cached_property
+    def _writable_fields(self):
+        writable_fields = super(_SignalSerializer, self)._writable_fields
+        fields = []
+        attrs = [
+            'field_name', 'source_attrs', 'source',
+            'read_only', 'required', 'write_only', 'default'
+        ]
+        for field in writable_fields:
+            if not isinstance(field, DataSerializer):
+                fields.append(field)
+                continue
+            field_object = serializers.DictField()
+            for attr in attrs:
+                setattr(field_object, attr, getattr(field, attr, None))
+            fields.append(field_object)
+        return fields
+
     @with_signals
     def create(self, validated_data):
         return super(_SignalSerializer, self).create(validated_data)
@@ -108,56 +181,9 @@ class _WithPermissionsSerializer(_SignalSerializer):
     def current_user(self):
         return self.context['request'].user
 
-    def __get_all_permission_serializer(self):  # noce
-        return PermissionsSerializer(
-            self.instance.acl.all(), many=True
-        )
-
-    def __duplicates_check(self, data):  # noce
-        without_role = [frozenset({e['member'], e['member_type']}) for e in data]
-        if len(without_role) != len(list(set(without_role))):
-            raise ValueError("There is duplicates in your permissions set.")
-
-    @transaction.atomic
-    def __permission_set(self, data, remove_old=True):  # noce
-        self.__duplicates_check(data)
-        for permission_args in data:
-            if remove_old:
-                self.instance.acl.all().extend().filter(
-                    member=permission_args['member'],
-                    member_type=permission_args['member_type']
-                ).delete()
-            self.instance.acl.create(**permission_args)
-
-    @transaction.atomic
-    def permissions(self, request):  # noce
-        user = self.current_user()
-        if request.method != "GET" and \
-                not self.instance.acl_handler.manageable_by(user):
-            raise PermissionDenied(self.perms_msg)
-        if request.method == "DELETE":
-            self.instance.acl.all().filter_by_data(request.data).delete()
-        elif request.method == "POST":
-            self.__permission_set(request.data)
-        elif request.method == "PUT":
-            self.instance.acl.clear()
-            self.__permission_set(request.data, False)
-        return Response(self.__get_all_permission_serializer().data, status.HTTP_200_OK)
-
-    def _change_owner(self, request):  # noce
-        if not self.instance.acl_handler.owned_by(self.current_user()):
-            raise PermissionDenied(self.perms_msg)
-        self.instance.acl_handler.set_owner(User.objects.get(pk=request.data))
-        return Response("Owner changed", status.HTTP_200_OK)
-
-    def owner(self, request):  # noce
-        if request.method == "GET":
-            return Response(self.instance.owner.id, status.HTTP_200_OK)
-        elif request.method == "PUT":
-            return self._change_owner(request)
-
 
 class UserSerializer(vst_serializers.UserSerializer):
+    is_staff = serializers.HiddenField(default=True)
 
     @with_signals
     def create(self, data):
@@ -168,22 +194,23 @@ class UserSerializer(vst_serializers.UserSerializer):
         return super(UserSerializer, self).update(instance, validated_data)
 
 
+class OneOwnerSerializer(UserSerializer):
+    class Meta(vst_serializers.OneUserSerializer.Meta):
+        pass
+
+
 class TeamSerializer(_WithPermissionsSerializer):
-    users_list = DictField(required=False, write_only=True)
 
     class Meta:
         model = models.UserGroup
         fields = (
             'id',
             "name",
-            "users_list",
             'url',
         )
 
 
 class OneTeamSerializer(TeamSerializer):
-    users = UserSerializer(many=True, required=False)
-    users_list = DictField(required=False)
     owner = UserSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
@@ -193,31 +220,9 @@ class OneTeamSerializer(TeamSerializer):
             'id',
             "name",
             "notes",
-            "users",
-            "users_list",
             "owner",
             'url',
         )
-
-
-class OneUserSerializer(UserSerializer):
-    groups = TeamSerializer(read_only=True, many=True)
-    password = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = User
-        fields = ('id',
-                  'username',
-                  'password',
-                  'is_active',
-                  'is_staff',
-                  'first_name',
-                  'last_name',
-                  'email',
-                  'groups',
-                  'url',)
-        read_only_fields = ('is_superuser',
-                            'date_joined',)
 
 
 class HistorySerializer(_SignalSerializer):
@@ -304,7 +309,7 @@ class HookSerializer(serializers.ModelSerializer):
 
 
 class VariableSerializer(_SignalSerializer):
-    value = serializers.CharField(default="", allow_blank=True)
+    value = MultiTypeField(default="", allow_blank=True)
 
     class Meta:
         model = models.Variable
@@ -407,6 +412,29 @@ class OnePlaybookSerializer(PlaybookSerializer):
                   'playbook',)
 
 
+class ModuleSerializer(vst_serializers.VSTSerializer):
+    class Meta:
+        model = models.Module
+        fields = (
+            'id',
+            'path',
+            'name',
+        )
+
+
+class OneModuleSerializer(ModuleSerializer):
+    data = DataSerializer()
+
+    class Meta:
+        model = models.Module
+        fields = (
+            'id',
+            'path',
+            'name',
+            'data',
+        )
+
+
 class PeriodictaskSerializer(_WithVariablesSerializer):
     kind = serializers.ChoiceField(
         choices=[(k, k) for k in models.PeriodicTask.kinds],
@@ -440,19 +468,10 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
     def _do_with_vars(self, *args, **kwargs):
         kw = kwargs['validated_data']
         if kw.get('kind', None) == 'TEMPLATE':
-            template = kw.get('template')
-            kw['project'] = template.project
             kw['inventory'] = ''
             kw['mode'] = ''
             kwargs['validated_data'] = kw
         return super(PeriodictaskSerializer, self)._do_with_vars(*args, **kwargs)
-
-    @transaction.atomic
-    def permissions(self, request):  # noce
-        raise main_exceptions.NotApplicable("See project permissions.")
-
-    def owner(self, request):  # noce
-        raise main_exceptions.NotApplicable("See project owner.")
 
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
@@ -483,26 +502,6 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
         ))
         rdata.is_valid(True)
         return Response(rdata.data, status.HTTP_201_CREATED)
-
-
-class DataSerializer(serializers.Serializer):
-
-    def to_internal_value(self, data):
-        return (
-            data
-            if (
-                isinstance(data, (six.string_types, six.text_type)) or
-                isinstance(data, (dict, list))
-            )
-            else self.fail("Unknown type.")
-        )
-
-    def to_representation(self, value):
-        return (
-            json.loads(value)
-            if not isinstance(value, (dict, list))
-            else value
-        )
 
 
 class TemplateSerializer(_WithVariablesSerializer):
@@ -555,7 +554,6 @@ class TemplateSerializer(_WithVariablesSerializer):
 
 class OneTemplateSerializer(TemplateSerializer):
     data = DataSerializer(required=True)
-    owner = UserSerializer(read_only=True)
     options = DataSerializer(required=False)
     options_list = serializers.ListField(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
@@ -567,7 +565,6 @@ class OneTemplateSerializer(TemplateSerializer):
             'name',
             'notes',
             'kind',
-            'owner',
             'data',
             'options',
             'options_list',
@@ -608,8 +605,6 @@ class GroupSerializer(_WithVariablesSerializer):
 
 
 class OneGroupSerializer(GroupSerializer, _InventoryOperations):
-    hosts  = HostSerializer(read_only=True, many=True)
-    groups = GroupSerializer(read_only=True, many=True)
     owner = UserSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
@@ -618,8 +613,6 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
         fields = ('id',
                   'name',
                   'notes',
-                  'hosts',
-                  "groups",
                   'children',
                   'owner',
                   'url',)
@@ -638,9 +631,6 @@ class InventorySerializer(_WithVariablesSerializer):
 
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
-    all_hosts  = HostSerializer(read_only=True, many=True)
-    hosts  = HostSerializer(read_only=True, many=True, source="hosts_list")
-    groups = GroupSerializer(read_only=True, many=True, source="groups_list")
     owner = UserSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
@@ -649,9 +639,6 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
         fields = ('id',
                   'name',
                   'notes',
-                  'hosts',
-                  'all_hosts',
-                  "groups",
                   'owner',
                   'url',)
 
@@ -676,9 +663,6 @@ class ProjectSerializer(_InventoryOperations):
 
 class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     repository  = serializers.CharField(default='MANUAL')
-    hosts       = HostSerializer(read_only=True, many=True)
-    groups      = GroupSerializer(read_only=True, many=True)
-    inventories = InventorySerializer(read_only=True, many=True)
     owner = UserSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
@@ -689,9 +673,6 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'notes',
                   'status',
                   'repository',
-                  'hosts',
-                  "groups",
-                  'inventories',
                   'owner',
                   'revision',
                   'branch',
@@ -742,25 +723,6 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
 
     def execute_module(self, request):
         return self._execution("module", dict(request.data), request.user)
-
-
-class PermissionsSerializer(_SignalSerializer):
-    member = serializers.IntegerField()
-    member_type = serializers.ChoiceField(choices=(
-        ('user', 'user'),
-        ('team', 'team'),
-    ))
-    role = serializers.ChoiceField(choices=(
-        ('MASTER', 'Full controlled'),
-        ('EDITOR', 'Write and edit'),
-        ('EXECUTOR', 'Read and execute'),
-    ))
-
-    class Meta:
-        model = models.ACLPermission
-        fields = ("member",
-                  "role",
-                  "member_type")
 
 
 ansible_reference = AnsibleArgumentsReference()

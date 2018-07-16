@@ -31,9 +31,9 @@ class BQuerySet(_BQSet):
             super(BQuerySet, self).create, **kwargs
         )
 
-    def user_filter(self, user, only_leads=False):
+    def user_filter(self, user, *args, **kwargs):
         # pylint: disable=unused-argument
-        return self.model.acl_handler.user_filter(self, user, only_leads=False)
+        return self.model.acl_handler.user_filter(self, user, *args, **kwargs)
 
 
 class Manager(_BManager.from_queryset(BQuerySet)):

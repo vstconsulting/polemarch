@@ -50,14 +50,6 @@ class UserGroup(BaseGroup, ACLModel):
     def __unicode__(self):  # nocv
         return super(UserGroup, self).__unicode__()
 
-    @property
-    def users_list(self):
-        return list(self.users.values_list("id", flat=True))
-
-    @users_list.setter
-    def users_list(self, value):
-        self.users.set(BaseUser.objects.filter(id__in=value))
-
 
 class UserSettings(BModel):
     settings = models.TextField(default="{}")

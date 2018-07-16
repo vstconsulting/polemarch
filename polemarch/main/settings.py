@@ -7,17 +7,15 @@ APACHE = False if ("runserver" in sys.argv) else True
 PROJECTS_DIR = config.get("main", "projects_dir", fallback="{HOME}/projects").format(**KWARGS)
 os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
 
+# Polemarch apps
 INSTALLED_APPS += [
     'polemarch.main',
     'polemarch.api',
 ]
 
+# Additional middleware and auth
 MIDDLEWARE_CLASSES += [
     'polemarch.main.middleware.PolemarchHeadersMiddleware',
-]
-
-REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
-    "polemarch.api.permissions.ModelPermission",
 ]
 
 AUTH_PASSWORD_VALIDATORS += [
@@ -29,6 +27,34 @@ AUTH_PASSWORD_VALIDATORS += [
     },
 ]
 
+# API settings
+VST_API_VERSION = 'v2'
+
+REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
+    "polemarch.api.{}.permissions.ModelPermission".format(VST_API_VERSION),
+]
+
+API_URL = VST_API_URL
+API = {
+    VST_API_VERSION: {
+        r'_bulk': {'view': 'polemarch.api.v2.views.BulkViewSet', 'type': 'view'},
+        r'token': {'view': 'polemarch.api.v2.views.TokenView', 'type': 'view'},
+        r'user': {'view': 'polemarch.api.v2.views.UserViewSet'},
+        r'team': {'view': 'polemarch.api.v2.views.TeamViewSet'},
+        r'host': {'view': 'polemarch.api.v2.views.HostViewSet'},
+        r'group': {'view': 'polemarch.api.v2.views.GroupViewSet'},
+        r'inventory': {'view': 'polemarch.api.v2.views.InventoryViewSet'},
+        r'project': {'view': 'polemarch.api.v2.views.ProjectViewSet'},
+        r'history': {'view': 'polemarch.api.v2.views.HistoryViewSet', "op_types": ['get', 'del', 'mod']},
+        r'hook': {'view': 'polemarch.api.v2.views.HookViewSet'},
+        r'stats': {'view': 'polemarch.api.v2.views.StatisticViewSet', 'op_types': ['get']},
+    }
+}
+
+
+# Polemarch handlers
+
+# Repos
 REPO_BACKENDS = {
     "GIT": {
         "BACKEND": "polemarch.main.repo.Git",
@@ -53,7 +79,7 @@ REPO_BACKENDS = {
     }
 }
 
-
+# RPC tasks settings
 TASKS_HANDLERS = {
     "REPO": {
         "BACKEND": "polemarch.main.tasks.tasks.RepoTask"
@@ -69,12 +95,16 @@ TASKS_HANDLERS = {
     },
 }
 
+CLONE_RETRY = config.getint('rpc', 'clone_retry_count', fallback=5)
+
+# ACL settings
 ACL = {
     "MODEL_HANDLERS": {
         "Default": "polemarch.main.acl.handlers.Default"
     }
 }
 
+# Outgoing hooks settings
 HOOKS = {
     "HTTP": {
         "BACKEND": 'polemarch.main.hooks.http.Backend'
@@ -86,27 +116,10 @@ HOOKS = {
 
 HOOKS_DIR = config.get("main", "hooks_dir", fallback="/etc/polemarch/hooks/")
 
-API_URL = VST_API_URL
-VST_API_VERSION = 'v2'
-API = {
-    VST_API_VERSION: {
-        r'token': {'view': 'polemarch.api.v2.views.TokenView', 'type': 'view'},
-        r'_bulk': {'view': 'polemarch.api.v2.views.BulkViewSet', 'type': 'view'},
-        r'user': {'view': 'polemarch.api.v2.views.UserViewSet'},
-        r'team': {'view': 'polemarch.api.v2.views.TeamViewSet'},
-        r'host': {'view': 'polemarch.api.v2.views.HostViewSet'},
-        r'group': {'view': 'polemarch.api.v2.views.GroupViewSet'},
-        r'inventory': {'view': 'polemarch.api.v2.views.InventoryViewSet'},
-        r'project': {'view': 'polemarch.api.v2.views.ProjectViewSet'},
-        r'history': {'view': 'polemarch.api.v2.views.HistoryViewSet', "op_types": ['get', 'del', 'mod']},
-        r'hook': {'view': 'polemarch.api.v2.views.HookViewSet'},
-        r'stats': {'view': 'polemarch.api.v2.views.StatisticViewSet', 'op_types': ['get']},
-        r'ansible': {'view': 'polemarch.api.v1.views.AnsibleViewSet', 'op_types': ['get']},
-    }
-}
 
-
+# TEST settings
 if "test" in sys.argv:
+    CLONE_RETRY = 0
     PROJECTS_DIR = '/tmp/polemarch_projects' + str(PY_VER)
     HOOKS_DIR = '/tmp/polemarch_hooks' + str(PY_VER)
     os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None

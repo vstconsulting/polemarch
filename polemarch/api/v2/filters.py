@@ -40,6 +40,17 @@ class TemplateFilter(_BaseFilter):
         )
 
 
+class ModuleFilter(filters.FilterSet):
+    path__not = CharFilter(method=name_filter)
+    path      = CharFilter(method=name_filter)
+
+    class Meta:
+        model = models.Module
+        fields = (
+            'path',
+        )
+
+
 class HookFilter(_BaseFilter):
     class Meta:
         model = models.Hook
