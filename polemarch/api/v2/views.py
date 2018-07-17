@@ -243,10 +243,10 @@ class __TemplateViewSet(base.ModelViewSetSet):
     'inventory', 'id', manager_name='inventories',
     allow_append=yes, view=InventoryViewSet
 )
-@base.nested_view('periodic_task', 'id', allow_append=yes, view=__PeriodicTaskViewSet)
 @base.nested_view('playbook', 'id', view=__PlaybookViewSet, methods=['get'])
 @base.nested_view('module', 'id', view=__ModuleViewSet, methods=['get'])
 @base.nested_view('template', 'id', manager_name='template', view=__TemplateViewSet)
+@base.nested_view('periodic_task', 'id', view=__PeriodicTaskViewSet)
 @base.nested_view('history', 'id', manager_name='history', view=HistoryViewSet)
 @base.nested_view('variables', 'id', view=__ProjectVarsViewSet)
 class ProjectViewSet(_GroupMixin):
