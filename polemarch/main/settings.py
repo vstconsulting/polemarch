@@ -35,6 +35,7 @@ REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
 ]
 
 API_URL = VST_API_URL
+DEFAULT_API_URL = "/{}/{}".format(API_URL, VST_API_VERSION)
 API = {
     VST_API_VERSION: {
         r'_bulk': {'view': 'polemarch.api.v2.views.BulkViewSet', 'type': 'view'},

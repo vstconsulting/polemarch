@@ -3,6 +3,10 @@ from django_filters import (CharFilter, NumberFilter, IsoDateTimeFilter)
 from vstutils.api.filters import extra_filter, name_filter, filters
 from ...main import models
 
+id_help = 'A unique integer value (or comma separated list) identifying this instance.'
+name_help = 'A name string value (or comma separated list) of instance.'
+vars_help = 'List of variables to filter. Comma separeted "key:value" list.'
+
 
 def variables_filter(queryset, field, value):
     # filter applicable only to variables
@@ -23,10 +27,10 @@ class VariableFilter(filters.FilterSet):
 
 
 class _BaseFilter(filters.FilterSet):
-    id        = CharFilter(method=extra_filter)
-    id__not   = CharFilter(method=extra_filter)
-    name__not = CharFilter(method=name_filter)
-    name      = CharFilter(method=name_filter)
+    id        = CharFilter(method=extra_filter, help_text=id_help)
+    id__not   = CharFilter(method=extra_filter, help_text=id_help)
+    name__not = CharFilter(method=name_filter, help_text=name_help)
+    name      = CharFilter(method=name_filter, help_text=name_help)
 
 
 class TemplateFilter(_BaseFilter):
@@ -62,7 +66,7 @@ class HookFilter(_BaseFilter):
 
 
 class _BaseHGIFilter(_BaseFilter):
-    variables = CharFilter(method=variables_filter)
+    variables = CharFilter(method=variables_filter, help_text=vars_help)
 
 
 class HostFilter(_BaseHGIFilter):
@@ -114,22 +118,33 @@ class TaskFilter(_BaseFilter):
 
 
 class HistoryFilter(_BaseFilter):
+    help_text_time = '{} time to search.'
+    help_text_time_start = help_text_time.format('Start')
+    help_text_time_stop = help_text_time.format('Stop')
     start_time__gt = IsoDateTimeFilter(name="start_time",
-                                       lookup_expr=('gt'))
+                                       lookup_expr=('gt'),
+                                       help_text=help_text_time_start)
     stop_time__gt = IsoDateTimeFilter(name="stop_time",
-                                      lookup_expr=('gt'))
+                                      lookup_expr=('gt'),
+                                      help_text=help_text_time_stop)
     start_time__lt = IsoDateTimeFilter(name="start_time",
-                                       lookup_expr=('lt'))
+                                       lookup_expr=('lt'),
+                                       help_text=help_text_time_start)
     stop_time__lt = IsoDateTimeFilter(name="stop_time",
-                                      lookup_expr=('lt'))
+                                      lookup_expr=('lt'),
+                                      help_text=help_text_time_stop)
     start_time__gte = IsoDateTimeFilter(name="start_time",
-                                        lookup_expr=('gte'))
+                                        lookup_expr=('gte'),
+                                        help_text=help_text_time_start)
     stop_time__gte = IsoDateTimeFilter(name="stop_time",
-                                       lookup_expr=('gte'))
+                                       lookup_expr=('gte'),
+                                       help_text=help_text_time_stop)
     start_time__lte = IsoDateTimeFilter(name="start_time",
-                                        lookup_expr=('lte'))
+                                        lookup_expr=('lte'),
+                                        help_text=help_text_time_start)
     stop_time__lte = IsoDateTimeFilter(name="stop_time",
-                                       lookup_expr=('lte'))
+                                       lookup_expr=('lte'),
+                                       help_text=help_text_time_stop)
 
     class Meta:
         model = models.History
