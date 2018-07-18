@@ -69,7 +69,21 @@
 
 <!--  Новое поле поиска -->
 <script  type="text/x-just" style="display: none;" data-just="search_filed">
-    Поиск отложен до реализации генератора навигации
+    <div class="input-group col-lg-2" style="float: right;">
+    <input
+        type="text"
+        id="search-query-input"
+        placeholder="Search by name"
+        class="form-control"
+        maxlength="255"
+        value="<% if(guiObj.model.filters.query){ %><%- guiObj.model.filters.query.name %><% } %>"
+        onkeyup="if(event.keyCode == 13) spajs.showLoader(goToSearch(<%- guiObj.view.class_name %>, $('#search-query-input').val()));"
+    >
+    
+    <div class="input-group-addon" onclick="spajs.showLoader(goToSearch(<%- guiObj.view.class_name %>, $('#search-query-input').val()));">
+    <span class="glyphicon glyphicon-search" ></span>
+    </div>
+    </div>
 </script>
 
 

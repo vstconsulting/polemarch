@@ -376,6 +376,7 @@ setTimeout(function(){
 tabSignal.connect("polemarch.start", function()
 {
     // hosts
+    /*
     spajs.addMenu({
         id:"hosts",
         urlregexp:[/^hosts$/, /^host$/, /^hosts\/search\/?$/, /^hosts\/page\/([0-9]+)$/],
@@ -419,7 +420,7 @@ tabSignal.connect("polemarch.start", function()
         urlregexp:[/^([A-z0-9_\/]+)\/hosts\/search\/([A-z0-9 %\-.:,=]+)$/,
             /^([A-z0-9_\/]+)\/hosts\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showSearchResultsForParent(holder, menuInfo, data);}
-    })
+    })*/
 })
 
 //изменение типа input'a на file при выборе
