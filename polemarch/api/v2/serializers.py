@@ -8,7 +8,7 @@ from django.utils.functional import cached_property
 from django.db import transaction
 from rest_framework import serializers, exceptions, status
 from rest_framework.exceptions import PermissionDenied
-from vstutils.api import serializers as vst_serializers
+from vstutils.api import serializers as vst_serializers, fields as vst_fields
 from vstutils.api.base import Response
 from ...main.utils import AnsibleArgumentsReference
 
@@ -740,6 +740,8 @@ def generate_fileds(ansible_type):
         if ref_type is None:
             field = serializers.BooleanField
             kwargs['default'] = False
+        elif ref in models.PeriodicTask.HIDDEN_VARS:
+            field = vst_fields.SecretFileInString
         elif ref_type == 'int':
             field = serializers.IntegerField
         elif ref_type == 'string' or 'choice':
