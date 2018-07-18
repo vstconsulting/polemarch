@@ -205,7 +205,12 @@ paths:
     get:
       operationId: group_group_get
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -222,6 +227,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -238,6 +248,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -248,7 +263,12 @@ paths:
     delete:
       operationId: group_group_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -268,7 +288,12 @@ paths:
     get:
       operationId: group_group_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -285,6 +310,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -306,7 +336,17 @@ paths:
     get:
       operationId: group_group_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -323,6 +363,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -339,6 +389,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -349,7 +409,17 @@ paths:
     delete:
       operationId: group_group_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -407,7 +477,12 @@ paths:
     get:
       operationId: group_host_get
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -424,6 +499,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -440,6 +520,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -450,7 +535,12 @@ paths:
     delete:
       operationId: group_host_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -476,6 +566,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SetOwner'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -497,7 +592,12 @@ paths:
     get:
       operationId: group_host_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -514,6 +614,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -535,7 +640,17 @@ paths:
     get:
       operationId: group_host_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -552,6 +667,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -568,6 +693,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -578,7 +713,17 @@ paths:
     delete:
       operationId: group_host_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -659,7 +804,12 @@ paths:
     get:
       operationId: group_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -676,6 +826,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -692,6 +847,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -702,7 +862,12 @@ paths:
     delete:
       operationId: group_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -945,6 +1110,24 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/Data'
+      tags:
+        - history
+    parameters:
+      - name: pk
+        in: path
+        description: A unique integer value identifying this history.
+        required: true
+        type: integer
+  /history/{pk}/lines/:
+    get:
+      operationId: history_lines_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/HistoryLines'
       tags:
         - history
     parameters:
@@ -1311,7 +1494,12 @@ paths:
     get:
       operationId: host_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1328,6 +1516,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1344,6 +1537,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1354,7 +1552,12 @@ paths:
     delete:
       operationId: host_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -1538,7 +1741,12 @@ paths:
     get:
       operationId: inventory_all_groups_detail
       description: ''
-      parameters: []
+      parameters:
+        - name: all_groups_id
+          in: path
+          description: A unique integer value identifying all_groups.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1578,7 +1786,12 @@ paths:
     get:
       operationId: inventory_all_hosts_detail
       description: ''
-      parameters: []
+      parameters:
+        - name: all_hosts_id
+          in: path
+          description: A unique integer value identifying all_hosts.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1634,7 +1847,12 @@ paths:
     get:
       operationId: inventory_group_get
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1651,6 +1869,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1667,6 +1890,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1677,7 +1905,12 @@ paths:
     delete:
       operationId: inventory_group_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -1697,7 +1930,12 @@ paths:
     get:
       operationId: inventory_group_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1714,6 +1952,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -1735,7 +1978,17 @@ paths:
     get:
       operationId: inventory_group_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1752,6 +2005,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1768,6 +2031,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1778,7 +2051,17 @@ paths:
     delete:
       operationId: inventory_group_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -1836,7 +2119,12 @@ paths:
     get:
       operationId: inventory_host_get
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1853,6 +2141,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1869,6 +2162,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1879,7 +2177,12 @@ paths:
     delete:
       operationId: inventory_host_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -1905,6 +2208,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SetOwner'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -1926,7 +2234,12 @@ paths:
     get:
       operationId: inventory_host_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1943,6 +2256,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -1964,7 +2282,17 @@ paths:
     get:
       operationId: inventory_host_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1981,6 +2309,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -1997,6 +2335,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2007,7 +2355,17 @@ paths:
     delete:
       operationId: inventory_host_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -2088,7 +2446,12 @@ paths:
     get:
       operationId: inventory_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2105,6 +2468,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2121,6 +2489,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2131,7 +2504,12 @@ paths:
     delete:
       operationId: inventory_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -2387,7 +2765,12 @@ paths:
     get:
       operationId: project_group_get
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2404,6 +2787,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2420,6 +2808,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2430,7 +2823,12 @@ paths:
     delete:
       operationId: project_group_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -2450,7 +2848,12 @@ paths:
     get:
       operationId: project_group_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2467,6 +2870,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -2488,7 +2896,17 @@ paths:
     get:
       operationId: project_group_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2505,6 +2923,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2521,6 +2949,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2531,7 +2969,17 @@ paths:
     delete:
       operationId: project_group_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -2589,7 +3037,12 @@ paths:
     get:
       operationId: project_history_get
       description: ''
-      parameters: []
+      parameters:
+        - name: history_id
+          in: path
+          description: A unique integer value identifying history.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2606,6 +3059,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHistory'
+        - name: history_id
+          in: path
+          description: A unique integer value identifying history.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2622,6 +3080,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHistory'
+        - name: history_id
+          in: path
+          description: A unique integer value identifying history.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2632,7 +3095,12 @@ paths:
     delete:
       operationId: project_history_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: history_id
+          in: path
+          description: A unique integer value identifying history.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -2658,6 +3126,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Data'
+        - name: history_id
+          in: path
+          description: A unique integer value identifying history.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -2679,7 +3152,12 @@ paths:
     delete:
       operationId: project_history_history_clear
       description: ''
-      parameters: []
+      parameters:
+        - name: history_id
+          in: path
+          description: A unique integer value identifying history.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -2699,7 +3177,12 @@ paths:
     get:
       operationId: project_history_history_facts
       description: ''
-      parameters: []
+      parameters:
+        - name: history_id
+          in: path
+          description: A unique integer value identifying history.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2721,7 +3204,12 @@ paths:
     get:
       operationId: project_history_history_lines_list
       description: ''
-      parameters: []
+      parameters:
+        - name: history_id
+          in: path
+          description: A unique integer value identifying history.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2743,7 +3231,12 @@ paths:
     get:
       operationId: project_history_history_raw
       description: ''
-      parameters: []
+      parameters:
+        - name: history_id
+          in: path
+          description: A unique integer value identifying history.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2799,7 +3292,12 @@ paths:
     get:
       operationId: project_host_get
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2816,6 +3314,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2832,6 +3335,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2842,7 +3350,12 @@ paths:
     delete:
       operationId: project_host_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -2868,6 +3381,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SetOwner'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -2889,7 +3407,12 @@ paths:
     get:
       operationId: project_host_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2906,6 +3429,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -2927,7 +3455,17 @@ paths:
     get:
       operationId: project_host_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2944,6 +3482,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2960,6 +3508,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -2970,7 +3528,17 @@ paths:
     delete:
       operationId: project_host_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -3028,7 +3596,12 @@ paths:
     get:
       operationId: project_inventory_get
       description: ''
-      parameters: []
+      parameters:
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3045,6 +3618,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneInventory'
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3061,6 +3639,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneInventory'
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3071,7 +3654,12 @@ paths:
     delete:
       operationId: project_inventory_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -3091,7 +3679,12 @@ paths:
     get:
       operationId: project_inventory_inventory_all_groups_list
       description: ''
-      parameters: []
+      parameters:
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3113,7 +3706,17 @@ paths:
     get:
       operationId: project_inventory_inventory_all_groups_detail
       description: ''
-      parameters: []
+      parameters:
+        - name: all_groups_id
+          in: path
+          description: A unique integer value identifying all_groups.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3139,7 +3742,12 @@ paths:
     get:
       operationId: project_inventory_inventory_all_hosts_list
       description: ''
-      parameters: []
+      parameters:
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3161,7 +3769,17 @@ paths:
     get:
       operationId: project_inventory_inventory_all_hosts_detail
       description: ''
-      parameters: []
+      parameters:
+        - name: all_hosts_id
+          in: path
+          description: A unique integer value identifying all_hosts.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3187,7 +3805,12 @@ paths:
     get:
       operationId: project_inventory_group_get
       description: ''
-      parameters: []
+      parameters:
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3204,6 +3827,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Group'
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -3225,7 +3853,17 @@ paths:
     get:
       operationId: project_inventory_group_get
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3242,6 +3880,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3258,6 +3906,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3268,7 +3926,17 @@ paths:
     delete:
       operationId: project_inventory_group_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -3292,7 +3960,17 @@ paths:
     get:
       operationId: project_inventory_group_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3309,6 +3987,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -3334,7 +4022,22 @@ paths:
     get:
       operationId: project_inventory_group_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3351,6 +4054,21 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3367,6 +4085,21 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3377,7 +4110,22 @@ paths:
     delete:
       operationId: project_inventory_group_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: group_id
+          in: path
+          description: A unique integer value identifying group.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -3405,7 +4153,12 @@ paths:
     get:
       operationId: project_inventory_host_get
       description: ''
-      parameters: []
+      parameters:
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3422,6 +4175,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Host'
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -3443,7 +4201,17 @@ paths:
     get:
       operationId: project_inventory_host_get
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3460,6 +4228,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3476,6 +4254,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3486,7 +4274,17 @@ paths:
     delete:
       operationId: project_inventory_host_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -3516,6 +4314,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SetOwner'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -3541,7 +4349,17 @@ paths:
     get:
       operationId: project_inventory_host_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3558,6 +4376,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -3583,7 +4411,22 @@ paths:
     get:
       operationId: project_inventory_host_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3600,6 +4443,21 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3616,6 +4474,21 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3626,7 +4499,22 @@ paths:
     delete:
       operationId: project_inventory_host_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: host_id
+          in: path
+          description: A unique integer value identifying host.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -3660,6 +4548,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SetOwner'
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -3681,7 +4574,12 @@ paths:
     get:
       operationId: project_inventory_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3698,6 +4596,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -3719,7 +4622,17 @@ paths:
     get:
       operationId: project_inventory_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3736,6 +4649,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3752,6 +4675,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3762,7 +4695,17 @@ paths:
     delete:
       operationId: project_inventory_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: inventory_id
+          in: path
+          description: A unique integer value identifying inventory.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -3804,7 +4747,12 @@ paths:
     get:
       operationId: project_module_detail
       description: ''
-      parameters: []
+      parameters:
+        - name: module_id
+          in: path
+          description: A unique integer value identifying module.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3860,7 +4808,12 @@ paths:
     get:
       operationId: project_periodic_task_get
       description: ''
-      parameters: []
+      parameters:
+        - name: periodic_task_id
+          in: path
+          description: A unique integer value identifying periodic_task.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3877,6 +4830,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OnePeriodictask'
+        - name: periodic_task_id
+          in: path
+          description: A unique integer value identifying periodic_task.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3893,6 +4851,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OnePeriodictask'
+        - name: periodic_task_id
+          in: path
+          description: A unique integer value identifying periodic_task.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3903,7 +4866,12 @@ paths:
     delete:
       operationId: project_periodic_task_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: periodic_task_id
+          in: path
+          description: A unique integer value identifying periodic_task.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -3929,6 +4897,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Periodictask'
+        - name: periodic_task_id
+          in: path
+          description: A unique integer value identifying periodic_task.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -3950,7 +4923,12 @@ paths:
     get:
       operationId: project_periodic_task_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: periodic_task_id
+          in: path
+          description: A unique integer value identifying periodic_task.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -3967,6 +4945,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: periodic_task_id
+          in: path
+          description: A unique integer value identifying periodic_task.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -3988,7 +4971,17 @@ paths:
     get:
       operationId: project_periodic_task_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: periodic_task_id
+          in: path
+          description: A unique integer value identifying periodic_task.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4005,6 +4998,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: periodic_task_id
+          in: path
+          description: A unique integer value identifying periodic_task.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4021,6 +5024,16 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: periodic_task_id
+          in: path
+          description: A unique integer value identifying periodic_task.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4031,7 +5044,17 @@ paths:
     delete:
       operationId: project_periodic_task_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
+        - name: periodic_task_id
+          in: path
+          description: A unique integer value identifying periodic_task.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -4073,7 +5096,12 @@ paths:
     get:
       operationId: project_playbook_detail
       description: ''
-      parameters: []
+      parameters:
+        - name: playbook_id
+          in: path
+          description: A unique integer value identifying playbook.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4175,7 +5203,12 @@ paths:
     get:
       operationId: project_template_get
       description: ''
-      parameters: []
+      parameters:
+        - name: template_id
+          in: path
+          description: A unique integer value identifying template.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4192,6 +5225,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneTemplate'
+        - name: template_id
+          in: path
+          description: A unique integer value identifying template.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4208,6 +5246,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneTemplate'
+        - name: template_id
+          in: path
+          description: A unique integer value identifying template.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4218,7 +5261,12 @@ paths:
     delete:
       operationId: project_template_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: template_id
+          in: path
+          description: A unique integer value identifying template.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -4244,6 +5292,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/TemplateExec'
+        - name: template_id
+          in: path
+          description: A unique integer value identifying template.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -4299,7 +5352,12 @@ paths:
     get:
       operationId: project_variables_get
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4316,6 +5374,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ProjectVariable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4332,6 +5395,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ProjectVariable'
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4342,7 +5410,12 @@ paths:
     delete:
       operationId: project_variables_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: variables_id
+          in: path
+          description: A unique integer value identifying variables.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -4560,7 +5633,12 @@ paths:
     get:
       operationId: team_user_get
       description: ''
-      parameters: []
+      parameters:
+        - name: user_id
+          in: path
+          description: A unique integer value identifying user.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4577,6 +5655,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneOwner'
+        - name: user_id
+          in: path
+          description: A unique integer value identifying user.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4593,6 +5676,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneOwner'
+        - name: user_id
+          in: path
+          description: A unique integer value identifying user.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4603,7 +5691,12 @@ paths:
     delete:
       operationId: team_user_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: user_id
+          in: path
+          description: A unique integer value identifying user.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -4623,7 +5716,12 @@ paths:
     get:
       operationId: team_user_settings_get
       description: ''
-      parameters: []
+      parameters:
+        - name: user_id
+          in: path
+          description: A unique integer value identifying user.
+          required: true
+          type: integer
       responses:
         '200':
           description: ''
@@ -4640,6 +5738,11 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Data'
+        - name: user_id
+          in: path
+          description: A unique integer value identifying user.
+          required: true
+          type: integer
       responses:
         '201':
           description: ''
@@ -4650,7 +5753,12 @@ paths:
     delete:
       operationId: team_user_settings_remove
       description: ''
-      parameters: []
+      parameters:
+        - name: user_id
+          in: path
+          description: A unique integer value identifying user.
+          required: true
+          type: integer
       responses:
         '204':
           description: ''
@@ -5167,6 +6275,20 @@ definitions:
   Data:
     type: object
     properties: {}
+  HistoryLines:
+    type: object
+    properties:
+      line_number:
+        title: Line number
+        type: integer
+      line_gnumber:
+        title: Line gnumber
+        type: integer
+      line:
+        title: Line
+        type: string
+        maxLength: 2048
+        minLength: 1
   Hook:
     required:
       - type
@@ -5192,14 +6314,14 @@ definitions:
         title: When
         type: string
         enum:
-          - on_execution
-          - on_user_del
-          - after_execution
-          - on_object_del
-          - on_user_upd
-          - on_user_add
-          - on_object_upd
           - on_object_add
+          - after_execution
+          - on_object_upd
+          - on_execution
+          - on_object_del
+          - on_user_del
+          - on_user_add
+          - on_user_upd
       enable:
         title: Enable
         type: boolean
@@ -5331,43 +6453,67 @@ definitions:
         title: Module
         type: string
         minLength: 1
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
-          '/usr/share/ansible/plugins/modules'])
-        type: string
-        minLength: 1
-      check:
-        title: Check
-        description: don't make any changes; instead, try to predict some of the changes
-          that may occur
-        type: boolean
-        default: false
-      become_user:
-        title: Become user
-        description: run operations as this user (default=root)
-        type: string
-        minLength: 1
-      sudo:
-        title: Sudo
-        description: run operations with sudo (nopasswd) (deprecated, use become)
-        type: boolean
-        default: false
-      args:
-        title: Args
-        description: module arguments
-        type: string
-        minLength: 1
-      one_line:
-        title: One line
-        description: condense output
-        type: boolean
-        default: false
       become_method:
         title: Become method
         description: 'privilege escalation method to use (default=sudo), valid choices:
           [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
           | machinectl ]'
+        type: string
+        minLength: 1
+      become:
+        title: Become
+        description: run operations with become (does not imply password prompting)
+        type: boolean
+        default: false
+      connection:
+        title: Connection
+        description: connection type to use (default=smart)
+        type: string
+        minLength: 1
+      scp_extra_args:
+        title: Scp extra args
+        description: specify extra arguments to pass to scp only (e.g. -l)
+        type: string
+        minLength: 1
+      vault_id:
+        title: Vault id
+        description: the vault identity to use
+        type: string
+        minLength: 1
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
+        type: boolean
+        default: false
+      one_line:
+        title: One line
+        description: condense output
+        type: boolean
+        default: false
+      ssh_extra_args:
+        title: Ssh extra args
+        description: specify extra arguments to pass to ssh only (e.g. -R)
+        type: string
+        minLength: 1
+      su:
+        title: Su
+        description: run operations with su (deprecated, use become)
+        type: boolean
+        default: false
+      ssh_common_args:
+        title: Ssh common args
+        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+        type: string
+        minLength: 1
+      limit:
+        title: Limit
+        description: further limit selected hosts to an additional pattern
+        type: string
+        minLength: 1
+      extra_vars:
+        title: Extra vars
+        description: set additional variables as key=value or YAML/JSON, if filename
+          prepend with @
         type: string
         minLength: 1
       sftp_extra_args:
@@ -5380,65 +6526,15 @@ definitions:
         description: outputs a list of matching hosts; does not execute anything else
         type: boolean
         default: false
-      extra_vars:
-        title: Extra vars
-        description: set additional variables as key=value or YAML/JSON, if filename
-          prepend with @
+      module_path:
+        title: Module path
+        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
+          '/usr/share/ansible/plugins/modules'])
         type: string
         minLength: 1
-      group:
-        title: Group
-        type: string
-        minLength: 1
-      private_key:
-        title: Private key
-        description: use this file to authenticate the connection
-        type: string
-        minLength: 1
-      su:
-        title: Su
-        description: run operations with su (deprecated, use become)
-        type: boolean
-        default: false
-      vault_id:
-        title: Vault id
-        description: the vault identity to use
-        type: string
-        minLength: 1
-      help:
-        title: Help
-        description: show this help message and exit
-        type: boolean
-        default: false
-      playbook_dir:
-        title: Playbook dir
-        description: Since this tool does not use playbooks, use this as a subsitute
-          playbook directory.This sets the relative path for many features including
-          roles/ group_vars/ etc.
-        type: string
-        minLength: 1
-      vault_password_file:
-        title: Vault password file
-        description: vault password file
-        type: string
-        minLength: 1
-      poll:
-        title: Poll
-        description: set the poll interval if using -B (default=15)
-        type: integer
-      version:
-        title: Version
-        description: show program's version number and exit
-        type: boolean
-        default: false
-      scp_extra_args:
-        title: Scp extra args
-        description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
-        minLength: 1
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
+      sudo:
+        title: Sudo
+        description: run operations with sudo (nopasswd) (deprecated, use become)
         type: boolean
         default: false
       key_file:
@@ -5446,9 +6542,32 @@ definitions:
         description: use this file to authenticate the connection
         type: string
         minLength: 1
-      tree:
-        title: Tree
-        description: log output to this directory
+      version:
+        title: Version
+        description: show program's version number and exit
+        type: boolean
+        default: false
+      help:
+        title: Help
+        description: show this help message and exit
+        type: boolean
+        default: false
+      forks:
+        title: Forks
+        description: specify number of parallel processes to use (default=5)
+        type: integer
+      user:
+        title: User
+        description: connect as this user (default=None)
+        type: string
+        minLength: 1
+      timeout:
+        title: Timeout
+        description: override the connection timeout in seconds (default=10)
+        type: integer
+      args:
+        title: Args
+        description: module arguments
         type: string
         minLength: 1
       diff:
@@ -5457,59 +6576,62 @@ definitions:
           in those files; works great with --check
         type: boolean
         default: false
-      ssh_extra_args:
-        title: Ssh extra args
-        description: specify extra arguments to pass to ssh only (e.g. -R)
-        type: string
-        minLength: 1
-      limit:
-        title: Limit
-        description: further limit selected hosts to an additional pattern
-        type: string
-        minLength: 1
-      user:
-        title: User
-        description: connect as this user (default=None)
-        type: string
-        minLength: 1
       su_user:
         title: Su user
         description: run operations with su as this user (default=None) (deprecated,
           use become)
         type: string
         minLength: 1
-      timeout:
-        title: Timeout
-        description: override the connection timeout in seconds (default=10)
-        type: integer
-      ssh_common_args:
-        title: Ssh common args
-        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
-        type: string
-        minLength: 1
-      connection:
-        title: Connection
-        description: connection type to use (default=smart)
+      sudo_user:
+        title: Sudo user
+        description: desired sudo user (default=root) (deprecated, use become)
         type: string
         minLength: 1
       background:
         title: Background
         description: run asynchronously, failing after X seconds (default=N/A)
         type: integer
-      forks:
-        title: Forks
-        description: specify number of parallel processes to use (default=5)
-        type: integer
-      sudo_user:
-        title: Sudo user
-        description: desired sudo user (default=root) (deprecated, use become)
+      private_key:
+        title: Private key
+        description: use this file to authenticate the connection
         type: string
         minLength: 1
-      become:
-        title: Become
-        description: run operations with become (does not imply password prompting)
+      poll:
+        title: Poll
+        description: set the poll interval if using -B (default=15)
+        type: integer
+      group:
+        title: Group
+        type: string
+        minLength: 1
+      check:
+        title: Check
+        description: don't make any changes; instead, try to predict some of the changes
+          that may occur
         type: boolean
         default: false
+      tree:
+        title: Tree
+        description: log output to this directory
+        type: string
+        minLength: 1
+      playbook_dir:
+        title: Playbook dir
+        description: Since this tool does not use playbooks, use this as a subsitute
+          playbook directory.This sets the relative path for many features including
+          roles/ group_vars/ etc.
+        type: string
+        minLength: 1
+      become_user:
+        title: Become user
+        description: run operations as this user (default=root)
+        type: string
+        minLength: 1
+      vault_password_file:
+        title: Vault password file
+        description: vault password file
+        type: string
+        minLength: 1
   ExecuteResponse:
     required:
       - detail
@@ -5534,181 +6656,6 @@ definitions:
         title: Playbook
         type: string
         minLength: 1
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
-          '/usr/share/ansible/plugins/modules'])
-        type: string
-        minLength: 1
-      check:
-        title: Check
-        description: don't make any changes; instead, try to predict some of the changes
-          that may occur
-        type: boolean
-        default: false
-      become_user:
-        title: Become user
-        description: run operations as this user (default=root)
-        type: string
-        minLength: 1
-      sudo:
-        title: Sudo
-        description: run operations with sudo (nopasswd) (deprecated, use become)
-        type: boolean
-        default: false
-      list_tasks:
-        title: List tasks
-        description: list all tasks that would be executed
-        type: boolean
-        default: false
-      ssh_common_args:
-        title: Ssh common args
-        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
-        type: string
-        minLength: 1
-      become_method:
-        title: Become method
-        description: 'privilege escalation method to use (default=sudo), valid choices:
-          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
-          | machinectl ]'
-        type: string
-        minLength: 1
-      sftp_extra_args:
-        title: Sftp extra args
-        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
-        type: string
-        minLength: 1
-      list_hosts:
-        title: List hosts
-        description: outputs a list of matching hosts; does not execute anything else
-        type: boolean
-        default: false
-      extra_vars:
-        title: Extra vars
-        description: set additional variables as key=value or YAML/JSON, if filename
-          prepend with @
-        type: string
-        minLength: 1
-      private_key:
-        title: Private key
-        description: use this file to authenticate the connection
-        type: string
-        minLength: 1
-      su:
-        title: Su
-        description: run operations with su (deprecated, use become)
-        type: boolean
-        default: false
-      vault_id:
-        title: Vault id
-        description: the vault identity to use
-        type: string
-        minLength: 1
-      help:
-        title: Help
-        description: show this help message and exit
-        type: boolean
-        default: false
-      flush_cache:
-        title: Flush cache
-        description: clear the fact cache for every host in inventory
-        type: boolean
-        default: false
-      vault_password_file:
-        title: Vault password file
-        description: vault password file
-        type: string
-        minLength: 1
-      su_user:
-        title: Su user
-        description: run operations with su as this user (default=None) (deprecated,
-          use become)
-        type: string
-        minLength: 1
-      version:
-        title: Version
-        description: show program's version number and exit
-        type: boolean
-        default: false
-      skip_tags:
-        title: Skip tags
-        description: only run plays and tasks whose tags do not match these values
-        type: string
-        minLength: 1
-      scp_extra_args:
-        title: Scp extra args
-        description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
-        minLength: 1
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
-        type: boolean
-        default: false
-      key_file:
-        title: Key file
-        description: use this file to authenticate the connection
-        type: string
-        minLength: 1
-      force_handlers:
-        title: Force handlers
-        description: run handlers even if a task fails
-        type: boolean
-        default: false
-      tags:
-        title: Tags
-        description: only run plays and tasks tagged with these values
-        type: string
-        minLength: 1
-      ssh_extra_args:
-        title: Ssh extra args
-        description: specify extra arguments to pass to ssh only (e.g. -R)
-        type: string
-        minLength: 1
-      list_tags:
-        title: List tags
-        description: list all available tags
-        type: boolean
-        default: false
-      timeout:
-        title: Timeout
-        description: override the connection timeout in seconds (default=10)
-        type: integer
-      forks:
-        title: Forks
-        description: specify number of parallel processes to use (default=5)
-        type: integer
-      limit:
-        title: Limit
-        description: further limit selected hosts to an additional pattern
-        type: string
-        minLength: 1
-      user:
-        title: User
-        description: connect as this user (default=None)
-        type: string
-        minLength: 1
-      start_at_task:
-        title: Start at task
-        description: start the playbook at the task matching this name
-        type: string
-        minLength: 1
-      step:
-        title: Step
-        description: 'one-step-at-a-time: confirm each task before running'
-        type: boolean
-        default: false
-      connection:
-        title: Connection
-        description: connection type to use (default=smart)
-        type: string
-        minLength: 1
-      diff:
-        title: Diff
-        description: when changing (small) files and templates, show the differences
-          in those files; works great with --check
-        type: boolean
-        default: false
       sudo_user:
         title: Sudo user
         description: desired sudo user (default=root) (deprecated, use become)
@@ -5719,19 +6666,180 @@ definitions:
         description: run operations with become (does not imply password prompting)
         type: boolean
         default: false
-  HistoryLines:
-    type: object
-    properties:
-      line_number:
-        title: Line number
-        type: integer
-      line_gnumber:
-        title: Line gnumber
-        type: integer
-      line:
-        title: Line
+      connection:
+        title: Connection
+        description: connection type to use (default=smart)
         type: string
-        maxLength: 2048
+        minLength: 1
+      private_key:
+        title: Private key
+        description: use this file to authenticate the connection
+        type: string
+        minLength: 1
+      become_user:
+        title: Become user
+        description: run operations as this user (default=root)
+        type: string
+        minLength: 1
+      vault_id:
+        title: Vault id
+        description: the vault identity to use
+        type: string
+        minLength: 1
+      user:
+        title: User
+        description: connect as this user (default=None)
+        type: string
+        minLength: 1
+      ssh_extra_args:
+        title: Ssh extra args
+        description: specify extra arguments to pass to ssh only (e.g. -R)
+        type: string
+        minLength: 1
+      su:
+        title: Su
+        description: run operations with su (deprecated, use become)
+        type: boolean
+        default: false
+      list_tasks:
+        title: List tasks
+        description: list all tasks that would be executed
+        type: boolean
+        default: false
+      start_at_task:
+        title: Start at task
+        description: start the playbook at the task matching this name
+        type: string
+        minLength: 1
+      flush_cache:
+        title: Flush cache
+        description: clear the fact cache for every host in inventory
+        type: boolean
+        default: false
+      force_handlers:
+        title: Force handlers
+        description: run handlers even if a task fails
+        type: boolean
+        default: false
+      limit:
+        title: Limit
+        description: further limit selected hosts to an additional pattern
+        type: string
+        minLength: 1
+      check:
+        title: Check
+        description: don't make any changes; instead, try to predict some of the changes
+          that may occur
+        type: boolean
+        default: false
+      extra_vars:
+        title: Extra vars
+        description: set additional variables as key=value or YAML/JSON, if filename
+          prepend with @
+        type: string
+        minLength: 1
+      key_file:
+        title: Key file
+        description: use this file to authenticate the connection
+        type: string
+        minLength: 1
+      list_hosts:
+        title: List hosts
+        description: outputs a list of matching hosts; does not execute anything else
+        type: boolean
+        default: false
+      module_path:
+        title: Module path
+        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
+          '/usr/share/ansible/plugins/modules'])
+        type: string
+        minLength: 1
+      sudo:
+        title: Sudo
+        description: run operations with sudo (nopasswd) (deprecated, use become)
+        type: boolean
+        default: false
+      skip_tags:
+        title: Skip tags
+        description: only run plays and tasks whose tags do not match these values
+        type: string
+        minLength: 1
+      version:
+        title: Version
+        description: show program's version number and exit
+        type: boolean
+        default: false
+      forks:
+        title: Forks
+        description: specify number of parallel processes to use (default=5)
+        type: integer
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
+        type: boolean
+        default: false
+      become_method:
+        title: Become method
+        description: 'privilege escalation method to use (default=sudo), valid choices:
+          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
+          | machinectl ]'
+        type: string
+        minLength: 1
+      diff:
+        title: Diff
+        description: when changing (small) files and templates, show the differences
+          in those files; works great with --check
+        type: boolean
+        default: false
+      su_user:
+        title: Su user
+        description: run operations with su as this user (default=None) (deprecated,
+          use become)
+        type: string
+        minLength: 1
+      list_tags:
+        title: List tags
+        description: list all available tags
+        type: boolean
+        default: false
+      ssh_common_args:
+        title: Ssh common args
+        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+        type: string
+        minLength: 1
+      vault_password_file:
+        title: Vault password file
+        description: vault password file
+        type: string
+        minLength: 1
+      tags:
+        title: Tags
+        description: only run plays and tasks tagged with these values
+        type: string
+        minLength: 1
+      help:
+        title: Help
+        description: show this help message and exit
+        type: boolean
+        default: false
+      step:
+        title: Step
+        description: 'one-step-at-a-time: confirm each task before running'
+        type: boolean
+        default: false
+      sftp_extra_args:
+        title: Sftp extra args
+        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
+        type: string
+        minLength: 1
+      timeout:
+        title: Timeout
+        description: override the connection timeout in seconds (default=10)
+        type: integer
+      scp_extra_args:
+        title: Scp extra args
+        description: specify extra arguments to pass to scp only (e.g. -l)
+        type: string
         minLength: 1
   Module:
     required:
@@ -6017,11 +7125,11 @@ definitions:
         title: Key
         type: string
         enum:
-          - repo_branch
           - repo_type
           - repo_key
           - repo_password
           - repo_sync_on_run
+          - repo_branch
       value:
         title: Value
         type: string

@@ -6,7 +6,7 @@ from rest_framework import exceptions as excepts, status
 from rest_framework.authtoken import views as token_views
 from drf_yasg.utils import swagger_auto_schema
 from vstutils.api.permissions import StaffPermission
-from vstutils.api import base, views
+from vstutils.api import base, views, decorators as deco
 from vstutils.utils import KVExchanger
 
 from . import filters
@@ -20,7 +20,7 @@ no = False
 class OwnedView(base.ModelViewSetSet):
     POST_WHITE_LIST = []
 
-    @base.action(methods=["post"], detail=True, serializer_class=sers.SetOwnerSerializer)
+    @deco.action(methods=["post"], detail=True, serializer_class=sers.SetOwnerSerializer)
     def set_owner(self, request, pk=None):
         '''
         Change instance owner.
@@ -62,7 +62,7 @@ class UserViewSet(views.UserViewSet):
     serializer_class = sers.UserSerializer
     serializer_class_one = sers.OneOwnerSerializer
 
-    @base.action(
+    @deco.action(
         ["post", "delete", "get"], url_path="settings",
         detail=yes, serializer_class=sers.DataSerializer
     )
@@ -75,7 +75,7 @@ class UserViewSet(views.UserViewSet):
         return base.Response(obj.settings.data, status.HTTP_200_OK).resp
 
 
-@base.nested_view('user', 'id', allow_append=yes, manager_name='users', view=UserViewSet)
+@deco.nested_view('user', 'id', allow_append=yes, manager_name='users', view=UserViewSet)
 class TeamViewSet(OwnedView):
     model = sers.models.UserGroup
     serializer_class = sers.TeamSerializer
@@ -91,7 +91,7 @@ class __HistoryLineViewSet(base.ReadOnlyModelViewSet):
 
 
 @method_decorator(name='lines_list', decorator=swagger_auto_schema(auto_schema=None))
-@base.nested_view('lines', manager_name='raw_history_line', view=__HistoryLineViewSet)
+@deco.nested_view('lines', manager_name='raw_history_line', view=__HistoryLineViewSet)
 class HistoryViewSet(base.HistoryModelViewSet):
     model = sers.models.History
     serializer_class = sers.HistorySerializer
@@ -100,24 +100,24 @@ class HistoryViewSet(base.HistoryModelViewSet):
     POST_WHITE_LIST = ['cancel']
 
     @swagger_auto_schema(auto_schema=None)
-    @base.action(["get"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["get"], detail=yes, serializer_class=sers.DataSerializer)
     def raw(self, request, *args, **kwargs):
         result = self.get_serializer(self.get_object()).get_raw(request)
         return HttpResponse(result, content_type="text/plain")
 
-    @base.action(["post"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["post"], detail=yes, serializer_class=sers.DataSerializer)
     def cancel(self, request, *args, **kwargs):
         obj = self.get_object()
         exch = KVExchanger(utils.CmdExecutor.CANCEL_PREFIX + str(obj.id))
         exch.send(True, 60)
         return base.Response("Task canceled: {}".format(obj.id), status.HTTP_200_OK).resp
 
-    @base.action(["get"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["get"], detail=yes, serializer_class=sers.DataSerializer)
     def facts(self, request, *args, **kwargs):
         objs = self.get_serializer(self.get_object()).get_facts(request)
         return base.Response(objs, status.HTTP_200_OK).resp
 
-    @base.action(["delete"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["delete"], detail=yes, serializer_class=sers.DataSerializer)
     def clear(self, request, *args, **kwargs):
         default_message = "Output trancated.\n"
         obj = self.get_object()
@@ -130,7 +130,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
         return base.Response(result, status.HTTP_204_NO_CONTENT).resp
 
 
-@base.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__VarsViewSet)
 class HostViewSet(OwnedView):
     model = sers.models.Host
     serializer_class = sers.HostSerializer
@@ -138,7 +138,7 @@ class HostViewSet(OwnedView):
     filter_class = filters.HostFilter
 
 
-@base.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__VarsViewSet)
 class _BaseGroupViewSet(base.ModelViewSetSet):
     model = sers.models.Group
     serializer_class = sers.GroupSerializer
@@ -146,10 +146,10 @@ class _BaseGroupViewSet(base.ModelViewSetSet):
     filter_class = filters.GroupFilter
 
 
-@base.nested_view(
+@deco.nested_view(
     'host', 'id', manager_name='hosts', allow_append=yes, view=HostViewSet
 )
-@base.nested_view(
+@deco.nested_view(
     'group', 'id', manager_name='groups', allow_append=yes, view=_BaseGroupViewSet
 )
 class _GroupMixin(OwnedView):
@@ -168,9 +168,9 @@ class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
             raise exception("Group is children.")
 
 
-@base.nested_view('all_groups', 'id', methods=['get'], view=GroupViewSet, subs=None)
-@base.nested_view('all_hosts', 'id', methods=['get'], view=HostViewSet, subs=None)
-@base.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('all_groups', 'id', methods=['get'], view=GroupViewSet, subs=None)
+@deco.nested_view('all_hosts', 'id', methods=['get'], view=HostViewSet, subs=None)
+@deco.nested_view('variables', 'id', view=__VarsViewSet)
 class InventoryViewSet(_GroupMixin):
     model = sers.models.Inventory
     serializer_class = sers.InventorySerializer
@@ -194,7 +194,7 @@ class __ModuleViewSet(base.ReadOnlyModelViewSet):
     filter_class = filters.ModuleFilter
 
 
-@base.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__VarsViewSet)
 class __PeriodicTaskViewSet(base.ModelViewSetSet):
     lookup_field = 'id'
     model = sers.models.PeriodicTask
@@ -202,7 +202,7 @@ class __PeriodicTaskViewSet(base.ModelViewSetSet):
     serializer_class_one = sers.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
 
-    @base.action(methods=["post"], detail=yes)
+    @deco.action(methods=["post"], detail=yes)
     def execute(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object())
         return serializer.execute().resp
@@ -221,7 +221,7 @@ class __TemplateViewSet(base.ModelViewSetSet):
     filter_class = filters.TemplateFilter
     POST_WHITE_LIST = ['execute']
 
-    @base.action(["post"], detail=yes, serializer_class=sers.TemplateExecSerializer)
+    @deco.action(["post"], detail=yes, serializer_class=sers.TemplateExecSerializer)
     def execute(self, request, *args, **kwargs):
         obj = self.get_object()
         return self.get_serializer(obj).execute(request).resp
@@ -239,16 +239,16 @@ class __TemplateViewSet(base.ModelViewSetSet):
     operation_description='Sync project repository.',
     responses={status.HTTP_200_OK: sers.ActionResponseSerializer(),}
 ))
-@base.nested_view(
+@deco.nested_view(
     'inventory', 'id', manager_name='inventories',
     allow_append=yes, view=InventoryViewSet
 )
-@base.nested_view('playbook', 'id', view=__PlaybookViewSet, methods=['get'])
-@base.nested_view('module', 'id', view=__ModuleViewSet, methods=['get'])
-@base.nested_view('template', 'id', manager_name='template', view=__TemplateViewSet)
-@base.nested_view('periodic_task', 'id', view=__PeriodicTaskViewSet)
-@base.nested_view('history', 'id', manager_name='history', view=HistoryViewSet)
-@base.nested_view('variables', 'id', view=__ProjectVarsViewSet)
+@deco.nested_view('playbook', 'id', view=__PlaybookViewSet, methods=['get'])
+@deco.nested_view('module', 'id', view=__ModuleViewSet, methods=['get'])
+@deco.nested_view('template', 'id', manager_name='template', view=__TemplateViewSet)
+@deco.nested_view('periodic_task', 'id', view=__PeriodicTaskViewSet)
+@deco.nested_view('history', 'id', manager_name='history', view=HistoryViewSet)
+@deco.nested_view('variables', 'id', view=__ProjectVarsViewSet)
 class ProjectViewSet(_GroupMixin):
     model = sers.models.Project
     serializer_class = sers.ProjectSerializer
@@ -256,11 +256,11 @@ class ProjectViewSet(_GroupMixin):
     filter_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
 
-    @base.action(methods=["post"], detail=yes, serializer_class=sers.EmptySerializer)
+    @deco.action(methods=["post"], detail=yes, serializer_class=sers.EmptySerializer)
     def sync(self, request, *args, **kwargs):
         return self.get_serializer(self.get_object()).sync().resp
 
-    @base.action(
+    @deco.action(
         ["post"], url_path="execute-playbook", detail=yes,
         serializer_class=sers.AnsiblePlaybookSerializer
     )
@@ -268,7 +268,7 @@ class ProjectViewSet(_GroupMixin):
         serializer = self.get_serializer(self.get_object())
         return serializer.execute_playbook(request).resp
 
-    @base.action(
+    @deco.action(
         ["post"], url_path="execute-module", detail=yes,
         serializer_class=sers.AnsibleModuleSerializer
     )
