@@ -70,7 +70,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -90,7 +90,7 @@ paths:
                 items:
                   $ref: '#/definitions/Group'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -118,11 +118,11 @@ paths:
             $ref: '#/definitions/OneGroup'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -147,11 +147,11 @@ paths:
       parameters: []
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -179,11 +179,11 @@ paths:
             $ref: '#/definitions/OneGroup'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -211,11 +211,11 @@ paths:
             $ref: '#/definitions/OneGroup'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -238,9 +238,9 @@ paths:
       parameters: []
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -312,7 +312,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -332,7 +332,7 @@ paths:
                 items:
                   $ref: '#/definitions/Group'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -360,11 +360,11 @@ paths:
             $ref: '#/definitions/Group'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Group'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -399,11 +399,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -436,11 +436,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -473,11 +473,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -505,9 +505,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -546,11 +546,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -583,11 +583,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -631,11 +631,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -673,11 +673,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -715,11 +715,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -752,9 +752,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -834,7 +834,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -854,7 +854,7 @@ paths:
                 items:
                   $ref: '#/definitions/Host'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -882,11 +882,11 @@ paths:
             $ref: '#/definitions/Host'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Host'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -921,11 +921,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -958,11 +958,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -995,11 +995,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1027,9 +1027,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1073,11 +1073,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/SetOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1116,11 +1116,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1153,11 +1153,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1201,11 +1201,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1243,11 +1243,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1285,11 +1285,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1322,9 +1322,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1367,11 +1367,11 @@ paths:
             $ref: '#/definitions/SetOwner'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/SetOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1443,7 +1443,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -1463,7 +1463,7 @@ paths:
                 items:
                   $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1491,11 +1491,11 @@ paths:
             $ref: '#/definitions/Variable'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1530,11 +1530,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1567,11 +1567,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1604,11 +1604,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1636,9 +1636,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1794,7 +1794,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -1814,7 +1814,7 @@ paths:
                 items:
                   $ref: '#/definitions/History'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1839,11 +1839,11 @@ paths:
       parameters: []
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHistory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1866,9 +1866,9 @@ paths:
       parameters: []
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1903,11 +1903,11 @@ paths:
             $ref: '#/definitions/Data'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Data'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1937,9 +1937,9 @@ paths:
       parameters: []
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -1970,11 +1970,11 @@ paths:
       parameters: []
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Data'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2126,7 +2126,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -2146,7 +2146,7 @@ paths:
                 items:
                   $ref: '#/definitions/HistoryLines'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2218,7 +2218,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -2238,7 +2238,7 @@ paths:
                 items:
                   $ref: '#/definitions/Hook'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2266,11 +2266,11 @@ paths:
             $ref: '#/definitions/Hook'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Hook'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2295,11 +2295,11 @@ paths:
       parameters: []
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Hook'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2327,11 +2327,11 @@ paths:
             $ref: '#/definitions/Hook'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Hook'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2359,11 +2359,11 @@ paths:
             $ref: '#/definitions/Hook'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Hook'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2386,9 +2386,9 @@ paths:
       parameters: []
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2465,7 +2465,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -2485,7 +2485,7 @@ paths:
                 items:
                   $ref: '#/definitions/Host'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2513,11 +2513,11 @@ paths:
             $ref: '#/definitions/OneHost'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2542,11 +2542,11 @@ paths:
       parameters: []
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2574,11 +2574,11 @@ paths:
             $ref: '#/definitions/OneHost'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2606,11 +2606,11 @@ paths:
             $ref: '#/definitions/OneHost'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2633,9 +2633,9 @@ paths:
       parameters: []
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2670,11 +2670,11 @@ paths:
             $ref: '#/definitions/SetOwner'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/SetOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2751,7 +2751,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -2771,7 +2771,7 @@ paths:
                 items:
                   $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2799,11 +2799,11 @@ paths:
             $ref: '#/definitions/Variable'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2838,11 +2838,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2875,11 +2875,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2912,11 +2912,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -2944,9 +2944,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3022,7 +3022,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -3042,7 +3042,7 @@ paths:
                 items:
                   $ref: '#/definitions/Inventory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3070,11 +3070,11 @@ paths:
             $ref: '#/definitions/OneInventory'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneInventory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3099,11 +3099,11 @@ paths:
       parameters: []
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneInventory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3131,11 +3131,11 @@ paths:
             $ref: '#/definitions/OneInventory'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneInventory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3163,11 +3163,11 @@ paths:
             $ref: '#/definitions/OneInventory'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneInventory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3190,9 +3190,9 @@ paths:
       parameters: []
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3264,7 +3264,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -3284,7 +3284,7 @@ paths:
                 items:
                   $ref: '#/definitions/Group'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3319,11 +3319,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3399,7 +3399,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -3419,7 +3419,7 @@ paths:
                 items:
                   $ref: '#/definitions/Host'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3454,11 +3454,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3534,7 +3534,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -3554,7 +3554,7 @@ paths:
                 items:
                   $ref: '#/definitions/Group'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3582,11 +3582,11 @@ paths:
             $ref: '#/definitions/Group'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Group'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3621,11 +3621,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3658,11 +3658,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3695,11 +3695,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3727,9 +3727,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3768,11 +3768,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3805,11 +3805,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3853,11 +3853,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3895,11 +3895,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3937,11 +3937,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -3974,9 +3974,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4056,7 +4056,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -4076,7 +4076,7 @@ paths:
                 items:
                   $ref: '#/definitions/Host'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4104,11 +4104,11 @@ paths:
             $ref: '#/definitions/Host'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Host'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4143,11 +4143,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4180,11 +4180,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4217,11 +4217,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4249,9 +4249,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4295,11 +4295,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/SetOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4338,11 +4338,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4375,11 +4375,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4423,11 +4423,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4465,11 +4465,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4507,11 +4507,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4544,9 +4544,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4589,11 +4589,11 @@ paths:
             $ref: '#/definitions/SetOwner'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/SetOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4665,7 +4665,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -4685,7 +4685,7 @@ paths:
                 items:
                   $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4713,11 +4713,11 @@ paths:
             $ref: '#/definitions/Variable'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4752,11 +4752,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4789,11 +4789,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4826,11 +4826,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4858,9 +4858,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4946,7 +4946,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -4966,7 +4966,7 @@ paths:
                 items:
                   $ref: '#/definitions/Project'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -4994,11 +4994,11 @@ paths:
             $ref: '#/definitions/OneProject'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneProject'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5023,11 +5023,11 @@ paths:
       parameters: []
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneProject'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5055,11 +5055,11 @@ paths:
             $ref: '#/definitions/OneProject'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneProject'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5087,11 +5087,11 @@ paths:
             $ref: '#/definitions/OneProject'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneProject'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5114,9 +5114,9 @@ paths:
       parameters: []
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5151,11 +5151,11 @@ paths:
             $ref: '#/definitions/AnsibleModule'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/ExecuteResponse'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5190,11 +5190,11 @@ paths:
             $ref: '#/definitions/AnsiblePlaybook'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/ExecuteResponse'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5276,7 +5276,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -5296,7 +5296,7 @@ paths:
                 items:
                   $ref: '#/definitions/Group'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5324,11 +5324,11 @@ paths:
             $ref: '#/definitions/Group'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Group'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5363,11 +5363,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5400,11 +5400,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5437,11 +5437,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5469,9 +5469,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5510,11 +5510,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5547,11 +5547,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5595,11 +5595,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5637,11 +5637,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5679,11 +5679,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5716,9 +5716,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5808,7 +5808,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -5828,7 +5828,7 @@ paths:
                 items:
                   $ref: '#/definitions/History'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5856,11 +5856,11 @@ paths:
             $ref: '#/definitions/History'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/History'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5895,11 +5895,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHistory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5932,11 +5932,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHistory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -5969,11 +5969,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHistory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6001,9 +6001,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6047,11 +6047,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Data'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6090,9 +6090,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6131,11 +6131,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Data'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6174,11 +6174,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/HistoryLines'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6217,11 +6217,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Data'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6307,7 +6307,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -6327,7 +6327,7 @@ paths:
                 items:
                   $ref: '#/definitions/Host'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6355,11 +6355,11 @@ paths:
             $ref: '#/definitions/Host'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Host'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6394,11 +6394,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6431,11 +6431,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6468,11 +6468,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6500,9 +6500,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6546,11 +6546,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/SetOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6589,11 +6589,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6626,11 +6626,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6674,11 +6674,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6716,11 +6716,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6758,11 +6758,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6795,9 +6795,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6887,7 +6887,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -6907,7 +6907,7 @@ paths:
                 items:
                   $ref: '#/definitions/Inventory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6935,11 +6935,11 @@ paths:
             $ref: '#/definitions/Inventory'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Inventory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -6974,11 +6974,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneInventory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7011,11 +7011,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneInventory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7048,11 +7048,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneInventory'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7080,9 +7080,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7121,11 +7121,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Group'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7169,11 +7169,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7216,11 +7216,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Host'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7264,11 +7264,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7311,11 +7311,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Group'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7348,11 +7348,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Group'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7396,11 +7396,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7438,11 +7438,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7480,11 +7480,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneGroup'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7517,9 +7517,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7567,11 +7567,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7609,11 +7609,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7666,11 +7666,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7713,11 +7713,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7760,11 +7760,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7802,9 +7802,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7851,11 +7851,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Host'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7888,11 +7888,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Host'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7936,11 +7936,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -7978,11 +7978,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8020,11 +8020,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneHost'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8057,9 +8057,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8112,11 +8112,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/SetOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8164,11 +8164,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8206,11 +8206,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8263,11 +8263,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8310,11 +8310,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8357,11 +8357,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8399,9 +8399,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8453,11 +8453,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/SetOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8496,11 +8496,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8533,11 +8533,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8581,11 +8581,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8623,11 +8623,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8665,11 +8665,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8702,9 +8702,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8794,7 +8794,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -8814,7 +8814,7 @@ paths:
                 items:
                   $ref: '#/definitions/Module'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8849,11 +8849,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneModule'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8939,7 +8939,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -8959,7 +8959,7 @@ paths:
                 items:
                   $ref: '#/definitions/Periodictask'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -8987,11 +8987,11 @@ paths:
             $ref: '#/definitions/Periodictask'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Periodictask'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9026,11 +9026,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OnePeriodictask'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9063,11 +9063,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OnePeriodictask'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9100,11 +9100,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OnePeriodictask'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9132,9 +9132,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9178,11 +9178,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Periodictask'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9221,11 +9221,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9258,11 +9258,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9306,11 +9306,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9348,11 +9348,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9390,11 +9390,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Variable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9427,9 +9427,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9519,7 +9519,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -9539,7 +9539,7 @@ paths:
                 items:
                   $ref: '#/definitions/Playbook'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9574,11 +9574,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OnePlaybook'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9617,11 +9617,11 @@ paths:
             $ref: '#/definitions/SetOwner'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/SetOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9656,11 +9656,11 @@ paths:
             $ref: '#/definitions/Empty'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/ActionResponse'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9742,7 +9742,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -9762,7 +9762,7 @@ paths:
                 items:
                   $ref: '#/definitions/Template'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9790,11 +9790,11 @@ paths:
             $ref: '#/definitions/Template'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Template'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9829,11 +9829,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneTemplate'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9866,11 +9866,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneTemplate'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9903,11 +9903,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneTemplate'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9935,9 +9935,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -9981,11 +9981,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/TemplateExec'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10071,7 +10071,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -10091,7 +10091,7 @@ paths:
                 items:
                   $ref: '#/definitions/ProjectVariable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10119,11 +10119,11 @@ paths:
             $ref: '#/definitions/ProjectVariable'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/ProjectVariable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10158,11 +10158,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/ProjectVariable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10195,11 +10195,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/ProjectVariable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10232,11 +10232,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/ProjectVariable'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10264,9 +10264,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10337,7 +10337,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -10357,7 +10357,7 @@ paths:
                 items:
                   $ref: '#/definitions/Team'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10385,11 +10385,11 @@ paths:
             $ref: '#/definitions/OneTeam'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneTeam'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10414,11 +10414,11 @@ paths:
       parameters: []
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneTeam'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10446,11 +10446,11 @@ paths:
             $ref: '#/definitions/OneTeam'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneTeam'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10478,11 +10478,11 @@ paths:
             $ref: '#/definitions/OneTeam'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneTeam'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10505,9 +10505,9 @@ paths:
       parameters: []
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10542,11 +10542,11 @@ paths:
             $ref: '#/definitions/SetOwner'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/SetOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10613,7 +10613,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -10633,7 +10633,7 @@ paths:
                 items:
                   $ref: '#/definitions/Owner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10661,11 +10661,11 @@ paths:
             $ref: '#/definitions/Owner'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Owner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10700,11 +10700,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10737,11 +10737,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10774,11 +10774,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10806,9 +10806,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10847,11 +10847,11 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Data'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10884,11 +10884,11 @@ paths:
           type: integer
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Data'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -10916,9 +10916,9 @@ paths:
           type: integer
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -11007,7 +11007,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             required:
               - count
@@ -11027,7 +11027,7 @@ paths:
                 items:
                   $ref: '#/definitions/Owner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -11055,11 +11055,11 @@ paths:
             $ref: '#/definitions/OneOwner'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -11084,11 +11084,11 @@ paths:
       parameters: []
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -11116,11 +11116,11 @@ paths:
             $ref: '#/definitions/OneOwner'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -11148,11 +11148,11 @@ paths:
             $ref: '#/definitions/OneOwner'
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/OneOwner'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -11175,9 +11175,9 @@ paths:
       parameters: []
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -11207,11 +11207,11 @@ paths:
       parameters: []
       responses:
         '200':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Data'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -11239,11 +11239,11 @@ paths:
             $ref: '#/definitions/Data'
       responses:
         '201':
-          description: ''
+          description: Action accepted.
           schema:
             $ref: '#/definitions/Data'
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -11266,9 +11266,9 @@ paths:
       parameters: []
       responses:
         '204':
-          description: ''
+          description: Action accepted.
         '400':
-          description: Validation error or some data error
+          description: Validation error or some data error.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -11631,20 +11631,20 @@ definitions:
         title: Type
         type: string
         enum:
-          - SCRIPT
           - HTTP
+          - SCRIPT
       when:
         title: When
         type: string
         enum:
-          - on_object_upd
-          - on_object_add
           - on_user_upd
+          - on_execution
+          - on_object_add
+          - after_execution
           - on_user_add
           - on_object_del
           - on_user_del
-          - on_execution
-          - after_execution
+          - on_object_upd
       enable:
         title: Enable
         type: boolean
@@ -11778,60 +11778,69 @@ definitions:
         format: autocomplete
         enum:
           $ref: '#/definitions/Module'
-      private_key:
-        title: Private key
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      su_user:
-        title: Su user
-        description: run operations with su as this user (default=None) (deprecated,
-          use become)
-        type: string
-        minLength: 1
-      version:
-        title: Version
-        description: show program's version number and exit
-        type: boolean
-        default: false
       sftp_extra_args:
         title: Sftp extra args
         description: specify extra arguments to pass to sftp only (e.g. -f, -l)
         type: string
         minLength: 1
-      sudo:
-        title: Sudo
-        description: run operations with sudo (nopasswd) (deprecated, use become)
+      ssh_common_args:
+        title: Ssh common args
+        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+        type: string
+        minLength: 1
+      key_file:
+        title: Key file
+        description: use this file to authenticate the connection
+        type: string
+        format: secretfile
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
         type: boolean
         default: false
-      user:
-        title: User
-        description: connect as this user (default=None)
-        type: string
-        minLength: 1
-      sudo_user:
-        title: Sudo user
-        description: desired sudo user (default=root) (deprecated, use become)
-        type: string
-        minLength: 1
-      args:
-        title: Args
-        description: module arguments
-        type: string
-        minLength: 1
-      forks:
-        title: Forks
-        description: specify number of parallel processes to use (default=5)
+      timeout:
+        title: Timeout
+        description: override the connection timeout in seconds (default=10)
         type: integer
-      list_hosts:
-        title: List hosts
-        description: outputs a list of matching hosts; does not execute anything else
+      connection:
+        title: Connection
+        description: connection type to use (default=smart)
+        type: string
+        minLength: 1
+      group:
+        title: Group
+        type: string
+        minLength: 1
+      vault_password_file:
+        title: Vault password file
+        description: vault password file
+        type: string
+        format: secretfile
+      su:
+        title: Su
+        description: run operations with su (deprecated, use become)
         type: boolean
         default: false
-      diff:
-        title: Diff
-        description: when changing (small) files and templates, show the differences
-          in those files; works great with --check
+      playbook_dir:
+        title: Playbook dir
+        description: Since this tool does not use playbooks, use this as a subsitute
+          playbook directory.This sets the relative path for many features including
+          roles/ group_vars/ etc.
+        type: string
+        minLength: 1
+      ssh_extra_args:
+        title: Ssh extra args
+        description: specify extra arguments to pass to ssh only (e.g. -R)
+        type: string
+        minLength: 1
+      private_key:
+        title: Private key
+        description: use this file to authenticate the connection
+        type: string
+        format: secretfile
+      one_line:
+        title: One line
+        description: condense output
         type: boolean
         default: false
       become_user:
@@ -11843,44 +11852,34 @@ definitions:
         title: Poll
         description: set the poll interval if using -B (default=15)
         type: integer
-      become_method:
-        title: Become method
-        description: 'privilege escalation method to use (default=sudo), valid choices:
-          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
-          | machinectl ]'
+      forks:
+        title: Forks
+        description: specify number of parallel processes to use (default=5)
+        type: integer
+      module_path:
+        title: Module path
+        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
+          '/usr/share/ansible/plugins/modules'])
         type: string
         minLength: 1
-      check:
-        title: Check
-        description: don't make any changes; instead, try to predict some of the changes
-          that may occur
+      user:
+        title: User
+        description: connect as this user (default=None)
+        type: string
+        minLength: 1
+      help:
+        title: Help
+        description: show this help message and exit
         type: boolean
         default: false
+      vault_id:
+        title: Vault id
+        description: the vault identity to use
+        type: string
+        minLength: 1
       scp_extra_args:
         title: Scp extra args
         description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
-        minLength: 1
-      connection:
-        title: Connection
-        description: connection type to use (default=smart)
-        type: string
-        minLength: 1
-      background:
-        title: Background
-        description: run asynchronously, failing after X seconds (default=N/A)
-        type: integer
-      become:
-        title: Become
-        description: run operations with become (does not imply password prompting)
-        type: boolean
-        default: false
-      timeout:
-        title: Timeout
-        description: override the connection timeout in seconds (default=10)
-        type: integer
-      group:
-        title: Group
         type: string
         minLength: 1
       limit:
@@ -11888,25 +11887,58 @@ definitions:
         description: further limit selected hosts to an additional pattern
         type: string
         minLength: 1
-      vault_password_file:
-        title: Vault password file
-        description: vault password file
-        type: string
-        format: secretfile
-      vault_id:
-        title: Vault id
-        description: the vault identity to use
+      diff:
+        title: Diff
+        description: when changing (small) files and templates, show the differences
+          in those files; works great with --check
+        type: boolean
+        default: false
+      list_hosts:
+        title: List hosts
+        description: outputs a list of matching hosts; does not execute anything else
+        type: boolean
+        default: false
+      sudo:
+        title: Sudo
+        description: run operations with sudo (nopasswd) (deprecated, use become)
+        type: boolean
+        default: false
+      su_user:
+        title: Su user
+        description: run operations with su as this user (default=None) (deprecated,
+          use become)
         type: string
         minLength: 1
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
-          '/usr/share/ansible/plugins/modules'])
+      background:
+        title: Background
+        description: run asynchronously, failing after X seconds (default=N/A)
+        type: integer
+      check:
+        title: Check
+        description: don't make any changes; instead, try to predict some of the changes
+          that may occur
+        type: boolean
+        default: false
+      sudo_user:
+        title: Sudo user
+        description: desired sudo user (default=root) (deprecated, use become)
         type: string
         minLength: 1
-      ssh_common_args:
-        title: Ssh common args
-        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+      become:
+        title: Become
+        description: run operations with become (does not imply password prompting)
+        type: boolean
+        default: false
+      become_method:
+        title: Become method
+        description: 'privilege escalation method to use (default=sudo), valid choices:
+          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
+          | machinectl ]'
+        type: string
+        minLength: 1
+      tree:
+        title: Tree
+        description: log output to this directory
         type: string
         minLength: 1
       extra_vars:
@@ -11915,46 +11947,14 @@ definitions:
           prepend with @
         type: string
         minLength: 1
-      playbook_dir:
-        title: Playbook dir
-        description: Since this tool does not use playbooks, use this as a subsitute
-          playbook directory.This sets the relative path for many features including
-          roles/ group_vars/ etc.
+      args:
+        title: Args
+        description: module arguments
         type: string
         minLength: 1
-      help:
-        title: Help
-        description: show this help message and exit
-        type: boolean
-        default: false
-      ssh_extra_args:
-        title: Ssh extra args
-        description: specify extra arguments to pass to ssh only (e.g. -R)
-        type: string
-        minLength: 1
-      one_line:
-        title: One line
-        description: condense output
-        type: boolean
-        default: false
-      key_file:
-        title: Key file
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      su:
-        title: Su
-        description: run operations with su (deprecated, use become)
-        type: boolean
-        default: false
-      tree:
-        title: Tree
-        description: log output to this directory
-        type: string
-        minLength: 1
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
+      version:
+        title: Version
+        description: show program's version number and exit
         type: boolean
         default: false
   ExecuteResponse:
@@ -11983,99 +11983,25 @@ definitions:
         format: autocomplete
         enum:
           $ref: '#/definitions/Playbook'
-      private_key:
-        title: Private key
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      su_user:
-        title: Su user
-        description: run operations with su as this user (default=None) (deprecated,
-          use become)
-        type: string
-        minLength: 1
-      version:
-        title: Version
-        description: show program's version number and exit
-        type: boolean
-        default: false
       sftp_extra_args:
         title: Sftp extra args
         description: specify extra arguments to pass to sftp only (e.g. -f, -l)
         type: string
         minLength: 1
-      list_tags:
-        title: List tags
-        description: list all available tags
-        type: boolean
-        default: false
-      start_at_task:
-        title: Start at task
-        description: start the playbook at the task matching this name
+      ssh_common_args:
+        title: Ssh common args
+        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
         type: string
         minLength: 1
-      step:
-        title: Step
-        description: 'one-step-at-a-time: confirm each task before running'
-        type: boolean
-        default: false
-      sudo_user:
-        title: Sudo user
-        description: desired sudo user (default=root) (deprecated, use become)
-        type: string
-        minLength: 1
-      tags:
-        title: Tags
-        description: only run plays and tasks tagged with these values
-        type: string
-        minLength: 1
-      list_hosts:
-        title: List hosts
-        description: outputs a list of matching hosts; does not execute anything else
-        type: boolean
-        default: false
       check:
         title: Check
         description: don't make any changes; instead, try to predict some of the changes
           that may occur
         type: boolean
         default: false
-      become_user:
-        title: Become user
-        description: run operations as this user (default=root)
-        type: string
-        minLength: 1
-      become_method:
-        title: Become method
-        description: 'privilege escalation method to use (default=sudo), valid choices:
-          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
-          | machinectl ]'
-        type: string
-        minLength: 1
-      flush_cache:
-        title: Flush cache
-        description: clear the fact cache for every host in inventory
-        type: boolean
-        default: false
-      scp_extra_args:
-        title: Scp extra args
-        description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
-        minLength: 1
-      skip_tags:
-        title: Skip tags
-        description: only run plays and tasks whose tags do not match these values
-        type: string
-        minLength: 1
-      diff:
-        title: Diff
-        description: when changing (small) files and templates, show the differences
-          in those files; works great with --check
-        type: boolean
-        default: false
-      become:
-        title: Become
-        description: run operations with become (does not imply password prompting)
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
         type: boolean
         default: false
       timeout:
@@ -12087,56 +12013,19 @@ definitions:
         description: connection type to use (default=smart)
         type: string
         minLength: 1
-      sudo:
-        title: Sudo
-        description: run operations with sudo (nopasswd) (deprecated, use become)
-        type: boolean
-        default: false
-      force_handlers:
-        title: Force handlers
-        description: run handlers even if a task fails
-        type: boolean
-        default: false
       vault_password_file:
         title: Vault password file
         description: vault password file
         type: string
         format: secretfile
-      vault_id:
-        title: Vault id
-        description: the vault identity to use
-        type: string
-        minLength: 1
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
-          '/usr/share/ansible/plugins/modules'])
-        type: string
-        minLength: 1
-      ssh_common_args:
-        title: Ssh common args
-        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
-        type: string
-        minLength: 1
-      list_tasks:
-        title: List tasks
-        description: list all tasks that would be executed
+      su:
+        title: Su
+        description: run operations with su (deprecated, use become)
         type: boolean
         default: false
-      extra_vars:
-        title: Extra vars
-        description: set additional variables as key=value or YAML/JSON, if filename
-          prepend with @
-        type: string
-        minLength: 1
-      limit:
-        title: Limit
-        description: further limit selected hosts to an additional pattern
-        type: string
-        minLength: 1
-      help:
-        title: Help
-        description: show this help message and exit
+      list_hosts:
+        title: List hosts
+        description: outputs a list of matching hosts; does not execute anything else
         type: boolean
         default: false
       ssh_extra_args:
@@ -12144,28 +12033,139 @@ definitions:
         description: specify extra arguments to pass to ssh only (e.g. -R)
         type: string
         minLength: 1
-      su:
-        title: Su
-        description: run operations with su (deprecated, use become)
-        type: boolean
-        default: false
-      key_file:
-        title: Key file
+      private_key:
+        title: Private key
         description: use this file to authenticate the connection
         type: string
         format: secretfile
+      start_at_task:
+        title: Start at task
+        description: start the playbook at the task matching this name
+        type: string
+        minLength: 1
+      become_user:
+        title: Become user
+        description: run operations as this user (default=root)
+        type: string
+        minLength: 1
+      flush_cache:
+        title: Flush cache
+        description: clear the fact cache for every host in inventory
+        type: boolean
+        default: false
       forks:
         title: Forks
         description: specify number of parallel processes to use (default=5)
         type: integer
+      module_path:
+        title: Module path
+        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
+          '/usr/share/ansible/plugins/modules'])
+        type: string
+        minLength: 1
+      tags:
+        title: Tags
+        description: only run plays and tasks tagged with these values
+        type: string
+        minLength: 1
+      skip_tags:
+        title: Skip tags
+        description: only run plays and tasks whose tags do not match these values
+        type: string
+        minLength: 1
+      list_tasks:
+        title: List tasks
+        description: list all tasks that would be executed
+        type: boolean
+        default: false
       user:
         title: User
         description: connect as this user (default=None)
         type: string
         minLength: 1
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
+      help:
+        title: Help
+        description: show this help message and exit
+        type: boolean
+        default: false
+      vault_id:
+        title: Vault id
+        description: the vault identity to use
+        type: string
+        minLength: 1
+      list_tags:
+        title: List tags
+        description: list all available tags
+        type: boolean
+        default: false
+      limit:
+        title: Limit
+        description: further limit selected hosts to an additional pattern
+        type: string
+        minLength: 1
+      diff:
+        title: Diff
+        description: when changing (small) files and templates, show the differences
+          in those files; works great with --check
+        type: boolean
+        default: false
+      force_handlers:
+        title: Force handlers
+        description: run handlers even if a task fails
+        type: boolean
+        default: false
+      su_user:
+        title: Su user
+        description: run operations with su as this user (default=None) (deprecated,
+          use become)
+        type: string
+        minLength: 1
+      scp_extra_args:
+        title: Scp extra args
+        description: specify extra arguments to pass to scp only (e.g. -l)
+        type: string
+        minLength: 1
+      sudo:
+        title: Sudo
+        description: run operations with sudo (nopasswd) (deprecated, use become)
+        type: boolean
+        default: false
+      step:
+        title: Step
+        description: 'one-step-at-a-time: confirm each task before running'
+        type: boolean
+        default: false
+      sudo_user:
+        title: Sudo user
+        description: desired sudo user (default=root) (deprecated, use become)
+        type: string
+        minLength: 1
+      key_file:
+        title: Key file
+        description: use this file to authenticate the connection
+        type: string
+        format: secretfile
+      become_method:
+        title: Become method
+        description: 'privilege escalation method to use (default=sudo), valid choices:
+          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
+          | machinectl ]'
+        type: string
+        minLength: 1
+      extra_vars:
+        title: Extra vars
+        description: set additional variables as key=value or YAML/JSON, if filename
+          prepend with @
+        type: string
+        minLength: 1
+      become:
+        title: Become
+        description: run operations with become (does not imply password prompting)
+        type: boolean
+        default: false
+      version:
+        title: Version
+        description: show program's version number and exit
         type: boolean
         default: false
   Module:
@@ -12453,10 +12453,10 @@ definitions:
         type: string
         enum:
           - repo_type
-          - repo_sync_on_run
           - repo_key
           - repo_branch
           - repo_password
+          - repo_sync_on_run
       value:
         title: Value
         type: string
