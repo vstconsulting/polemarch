@@ -9,6 +9,7 @@ from django.db import transaction
 from rest_framework import serializers, exceptions, status
 from rest_framework.exceptions import PermissionDenied
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
+from vstutils.api.serializers import DataSerializer
 from vstutils.api.base import Response
 from ...main.utils import AnsibleArgumentsReference
 
@@ -63,26 +64,6 @@ class MultiTypeField(serializers.CharField):
         return (
             value if not isinstance(value, six.class_types)
             else str(value)
-        )
-
-
-class DataSerializer(serializers.Serializer):
-
-    def to_internal_value(self, data):  # nocv
-        return (
-            data
-            if (
-                isinstance(data, (six.string_types, six.text_type)) or
-                isinstance(data, (dict, list))
-            )
-            else self.fail("Unknown type.")
-        )
-
-    def to_representation(self, value):
-        return (
-            json.loads(value)
-            if not isinstance(value, (dict, list))
-            else value
         )
 
 
