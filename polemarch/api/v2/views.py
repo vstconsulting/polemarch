@@ -59,7 +59,7 @@ class TokenView(token_views.ObtainAuthToken):
 
 
 class UserViewSet(views.UserViewSet):
-    serializer_class = sers.UserSerializer
+    serializer_class = sers.OwnerSerializer
     serializer_class_one = sers.OneOwnerSerializer
 
     @deco.action(
