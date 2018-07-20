@@ -61,7 +61,7 @@ if(window.moment && window.moment.tz)
 
 polemarch.opt = {}
 polemarch.opt.holder = undefined
-polemarch.opt.host = "//"+window.location.host
+polemarch.opt.host = "//"+hostname
 
 polemarch.model = {}
 

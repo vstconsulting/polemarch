@@ -469,7 +469,7 @@ pmUsers.deactivateItem = function(item_id, force) {
         {
             if(my_user_id==item_id)
             {
-                spajs.openURL(window.location.protocol+"//"+window.location.host);
+                spajs.openURL(window.location.protocol+"//"+hostname);
             }
             else {
                 $.notify("Account was deactivated", "success");
@@ -663,7 +663,7 @@ pmUsers.updateProfile = function (item_id) {
     return def.promise();
 }
 
-
+/*
 tabSignal.connect("polemarch.start", function()
 {
     // users
@@ -698,3 +698,4 @@ tabSignal.connect("polemarch.start", function()
     })
 
 })
+*/

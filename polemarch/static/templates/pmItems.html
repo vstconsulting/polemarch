@@ -31,22 +31,22 @@
     <% } %>
 </script>
 
-<!--  
+<!--
     <%[ blockBody %>
-        <p>This is block contentRT</p> 
+        <p>This is block contentRT</p>
     <%] %>
-    
+
     <%[ testB %> // Переопределение блока
         <p>This is block testBAS</p>
     <%] %>
-    
+
     <%* blockName %> // Вывод блока
-    
+
     <%! base_items_list %> // Наследование, писать последней строкой в шаблоне
---> 
+-->
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="base_items_list">
-    <!-- base_items_list --> 
+    <!-- base_items_list -->
 </script>
 
 
@@ -79,7 +79,7 @@
         value="<% if(guiObj.model.filters.query){ %><%- guiObj.model.filters.query.name %><% } %>"
         onkeyup="if(event.keyCode == 13) spajs.showLoader(goToSearch(<%- guiObj.view.class_name %>, $('#search-query-input').val()));"
     >
-    
+
     <div class="input-group-addon" onclick="spajs.showLoader(goToSearch(<%- guiObj.view.class_name %>, $('#search-query-input').val()));">
     <span class="glyphicon glyphicon-search" ></span>
     </div>
@@ -89,23 +89,23 @@
 
 
 <!-- Список сущностей -->
-<script type="text/x-just" data-just="items_empty_list"> 
-    <div style="text-align: center;" >No child elements, list is empty</div> 
+<script type="text/x-just" data-just="items_empty_list">
+    <div style="text-align: center;" >No child elements, list is empty</div>
 </script>
- 
+
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="entity_list">
-    
-    <section class="content"> 
+
+    <section class="content">
         <div class="row">
             <div class="col-lg-12">
-                <%[ buttons %> 
+                <%[ buttons %>
                     <% if(guiObj.model.buttons){ %>
                         <% for(var i in  guiObj.model.buttons){ %>
                             <% if(guiObj.model.buttons[i].tpl){ %>
                                 <%= guiObj.model.buttons[i].tpl.apply(guiObj, [opt]) %>
-                            <% }else{ %> 
-                                <a 
+                            <% }else{ %>
+                                <a
                                     class="top-line-btn <% if(typeof guiObj.model.buttons[i].class == 'function'){ %>
                                                 <%- guiObj.model.buttons[i].class.apply(guiObj, [opt]) %>
                                            <% }else{ %>
@@ -131,32 +131,32 @@
             </div>
         </div>
         <br>
-         
+
         <div class="row">
             <section class="col-lg-12">
-                <div class="box box-info"> 
-                    <div class="box-header with-border"> 
-                        <%[ search_form %> 
-                            <%= spajs.just.render('search_filed', {guiObj: guiObj}) %> 
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <%[ search_form %>
+                            <%= spajs.just.render('search_filed', {guiObj: guiObj}) %>
                         <%] %>
                         <%* search_form %>
-                        <%[ pagination %> 
+                        <%[ pagination %>
                             <% if(guiObj.getTotalPages()){ %>
                                 <div style="float: right; margin-right: 20px;" class="hidden-xs">
                                     <%= guiObj.paginationHtml() %>
                                 </div>
-                            <% } %> 
+                            <% } %>
                         <%] %>
                         <%* pagination %>
                     </div>
                     <div class="box-body">
-                        <%  if (!guiObj.model.data.results.length){ %>  
-                            <%[ empty_list %> 
+                        <%  if (!guiObj.model.data.results.length){ %>
+                            <%[ empty_list %>
                                     <%= this.partial('items_empty_list', { }) %>
                             <%] %>
                             <%* empty_list %>
-                        <% } else{ %> 
-                            <%[ data_list %> 
+                        <% } else{ %>
+                            <%[ data_list %>
                                 <table class="table table-bordered multiple-select">
                                     <tbody>
                                         <tr>
@@ -165,14 +165,14 @@
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </th>
                                             <% for(var j in guiObj.model.fileds){ %>
-                                                <th 
-                                                    <% if(guiObj.model.fileds[j].style){ %><%= guiObj.model.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %> 
+                                                <th
+                                                    <% if(guiObj.model.fileds[j].style){ %><%= guiObj.model.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
                                                     <% if(guiObj.model.fileds[j].class){ %><%= guiObj.model.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
                                                         <%- guiObj.model.fileds[j].title %>
-                                                </th> 
+                                                </th>
                                             <% } %>
                                             <th style="width: 95px;" >Actions</th>
-                                        </tr> 
+                                        </tr>
                                         <% for(var i in guiObj.model.data.results){ %>
                                             <tr
                                                 class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- guiObj.model.selectedItems.justClass(guiObj.model.data.results[i].id, 'selected') %>"
@@ -193,7 +193,7 @@
                                                             <%= guiObj.model.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], guiObj.model.fileds[j].name, opt]) %>
                                                         <% } %>
                                                     </td>
-                                                <% } %> 
+                                                <% } %>
                                                 <td>
                                                     <div class="btn-group" role="group">
                                                         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -243,7 +243,7 @@
                                                     </div>
                                                 </td>
                                             </tr>
-                                        <% } %> 
+                                        <% } %>
                                     </tbody>
                                 </table>
                             <%] %>
@@ -251,7 +251,7 @@
                         <% } %>
                     </div>
                     <div class="box-footer clearfix">
-                        <%[ action_buttons %> 
+                        <%[ action_buttons %>
                         <div class="btn-group <%- guiObj.model.justNotClass('selectedCount', 'hide') %>" role="group">
                             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Actions on <%= guiObj.model.justText('selectedCount') %> items
@@ -261,11 +261,11 @@
                                 <li>
                                     <a href="#"
                                         onclick="spajs.showLoader(<%- guiObj.model.className %>.deleteRows($('.multiple-select .item-row.selected'))); return false;" >Delete from this page</a>
-                                </li> 
+                                </li>
                                 <li>
                                     <a href="#" onclick="spajs.showLoader(<%- guiObj.model.className %>.deleteSelected()); return false;" >Delete all selected elements</a>
                                 </li>
-                                <% for(var j in guiObj.model.actionsOnSelected){ %> 
+                                <% for(var j in guiObj.model.actionsOnSelected){ %>
                                     <% if(!guiObj.model.actionsOnSelected[j].title){ %>
                                         <li role="separator" class="divider"></li>
                                     <% }else{ %>
@@ -284,16 +284,16 @@
                             </ul>
                         </div>
                         <%] %>
-                        <%* action_buttons %> 
+                        <%* action_buttons %>
 
                         <% if(!query){ %>
-                            <%[ select_buttons %> 
+                            <%[ select_buttons %>
                                 <div class="btn-group" role="group">
                                     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         Select
                                         <span class="caret"></span>
                                     </button>
-                                    <ul class="dropdown-menu">  
+                                    <ul class="dropdown-menu">
                                         <li>
                                             <a href="#" onclick="spajs.showLoader(<%- guiObj.model.className %>.toggleSelectEachItem(true)); return false;" >Select all</a>
                                         </li>
@@ -303,12 +303,12 @@
                                     </ul>
                                 </div>
                             <%] %>
-                            <%* select_buttons %> 
-                        <% } %> 
-                        <%[ pagination %> 
+                            <%* select_buttons %>
+                        <% } %>
+                        <%[ pagination %>
                             <% if(guiObj.getTotalPages()){ %>
                                 <%= guiObj.paginationHtml(guiObj.model.data) %>
-                            <% } %> 
+                            <% } %>
                         <%] %>
                     </div>
                 </div>
@@ -320,52 +320,97 @@
 
 <script type="text/x-just" data-just="entity_one">
 <!-- items_new_page -->
-    
+
     <section class="content">
-         
+        <div class="row">
+            <section class="col-lg-12">
+                <%= new guiElements.button({onclick:function(){guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
+                <%= new guiElements.button({onclick:function(){ deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete this '+guiObj.view.bulk_name, text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
+            </section>
+        </div>
+
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
                         short_title<br>
                     </div>
-                    <div class="box-body"> 
-                        <% for(var i in guiObj.model.fileds){ %>
-                            <div class="row">
-                                <%= i %> = <%= JSON.stringify(guiObj.model.fileds[i]) %>
-                                <br>
-                            </div>
-                        <% } %> 
+                    <div class="box-body">
+                        <div class="row">
+                            <% for(var i in guiObj.model.fileds){ %>
+                                <!-- <%= i %> = <%= JSON.stringify(guiObj.model.fileds[i]) %> -->
+                                <%= guiObj.renderFiled(guiObj.model.fileds[i]) %>
+                            <% } %>
+                        </div>
                     </div>
                 </div>
-            </section> 
+            </section>
         </div>
     </section>
     <!-- /items_new_page -->
 </script>
-                
+
+<!-- Отрисует страницу ошибки загрузки данных -->
+<script type="text/x-just" data-just="error_as_page">
+    <!-- error_as_page --> 
+    <section class="content"> 
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Error renderErrorAsPage<br>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <%- error.status %><br>
+                                <%- error.data.detail %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+<!-- Отрисует объект как паоле в другом объекте -->
+<script type="text/x-just" data-just="entity_one_as_filed">
+    <!-- entity_one_as_filed -->
+
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label"><%- guiObj.view.bulk_name %></label>
+        <div class="form-control disabled" disabled="" maxlength="255">
+            <a href="<%- hostname %>/?<%- guiObj.view.bulk_name %>/<%- guiObj.model.data.id %>" onclick="return spajs.openURL(this.href);">
+                <%- guiObj.model.data.name || guiObj.model.data.username || (guiObj.view.bulk_name + "/"+guiObj.model.data.id) %>
+            </a>
+        </div>
+        <div class="help-block"></div>
+    </div>
+</script>
+
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="items_list">
     <!-- items_list -->
     <section class="content-header">
         <h1>
-            <%- pmObj.model.page_list.title %> 
+            <%- pmObj.model.page_list.title %>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
             <li class="active"><%- pmObj.model.page_list.short_title %></li>
         </ol>
     </section>
- 
-    <section class="content"> 
+
+    <section class="content">
         <div class="row">
             <div class="col-lg-12">
                 <% if(pmObj.model.page_list.buttons){ %>
-                    <% for(var i in  pmObj.model.page_list.buttons){ %>
+                    Кнопки не готовы @todo
+                    <!--<% for(var i in  pmObj.model.page_list.buttons){ %>
                         <% if(pmObj.model.page_list.buttons[i].tpl){ %>
                             <%= pmObj.model.page_list.buttons[i].tpl.apply(pmObj, [opt]) %>
-                        <% }else{ %> 
-                            <a 
+                        <% }else{ %>
+                            <a
                                 class="top-line-btn <% if(typeof pmObj.model.page_list.buttons[i].class == 'function'){ %>
                                             <%- pmObj.model.page_list.buttons[i].class.apply(pmObj, [opt]) %>
                                        <% }else{ %>
@@ -385,27 +430,27 @@
                                     <% } %>
                             </a>
                         <% } %>
-                    <% } %>
+                    <% } %>-->
                 <% } %>
             </div>
         </div>
         <br>
-         
+
         <div class="row">
             <section class="col-lg-12">
-                <div class="box box-info"> 
-                    <div class="box-header with-border"> 
-                        <%= pmObj.searchFiled({query:query}) %> 
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <%= pmObj.searchFiled({query:query}) %>
                         <% if(pmObj.getTotalPages(pmObj.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
                                 <%= pmObj.paginationHtml(pmObj.model.itemslist) %>
                             </div>
-                        <% } %> 
+                        <% } %>
                     </div>
                     <div class="box-body">
-                        <% if (!pmObj.model.itemslist.results.length){ %>  
+                        <% if (!pmObj.model.itemslist.results.length){ %>
                             <%= this.partial('items_empty_list', { }) %>
-                        <% } else{ %> 
+                        <% } else{ %>
                             <table class="table table-bordered multiple-select">
                                 <tbody>
                                     <tr>
@@ -414,14 +459,14 @@
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </th>
                                         <% for(var j in pmObj.model.page_list.fileds){ %>
-                                            <th 
-                                                <% if(pmObj.model.page_list.fileds[j].style){ %><%= pmObj.model.page_list.fileds[j].style.apply(pmObj,[undefined, opt]) %><% } %> 
+                                            <th
+                                                <% if(pmObj.model.page_list.fileds[j].style){ %><%= pmObj.model.page_list.fileds[j].style.apply(pmObj,[undefined, opt]) %><% } %>
                                                 <% if(pmObj.model.page_list.fileds[j].class){ %><%= pmObj.model.page_list.fileds[j].class.apply(pmObj,[undefined, opt]) %><% } %>  >
                                                     <%- pmObj.model.page_list.fileds[j].title %>
-                                            </th> 
+                                            </th>
                                         <% } %>
                                         <th style="width: 95px;" >Actions</th>
-                                    </tr> 
+                                    </tr>
                                     <% for(var i in pmObj.model.itemslist.results){ %>
                                         <tr
                                             class="item-row item-<%- pmObj.model.itemslist.results[i].id %>  <%- pmObj.model.selectedItems.justClass(pmObj.model.itemslist.results[i].id, 'selected') %>"
@@ -442,7 +487,7 @@
                                                         <%= pmObj.model.page_list.fileds[j].value.apply(pmObj, [pmObj.model.itemslist.results[i], pmObj.model.page_list.fileds[j].name, opt]) %>
                                                     <% } %>
                                                 </td>
-                                            <% } %> 
+                                            <% } %>
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -493,7 +538,7 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    <% } %> 
+                                    <% } %>
                                 </tbody>
                             </table>
                         <% } %>
@@ -508,11 +553,11 @@
                                 <li>
                                     <a href="#"
                                         onclick="spajs.showLoader(<%- pmObj.model.className %>.deleteRows($('.multiple-select .item-row.selected'))); return false;" >Delete from this page</a>
-                                </li> 
+                                </li>
                                 <li>
                                     <a href="#" onclick="spajs.showLoader(<%- pmObj.model.className %>.deleteSelected()); return false;" >Delete all selected elements</a>
                                 </li>
-                                <% for(var j in pmObj.model.page_list.actionsOnSelected){ %> 
+                                <% for(var j in pmObj.model.page_list.actionsOnSelected){ %>
                                     <% if(!pmObj.model.page_list.actionsOnSelected[j].title){ %>
                                         <li role="separator" class="divider"></li>
                                     <% }else{ %>
@@ -537,7 +582,7 @@
                                     Select
                                     <span class="caret"></span>
                                 </button>
-                                <ul class="dropdown-menu">  
+                                <ul class="dropdown-menu">
                                     <li>
                                         <a href="#" onclick="spajs.showLoader(<%- pmObj.model.className %>.toggleSelectEachItem(true)); return false;" >Select all</a>
                                     </li>
@@ -626,7 +671,7 @@
         <br>
 
         <div class="row">
-            <section class="col-lg-12">  
+            <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
                         <%= pmObj.searchFiled({query:query, parent_type: opt.parent_type, parent_item: opt.parent_item}) %>
@@ -640,9 +685,9 @@
                         <% } %>
                     </div>
                     <div class="box-body">
-                        <% if (!pmObj.model.itemslistForParent.results.length){ %>  
+                        <% if (!pmObj.model.itemslistForParent.results.length){ %>
                             <%= this.partial('items_empty_list', { }) %>
-                        <% } else{ %> 
+                        <% } else{ %>
                             <table class="table table-bordered multiple-select">
                                 <tbody>
                                     <tr>
@@ -782,7 +827,7 @@
                                 <%= pmObj.paginationHtml(pmObj.model.itemslistForParent) %>
                         <% } %>
                     </div>
-                </div> 
+                </div>
             </section>
         </div>
     </section>
@@ -850,8 +895,8 @@
                     <% for(var i in  pmObj.model.page_new.buttons){ %>
                         <% if(pmObj.model.page_new.buttons[i].tpl){ %>
                             <%= pmObj.model.page_new.buttons[i].tpl.apply(pmObj, [opt]) %>
-                        <% }else{ %> 
-                            <a 
+                        <% }else{ %>
+                            <a
                                 class="top-line-btn <% if(typeof pmObj.model.page_new.buttons[i].title == 'function'){ %>
                                             <%- pmObj.model.page_new.buttons[i].class.apply(pmObj, [opt]) %>
                                        <% }else{ %>
@@ -878,14 +923,14 @@
                     <div class="box-header with-border">
                         <%- pmObj.model.page_new.short_title %><br>
                     </div>
-                    <div class="box-body"> 
+                    <div class="box-body">
                         <% for(var i in pmObj.model.page_new.fileds){ %>
                             <div class="row">
                                 <% for(var j in pmObj.model.page_new.fileds[i]){ var filed = pmObj.model.page_new.fileds[i][j]; %>
                                         <%= filed.filed.render(pmObj, filed) %>
                                 <% } %>
                             </div>
-                        <% } %> 
+                        <% } %>
                     </div>
                 </div>
             </section>
@@ -900,12 +945,12 @@
 </script>
 
 <!-- Страница сущьности -->
-<script type="text/x-just" data-just="items_page"> 
-    
+<script type="text/x-just" data-just="items_page">
+
     <!-- items_page -->
     <section class="content-header">
         <h1>
-            <a href="<% if(pmObj.model.page_item.back_link){ %><%- pmObj.model.page_item.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- pmObj.model.name %><% } %>" 
+            <a href="<% if(pmObj.model.page_item.back_link){ %><%- pmObj.model.page_item.back_link.apply(pmObj, [item_id, opt]) %><% }else{ %><%- polemarch.opt.host %>/?<%- pmObj.model.name %><% } %>"
                 onclick="return spajs.openURL(this.href);" class="btn btn-default" >
                 <span class="glyphicon glyphicon-arrow-left"></span>
             </a>
@@ -927,8 +972,8 @@
                     <% for(var i in  pmObj.model.page_item.buttons){ %>
                         <% if(pmObj.model.page_item.buttons[i].tpl){ %>
                             <%= pmObj.model.page_item.buttons[i].tpl.apply(pmObj, [item_id, opt]) %>
-                        <% }else{ %> 
-                            <a 
+                        <% }else{ %>
+                            <a
                                 class="top-line-btn <% if(typeof pmObj.model.page_item.buttons[i].class == 'function'){ %>
                                             <%- pmObj.model.page_item.buttons[i].class.apply(pmObj, [item_id, opt]) %>
                                        <% }else{ %>
@@ -953,7 +998,7 @@
             </div>
         </div>
         <br>
-        
+
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -962,14 +1007,14 @@
                         <div class="box-tools pull-right">
                         </div>
                     </div>
-                    <div class="box-body"> 
+                    <div class="box-body">
                         <% for(var i in pmObj.model.page_item.fileds){ %>
                             <div class="row">
                                 <% for(var j in pmObj.model.page_item.fileds[i]){ var filed = pmObj.model.page_item.fileds[i][j]; %>
                                         <%= filed.filed.render(pmObj, filed, item_id, opt) %>
                                 <% } %>
                             </div>
-                        <% } %>  
+                        <% } %>
                     </div>
                 </div>
             </section>
