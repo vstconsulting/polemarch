@@ -121,6 +121,8 @@ class _Base(object):
 
 class _ArchiveRepo(_Base):
     def make_clone(self, options):
+        if os.path.exists(self.path):
+            shutil.rmtree(self.path)
         os.mkdir(self.path)
         archive = self._download(self.proj.repository, options)
         self._extract(archive, self.path, options)

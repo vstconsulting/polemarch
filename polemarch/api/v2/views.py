@@ -419,10 +419,7 @@ class ProjectViewSet(_GroupMixin):
         '''
         return self.get_serializer(self.get_object()).sync().resp
 
-    @deco.action(
-        ["post"], url_path="execute-playbook", detail=yes,
-        serializer_class=sers.AnsiblePlaybookSerializer
-    )
+    @deco.action(["post"], detail=yes, serializer_class=sers.AnsiblePlaybookSerializer)
     def execute_playbook(self, request, *args, **kwargs):
         '''
         Execute `ansible-playbook` with arguments.
@@ -430,10 +427,7 @@ class ProjectViewSet(_GroupMixin):
         serializer = self.get_serializer(self.get_object())
         return serializer.execute_playbook(request).resp
 
-    @deco.action(
-        ["post"], url_path="execute-module", detail=yes,
-        serializer_class=sers.AnsibleModuleSerializer
-    )
+    @deco.action(["post"], detail=yes, serializer_class=sers.AnsibleModuleSerializer)
     def execute_module(self, request, *args, **kwargs):
         '''
         Execute `ansible -m [module]` with arguments.

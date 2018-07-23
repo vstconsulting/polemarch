@@ -391,12 +391,7 @@ paths:
     get:
       operationId: group_group_get
       description: ''
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -429,11 +424,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -466,11 +456,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -497,12 +482,7 @@ paths:
     delete:
       operationId: group_group_remove
       description: ''
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -528,7 +508,8 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this group.
@@ -538,12 +519,7 @@ paths:
     get:
       operationId: group_group_variables_get
       description: ''
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -576,11 +552,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -608,7 +579,8 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this group.
@@ -618,17 +590,7 @@ paths:
     get:
       operationId: group_group_variables_get
       description: ''
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -661,16 +623,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -703,16 +655,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -739,17 +681,7 @@ paths:
     delete:
       operationId: group_group_variables_remove
       description: ''
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -775,7 +707,8 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this group.
@@ -784,7 +717,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /group/{pk}/host/:
     get:
       operationId: group_host_get
@@ -913,12 +848,7 @@ paths:
     get:
       operationId: group_host_get
       description: ''
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -951,11 +881,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -988,11 +913,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -1019,12 +939,7 @@ paths:
     delete:
       operationId: group_host_remove
       description: ''
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -1050,7 +965,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this group.
@@ -1066,11 +982,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SetOwner'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -1098,7 +1009,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this group.
@@ -1108,12 +1020,7 @@ paths:
     get:
       operationId: group_host_variables_get
       description: ''
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -1146,11 +1053,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -1178,7 +1080,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this group.
@@ -1188,17 +1091,7 @@ paths:
     get:
       operationId: group_host_variables_get
       description: ''
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -1231,16 +1124,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -1273,16 +1156,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -1309,17 +1182,7 @@ paths:
     delete:
       operationId: group_host_variables_remove
       description: ''
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -1345,7 +1208,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this group.
@@ -1354,7 +1218,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /group/{pk}/set_owner/:
     post:
       operationId: group_set_owner
@@ -1522,12 +1388,7 @@ paths:
     get:
       operationId: group_variables_get
       description: ''
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -1560,11 +1421,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -1597,11 +1453,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -1628,12 +1479,7 @@ paths:
     delete:
       operationId: group_variables_remove
       description: ''
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -1664,7 +1510,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /history/:
     get:
       operationId: history_list
@@ -1973,178 +1821,6 @@ paths:
           description: Action accepted.
           schema:
             $ref: '#/definitions/Data'
-        '400':
-          description: Validation error or some data error.
-          schema:
-            $ref: '#/definitions/Error'
-        '404':
-          description: Not found error.
-          schema:
-            $ref: '#/definitions/Error'
-        '403':
-          description: Permission denied error.
-          schema:
-            $ref: '#/definitions/Error'
-        '401':
-          description: Unauthorized access error.
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-        - history
-    parameters:
-      - name: pk
-        in: path
-        description: A unique integer value identifying this history.
-        required: true
-        type: integer
-  /history/{pk}/lines/:
-    get:
-      operationId: history_lines_list
-      description: Executions history.
-      parameters:
-        - name: id
-          in: query
-          description: A unique integer value (or comma separated list) identifying
-            this instance.
-          required: false
-          type: string
-        - name: mode
-          in: query
-          description: ''
-          required: false
-          type: string
-        - name: kind
-          in: query
-          description: ''
-          required: false
-          type: string
-        - name: project
-          in: query
-          description: ''
-          required: false
-          type: string
-        - name: status
-          in: query
-          description: ''
-          required: false
-          type: string
-        - name: inventory
-          in: query
-          description: ''
-          required: false
-          type: string
-        - name: start_time
-          in: query
-          description: ''
-          required: false
-          type: string
-        - name: stop_time
-          in: query
-          description: ''
-          required: false
-          type: string
-        - name: initiator
-          in: query
-          description: ''
-          required: false
-          type: number
-        - name: initiator_type
-          in: query
-          description: ''
-          required: false
-          type: string
-        - name: id__not
-          in: query
-          description: A unique integer value (or comma separated list) identifying
-            this instance.
-          required: false
-          type: string
-        - name: name__not
-          in: query
-          description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: name
-          in: query
-          description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: start_time__gt
-          in: query
-          description: Start time to search.
-          required: false
-          type: string
-        - name: stop_time__gt
-          in: query
-          description: Stop time to search.
-          required: false
-          type: string
-        - name: start_time__lt
-          in: query
-          description: Start time to search.
-          required: false
-          type: string
-        - name: stop_time__lt
-          in: query
-          description: Stop time to search.
-          required: false
-          type: string
-        - name: start_time__gte
-          in: query
-          description: Start time to search.
-          required: false
-          type: string
-        - name: stop_time__gte
-          in: query
-          description: Stop time to search.
-          required: false
-          type: string
-        - name: start_time__lte
-          in: query
-          description: Start time to search.
-          required: false
-          type: string
-        - name: stop_time__lte
-          in: query
-          description: Stop time to search.
-          required: false
-          type: string
-        - name: ordering
-          in: query
-          description: Which field to use when ordering the results.
-          required: false
-          type: string
-        - name: limit
-          in: query
-          description: Number of results to return per page.
-          required: false
-          type: integer
-        - name: offset
-          in: query
-          description: The initial index from which to return the results.
-          required: false
-          type: integer
-      responses:
-        '200':
-          description: Action accepted.
-          schema:
-            required:
-              - count
-              - results
-            type: object
-            properties:
-              count:
-                type: integer
-              next:
-                type: string
-                format: uri
-              previous:
-                type: string
-                format: uri
-              results:
-                type: array
-                items:
-                  $ref: '#/definitions/HistoryLines'
         '400':
           description: Validation error or some data error.
           schema:
@@ -2830,12 +2506,7 @@ paths:
     get:
       operationId: host_variables_get
       description: Polemarch hosts.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -2868,11 +2539,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -2905,11 +2571,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -2936,12 +2597,7 @@ paths:
     delete:
       operationId: host_variables_remove
       description: Polemarch hosts.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -2972,7 +2628,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /inventory/:
     get:
       operationId: inventory_list
@@ -3311,12 +2969,7 @@ paths:
     get:
       operationId: inventory_all_groups_detail
       description: Polemarch inventories.
-      parameters:
-        - name: all_groups_id
-          in: path
-          description: A unique integer value identifying all_groups.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -3446,12 +3099,7 @@ paths:
     get:
       operationId: inventory_all_hosts_detail
       description: Polemarch inventories.
-      parameters:
-        - name: all_hosts_id
-          in: path
-          description: A unique integer value identifying all_hosts.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -3613,12 +3261,7 @@ paths:
     get:
       operationId: inventory_group_get
       description: Polemarch inventories.
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -3651,11 +3294,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -3688,11 +3326,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -3719,12 +3352,7 @@ paths:
     delete:
       operationId: inventory_group_remove
       description: Polemarch inventories.
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -3750,7 +3378,8 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this inventory.
@@ -3760,12 +3389,7 @@ paths:
     get:
       operationId: inventory_group_variables_get
       description: Polemarch inventories.
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -3798,11 +3422,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -3830,7 +3449,8 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this inventory.
@@ -3840,17 +3460,7 @@ paths:
     get:
       operationId: inventory_group_variables_get
       description: Polemarch inventories.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -3883,16 +3493,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -3925,16 +3525,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -3961,17 +3551,7 @@ paths:
     delete:
       operationId: inventory_group_variables_remove
       description: Polemarch inventories.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -3997,7 +3577,8 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this inventory.
@@ -4006,7 +3587,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /inventory/{pk}/host/:
     get:
       operationId: inventory_host_get
@@ -4135,12 +3718,7 @@ paths:
     get:
       operationId: inventory_host_get
       description: Polemarch inventories.
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -4173,11 +3751,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -4210,11 +3783,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -4241,12 +3809,7 @@ paths:
     delete:
       operationId: inventory_host_remove
       description: Polemarch inventories.
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -4272,7 +3835,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this inventory.
@@ -4288,11 +3852,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SetOwner'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -4320,7 +3879,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this inventory.
@@ -4330,12 +3890,7 @@ paths:
     get:
       operationId: inventory_host_variables_get
       description: Polemarch inventories.
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -4368,11 +3923,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -4400,7 +3950,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this inventory.
@@ -4410,17 +3961,7 @@ paths:
     get:
       operationId: inventory_host_variables_get
       description: Polemarch inventories.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -4453,16 +3994,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -4495,16 +4026,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -4531,17 +4052,7 @@ paths:
     delete:
       operationId: inventory_host_variables_remove
       description: Polemarch inventories.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -4567,7 +4078,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this inventory.
@@ -4576,7 +4088,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /inventory/{pk}/set_owner/:
     post:
       operationId: inventory_set_owner
@@ -4744,12 +4258,7 @@ paths:
     get:
       operationId: inventory_variables_get
       description: Polemarch inventories.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -4782,11 +4291,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -4819,11 +4323,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -4850,12 +4349,7 @@ paths:
     delete:
       operationId: inventory_variables_remove
       description: Polemarch inventories.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -4886,7 +4380,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /project/:
     get:
       operationId: project_list
@@ -5139,7 +4635,7 @@ paths:
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/execute-module/:
+  /project/{pk}/execute_module/:
     post:
       operationId: project_execute_module
       description: Execute ansible module.
@@ -5178,7 +4674,7 @@ paths:
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/execute-playbook/:
+  /project/{pk}/execute_playbook/:
     post:
       operationId: project_execute_playbook
       description: Execute ansible module.
@@ -5355,12 +4851,7 @@ paths:
     get:
       operationId: project_group_get
       description: Polemarch projects.
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -5393,11 +4884,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -5430,11 +4916,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -5461,12 +4942,7 @@ paths:
     delete:
       operationId: project_group_remove
       description: Polemarch projects.
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -5492,7 +4968,8 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -5502,12 +4979,7 @@ paths:
     get:
       operationId: project_group_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -5540,11 +5012,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -5572,7 +5039,8 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -5582,17 +5050,7 @@ paths:
     get:
       operationId: project_group_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -5625,16 +5083,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -5667,16 +5115,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -5703,17 +5141,7 @@ paths:
     delete:
       operationId: project_group_variables_remove
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -5739,7 +5167,8 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -5748,7 +5177,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /project/{pk}/history/:
     get:
       operationId: project_history_get
@@ -5887,12 +5318,7 @@ paths:
     get:
       operationId: project_history_get
       description: Polemarch projects.
-      parameters:
-        - name: history_id
-          in: path
-          description: A unique integer value identifying history.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -5925,11 +5351,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHistory'
-        - name: history_id
-          in: path
-          description: A unique integer value identifying history.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -5962,11 +5383,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHistory'
-        - name: history_id
-          in: path
-          description: A unique integer value identifying history.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -5993,12 +5409,7 @@ paths:
     delete:
       operationId: project_history_remove
       description: Polemarch projects.
-      parameters:
-        - name: history_id
-          in: path
-          description: A unique integer value identifying history.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -6024,7 +5435,8 @@ paths:
       - name: history_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this history sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -6040,11 +5452,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Data'
-        - name: history_id
-          in: path
-          description: A unique integer value identifying history.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -6072,7 +5479,8 @@ paths:
       - name: history_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this history sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -6082,12 +5490,7 @@ paths:
     delete:
       operationId: project_history_clear
       description: Polemarch projects.
-      parameters:
-        - name: history_id
-          in: path
-          description: A unique integer value identifying history.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -6113,7 +5516,8 @@ paths:
       - name: history_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this history sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -6123,12 +5527,7 @@ paths:
     get:
       operationId: project_history_facts
       description: Polemarch projects.
-      parameters:
-        - name: history_id
-          in: path
-          description: A unique integer value identifying history.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -6156,7 +5555,8 @@ paths:
       - name: history_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this history sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -6166,12 +5566,7 @@ paths:
     get:
       operationId: project_history_lines_list
       description: Polemarch projects.
-      parameters:
-        - name: history_id
-          in: path
-          description: A unique integer value identifying history.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -6199,7 +5594,8 @@ paths:
       - name: history_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this history sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -6209,12 +5605,7 @@ paths:
     get:
       operationId: project_history_raw
       description: Polemarch projects.
-      parameters:
-        - name: history_id
-          in: path
-          description: A unique integer value identifying history.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -6242,7 +5633,8 @@ paths:
       - name: history_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this history sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -6386,12 +5778,7 @@ paths:
     get:
       operationId: project_host_get
       description: Polemarch projects.
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -6424,11 +5811,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -6461,11 +5843,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -6492,12 +5869,7 @@ paths:
     delete:
       operationId: project_host_remove
       description: Polemarch projects.
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -6523,7 +5895,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -6539,11 +5912,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SetOwner'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -6571,7 +5939,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -6581,12 +5950,7 @@ paths:
     get:
       operationId: project_host_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -6619,11 +5983,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -6651,7 +6010,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -6661,17 +6021,7 @@ paths:
     get:
       operationId: project_host_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -6704,16 +6054,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -6746,16 +6086,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -6782,17 +6112,7 @@ paths:
     delete:
       operationId: project_host_variables_remove
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -6818,7 +6138,8 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -6827,7 +6148,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /project/{pk}/inventory/:
     get:
       operationId: project_inventory_get
@@ -6966,12 +6289,7 @@ paths:
     get:
       operationId: project_inventory_get
       description: Polemarch projects.
-      parameters:
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -7004,11 +6322,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneInventory'
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -7041,11 +6354,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneInventory'
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -7072,12 +6380,7 @@ paths:
     delete:
       operationId: project_inventory_remove
       description: Polemarch projects.
-      parameters:
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -7103,7 +6406,9 @@ paths:
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -7113,12 +6418,7 @@ paths:
     get:
       operationId: project_inventory_all_groups_list
       description: Polemarch projects.
-      parameters:
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -7146,7 +6446,9 @@ paths:
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -7156,17 +6458,7 @@ paths:
     get:
       operationId: project_inventory_all_groups_detail
       description: Polemarch projects.
-      parameters:
-        - name: all_groups_id
-          in: path
-          description: A unique integer value identifying all_groups.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -7198,7 +6490,9 @@ paths:
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -7208,12 +6502,7 @@ paths:
     get:
       operationId: project_inventory_all_hosts_list
       description: Polemarch projects.
-      parameters:
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -7241,7 +6530,9 @@ paths:
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -7251,17 +6542,7 @@ paths:
     get:
       operationId: project_inventory_all_hosts_detail
       description: Polemarch projects.
-      parameters:
-        - name: all_hosts_id
-          in: path
-          description: A unique integer value identifying all_hosts.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -7293,7 +6574,9 @@ paths:
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -7303,12 +6586,7 @@ paths:
     get:
       operationId: project_inventory_group_get
       description: Polemarch projects.
-      parameters:
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -7341,11 +6619,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Group'
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -7373,7 +6646,9 @@ paths:
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -7383,17 +6658,7 @@ paths:
     get:
       operationId: project_inventory_group_get
       description: Polemarch projects.
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -7426,16 +6691,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -7468,16 +6723,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneGroup'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -7504,17 +6749,7 @@ paths:
     delete:
       operationId: project_inventory_group_remove
       description: Polemarch projects.
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -7540,11 +6775,14 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -7554,17 +6792,7 @@ paths:
     get:
       operationId: project_inventory_group_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -7597,16 +6825,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -7634,11 +6852,14 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -7648,22 +6869,7 @@ paths:
     get:
       operationId: project_inventory_group_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -7696,21 +6902,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -7743,21 +6934,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -7784,22 +6960,7 @@ paths:
     delete:
       operationId: project_inventory_group_variables_remove
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: group_id
-          in: path
-          description: A unique integer value identifying group.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -7825,11 +6986,14 @@ paths:
       - name: group_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -7838,17 +7002,14 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /project/{pk}/inventory/{inventory_id}/host/:
     get:
       operationId: project_inventory_host_get
       description: Polemarch projects.
-      parameters:
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -7881,11 +7042,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Host'
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -7913,7 +7069,9 @@ paths:
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -7923,17 +7081,7 @@ paths:
     get:
       operationId: project_inventory_host_get
       description: Polemarch projects.
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -7966,16 +7114,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -8008,16 +7146,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneHost'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -8044,17 +7172,7 @@ paths:
     delete:
       operationId: project_inventory_host_remove
       description: Polemarch projects.
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -8080,11 +7198,14 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -8100,16 +7221,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SetOwner'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -8137,11 +7248,14 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -8151,17 +7265,7 @@ paths:
     get:
       operationId: project_inventory_host_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -8194,16 +7298,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -8231,11 +7325,14 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -8245,22 +7342,7 @@ paths:
     get:
       operationId: project_inventory_host_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -8293,21 +7375,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -8340,21 +7407,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -8381,22 +7433,7 @@ paths:
     delete:
       operationId: project_inventory_host_variables_remove
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: host_id
-          in: path
-          description: A unique integer value identifying host.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -8422,11 +7459,14 @@ paths:
       - name: host_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -8435,7 +7475,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /project/{pk}/inventory/{inventory_id}/set_owner/:
     post:
       operationId: project_inventory_set_owner
@@ -8446,11 +7488,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SetOwner'
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -8478,7 +7515,9 @@ paths:
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -8488,12 +7527,7 @@ paths:
     get:
       operationId: project_inventory_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -8526,11 +7560,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -8558,7 +7587,9 @@ paths:
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -8568,17 +7599,7 @@ paths:
     get:
       operationId: project_inventory_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -8611,16 +7632,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -8653,16 +7664,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -8689,17 +7690,7 @@ paths:
     delete:
       operationId: project_inventory_variables_remove
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: inventory_id
-          in: path
-          description: A unique integer value identifying inventory.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -8725,7 +7716,9 @@ paths:
       - name: inventory_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -8734,7 +7727,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /project/{pk}/module/:
     get:
       operationId: project_module_list
@@ -8841,12 +7836,7 @@ paths:
     get:
       operationId: project_module_detail
       description: Polemarch projects.
-      parameters:
-        - name: module_id
-          in: path
-          description: A unique integer value identifying module.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -9018,12 +8008,7 @@ paths:
     get:
       operationId: project_periodic_task_get
       description: Polemarch projects.
-      parameters:
-        - name: periodic_task_id
-          in: path
-          description: A unique integer value identifying periodic_task.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -9056,11 +8041,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OnePeriodictask'
-        - name: periodic_task_id
-          in: path
-          description: A unique integer value identifying periodic_task.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -9093,11 +8073,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OnePeriodictask'
-        - name: periodic_task_id
-          in: path
-          description: A unique integer value identifying periodic_task.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -9124,12 +8099,7 @@ paths:
     delete:
       operationId: project_periodic_task_remove
       description: Polemarch projects.
-      parameters:
-        - name: periodic_task_id
-          in: path
-          description: A unique integer value identifying periodic_task.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -9155,7 +8125,9 @@ paths:
       - name: periodic_task_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this periodic_task
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -9171,11 +8143,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Periodictask'
-        - name: periodic_task_id
-          in: path
-          description: A unique integer value identifying periodic_task.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -9203,7 +8170,9 @@ paths:
       - name: periodic_task_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this periodic_task
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -9213,12 +8182,7 @@ paths:
     get:
       operationId: project_periodic_task_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: periodic_task_id
-          in: path
-          description: A unique integer value identifying periodic_task.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -9251,11 +8215,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: periodic_task_id
-          in: path
-          description: A unique integer value identifying periodic_task.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -9283,7 +8242,9 @@ paths:
       - name: periodic_task_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this periodic_task
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -9293,17 +8254,7 @@ paths:
     get:
       operationId: project_periodic_task_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: periodic_task_id
-          in: path
-          description: A unique integer value identifying periodic_task.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -9336,16 +8287,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: periodic_task_id
-          in: path
-          description: A unique integer value identifying periodic_task.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -9378,16 +8319,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Variable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: periodic_task_id
-          in: path
-          description: A unique integer value identifying periodic_task.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -9414,17 +8345,7 @@ paths:
     delete:
       operationId: project_periodic_task_variables_remove
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
-        - name: periodic_task_id
-          in: path
-          description: A unique integer value identifying periodic_task.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -9450,7 +8371,9 @@ paths:
       - name: periodic_task_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this periodic_task
+          sublist.
       - name: pk
         in: path
         description: A unique integer value identifying this project.
@@ -9459,7 +8382,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /project/{pk}/playbook/:
     get:
       operationId: project_playbook_list
@@ -9566,12 +8491,7 @@ paths:
     get:
       operationId: project_playbook_detail
       description: Polemarch projects.
-      parameters:
-        - name: playbook_id
-          in: path
-          description: A unique integer value identifying playbook.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -9604,7 +8524,9 @@ paths:
       - name: playbook_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this playbook
+          sublist.
   /project/{pk}/set_owner/:
     post:
       operationId: project_set_owner
@@ -9821,12 +8743,7 @@ paths:
     get:
       operationId: project_template_get
       description: Polemarch projects.
-      parameters:
-        - name: template_id
-          in: path
-          description: A unique integer value identifying template.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -9859,11 +8776,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneTemplate'
-        - name: template_id
-          in: path
-          description: A unique integer value identifying template.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -9896,11 +8808,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneTemplate'
-        - name: template_id
-          in: path
-          description: A unique integer value identifying template.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -9927,12 +8834,7 @@ paths:
     delete:
       operationId: project_template_remove
       description: Polemarch projects.
-      parameters:
-        - name: template_id
-          in: path
-          description: A unique integer value identifying template.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -9963,7 +8865,9 @@ paths:
       - name: template_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this template
+          sublist.
   /project/{pk}/template/{template_id}/execute/:
     post:
       operationId: project_template_execute
@@ -9974,11 +8878,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/TemplateExec'
-        - name: template_id
-          in: path
-          description: A unique integer value identifying template.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -10011,7 +8910,9 @@ paths:
       - name: template_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this template
+          sublist.
   /project/{pk}/variables/:
     get:
       operationId: project_variables_get
@@ -10150,12 +9051,7 @@ paths:
     get:
       operationId: project_variables_get
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -10188,11 +9084,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ProjectVariable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -10225,11 +9116,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ProjectVariable'
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -10256,12 +9142,7 @@ paths:
     delete:
       operationId: project_variables_remove
       description: Polemarch projects.
-      parameters:
-        - name: variables_id
-          in: path
-          description: A unique integer value identifying variables.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -10292,7 +9173,9 @@ paths:
       - name: variables_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /team/:
     get:
       operationId: team_list
@@ -10692,12 +9575,7 @@ paths:
     get:
       operationId: team_user_get
       description: Polemarch user groups.
-      parameters:
-        - name: user_id
-          in: path
-          description: A unique integer value identifying user.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -10730,11 +9608,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneOwner'
-        - name: user_id
-          in: path
-          description: A unique integer value identifying user.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -10767,11 +9640,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/OneOwner'
-        - name: user_id
-          in: path
-          description: A unique integer value identifying user.
-          required: true
-          type: integer
       responses:
         '200':
           description: Action accepted.
@@ -10798,12 +9666,7 @@ paths:
     delete:
       operationId: team_user_remove
       description: Polemarch user groups.
-      parameters:
-        - name: user_id
-          in: path
-          description: A unique integer value identifying user.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -10834,17 +9697,13 @@ paths:
       - name: user_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this users sublist.
   /team/{pk}/user/{user_id}/settings/:
     get:
       operationId: team_user_settings_get
       description: Polemarch user groups.
-      parameters:
-        - name: user_id
-          in: path
-          description: A unique integer value identifying user.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '200':
           description: Action accepted.
@@ -10877,11 +9736,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Data'
-        - name: user_id
-          in: path
-          description: A unique integer value identifying user.
-          required: true
-          type: integer
       responses:
         '201':
           description: Action accepted.
@@ -10908,12 +9762,7 @@ paths:
     delete:
       operationId: team_user_settings_remove
       description: Polemarch user groups.
-      parameters:
-        - name: user_id
-          in: path
-          description: A unique integer value identifying user.
-          required: true
-          type: integer
+      parameters: []
       responses:
         '204':
           description: Action accepted.
@@ -10944,7 +9793,8 @@ paths:
       - name: user_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this users sublist.
   /user/:
     get:
       operationId: user_list
@@ -11598,20 +10448,6 @@ definitions:
   Data:
     type: object
     properties: {}
-  HistoryLines:
-    type: object
-    properties:
-      line_number:
-        title: Line number
-        type: integer
-      line_gnumber:
-        title: Line gnumber
-        type: integer
-      line:
-        title: Line
-        type: string
-        maxLength: 2048
-        minLength: 1
   Hook:
     required:
       - type
@@ -11631,20 +10467,20 @@ definitions:
         title: Type
         type: string
         enum:
-          - HTTP
           - SCRIPT
+          - HTTP
       when:
         title: When
         type: string
         enum:
-          - on_user_upd
           - on_execution
-          - on_object_add
           - after_execution
+          - on_object_add
           - on_user_add
           - on_object_del
-          - on_user_del
           - on_object_upd
+          - on_user_del
+          - on_user_upd
       enable:
         title: Enable
         type: boolean
@@ -11778,157 +10614,11 @@ definitions:
         format: autocomplete
         enum:
           $ref: '#/definitions/Module'
-      sftp_extra_args:
-        title: Sftp extra args
-        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
-        type: string
-        minLength: 1
-      ssh_common_args:
-        title: Ssh common args
-        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
-        type: string
-        minLength: 1
-      key_file:
-        title: Key file
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
-        type: boolean
-        default: false
-      timeout:
-        title: Timeout
-        description: override the connection timeout in seconds (default=10)
-        type: integer
-      connection:
-        title: Connection
-        description: connection type to use (default=smart)
-        type: string
-        minLength: 1
-      group:
-        title: Group
-        type: string
-        minLength: 1
-      vault_password_file:
-        title: Vault password file
-        description: vault password file
-        type: string
-        format: secretfile
-      su:
-        title: Su
-        description: run operations with su (deprecated, use become)
-        type: boolean
-        default: false
-      playbook_dir:
-        title: Playbook dir
-        description: Since this tool does not use playbooks, use this as a subsitute
-          playbook directory.This sets the relative path for many features including
-          roles/ group_vars/ etc.
-        type: string
-        minLength: 1
-      ssh_extra_args:
-        title: Ssh extra args
-        description: specify extra arguments to pass to ssh only (e.g. -R)
-        type: string
-        minLength: 1
-      private_key:
-        title: Private key
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      one_line:
-        title: One line
-        description: condense output
-        type: boolean
-        default: false
-      become_user:
-        title: Become user
-        description: run operations as this user (default=root)
-        type: string
-        minLength: 1
-      poll:
-        title: Poll
-        description: set the poll interval if using -B (default=15)
-        type: integer
-      forks:
-        title: Forks
-        description: specify number of parallel processes to use (default=5)
-        type: integer
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
-          '/usr/share/ansible/plugins/modules'])
-        type: string
-        minLength: 1
-      user:
-        title: User
-        description: connect as this user (default=None)
-        type: string
-        minLength: 1
-      help:
-        title: Help
-        description: show this help message and exit
-        type: boolean
-        default: false
       vault_id:
         title: Vault id
         description: the vault identity to use
         type: string
         minLength: 1
-      scp_extra_args:
-        title: Scp extra args
-        description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
-        minLength: 1
-      limit:
-        title: Limit
-        description: further limit selected hosts to an additional pattern
-        type: string
-        minLength: 1
-      diff:
-        title: Diff
-        description: when changing (small) files and templates, show the differences
-          in those files; works great with --check
-        type: boolean
-        default: false
-      list_hosts:
-        title: List hosts
-        description: outputs a list of matching hosts; does not execute anything else
-        type: boolean
-        default: false
-      sudo:
-        title: Sudo
-        description: run operations with sudo (nopasswd) (deprecated, use become)
-        type: boolean
-        default: false
-      su_user:
-        title: Su user
-        description: run operations with su as this user (default=None) (deprecated,
-          use become)
-        type: string
-        minLength: 1
-      background:
-        title: Background
-        description: run asynchronously, failing after X seconds (default=N/A)
-        type: integer
-      check:
-        title: Check
-        description: don't make any changes; instead, try to predict some of the changes
-          that may occur
-        type: boolean
-        default: false
-      sudo_user:
-        title: Sudo user
-        description: desired sudo user (default=root) (deprecated, use become)
-        type: string
-        minLength: 1
-      become:
-        title: Become
-        description: run operations with become (does not imply password prompting)
-        type: boolean
-        default: false
       become_method:
         title: Become method
         description: 'privilege escalation method to use (default=sudo), valid choices:
@@ -11936,9 +10626,33 @@ definitions:
           | machinectl ]'
         type: string
         minLength: 1
-      tree:
-        title: Tree
-        description: log output to this directory
+      sudo:
+        title: Sudo
+        description: run operations with sudo (nopasswd) (deprecated, use become)
+        type: boolean
+        default: false
+      help:
+        title: Help
+        description: show this help message and exit
+        type: boolean
+        default: false
+      timeout:
+        title: Timeout
+        description: override the connection timeout in seconds (default=10)
+        type: integer
+      list_hosts:
+        title: List hosts
+        description: outputs a list of matching hosts; does not execute anything else
+        type: boolean
+        default: false
+      args:
+        title: Args
+        description: module arguments
+        type: string
+        minLength: 1
+      ssh_extra_args:
+        title: Ssh extra args
+        description: specify extra arguments to pass to ssh only (e.g. -R)
         type: string
         minLength: 1
       extra_vars:
@@ -11947,14 +10661,136 @@ definitions:
           prepend with @
         type: string
         minLength: 1
-      args:
-        title: Args
-        description: module arguments
+      module_path:
+        title: Module path
+        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
+          '/usr/share/ansible/plugins/modules'])
         type: string
         minLength: 1
+      diff:
+        title: Diff
+        description: when changing (small) files and templates, show the differences
+          in those files; works great with --check
+        type: boolean
+        default: false
+      su:
+        title: Su
+        description: run operations with su (deprecated, use become)
+        type: boolean
+        default: false
+      vault_password_file:
+        title: Vault password file
+        description: vault password file
+        type: string
+        format: secretfile
+      connection:
+        title: Connection
+        description: connection type to use (default=smart)
+        type: string
+        minLength: 1
+      su_user:
+        title: Su user
+        description: run operations with su as this user (default=None) (deprecated,
+          use become)
+        type: string
+        minLength: 1
+      scp_extra_args:
+        title: Scp extra args
+        description: specify extra arguments to pass to scp only (e.g. -l)
+        type: string
+        minLength: 1
+      check:
+        title: Check
+        description: don't make any changes; instead, try to predict some of the changes
+          that may occur
+        type: boolean
+        default: false
+      sftp_extra_args:
+        title: Sftp extra args
+        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
+        type: string
+        minLength: 1
+      background:
+        title: Background
+        description: run asynchronously, failing after X seconds (default=N/A)
+        type: integer
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
+        type: boolean
+        default: false
+      sudo_user:
+        title: Sudo user
+        description: desired sudo user (default=root) (deprecated, use become)
+        type: string
+        minLength: 1
+      limit:
+        title: Limit
+        description: further limit selected hosts to an additional pattern
+        type: string
+        minLength: 1
+      become:
+        title: Become
+        description: run operations with become (does not imply password prompting)
+        type: boolean
+        default: false
       version:
         title: Version
         description: show program's version number and exit
+        type: boolean
+        default: false
+      key_file:
+        title: Key file
+        description: use this file to authenticate the connection
+        type: string
+        format: secretfile
+      group:
+        title: Group
+        type: string
+        minLength: 1
+      become_user:
+        title: Become user
+        description: run operations as this user (default=root)
+        type: string
+        minLength: 1
+      private_key:
+        title: Private key
+        description: use this file to authenticate the connection
+        type: string
+        format: secretfile
+      forks:
+        title: Forks
+        description: specify number of parallel processes to use (default=5)
+        type: integer
+      tree:
+        title: Tree
+        description: log output to this directory
+        type: string
+        minLength: 1
+      user:
+        title: User
+        description: connect as this user (default=None)
+        type: string
+        minLength: 1
+      ssh_common_args:
+        title: Ssh common args
+        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+        type: string
+        minLength: 1
+      playbook_dir:
+        title: Playbook dir
+        description: Since this tool does not use playbooks, use this as a subsitute
+          playbook directory.This sets the relative path for many features including
+          roles/ group_vars/ etc.
+        type: string
+        minLength: 1
+      poll:
+        title: Poll
+        description: set the poll interval if using -B (default=15)
+        type: integer
+      one_line:
+        title: One line
+        description: condense output
         type: boolean
         default: false
   ExecuteResponse:
@@ -11983,14 +10819,107 @@ definitions:
         format: autocomplete
         enum:
           $ref: '#/definitions/Playbook'
+      timeout:
+        title: Timeout
+        description: override the connection timeout in seconds (default=10)
+        type: integer
+      skip_tags:
+        title: Skip tags
+        description: only run plays and tasks whose tags do not match these values
+        type: string
+        minLength: 1
+      become_method:
+        title: Become method
+        description: 'privilege escalation method to use (default=sudo), valid choices:
+          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
+          | machinectl ]'
+        type: string
+        minLength: 1
+      sudo:
+        title: Sudo
+        description: run operations with sudo (nopasswd) (deprecated, use become)
+        type: boolean
+        default: false
+      flush_cache:
+        title: Flush cache
+        description: clear the fact cache for every host in inventory
+        type: boolean
+        default: false
+      become:
+        title: Become
+        description: run operations with become (does not imply password prompting)
+        type: boolean
+        default: false
+      list_hosts:
+        title: List hosts
+        description: outputs a list of matching hosts; does not execute anything else
+        type: boolean
+        default: false
       sftp_extra_args:
         title: Sftp extra args
         description: specify extra arguments to pass to sftp only (e.g. -f, -l)
         type: string
         minLength: 1
-      ssh_common_args:
-        title: Ssh common args
-        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+      list_tasks:
+        title: List tasks
+        description: list all tasks that would be executed
+        type: boolean
+        default: false
+      scp_extra_args:
+        title: Scp extra args
+        description: specify extra arguments to pass to scp only (e.g. -l)
+        type: string
+        minLength: 1
+      ssh_extra_args:
+        title: Ssh extra args
+        description: specify extra arguments to pass to ssh only (e.g. -R)
+        type: string
+        minLength: 1
+      user:
+        title: User
+        description: connect as this user (default=None)
+        type: string
+        minLength: 1
+      module_path:
+        title: Module path
+        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
+          '/usr/share/ansible/plugins/modules'])
+        type: string
+        minLength: 1
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
+        type: boolean
+        default: false
+      diff:
+        title: Diff
+        description: when changing (small) files and templates, show the differences
+          in those files; works great with --check
+        type: boolean
+        default: false
+      su:
+        title: Su
+        description: run operations with su (deprecated, use become)
+        type: boolean
+        default: false
+      vault_password_file:
+        title: Vault password file
+        description: vault password file
+        type: string
+        format: secretfile
+      connection:
+        title: Connection
+        description: connection type to use (default=smart)
+        type: string
+        minLength: 1
+      step:
+        title: Step
+        description: 'one-step-at-a-time: confirm each task before running'
+        type: boolean
+        default: false
+      tags:
+        title: Tags
+        description: only run plays and tasks tagged with these values
         type: string
         minLength: 1
       check:
@@ -11999,42 +10928,28 @@ definitions:
           that may occur
         type: boolean
         default: false
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
-        type: boolean
-        default: false
-      timeout:
-        title: Timeout
-        description: override the connection timeout in seconds (default=10)
-        type: integer
-      connection:
-        title: Connection
-        description: connection type to use (default=smart)
+      ssh_common_args:
+        title: Ssh common args
+        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
         type: string
         minLength: 1
-      vault_password_file:
-        title: Vault password file
-        description: vault password file
-        type: string
-        format: secretfile
-      su:
-        title: Su
-        description: run operations with su (deprecated, use become)
+      help:
+        title: Help
+        description: show this help message and exit
         type: boolean
         default: false
-      list_hosts:
-        title: List hosts
-        description: outputs a list of matching hosts; does not execute anything else
-        type: boolean
-        default: false
-      ssh_extra_args:
-        title: Ssh extra args
-        description: specify extra arguments to pass to ssh only (e.g. -R)
+      sudo_user:
+        title: Sudo user
+        description: desired sudo user (default=root) (deprecated, use become)
         type: string
         minLength: 1
-      private_key:
-        title: Private key
+      limit:
+        title: Limit
+        description: further limit selected hosts to an additional pattern
+        type: string
+        minLength: 1
+      key_file:
+        title: Key file
         description: use this file to authenticate the connection
         type: string
         format: secretfile
@@ -12048,65 +10963,29 @@ definitions:
         description: run operations as this user (default=root)
         type: string
         minLength: 1
-      flush_cache:
-        title: Flush cache
-        description: clear the fact cache for every host in inventory
-        type: boolean
-        default: false
+      private_key:
+        title: Private key
+        description: use this file to authenticate the connection
+        type: string
+        format: secretfile
       forks:
         title: Forks
         description: specify number of parallel processes to use (default=5)
         type: integer
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
-          '/usr/share/ansible/plugins/modules'])
-        type: string
-        minLength: 1
-      tags:
-        title: Tags
-        description: only run plays and tasks tagged with these values
-        type: string
-        minLength: 1
-      skip_tags:
-        title: Skip tags
-        description: only run plays and tasks whose tags do not match these values
-        type: string
-        minLength: 1
-      list_tasks:
-        title: List tasks
-        description: list all tasks that would be executed
-        type: boolean
-        default: false
-      user:
-        title: User
-        description: connect as this user (default=None)
-        type: string
-        minLength: 1
-      help:
-        title: Help
-        description: show this help message and exit
-        type: boolean
-        default: false
       vault_id:
         title: Vault id
         description: the vault identity to use
         type: string
         minLength: 1
+      extra_vars:
+        title: Extra vars
+        description: set additional variables as key=value or YAML/JSON, if filename
+          prepend with @
+        type: string
+        minLength: 1
       list_tags:
         title: List tags
         description: list all available tags
-        type: boolean
-        default: false
-      limit:
-        title: Limit
-        description: further limit selected hosts to an additional pattern
-        type: string
-        minLength: 1
-      diff:
-        title: Diff
-        description: when changing (small) files and templates, show the differences
-          in those files; works great with --check
         type: boolean
         default: false
       force_handlers:
@@ -12120,54 +10999,25 @@ definitions:
           use become)
         type: string
         minLength: 1
-      scp_extra_args:
-        title: Scp extra args
-        description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
-        minLength: 1
-      sudo:
-        title: Sudo
-        description: run operations with sudo (nopasswd) (deprecated, use become)
-        type: boolean
-        default: false
-      step:
-        title: Step
-        description: 'one-step-at-a-time: confirm each task before running'
-        type: boolean
-        default: false
-      sudo_user:
-        title: Sudo user
-        description: desired sudo user (default=root) (deprecated, use become)
-        type: string
-        minLength: 1
-      key_file:
-        title: Key file
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      become_method:
-        title: Become method
-        description: 'privilege escalation method to use (default=sudo), valid choices:
-          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
-          | machinectl ]'
-        type: string
-        minLength: 1
-      extra_vars:
-        title: Extra vars
-        description: set additional variables as key=value or YAML/JSON, if filename
-          prepend with @
-        type: string
-        minLength: 1
-      become:
-        title: Become
-        description: run operations with become (does not imply password prompting)
-        type: boolean
-        default: false
       version:
         title: Version
         description: show program's version number and exit
         type: boolean
         default: false
+  HistoryLines:
+    type: object
+    properties:
+      line_number:
+        title: Line number
+        type: integer
+      line_gnumber:
+        title: Line gnumber
+        type: integer
+      line:
+        title: Line
+        type: string
+        maxLength: 2048
+        minLength: 1
   Module:
     required:
       - path
@@ -12452,10 +11302,10 @@ definitions:
         title: Key
         type: string
         enum:
-          - repo_type
           - repo_key
           - repo_branch
           - repo_password
+          - repo_type
           - repo_sync_on_run
       value:
         title: Value
