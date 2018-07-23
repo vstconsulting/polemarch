@@ -377,6 +377,8 @@ class History(BModel):
     executor       = models.ForeignKey(User, blank=True, null=True, default=None)
     json_options   = models.TextField(default="{}")
 
+    statuses = ['DELAY', 'OK', 'ERROR', 'OFFLINE', 'INTERRUPTED']
+
     def __init__(self, *args, **kwargs):
         execute_args = kwargs.pop('execute_args', None)
         super(History, self).__init__(*args, **kwargs)

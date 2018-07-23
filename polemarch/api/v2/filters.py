@@ -118,46 +118,22 @@ class TaskFilter(_BaseFilter):
 
 
 class HistoryFilter(_BaseFilter):
-    help_text_time = '{} time to search.'
-    help_text_time_start = help_text_time.format('Start')
-    help_text_time_stop = help_text_time.format('Stop')
-    start_time__gt = IsoDateTimeFilter(name="start_time",
-                                       lookup_expr=('gt'),
-                                       help_text=help_text_time_start)
-    stop_time__gt = IsoDateTimeFilter(name="stop_time",
-                                      lookup_expr=('gt'),
-                                      help_text=help_text_time_stop)
-    start_time__lt = IsoDateTimeFilter(name="start_time",
-                                       lookup_expr=('lt'),
-                                       help_text=help_text_time_start)
-    stop_time__lt = IsoDateTimeFilter(name="stop_time",
-                                      lookup_expr=('lt'),
-                                      help_text=help_text_time_stop)
-    start_time__gte = IsoDateTimeFilter(name="start_time",
-                                        lookup_expr=('gte'),
-                                        help_text=help_text_time_start)
-    stop_time__gte = IsoDateTimeFilter(name="stop_time",
-                                       lookup_expr=('gte'),
-                                       help_text=help_text_time_stop)
-    start_time__lte = IsoDateTimeFilter(name="start_time",
-                                        lookup_expr=('lte'),
-                                        help_text=help_text_time_start)
-    stop_time__lte = IsoDateTimeFilter(name="stop_time",
-                                       lookup_expr=('lte'),
-                                       help_text=help_text_time_stop)
+    status = CharFilter(help_text='Status of execution.')
+    mode = CharFilter(help_text='Module or playbook name.')
+    kind = CharFilter(help_text='Kind of execution.')
+    older = IsoDateTimeFilter(name="start_time",
+                              lookup_expr=('lt'),
+                              help_text='Older then this time')
+    newer = IsoDateTimeFilter(name="start_time",
+                              lookup_expr=('gt'),
+                              help_text='Newer then this time')
 
     class Meta:
         model = models.History
         fields = ('id',
                   'mode',
                   'kind',
-                  'project',
-                  'status',
-                  'inventory',
-                  'start_time',
-                  'stop_time',
-                  'initiator',
-                  'initiator_type')
+                  'status',)
 
 
 class PeriodicTaskFilter(_BaseFilter):

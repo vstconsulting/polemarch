@@ -933,6 +933,19 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(new_results[2]['data']['count'], 5)
         self.assertEqual(new_results[3]['status'], 405)
 
+        # Check history filters
+        df = "%Y-%m-%dT%H:%M:%S.%fZ"
+        now_time = (now() + timedelta(hours=1)).strftime(df)
+        bulk_data = [
+            self.get_bulk('history', {}, 'get', filters='newer={}'.format(now_time)),
+            self.get_bulk('history', {}, 'get', filters='older={}'.format(now_time)),
+        ]
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data']['count'], 0)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[1]['data']['count'], len(subs['history']))
+
     def test_project_required_inventory(self):
         # Test removing inventory linked to periodic task or template
         bulk_data = [
@@ -984,7 +997,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results[-2]['status'], 204)
         self.assertEqual(results[-1]['status'], 204)
         self.assertTrue(not self.get_model_filter('Inventory', pk=inv_id).exists())
-
 
     def test_history_facts(self):
         history_kwargs = dict(project=None, mode="setup",
