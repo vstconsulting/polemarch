@@ -273,7 +273,7 @@ class HistoryLinesSerializer(_SignalSerializer):
 
 class HookSerializer(serializers.ModelSerializer):
     when = serializers.ChoiceField(
-        choices=tuple(models.Hook.handlers.when_types_names.items()),
+        choices=list(models.Hook.handlers.when_types_names.items()),
         required=False, allow_blank=True, default=None
     )
     type = serializers.ChoiceField(
@@ -318,7 +318,7 @@ class ProjectVariableSerializer(VariableSerializer):
         repo_password="[Only for GIT repos] Password to fetch access.",
         repo_key="[Only for GIT repos] Key to fetch access.",
     )
-    key = serializers.ChoiceField(choices=tuple(project_keys.items()))
+    key = serializers.ChoiceField(choices=list(project_keys.items()))
 
 
 class _WithVariablesSerializer(_WithPermissionsSerializer):

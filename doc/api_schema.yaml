@@ -10407,19 +10407,19 @@ definitions:
         title: Type
         type: string
         enum:
-          - SCRIPT
           - HTTP
+          - SCRIPT
       when:
         title: When
         type: string
         enum:
+          - on_object_del
+          - on_user_del
           - on_user_add
           - on_object_add
-          - on_object_upd
           - on_user_upd
-          - on_object_del
+          - on_object_upd
           - after_execution
-          - on_user_del
           - on_execution
       enable:
         title: Enable
@@ -11242,11 +11242,11 @@ definitions:
         title: Key
         type: string
         enum:
-          - repo_branch
-          - repo_sync_on_run
-          - repo_key
           - repo_password
           - repo_type
+          - repo_branch
+          - repo_key
+          - repo_sync_on_run
       value:
         title: Value
         type: string
