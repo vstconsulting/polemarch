@@ -1,9 +1,8 @@
 # pylint: disable=import-error
 from django_filters import (CharFilter, NumberFilter, IsoDateTimeFilter)
-from vstutils.api.filters import extra_filter, name_filter, filters
+from vstutils.api.filters import DefaultIDFilter, extra_filter, name_filter, filters
 from ...main import models
 
-id_help = 'A unique integer value (or comma separated list) identifying this instance.'
 name_help = 'A name string value (or comma separated list) of instance.'
 vars_help = 'List of variables to filter. Comma separeted "key:value" list.'
 
@@ -16,7 +15,10 @@ def variables_filter(queryset, field, value):
     return queryset.var_filter(**kwargs)
 
 
-class VariableFilter(filters.FilterSet):
+class VariableFilter(DefaultIDFilter):
+    key = CharFilter(method=name_filter, help_text=name_help.replace('name', 'key name'))
+    value = CharFilter(method=name_filter, help_text='A value of instance.')
+
     class Meta:
         model = models.Variable
         fields = (
@@ -26,14 +28,19 @@ class VariableFilter(filters.FilterSet):
         )
 
 
-class _BaseFilter(filters.FilterSet):
-    id        = CharFilter(method=extra_filter, help_text=id_help)
-    id__not   = CharFilter(method=extra_filter, help_text=id_help)
+class _BaseFilter(DefaultIDFilter):
     name__not = CharFilter(method=name_filter, help_text=name_help)
     name      = CharFilter(method=name_filter, help_text=name_help)
 
 
+class _TypedFilter(_BaseFilter):
+    type = CharFilter(help_text='Instance type.')
+
+
 class TemplateFilter(_BaseFilter):
+    kind = CharFilter(help_text='A kind of template.')
+    inventory = CharFilter(help_text='The inventory id or path in project.')
+
     class Meta:
         model = models.Template
         fields = (
@@ -55,7 +62,7 @@ class ModuleFilter(filters.FilterSet):
         )
 
 
-class HookFilter(_BaseFilter):
+class HookFilter(_TypedFilter):
     class Meta:
         model = models.Hook
         fields = (
@@ -69,7 +76,7 @@ class _BaseHGIFilter(_BaseFilter):
     variables = CharFilter(method=variables_filter, help_text=vars_help)
 
 
-class HostFilter(_BaseHGIFilter):
+class HostFilter(_TypedFilter):
 
     class Meta:
         model = models.Host
@@ -136,7 +143,7 @@ class HistoryFilter(_BaseFilter):
                   'status',)
 
 
-class PeriodicTaskFilter(_BaseFilter):
+class PeriodicTaskFilter(_TypedFilter):
 
     class Meta:
         model = models.PeriodicTask

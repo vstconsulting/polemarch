@@ -1271,25 +1271,20 @@ paths:
             this instance.
           required: false
           type: string
-        - name: name
+        - name: key
           in: query
-          description: A name string value (or comma separated list) of instance.
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
           required: false
           type: string
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
             this instance.
-          required: false
-          type: string
-        - name: name__not
-          in: query
-          description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -1803,7 +1798,7 @@ paths:
           type: string
         - name: type
           in: query
-          description: ''
+          description: Instance type.
           required: false
           type: string
         - name: id__not
@@ -2045,7 +2040,7 @@ paths:
           type: string
         - name: type
           in: query
-          description: ''
+          description: Instance type.
           required: false
           type: string
         - name: id__not
@@ -2057,11 +2052,6 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -2316,7 +2306,7 @@ paths:
   /host/{pk}/variables/:
     get:
       operationId: host_variables_get
-      description: Polemarch hosts.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -2324,30 +2314,20 @@ paths:
             this instance.
           required: false
           type: string
-        - name: name
+        - name: key
           in: query
-          description: A name string value (or comma separated list) of instance.
+          description: A key name string value (or comma separated list) of instance.
           required: false
           type: string
-        - name: type
+        - name: value
           in: query
-          description: ''
+          description: A value of instance.
           required: false
           type: string
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
             this instance.
-          required: false
-          type: string
-        - name: name__not
-          in: query
-          description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -2406,7 +2386,7 @@ paths:
         - host
     post:
       operationId: host_variables_add
-      description: Polemarch hosts.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -2445,7 +2425,7 @@ paths:
   /host/{pk}/variables/{variables_id}/:
     get:
       operationId: host_variables_get
-      description: Polemarch hosts.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -2472,7 +2452,7 @@ paths:
         - host
     put:
       operationId: host_variables_update
-      description: Polemarch hosts.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -2504,7 +2484,7 @@ paths:
         - host
     patch:
       operationId: host_variables_edit
-      description: Polemarch hosts.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -2536,7 +2516,7 @@ paths:
         - host
     delete:
       operationId: host_variables_remove
-      description: Polemarch hosts.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -2816,7 +2796,7 @@ paths:
   /inventory/{pk}/all_groups/:
     get:
       operationId: inventory_all_groups_list
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -2908,7 +2888,7 @@ paths:
   /inventory/{pk}/all_groups/{all_groups_id}/:
     get:
       operationId: inventory_all_groups_detail
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -2946,7 +2926,7 @@ paths:
   /inventory/{pk}/all_hosts/:
     get:
       operationId: inventory_all_hosts_list
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -2959,6 +2939,11 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
+        - name: type
+          in: query
+          description: Instance type.
+          required: false
+          type: string
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -2968,11 +2953,6 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -3038,7 +3018,7 @@ paths:
   /inventory/{pk}/all_hosts/{all_hosts_id}/:
     get:
       operationId: inventory_all_hosts_detail
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -3076,7 +3056,7 @@ paths:
   /inventory/{pk}/group/:
     get:
       operationId: inventory_group_get
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -3161,7 +3141,7 @@ paths:
         - inventory
     post:
       operationId: inventory_group_add
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3200,7 +3180,7 @@ paths:
   /inventory/{pk}/group/{group_id}/:
     get:
       operationId: inventory_group_get
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -3227,7 +3207,7 @@ paths:
         - inventory
     put:
       operationId: inventory_group_update
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3259,7 +3239,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_edit
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3291,7 +3271,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_remove
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -3328,7 +3308,7 @@ paths:
   /inventory/{pk}/group/{group_id}/variables/:
     get:
       operationId: inventory_group_variables_get
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -3355,7 +3335,7 @@ paths:
         - inventory
     post:
       operationId: inventory_group_variables_add
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3399,7 +3379,7 @@ paths:
   /inventory/{pk}/group/{group_id}/variables/{variables_id}/:
     get:
       operationId: inventory_group_variables_get
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -3426,7 +3406,7 @@ paths:
         - inventory
     put:
       operationId: inventory_group_variables_update
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3458,7 +3438,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_variables_edit
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3490,7 +3470,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_variables_remove
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -3533,7 +3513,7 @@ paths:
   /inventory/{pk}/host/:
     get:
       operationId: inventory_host_get
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -3546,6 +3526,11 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
+        - name: type
+          in: query
+          description: Instance type.
+          required: false
+          type: string
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -3555,11 +3540,6 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -3618,7 +3598,7 @@ paths:
         - inventory
     post:
       operationId: inventory_host_add
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3657,7 +3637,7 @@ paths:
   /inventory/{pk}/host/{host_id}/:
     get:
       operationId: inventory_host_get
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -3684,7 +3664,7 @@ paths:
         - inventory
     put:
       operationId: inventory_host_update
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3716,7 +3696,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_host_edit
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3748,7 +3728,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_host_remove
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -3785,7 +3765,7 @@ paths:
   /inventory/{pk}/host/{host_id}/set_owner/:
     post:
       operationId: inventory_host_set_owner
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3829,7 +3809,7 @@ paths:
   /inventory/{pk}/host/{host_id}/variables/:
     get:
       operationId: inventory_host_variables_get
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -3856,7 +3836,7 @@ paths:
         - inventory
     post:
       operationId: inventory_host_variables_add
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3900,7 +3880,7 @@ paths:
   /inventory/{pk}/host/{host_id}/variables/{variables_id}/:
     get:
       operationId: inventory_host_variables_get
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -3927,7 +3907,7 @@ paths:
         - inventory
     put:
       operationId: inventory_host_variables_update
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3959,7 +3939,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_host_variables_edit
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -3991,7 +3971,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_host_variables_remove
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -4073,7 +4053,7 @@ paths:
   /inventory/{pk}/variables/:
     get:
       operationId: inventory_variables_get
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -4081,25 +4061,20 @@ paths:
             this instance.
           required: false
           type: string
-        - name: name
+        - name: key
           in: query
-          description: A name string value (or comma separated list) of instance.
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
           required: false
           type: string
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
             this instance.
-          required: false
-          type: string
-        - name: name__not
-          in: query
-          description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -4158,7 +4133,7 @@ paths:
         - inventory
     post:
       operationId: inventory_variables_add
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -4197,7 +4172,7 @@ paths:
   /inventory/{pk}/variables/{variables_id}/:
     get:
       operationId: inventory_variables_get
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -4224,7 +4199,7 @@ paths:
         - inventory
     put:
       operationId: inventory_variables_update
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -4256,7 +4231,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_variables_edit
-      description: Polemarch inventories.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -4288,7 +4263,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_variables_remove
-      description: Polemarch inventories.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -4656,7 +4631,7 @@ paths:
   /project/{pk}/group/:
     get:
       operationId: project_group_get
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -4667,11 +4642,6 @@ paths:
         - name: name
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: status
-          in: query
-          description: ''
           required: false
           type: string
         - name: id__not
@@ -4688,11 +4658,6 @@ paths:
         - name: variables
           in: query
           description: List of variables to filter. Comma separeted "key:value" list.
-          required: false
-          type: string
-        - name: status__not
-          in: query
-          description: ''
           required: false
           type: string
         - name: ordering
@@ -4751,7 +4716,7 @@ paths:
         - project
     post:
       operationId: project_group_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -4790,7 +4755,7 @@ paths:
   /project/{pk}/group/{group_id}/:
     get:
       operationId: project_group_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -4817,7 +4782,7 @@ paths:
         - project
     put:
       operationId: project_group_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -4849,7 +4814,7 @@ paths:
         - project
     patch:
       operationId: project_group_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -4881,7 +4846,7 @@ paths:
         - project
     delete:
       operationId: project_group_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -4918,7 +4883,7 @@ paths:
   /project/{pk}/group/{group_id}/variables/:
     get:
       operationId: project_group_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -4945,7 +4910,7 @@ paths:
         - project
     post:
       operationId: project_group_variables_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -4989,7 +4954,7 @@ paths:
   /project/{pk}/group/{group_id}/variables/{variables_id}/:
     get:
       operationId: project_group_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -5016,7 +4981,7 @@ paths:
         - project
     put:
       operationId: project_group_variables_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -5048,7 +5013,7 @@ paths:
         - project
     patch:
       operationId: project_group_variables_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -5080,7 +5045,7 @@ paths:
         - project
     delete:
       operationId: project_group_variables_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -5123,7 +5088,7 @@ paths:
   /project/{pk}/history/:
     get:
       operationId: project_history_get
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -5131,14 +5096,19 @@ paths:
             this instance.
           required: false
           type: string
-        - name: name
+        - name: mode
           in: query
-          description: A name string value (or comma separated list) of instance.
+          description: Module or playbook name.
+          required: false
+          type: string
+        - name: kind
+          in: query
+          description: Kind of execution.
           required: false
           type: string
         - name: status
           in: query
-          description: ''
+          description: Status of execution.
           required: false
           type: string
         - name: id__not
@@ -5152,14 +5122,19 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
-        - name: variables
+        - name: name
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: A name string value (or comma separated list) of instance.
           required: false
           type: string
-        - name: status__not
+        - name: older
           in: query
-          description: ''
+          description: Older then this time
+          required: false
+          type: string
+        - name: newer
+          in: query
+          description: Newer then this time
           required: false
           type: string
         - name: ordering
@@ -5218,7 +5193,7 @@ paths:
         - project
     post:
       operationId: project_history_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -5257,7 +5232,7 @@ paths:
   /project/{pk}/history/{history_id}/:
     get:
       operationId: project_history_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -5284,7 +5259,7 @@ paths:
         - project
     put:
       operationId: project_history_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -5316,7 +5291,7 @@ paths:
         - project
     patch:
       operationId: project_history_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -5348,7 +5323,7 @@ paths:
         - project
     delete:
       operationId: project_history_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -5385,7 +5360,7 @@ paths:
   /project/{pk}/history/{history_id}/cancel/:
     post:
       operationId: project_history_cancel
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -5429,7 +5404,7 @@ paths:
   /project/{pk}/history/{history_id}/clear/:
     delete:
       operationId: project_history_clear
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -5466,7 +5441,7 @@ paths:
   /project/{pk}/history/{history_id}/facts/:
     get:
       operationId: project_history_facts
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -5505,7 +5480,7 @@ paths:
   /project/{pk}/history/{history_id}/lines/:
     get:
       operationId: project_history_lines_list
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -5544,7 +5519,7 @@ paths:
   /project/{pk}/history/{history_id}/raw/:
     get:
       operationId: project_history_raw
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -5583,7 +5558,7 @@ paths:
   /project/{pk}/host/:
     get:
       operationId: project_host_get
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -5596,9 +5571,9 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
-        - name: status
+        - name: type
           in: query
-          description: ''
+          description: Instance type.
           required: false
           type: string
         - name: id__not
@@ -5610,16 +5585,6 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
-          required: false
-          type: string
-        - name: status__not
-          in: query
-          description: ''
           required: false
           type: string
         - name: ordering
@@ -5678,7 +5643,7 @@ paths:
         - project
     post:
       operationId: project_host_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -5717,7 +5682,7 @@ paths:
   /project/{pk}/host/{host_id}/:
     get:
       operationId: project_host_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -5744,7 +5709,7 @@ paths:
         - project
     put:
       operationId: project_host_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -5776,7 +5741,7 @@ paths:
         - project
     patch:
       operationId: project_host_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -5808,7 +5773,7 @@ paths:
         - project
     delete:
       operationId: project_host_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -5845,7 +5810,7 @@ paths:
   /project/{pk}/host/{host_id}/set_owner/:
     post:
       operationId: project_host_set_owner
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -5889,7 +5854,7 @@ paths:
   /project/{pk}/host/{host_id}/variables/:
     get:
       operationId: project_host_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -5916,7 +5881,7 @@ paths:
         - project
     post:
       operationId: project_host_variables_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -5960,7 +5925,7 @@ paths:
   /project/{pk}/host/{host_id}/variables/{variables_id}/:
     get:
       operationId: project_host_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -5987,7 +5952,7 @@ paths:
         - project
     put:
       operationId: project_host_variables_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -6019,7 +5984,7 @@ paths:
         - project
     patch:
       operationId: project_host_variables_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -6051,7 +6016,7 @@ paths:
         - project
     delete:
       operationId: project_host_variables_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -6094,7 +6059,7 @@ paths:
   /project/{pk}/inventory/:
     get:
       operationId: project_inventory_get
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -6105,11 +6070,6 @@ paths:
         - name: name
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: status
-          in: query
-          description: ''
           required: false
           type: string
         - name: id__not
@@ -6126,11 +6086,6 @@ paths:
         - name: variables
           in: query
           description: List of variables to filter. Comma separeted "key:value" list.
-          required: false
-          type: string
-        - name: status__not
-          in: query
-          description: ''
           required: false
           type: string
         - name: ordering
@@ -6189,7 +6144,7 @@ paths:
         - project
     post:
       operationId: project_inventory_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -6228,7 +6183,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/:
     get:
       operationId: project_inventory_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -6255,7 +6210,7 @@ paths:
         - project
     put:
       operationId: project_inventory_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -6287,7 +6242,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -6319,7 +6274,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -6357,7 +6312,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/all_groups/:
     get:
       operationId: project_inventory_all_groups_list
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -6397,7 +6352,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/all_groups/{all_groups_id}/:
     get:
       operationId: project_inventory_all_groups_detail
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -6441,7 +6396,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/all_hosts/:
     get:
       operationId: project_inventory_all_hosts_list
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -6481,7 +6436,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/all_hosts/{all_hosts_id}/:
     get:
       operationId: project_inventory_all_hosts_detail
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -6525,7 +6480,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/group/:
     get:
       operationId: project_inventory_group_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -6552,7 +6507,7 @@ paths:
         - project
     post:
       operationId: project_inventory_group_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -6597,7 +6552,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/group/{group_id}/:
     get:
       operationId: project_inventory_group_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -6624,7 +6579,7 @@ paths:
         - project
     put:
       operationId: project_inventory_group_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -6656,7 +6611,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_group_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -6688,7 +6643,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_group_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -6731,7 +6686,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/group/{group_id}/variables/:
     get:
       operationId: project_inventory_group_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -6758,7 +6713,7 @@ paths:
         - project
     post:
       operationId: project_inventory_group_variables_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -6808,7 +6763,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/group/{group_id}/variables/{variables_id}/:
     get:
       operationId: project_inventory_group_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -6835,7 +6790,7 @@ paths:
         - project
     put:
       operationId: project_inventory_group_variables_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -6867,7 +6822,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_group_variables_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -6899,7 +6854,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_group_variables_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -6948,7 +6903,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/host/:
     get:
       operationId: project_inventory_host_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -6975,7 +6930,7 @@ paths:
         - project
     post:
       operationId: project_inventory_host_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7020,7 +6975,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/host/{host_id}/:
     get:
       operationId: project_inventory_host_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -7047,7 +7002,7 @@ paths:
         - project
     put:
       operationId: project_inventory_host_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7079,7 +7034,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_host_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7111,7 +7066,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_host_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -7154,7 +7109,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/host/{host_id}/set_owner/:
     post:
       operationId: project_inventory_host_inventory_set_owner
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7204,7 +7159,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/host/{host_id}/variables/:
     get:
       operationId: project_inventory_host_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -7231,7 +7186,7 @@ paths:
         - project
     post:
       operationId: project_inventory_host_variables_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7281,7 +7236,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/host/{host_id}/variables/{variables_id}/:
     get:
       operationId: project_inventory_host_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -7308,7 +7263,7 @@ paths:
         - project
     put:
       operationId: project_inventory_host_variables_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7340,7 +7295,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_host_variables_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7372,7 +7327,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_host_variables_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -7421,7 +7376,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/set_owner/:
     post:
       operationId: project_inventory_set_owner
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7466,7 +7421,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/variables/:
     get:
       operationId: project_inventory_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -7493,7 +7448,7 @@ paths:
         - project
     post:
       operationId: project_inventory_variables_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7538,7 +7493,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/variables/{variables_id}/:
     get:
       operationId: project_inventory_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -7565,7 +7520,7 @@ paths:
         - project
     put:
       operationId: project_inventory_variables_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7597,7 +7552,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_variables_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7629,7 +7584,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_variables_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -7673,41 +7628,14 @@ paths:
   /project/{pk}/module/:
     get:
       operationId: project_module_list
-      description: Polemarch projects.
+      description: ''
       parameters:
-        - name: id
-          in: query
-          description: A unique integer value (or comma separated list) identifying
-            this instance.
-          required: false
-          type: string
-        - name: name
-          in: query
-          description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: status
+        - name: path
           in: query
           description: ''
           required: false
           type: string
-        - name: id__not
-          in: query
-          description: A unique integer value (or comma separated list) identifying
-            this instance.
-          required: false
-          type: string
-        - name: name__not
-          in: query
-          description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
-          required: false
-          type: string
-        - name: status__not
+        - name: path__not
           in: query
           description: ''
           required: false
@@ -7775,7 +7703,7 @@ paths:
   /project/{pk}/module/{module_id}/:
     get:
       operationId: project_module_detail
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -7813,7 +7741,7 @@ paths:
   /project/{pk}/periodic_task/:
     get:
       operationId: project_periodic_task_get
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -7821,12 +7749,27 @@ paths:
             this instance.
           required: false
           type: string
-        - name: name
+        - name: mode
           in: query
-          description: A name string value (or comma separated list) of instance.
+          description: ''
           required: false
           type: string
-        - name: status
+        - name: kind
+          in: query
+          description: ''
+          required: false
+          type: string
+        - name: type
+          in: query
+          description: Instance type.
+          required: false
+          type: string
+        - name: project
+          in: query
+          description: ''
+          required: false
+          type: string
+        - name: template
           in: query
           description: ''
           required: false
@@ -7842,14 +7785,9 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
-        - name: variables
+        - name: name
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
-          required: false
-          type: string
-        - name: status__not
-          in: query
-          description: ''
+          description: A name string value (or comma separated list) of instance.
           required: false
           type: string
         - name: ordering
@@ -7908,7 +7846,7 @@ paths:
         - project
     post:
       operationId: project_periodic_task_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -7947,7 +7885,7 @@ paths:
   /project/{pk}/periodic_task/{periodic_task_id}/:
     get:
       operationId: project_periodic_task_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -7974,7 +7912,7 @@ paths:
         - project
     put:
       operationId: project_periodic_task_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -8006,7 +7944,7 @@ paths:
         - project
     patch:
       operationId: project_periodic_task_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -8038,7 +7976,7 @@ paths:
         - project
     delete:
       operationId: project_periodic_task_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -8076,7 +8014,7 @@ paths:
   /project/{pk}/periodic_task/{periodic_task_id}/execute/:
     post:
       operationId: project_periodic_task_execute
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -8121,7 +8059,7 @@ paths:
   /project/{pk}/periodic_task/{periodic_task_id}/variables/:
     get:
       operationId: project_periodic_task_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -8148,7 +8086,7 @@ paths:
         - project
     post:
       operationId: project_periodic_task_variables_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -8193,7 +8131,7 @@ paths:
   /project/{pk}/periodic_task/{periodic_task_id}/variables/{variables_id}/:
     get:
       operationId: project_periodic_task_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -8220,7 +8158,7 @@ paths:
         - project
     put:
       operationId: project_periodic_task_variables_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -8252,7 +8190,7 @@ paths:
         - project
     patch:
       operationId: project_periodic_task_variables_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -8284,7 +8222,7 @@ paths:
         - project
     delete:
       operationId: project_periodic_task_variables_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -8328,7 +8266,7 @@ paths:
   /project/{pk}/playbook/:
     get:
       operationId: project_playbook_list
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -8341,7 +8279,12 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
-        - name: status
+        - name: playbook
+          in: query
+          description: ''
+          required: false
+          type: string
+        - name: project
           in: query
           description: ''
           required: false
@@ -8357,12 +8300,7 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
-          required: false
-          type: string
-        - name: status__not
+        - name: playbook__not
           in: query
           description: ''
           required: false
@@ -8430,7 +8368,7 @@ paths:
   /project/{pk}/playbook/{playbook_id}/:
     get:
       operationId: project_playbook_detail
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -8548,7 +8486,7 @@ paths:
   /project/{pk}/template/:
     get:
       operationId: project_template_get
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -8561,9 +8499,14 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
-        - name: status
+        - name: kind
           in: query
-          description: ''
+          description: A kind of template.
+          required: false
+          type: string
+        - name: inventory
+          in: query
+          description: The inventory id or path in project.
           required: false
           type: string
         - name: id__not
@@ -8575,16 +8518,6 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
-          required: false
-          type: string
-        - name: status__not
-          in: query
-          description: ''
           required: false
           type: string
         - name: ordering
@@ -8643,7 +8576,7 @@ paths:
         - project
     post:
       operationId: project_template_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -8682,7 +8615,7 @@ paths:
   /project/{pk}/template/{template_id}/:
     get:
       operationId: project_template_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -8709,7 +8642,7 @@ paths:
         - project
     put:
       operationId: project_template_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -8741,7 +8674,7 @@ paths:
         - project
     patch:
       operationId: project_template_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -8773,7 +8706,7 @@ paths:
         - project
     delete:
       operationId: project_template_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -8811,7 +8744,7 @@ paths:
   /project/{pk}/template/{template_id}/execute/:
     post:
       operationId: project_template_execute
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -8856,7 +8789,7 @@ paths:
   /project/{pk}/variables/:
     get:
       operationId: project_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -8864,35 +8797,20 @@ paths:
             this instance.
           required: false
           type: string
-        - name: name
+        - name: key
           in: query
-          description: A name string value (or comma separated list) of instance.
+          description: A key name string value (or comma separated list) of instance.
           required: false
           type: string
-        - name: status
+        - name: value
           in: query
-          description: ''
+          description: A value of instance.
           required: false
           type: string
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
             this instance.
-          required: false
-          type: string
-        - name: name__not
-          in: query
-          description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
-          required: false
-          type: string
-        - name: status__not
-          in: query
-          description: ''
           required: false
           type: string
         - name: ordering
@@ -8951,7 +8869,7 @@ paths:
         - project
     post:
       operationId: project_variables_add
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -8990,7 +8908,7 @@ paths:
   /project/{pk}/variables/{variables_id}/:
     get:
       operationId: project_variables_get
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -9017,7 +8935,7 @@ paths:
         - project
     put:
       operationId: project_variables_update
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -9049,7 +8967,7 @@ paths:
         - project
     patch:
       operationId: project_variables_edit
-      description: Polemarch projects.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -9081,7 +8999,7 @@ paths:
         - project
     delete:
       operationId: project_variables_remove
-      description: Polemarch projects.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -9395,7 +9313,7 @@ paths:
   /team/{pk}/user/:
     get:
       operationId: team_user_get
-      description: Polemarch user groups.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -9403,9 +9321,29 @@ paths:
             this instance.
           required: false
           type: string
-        - name: name
+        - name: username
           in: query
           description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: is_active
+          in: query
+          description: Boolean value meaning status of user.
+          required: false
+          type: string
+        - name: first_name
+          in: query
+          description: Users first name.
+          required: false
+          type: string
+        - name: last_name
+          in: query
+          description: Users last name.
+          required: false
+          type: string
+        - name: email
+          in: query
+          description: Users e-mail value.
           required: false
           type: string
         - name: id__not
@@ -9414,7 +9352,7 @@ paths:
             this instance.
           required: false
           type: string
-        - name: name__not
+        - name: username__not
           in: query
           description: A name string value (or comma separated list) of instance.
           required: false
@@ -9475,7 +9413,7 @@ paths:
         - team
     post:
       operationId: team_user_add
-      description: Polemarch user groups.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -9514,7 +9452,7 @@ paths:
   /team/{pk}/user/{user_id}/:
     get:
       operationId: team_user_get
-      description: Polemarch user groups.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -9541,7 +9479,7 @@ paths:
         - team
     put:
       operationId: team_user_update
-      description: Polemarch user groups.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -9573,7 +9511,7 @@ paths:
         - team
     patch:
       operationId: team_user_edit
-      description: Polemarch user groups.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -9605,7 +9543,7 @@ paths:
         - team
     delete:
       operationId: team_user_remove
-      description: Polemarch user groups.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -9642,7 +9580,7 @@ paths:
   /team/{pk}/user/{user_id}/settings/:
     get:
       operationId: team_user_settings_get
-      description: Polemarch user groups.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -9669,7 +9607,7 @@ paths:
         - team
     post:
       operationId: team_user_settings_add
-      description: Polemarch user groups.
+      description: ''
       parameters:
         - name: data
           in: body
@@ -9701,7 +9639,7 @@ paths:
         - team
     delete:
       operationId: team_user_settings_remove
-      description: Polemarch user groups.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -9742,42 +9680,44 @@ paths:
       parameters:
         - name: id
           in: query
-          description: ''
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
           required: false
           type: string
         - name: username
           in: query
-          description: ''
+          description: A name string value (or comma separated list) of instance.
           required: false
           type: string
         - name: is_active
           in: query
-          description: ''
+          description: Boolean value meaning status of user.
           required: false
           type: string
         - name: first_name
           in: query
-          description: ''
+          description: Users first name.
           required: false
           type: string
         - name: last_name
           in: query
-          description: ''
+          description: Users last name.
           required: false
           type: string
         - name: email
           in: query
-          description: ''
+          description: Users e-mail value.
           required: false
           type: string
         - name: id__not
           in: query
-          description: ''
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
           required: false
           type: string
         - name: username__not
           in: query
-          description: ''
+          description: A name string value (or comma separated list) of instance.
           required: false
           type: string
         - name: ordering
@@ -9961,7 +9901,7 @@ paths:
         - user
     delete:
       operationId: user_remove
-      description: Polemarch users.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -10414,13 +10354,13 @@ definitions:
         type: string
         enum:
           - on_object_del
-          - on_user_del
-          - on_user_add
           - on_object_add
-          - on_user_upd
+          - on_user_add
+          - on_execution
           - on_object_upd
           - after_execution
-          - on_execution
+          - on_user_del
+          - on_user_upd
       enable:
         title: Enable
         type: boolean
@@ -11242,11 +11182,11 @@ definitions:
         title: Key
         type: string
         enum:
-          - repo_password
-          - repo_type
-          - repo_branch
-          - repo_key
           - repo_sync_on_run
+          - repo_key
+          - repo_type
+          - repo_password
+          - repo_branch
       value:
         title: Value
         type: string
