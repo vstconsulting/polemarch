@@ -24,6 +24,6 @@ or `report bugs
    pipinstall
    config
    gui
-   restapi
+   api
    contribute
    cla

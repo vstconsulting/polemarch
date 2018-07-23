@@ -8,7 +8,8 @@ from django.utils.functional import cached_property
 from django.db import transaction
 from rest_framework import serializers, exceptions, status
 from rest_framework.exceptions import PermissionDenied
-from vstutils.api import serializers as vst_serializers
+from vstutils.api import serializers as vst_serializers, fields as vst_fields
+from vstutils.api.serializers import DataSerializer
 from vstutils.api.base import Response
 from ...main.utils import AnsibleArgumentsReference
 
@@ -63,26 +64,6 @@ class MultiTypeField(serializers.CharField):
         return (
             value if not isinstance(value, six.class_types)
             else str(value)
-        )
-
-
-class DataSerializer(serializers.Serializer):
-
-    def to_internal_value(self, data):  # nocv
-        return (
-            data
-            if (
-                isinstance(data, (six.string_types, six.text_type)) or
-                isinstance(data, (dict, list))
-            )
-            else self.fail("Unknown type.")
-        )
-
-    def to_representation(self, value):
-        return (
-            json.loads(value)
-            if not isinstance(value, (dict, list))
-            else value
         )
 
 
@@ -182,19 +163,22 @@ class _WithPermissionsSerializer(_SignalSerializer):
         return self.context['request'].user
 
 
-class UserSerializer(vst_serializers.UserSerializer):
+class OwnerSerializer(vst_serializers.UserSerializer):
     is_staff = serializers.HiddenField(default=True)
 
     @with_signals
     def create(self, data):
-        return super(UserSerializer, self).create(data)
+        return super(OwnerSerializer, self).create(data)
 
     @with_signals
     def update(self, instance, validated_data):
-        return super(UserSerializer, self).update(instance, validated_data)
+        return super(OwnerSerializer, self).update(instance, validated_data)
 
 
-class OneOwnerSerializer(UserSerializer):
+class OneOwnerSerializer(OwnerSerializer):
+    password = serializers.CharField(write_only=True, required=False)
+    email = serializers.EmailField(required=False)
+    
     class Meta(vst_serializers.OneUserSerializer.Meta):
         pass
 
@@ -211,7 +195,7 @@ class TeamSerializer(_WithPermissionsSerializer):
 
 
 class OneTeamSerializer(TeamSerializer):
-    owner = UserSerializer(read_only=True)
+    owner = OwnerSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
@@ -381,7 +365,7 @@ class HostSerializer(_WithVariablesSerializer):
 
 
 class OneHostSerializer(HostSerializer):
-    owner = UserSerializer(read_only=True)
+    owner = OwnerSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
@@ -605,7 +589,7 @@ class GroupSerializer(_WithVariablesSerializer):
 
 
 class OneGroupSerializer(GroupSerializer, _InventoryOperations):
-    owner = UserSerializer(read_only=True)
+    owner = OwnerSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
@@ -631,7 +615,7 @@ class InventorySerializer(_WithVariablesSerializer):
 
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
-    owner = UserSerializer(read_only=True)
+    owner = OwnerSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
@@ -663,7 +647,7 @@ class ProjectSerializer(_InventoryOperations):
 
 class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     repository  = serializers.CharField(default='MANUAL')
-    owner = UserSerializer(read_only=True)
+    owner = OwnerSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
@@ -740,6 +724,8 @@ def generate_fileds(ansible_type):
         if ref_type is None:
             field = serializers.BooleanField
             kwargs['default'] = False
+        elif ref in models.PeriodicTask.HIDDEN_VARS:
+            field = vst_fields.SecretFileInString
         elif ref_type == 'int':
             field = serializers.IntegerField
         elif ref_type == 'string' or 'choice':
@@ -770,11 +756,11 @@ class _AnsibleSerializer(serializers.Serializer):
 
 
 class AnsiblePlaybookSerializer(_AnsibleSerializer):
-    playbook = serializers.CharField(required=True)
+    playbook = vst_fields.AutoCompletionField(required=True, autocomplete='Playbook')
 
 
 class AnsibleModuleSerializer(_AnsibleSerializer):
-    module = serializers.CharField(required=True)
+    module = vst_fields.AutoCompletionField(required=True, autocomplete='Module')
 
 
 class BaseDashboardJobSerializer(serializers.Serializer):

@@ -216,15 +216,17 @@ class BaseExecutionsTestCase(BaseTestCase):
     def get_access_deps(self):
         return self.get_complex_data(with_subs=True)
 
-    def generate_subs(self):
+    def generate_subs(self, bulk_results=None):
         # Create project and dependences
-        results = self.make_bulk(self.get_access_deps())
+        if bulk_results is None:
+            bulk_results = self.make_bulk(self.get_access_deps())
         objects = OrderedDict(
             host=[], group=[], inventory=[],
-            project=[], template=[], periodic_task=[], history=[]
+            project=[], template=[], periodic_task=[], history=[],
+            team=[]
         )
         hard_subitems = ['template', 'periodic_task']
-        for result in results:
+        for result in bulk_results:
             if result['type'] == 'add':
                 self.assertEqual(result['status'], 201)
                 objects[result['item']].append(result['data'])
@@ -930,6 +932,58 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(new_results[2]['status'], 200)
         self.assertEqual(new_results[2]['data']['count'], 5)
         self.assertEqual(new_results[3]['status'], 405)
+
+    def test_project_required_inventory(self):
+        # Test removing inventory linked to periodic task or template
+        bulk_data = [
+            self.get_complex_bulk('inventory', name='project_required_inventory'),
+            self.get_complex_bulk('project', name='project_req', repository='MANUAL'),
+            # to project
+            self.get_mod_bulk(
+                'project', "<1[data][id]>", dict(id="<0[data][id]>"), 'inventory'
+            ),
+        ]
+        bulk_data = self.get_templates_data(bulk_data, "<1[data][id]>", "<0[data][id]>")
+        subs = self.generate_subs(self.make_bulk(bulk_data))
+        subs['project'][0] = self.sync_project(subs['project'][0]['id'])
+        prj_id = subs['project'][0]['id']
+        inv_id = subs['inventory'][0]['id']
+        ptask_id = subs['periodic_task'][0]['id']
+        tmplt_ids = [t['id'] for t in subs['template']]
+        test_bulk_data = [
+            self.get_mod_bulk(
+                'project', prj_id, {}, 'inventory/{}'.format(inv_id), 'delete'
+            ),
+            self.get_mod_bulk(
+                'project', prj_id, {}, 'periodic_task/{}'.format(ptask_id), 'delete'
+            ),
+            self.get_mod_bulk(
+                'project', prj_id, {}, 'inventory/{}'.format(inv_id), 'delete'
+            ),
+            self.get_mod_bulk(
+                'project', prj_id, {}, 'template/{}'.format(tmplt_ids[0]), 'delete'
+            ),
+            self.get_mod_bulk(
+                'project', prj_id, {}, 'inventory/{}'.format(inv_id), 'delete'
+            ),
+            self.get_mod_bulk(
+                'project', prj_id, {}, 'template/{}'.format(tmplt_ids[1]), 'delete'
+            ),
+            self.get_bulk('inventory', {}, 'del', pk=inv_id),
+            self.get_mod_bulk(
+                'project', prj_id, {}, 'inventory/{}'.format(inv_id), 'delete'
+            ),
+            self.get_bulk('inventory', {}, 'del', pk=inv_id),
+        ]
+        results = self.make_bulk(test_bulk_data, 'put')
+        for result in results[:-2]:
+            if 'inventory' not in result.get('subitem', result['item']):
+                self.assertEqual(result['status'], 204, result)
+            else:
+                self.assertEqual(result['status'], 400)
+        self.assertEqual(results[-2]['status'], 204)
+        self.assertEqual(results[-1]['status'], 204)
+        self.assertTrue(not self.get_model_filter('Inventory', pk=inv_id).exists())
 
 
     def test_history_facts(self):

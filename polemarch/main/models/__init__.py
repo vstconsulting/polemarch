@@ -6,8 +6,9 @@ import logging
 from collections import OrderedDict
 import django_celery_beat
 from django_celery_beat.models import IntervalSchedule, CrontabSchedule
-from django.db.models import signals
+from django.db.models import signals, IntegerField
 from django.dispatch import receiver
+from django.db.models.functions import Cast
 from django.core.validators import ValidationError
 from django.conf import settings
 from vstutils.utils import raise_context
@@ -51,6 +52,10 @@ def send_user_hook(when, instance):
 def send_polemarch_models(when, instance, **kwargs):
     target = OrderedDict(id=instance.id, name=instance.name, **kwargs)
     send_hook(when, target)
+
+
+def raise_linked_error(exception_class=ValidationError, **kwargs):
+    raise exception_class(kwargs)
 
 
 #####################################
@@ -216,6 +221,33 @@ def delete_from_beat(instance, **kwargs):
             if not others.exists():
                 qs_dict[field].get(id=pk).delete()
     celery_tasks.delete()
+
+
+@receiver(signals.m2m_changed, sender=Project.inventories.through)
+def check_if_inventory_linked(instance, action, **kwargs):
+    if action != "pre_remove":
+        return
+    removing_inventories = instance.inventories.filter(pk__in=kwargs['pk_set'])
+    check_id = removing_inventories.values_list('id', flat=True)
+    linked_templates = Template.objects.filter(inventory__iregex=r'^[0-9]$').annotate(
+        inventory__id=Cast('inventory', IntegerField())
+    ).filter(inventory__id__in=check_id)
+    linked_periodic_tasks = PeriodicTask.objects.filter(_inventory__in=check_id)
+    if linked_periodic_tasks.exists() or linked_templates.exists():
+        raise_linked_error(
+            linked_templates=list(linked_templates.values_list('id', flat=True)),
+            linked_periodic_tasks=list(
+                linked_periodic_tasks.values_list('id', flat=True)
+            ),
+        )
+
+
+@receiver(signals.pre_delete, sender=Inventory)
+def check_if_inventory_linked_project(instance, **kwargs):
+    if instance.projects.exists():
+        raise_linked_error(
+            linked_projects=list(instance.projects.values_list('id', flat=True))
+        )
 
 
 @receiver(signals.pre_save, sender=Hook)

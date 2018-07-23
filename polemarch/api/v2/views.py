@@ -6,7 +6,7 @@ from rest_framework import exceptions as excepts, status
 from rest_framework.authtoken import views as token_views
 from drf_yasg.utils import swagger_auto_schema
 from vstutils.api.permissions import StaffPermission
-from vstutils.api import base, views
+from vstutils.api import base, views, decorators as deco
 from vstutils.utils import KVExchanger
 
 from . import filters
@@ -20,7 +20,7 @@ no = False
 class OwnedView(base.ModelViewSetSet):
     POST_WHITE_LIST = []
 
-    @base.action(methods=["post"], detail=True, serializer_class=sers.SetOwnerSerializer)
+    @deco.action(methods=["post"], detail=True, serializer_class=sers.SetOwnerSerializer)
     def set_owner(self, request, pk=None):
         '''
         Change instance owner.
@@ -35,12 +35,18 @@ class OwnedView(base.ModelViewSetSet):
 
 
 class __VarsViewSet(base.ModelViewSetSet):
+    '''
+    Instance execution variables.
+    '''
     model = sers.models.Variable
     serializer_class = sers.VariableSerializer
     filter_class = filters.VariableFilter
 
 
 class __ProjectVarsViewSet(__VarsViewSet):
+    '''
+    Project settings variables.
+    '''
     serializer_class = sers.ProjectVariableSerializer
 
 
@@ -59,14 +65,38 @@ class TokenView(token_views.ObtainAuthToken):
 
 
 class UserViewSet(views.UserViewSet):
-    serializer_class = sers.UserSerializer
+    '''
+    Polemarch users.
+
+    retrieve:
+        Return a user instance.
+
+    list:
+        Return all users.
+
+    create:
+        Create a new user.
+
+    delete:
+        Remove an existing user.
+
+    partial_update:
+        Update one or more fields on an existing user.
+
+    update:
+        Update a user.
+    '''
+    serializer_class = sers.OwnerSerializer
     serializer_class_one = sers.OneOwnerSerializer
 
-    @base.action(
+    @deco.action(
         ["post", "delete", "get"], url_path="settings",
         detail=yes, serializer_class=sers.DataSerializer
     )
     def user_settings(self, request, *args, **kwargs):
+        '''
+        Return user settings.
+        '''
         obj = self.get_object()
         method = request.method
         if method != "GET":
@@ -75,8 +105,29 @@ class UserViewSet(views.UserViewSet):
         return base.Response(obj.settings.data, status.HTTP_200_OK).resp
 
 
-@base.nested_view('user', 'id', allow_append=yes, manager_name='users', view=UserViewSet)
+@deco.nested_view('user', 'id', allow_append=yes, manager_name='users', view=UserViewSet)
 class TeamViewSet(OwnedView):
+    '''
+    Polemarch user groups.
+
+    retrieve:
+        Return a team instance.
+
+    list:
+        Return all teams.
+
+    create:
+        Create a new team.
+
+    delete:
+        Remove an existing team.
+
+    partial_update:
+        Update one or more fields on an existing team.
+
+    update:
+        Update a team.
+    '''
     model = sers.models.UserGroup
     serializer_class = sers.TeamSerializer
     serializer_class_one = sers.OneTeamSerializer
@@ -91,8 +142,11 @@ class __HistoryLineViewSet(base.ReadOnlyModelViewSet):
 
 
 @method_decorator(name='lines_list', decorator=swagger_auto_schema(auto_schema=None))
-@base.nested_view('lines', manager_name='raw_history_line', view=__HistoryLineViewSet)
+@deco.nested_view('lines', manager_name='raw_history_line', view=__HistoryLineViewSet)
 class HistoryViewSet(base.HistoryModelViewSet):
+    '''
+    Executions history.
+    '''
     model = sers.models.History
     serializer_class = sers.HistorySerializer
     serializer_class_one = sers.OneHistorySerializer
@@ -100,25 +154,37 @@ class HistoryViewSet(base.HistoryModelViewSet):
     POST_WHITE_LIST = ['cancel']
 
     @swagger_auto_schema(auto_schema=None)
-    @base.action(["get"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["get"], detail=yes, serializer_class=sers.DataSerializer)
     def raw(self, request, *args, **kwargs):
+        '''
+        RAW executions output.
+        '''
         result = self.get_serializer(self.get_object()).get_raw(request)
         return HttpResponse(result, content_type="text/plain")
 
-    @base.action(["post"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["post"], detail=yes, serializer_class=sers.DataSerializer)
     def cancel(self, request, *args, **kwargs):
+        '''
+        Cencel working task.
+        '''
         obj = self.get_object()
         exch = KVExchanger(utils.CmdExecutor.CANCEL_PREFIX + str(obj.id))
         exch.send(True, 60)
         return base.Response("Task canceled: {}".format(obj.id), status.HTTP_200_OK).resp
 
-    @base.action(["get"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["get"], detail=yes, serializer_class=sers.DataSerializer)
     def facts(self, request, *args, **kwargs):
+        '''
+        Get compilated history facts (only for execution 'module' with module 'setup').
+        '''
         objs = self.get_serializer(self.get_object()).get_facts(request)
         return base.Response(objs, status.HTTP_200_OK).resp
 
-    @base.action(["delete"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["delete"], detail=yes, serializer_class=sers.DataSerializer)
     def clear(self, request, *args, **kwargs):
+        '''
+        Clear history output.
+        '''
         default_message = "Output trancated.\n"
         obj = self.get_object()
         if obj.status in ["RUN", "DELAY"] or obj.raw_stdout == default_message:  # nocv
@@ -130,26 +196,68 @@ class HistoryViewSet(base.HistoryModelViewSet):
         return base.Response(result, status.HTTP_204_NO_CONTENT).resp
 
 
-@base.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__VarsViewSet)
 class HostViewSet(OwnedView):
+    '''
+    Polemarch hosts.
+
+    retrieve:
+        Return a host instance.
+
+    list:
+        Return all hosts.
+
+    create:
+        Create a new host.
+
+    delete:
+        Remove an existing host.
+
+    partial_update:
+        Update one or more fields on an existing host.
+
+    update:
+        Update a host.
+    '''
     model = sers.models.Host
     serializer_class = sers.HostSerializer
     serializer_class_one = sers.OneHostSerializer
     filter_class = filters.HostFilter
 
 
-@base.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__VarsViewSet)
 class _BaseGroupViewSet(base.ModelViewSetSet):
+    '''
+    Polemarch groups.
+
+    retrieve:
+        Return a group instance.
+
+    list:
+        Return all groups.
+
+    create:
+        Create a new group.
+
+    delete:
+        Remove an existing group.
+
+    partial_update:
+        Update one or more fields on an existing group.
+
+    update:
+        Update a group.
+    '''
     model = sers.models.Group
     serializer_class = sers.GroupSerializer
     serializer_class_one = sers.OneGroupSerializer
     filter_class = filters.GroupFilter
 
 
-@base.nested_view(
+@deco.nested_view(
     'host', 'id', manager_name='hosts', allow_append=yes, view=HostViewSet
 )
-@base.nested_view(
+@deco.nested_view(
     'group', 'id', manager_name='groups', allow_append=yes, view=_BaseGroupViewSet
 )
 class _GroupMixin(OwnedView):
@@ -168,10 +276,31 @@ class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
             raise exception("Group is children.")
 
 
-@base.nested_view('all_groups', 'id', methods=['get'], view=GroupViewSet, subs=None)
-@base.nested_view('all_hosts', 'id', methods=['get'], view=HostViewSet, subs=None)
-@base.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('all_groups', 'id', methods=['get'], view=GroupViewSet, subs=None)
+@deco.nested_view('all_hosts', 'id', methods=['get'], view=HostViewSet, subs=None)
+@deco.nested_view('variables', 'id', view=__VarsViewSet)
 class InventoryViewSet(_GroupMixin):
+    '''
+    Polemarch inventories.
+
+    retrieve:
+        Return a inventory instance.
+
+    list:
+        Return all inventories.
+
+    create:
+        Create a new inventory.
+
+    delete:
+        Remove an existing inventory.
+
+    partial_update:
+        Update one or more fields on an existing inventory.
+
+    update:
+        Update a inventory.
+    '''
     model = sers.models.Inventory
     serializer_class = sers.InventorySerializer
     serializer_class_one = sers.OneInventorySerializer
@@ -194,7 +323,7 @@ class __ModuleViewSet(base.ReadOnlyModelViewSet):
     filter_class = filters.ModuleFilter
 
 
-@base.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__VarsViewSet)
 class __PeriodicTaskViewSet(base.ModelViewSetSet):
     lookup_field = 'id'
     model = sers.models.PeriodicTask
@@ -202,8 +331,11 @@ class __PeriodicTaskViewSet(base.ModelViewSetSet):
     serializer_class_one = sers.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
 
-    @base.action(methods=["post"], detail=yes)
+    @deco.action(methods=["post"], detail=yes)
     def execute(self, request, *args, **kwargs):
+        '''
+        Ad-hoc execute periodic task.
+        '''
         serializer = self.get_serializer(self.get_object())
         return serializer.execute().resp
 
@@ -221,8 +353,11 @@ class __TemplateViewSet(base.ModelViewSetSet):
     filter_class = filters.TemplateFilter
     POST_WHITE_LIST = ['execute']
 
-    @base.action(["post"], detail=yes, serializer_class=sers.TemplateExecSerializer)
+    @deco.action(["post"], detail=yes, serializer_class=sers.TemplateExecSerializer)
     def execute(self, request, *args, **kwargs):
+        '''
+        Execute template with option.
+        '''
         obj = self.get_object()
         return self.get_serializer(obj).execute(request).resp
 
@@ -239,45 +374,96 @@ class __TemplateViewSet(base.ModelViewSetSet):
     operation_description='Sync project repository.',
     responses={status.HTTP_200_OK: sers.ActionResponseSerializer(),}
 ))
-@base.nested_view(
+@deco.nested_view(
     'inventory', 'id', manager_name='inventories',
     allow_append=yes, view=InventoryViewSet
 )
-@base.nested_view('periodic_task', 'id', allow_append=yes, view=__PeriodicTaskViewSet)
-@base.nested_view('playbook', 'id', view=__PlaybookViewSet, methods=['get'])
-@base.nested_view('module', 'id', view=__ModuleViewSet, methods=['get'])
-@base.nested_view('template', 'id', manager_name='template', view=__TemplateViewSet)
-@base.nested_view('history', 'id', manager_name='history', view=HistoryViewSet)
-@base.nested_view('variables', 'id', view=__ProjectVarsViewSet)
+@deco.nested_view('playbook', 'id', view=__PlaybookViewSet, methods=['get'])
+@deco.nested_view('module', 'id', view=__ModuleViewSet, methods=['get'])
+@deco.nested_view('template', 'id', manager_name='template', view=__TemplateViewSet)
+@deco.nested_view('periodic_task', 'id', view=__PeriodicTaskViewSet)
+@deco.nested_view('history', 'id', manager_name='history', view=HistoryViewSet)
+@deco.nested_view('variables', 'id', view=__ProjectVarsViewSet)
 class ProjectViewSet(_GroupMixin):
+    '''
+    Polemarch projects.
+
+    retrieve:
+        Return a project instance.
+
+    list:
+        Return all projects.
+
+    create:
+        Create a new project.
+
+    delete:
+        Remove an existing project.
+
+    partial_update:
+        Update one or more fields on an existing project.
+
+    update:
+        Update a project.
+    '''
     model = sers.models.Project
     serializer_class = sers.ProjectSerializer
     serializer_class_one = sers.OneProjectSerializer
     filter_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
 
-    @base.action(methods=["post"], detail=yes, serializer_class=sers.EmptySerializer)
+    @deco.action(methods=["post"], detail=yes, serializer_class=sers.EmptySerializer)
     def sync(self, request, *args, **kwargs):
+        '''
+        Sync project with repository.
+        '''
         return self.get_serializer(self.get_object()).sync().resp
 
-    @base.action(
+    @deco.action(
         ["post"], url_path="execute-playbook", detail=yes,
         serializer_class=sers.AnsiblePlaybookSerializer
     )
     def execute_playbook(self, request, *args, **kwargs):
+        '''
+        Execute `ansible-playbook` with arguments.
+        '''
         serializer = self.get_serializer(self.get_object())
         return serializer.execute_playbook(request).resp
 
-    @base.action(
+    @deco.action(
         ["post"], url_path="execute-module", detail=yes,
         serializer_class=sers.AnsibleModuleSerializer
     )
     def execute_module(self, request, *args, **kwargs):
+        '''
+        Execute `ansible -m [module]` with arguments.
+        '''
         serializer = self.get_serializer(self.get_object())
         return serializer.execute_module(request).resp
 
 
 class HookViewSet(base.ModelViewSetSet):
+    '''
+    Polemarch hooks.
+
+    retrieve:
+        Return a hook instance.
+
+    list:
+        Return all hooks.
+
+    create:
+        Create a new hook.
+
+    delete:
+        Remove an existing hook.
+
+    partial_update:
+        Update one or more fields on an existing hook.
+
+    update:
+        Update a hook.
+    '''
     model = sers.models.Hook
     serializer_class = sers.HookSerializer
     filter_class = filters.HookFilter

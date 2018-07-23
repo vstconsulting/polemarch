@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from vstutils.settings import *
 
 POLEMARCH_VERSION = PROJECT_VERSION
@@ -35,20 +36,20 @@ REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
 ]
 
 API_URL = VST_API_URL
+DEFAULT_API_URL = "/{}/{}".format(API_URL, VST_API_VERSION)
 API = {
-    VST_API_VERSION: {
-        r'_bulk': {'view': 'polemarch.api.v2.views.BulkViewSet', 'type': 'view'},
-        r'token': {'view': 'polemarch.api.v2.views.TokenView', 'type': 'view'},
-        r'user': {'view': 'polemarch.api.v2.views.UserViewSet'},
-        r'team': {'view': 'polemarch.api.v2.views.TeamViewSet'},
-        r'host': {'view': 'polemarch.api.v2.views.HostViewSet'},
-        r'group': {'view': 'polemarch.api.v2.views.GroupViewSet'},
-        r'inventory': {'view': 'polemarch.api.v2.views.InventoryViewSet'},
-        r'project': {'view': 'polemarch.api.v2.views.ProjectViewSet'},
-        r'history': {'view': 'polemarch.api.v2.views.HistoryViewSet', "op_types": ['get', 'del', 'mod']},
-        r'hook': {'view': 'polemarch.api.v2.views.HookViewSet'},
-        r'stats': {'view': 'polemarch.api.v2.views.StatisticViewSet', 'op_types': ['get']},
-    }
+    VST_API_VERSION: OrderedDict(
+        project={'view': 'polemarch.api.v2.views.ProjectViewSet'},
+        inventory={'view': 'polemarch.api.v2.views.InventoryViewSet'},
+        group={'view': 'polemarch.api.v2.views.GroupViewSet'},
+        host={'view': 'polemarch.api.v2.views.HostViewSet'},
+        history={'view': 'polemarch.api.v2.views.HistoryViewSet', "op_types": ['get', 'del', 'mod']},
+        _bulk={'view': 'polemarch.api.v2.views.BulkViewSet', 'type': 'view'},
+        user={'view': 'polemarch.api.v2.views.UserViewSet'},
+        team={'view': 'polemarch.api.v2.views.TeamViewSet'},
+        token={'view': 'polemarch.api.v2.views.TokenView', 'type': 'view'},
+        hook={'view': 'polemarch.api.v2.views.HookViewSet'},
+        stats={'view': 'polemarch.api.v2.views.StatisticViewSet', 'op_types': ['get']})
 }
 
 
