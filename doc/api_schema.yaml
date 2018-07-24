@@ -10364,13 +10364,13 @@ definitions:
         type: string
         enum:
           - on_execution
-          - after_execution
-          - on_object_del
-          - on_user_del
-          - on_object_add
-          - on_user_add
           - on_user_upd
+          - on_object_del
+          - on_user_add
           - on_object_upd
+          - after_execution
+          - on_object_add
+          - on_user_del
       enable:
         title: Enable
         type: boolean
@@ -10502,7 +10502,7 @@ definitions:
         title: Module
         type: string
         format: autocomplete
-        enum:
+        additionalProperties:
           $ref: '#/definitions/Module'
       version:
         title: Version
@@ -10707,7 +10707,7 @@ definitions:
         title: Playbook
         type: string
         format: autocomplete
-        enum:
+        additionalProperties:
           $ref: '#/definitions/Playbook'
       version:
         title: Version
@@ -11194,11 +11194,11 @@ definitions:
         title: Key
         type: string
         enum:
-          - repo_password
           - repo_sync_on_run
-          - repo_type
           - repo_branch
+          - repo_password
           - repo_key
+          - repo_type
       value:
         title: Value
         type: string
