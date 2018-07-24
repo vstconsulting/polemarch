@@ -265,7 +265,7 @@ paths:
         type: integer
   /group/{pk}/group/:
     get:
-      operationId: group_group_get
+      operationId: group_group_list
       description: ''
       parameters:
         - name: id
@@ -517,7 +517,7 @@ paths:
         type: integer
   /group/{pk}/group/{group_id}/variables/:
     get:
-      operationId: group_group_variables_get
+      operationId: group_group_variables_list
       description: ''
       parameters: []
       responses:
@@ -722,7 +722,7 @@ paths:
           sublist.
   /group/{pk}/host/:
     get:
-      operationId: group_host_get
+      operationId: group_host_list
       description: ''
       parameters:
         - name: id
@@ -1018,7 +1018,7 @@ paths:
         type: integer
   /group/{pk}/host/{host_id}/variables/:
     get:
-      operationId: group_host_variables_get
+      operationId: group_host_variables_list
       description: ''
       parameters: []
       responses:
@@ -1262,7 +1262,7 @@ paths:
         type: integer
   /group/{pk}/variables/:
     get:
-      operationId: group_variables_get
+      operationId: group_variables_list
       description: ''
       parameters:
         - name: id
@@ -2310,7 +2310,7 @@ paths:
         type: integer
   /host/{pk}/variables/:
     get:
-      operationId: host_variables_get
+      operationId: host_variables_list
       description: ''
       parameters:
         - name: id
@@ -3065,7 +3065,7 @@ paths:
         type: integer
   /inventory/{pk}/group/:
     get:
-      operationId: inventory_group_get
+      operationId: inventory_group_list
       description: ''
       parameters:
         - name: id
@@ -3317,7 +3317,7 @@ paths:
         type: integer
   /inventory/{pk}/group/{group_id}/variables/:
     get:
-      operationId: inventory_group_variables_get
+      operationId: inventory_group_variables_list
       description: ''
       parameters: []
       responses:
@@ -3522,7 +3522,7 @@ paths:
           sublist.
   /inventory/{pk}/host/:
     get:
-      operationId: inventory_host_get
+      operationId: inventory_host_list
       description: ''
       parameters:
         - name: id
@@ -3823,7 +3823,7 @@ paths:
         type: integer
   /inventory/{pk}/host/{host_id}/variables/:
     get:
-      operationId: inventory_host_variables_get
+      operationId: inventory_host_variables_list
       description: ''
       parameters: []
       responses:
@@ -4067,7 +4067,7 @@ paths:
         type: integer
   /inventory/{pk}/variables/:
     get:
-      operationId: inventory_variables_get
+      operationId: inventory_variables_list
       description: ''
       parameters:
         - name: id
@@ -4645,7 +4645,7 @@ paths:
         type: integer
   /project/{pk}/group/:
     get:
-      operationId: project_group_get
+      operationId: project_group_list
       description: ''
       parameters:
         - name: id
@@ -4897,7 +4897,7 @@ paths:
         type: integer
   /project/{pk}/group/{group_id}/variables/:
     get:
-      operationId: project_group_variables_get
+      operationId: project_group_variables_list
       description: ''
       parameters: []
       responses:
@@ -5102,7 +5102,7 @@ paths:
           sublist.
   /project/{pk}/history/:
     get:
-      operationId: project_history_get
+      operationId: project_history_list
       description: ''
       parameters:
         - name: id
@@ -5572,7 +5572,7 @@ paths:
         type: integer
   /project/{pk}/host/:
     get:
-      operationId: project_host_get
+      operationId: project_host_list
       description: ''
       parameters:
         - name: id
@@ -5873,7 +5873,7 @@ paths:
         type: integer
   /project/{pk}/host/{host_id}/variables/:
     get:
-      operationId: project_host_variables_get
+      operationId: project_host_variables_list
       description: ''
       parameters: []
       responses:
@@ -6078,7 +6078,7 @@ paths:
           sublist.
   /project/{pk}/inventory/:
     get:
-      operationId: project_inventory_get
+      operationId: project_inventory_list
       description: ''
       parameters:
         - name: id
@@ -6499,7 +6499,7 @@ paths:
         type: integer
   /project/{pk}/inventory/{inventory_id}/group/:
     get:
-      operationId: project_inventory_group_get
+      operationId: project_inventory_group_list
       description: ''
       parameters: []
       responses:
@@ -6705,7 +6705,7 @@ paths:
         type: integer
   /project/{pk}/inventory/{inventory_id}/group/{group_id}/variables/:
     get:
-      operationId: project_inventory_group_variables_get
+      operationId: project_inventory_group_variables_list
       description: ''
       parameters: []
       responses:
@@ -6922,7 +6922,7 @@ paths:
           sublist.
   /project/{pk}/inventory/{inventory_id}/host/:
     get:
-      operationId: project_inventory_host_get
+      operationId: project_inventory_host_list
       description: ''
       parameters: []
       responses:
@@ -7178,7 +7178,7 @@ paths:
         type: integer
   /project/{pk}/inventory/{inventory_id}/host/{host_id}/variables/:
     get:
-      operationId: project_inventory_host_variables_get
+      operationId: project_inventory_host_variables_list
       description: ''
       parameters: []
       responses:
@@ -7440,7 +7440,7 @@ paths:
         type: integer
   /project/{pk}/inventory/{inventory_id}/variables/:
     get:
-      operationId: project_inventory_variables_get
+      operationId: project_inventory_variables_list
       description: ''
       parameters: []
       responses:
@@ -7760,7 +7760,7 @@ paths:
         type: integer
   /project/{pk}/periodic_task/:
     get:
-      operationId: project_periodic_task_get
+      operationId: project_periodic_task_list
       description: ''
       parameters:
         - name: id
@@ -8073,7 +8073,7 @@ paths:
         type: integer
   /project/{pk}/periodic_task/{periodic_task_id}/variables/:
     get:
-      operationId: project_periodic_task_variables_get
+      operationId: project_periodic_task_variables_list
       description: ''
       parameters: []
       responses:
@@ -8495,7 +8495,7 @@ paths:
         type: integer
   /project/{pk}/template/:
     get:
-      operationId: project_template_get
+      operationId: project_template_list
       description: ''
       parameters:
         - name: id
@@ -8798,7 +8798,7 @@ paths:
           sublist.
   /project/{pk}/variables/:
     get:
-      operationId: project_variables_get
+      operationId: project_variables_list
       description: ''
       parameters:
         - name: id
@@ -9322,7 +9322,7 @@ paths:
         type: string
   /team/{pk}/user/:
     get:
-      operationId: team_user_get
+      operationId: team_user_list
       description: ''
       parameters:
         - name: id
@@ -9589,7 +9589,7 @@ paths:
         description: A unique integer value identifying instance of this users sublist.
   /team/{pk}/user/{user_id}/settings/:
     get:
-      operationId: team_user_settings_get
+      operationId: team_user_settings_list
       description: ''
       parameters: []
       responses:
@@ -9942,7 +9942,7 @@ paths:
         type: integer
   /user/{pk}/settings/:
     get:
-      operationId: user_settings_get
+      operationId: user_settings_list
       description: Return user settings.
       parameters: []
       responses:
@@ -10363,14 +10363,14 @@ definitions:
         title: When
         type: string
         enum:
-          - on_object_del
-          - on_user_upd
-          - after_execution
-          - on_user_del
-          - on_object_upd
-          - on_user_add
-          - on_object_add
           - on_execution
+          - after_execution
+          - on_object_del
+          - on_user_del
+          - on_object_add
+          - on_user_add
+          - on_user_upd
+          - on_object_upd
       enable:
         title: Enable
         type: boolean
@@ -11127,9 +11127,9 @@ definitions:
         title: Kind
         type: string
         enum:
-          - Module
           - Task
-        default: Module
+          - Module
+        default: Task
       data:
         $ref: '#/definitions/Data'
       options:
@@ -11161,9 +11161,9 @@ definitions:
         title: Kind
         type: string
         enum:
-          - Module
           - Task
-        default: Module
+          - Module
+        default: Task
       data:
         $ref: '#/definitions/Data'
       options:
@@ -11194,11 +11194,11 @@ definitions:
         title: Key
         type: string
         enum:
-          - repo_key
+          - repo_password
+          - repo_sync_on_run
           - repo_type
           - repo_branch
-          - repo_sync_on_run
-          - repo_password
+          - repo_key
       value:
         title: Value
         type: string
