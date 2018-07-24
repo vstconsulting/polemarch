@@ -200,7 +200,7 @@ class BaseExecutionsTestCase(BaseTestCase):
                 'project', "<10[data][id]>", _exec, 'sync',
             ),
             self.get_mod_bulk(
-                'project', "<10[data][id]>", _exec, 'execute-module',
+                'project', "<10[data][id]>", _exec, 'execute_module',
             ),
             self.get_bulk(
                 'history', {}, 'get',
@@ -350,7 +350,7 @@ class BaseExecutionsTestCase(BaseTestCase):
         )
         return self.make_bulk([
             self.get_mod_bulk(
-                'project', project_data['id'], exec_data, 'execute-{}'.format(type)
+                'project', project_data['id'], exec_data, 'execute_{}'.format(type)
             ),
             self.get_mod_bulk(
                 'project', project_data['id'], {}, 'history/<0[data][history_id]>', 'get'
@@ -364,7 +364,7 @@ class BaseExecutionsTestCase(BaseTestCase):
         )
         bulk_data = self.project_bulk_sync_and_playbooks(prj['id'])
         bulk_data += [
-            self.get_mod_bulk('project', prj['id'], _exec, 'execute-playbook'),
+            self.get_mod_bulk('project', prj['id'], _exec, 'execute_playbook'),
         ] if execute else []
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 200)
@@ -812,9 +812,9 @@ class ProjectTestCase(BaseExecutionsTestCase):
                     self.get_bulk('project', {}, 'get', pk=pk),
                     self.get_mod_bulk('project', pk, {}, 'sync'),
                     self.get_bulk('project', {}, 'get', pk=project_data['id']),
-                    self.get_mod_bulk('project', pk, _ex_module, 'execute-module'),
+                    self.get_mod_bulk('project', pk, _ex_module, 'execute_module'),
                     self.get_mod_bulk('project', pk, unsync, 'variables'),
-                    self.get_mod_bulk('project', pk, _ex_playbook, 'execute-playbook'),
+                    self.get_mod_bulk('project', pk, _ex_playbook, 'execute_playbook'),
                     self.get_mod_bulk(
                         'project', pk, {}, 'history', method='get', filters='limit=2'
                     ),
@@ -933,6 +933,19 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(new_results[2]['data']['count'], 5)
         self.assertEqual(new_results[3]['status'], 405)
 
+        # Check history filters
+        df = "%Y-%m-%dT%H:%M:%S.%fZ"
+        now_time = (now() + timedelta(hours=1)).strftime(df)
+        bulk_data = [
+            self.get_bulk('history', {}, 'get', filters='newer={}'.format(now_time)),
+            self.get_bulk('history', {}, 'get', filters='older={}'.format(now_time)),
+        ]
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data']['count'], 0)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[1]['data']['count'], len(subs['history']))
+
     def test_project_required_inventory(self):
         # Test removing inventory linked to periodic task or template
         bulk_data = [
@@ -984,7 +997,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results[-2]['status'], 204)
         self.assertEqual(results[-1]['status'], 204)
         self.assertTrue(not self.get_model_filter('Inventory', pk=inv_id).exists())
-
 
     def test_history_facts(self):
         history_kwargs = dict(project=None, mode="setup",

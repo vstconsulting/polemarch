@@ -264,7 +264,7 @@ class AnsibleArgumentsReference(object):
 
     def __parse_option(self, option):
         # pylint: disable=protected-access,
-        cli_result = dict()
+        cli_result = OrderedDict()
         for name in option._long_opts:
             name = name[2:]
             if name in self._EXCLUDE_ARGS:
@@ -278,7 +278,7 @@ class AnsibleArgumentsReference(object):
     def __parse_cli(self, cli):
         # pylint: disable=protected-access,
         cli.parse()
-        cli_result = {}
+        cli_result = OrderedDict()
         for option in cli.parser._get_all_options():
             cli_result.update(self.__parse_option(option))
         return cli_result
@@ -291,9 +291,9 @@ class AnsibleArgumentsReference(object):
         :rtype: dict
         '''
         # pylint: disable=protected-access,
-        result = {
-            name: self.__parse_cli(cli) for name, cli in self.clis.items()
-        }
+        result = OrderedDict()
+        for name, cli in self.clis.items():
+            result[name] = self.__parse_cli(cli)
         result['module']['group'] = {"type": "string", "help": ""}
         result['periodic_playbook'] = result['playbook']
         result['periodic_module'] = result['module']

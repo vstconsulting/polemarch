@@ -66,8 +66,6 @@ class TokenView(token_views.ObtainAuthToken):
 
 class UserViewSet(views.UserViewSet):
     '''
-    Polemarch users.
-
     retrieve:
         Return a user instance.
 
@@ -108,8 +106,6 @@ class UserViewSet(views.UserViewSet):
 @deco.nested_view('user', 'id', allow_append=yes, manager_name='users', view=UserViewSet)
 class TeamViewSet(OwnedView):
     '''
-    Polemarch user groups.
-
     retrieve:
         Return a team instance.
 
@@ -199,8 +195,6 @@ class HistoryViewSet(base.HistoryModelViewSet):
 @deco.nested_view('variables', 'id', view=__VarsViewSet)
 class HostViewSet(OwnedView):
     '''
-    Polemarch hosts.
-
     retrieve:
         Return a host instance.
 
@@ -228,8 +222,6 @@ class HostViewSet(OwnedView):
 @deco.nested_view('variables', 'id', view=__VarsViewSet)
 class _BaseGroupViewSet(base.ModelViewSetSet):
     '''
-    Polemarch groups.
-
     retrieve:
         Return a group instance.
 
@@ -281,8 +273,6 @@ class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
 @deco.nested_view('variables', 'id', view=__VarsViewSet)
 class InventoryViewSet(_GroupMixin):
     '''
-    Polemarch inventories.
-
     retrieve:
         Return a inventory instance.
 
@@ -386,8 +376,6 @@ class __TemplateViewSet(base.ModelViewSetSet):
 @deco.nested_view('variables', 'id', view=__ProjectVarsViewSet)
 class ProjectViewSet(_GroupMixin):
     '''
-    Polemarch projects.
-
     retrieve:
         Return a project instance.
 
@@ -419,10 +407,7 @@ class ProjectViewSet(_GroupMixin):
         '''
         return self.get_serializer(self.get_object()).sync().resp
 
-    @deco.action(
-        ["post"], url_path="execute-playbook", detail=yes,
-        serializer_class=sers.AnsiblePlaybookSerializer
-    )
+    @deco.action(["post"], detail=yes, serializer_class=sers.AnsiblePlaybookSerializer)
     def execute_playbook(self, request, *args, **kwargs):
         '''
         Execute `ansible-playbook` with arguments.
@@ -430,10 +415,7 @@ class ProjectViewSet(_GroupMixin):
         serializer = self.get_serializer(self.get_object())
         return serializer.execute_playbook(request).resp
 
-    @deco.action(
-        ["post"], url_path="execute-module", detail=yes,
-        serializer_class=sers.AnsibleModuleSerializer
-    )
+    @deco.action(["post"], detail=yes, serializer_class=sers.AnsibleModuleSerializer)
     def execute_module(self, request, *args, **kwargs):
         '''
         Execute `ansible -m [module]` with arguments.
@@ -444,8 +426,6 @@ class ProjectViewSet(_GroupMixin):
 
 class HookViewSet(base.ModelViewSetSet):
     '''
-    Polemarch hooks.
-
     retrieve:
         Return a hook instance.
 

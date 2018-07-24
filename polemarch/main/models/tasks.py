@@ -37,7 +37,7 @@ class Template(ACLModel):
     template_data = models.TextField(default="{}")
     options_data  = models.TextField(default="{}")
     inventory     = models.CharField(max_length=128, default=None, blank=True, null=True)
-    project       = ForeignKeyACL(Project, on_delete=models.SET_NULL,
+    project       = ForeignKeyACL(Project, on_delete=models.CASCADE,
                                   default=None, blank=True, null=True)
 
     class Meta:
@@ -57,6 +57,7 @@ class Template(ACLModel):
         "Task": "playbook",
         "Module": "module",
     }
+    kinds = list(template_fields.keys())
 
     def get_option_data(self, option):
         return self.options.get(option, {})
@@ -376,6 +377,8 @@ class History(BModel):
     initiator_type = models.CharField(max_length=50, default="project")
     executor       = models.ForeignKey(User, blank=True, null=True, default=None)
     json_options   = models.TextField(default="{}")
+
+    statuses = ['DELAY', 'OK', 'ERROR', 'OFFLINE', 'INTERRUPTED']
 
     def __init__(self, *args, **kwargs):
         execute_args = kwargs.pop('execute_args', None)

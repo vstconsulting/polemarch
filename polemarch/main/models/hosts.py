@@ -128,6 +128,9 @@ class Inventory(AbstractModel):
 
     @property
     def groups_list(self):
+        '''
+        :return:GroupQuerySet: Mixed queryset with all groups
+        '''
         groups_list = self.groups.filter(children=False) | \
                       self.groups.filter(children=True).get_subgroups()
         groups_list = groups_list.distinct().prefetch_related("variables", "hosts")
@@ -135,6 +138,9 @@ class Inventory(AbstractModel):
 
     @property
     def hosts_list(self):
+        '''
+        :return:HostQuerySet: Mixed queryset with all hosts
+        '''
         return self.hosts.all().order_by("name")
 
     def get_inventory(self):

@@ -1,9 +1,8 @@
 # pylint: disable=import-error
 from django_filters import (CharFilter, NumberFilter, IsoDateTimeFilter)
-from vstutils.api.filters import extra_filter, name_filter, filters
+from vstutils.api.filters import DefaultIDFilter, extra_filter, name_filter, filters
 from ...main import models
 
-id_help = 'A unique integer value (or comma separated list) identifying this instance.'
 name_help = 'A name string value (or comma separated list) of instance.'
 vars_help = 'List of variables to filter. Comma separeted "key:value" list.'
 
@@ -16,7 +15,10 @@ def variables_filter(queryset, field, value):
     return queryset.var_filter(**kwargs)
 
 
-class VariableFilter(filters.FilterSet):
+class VariableFilter(DefaultIDFilter):
+    key = CharFilter(method=name_filter, help_text=name_help.replace('name', 'key name'))
+    value = CharFilter(method=name_filter, help_text='A value of instance.')
+
     class Meta:
         model = models.Variable
         fields = (
@@ -26,14 +28,19 @@ class VariableFilter(filters.FilterSet):
         )
 
 
-class _BaseFilter(filters.FilterSet):
-    id        = CharFilter(method=extra_filter, help_text=id_help)
-    id__not   = CharFilter(method=extra_filter, help_text=id_help)
+class _BaseFilter(DefaultIDFilter):
     name__not = CharFilter(method=name_filter, help_text=name_help)
     name      = CharFilter(method=name_filter, help_text=name_help)
 
 
+class _TypedFilter(_BaseFilter):
+    type = CharFilter(help_text='Instance type.')
+
+
 class TemplateFilter(_BaseFilter):
+    kind = CharFilter(help_text='A kind of template.')
+    inventory = CharFilter(help_text='The inventory id or path in project.')
+
     class Meta:
         model = models.Template
         fields = (
@@ -45,8 +52,8 @@ class TemplateFilter(_BaseFilter):
 
 
 class ModuleFilter(filters.FilterSet):
-    path__not = CharFilter(method=name_filter)
-    path      = CharFilter(method=name_filter)
+    path__not = CharFilter(method=name_filter, help_text='Full path to module.')
+    path      = CharFilter(method=name_filter, help_text='Full path to module.')
 
     class Meta:
         model = models.Module
@@ -55,7 +62,7 @@ class ModuleFilter(filters.FilterSet):
         )
 
 
-class HookFilter(_BaseFilter):
+class HookFilter(_TypedFilter):
     class Meta:
         model = models.Hook
         fields = (
@@ -69,7 +76,7 @@ class _BaseHGIFilter(_BaseFilter):
     variables = CharFilter(method=variables_filter, help_text=vars_help)
 
 
-class HostFilter(_BaseHGIFilter):
+class HostFilter(_TypedFilter, _BaseHGIFilter):
 
     class Meta:
         model = models.Host
@@ -95,8 +102,8 @@ class InventoryFilter(_BaseHGIFilter):
 
 
 class ProjectFilter(_BaseHGIFilter):
-    status        = CharFilter(method=extra_filter)
-    status__not   = CharFilter(method=extra_filter)
+    status        = CharFilter(method=extra_filter, help_text='Project sync status.')
+    status__not   = CharFilter(method=extra_filter, help_text='Project sync status.')
 
     class Meta:
         model = models.Project
@@ -106,61 +113,41 @@ class ProjectFilter(_BaseHGIFilter):
 
 
 class TaskFilter(_BaseFilter):
-    playbook__not = CharFilter(method=name_filter)
-    playbook      = CharFilter(method=name_filter)
+    playbook__not = CharFilter(method=name_filter, help_text='Playbook filename.')
+    playbook      = CharFilter(method=name_filter, help_text='Playbook filename.')
 
     class Meta:
         model = models.Task
         fields = ('id',
                   'name',
-                  'playbook',
-                  'project')
+                  'playbook',)
 
 
 class HistoryFilter(_BaseFilter):
-    help_text_time = '{} time to search.'
-    help_text_time_start = help_text_time.format('Start')
-    help_text_time_stop = help_text_time.format('Stop')
-    start_time__gt = IsoDateTimeFilter(name="start_time",
-                                       lookup_expr=('gt'),
-                                       help_text=help_text_time_start)
-    stop_time__gt = IsoDateTimeFilter(name="stop_time",
-                                      lookup_expr=('gt'),
-                                      help_text=help_text_time_stop)
-    start_time__lt = IsoDateTimeFilter(name="start_time",
-                                       lookup_expr=('lt'),
-                                       help_text=help_text_time_start)
-    stop_time__lt = IsoDateTimeFilter(name="stop_time",
-                                      lookup_expr=('lt'),
-                                      help_text=help_text_time_stop)
-    start_time__gte = IsoDateTimeFilter(name="start_time",
-                                        lookup_expr=('gte'),
-                                        help_text=help_text_time_start)
-    stop_time__gte = IsoDateTimeFilter(name="stop_time",
-                                       lookup_expr=('gte'),
-                                       help_text=help_text_time_stop)
-    start_time__lte = IsoDateTimeFilter(name="start_time",
-                                        lookup_expr=('lte'),
-                                        help_text=help_text_time_start)
-    stop_time__lte = IsoDateTimeFilter(name="stop_time",
-                                       lookup_expr=('lte'),
-                                       help_text=help_text_time_stop)
+    status = CharFilter(help_text='Status of execution.')
+    mode = CharFilter(help_text='Module or playbook name.')
+    kind = CharFilter(help_text='Kind of execution.')
+    older = IsoDateTimeFilter(name="start_time",
+                              lookup_expr=('lt'),
+                              help_text='Older then this time')
+    newer = IsoDateTimeFilter(name="start_time",
+                              lookup_expr=('gt'),
+                              help_text='Newer then this time')
 
     class Meta:
         model = models.History
         fields = ('id',
                   'mode',
                   'kind',
-                  'project',
-                  'status',
-                  'inventory',
-                  'start_time',
-                  'stop_time',
-                  'initiator',
-                  'initiator_type')
+                  'status',)
 
 
-class PeriodicTaskFilter(_BaseFilter):
+class PeriodicTaskFilter(_TypedFilter):
+    mode = CharFilter(help_text='Periodic task module or playbook name.')
+    kind = CharFilter(help_text='Kind of periodic task.')
+    template = NumberFilter(
+        help_text='A unique integer id of template used in periodic task.'
+    )
 
     class Meta:
         model = models.PeriodicTask
@@ -168,7 +155,6 @@ class PeriodicTaskFilter(_BaseFilter):
                   'mode',
                   'kind',
                   'type',
-                  'project',
                   'template')
 
 
