@@ -492,6 +492,11 @@ class TemplateSerializer(_WithVariablesSerializer):
     data = DataSerializer(required=True, write_only=True)
     options = DataSerializer(write_only=True)
     options_list = serializers.ListField(read_only=True)
+    kind = serializers.ChoiceField(
+        choices=[(k, k) for k in models.Template.kinds],
+        required=False,
+        default=models.Template.kinds[0]
+    )
 
     class Meta:
         model = models.Template

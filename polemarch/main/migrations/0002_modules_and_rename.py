@@ -35,6 +35,11 @@ def set_inventories_to_project(apps, schema_editor):
             pass
 
 
+def remove_templates_without_project(apps, schema_editor):
+    Template = apps.get_registered_model('main', 'Template')
+    Template.objects.filter(project=None).delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -88,7 +93,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='template',
             name='project',
-            field=polemarch.main.models.base.ForeignKeyACL(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='template', to='main.Project'),
+            field=polemarch.main.models.base.ForeignKeyACL(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='template', to='main.Project'),
         ),
         migrations.RunPython(
             code=sync_modules,
@@ -96,6 +101,10 @@ class Migration(migrations.Migration):
         ),
         migrations.RunPython(
             code=set_inventories_to_project,
+            reverse_code=migrations.RunPython.noop
+        ),
+        migrations.RunPython(
+            code=remove_templates_without_project,
             reverse_code=migrations.RunPython.noop
         ),
     ]

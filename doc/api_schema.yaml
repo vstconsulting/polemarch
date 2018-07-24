@@ -2054,6 +2054,11 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
+          required: false
+          type: string
         - name: ordering
           in: query
           description: Which field to use when ordering the results.
@@ -2955,6 +2960,11 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
+          required: false
+          type: string
         - name: ordering
           in: query
           description: Which field to use when ordering the results.
@@ -3540,6 +3550,11 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -4316,7 +4331,7 @@ paths:
           type: string
         - name: status
           in: query
-          description: ''
+          description: Project sync status.
           required: false
           type: string
         - name: id__not
@@ -4337,7 +4352,7 @@ paths:
           type: string
         - name: status__not
           in: query
-          description: ''
+          description: Project sync status.
           required: false
           type: string
         - name: ordering
@@ -5585,6 +5600,11 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -7632,12 +7652,12 @@ paths:
       parameters:
         - name: path
           in: query
-          description: ''
+          description: Full path to module.
           required: false
           type: string
         - name: path__not
           in: query
-          description: ''
+          description: Full path to module.
           required: false
           type: string
         - name: ordering
@@ -7751,12 +7771,12 @@ paths:
           type: string
         - name: mode
           in: query
-          description: ''
+          description: Periodic task module or playbook name.
           required: false
           type: string
         - name: kind
           in: query
-          description: ''
+          description: Kind of periodic task.
           required: false
           type: string
         - name: type
@@ -7764,16 +7784,11 @@ paths:
           description: Instance type.
           required: false
           type: string
-        - name: project
-          in: query
-          description: ''
-          required: false
-          type: string
         - name: template
           in: query
-          description: ''
+          description: A unique integer id of template used in periodic task.
           required: false
-          type: string
+          type: number
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -8281,12 +8296,7 @@ paths:
           type: string
         - name: playbook
           in: query
-          description: ''
-          required: false
-          type: string
-        - name: project
-          in: query
-          description: ''
+          description: Playbook filename.
           required: false
           type: string
         - name: id__not
@@ -8302,7 +8312,7 @@ paths:
           type: string
         - name: playbook__not
           in: query
-          description: ''
+          description: Playbook filename.
           required: false
           type: string
         - name: ordering
@@ -10354,13 +10364,13 @@ definitions:
         type: string
         enum:
           - on_object_del
-          - on_object_add
-          - on_user_add
-          - on_execution
-          - on_object_upd
+          - on_user_upd
           - after_execution
           - on_user_del
-          - on_user_upd
+          - on_object_upd
+          - on_user_add
+          - on_object_add
+          - on_execution
       enable:
         title: Enable
         type: boolean
@@ -11100,7 +11110,6 @@ definitions:
   Template:
     required:
       - name
-      - kind
       - data
       - options
     type: object
@@ -11117,8 +11126,10 @@ definitions:
       kind:
         title: Kind
         type: string
-        maxLength: 32
-        minLength: 1
+        enum:
+          - Module
+          - Task
+        default: Module
       data:
         $ref: '#/definitions/Data'
       options:
@@ -11131,7 +11142,6 @@ definitions:
   OneTemplate:
     required:
       - name
-      - kind
       - data
     type: object
     properties:
@@ -11150,8 +11160,10 @@ definitions:
       kind:
         title: Kind
         type: string
-        maxLength: 32
-        minLength: 1
+        enum:
+          - Module
+          - Task
+        default: Module
       data:
         $ref: '#/definitions/Data'
       options:
@@ -11182,11 +11194,11 @@ definitions:
         title: Key
         type: string
         enum:
-          - repo_sync_on_run
           - repo_key
           - repo_type
-          - repo_password
           - repo_branch
+          - repo_sync_on_run
+          - repo_password
       value:
         title: Value
         type: string

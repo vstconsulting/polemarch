@@ -52,8 +52,8 @@ class TemplateFilter(_BaseFilter):
 
 
 class ModuleFilter(filters.FilterSet):
-    path__not = CharFilter(method=name_filter)
-    path      = CharFilter(method=name_filter)
+    path__not = CharFilter(method=name_filter, help_text='Full path to module.')
+    path      = CharFilter(method=name_filter, help_text='Full path to module.')
 
     class Meta:
         model = models.Module
@@ -76,7 +76,7 @@ class _BaseHGIFilter(_BaseFilter):
     variables = CharFilter(method=variables_filter, help_text=vars_help)
 
 
-class HostFilter(_TypedFilter):
+class HostFilter(_TypedFilter, _BaseHGIFilter):
 
     class Meta:
         model = models.Host
@@ -102,8 +102,8 @@ class InventoryFilter(_BaseHGIFilter):
 
 
 class ProjectFilter(_BaseHGIFilter):
-    status        = CharFilter(method=extra_filter)
-    status__not   = CharFilter(method=extra_filter)
+    status        = CharFilter(method=extra_filter, help_text='Project sync status.')
+    status__not   = CharFilter(method=extra_filter, help_text='Project sync status.')
 
     class Meta:
         model = models.Project
@@ -113,15 +113,14 @@ class ProjectFilter(_BaseHGIFilter):
 
 
 class TaskFilter(_BaseFilter):
-    playbook__not = CharFilter(method=name_filter)
-    playbook      = CharFilter(method=name_filter)
+    playbook__not = CharFilter(method=name_filter, help_text='Playbook filename.')
+    playbook      = CharFilter(method=name_filter, help_text='Playbook filename.')
 
     class Meta:
         model = models.Task
         fields = ('id',
                   'name',
-                  'playbook',
-                  'project')
+                  'playbook',)
 
 
 class HistoryFilter(_BaseFilter):
@@ -144,6 +143,11 @@ class HistoryFilter(_BaseFilter):
 
 
 class PeriodicTaskFilter(_TypedFilter):
+    mode = CharFilter(help_text='Periodic task module or playbook name.')
+    kind = CharFilter(help_text='Kind of periodic task.')
+    template = NumberFilter(
+        help_text='A unique integer id of template used in periodic task.'
+    )
 
     class Meta:
         model = models.PeriodicTask
@@ -151,7 +155,6 @@ class PeriodicTaskFilter(_TypedFilter):
                   'mode',
                   'kind',
                   'type',
-                  'project',
                   'template')
 
 
