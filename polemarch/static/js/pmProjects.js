@@ -791,7 +791,7 @@ pmProjects.syncSelectedProjects = function()
 tabSignal.connect("polemarch.start", function()
 {
     // projects
-    spajs.addMenu({
+   /* spajs.addMenu({
         id:"projects",
         urlregexp:[/^projects$/, /^projects\/search\/?$/, /^project$/, /^projects\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmProjects.showUpdatedList(holder, menuInfo, data);},
@@ -827,5 +827,5 @@ tabSignal.connect("polemarch.start", function()
         id:"project-ansible-module-run",
         urlregexp:[/^project\/([0-9]+)\/ansible-module\/run$/],
         onOpen:function(holder, menuInfo, data){return pmAnsibleModule.showInProject(holder, menuInfo, data);}
-    })
+    })*/
 })

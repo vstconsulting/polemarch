@@ -2783,7 +2783,7 @@ pmInventories.filed.inventoriesAutocomplete.render = function(pmObj, filed, item
 tabSignal.connect("polemarch.start", function()
 {
     // inventories
-    spajs.addMenu({
+    /*spajs.addMenu({
         id:"inventories",
         urlregexp:[/^inventories$/, /^inventory$/, /^inventories\/search\/?$/, /^inventories\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showList(holder, menuInfo, data);}
@@ -2812,5 +2812,5 @@ tabSignal.connect("polemarch.start", function()
         id:"newInventory",
         urlregexp:[/^new-inventory$/, /^([A-z0-9_]+)\/([0-9]+)\/new-inventory$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showNewItemPage(holder, menuInfo, data);}
-    })
+    })*/
 })

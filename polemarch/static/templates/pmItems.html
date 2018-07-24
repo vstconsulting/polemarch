@@ -1,33 +1,33 @@
 
 <script  type="text/x-just" style="display: none;" data-just="pagination">
     <% if(totalPage > 1){ %>
-    <ul class="pagination no-margin pull-right">
-        <% if(totalPage < 21){ %>
-        <% for(var i = 0; i < totalPage; i++){ %>
-        <% if(i == currentPage){ %>
-        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
-        <% }else{ %>
-        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" ><%- i+1 %></a></li>
-        <% } %>
-        <% } %>
-        <% }else{ %>
-        <% for(var i = 0; i < totalPage; i++){ %>
-        <% if(i == currentPage){ %>
-        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
-        <% }else{ %>
-        <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
-        <% if( dotShow == false){ %>
-        <% dotShow = true %>
-        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);">..</a></li>
-        <% } %>
-        <% }else{ %>
-        <% dotShow = false %>
-        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" ><%- i+1 %></a></li>
-        <% } %>
-        <% } %>
-        <% } %>
-        <% } %>
-    </ul>
+        <ul class="pagination no-margin pull-right">
+            <% if(totalPage < 21){ %>
+                <% for(var i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" ><%- i+1 %></a></li>
+                    <% } %>
+                <% } %>
+            <% }else{ %>
+                <% for(var i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
+                            <% if( dotShow == false){ %>
+                                <% dotShow = true %>
+                                <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);">..</a></li>
+                            <% } %>
+                        <% }else{ %>
+                            <% dotShow = false %>
+                            <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" ><%- i+1 %></a></li>
+                        <% } %>
+                    <% } %>
+                <% } %>
+            <% } %>
+        </ul>
     <% } %>
 </script>
 
@@ -310,6 +310,7 @@
                                 <%= guiObj.paginationHtml(guiObj.model.data) %>
                             <% } %>
                         <%] %>
+                        <%* pagination %>
                     </div>
                 </div>
             </section>
@@ -321,11 +322,24 @@
 <script type="text/x-just" data-just="entity_one">
 <!-- items_new_page -->
 
+    <%[ buttons %>
+        <%= new guiElements.button({onclick:function(){guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
+        <%= new guiElements.button({onclick:function(){ deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete this '+guiObj.view.bulk_name, text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
+    <%] %>  
+
+    <!-- Родительский шаблон -->
+    <%! entity_new %>
+</script>
+
+<script type="text/x-just" data-just="entity_new">
+           
     <section class="content">
         <div class="row">
             <section class="col-lg-12">
-                <%= new guiElements.button({onclick:function(){guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
-                <%= new guiElements.button({onclick:function(){ deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete this '+guiObj.view.bulk_name, text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
+                <%[ buttons %>
+                    <%= new guiElements.button({onclick:function(){createAndGoEdit(guiObj)}, class:'btn btn-primary', title:'Create', text:'Create'}).render() %> 
+                <%] %> 
+                <%* buttons %>
             </section>
         </div>
 
@@ -347,9 +361,10 @@
             </section>
         </div>
     </section>
-    <!-- /items_new_page -->
+    <!-- /items_new_page --> 
 </script>
-
+            
+            
 <!-- Отрисует страницу ошибки загрузки данных -->
 <script type="text/x-just" data-just="error_as_page">
     <!-- error_as_page --> 
@@ -376,16 +391,17 @@
 <!-- Отрисует объект как паоле в другом объекте -->
 <script type="text/x-just" data-just="entity_one_as_filed">
     <!-- entity_one_as_filed -->
-
-    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-        <label class="control-label"><%- guiObj.view.bulk_name %></label>
-        <div class="form-control disabled" disabled="" maxlength="255">
-            <a href="<%- hostname %>/?<%- guiObj.view.bulk_name %>/<%- guiObj.model.data.id %>" onclick="return spajs.openURL(this.href);">
-                <%- guiObj.model.data.name || guiObj.model.data.username || (guiObj.view.bulk_name + "/"+guiObj.model.data.id) %>
-            </a>
+    <% if(guiObj.model.data){ %>
+        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+            <label class="control-label"><%- guiObj.view.bulk_name %></label>
+            <div class="form-control disabled" disabled="" maxlength="255">
+                <a href="<%- hostname %>/?<%- guiObj.view.bulk_name %>/<%- guiObj.model.data.id %>" onclick="return spajs.openURL(this.href);">
+                    <%- guiObj.model.data.name || guiObj.model.data.username || (guiObj.view.bulk_name + "/"+guiObj.model.data.id) %>
+                </a>
+            </div>
+            <div class="help-block"></div>
         </div>
-        <div class="help-block"></div>
-    </div>
+    <% } %>
 </script>
 
 <!-- Список сущностей -->

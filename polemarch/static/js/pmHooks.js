@@ -589,6 +589,7 @@ pmHooks.changeSelectedItemsActivation = function(mode)
 
 tabSignal.connect("polemarch.start", function()
 {
+/*
     spajs.addMenu({
         id:"hooks",
         urlregexp:[/^hooks/, /^hooks\/search\/?$/, /^hooks\/page\/([0-9]+)$/],
@@ -612,4 +613,5 @@ tabSignal.connect("polemarch.start", function()
         urlregexp:[/^hooks\/search\/([A-z0-9 %\-.:,=]+)$/, /^hooks\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHooks.openSomeHookPage(holder, menuInfo, data, 'showSearchResults');}
     })
+*/
 })

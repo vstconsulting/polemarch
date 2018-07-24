@@ -1165,6 +1165,7 @@ pmHistory.setTableRowLinkInLink = function()
 
 tabSignal.connect("polemarch.start", function()
 {
+/*
     // history
     spajs.addMenu({
         id:"history",
@@ -1287,5 +1288,5 @@ tabSignal.connect("polemarch.start", function()
             /^project\/([0-9]+)\/template\/Module\/([0-9]+)\/history\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHistory.showSearchResultsInTemplate(holder, menuInfo, data, pmModuleTemplates);}
     })
-
+*/
 })
