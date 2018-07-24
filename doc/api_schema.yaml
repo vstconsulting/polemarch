@@ -1,10 +1,17 @@
 swagger: '2.0'
 info:
   title: Polemarch
-  description: Polemarch
+  description: "\n### Polemarch is ansible based service for orchestration infrastructure.\n\
+    \n* [Documentation](http://polemarch.readthedocs.io/)\n* [Issue Tracker](https://gitlab.com/vstconsulting/polemarch/issues)\n\
+    * [Source Code](https://gitlab.com/vstconsulting/polemarch)\n\n"
   termsOfService: ''
   contact:
     name: System Administrator
+  x-versions:
+    django: 1.11.10
+    vstutils: 1.2.0
+    library: 0.1.13
+    application: 0.1.13
   version: v2
 host: localhost:8080
 schemes:
@@ -10357,20 +10364,20 @@ definitions:
         title: Type
         type: string
         enum:
-          - HTTP
           - SCRIPT
+          - HTTP
       when:
         title: When
         type: string
         enum:
           - on_execution
-          - on_user_upd
-          - on_object_del
-          - on_user_add
-          - on_object_upd
           - after_execution
-          - on_object_add
+          - on_user_add
+          - on_user_upd
           - on_user_del
+          - on_object_add
+          - on_object_upd
+          - on_object_del
       enable:
         title: Enable
         type: boolean
@@ -10503,17 +10510,7 @@ definitions:
         type: string
         format: autocomplete
         additionalProperties:
-          $ref: '#/definitions/Module'
-      version:
-        title: Version
-        description: show program's version number and exit
-        type: boolean
-        default: false
-      help:
-        title: Help
-        description: show this help message and exit
-        type: boolean
-        default: false
+          $ref: '#/definitions/Module/properties/id'
       list_hosts:
         title: List hosts
         description: outputs a list of matching hosts; does not execute anything else
@@ -10708,17 +10705,7 @@ definitions:
         type: string
         format: autocomplete
         additionalProperties:
-          $ref: '#/definitions/Playbook'
-      version:
-        title: Version
-        description: show program's version number and exit
-        type: boolean
-        default: false
-      help:
-        title: Help
-        description: show this help message and exit
-        type: boolean
-        default: false
+          $ref: '#/definitions/Playbook/properties/id'
       list_hosts:
         title: List hosts
         description: outputs a list of matching hosts; does not execute anything else
@@ -11127,9 +11114,9 @@ definitions:
         title: Kind
         type: string
         enum:
-          - Task
           - Module
-        default: Task
+          - Task
+        default: Module
       data:
         $ref: '#/definitions/Data'
       options:
@@ -11161,9 +11148,9 @@ definitions:
         title: Kind
         type: string
         enum:
-          - Task
           - Module
-        default: Task
+          - Task
+        default: Module
       data:
         $ref: '#/definitions/Data'
       options:
@@ -11194,11 +11181,11 @@ definitions:
         title: Key
         type: string
         enum:
+          - repo_type
           - repo_sync_on_run
           - repo_branch
           - repo_password
           - repo_key
-          - repo_type
       value:
         title: Value
         type: string

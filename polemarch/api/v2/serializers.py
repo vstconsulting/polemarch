@@ -311,14 +311,14 @@ class VariableSerializer(_SignalSerializer):
 
 
 class ProjectVariableSerializer(VariableSerializer):
-    project_keys = OrderedDict(
-        repo_type='Types of repo. Default="MANUAL".',
-        repo_sync_on_run="Sync project by every execution.",
-        repo_branch="[Only for GIT repos] Checkout branch on sync.",
-        repo_password="[Only for GIT repos] Password to fetch access.",
-        repo_key="[Only for GIT repos] Key to fetch access.",
+    project_keys = (
+        ('repo_type', 'Types of repo. Default="MANUAL".'),
+        ('repo_sync_on_run', "Sync project by every execution."),
+        ('repo_branch', "[Only for GIT repos] Checkout branch on sync."),
+        ('repo_password', "[Only for GIT repos] Password to fetch access."),
+        ('repo_key', "[Only for GIT repos] Key to fetch access."),
     )
-    key = serializers.ChoiceField(choices=list(project_keys.items()))
+    key = serializers.ChoiceField(choices=project_keys)
 
 
 class _WithVariablesSerializer(_WithPermissionsSerializer):
@@ -724,6 +724,8 @@ def generate_fileds(ansible_type):
     fields = OrderedDict()
 
     for ref, settings in ansible_reference.raw_dict[ansible_type].items():
+        if ref in ['help', 'version',]:
+            continue
         ref_type = settings.get('type', None)
         kwargs = dict(help_text=settings.get('help', ''), required=False)
         if ref_type is None:

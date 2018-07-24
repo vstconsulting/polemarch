@@ -1,3 +1,12 @@
+'''
+### Polemarch is ansible based service for orchestration infrastructure.
+
+* [Documentation](http://polemarch.readthedocs.io/)
+* [Issue Tracker](https://gitlab.com/vstconsulting/polemarch/issues)
+* [Source Code](https://gitlab.com/vstconsulting/polemarch)
+
+'''
+
 import os
 import warnings
 try:
