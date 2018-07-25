@@ -28,6 +28,7 @@ default_settings = {
     ),
     # VSTUTILS settings
     "VST_PROJECT": os.getenv("VST_PROJECT", 'polemarch'),
+    "VST_ROOT_URLCONF": os.getenv("VST_ROOT_URLCONF", 'vstutils.urls'),
 }
 
 __version__ = "0.1.13"

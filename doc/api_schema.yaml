@@ -8,10 +8,11 @@ info:
   contact:
     name: System Administrator
   x-versions:
-    django: 1.11.10
-    vstutils: 1.2.0
-    library: 0.1.13
     application: 0.1.13
+    library: 0.1.13
+    vstutils: 1.2.0
+    django: 1.11.10
+    ansible: 2.6.1
   version: v2
 host: localhost:8080
 schemes:
