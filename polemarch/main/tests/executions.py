@@ -348,6 +348,7 @@ class BaseExecutionsTestCase(BaseTestCase):
         exec_data = exec_data or dict(
             playbook='main.yml', inventory='inventory.ini', save_result=False
         )
+        exec_data['check'] = True
         return self.make_bulk([
             self.get_mod_bulk(
                 'project', project_data['id'], exec_data, 'execute_{}'.format(type)

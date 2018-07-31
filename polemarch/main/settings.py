@@ -52,6 +52,7 @@ API = {
         stats={'view': 'polemarch.api.v2.views.StatisticViewSet', 'op_types': ['get']})
 }
 
+SWAGGER_SETTINGS['DEFAULT_INFO'] = 'polemarch.api.v2.swagger.api_info'
 
 # Polemarch handlers
 

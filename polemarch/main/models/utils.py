@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
 import re
 import sys
 import logging
@@ -13,7 +12,7 @@ import six
 from django.utils import timezone
 from vstutils.utils import tmp_file, KVExchanger
 from .hosts import Inventory
-from ...main.utils import CmdExecutor, CalledProcessError
+from ...main.utils import CmdExecutor, CalledProcessError, AnsibleArgumentsReference
 
 
 logger = logging.getLogger("polemarch")
@@ -91,6 +90,10 @@ class Executor(CmdExecutor):
 
 
 class AnsibleCommand(object):
+    ref_types = {
+        'ansible-playbook': 'playbook',
+        'ansible': 'module',
+    }
     command_type = None
 
     status_codes = {
@@ -143,6 +146,8 @@ class AnsibleCommand(object):
         self.args = args
         self.kwargs = kwargs
         self.__will_raise_exception = False
+        self.ref_type = self.ref_types[self.command_type]
+        self.ansible_ref = AnsibleArgumentsReference().raw_dict[self.ref_type]
 
     def __generate_arg_file(self, value):
         file = tmp_file(value)
@@ -167,8 +172,11 @@ class AnsibleCommand(object):
                 result = self.__generate_arg_file(value)  # nocv
             value = result[0]
             files = files + result[1]
-            extra_args.append("--{}".format(key))
-            extra_args += [str(value)] if value else []
+
+            key_type = self.ansible_ref[key].get('type', None)
+            if (key_type is None and value) or key_type:
+                extra_args.append("--{}".format(key))
+            extra_args += [str(value)] if key_type else []
         return AnsibleExtra(extra_args, files)
 
     def get_workdir(self):
@@ -281,6 +289,7 @@ class AnsibleModule(AnsibleCommand):
         if not kwargs.get('args', None):
             kwargs.pop('args', None)
         super(AnsibleModule, self).__init__(*pargs, **kwargs)
+        self.ansible_ref['module-name'] = {'type': 'string'}
 
     def get_inventory_arg(self, target, extra_args):
         if not self.inventory_object.is_file:

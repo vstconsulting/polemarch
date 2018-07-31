@@ -10,16 +10,16 @@ logger = logging.getLogger('polemarch')
 
 
 class HookHandlers(ModelHandlers):
-    when_types_names = collections.OrderedDict(
-        on_execution="Before start task",
-        after_execution="After end task",
-        on_user_add="When new user register",
-        on_user_upd="When user update data",
-        on_user_del="When user was removed",
-        on_object_add="When new Polemarch object was added",
-        on_object_upd="When Polemarch object was updated",
-        on_object_del="When Polemarch object was removed",
-    )
+    when_types_names = collections.OrderedDict((
+        ('on_execution', "Before start task"),
+        ('after_execution', "After end task"),
+        ('on_user_add', "When new user register"),
+        ('on_user_upd', "When user update data"),
+        ('on_user_del', "When user was removed"),
+        ('on_object_add', "When new Polemarch object was added"),
+        ('on_object_upd', "When Polemarch object was updated"),
+        ('on_object_del', "When Polemarch object was removed"),
+    ))
     when_types = tuple(when_types_names.keys())
 
     def get_handler(self, obj):

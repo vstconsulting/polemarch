@@ -241,8 +241,8 @@ class AnsibleArgumentsReference(object):
         mtype = self.raw_dict[command][argument]["type"]
         if mtype == 'int':
             int(value)
-        elif mtype is None and value not in [None, ""]:  # nocv
-            raise AssertionError("This argument shouldn't have value")
+        elif mtype is not None and value is None:  # nocv
+            raise AssertionError("This argument should have value")
         return True
 
     def validate_args(self, command, args):
