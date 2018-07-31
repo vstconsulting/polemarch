@@ -378,7 +378,9 @@ class History(BModel):
     executor       = models.ForeignKey(User, blank=True, null=True, default=None)
     json_options   = models.TextField(default="{}")
 
-    statuses = ['DELAY', 'OK', 'ERROR', 'OFFLINE', 'INTERRUPTED']
+    working_statuses = ['DELAY', 'RUN']
+    stoped_statuses = ['OK', 'ERROR', 'OFFLINE', 'INTERRUPTED']
+    statuses = working_statuses + stoped_statuses
 
     def __init__(self, *args, **kwargs):
         execute_args = kwargs.pop('execute_args', None)
@@ -398,6 +400,10 @@ class History(BModel):
             ["id", "project", "mode", "status", "inventory",
              "start_time", "stop_time", "initiator", "initiator_type"]
         ]
+
+    @property
+    def working(self):
+        return self.status in self.working_statuses
 
     def get_hook_data(self, when):
         data = OrderedDict()

@@ -8,6 +8,7 @@ from datetime import timedelta
 from django.utils.timezone import now
 from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
+from .. import utils
 
 
 test_playbook_content = '''
@@ -291,6 +292,8 @@ class BaseExecutionsTestCase(BaseTestCase):
         self.assertFalse(os.path.exists(self.get_project_dir(id, **kwargs)))
 
     def project_workflow(self, repo_type, **kwargs):
+        utils.AnsibleModules(detailed=True).clear_cache()
+        utils.AnsibleArgumentsReference().clear_cache()
         execute = kwargs.pop('execute', False)
         project_data = self.create_project_test(str(uuid.uuid1()), repo_type, **kwargs)
         self.remove_project_dir(**project_data)

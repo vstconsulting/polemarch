@@ -22,6 +22,7 @@ from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
 from .base import ManyToManyFieldACL, BQuerySet, BModel
 from .hooks import Hook
+from ..utils import AnsibleModules
 
 
 logger = logging.getLogger("polemarch")
@@ -250,8 +251,25 @@ class Module(BModel):
 
     @property
     def name(self):
-        return self.data.get('module', None) or self.path.split('.')[-1]
+        return self.path.split('.')[-1]
+
+    def _load_data(self, data):
+        return load(data, Loader=Loader)
+
+    def _get_module_data_from_cli(self):
+        modules = AnsibleModules(detailed=True)
+        module_list = modules.get(self.path)
+        module = module_list[0] if module_list else None
+        if module:
+            doc_data = module['doc_data']
+            data = self._load_data(doc_data)
+            self._data = doc_data
+            self.save()
+            return data
 
     @property
     def data(self):
-        return load(self._data, Loader=Loader)
+        data = self._load_data(self._data)
+        if not data:
+           data = self._get_module_data_from_cli()
+        return data

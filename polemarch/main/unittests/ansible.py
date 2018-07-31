@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from ..utils import AnsibleArgumentsReference, AnsibleModules
+from ..utils import AnsibleArgumentsReference
 
 
 class AnsibleTestCase(TestCase):
