@@ -165,7 +165,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
         '''
         obj = self.get_object()
         exch = KVExchanger(utils.CmdExecutor.CANCEL_PREFIX + str(obj.id))
-        exch.send(True, 60)
+        exch.send(True, 60) if obj.working else None
         return base.Response("Task canceled: {}".format(obj.id), status.HTTP_200_OK).resp
 
     @deco.action(["get"], detail=yes, serializer_class=sers.DataSerializer)
