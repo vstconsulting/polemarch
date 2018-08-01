@@ -69,16 +69,34 @@
 </script>
 
 
+<script type="text/x-just" data-just="page_breadcrumb">
+    <section class="content-header">
+        <h1>
+            page_breadcrumb
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">page_breadcrumb</li>
+        </ol>
+    </section>
+</script>
+
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="action_page">
-    
+ 
     <section class="content">
         <div class="row">
             <section class="col-lg-12">
+                <%[ breadcrumb %>
+                    <%= this.partial('page_breadcrumb', { }) %>
+                <%] %>
+                <%* breadcrumb %>
+                
                 <%[ buttons %>
-                 
+
                 <%] %>
                 <%* buttons %>
+                
             </section>
         </div>
 
@@ -115,12 +133,27 @@
 </script>
 
 <!-- Список сущностей -->
+<script type="text/x-just" data-just="action_as_button">
+    <a href="<%- opt.link %>"
+        onclick="return spajs.openURL(this.href);"
+        class="<%- opt.class %>"
+    >
+        <%- opt.title %>
+    </a>
+</script>
+
+<!-- Список сущностей -->
 <script type="text/x-just" data-just="items_empty_list">
     <div style="text-align: center;" >No child elements, list is empty</div>
 </script>
 
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="entity_list">
+
+    <%[ breadcrumb %>
+        <%= this.partial('page_breadcrumb', { }) %>
+    <%] %>
+    <%* breadcrumb %>
 
     <section class="content">
         <div class="row">
@@ -197,7 +230,9 @@
                                                         <%- guiObj.model.fileds[j].title %>
                                                 </th>
                                             <% } %>
-                                            <th style="width: 95px;" >Actions</th>
+                                            <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
+                                                <th style="width: 95px;" >Actions</th>
+                                            <% } %>
                                         </tr>
                                         <% for(var i in guiObj.model.data.results){ %>
                                             <tr
@@ -212,32 +247,34 @@
                                                         <% if(guiObj.model.fileds[j].style){ %><%= guiObj.model.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                         <% if(guiObj.model.fileds[j].class){ %><%= guiObj.model.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                     >
-                                                        <% if(!guiObj.model.fileds[j].value){ %> 
-                                                            <a href="/?<%- guiObj.model.page_name %>/<%- guiObj.model.data.results[i].id %>" class="item-name"
+                                                        <% if(!guiObj.model.fileds[j].value){ %>
+                                                            <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id %>" class="item-name"
                                                                 onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][guiObj.model.fileds[j].name] %></a>
                                                         <% }else{ %>
                                                             <%= guiObj.model.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], guiObj.model.fileds[j].name, opt]) %>
                                                         <% } %>
                                                     </td>
                                                 <% } %>
-                                                <td>
-                                                   <!-- < % [ actions % >  -->
-                                                        <div class="btn-group" role="group">
-                                                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                                Actions <%   %><%   %><%   %><%   %>
-                                                                <span class="caret"></span>
-                                                            </button>
-                                                            <ul class="dropdown-menu dropdown-menu-right">
-                                                                <% for(var k in guiObj.parent.one.actions){   %>
-                                                                    <li>
-                                                                        <%= guiObj.parent.one.actions[k].renderAsLink(guiObj.model.data.results[i]) %>
-                                                                    </li>
-                                                                <% } %> 
-                                                            </ul>
-                                                        </div>
-                                                    <!-- < % ] % > 
-                                                    < % * actions % > -->
-                                                </td>
+                                                <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
+                                                    <td>
+                                                       <!-- < % [ actions % >  -->
+                                                            <div class="btn-group" role="group">
+                                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                    Actions 
+                                                                    <span class="caret"></span>
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-right">
+                                                                    <% for(var k in guiObj.model.sublinks){   %>
+                                                                        <li>
+                                                                            <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>"><%- k %> <%- guiObj.model.sublinks[k].description %></a>
+                                                                        </li>
+                                                                    <% } %>
+                                                                </ul>
+                                                            </div>
+                                                        <!-- < % ] % >
+                                                        < % * actions % > -->
+                                                    </td>
+                                                <% } %>
                                             </tr>
                                         <% } %>
                                     </tbody>
@@ -321,6 +358,11 @@
     <%[ buttons %>
         <%= new guiElements.button({onclick:function(){guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
         <%= new guiElements.button({onclick:function(){ deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete this '+guiObj.view.bulk_name, text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
+
+        <% for(var k in guiObj.model.sublinks){   %>
+            <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents+'/'+ guiObj.model.sublinks[k].name %>"><%- k %> <%- guiObj.model.sublinks[k].description %></a>
+        <% } %>
+
     <%] %>
 
     <!-- Родительский шаблон -->
@@ -329,6 +371,11 @@
 
 <script type="text/x-just" data-just="entity_new">
 <!-- items_new_page -->
+
+    <%[ breadcrumb %>
+        <%= this.partial('page_breadcrumb', { }) %>
+    <%] %>
+    <%* breadcrumb %>
 
     <section class="content">
         <div class="row">
@@ -401,8 +448,8 @@
     <% }else{ %>
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
             <label class="control-label"><%- guiObj.view.bulk_name %></label>
-            <div class="form-control disabled" disabled="" maxlength="255"> 
-                <%- guiObj.view.bulk_name  %> 
+            <div class="form-control disabled" disabled="" maxlength="255">
+                <%- guiObj.view.bulk_name  %>
             </div>
             <div class="help-block"></div>
         </div>
