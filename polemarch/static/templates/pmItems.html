@@ -219,7 +219,7 @@
                                 <table class="table table-bordered multiple-select">
                                     <tbody>
                                         <tr>
-                                            <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); <%- guiObj.model.className %>.toggleSelectAll($('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                            <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- guiObj.model.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </th>
@@ -236,9 +236,9 @@
                                         </tr>
                                         <% for(var i in guiObj.model.data.results){ %>
                                             <tr
-                                                class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- guiObj.model.selectedItems.justClass(guiObj.model.data.results[i].id, 'selected') %>"
+                                                class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- window.guiListSelections.selectionControll(guiObj.model.selectionTag, guiObj.model.data.results[i].id) %>"
                                                 data-id="<%- guiObj.model.data.results[i].id %>" >
-                                                <td class=""  onclick="<%- guiObj.model.className %>.toggleSelect(<%- guiObj.model.data.results[i].id %>); return false;">
+                                                <td class=""  onclick="window.guiListSelections.toggleSelection('<%- guiObj.model.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
                                                     <div class="ico-on fa fa-toggle-on"></div>
                                                     <div class="ico-off fa  fa-toggle-off"></div>
                                                 </td>
@@ -266,7 +266,11 @@
                                                                 <ul class="dropdown-menu dropdown-menu-right">
                                                                     <% for(var k in guiObj.model.sublinks){   %>
                                                                         <li>
-                                                                            <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>"><%- k %> <%- guiObj.model.sublinks[k].description %></a>
+                                                                            <a 
+                                                                                href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>" 
+                                                                                onclick="return spajs.openURL(this.href);">
+                                                                                    <%- k %> <%- guiObj.model.sublinks[k].description %>
+                                                                            </a>
                                                                         </li>
                                                                     <% } %>
                                                                 </ul>
@@ -285,37 +289,38 @@
                     </div>
                     <div class="box-footer clearfix">
                         <%[ action_buttons %>
-                        <div class="btn-group <%- guiObj.model.justNotClass('selectedCount', 'hide') %>" role="group">
-                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Actions on <%= guiObj.model.justText('selectedCount') %> items
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a href="#"
-                                        onclick="spajs.showLoader(<%- guiObj.model.className %>.deleteRows($('.multiple-select .item-row.selected'))); return false;" >Delete from this page</a>
-                                </li>
-                                <li>
-                                    <a href="#" onclick="spajs.showLoader(<%- guiObj.model.className %>.deleteSelected()); return false;" >Delete all selected elements</a>
-                                </li>
-                                <% for(var j in guiObj.model.actionsOnSelected){ %>
-                                    <% if(!guiObj.model.actionsOnSelected[j].title){ %>
-                                        <li role="separator" class="divider"></li>
-                                    <% }else{ %>
+                            <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(guiObj.model.selectionTag, 'hide') %>" role="group">
+                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Actions on <%= window.guiListSelections.selectedCount.justText(guiObj.model.selectionTag) %> items
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <% for(var k in guiObj.model.multi_actions){   %>
+                                        <!--<li>
+                                            <a href="#"
+                                                onclick="spajs.showLoader(<%- guiObj.model.className %>.deleteRows($('.multiple-select .item-row.selected'))); return false;" >Delete from this page</a>
+                                        </li>
                                         <li>
-                                            <a href="<%- guiObj.model.actionsOnSelected[j].link.apply(guiObj, [guiObj.model.data.results[i], opt]) %>"
-                                                onclick="<%- guiObj.model.actionsOnSelected[j].function.apply(guiObj, [guiObj.model.data.results[i], opt]) %>" >
-                                                    <% if(typeof guiObj.model.actionsOnSelected[j].title == 'function'){ %>
-                                                        <%= guiObj.model.actionsOnSelected[j].title.apply(guiObj, [guiObj.model.data.results[i], opt]) %>
-                                                    <% }else{ %>
-                                                        <%- guiObj.model.actionsOnSelected[j].title %>
-                                                    <% } %>
+                                            <a href="#" onclick="spajs.showLoader(<%- guiObj.model.className %>.deleteSelected()); return false;" >Delete all selected elements</a>
+                                        </li>-->
+                                        <li>
+                                            <a  
+                                                href="#" 
+                                                onclick="goToMultiAction(window.guiListSelections.getSelection('<%- guiObj.model.selectionTag %>'), '<%- guiObj.model.multi_actions[k].name %>'); return false;">
+                                                    <%- k %> <%- guiObj.model.multi_actions[k].description %>
                                             </a>
                                         </li>
-                                    <% } %>
-                                <% } %>
-                            </ul>
-                        </div>
+                                        <li>
+                                            <a 
+                                                href="#" 
+                                                onclick="goToMultiActionFromElements($('.multiple-select .item-row.selected'), '<%- guiObj.model.multi_actions[k].name %>'); return false;">
+                                                    <%- k %> <%- guiObj.model.multi_actions[k].description %> for all selected elements
+                                            </a>
+                                        </li>
+                                        <li role="separator" class="divider"></li>
+                                    <% } %> 
+                                </ul>
+                            </div>
                         <%] %>
                         <%* action_buttons %>
 
@@ -328,10 +333,10 @@
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a href="#" onclick="spajs.showLoader(<%- guiObj.model.className %>.toggleSelectEachItem(true)); return false;" >Select all</a>
+                                            <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(guiObj.model.selectionTag, true)); return false; }) %> >Select all</a>
                                         </li>
-                                        <li class=" <%- guiObj.model.justNotClass('selectedCount', 'hide') %>" >
-                                            <a href="#" onclick="spajs.showLoader(<%- guiObj.model.className %>.toggleSelectEachItem(false)); return false;" >Unselect all</a>
+                                        <li class="<%- window.guiListSelections.selectedCount.justNotClass(guiObj.model.selectionTag, 'hide') %>" >
+                                            <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(guiObj.model.selectionTag, false)); return false; }) %>" >Unselect all</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -351,6 +356,12 @@
     </section>
 </script>
 
+<script type="text/x-just" data-just="entity_list_add_subitems">
+<!-- entity_one -->
+ 
+    <!-- Родительский шаблон -->
+    <%! entity_list %>
+</script>
 
 <script type="text/x-just" data-just="entity_one">
 <!-- entity_one -->
