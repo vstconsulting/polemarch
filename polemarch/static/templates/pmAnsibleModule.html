@@ -107,10 +107,10 @@
                             style="width:100%" 
                         >
                             <option selected value="0" disabled>Not set</option>
-                            <% for(var i in pmProjects.model.itemslist.results){ %>
+                            <% for(var i in projects.model.data.results){ %>
                                 <option
-                                    value="<%- pmProjects.model.itemslist.results[i].id %>"
-                                    ><%- pmProjects.model.itemslist.results[i].name %></option>
+                                    value="<%- projects.model.data.results[i].id %>"
+                                    ><%- projects.model.data.results[i].name %></option>
                             <% } %>
                         </select>
                     </div>

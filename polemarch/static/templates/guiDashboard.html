@@ -228,11 +228,15 @@
                 <% for(var j in pmDashboard.model.widgets[i]){  %>
                     <% if (pmDashboard.model.widgets[i][j].active) { %>
                         <% if(pmDashboard.model.widgets[i][j].widget && pmDashboard.model.widgets[i][j].type==1){ %>
-                            <%= pmDashboard.model.widgets[i][j].widget.render() %>
+                            <% if(pmDashboard.model.widgets[i][j].widget){ %>
+                                <%= pmDashboard.model.widgets[i][j].widget.render() %>
+                            <% } %>
                         <% } %>
                         <% if(pmDashboard.model.widgets[i][j].type==0){ %>
-                            <div class="dnd-block" id="<%= pmDashboard.model.widgets[i][j].name %>"></div>
-                            <%= pmDashboard.model.widgets[i][j].widget.render() %>
+                            <% if(pmDashboard.model.widgets[i][j].widget){ %>
+                                <div class="dnd-block" id="<%= pmDashboard.model.widgets[i][j].name %>"></div>
+                                <%= pmDashboard.model.widgets[i][j].widget.render() %>
+                            <% } %>
                         <% } %>
                     <% } %>
                 <% } %>
