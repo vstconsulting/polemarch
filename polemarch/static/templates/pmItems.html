@@ -91,9 +91,9 @@
                     <%= this.partial('page_breadcrumb', { }) %>
                 <%] %>
                 <%* breadcrumb %>
-                
-                <%[ buttons %>
 
+                <%[ buttons %> 
+                    <%= new guiElements.button({onclick:function(){guiObj.exec()}, class:'btn btn-primary', title:'Exec', text:'Exec'}).render() %>
                 <%] %>
                 <%* buttons %>
                 
@@ -611,13 +611,9 @@
             <div class="help-block"></div>
         </div>
     <% }else{ %>
-        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-            <label class="control-label"><%- guiObj.view.bulk_name %></label>
-            <div class="form-control disabled" disabled="" maxlength="255">
-                <%- guiObj.view.bulk_name  %>
-            </div>
-            <div class="help-block"></div>
-        </div>
+        <% for(var i in guiObj.model.fileds){ %> 
+            <%= guiObj.renderFiled(guiObj.model.fileds[i]) %>
+        <% } %> 
     <% } %>
 </script>
 
