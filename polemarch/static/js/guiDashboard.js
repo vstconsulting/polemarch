@@ -871,7 +871,7 @@ pmDashboard.updateData = function()
                 startTimeOrg=yearNum+"-"+monthNum+"-"+dayNum+hourNum;
                 break;
         }
-
+       
         //задаем стартовую дату для графика.
         //pmDashboard.statsDataLast - количество периодов назад
         //pmDashboard.statsDataMomentType - тип периода - месяц/год
