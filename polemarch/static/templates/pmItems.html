@@ -88,7 +88,7 @@
         <div class="row">
             <section class="col-lg-12">
                 <%[ breadcrumb %>
-                    <%= this.partial('page_breadcrumb', { }) %>
+                    <%= renderBreadcrumbs() %>
                 <%] %>
                 <%* breadcrumb %>
 
@@ -151,7 +151,7 @@
 <script type="text/x-just" data-just="entity_list">
 
     <%[ breadcrumb %>
-        <%= this.partial('page_breadcrumb', {guiObj:guiObj}) %>
+        <%= renderBreadcrumbs() %>
     <%] %>
     <%* breadcrumb %>
 
@@ -379,7 +379,7 @@
 <!-- entity_list_add_subitems -->
  
     <%[ breadcrumb %>
-        <%= this.partial('page_breadcrumb', {guiObj:guiObj}) %>
+        <%= renderBreadcrumbs() %>
     <%] %>
     <%* breadcrumb %>
 
@@ -538,7 +538,7 @@
 <!-- items_new_page -->
 
     <%[ breadcrumb %>
-        <%= this.partial('page_breadcrumb', { }) %>
+        <%= renderBreadcrumbs() %>
     <%] %>
     <%* breadcrumb %>
 
