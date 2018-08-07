@@ -256,27 +256,24 @@
                                                     </td>
                                                 <% } %>
                                                 <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
-                                                    <td>
-                                                       <!-- < % [ actions % >  -->
-                                                            <div class="btn-group" role="group">
-                                                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                                    Actions 
-                                                                    <span class="caret"></span>
-                                                                </button>
-                                                                <ul class="dropdown-menu dropdown-menu-right">
-                                                                    <% for(var k in guiObj.model.sublinks){   %>
-                                                                        <li>
-                                                                            <a 
-                                                                                href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>" 
-                                                                                onclick="return spajs.openURL(this.href);">
-                                                                                    <%- k %> <%- guiObj.model.sublinks[k].description %>
-                                                                            </a>
-                                                                        </li>
-                                                                    <% } %>
-                                                                </ul>
-                                                            </div>
-                                                        <!-- < % ] % >
-                                                        < % * actions % > -->
+                                                    <td> 
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                Actions 
+                                                                <span class="caret"></span>
+                                                            </button>
+                                                            <ul class="dropdown-menu dropdown-menu-right">
+                                                                <% for(var k in guiObj.model.sublinks){   %>
+                                                                    <li>
+                                                                        <a 
+                                                                            href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>" 
+                                                                            onclick="return spajs.openURL(this.href);">
+                                                                                <%- k %> <%- guiObj.model.sublinks[k].description %>
+                                                                        </a>
+                                                                    </li>
+                                                                <% } %>
+                                                            </ul>
+                                                        </div> 
                                                     </td>
                                                 <% } %>
                                             </tr>
@@ -443,13 +440,12 @@
                                                     <div class="ico-off fa  fa-toggle-off"></div>
                                                 </td>
                                                 <% for(var j in guiObj.model.fileds){ %>
-                                                    <td
+                                                    <td   onclick="window.guiListSelections.toggleSelection('<%- guiObj.model.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;"
                                                         <% if(guiObj.model.fileds[j].style){ %><%= guiObj.model.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                         <% if(guiObj.model.fileds[j].class){ %><%= guiObj.model.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                     >
                                                         <% if(!guiObj.model.fileds[j].value){ %>
-                                                            <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id %>" class="item-name"
-                                                                onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][guiObj.model.fileds[j].name] %></a>
+                                                            <%- guiObj.model.data.results[i][guiObj.model.fileds[j].name] %>
                                                         <% }else{ %>
                                                             <%= guiObj.model.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], guiObj.model.fileds[j].name, opt]) %>
                                                         <% } %>
