@@ -64,6 +64,5 @@ tabSignal.connect("openapi.factory.project", function(data)
 
         return data;
     }
-    
-    debugger;
+     
 })
