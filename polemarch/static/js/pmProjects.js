@@ -787,45 +787,107 @@ pmProjects.syncSelectedProjects = function()
     }).promise();
 
 }
-
-tabSignal.connect("polemarch.start", function()
+ 
+ 
+tabSignal.connect("openapi.factory.project", function(data)
 {
-    // projects
-   /* spajs.addMenu({
-        id:"projects",
-        urlregexp:[/^projects$/, /^projects\/search\/?$/, /^project$/, /^projects\/page\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.showUpdatedList(holder, menuInfo, data);},
-        onClose:function(){return pmProjects.stopUpdates();},
-    })
+    apiproject.one.onBeforeadd = function(data)
+    { 
+        data.repository = $("#new_project_repository").val()
+        data.vars = {
+            repo_type:$("#new_project_type").val(),
+            //repo_password:$("#new_project_password").val(),
+        }
 
-    spajs.addMenu({
-        id:"projects-search",
-        urlregexp:[/^projects\/search\/([A-z0-9 %\-.:,=]+)$/, /^projects\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.showSearchResults(holder, menuInfo, data);}
-    })
+        if(data.repo_sync_on_run)
+        {
+            data.vars.repo_sync_on_run = true;
+        }
 
-    spajs.addMenu({
-        id:"project",
-        urlregexp:[/^project\/([0-9]+)$/, /^projects\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.openItem(holder, menuInfo, data);},
-        onClose:function(){return pmHistory.stopUpdates();},
-    })
+        delete data.repo_sync_on_run;
 
-    spajs.addMenu({
-        id:"newProject",
-        urlregexp:[/^new-project$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.openNewItemPage(holder, menuInfo, data);}
-    })
+        if(data.vars.repo_type == "GIT")
+        {
+            if($("#new_project_branch").val().trim()!="")
+            {
+                data.vars.repo_branch=$("#new_project_branch").val().trim();
+            }
 
-    spajs.addMenu({
-        id:"project-run-playbook",
-        urlregexp:[/^project\/([0-9]+)\/playbook\/run$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.openRunPlaybookPage(holder, menuInfo, data);}
-    })
+            if($("#new_project_password").val().trim()!="")
+            {
+                data.vars.repo_password=$("#new_project_password").val().trim();
+            }
+        }
 
-    spajs.addMenu({
-        id:"project-ansible-module-run",
-        urlregexp:[/^project\/([0-9]+)\/ansible-module\/run$/],
-        onOpen:function(holder, menuInfo, data){return pmAnsibleModule.showInProject(holder, menuInfo, data);}
-    })*/
+
+        if(!data.repository)
+        {
+            if(data.vars.repo_type == "MANUAL")
+            {
+                data.repository = "MANUAL"
+            }
+            else
+            {
+                $.notify("Invalid value in field `Repository URL`", "error");
+                return false;
+            }
+        }
+
+        return data;
+    }
+     
+    
+    // Переопределяет список полей которые будут показаны в списке истории
+    apiproject.one.getFiledsFor_renderAsPage = function()
+    {
+        debugger;
+        let fileds = []
+        for(let i in this.model.fileds)
+        {
+            let val = this.model.fileds[i]
+          
+            if($.inArray(val.name, ['owner', "repository"]) == -1)
+            {
+                fileds.push(val)
+            }
+        }
+         
+        return fileds;
+    }  
+    
+    // Переопределяет список полей которые будут показаны в списке истории
+    apiproject.one.getFiledsFor_renderAsNewPage = function()
+    {
+        debugger;
+        let fileds = []
+        for(let i in this.model.fileds)
+        {
+            let val = this.model.fileds[i]
+          
+            if($.inArray(val.name, ['owner', "repository"]) == -1)
+            {
+                fileds.push(val)
+            }
+        }
+         
+        return fileds;
+    }  
+    
+    apiproject.list.getFiledsFor_renderAsPage = function()
+    {
+        debugger;
+        let fileds = []
+        for(let i in this.model.fileds)
+        {
+            let val = this.model.fileds[i]
+          
+            if($.inArray(val.name, ['name']) !== -1)
+            {
+                fileds.push(val)
+            }
+        }
+        
+        return fileds;
+    }   
+     
 })
