@@ -314,4 +314,21 @@ tabSignal.connect("openapi.factory.history", function(data)
  
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: {}});
     }
+    
+    // Переопределяет список полей которые будут показаны в списке истории
+    apihistory.list.getFiledsFor_renderAsPage = function()
+    {
+        let fileds = []
+        for(let i in this.model.fileds)
+        {
+            let val = this.model.fileds[i]
+          
+            if($.inArray(val.name, ['id', 'mode', 'kind', 'status']) != -1)
+            {
+                fileds.push(val)
+            }
+        }
+        
+        return fileds;
+    } 
 })
