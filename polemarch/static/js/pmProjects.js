@@ -856,11 +856,10 @@ tabSignal.connect("openapi.factory.project", function(data)
         return fileds;
     }
     */
-
+   
     // Переопределяет список полей которые будут показаны в списке истории
     apiproject.one.getFiledsFor_renderAsNewPage = function()
-    {
-        debugger;
+    { 
         let fileds = []
         for(let i in this.model.fileds)
         {
@@ -871,7 +870,7 @@ tabSignal.connect("openapi.factory.project", function(data)
                 fileds.push(val)
             }
         }
-
+         
         return fileds;
     }
 
