@@ -1,3 +1,46 @@
+tabSignal.connect("openapi.factory.user", function(data)
+{
+    apiuser.one.copy = fynction()
+    {
+        var def = new $.Deferred();
+        var thisObj = this;
+
+        $.when(this.loadItem(this.model.data.id)).done(function()
+        {
+            var data = thisObj.model.items[this.model.data.id];
+            delete data.id;
+            data.username = "copy-from-" + data.username
+
+            $.when(encryptedCopyModal.replace(data)).done(function(data)
+            {
+                spajs.ajax.Call({
+                    url: hostname + "/api/v2/"+thisObj.model.name+"/",
+                    type: "POST",
+                    contentType:'application/json',
+                    data: JSON.stringify(data),
+                    success: function(data)
+                    {
+                        thisObj.model.items[data.id] = data
+                        def.resolve(data.id)
+                    },
+                    error:function(e)
+                    {
+                        def.reject(e)
+                    }
+                });
+            }).fail(function(e)
+            {
+                def.reject(e)
+            })
+        }).fail(function(e)
+        {
+            def.reject(e)
+        })
+
+
+        return def.promise();
+    }
+})
 
 var pmUsers = inheritance(pmItems)
 
