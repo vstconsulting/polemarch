@@ -1,6 +1,6 @@
-tabSignal.connect("openapi.factory.user", function(data)
+tabSignal.connect("openapi.factory.periodic_rask", function(data)
 {
-    apiuser.one.copy = fynction()
+    apiperiodic_task.one.copy = function()
     {
         if(!this.model.data.id)
         {

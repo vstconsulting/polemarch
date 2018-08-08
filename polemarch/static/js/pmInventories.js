@@ -1,6 +1,6 @@
 tabSignal.connect("openapi.factory.inventory", function(data)
 {
-    apiinventory.one.copy = fynction()
+    apiinventory.one.copy = function()
     {
         var def = new $.Deferred();
         var thisObj = this;

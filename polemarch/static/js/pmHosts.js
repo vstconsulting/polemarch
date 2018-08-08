@@ -1,6 +1,6 @@
 tabSignal.connect("openapi.factory.host", function(data)
 {
-    apihost.one.copy = fynction()
+    apihost.one.copy = function()
     {
         var def = new $.Deferred();
         var thisObj = this;
