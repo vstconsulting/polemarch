@@ -269,19 +269,14 @@
 </script>
 
 <script type="text/x-just" data-just="history_one">
+    <%[ breadcrumb %>
+        <%= renderBreadcrumbs() %>
+    <%] %>
+    <%* breadcrumb %>
     <section class="content-header">
-        <h1>
-            <a href="<%- polemarch.opt.host %>/?history"  onclick="return spajs.openURL(this.href);" class="btn btn-default" >
-                <span class="glyphicon glyphicon-arrow-left"></span>
-            </a>
-
+        <h1> 
             <span class="h1-header" ><% if( guiObj.model.data.kind != "MODULE"){ %>Playbook<% }else{ %>Module<% } %> `<%- guiObj.model.data.mode %>`</span>
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="<%- polemarch.opt.host %>"  onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li><a href="<%- polemarch.opt.host %>/?history"  onclick="return spajs.openURL(this.href);" >History</a></li>
-            <li class="active"><% if( guiObj.model.data.kind != "MODULE"){ %>Playbook<% }else{ %>Module<% } %> `<%- guiObj.model.data.mode.slice(0, 20) %>`</li>
-        </ol>
+        </h1> 
     </section>
 
     <section class="content">

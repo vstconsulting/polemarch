@@ -108,9 +108,9 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <% for(var i in guiObj.model.fileds){ %>
-                            <!--     <%= i %> = <%= JSON.stringify(guiObj.model.fileds[i]) %> -->
-                                <%= guiObj.renderFiled(guiObj.model.fileds[i]) %>
+                            <% for(var i in opt.fileds){ %>
+                            <!--     <%= i %> = <%= JSON.stringify(opt.fileds[i]) %> -->
+                                <%= guiObj.renderFiled(opt.fileds[i]) %>
                             <% } %>
                         </div>
                     </div>
@@ -223,11 +223,11 @@
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </th>
-                                            <% for(var j in guiObj.model.fileds){ %>
+                                            <% for(var j in opt.fileds){ %>
                                                 <th
-                                                    <% if(guiObj.model.fileds[j].style){ %><%= guiObj.model.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
-                                                    <% if(guiObj.model.fileds[j].class){ %><%= guiObj.model.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
-                                                        <%- guiObj.model.fileds[j].title %>
+                                                    <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
+                                                    <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
+                                                        <%- opt.fileds[j].title %>
                                                 </th>
                                             <% } %>
                                             <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
@@ -242,16 +242,16 @@
                                                     <div class="ico-on fa fa-toggle-on"></div>
                                                     <div class="ico-off fa  fa-toggle-off"></div>
                                                 </td>
-                                                <% for(var j in guiObj.model.fileds){ %>
+                                                <% for(var j in opt.fileds){ %>
                                                     <td
-                                                        <% if(guiObj.model.fileds[j].style){ %><%= guiObj.model.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
-                                                        <% if(guiObj.model.fileds[j].class){ %><%= guiObj.model.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                        <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                        <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                     >
-                                                        <% if(!guiObj.model.fileds[j].value){ %>
+                                                        <% if(!opt.fileds[j].value){ %>
                                                             <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id %>" class="item-name"
-                                                                onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][guiObj.model.fileds[j].name] %></a>
+                                                                onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][opt.fileds[j].name] %></a>
                                                         <% }else{ %>
-                                                            <%= guiObj.model.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], guiObj.model.fileds[j].name, opt]) %>
+                                                            <%= opt.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fileds[j].name, opt]) %>
                                                         <% } %>
                                                     </td>
                                                 <% } %>
@@ -423,11 +423,11 @@
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </th>
-                                            <% for(var j in guiObj.model.fileds){ %>
+                                            <% for(var j in opt.fileds){ %>
                                                 <th
-                                                    <% if(guiObj.model.fileds[j].style){ %><%= guiObj.model.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
-                                                    <% if(guiObj.model.fileds[j].class){ %><%= guiObj.model.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
-                                                        <%- guiObj.model.fileds[j].title %>
+                                                    <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
+                                                    <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
+                                                        <%- opt.fileds[j].title %>
                                                 </th>
                                             <% } %> 
                                         </tr>
@@ -439,16 +439,16 @@
                                                     <div class="ico-on fa fa-toggle-on"></div>
                                                     <div class="ico-off fa  fa-toggle-off"></div>
                                                 </td>
-                                                <% for(var j in guiObj.model.fileds){ %>
+                                                <% for(var j in opt.fileds){ %>
                                                     <td
-                                                        <% if(guiObj.model.fileds[j].style){ %><%= guiObj.model.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
-                                                        <% if(guiObj.model.fileds[j].class){ %><%= guiObj.model.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                        <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                        <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                     >
-                                                        <% if(!guiObj.model.fileds[j].value){ %>
+                                                        <% if(!opt.fileds[j].value){ %>
                                                             <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id %>" class="item-name"
-                                                                onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][guiObj.model.fileds[j].name] %></a>
+                                                                onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][opt.fileds[j].name] %></a>
                                                         <% }else{ %>
-                                                            <%= guiObj.model.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], guiObj.model.fileds[j].name, opt]) %>
+                                                            <%= opt.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fileds[j].name, opt]) %>
                                                         <% } %>
                                                     </td>
                                                 <% } %> 
@@ -549,9 +549,9 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <% for(var i in guiObj.model.fileds){ %>
-                                <!-- <%= i %> = <%= JSON.stringify(guiObj.model.fileds[i]) %> -->
-                                <%= guiObj.renderFiled(guiObj.model.fileds[i]) %>
+                            <% for(var i in opt.fileds){ %>
+                                <!-- <%= i %> = <%= JSON.stringify(opt.fileds[i]) %> -->
+                                <%= guiObj.renderFiled(opt.fileds[i]) %>
                             <% } %>
                         </div>
                     </div>
@@ -593,11 +593,11 @@
                         <div class="ico-on fa fa-toggle-on"></div>
                         <div class="ico-off fa  fa-toggle-off"></div>
                     </th>
-                    <% for(var j in guiObj.model.fileds){ %>
+                    <% for(var j in opt.fileds){ %>
                         <th
-                            <% if(guiObj.model.fileds[j].style){ %><%= guiObj.model.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
-                            <% if(guiObj.model.fileds[j].class){ %><%= guiObj.model.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
-                                <%- guiObj.model.fileds[j].title %>
+                            <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
+                            <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
+                                <%- opt.fileds[j].title %>
                         </th>
                     <% } %>
                     <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
@@ -612,16 +612,16 @@
                             <div class="ico-on fa fa-toggle-on"></div>
                             <div class="ico-off fa  fa-toggle-off"></div>
                         </td>
-                        <% for(var j in guiObj.model.fileds){ %>
+                        <% for(var j in opt.fileds){ %>
                             <td
-                                <% if(guiObj.model.fileds[j].style){ %><%= guiObj.model.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
-                                <% if(guiObj.model.fileds[j].class){ %><%= guiObj.model.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                             >
-                                <% if(!guiObj.model.fileds[j].value){ %>
+                                <% if(!opt.fileds[j].value){ %>
                                     <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id %>" class="item-name"
-                                        onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][guiObj.model.fileds[j].name] %></a>
+                                        onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][opt.fileds[j].name] %></a>
                                 <% }else{ %>
-                                    <%= guiObj.model.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], guiObj.model.fileds[j].name, opt]) %>
+                                    <%= opt.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fileds[j].name, opt]) %>
                                 <% } %>
                             </td>
                         <% } %>
@@ -711,8 +711,8 @@
             <div class="help-block"></div>
         </div>
     <% }else{ %>
-        <% for(var i in guiObj.model.fileds){ %> 
-            <%= guiObj.renderFiled(guiObj.model.fileds[i]) %>
+        <% for(var i in opt.fileds){ %> 
+            <%= guiObj.renderFiled(opt.fileds[i]) %>
         <% } %> 
     <% } %>
 </script>

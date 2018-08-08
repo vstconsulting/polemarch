@@ -1,6 +1,8 @@
 
 tabSignal.connect("openapi.factory.history", function(data)
 {
+    //apihistory.view.defaultName = ''
+     
     apihistory.one.loadLines = function(item_id, opt)
     {
         var thisObj = this;

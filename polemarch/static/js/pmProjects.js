@@ -185,7 +185,7 @@ pmProjects.model.page_list = {
  */
 pmProjects.model.page_new = {
     title: "New project",               // Текст заголовка страницы
-    short_title: "New project",         // Короткий текст заголовка страницы   
+    short_title: "New project",         // Короткий текст заголовка страницы
     /**
      * Содержит массив с массивами описаний полей в списке элементов
      * Масиивы представляют собой блоки строк в которые вставляются поля ввода
@@ -787,12 +787,12 @@ pmProjects.syncSelectedProjects = function()
     }).promise();
 
 }
- 
- 
+
+
 tabSignal.connect("openapi.factory.project", function(data)
 {
     apiproject.one.onBeforeadd = function(data)
-    { 
+    {
         data.repository = $("#new_project_repository").val()
         data.vars = {
             repo_type:$("#new_project_type").val(),
@@ -835,8 +835,9 @@ tabSignal.connect("openapi.factory.project", function(data)
 
         return data;
     }
-     
-    
+
+
+    /*
     // Переопределяет список полей которые будут показаны в списке истории
     apiproject.one.getFiledsFor_renderAsPage = function()
     {
@@ -845,16 +846,17 @@ tabSignal.connect("openapi.factory.project", function(data)
         for(let i in this.model.fileds)
         {
             let val = this.model.fileds[i]
-          
+
             if($.inArray(val.name, ['owner', "repository"]) == -1)
             {
                 fileds.push(val)
             }
         }
-         
+
         return fileds;
-    }  
-    
+    }
+    */
+
     // Переопределяет список полей которые будут показаны в списке истории
     apiproject.one.getFiledsFor_renderAsNewPage = function()
     {
@@ -863,16 +865,17 @@ tabSignal.connect("openapi.factory.project", function(data)
         for(let i in this.model.fileds)
         {
             let val = this.model.fileds[i]
-          
+
             if($.inArray(val.name, ['owner', "repository"]) == -1)
             {
                 fileds.push(val)
             }
         }
-         
+
         return fileds;
-    }  
-    
+    }
+
+    /*
     apiproject.list.getFiledsFor_renderAsPage = function()
     {
         debugger;
@@ -880,14 +883,15 @@ tabSignal.connect("openapi.factory.project", function(data)
         for(let i in this.model.fileds)
         {
             let val = this.model.fileds[i]
-          
+
             if($.inArray(val.name, ['name']) !== -1)
             {
                 fileds.push(val)
             }
         }
-        
+
         return fileds;
-    }   
-     
+    }
+    */
+
 })
