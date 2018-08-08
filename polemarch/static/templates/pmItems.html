@@ -522,6 +522,9 @@
             <section class="col-lg-12">
             <%[ buttons %>
                 <%= new guiElements.button({onclick:function(){guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
+                <% if (guiObj.copy != undefined) {%>
+                    <%= new guiElements.button({onclick:function(){guiObj.copy()}, class:'btn btn-primary btn-copy', title:'Copy', text:'Copy'}).render() %>
+                <% } %>
                 <%= new guiElements.button({onclick:function(){ deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete this '+guiObj.view.bulk_name, text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
 
             <%] %>
