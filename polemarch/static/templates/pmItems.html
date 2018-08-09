@@ -110,7 +110,7 @@
                         <div class="row">
                             <% for(var i in opt.fileds){ %>
                             <!--     <%= i %> = <%= JSON.stringify(opt.fileds[i]) %> -->
-                                <%= guiObj.renderFiled(opt.fileds[i]) %>
+                                <%= guiObj.renderFiled(opt.fileds[i], opt) %>
                             <% } %>
                         </div>
                     </div>
@@ -552,9 +552,14 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <% for(var i in opt.fileds){ %>
-                                <!-- <%= i %> = <%= JSON.stringify(opt.fileds[i]) %> -->
-                                <%= guiObj.renderFiled(opt.fileds[i]) %>
+                            <% for(var i in opt.fileds){ %> 
+                                <%= guiObj.renderFiled(opt.fileds[i], opt) %>
+                            <% } %>
+                            
+                            <% if(opt.sections){ %>
+                                <% for(var i in opt.sections){ %>
+                                    <%= opt.sections[i].apply(guiObj, [opt.sections[i], opt]) %>
+                                <% } %>
                             <% } %>
                         </div>
                     </div>
@@ -670,8 +675,7 @@
     <%[ buttons %>
         <%= new guiElements.button({onclick:function(){createAndGoEdit(guiObj)}, class:'btn btn-primary', title:'Create', text:'Create'}).render() %>
     <%] %>
-    <%* buttons %>
-
+    
     <%! entity_one %>
 
 </script>
@@ -713,10 +717,6 @@
             </div>
             <div class="help-block"></div>
         </div>
-    <% }else{ %>
-        <% for(var i in opt.fileds){ %> 
-            <%= guiObj.renderFiled(opt.fileds[i]) %>
-        <% } %> 
     <% } %>
 </script>
 

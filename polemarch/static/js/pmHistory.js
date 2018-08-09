@@ -310,7 +310,7 @@ tabSignal.connect("openapi.factory.history", function(data)
             });
 
             let promise = def.promise();
-            promise._test = "ABC"
+           
             return promise
         }
  
