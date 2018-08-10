@@ -88,10 +88,6 @@ def with_signals(func):
 
 
 # Serializers
-class EmptySerializer(serializers.Serializer):
-    pass
-
-
 class ActionResponseSerializer(serializers.Serializer):
     detail = serializers.CharField()
 

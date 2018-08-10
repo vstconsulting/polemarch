@@ -6,6 +6,7 @@ from subprocess import CalledProcessError, Popen, PIPE, STDOUT
 from threading import Thread
 
 import sys
+import os
 import re
 import json
 from os.path import dirname
@@ -45,8 +46,10 @@ class CmdExecutor(object):
     CANCEL_PREFIX = "CANCEL_EXECUTE_"
     newlines = ['\n', '\r\n', '\r']
 
-    def __init__(self):
+    def __init__(self, stdout=PIPE, stderr=STDOUT):
         self.output = ''
+        self._stdout = stdout
+        self._stderr = stderr
 
     def write_output(self, line):
         '''
@@ -98,8 +101,10 @@ class CmdExecutor(object):
         :rtype: str
         '''
         self.output = ""
-        proc = Popen(cmd, stdout=PIPE, stderr=STDOUT,
-                     universal_newlines=True, cwd=cwd)
+        proc = Popen(
+            cmd, stdout=self._stdout, stderr=self._stderr,
+            universal_newlines=True, cwd=cwd
+        )
         for line in self._unbuffered(proc):
             if self.line_handler(proc, line):
                 break
@@ -218,15 +223,16 @@ class PMAnsible(object):
 
     def get_args(self):
         python_exec = sys.executable or 'python'
-        return [python_exec, '-m', 'pm_ansible', self.get_ref()]
+        return [python_exec, '-W', 'ignore', '-m', 'pm_ansible', self.get_ref()]
 
     def get_data(self):
         cache = self.get_ansible_cache()
         result = cache.get()
         if result is None:
-            cmd = CmdExecutor()
-            cmd_command = self.get_args()
-            cmd.execute(cmd_command, '/tmp/')
+            with open(os.devnull, 'wb') as DEVNULL:
+                cmd = CmdExecutor(stderr=DEVNULL)
+                cmd_command = self.get_args()
+                cmd.execute(cmd_command, '/tmp/')
             result = self._get_only_json(cmd.output)
             cache.set(result)
         return result

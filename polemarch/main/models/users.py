@@ -57,6 +57,9 @@ class UserSettings(BModel):
                                     related_query_name="settings",
                                     related_name="settings")
 
+    def get_settings_copy(self):
+        return self.data
+
     @property
     def data(self):
         return json.loads(self.settings)
