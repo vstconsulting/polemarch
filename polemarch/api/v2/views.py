@@ -424,9 +424,7 @@ class ProjectViewSet(_GroupMixin):
     copy_related = _GroupMixin.copy_related + ['inventories']
 
     def copy_instance(self, instance):
-        instance.status = [
-            f for f in instance.__class__._meta.fields if f.name == 'status'
-        ][0].default
+        instance.status = instance.__class__._meta.get_field('status').default
         return super(ProjectViewSet, self).copy_instance(instance)
 
     @deco.action(methods=["post"], detail=yes, serializer_class=vstsers.EmptySerializer)

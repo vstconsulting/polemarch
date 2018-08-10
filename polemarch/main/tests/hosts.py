@@ -110,7 +110,7 @@ class InvBaseTestCase(BaseTestCase):
         result = self.make_bulk(bulk_data, 'put')
         if should_fail:
             for res in result:
-                self.assertEqual(res['status'], 409 or 400)
+                self.assertIn(res['status'], [409, 400])
             return
         self.assertEqual(result[0]['status'], 201, result[0])
         self.assertEqual(result[1]['status'], 200, result[1])
