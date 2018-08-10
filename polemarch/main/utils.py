@@ -223,7 +223,7 @@ class PMAnsible(object):
 
     def get_args(self):
         python_exec = sys.executable or 'python'
-        return [python_exec, '-W', 'ignore', '-m', 'pm_ansible', self.get_ref()]
+        return [python_exec, '-m', 'pm_ansible', self.get_ref()]
 
     def get_data(self):
         cache = self.get_ansible_cache()
