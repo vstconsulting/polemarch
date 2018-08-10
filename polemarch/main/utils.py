@@ -330,7 +330,6 @@ class AnsibleArgumentsReference(PMAnsible):
         # pylint: disable=protected-access,
         data = self.get_data()
         self.version = data['version']
-        self.modules = data['modules']
         result = data['keywords'].copy()
         result['module']['group'] = {"type": "string", "help": ""}
         result['periodic_playbook'] = result['playbook']
