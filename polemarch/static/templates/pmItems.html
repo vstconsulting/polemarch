@@ -92,7 +92,7 @@
                 <%] %>
                 <%* breadcrumb %>
 
-                <%[ buttons %> 
+                <%[ buttons %>
                     <%= new guiElements.button({onclick:function(){guiObj.exec()}, class:'btn btn-primary', title:'Exec', text:'Exec'}).render() %>
                 <%] %>
                 <%* buttons %>
@@ -532,9 +532,16 @@
 
             <%[ sublink_buttons %>
                 <% for(var k in guiObj.model.sublinks){   %>
+                    <!-- /TODO оптимизировать обработку типа экшена -->
                     <a
-                        href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents+'/'+ guiObj.model.sublinks[k].name %>"
-                        onclick="return spajs.openURL(this.href);"
+                        <% if  ((!guiObj.model.sublinks[k].isAction) || (guiObj.model.sublinks[k].isAction && (!guiObj.model.sublinks[k].api_path_value.post.parameters.some(elem => elem.schema.$ref == "#/definitions/Empty")))) { %>
+                            href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents+'/'+ guiObj.model.sublinks[k].name %>"
+                            onclick="return spajs.openURL(this.href);"
+                        <% } else { %>
+                            <% debugger %>
+                            href="<%= guiObj.exec %>"
+                            onclick="return spajs.openURL(this.href);"
+                        <% } %>
                     >
                         <%- k %> <%- guiObj.model.sublinks[k].description %>
                     </a>

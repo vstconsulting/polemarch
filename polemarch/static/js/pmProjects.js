@@ -788,7 +788,7 @@ pmProjects.syncSelectedProjects = function()
 
 }
 
-
+/*
 tabSignal.connect("openapi.factory.project", function(data)
 { 
     // Добавляет к странице ещё один блок
@@ -796,3 +796,4 @@ tabSignal.connect("openapi.factory.project", function(data)
         return "ABC"
     }) 
 })
+*/
