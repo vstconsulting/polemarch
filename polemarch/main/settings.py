@@ -5,7 +5,7 @@ POLEMARCH_VERSION = PROJECT_VERSION
 APACHE = False if ("runserver" in sys.argv) else True
 
 # Directory for git projects
-PROJECTS_DIR = config.get("main", "projects_dir", fallback="{HOME}/projects").format(**KWARGS)
+PROJECTS_DIR = main.get("projects_dir", fallback="{LIB}/projects")
 os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
 
 # Polemarch apps
@@ -97,7 +97,7 @@ TASKS_HANDLERS = {
     },
 }
 
-CLONE_RETRY = config.getint('rpc', 'clone_retry_count', fallback=5)
+CLONE_RETRY = rpc.getint('clone_retry_count', fallback=5)
 
 # ACL settings
 ACL = {
@@ -116,7 +116,7 @@ HOOKS = {
     },
 }
 
-HOOKS_DIR = config.get("main", "hooks_dir", fallback="/etc/polemarch/hooks/")
+HOOKS_DIR = main.get("hooks_dir", fallback="/etc/polemarch/hooks/")
 
 
 # TEST settings
