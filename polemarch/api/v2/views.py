@@ -376,15 +376,15 @@ class __TemplateViewSet(base.ModelViewSetSet):
 
 @method_decorator(name='execute_module', decorator=swagger_auto_schema(
     operation_description='Execute ansible module.',
-    responses={status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(),}
+    responses={status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(), }
 ))
 @method_decorator(name='execute_playbook', decorator=swagger_auto_schema(
     operation_description='Execute ansible module.',
-    responses={status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(),}
+    responses={status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(), }
 ))
 @method_decorator(name='sync', decorator=swagger_auto_schema(
     operation_description='Sync project repository.',
-    responses={status.HTTP_200_OK: sers.ActionResponseSerializer(),}
+    responses={status.HTTP_200_OK: sers.ActionResponseSerializer(), }
 ))
 @deco.nested_view(
     'inventory', 'id', manager_name='inventories',
@@ -479,7 +479,7 @@ class HookViewSet(base.ModelViewSetSet):
 
 @method_decorator(name='list', decorator=swagger_auto_schema(
     operation_description='Dashboard statistic.',
-    responses={status.HTTP_200_OK: sers.DashboardStatisticSerializer(),}
+    responses={status.HTTP_200_OK: sers.DashboardStatisticSerializer(), }
 ))
 class StatisticViewSet(base.ListNonModelViewSet):
     base_name = "stats"

@@ -33,7 +33,7 @@ class InvBaseTestCase(BaseTestCase):
 
     def _check_hidden(self, model_name, api_name, bulk_name):
         HIDDEN_VARS = getattr(self.get_model_class(model_name), 'HIDDEN_VARS', [])
-        data = dict(name="test-hidden", variables={k:'hidden' for k in HIDDEN_VARS})
+        data = dict(name="test-hidden", variables={k: 'hidden' for k in HIDDEN_VARS})
         data['variables']['not_hidden'] = 'value'
         pk = self.mass_create_bulk(bulk_name, [data])[0]['data']['id']
         result = self.get_result('get', self.get_url(api_name, pk, 'variables'))
@@ -200,7 +200,7 @@ class InventoriesTestCase(InvBaseTestCase):
             self.get_mod_bulk(
                 'group', '<0[data][id]>', dict(id='<{}[data][id]>'.format(i)), 'group'
             )
-            for i in range(1,4)
+            for i in range(1, 4)
         ]
         results = self.make_bulk(bulk_data)
         for result in results:

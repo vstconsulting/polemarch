@@ -1,6 +1,5 @@
 import json  # noqa: F401
 
-import copy
 import os
 from vstutils.tests import BaseTestCase as VSTBaseTestCase
 from ...main import models

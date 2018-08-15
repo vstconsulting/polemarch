@@ -548,8 +548,8 @@ class ProjectTestCase(BaseExecutionsTestCase):
             ),
         ]
         bulk_data = [
-            self.get_mod_bulk('project', pk, data, 'periodic_task')
-            for data in ptask_data
+            self.get_mod_bulk('project', pk, dt, 'periodic_task')
+            for dt in ptask_data
         ]
         results = self.make_bulk(bulk_data)
         for result in results:
@@ -759,6 +759,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
     def make_test_readme(self, project_data):
         project = self.get_model_filter("Project", pk=project_data['id']).get()
+
         def get_bulk_readme():
             bulk_data = [
                 self.get_mod_bulk('project', project_data['id'], {}, 'sync', 'post'),

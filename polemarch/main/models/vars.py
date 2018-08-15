@@ -1,13 +1,10 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
-import json
 import logging
 import uuid
 
 from collections import OrderedDict
-from six import string_types, text_type
-from django.db import transaction
 from django.db.models import Case, When, Value
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation

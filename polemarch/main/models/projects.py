@@ -13,9 +13,9 @@ from django.core.validators import ValidationError
 from vstutils.utils import ModelHandlers
 from yaml import load
 try:
-    from yaml import CLoader as Loader, CDumper as Dumper
+    from yaml import CLoader as Loader
 except ImportError:  # nocv
-    from yaml import Loader, Dumper
+    from yaml import Loader
 
 from . import hosts as hosts_models
 from .vars import AbstractModel, AbstractVarsQuerySet, models
@@ -194,7 +194,7 @@ class Project(AbstractModel):
 
     @property
     def module(self):
-        return Module.objects.filter(Q(project=self)|Q(project=None))
+        return Module.objects.filter(Q(project=self) | Q(project=None))
 
     def __get_readme(self):
         readme = getattr(self, 'readme', None)
@@ -271,5 +271,5 @@ class Module(BModel):
     def data(self):
         data = self._load_data(self._data)
         if not data:
-           data = self._get_module_data_from_cli()
+            data = self._get_module_data_from_cli()
         return data

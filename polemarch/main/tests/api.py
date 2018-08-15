@@ -427,4 +427,3 @@ class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase):
         self.assertIn("set", result["operations_types"])
         self.assertIn("del", result["operations_types"])
         self.assertIn("mod", result["operations_types"])
-

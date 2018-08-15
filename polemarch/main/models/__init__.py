@@ -244,6 +244,7 @@ def check_if_inventory_linked(instance, action, **kwargs):
 
 @receiver(signals.pre_delete, sender=Inventory)
 def check_if_inventory_linked_project(instance, **kwargs):
+    # pylint: disable=invalid-name
     if instance.projects.exists():
         raise_linked_error(
             linked_projects=list(instance.projects.values_list('id', flat=True))

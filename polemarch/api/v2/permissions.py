@@ -6,6 +6,7 @@ class ModelPermission(permissions.IsAuthenticated):
         return super(ModelPermission, self).has_permission(request, view)
 
     def get_user_permission(self, request, view, obj):  # nocv
+        # pylint: disable=unused-argument
         return False
 
     def has_object_permission(self, request, view, obj):
