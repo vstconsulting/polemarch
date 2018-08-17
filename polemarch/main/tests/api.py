@@ -271,6 +271,26 @@ class ApiUsersTestCase(BaseTestCase):
         self.assertEqual(result['results'][0]['username'], 'te')
         self.assertEqual(result['results'][1]['username'], 'test_user')
 
+        # Test copy
+        bulk_data = [
+            self.get_mod_bulk('user', results[1]['data']['id'], {}, 'copy'),
+            self.get_bulk('user', {}, 'get', pk='<0[data][id]>'),
+            self.get_mod_bulk(
+                'team', results[0]['data']['id'], {}, 'user/<0[data][id]>', method='get'
+            ),
+            self.get_mod_bulk('team', results[0]['data']['id'], {"name": "new"}, 'copy'),
+            self.get_mod_bulk(
+                'team', results[0]['data']['id'], {}, 'user', method='get'
+            ),
+        ]
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[1]['data']['username'], 'copy-test_user')
+        self.assertEqual(results[2]['data']['username'], 'copy-test_user')
+        self.assertEqual(results[3]['data']['name'], 'new')
+        self.assertEqual(results[4]['data']['count'], 3)
+
     def test_users_localsettings(self):
         result = self.get_result("get", self.get_url('user', self.user.id))
         self.assertEqual(result["username"], self.user.username)
@@ -407,4 +427,3 @@ class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase):
         self.assertIn("set", result["operations_types"])
         self.assertIn("del", result["operations_types"])
         self.assertIn("mod", result["operations_types"])
-

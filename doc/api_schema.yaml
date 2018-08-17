@@ -11,7 +11,7 @@ info:
     application: 0.1.13
     library: 0.1.13
     vstutils: 1.2.0
-    django: 1.11.14
+    django: 1.11.15
     ansible: 2.6.2
   version: v2
 host: localhost:8080
@@ -247,6 +247,45 @@ paths:
       responses:
         '204':
           description: Action accepted.
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - group
+    parameters:
+      - name: pk
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+  /group/{pk}/copy/:
+    post:
+      operationId: group_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Group'
         '400':
           description: Validation error or some data error.
           schema:
@@ -951,6 +990,50 @@ paths:
       responses:
         '204':
           description: Action accepted.
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - group
+    parameters:
+      - name: host_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+  /group/{pk}/host/{host_id}/copy/:
+    post:
+      operationId: group_host_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Host'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Host'
         '400':
           description: Validation error or some data error.
           schema:
@@ -2277,6 +2360,45 @@ paths:
         description: A unique integer value identifying this host.
         required: true
         type: integer
+  /host/{pk}/copy/:
+    post:
+      operationId: host_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Host'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Host'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - host
+    parameters:
+      - name: pk
+        in: path
+        description: A unique integer value identifying this host.
+        required: true
+        type: integer
   /host/{pk}/set_owner/:
     post:
       operationId: host_set_owner
@@ -3071,6 +3193,45 @@ paths:
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
+  /inventory/{pk}/copy/:
+    post:
+      operationId: inventory_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Inventory'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Inventory'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - inventory
+    parameters:
+      - name: pk
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
   /inventory/{pk}/group/:
     get:
       operationId: inventory_group_list
@@ -3756,6 +3917,50 @@ paths:
       responses:
         '204':
           description: Action accepted.
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - inventory
+    parameters:
+      - name: host_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
+  /inventory/{pk}/host/{host_id}/copy/:
+    post:
+      operationId: inventory_host_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Host'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Host'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4549,6 +4754,45 @@ paths:
       responses:
         '204':
           description: Action accepted.
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - project
+    parameters:
+      - name: pk
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+  /project/{pk}/copy/:
+    post:
+      operationId: project_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Project'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Project'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5835,6 +6079,50 @@ paths:
         description: A unique integer value identifying this project.
         required: true
         type: integer
+  /project/{pk}/host/{host_id}/copy/:
+    post:
+      operationId: project_host_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Host'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Host'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - project
+    parameters:
+      - name: host_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
   /project/{pk}/host/{host_id}/set_owner/:
     post:
       operationId: project_host_set_owner
@@ -6505,6 +6793,51 @@ paths:
         description: A unique integer value identifying this project.
         required: true
         type: integer
+  /project/{pk}/inventory/{inventory_id}/copy/:
+    post:
+      operationId: project_inventory_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Inventory'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Inventory'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - project
+    parameters:
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
   /project/{pk}/inventory/{inventory_id}/group/:
     get:
       operationId: project_inventory_group_list
@@ -7099,6 +7432,56 @@ paths:
       responses:
         '204':
           description: Action accepted.
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - project
+    parameters:
+      - name: host_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+  /project/{pk}/inventory/{inventory_id}/host/{host_id}/copy/:
+    post:
+      operationId: project_inventory_host_inventory_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Host'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Host'
         '400':
           description: Validation error or some data error.
           schema:
@@ -9289,6 +9672,45 @@ paths:
         description: A unique value identifying this user group.
         required: true
         type: string
+  /team/{pk}/copy/:
+    post:
+      operationId: team_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Team'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Team'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - team
+    parameters:
+      - name: pk
+        in: path
+        description: A unique value identifying this user group.
+        required: true
+        type: string
   /team/{pk}/set_owner/:
     post:
       operationId: team_set_owner
@@ -9595,9 +10017,53 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this users sublist.
+  /team/{pk}/user/{user_id}/copy/:
+    post:
+      operationId: team_user_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Owner'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Owner'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - team
+    parameters:
+      - name: pk
+        in: path
+        description: A unique value identifying this user group.
+        required: true
+        type: string
+      - name: user_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this users sublist.
   /team/{pk}/user/{user_id}/settings/:
     get:
-      operationId: team_user_settings_list
+      operationId: team_user_settings_get
       description: ''
       parameters: []
       responses:
@@ -9948,9 +10414,48 @@ paths:
         description: A unique integer value identifying this user.
         required: true
         type: integer
+  /user/{pk}/copy/:
+    post:
+      operationId: user_copy
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Owner'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Owner'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - user
+    parameters:
+      - name: pk
+        in: path
+        description: A unique integer value identifying this user.
+        required: true
+        type: integer
   /user/{pk}/settings/:
     get:
-      operationId: user_settings_list
+      operationId: user_settings_get
       description: Return user settings.
       parameters: []
       responses:
@@ -10512,15 +11017,25 @@ definitions:
         format: autocomplete
         additionalProperties:
           $ref: '#/definitions/Module/properties/id'
-      extra_vars:
-        title: Extra vars
-        description: set additional variables as key=value or YAML/JSON, if filename
-          prepend with @
+      args:
+        title: Args
+        description: module arguments
         type: string
         minLength: 1
-      connection:
-        title: Connection
-        description: connection type to use (default=smart)
+      background:
+        title: Background
+        description: run asynchronously, failing after X seconds (default=N/A)
+        type: integer
+      become:
+        title: Become
+        description: run operations with become (does not imply password prompting)
+        type: boolean
+        default: false
+      become_method:
+        title: Become method
+        description: 'privilege escalation method to use (default=sudo), valid choices:
+          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
+          | machinectl ]'
         type: string
         minLength: 1
       become_user:
@@ -10528,25 +11043,63 @@ definitions:
         description: run operations as this user (default=root)
         type: string
         minLength: 1
-      sudo:
-        title: Sudo
-        description: run operations with sudo (nopasswd) (deprecated, use become)
+      check:
+        title: Check
+        description: don't make any changes; instead, try to predict some of the changes
+          that may occur
         type: boolean
         default: false
-      key_file:
-        title: Key file
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      sudo_user:
-        title: Sudo user
-        description: desired sudo user (default=root) (deprecated, use become)
+      connection:
+        title: Connection
+        description: connection type to use (default=smart)
         type: string
         minLength: 1
       diff:
         title: Diff
         description: when changing (small) files and templates, show the differences
           in those files; works great with --check
+        type: boolean
+        default: false
+      extra_vars:
+        title: Extra vars
+        description: set additional variables as key=value or YAML/JSON, if filename
+          prepend with @
+        type: string
+        minLength: 1
+      forks:
+        title: Forks
+        description: specify number of parallel processes to use (default=5)
+        type: integer
+      inventory:
+        title: Inventory
+        description: specify inventory host path or comma separated host list. --inventory-file
+          is deprecated
+        type: string
+        minLength: 1
+      key_file:
+        title: Key file
+        description: use this file to authenticate the connection
+        type: string
+        format: secretfile
+      limit:
+        title: Limit
+        description: further limit selected hosts to an additional pattern
+        type: string
+        minLength: 1
+      list_hosts:
+        title: List hosts
+        description: outputs a list of matching hosts; does not execute anything else
+        type: boolean
+        default: false
+      module_path:
+        title: Module path
+        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
+          '/usr/share/ansible/plugins/modules'])
+        type: string
+        minLength: 1
+      one_line:
+        title: One line
+        description: condense output
         type: boolean
         default: false
       playbook_dir:
@@ -10556,70 +11109,18 @@ definitions:
           roles/ group_vars/ etc.
         type: string
         minLength: 1
-      check:
-        title: Check
-        description: don't make any changes; instead, try to predict some of the changes
-          that may occur
-        type: boolean
-        default: false
       poll:
         title: Poll
         description: set the poll interval if using -B (default=15)
         type: integer
-      group:
-        title: Group
-        type: string
-        minLength: 1
-      scp_extra_args:
-        title: Scp extra args
-        description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
-        minLength: 1
-      become_method:
-        title: Become method
-        description: 'privilege escalation method to use (default=sudo), valid choices:
-          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
-          | machinectl ]'
-        type: string
-        minLength: 1
-      ssh_extra_args:
-        title: Ssh extra args
-        description: specify extra arguments to pass to ssh only (e.g. -R)
-        type: string
-        minLength: 1
-      one_line:
-        title: One line
-        description: condense output
-        type: boolean
-        default: false
-      inventory:
-        title: Inventory
-        description: specify inventory host path or comma separated host list. --inventory-file
-          is deprecated
-        type: string
-        minLength: 1
-      forks:
-        title: Forks
-        description: specify number of parallel processes to use (default=5)
-        type: integer
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
-        type: boolean
-        default: false
-      list_hosts:
-        title: List hosts
-        description: outputs a list of matching hosts; does not execute anything else
-        type: boolean
-        default: false
       private_key:
         title: Private key
         description: use this file to authenticate the connection
         type: string
         format: secretfile
-      args:
-        title: Args
-        description: module arguments
+      scp_extra_args:
+        title: Scp extra args
+        description: specify extra arguments to pass to scp only (e.g. -l)
         type: string
         minLength: 1
       sftp_extra_args:
@@ -10627,29 +11128,14 @@ definitions:
         description: specify extra arguments to pass to sftp only (e.g. -f, -l)
         type: string
         minLength: 1
-      user:
-        title: User
-        description: connect as this user (default=None)
-        type: string
-        minLength: 1
-      background:
-        title: Background
-        description: run asynchronously, failing after X seconds (default=N/A)
-        type: integer
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=[u'/home/grey/.ansible/plugins/modules',
-          u'/usr/share/ansible/plugins/modules'])
-        type: string
-        minLength: 1
-      tree:
-        title: Tree
-        description: log output to this directory
-        type: string
-        minLength: 1
       ssh_common_args:
         title: Ssh common args
         description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+        type: string
+        minLength: 1
+      ssh_extra_args:
+        title: Ssh extra args
+        description: specify extra arguments to pass to ssh only (e.g. -R)
         type: string
         minLength: 1
       su:
@@ -10657,34 +11143,53 @@ definitions:
         description: run operations with su (deprecated, use become)
         type: boolean
         default: false
-      vault_password_file:
-        title: Vault password file
-        description: vault password file
-        type: string
-        format: secretfile
-      limit:
-        title: Limit
-        description: further limit selected hosts to an additional pattern
+      su_user:
+        title: Su user
+        description: run operations with su as this user (default=None) (deprecated,
+          use become)
         type: string
         minLength: 1
+      sudo:
+        title: Sudo
+        description: run operations with sudo (nopasswd) (deprecated, use become)
+        type: boolean
+        default: false
+      sudo_user:
+        title: Sudo user
+        description: desired sudo user (default=root) (deprecated, use become)
+        type: string
+        minLength: 1
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
+        type: boolean
+        default: false
       timeout:
         title: Timeout
         description: override the connection timeout in seconds (default=10)
         type: integer
-      become:
-        title: Become
-        description: run operations with become (does not imply password prompting)
-        type: boolean
-        default: false
+      tree:
+        title: Tree
+        description: log output to this directory
+        type: string
+        minLength: 1
+      user:
+        title: User
+        description: connect as this user (default=None)
+        type: string
+        minLength: 1
       vault_id:
         title: Vault id
         description: the vault identity to use
         type: string
         minLength: 1
-      su_user:
-        title: Su user
-        description: run operations with su as this user (default=None) (deprecated,
-          use become)
+      vault_password_file:
+        title: Vault password file
+        description: vault password file
+        type: string
+        format: secretfile
+      group:
+        title: Group
         type: string
         minLength: 1
   ExecuteResponse:
@@ -10713,20 +11218,16 @@ definitions:
         format: autocomplete
         additionalProperties:
           $ref: '#/definitions/Playbook/properties/id'
-      flush_cache:
-        title: Flush cache
-        description: clear the fact cache for every host in inventory
+      become:
+        title: Become
+        description: run operations with become (does not imply password prompting)
         type: boolean
         default: false
-      extra_vars:
-        title: Extra vars
-        description: set additional variables as key=value or YAML/JSON, if filename
-          prepend with @
-        type: string
-        minLength: 1
-      connection:
-        title: Connection
-        description: connection type to use (default=smart)
+      become_method:
+        title: Become method
+        description: 'privilege escalation method to use (default=sudo), valid choices:
+          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
+          | machinectl ]'
         type: string
         minLength: 1
       become_user:
@@ -10734,29 +11235,15 @@ definitions:
         description: run operations as this user (default=root)
         type: string
         minLength: 1
-      sudo:
-        title: Sudo
-        description: run operations with sudo (nopasswd) (deprecated, use become)
+      check:
+        title: Check
+        description: don't make any changes; instead, try to predict some of the changes
+          that may occur
         type: boolean
         default: false
-      force_handlers:
-        title: Force handlers
-        description: run handlers even if a task fails
-        type: boolean
-        default: false
-      key_file:
-        title: Key file
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      skip_tags:
-        title: Skip tags
-        description: only run plays and tasks whose tags do not match these values
-        type: string
-        minLength: 1
-      sudo_user:
-        title: Sudo user
-        description: desired sudo user (default=root) (deprecated, use become)
+      connection:
+        title: Connection
+        description: connection type to use (default=smart)
         type: string
         minLength: 1
       diff:
@@ -10765,108 +11252,35 @@ definitions:
           in those files; works great with --check
         type: boolean
         default: false
-      check:
-        title: Check
-        description: don't make any changes; instead, try to predict some of the changes
-          that may occur
+      extra_vars:
+        title: Extra vars
+        description: set additional variables as key=value or YAML/JSON, if filename
+          prepend with @
+        type: string
+        minLength: 1
+      flush_cache:
+        title: Flush cache
+        description: clear the fact cache for every host in inventory
         type: boolean
         default: false
-      scp_extra_args:
-        title: Scp extra args
-        description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
-        minLength: 1
-      become_method:
-        title: Become method
-        description: 'privilege escalation method to use (default=sudo), valid choices:
-          [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
-          | machinectl ]'
-        type: string
-        minLength: 1
-      ssh_extra_args:
-        title: Ssh extra args
-        description: specify extra arguments to pass to ssh only (e.g. -R)
-        type: string
-        minLength: 1
-      list_tasks:
-        title: List tasks
-        description: list all tasks that would be executed
+      force_handlers:
+        title: Force handlers
+        description: run handlers even if a task fails
         type: boolean
         default: false
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=[u'/home/grey/.ansible/plugins/modules',
-          u'/usr/share/ansible/plugins/modules'])
-        type: string
-        minLength: 1
+      forks:
+        title: Forks
+        description: specify number of parallel processes to use (default=5)
+        type: integer
       inventory:
         title: Inventory
         description: specify inventory host path or comma separated host list. --inventory-file
           is deprecated
         type: string
         minLength: 1
-      forks:
-        title: Forks
-        description: specify number of parallel processes to use (default=5)
-        type: integer
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
-        type: boolean
-        default: false
-      list_hosts:
-        title: List hosts
-        description: outputs a list of matching hosts; does not execute anything else
-        type: boolean
-        default: false
-      tags:
-        title: Tags
-        description: only run plays and tasks tagged with these values
-        type: string
-        minLength: 1
-      private_key:
-        title: Private key
+      key_file:
+        title: Key file
         description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      step:
-        title: Step
-        description: 'one-step-at-a-time: confirm each task before running'
-        type: boolean
-        default: false
-      sftp_extra_args:
-        title: Sftp extra args
-        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
-        type: string
-        minLength: 1
-      user:
-        title: User
-        description: connect as this user (default=None)
-        type: string
-        minLength: 1
-      list_tags:
-        title: List tags
-        description: list all available tags
-        type: boolean
-        default: false
-      start_at_task:
-        title: Start at task
-        description: start the playbook at the task matching this name
-        type: string
-        minLength: 1
-      ssh_common_args:
-        title: Ssh common args
-        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
-        type: string
-        minLength: 1
-      su:
-        title: Su
-        description: run operations with su (deprecated, use become)
-        type: boolean
-        default: false
-      vault_password_file:
-        title: Vault password file
-        description: vault password file
         type: string
         format: secretfile
       limit:
@@ -10874,26 +11288,117 @@ definitions:
         description: further limit selected hosts to an additional pattern
         type: string
         minLength: 1
-      timeout:
-        title: Timeout
-        description: override the connection timeout in seconds (default=10)
-        type: integer
-      become:
-        title: Become
-        description: run operations with become (does not imply password prompting)
+      list_hosts:
+        title: List hosts
+        description: outputs a list of matching hosts; does not execute anything else
         type: boolean
         default: false
-      vault_id:
-        title: Vault id
-        description: the vault identity to use
+      list_tags:
+        title: List tags
+        description: list all available tags
+        type: boolean
+        default: false
+      list_tasks:
+        title: List tasks
+        description: list all tasks that would be executed
+        type: boolean
+        default: false
+      module_path:
+        title: Module path
+        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
+          '/usr/share/ansible/plugins/modules'])
         type: string
         minLength: 1
+      private_key:
+        title: Private key
+        description: use this file to authenticate the connection
+        type: string
+        format: secretfile
+      scp_extra_args:
+        title: Scp extra args
+        description: specify extra arguments to pass to scp only (e.g. -l)
+        type: string
+        minLength: 1
+      sftp_extra_args:
+        title: Sftp extra args
+        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
+        type: string
+        minLength: 1
+      skip_tags:
+        title: Skip tags
+        description: only run plays and tasks whose tags do not match these values
+        type: string
+        minLength: 1
+      ssh_common_args:
+        title: Ssh common args
+        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+        type: string
+        minLength: 1
+      ssh_extra_args:
+        title: Ssh extra args
+        description: specify extra arguments to pass to ssh only (e.g. -R)
+        type: string
+        minLength: 1
+      start_at_task:
+        title: Start at task
+        description: start the playbook at the task matching this name
+        type: string
+        minLength: 1
+      step:
+        title: Step
+        description: 'one-step-at-a-time: confirm each task before running'
+        type: boolean
+        default: false
+      su:
+        title: Su
+        description: run operations with su (deprecated, use become)
+        type: boolean
+        default: false
       su_user:
         title: Su user
         description: run operations with su as this user (default=None) (deprecated,
           use become)
         type: string
         minLength: 1
+      sudo:
+        title: Sudo
+        description: run operations with sudo (nopasswd) (deprecated, use become)
+        type: boolean
+        default: false
+      sudo_user:
+        title: Sudo user
+        description: desired sudo user (default=root) (deprecated, use become)
+        type: string
+        minLength: 1
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
+        type: boolean
+        default: false
+      tags:
+        title: Tags
+        description: only run plays and tasks tagged with these values
+        type: string
+        minLength: 1
+      timeout:
+        title: Timeout
+        description: override the connection timeout in seconds (default=10)
+        type: integer
+      user:
+        title: User
+        description: connect as this user (default=None)
+        type: string
+        minLength: 1
+      vault_id:
+        title: Vault id
+        description: the vault identity to use
+        type: string
+        minLength: 1
+      vault_password_file:
+        title: Vault password file
+        description: vault password file
+        type: string
+        format: secretfile
   HistoryLines:
     type: object
     properties:

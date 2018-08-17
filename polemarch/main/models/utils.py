@@ -226,13 +226,14 @@ class AnsibleCommand(object):
         self.project.hook(when, msg)
 
     def get_inventory_arg(self, target, extra_args):
+        # pylint: disable=unused-argument
         return [target, '-i', self.inventory_object.file_name]
 
     def get_args(self, target, extra_args):
         return (
             [self.path_to_ansible] +
             self.get_inventory_arg(target, extra_args) +
-            [ '-v' ] +
+            ['-v'] +
             extra_args
         )
 

@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import logging
 
-from django.db import transaction
 from django.db.models import Q
 from vstutils.utils import get_render
 
@@ -11,7 +10,7 @@ from .base import models
 from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
 from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex
-from ..validators import validate_hostname, RegexValidator
+from ..validators import RegexValidator
 
 logger = logging.getLogger("polemarch")
 
@@ -131,8 +130,10 @@ class Inventory(AbstractModel):
         '''
         :return:GroupQuerySet: Mixed queryset with all groups
         '''
-        groups_list = self.groups.filter(children=False) | \
-                      self.groups.filter(children=True).get_subgroups()
+        groups_list = (
+            self.groups.filter(children=False) |
+            self.groups.filter(children=True).get_subgroups()
+        )
         groups_list = groups_list.distinct().prefetch_related("variables", "hosts")
         return groups_list.order_by("-children", "id")
 

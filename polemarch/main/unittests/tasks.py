@@ -4,8 +4,6 @@ from ..tasks.exceptions import TaskError
 from ..tasks import RepoTask
 from ..exceptions import PMException
 from ..models import History
-from ..tests._base import BaseTestCase
-from ..tests._base import AnsibleArgsValidationTest
 
 
 class TasksTestCase(TestCase):

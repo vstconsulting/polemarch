@@ -6,7 +6,7 @@ from rest_framework import exceptions as excepts, status
 from rest_framework.authtoken import views as token_views
 from drf_yasg.utils import swagger_auto_schema
 from vstutils.api.permissions import StaffPermission
-from vstutils.api import base, views, decorators as deco
+from vstutils.api import base, views, serializers as vstsers, decorators as deco
 from vstutils.utils import KVExchanger
 
 from . import filters
@@ -17,7 +17,17 @@ yes = True
 no = False
 
 
-class OwnedView(base.ModelViewSetSet):
+class _VariablesCopyMixin(base.CopyMixin):
+    def copy_instance(self, instance):
+        new_instance = super(_VariablesCopyMixin, self).copy_instance(instance)
+        new_instance.variables.bulk_create([
+            sers.models.Variable(key=key, value=value, content_object=new_instance)
+            for key, value in instance.vars.items()
+        ])
+        return new_instance
+
+
+class OwnedView(base.ModelViewSetSet, base.CopyMixin):
     POST_WHITE_LIST = []
 
     @deco.action(methods=["post"], detail=True, serializer_class=sers.SetOwnerSerializer)
@@ -64,7 +74,7 @@ class TokenView(token_views.ObtainAuthToken):
         raise excepts.ParseError("Token not found.")
 
 
-class UserViewSet(views.UserViewSet):
+class UserViewSet(views.UserViewSet, base.CopyMixin):
     '''
     retrieve:
         Return a user instance.
@@ -86,6 +96,15 @@ class UserViewSet(views.UserViewSet):
     '''
     serializer_class = sers.OwnerSerializer
     serializer_class_one = sers.OneOwnerSerializer
+
+    copy_related = ['groups']
+    copy_field_name = 'username'
+
+    def copy_instance(self, instance):
+        new_instance = super(UserViewSet, self).copy_instance(instance)
+        new_instance.settings.data = instance.settings.get_settings_copy()
+        new_instance.settings.save()
+        return new_instance
 
     @deco.action(
         ["post", "delete", "get"], url_path="settings",
@@ -128,6 +147,7 @@ class TeamViewSet(OwnedView):
     serializer_class = sers.TeamSerializer
     serializer_class_one = sers.OneTeamSerializer
     filter_class = filters.TeamFilter
+    copy_related = ['users']
 
 
 class __HistoryLineViewSet(base.ReadOnlyModelViewSet):
@@ -193,7 +213,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
 
 
 @deco.nested_view('variables', 'id', view=__VarsViewSet)
-class HostViewSet(OwnedView):
+class HostViewSet(OwnedView, _VariablesCopyMixin):
     '''
     retrieve:
         Return a host instance.
@@ -252,10 +272,11 @@ class _BaseGroupViewSet(base.ModelViewSetSet):
 @deco.nested_view(
     'group', 'id', manager_name='groups', allow_append=yes, view=_BaseGroupViewSet
 )
-class _GroupMixin(OwnedView):
+class _GroupMixin(_VariablesCopyMixin, OwnedView):
     '''
     Instance with groups and hosts.
     '''
+    copy_related = ['hosts', 'groups']
 
 
 class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
@@ -295,6 +316,7 @@ class InventoryViewSet(_GroupMixin):
     serializer_class = sers.InventorySerializer
     serializer_class_one = sers.OneInventorySerializer
     filter_class = filters.InventoryFilter
+    copy_related = ['hosts', 'groups']
 
 
 class __PlaybookViewSet(base.ReadOnlyModelViewSet):
@@ -354,15 +376,15 @@ class __TemplateViewSet(base.ModelViewSetSet):
 
 @method_decorator(name='execute_module', decorator=swagger_auto_schema(
     operation_description='Execute ansible module.',
-    responses={status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(),}
+    responses={status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(), }
 ))
 @method_decorator(name='execute_playbook', decorator=swagger_auto_schema(
     operation_description='Execute ansible module.',
-    responses={status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(),}
+    responses={status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(), }
 ))
 @method_decorator(name='sync', decorator=swagger_auto_schema(
     operation_description='Sync project repository.',
-    responses={status.HTTP_200_OK: sers.ActionResponseSerializer(),}
+    responses={status.HTTP_200_OK: sers.ActionResponseSerializer(), }
 ))
 @deco.nested_view(
     'inventory', 'id', manager_name='inventories',
@@ -399,8 +421,13 @@ class ProjectViewSet(_GroupMixin):
     serializer_class_one = sers.OneProjectSerializer
     filter_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
+    copy_related = _GroupMixin.copy_related + ['inventories']
 
-    @deco.action(methods=["post"], detail=yes, serializer_class=sers.EmptySerializer)
+    def copy_instance(self, instance):
+        instance.status = instance.__class__._meta.get_field('status').default
+        return super(ProjectViewSet, self).copy_instance(instance)
+
+    @deco.action(methods=["post"], detail=yes, serializer_class=vstsers.EmptySerializer)
     def sync(self, request, *args, **kwargs):
         '''
         Sync project with repository.
@@ -452,7 +479,7 @@ class HookViewSet(base.ModelViewSetSet):
 
 @method_decorator(name='list', decorator=swagger_auto_schema(
     operation_description='Dashboard statistic.',
-    responses={status.HTTP_200_OK: sers.DashboardStatisticSerializer(),}
+    responses={status.HTTP_200_OK: sers.DashboardStatisticSerializer(), }
 ))
 class StatisticViewSet(base.ListNonModelViewSet):
     base_name = "stats"

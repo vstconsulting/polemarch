@@ -6,6 +6,7 @@ from subprocess import CalledProcessError, Popen, PIPE, STDOUT
 from threading import Thread
 
 import sys
+import os
 import re
 import json
 from os.path import dirname
@@ -45,8 +46,10 @@ class CmdExecutor(object):
     CANCEL_PREFIX = "CANCEL_EXECUTE_"
     newlines = ['\n', '\r\n', '\r']
 
-    def __init__(self):
+    def __init__(self, stdout=PIPE, stderr=STDOUT):
         self.output = ''
+        self._stdout = stdout
+        self._stderr = stderr
 
     def write_output(self, line):
         '''
@@ -98,8 +101,10 @@ class CmdExecutor(object):
         :rtype: str
         '''
         self.output = ""
-        proc = Popen(cmd, stdout=PIPE, stderr=STDOUT,
-                     universal_newlines=True, cwd=cwd)
+        proc = Popen(
+            cmd, stdout=self._stdout, stderr=self._stderr,
+            universal_newlines=True, cwd=cwd
+        )
         for line in self._unbuffered(proc):
             if self.line_handler(proc, line):
                 break
@@ -224,9 +229,10 @@ class PMAnsible(object):
         cache = self.get_ansible_cache()
         result = cache.get()
         if result is None:
-            cmd = CmdExecutor()
-            cmd_command = self.get_args()
-            cmd.execute(cmd_command, '/tmp/')
+            with open(os.devnull, 'wb') as DEVNULL:
+                cmd = CmdExecutor(stderr=DEVNULL)
+                cmd_command = self.get_args()
+                cmd.execute(cmd_command, '/tmp/')
             result = self._get_only_json(cmd.output)
             cache.set(result)
         return result
@@ -324,7 +330,6 @@ class AnsibleArgumentsReference(PMAnsible):
         # pylint: disable=protected-access,
         data = self.get_data()
         self.version = data['version']
-        self.modules = data['modules']
         result = data['keywords'].copy()
         result['module']['group'] = {"type": "string", "help": ""}
         result['periodic_playbook'] = result['playbook']

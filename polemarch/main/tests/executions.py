@@ -291,6 +291,19 @@ class BaseExecutionsTestCase(BaseTestCase):
         self.get_result('delete', self.get_url('project', id))
         self.assertFalse(os.path.exists(self.get_project_dir(id, **kwargs)))
 
+    def _check_copy_project(self, id, **kwargs):
+        obj = self.get_model_filter('Project', pk=id).get()
+        bulk_data = [
+            self.get_mod_bulk('project', obj.id, {'name': 'copied'}, 'copy'),
+            self.get_mod_bulk('project', '<0[data][id]>', {}, 'variables', method='GET'),
+            self.get_bulk('project', {}, 'del', pk='<0[data][id]>'),
+        ]
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[0]['data']['status'], 'NEW')
+        self.assertEqual(results[1]['data']['count'], len(obj.vars))
+        for value in results[1]['data']['results']:
+            self.assertEqual(value['value'], obj.vars[value['key']] or '[~~ENCRYPTED~~]')
+
     def project_workflow(self, repo_type, **kwargs):
         utils.AnsibleModules(detailed=True).clear_cache()
         utils.AnsibleArgumentsReference().clear_cache()
@@ -300,6 +313,7 @@ class BaseExecutionsTestCase(BaseTestCase):
         self.remove_project(**project_data)
         project_data = self.create_project_test(str(uuid.uuid1()), repo_type, **kwargs)
         try:
+            self._check_copy_project(**project_data)
             if not execute:
                 return
             kwargs = getattr(self, 'wip_{}'.format(repo_type.lower()), str)(project_data)
@@ -534,8 +548,8 @@ class ProjectTestCase(BaseExecutionsTestCase):
             ),
         ]
         bulk_data = [
-            self.get_mod_bulk('project', pk, data, 'periodic_task')
-            for data in ptask_data
+            self.get_mod_bulk('project', pk, dt, 'periodic_task')
+            for dt in ptask_data
         ]
         results = self.make_bulk(bulk_data)
         for result in results:
@@ -745,6 +759,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
     def make_test_readme(self, project_data):
         project = self.get_model_filter("Project", pk=project_data['id']).get()
+
         def get_bulk_readme():
             bulk_data = [
                 self.get_mod_bulk('project', project_data['id'], {}, 'sync', 'post'),

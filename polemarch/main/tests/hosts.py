@@ -33,7 +33,7 @@ class InvBaseTestCase(BaseTestCase):
 
     def _check_hidden(self, model_name, api_name, bulk_name):
         HIDDEN_VARS = getattr(self.get_model_class(model_name), 'HIDDEN_VARS', [])
-        data = dict(name="test-hidden", variables={k:'hidden' for k in HIDDEN_VARS})
+        data = dict(name="test-hidden", variables={k: 'hidden' for k in HIDDEN_VARS})
         data['variables']['not_hidden'] = 'value'
         pk = self.mass_create_bulk(bulk_name, [data])[0]['data']['id']
         result = self.get_result('get', self.get_url(api_name, pk, 'variables'))
@@ -44,6 +44,7 @@ class InvBaseTestCase(BaseTestCase):
             self.assertEqual(var['value'], "[~~ENCRYPTED~~]")
 
     def _check_with_vars(self, model_name, data, api_name=None, bulk_name=None, **kw):
+        copy_checks = kw.pop('copy_check', {})
         self.get_model_filter(model_name).delete()
         api_name = api_name or model_name.lower()
         bulk_name = bulk_name or model_name.lower()
@@ -59,8 +60,34 @@ class InvBaseTestCase(BaseTestCase):
 
         self._filter_vars(url, kw, hosts.var_filter(**kw).count())
         self._check_hidden(model_name, api_name, bulk_name)
+        self._check_copy(model_name, bulk_name, copy_checks)
+
+    def _check_copy(self, model_name, bulk_name, copy_checks=None):
+        copy_checks = copy_checks or dict()
+        obj = self.get_model_filter(model_name).first()
+        for name in copy_checks.values():
+            getattr(obj, name).create()
+        bulk_data = [
+            self.get_mod_bulk(bulk_name, obj.id, {'name': 'copied'}, 'copy'),
+            self.get_mod_bulk(bulk_name, '<0[data][id]>', {}, 'variables', method='GET'),
+        ]
+        bulk_data += [
+            self.get_mod_bulk(bulk_name, '<0[data][id]>', {}, name, method='GET')
+            for name in copy_checks.keys()
+        ]
+        bulk_data.append(self.get_bulk(bulk_name, {}, 'del', pk='<0[data][id]>'))
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[1]['data']['count'], len(obj.vars))
+        for value in results[1]['data']['results']:
+            self.assertEqual(value['value'], obj.vars[value['key']])
+        for result in results[2:-1]:
+            item_name = result['subitem']
+            self.assertEqual(
+                result['data']['count'], getattr(obj, copy_checks[item_name]).count()
+            )
 
     def _check_dependent(self, model_name, data, child_name, child_data, **kwargs):
+        copy_checks = kwargs.pop('copy_check', {})
         api_name = kwargs.get('api_name', model_name.lower())
         child_api_name = kwargs.get('child_api_name', child_name.lower())
         bulk_name = kwargs.get('bulk_name', api_name)
@@ -83,7 +110,7 @@ class InvBaseTestCase(BaseTestCase):
         result = self.make_bulk(bulk_data, 'put')
         if should_fail:
             for res in result:
-                self.assertEqual(res['status'], 409 or 400)
+                self.assertIn(res['status'], [409, 400])
             return
         self.assertEqual(result[0]['status'], 201, result[0])
         self.assertEqual(result[1]['status'], 200, result[1])
@@ -93,6 +120,7 @@ class InvBaseTestCase(BaseTestCase):
         self.assertEqual(result[3]['status'], 200, result[3])
         self.assertEqual(result[4]['status'], 204, result[4])
         self.assertTrue(self.get_model_filter(child_name, pk=id).exists())
+        self._check_copy(model_name, bulk_name, copy_checks)
 
 
 class InventoriesTestCase(InvBaseTestCase):
@@ -147,6 +175,7 @@ class InventoriesTestCase(InvBaseTestCase):
         self._check_dependent(
             'Group', dict(name='g_children', children=True),
             'Group', dict(name='g_child', children=False),
+            copy_check=dict(group='groups')
         )
         self._check_dependent(
             'Group', dict(name='g_children', children=False),
@@ -171,7 +200,7 @@ class InventoriesTestCase(InvBaseTestCase):
             self.get_mod_bulk(
                 'group', '<0[data][id]>', dict(id='<{}[data][id]>'.format(i)), 'group'
             )
-            for i in range(1,4)
+            for i in range(1, 4)
         ]
         results = self.make_bulk(bulk_data)
         for result in results:
@@ -214,8 +243,10 @@ class InventoriesTestCase(InvBaseTestCase):
         self._check_dependent(
             'Inventory', dict(name='inventory'),
             'Group', dict(name='inv-group', children=False),
+            copy_check=dict(group='groups')
         )
         self._check_dependent(
             'Inventory', dict(name='inventory'),
             'Host', dict(name='inv-host'),
+            copy_check=dict(host='hosts')
         )

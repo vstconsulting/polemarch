@@ -88,11 +88,7 @@ def with_signals(func):
 
 
 # Serializers
-class EmptySerializer(serializers.Serializer):
-    pass
-
-
-class ActionResponseSerializer(serializers.Serializer):
+class ActionResponseSerializer(DataSerializer):
     detail = serializers.CharField()
 
 
@@ -178,7 +174,7 @@ class OwnerSerializer(vst_serializers.UserSerializer):
 class OneOwnerSerializer(OwnerSerializer):
     password = serializers.CharField(write_only=True, required=False)
     email = serializers.EmailField(required=False)
-    
+
     class Meta(vst_serializers.OneUserSerializer.Meta):
         pass
 
@@ -571,7 +567,7 @@ class OneTemplateSerializer(TemplateSerializer):
         )
 
 
-class TemplateExecSerializer(serializers.Serializer):
+class TemplateExecSerializer(DataSerializer):
     option = serializers.CharField(
         help_text='Option name from template options.',
         min_length=0, allow_blank=True,
@@ -729,7 +725,7 @@ def generate_fileds(ansible_type):
     fields = OrderedDict()
 
     for ref, settings in ansible_reference.raw_dict[ansible_type].items():
-        if ref in ['help', 'version',]:
+        if ref in ['help', 'version', ]:
             continue
         ref_type = settings.get('type', None)
         kwargs = dict(help_text=settings.get('help', ''), required=False)
@@ -763,7 +759,7 @@ class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
 
 
 @six.add_metaclass(AnsibleSerializerMetaclass)
-class _AnsibleSerializer(serializers.Serializer):
+class _AnsibleSerializer(DataSerializer):
     pass
 
 
@@ -775,7 +771,7 @@ class AnsibleModuleSerializer(_AnsibleSerializer):
     module = vst_fields.AutoCompletionField(required=True, autocomplete='Module')
 
 
-class BaseDashboardJobSerializer(serializers.Serializer):
+class BaseDashboardJobSerializer(DataSerializer):
     status = serializers.CharField()
     sum = serializers.IntegerField()
     all = serializers.IntegerField()
@@ -793,13 +789,13 @@ class YearDashboardJobSerializer(BaseDashboardJobSerializer):
     year = serializers.DateTimeField()
 
 
-class DashboardJobsSerializer(serializers.Serializer):
+class DashboardJobsSerializer(DataSerializer):
     day = DayDashboardJobSerializer(many=True)
     month = MonthDashboardJobSerializer(many=True)
     year = YearDashboardJobSerializer(many=True)
 
 
-class DashboardStatisticSerializer(serializers.Serializer):
+class DashboardStatisticSerializer(DataSerializer):
     projects = serializers.IntegerField()
     templates = serializers.IntegerField()
     inventories = serializers.IntegerField()
