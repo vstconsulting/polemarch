@@ -440,7 +440,7 @@ pmItems.copyItem = function (item_id)
         $.when(encryptedCopyModal.replace(data)).done(function (data)
         {
             spajs.ajax.Call({
-                url: hostname + "/api/v1/" + thisObj.model.name + "/",
+                url: hostname + "/api/v2/" + thisObj.model.name + "/",
                 type: "POST",
                 contentType: 'application/json',
                 data: JSON.stringify(data),
@@ -471,7 +471,7 @@ pmItems.importItem = function (data)
     var thisObj = this;
 
     spajs.ajax.Call({
-        url: hostname + "/api/v1/" + thisObj.model.name + "/",
+        url: hostname + "/api/v2/" + thisObj.model.name + "/",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -898,7 +898,7 @@ pmItems.loadItems = function (limit, offset)
 
     var thisObj = this;
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/",
+        url: hostname + "/api/v2/" + this.model.name + "/",
         type: "GET",
         contentType: 'application/json',
         data: "limit=" + encodeURIComponent(limit) + "&offset=" + encodeURIComponent(offset),
@@ -1008,7 +1008,7 @@ pmItems.sendSearchQuery = function (query, limit, offset, ordering)
 
     var thisObj = this;
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/?" + q.join("&"),
+        url: hostname + "/api/v2/" + this.model.name + "/?" + q.join("&"),
         type: "GET",
         contentType: 'application/json',
         success: function (data)
@@ -1076,7 +1076,7 @@ pmItems.loadItem = function (item_id)
     }
 
     spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/",
+        url: hostname + "/api/v2/" + this.model.name + "/" + item_id + "/",
         type: "GET",
         contentType: 'application/json',
         data: "",
@@ -1171,7 +1171,7 @@ pmItems.deleteRows = function (elements)
 
         var thisObj = this;
         return $.when(spajs.ajax.Call({
-            url: hostname + "/api/v1/_bulk/",
+            url: hostname + "/api/v2/_bulk/",
             type: "POST",
             contentType: 'application/json',
             data: JSON.stringify(deleteBulk)
@@ -1213,7 +1213,7 @@ pmItems.deleteSelected = function ()
             }
         }
         return $.when(spajs.ajax.Call({
-            url: hostname + "/api/v1/_bulk/",
+            url: hostname + "/api/v2/_bulk/",
             type: "POST",
             contentType: 'application/json',
             data: JSON.stringify(deleteBulk)
@@ -1278,7 +1278,7 @@ pmItems.deleteItemQuery = function (item_id)
     this.toggleSelect(item_id, false);
 
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/",
+        url: hostname + "/api/v2/" + this.model.name + "/" + item_id + "/",
         type: "DELETE",
         contentType: 'application/json',
         success: function (data)
@@ -1429,7 +1429,7 @@ pmItems.addItem = function (parent_type, parent_item, opt)
 
     var thisObj = this;
     spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/",
+        url: hostname + "/api/v2/" + this.model.name + "/",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -1491,7 +1491,7 @@ pmItems.updateItem = function (item_id, opt)
 
     var thisObj = this;
     spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/",
+        url: hostname + "/api/v2/" + this.model.name + "/" + item_id + "/",
         type: "PATCH",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -1573,7 +1573,7 @@ pmItems.addExistingChildItemToParent = function(parent_type, parent_item)
         }
         childIds.push(childItem_id);
         spajs.ajax.Call({
-            url: hostname + "/api/v1/" + parentObj.model.name + "/" + parent_item + "/" + childItem_type + "/",
+            url: hostname + "/api/v2/" + parentObj.model.name + "/" + parent_item + "/" + childItem_type + "/",
             type: "PUT",
             contentType: 'application/json',
             data: JSON.stringify(childIds),
@@ -1617,7 +1617,7 @@ pmItems.deleteChildFromParent = function (parent_type, parent_item, childItem_id
     var parentObj = thisObj.definePmObject(parent_type);
     parent_type = parentObj.model.page_name;
     spajs.ajax.Call({
-        url: hostname + "/api/v1/" + parentObj.model.name + "/" + parent_item + "/" + thisObj.model.name + "/",
+        url: hostname + "/api/v2/" + parentObj.model.name + "/" + parent_item + "/" + thisObj.model.name + "/",
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(childrenItemsIds),
@@ -1673,7 +1673,7 @@ pmItems.deleteChildrenFromParent = function (parent_type, parent_item)
     var parentObj = thisObj.definePmObject(parent_type);
     parent_type = parentObj.model.page_name;
     spajs.ajax.Call({
-        url: hostname + "/api/v1/" + parentObj.model.name + "/" + parent_item + "/" + thisObj.model.name + "/",
+        url: hostname + "/api/v2/" + parentObj.model.name + "/" + parent_item + "/" + thisObj.model.name + "/",
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(childrenItemsIds),

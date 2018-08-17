@@ -58,11 +58,20 @@ pmAnsibleModule.showInProject = function(holder, menuInfo, data)
  */
 pmAnsibleModule.fastCommandWidget = function(holder)
 {
-    $.when(pmProjects.loadAllItems(), pmInventories.loadAllItems()).always(function(){ 
-        $(holder).insertTpl(spajs.just.render('fastcommand_widget', {}))
+    console.error("Виджет fastCommandWidget не готов ещё!")
+    
+    let projects = new apiproject.list()
+    let inventory = new apiinventory.list()
+    
+    
+    $.when(projects.loadAllItems(), inventory.loadAllItems()).always(function()
+    {
+        $(holder).insertTpl(spajs.just.render('fastcommand_widget', {projects:projects, inventory:inventory}))
+        debugger;
+        
         $("#projects-autocomplete").select2({ width: '100%' });
         $("#inventories-autocomplete").select2({ width: '100%' });
-    })
+    })/**/
 }
 
 pmAnsibleModule.fastCommandWidget_RunBtn = function()
@@ -134,7 +143,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
     }
 
     spajs.ajax.Call({
-        url: hostname + "/api/v1/projects/"+project_id+"/execute-module/",
+        url: hostname + "/api/v2/project/"+project_id+"/execute-module/",
         type: "POST",
         data:JSON.stringify(data),
         contentType:'application/json',

@@ -7,7 +7,7 @@ pmModuleTemplates.model.bulk_name = "template"
 pmModuleTemplates.model.selectedInventory = 0
 pmModuleTemplates.model.className = "pmModuleTemplates"
 
-// Поддерживаемые kind /api/v1/templates/supported-kinds/
+// Поддерживаемые kind /api/v2/templates/supported-kinds/
 pmModuleTemplates.model.kind = "Module"
 
 pmModuleTemplates.inventoriesAutocompletefiled = new pmInventories.filed.inventoriesAutocomplete()
@@ -466,7 +466,7 @@ pmModuleTemplates.saveOption = function(item_id)
         dataToAdd1.options[optionName]=dataToAdd;
         var thisObj = this;
         spajs.ajax.Call({
-            url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/",
+            url: hostname + "/api/v2/" + this.model.name + "/" + item_id + "/",
             type: "PATCH",
             contentType: 'application/json',
             data: JSON.stringify(dataToAdd1),
@@ -821,7 +821,7 @@ pmModuleTemplates.addItem = function()
 
     var thisObj = this;
     spajs.ajax.Call({
-        url: hostname + "/api/v1/templates/",
+        url: hostname + "/api/v2/templates/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(data),

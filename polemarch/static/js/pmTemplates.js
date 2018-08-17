@@ -4,7 +4,7 @@ var pmTemplates = inheritance(pmItems)
 pmTemplates.model.name = "templates"
 
 
-// Поддерживаемые kind /api/v1/templates/supported-kinds/
+// Поддерживаемые kind /api/v2/templates/supported-kinds/
 pmTemplates.model.kind = "Task,Module"
 pmTemplates.model.page_name = "templates"
 pmTemplates.model.bulk_name = "template"
@@ -54,7 +54,7 @@ pmTemplates.execute = function (item_id, option)
     }
     var def = new $.Deferred();
     spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/" + item_id + "/execute/",
+        url: hostname + "/api/v2/" + this.model.name + "/" + item_id + "/execute/",
         type: "POST",
         data: JSON.stringify(option),
         contentType: 'application/json',
@@ -106,7 +106,7 @@ pmTemplates.exportToFile = function (item_ids)
 
     var thisObj = this;
     spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/filter/?detail=1",
+        url: hostname + "/api/v2/" + this.model.name + "/filter/?detail=1",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -197,7 +197,7 @@ pmTemplates.importFromFile = function (files_event, project_id)
                             console.log(bulkdata)
 
                             spajs.ajax.Call({
-                                url: hostname + "/api/v1/_bulk/",
+                                url: hostname + "/api/v2/_bulk/",
                                 type: "POST",
                                 contentType: 'application/json',
                                 data: JSON.stringify(bulkdata),
@@ -326,7 +326,7 @@ pmTemplates.removeOption = function(item_id, option_name)
     var dataToAdd1={options:{}};
     dataToAdd1['options']=thisObj.model.items[item_id].optionsCopyForDelete;
     spajs.ajax.Call({
-        url: hostname + "/api/v1/" + thisObj.model.name + "/" + item_id + "/",
+        url: hostname + "/api/v2/" + thisObj.model.name + "/" + item_id + "/",
         type: "PATCH",
         contentType: 'application/json',
         data: JSON.stringify(dataToAdd1),
@@ -366,7 +366,7 @@ pmTemplates.loadAllItemsFromProject = function(project_id)
 {
     var thisObj = this;
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/" + this.model.name + "/",
+        url: hostname + "/api/v2/" + this.model.name + "/",
         type: "GET",
         contentType: 'application/json',
         data: "project="+project_id,
@@ -398,7 +398,7 @@ pmTemplates.loadLinkedPeriodicTasks = function(template_id)
 {
     var thisObj = this;
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/periodic-tasks/",
+        url: hostname + "/api/v2/periodic-tasks/",
         type: "GET",
         contentType: 'application/json',
         data: "template="+template_id,
@@ -547,7 +547,7 @@ pmTemplates.removeSelectedOptions = function(item_id, option_names)
     var dataToAdd1={options:{}};
     dataToAdd1['options']=thisObj.model.items[item_id].optionsCopyForDelete;
     spajs.ajax.Call({
-        url: hostname + "/api/v1/" + thisObj.model.name + "/" + item_id + "/",
+        url: hostname + "/api/v2/" + thisObj.model.name + "/" + item_id + "/",
         type: "PATCH",
         contentType: 'application/json',
         data: JSON.stringify(dataToAdd1),
@@ -791,7 +791,7 @@ pmTemplates.showListForProject = function (holder, menuInfo, data)
             }
         ];
         spajs.ajax.Call({
-            url: hostname + "/api/v1/templates/",
+            url: hostname + "/api/v2/templates/",
             type: "GET",
             contentType:'application/json',
             data:"project="+project_id,
@@ -856,7 +856,7 @@ pmTemplates.showSearchResultsForProject = function (holder, menuInfo, data)
             }
         ];
         spajs.ajax.Call({
-            url: hostname + "/api/v1/templates/",
+            url: hostname + "/api/v2/templates/",
             type: "GET",
             contentType:'application/json',
             data:"project=" + project_id + "&name=" + search_query,
