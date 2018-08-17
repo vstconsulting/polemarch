@@ -91,7 +91,6 @@
                     <%= renderBreadcrumbs() %>
                 <%] %>
                 <%* breadcrumb %>
-
                 <%[ buttons %>
                     <%= new guiElements.button({onclick:function(){guiObj.exec()}, class:'btn btn-primary', title:'Exec', text:'Exec'}).render() %>
                 <%] %>
@@ -533,18 +532,18 @@
             <%[ sublink_buttons %>
                 <% for(var k in guiObj.model.sublinks){   %>
                     <!-- /TODO оптимизировать обработку типа экшена -->
-                    <a
+
                         <% if  ((!guiObj.model.sublinks[k].isAction) || (guiObj.model.sublinks[k].isAction && (!guiObj.model.sublinks[k].api_path_value.post.parameters.some(elem => elem.schema.$ref == "#/definitions/Empty")))) { %>
-                            href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents+'/'+ guiObj.model.sublinks[k].name %>"
+                            <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents+'/'+ guiObj.model.sublinks[k].name %>"
                             onclick="return spajs.openURL(this.href);"
+                            >
+                            <%- k %> <%- guiObj.model.sublinks[k].description %>
+                            </a>
                         <% } else { %>
-                            <% debugger %>
-                            href="<%= guiObj.exec %>"
-                            onclick="return spajs.openURL(this.href);"
+                            <%= new guiElements.button({onclick:function(){ guiObj.sendToApi('PUT')}, class:'btn btn-primary', title:k, text:k}).render() %>
                         <% } %>
-                    >
-                        <%- k %> <%- guiObj.model.sublinks[k].description %>
-                    </a>
+
+
                 <% } %>
             <%] %>
             <%* sublink_buttons %>
@@ -559,7 +558,8 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <% for(var i in opt.fileds){ %> 
+                            <% debugger; %>
+                            <% for(var i in opt.fileds){ %>
                                 <%= guiObj.renderFiled(opt.fileds[i], opt) %>
                             <% } %>
                             
@@ -714,6 +714,7 @@
 <!-- Отрисует объект как паоле в другом объекте -->
 <script type="text/x-just" data-just="entity_one_as_filed">
     <!-- entity_one_as_filed -->
+    <% debugger; %>
     <% if(guiObj.model.data){ %>
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
             <label class="control-label"><%- guiObj.view.bulk_name %></label>
