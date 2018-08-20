@@ -607,7 +607,7 @@ jsonEditor.initForm = function (optionsblock, prefix)
     } else
     {
         return spajs.ajax.Call({
-            url: hostname + "/api/v1/ansible/cli_reference/",
+            url: hostname + "/api/v2/ansible/cli_reference/",
             type: "GET",
             contentType: 'application/json',
             data: "",

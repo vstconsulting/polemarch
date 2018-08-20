@@ -20,19 +20,19 @@ function getCookie(name)
 }
 
 function loadTpl(name)
-{  
+{
     return jQuery.ajax({
        url:  hostname + window.guiStaticPath+""+name+".html?v="+window.gui_version,
        type: "GET",
        success: function(res)
        {
-            $("body").append(res)  
+            $("body").append(res)
        }
     })
 }
 
 function loadTplArray(templatesArray)
-{ 
+{
     var def = new $.Deferred();
     var promiseArr = []
     for(var i in templatesArray)
@@ -43,10 +43,10 @@ function loadTplArray(templatesArray)
     $.when.apply($, promiseArr).done(function()
     {
         def.resolve();
-    }).fail(function(e){ 
+    }).fail(function(e){
         def.reject(e);
-    }) 
-    
+    })
+
     return def.promise()
 }
 
@@ -61,12 +61,12 @@ if(window.moment && window.moment.tz)
 
 polemarch.opt = {}
 polemarch.opt.holder = undefined
-polemarch.opt.host = "//"+window.location.host
+polemarch.opt.host = "//"+hostname
 
 polemarch.model = {}
 
 polemarch.model.nowTime = 0;
-    
+
 polemarch.start = function(options)
 {
     for(var i in options)
@@ -95,7 +95,7 @@ polemarch.start = function(options)
         var t = new Date();
         polemarch.model.nowTime = t.getTime();
     }, 5001)
-    
+
 
     $("body").touchwipe({
         wipingLeftEnd: function(e)
@@ -130,11 +130,11 @@ polemarch.start = function(options)
     tabSignal.emit("polemarch.start")
 
     try{
-        $.when(spajs.openMenuFromUrl(undefined, {withoutFailPage:window.location.pathname != "/"})).always(function(){ 
+        $.when(spajs.openMenuFromUrl(undefined, {withoutFailPage:window.location.pathname != "/"})).always(function(){
             hideLoadingProgress();
             tabSignal.emit("hideLoadingProgress")
         })
-        
+
     }
     catch (exception)
     {
@@ -142,7 +142,7 @@ polemarch.start = function(options)
         {
             return;
         }
-        
+
         console.error("spajs.openMenuFromUrl exception", exception.stack)
         hideLoadingProgress();
         tabSignal.emit("hideLoadingProgress")
@@ -150,32 +150,32 @@ polemarch.start = function(options)
         //spajs.openURL("");
     }
 }
- 
+
 polemarch.showErrors = function(res)
 {
     if(!res)
     {
         return true;
     }
-    
+
     if(res.responseJSON)
     {
         res = res.responseJSON
     }
 
     if(res && res.info && res.info.message)
-    { 
+    {
         console.error('showErrors:' + res.info.message)
         $.notify(res.info.message, "error");
         return res.info.message;
     }
     else if(res && res.message)
-    { 
+    {
         console.error('showErrors:' + res.message)
         $.notify(res.message, "error");
         return res.message;
-    } 
-    
+    }
+
     if(typeof res === "string")
     {
         console.error('showErrors:' + res)
@@ -204,7 +204,7 @@ polemarch.showErrors = function(res)
 }
 
 spajs.errorPage = function(holder, menuInfo, data, error_data)
-{ 
+{
     var error = {
         error_data:error_data
     }
@@ -239,10 +239,11 @@ spajs.errorPage = function(holder, menuInfo, data, error_data)
 
 
 tabSignal.connect("loading.completed", function()
-{  
+{ 
+    // Запуск полемарча
     polemarch.start({
         is_superuser:window.is_superuser,
         holder:'#spajs-body'
     })
-    
+
 })

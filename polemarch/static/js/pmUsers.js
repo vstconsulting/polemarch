@@ -1,3 +1,46 @@
+tabSignal.connect("openapi.factory.user", function(data)
+{
+    apiuser.one.copy = function()
+    {
+        var def = new $.Deferred();
+        var thisObj = this;
+
+        $.when(this.loadItem(this.model.data.id)).done(function()
+        {
+            var data = thisObj.model.items[this.model.data.id];
+            delete data.id;
+            data.username = "copy-from-" + data.username
+
+            $.when(encryptedCopyModal.replace(data)).done(function(data)
+            {
+                spajs.ajax.Call({
+                    url: hostname + "/api/v2/"+thisObj.model.name+"/",
+                    type: "POST",
+                    contentType:'application/json',
+                    data: JSON.stringify(data),
+                    success: function(data)
+                    {
+                        thisObj.model.items[data.id] = data
+                        def.resolve(data.id)
+                    },
+                    error:function(e)
+                    {
+                        def.reject(e)
+                    }
+                });
+            }).fail(function(e)
+            {
+                def.reject(e)
+            })
+        }).fail(function(e)
+        {
+            def.reject(e)
+        })
+
+
+        return def.promise();
+    }
+})
 
 var pmUsers = inheritance(pmItems)
 
@@ -406,7 +449,7 @@ pmUsers.copyItem = function(item_id)
         $.when(encryptedCopyModal.replace(data)).done(function(data)
         {
             spajs.ajax.Call({
-                url: hostname + "/api/v1/"+thisObj.model.name+"/",
+                url: hostname + "/api/v2/"+thisObj.model.name+"/",
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
@@ -461,7 +504,7 @@ pmUsers.deactivateItem = function(item_id, force) {
     }
     var data={ "is_active": false }
     spajs.ajax.Call({
-        url: hostname + "/api/v1/"+thisObj.model.name+"/"+item_id+"/",
+        url: hostname + "/api/v2/"+thisObj.model.name+"/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data: JSON.stringify(data),
@@ -469,7 +512,7 @@ pmUsers.deactivateItem = function(item_id, force) {
         {
             if(my_user_id==item_id)
             {
-                spajs.openURL(window.location.protocol+"//"+window.location.host);
+                spajs.openURL(window.location.protocol+"//"+hostname);
             }
             else {
                 $.notify("Account was deactivated", "success");
@@ -503,7 +546,7 @@ pmUsers.activateItem = function(item_id, force) {
     var def = new $.Deferred();
     var data={ "is_active": true }
     spajs.ajax.Call({
-        url: hostname + "/api/v1/"+thisObj.model.name+"/"+item_id+"/",
+        url: hostname + "/api/v2/"+thisObj.model.name+"/"+item_id+"/",
         type: "PATCH",
         contentType:'application/json',
         data: JSON.stringify(data),
@@ -580,7 +623,7 @@ pmUsers.changePassword = function(item_id)
     {
         var data={"password": newPassword1};
         spajs.ajax.Call({
-            url: hostname + "/api/v1/"+thisObj.model.name+"/"+item_id+"/",
+            url: hostname + "/api/v2/"+thisObj.model.name+"/"+item_id+"/",
             type: "PATCH",
             contentType:'application/json',
             data: JSON.stringify(data),
@@ -663,7 +706,7 @@ pmUsers.updateProfile = function (item_id) {
     return def.promise();
 }
 
-
+/*
 tabSignal.connect("polemarch.start", function()
 {
     // users
@@ -698,3 +741,4 @@ tabSignal.connect("polemarch.start", function()
     })
 
 })
+*/

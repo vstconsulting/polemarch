@@ -185,7 +185,7 @@ pmProjects.model.page_list = {
  */
 pmProjects.model.page_new = {
     title: "New project",               // Текст заголовка страницы
-    short_title: "New project",         // Короткий текст заголовка страницы   
+    short_title: "New project",         // Короткий текст заголовка страницы
     /**
      * Содержит массив с массивами описаний полей в списке элементов
      * Масиивы представляют собой блоки строк в которые вставляются поля ввода
@@ -656,7 +656,7 @@ pmProjects.syncRepo = function(item_id)
     }
 
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/projects/"+item_id+"/sync/",
+        url: hostname + "/api/v2/project"+item_id+"/sync/",
         type: "POST",
         contentType:'application/json',
         success: function(data)
@@ -679,7 +679,7 @@ pmProjects.syncRepoFromProjectPage = function(item_id)
     pmProjects.startUpdateProjectItem(item_id);
 
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/projects/"+item_id+"/sync/",
+        url: hostname + "/api/v2/project"+item_id+"/sync/",
         type: "POST",
         contentType:'application/json',
         success: function(data)
@@ -701,7 +701,7 @@ pmProjects.syncRepoFromProjectPage = function(item_id)
 pmProjects.supportedRepos = function()
 {
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/projects/supported-repos/",
+        url: hostname + "/api/v2/projectsupported-repos/",
         type: "GET",
         contentType:'application/json',
         success: function(data)
@@ -769,7 +769,7 @@ pmProjects.syncSelectedProjects = function()
     return $.when(spajs.ajax.Call
     (
         {
-            url: hostname + "/api/v1/_bulk/",
+            url: hostname + "/api/v2/_bulk/",
             type: "POST",
             contentType: 'application/json',
             data: JSON.stringify(syncBulk)
@@ -788,44 +788,12 @@ pmProjects.syncSelectedProjects = function()
 
 }
 
-tabSignal.connect("polemarch.start", function()
-{
-    // projects
-    spajs.addMenu({
-        id:"projects",
-        urlregexp:[/^projects$/, /^projects\/search\/?$/, /^project$/, /^projects\/page\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.showUpdatedList(holder, menuInfo, data);},
-        onClose:function(){return pmProjects.stopUpdates();},
-    })
-
-    spajs.addMenu({
-        id:"projects-search",
-        urlregexp:[/^projects\/search\/([A-z0-9 %\-.:,=]+)$/, /^projects\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.showSearchResults(holder, menuInfo, data);}
-    })
-
-    spajs.addMenu({
-        id:"project",
-        urlregexp:[/^project\/([0-9]+)$/, /^projects\/([0-9]+)$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.openItem(holder, menuInfo, data);},
-        onClose:function(){return pmHistory.stopUpdates();},
-    })
-
-    spajs.addMenu({
-        id:"newProject",
-        urlregexp:[/^new-project$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.openNewItemPage(holder, menuInfo, data);}
-    })
-
-    spajs.addMenu({
-        id:"project-run-playbook",
-        urlregexp:[/^project\/([0-9]+)\/playbook\/run$/],
-        onOpen:function(holder, menuInfo, data){return pmProjects.openRunPlaybookPage(holder, menuInfo, data);}
-    })
-
-    spajs.addMenu({
-        id:"project-ansible-module-run",
-        urlregexp:[/^project\/([0-9]+)\/ansible-module\/run$/],
-        onOpen:function(holder, menuInfo, data){return pmAnsibleModule.showInProject(holder, menuInfo, data);}
-    })
+/*
+tabSignal.connect("openapi.factory.project", function(data)
+{ 
+    // Добавляет к странице ещё один блок
+    apiproject.one.addSection('renderAsPage', function(){
+        return "ABC"
+    }) 
 })
+*/

@@ -351,6 +351,11 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
 
 
 class HostSerializer(_WithVariablesSerializer):
+    type = serializers.ChoiceField(
+        choices=list(dict(HOST='One host.', RANGE='Range of hosts.').items()),
+        required=False,
+        default='HOST'
+    )
 
     class Meta:
         model = models.Host

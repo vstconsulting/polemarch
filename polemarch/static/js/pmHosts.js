@@ -1,3 +1,45 @@
+tabSignal.connect("openapi.factory.host", function(data)
+{
+    apihost.one.copy = function()
+    {
+        var def = new $.Deferred();
+        var thisObj = this;
+
+        $.when(this.loadItem(this.model.data.id)).done(function()
+        {
+            var data = thisObj.model.items[this.model.data.id];
+            $.when(encryptedCopyModal.replace(data)).done(function(data)
+            {
+                delete data.id;
+                spajs.ajax.Call({
+                    url: hostname + "/api/v2/"+thisObj.model.name+"/",
+                    type: "POST",
+                    contentType:'application/json',
+                    data: JSON.stringify(data),
+                    success: function(data)
+                    {
+                        thisObj.model.items[data.id] = data
+                        def.resolve(data.id)
+                    },
+                    error:function(e)
+                    {
+                        def.reject(e)
+                    }
+                });
+            }).fail(function(e)
+            {
+                def.reject(e)
+            })
+
+        }).fail(function(e)
+        {
+            def.reject(e)
+        })
+
+
+        return def.promise();
+    }
+})
 
 var pmHosts = inheritance(pmItems)
 
@@ -324,7 +366,7 @@ pmHosts.copyItem = function(item_id)
         {
             delete data.id;
             spajs.ajax.Call({
-                url: hostname + "/api/v1/"+thisObj.model.name+"/",
+                url: hostname + "/api/v2/"+thisObj.model.name+"/",
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
@@ -364,7 +406,7 @@ setTimeout(function(){
     name = Math.random()+"-"+Math.random()
     name = name.replace(/\./g, "")
     spajs.ajax.Call({
-            url: hostname + "/api/v1/hosts/",
+            url: hostname + "/api/v2/hosts/",
             type: "POST",
             contentType:'application/json',
             data: JSON.stringify({name:name, type:"HOST"}),
@@ -376,6 +418,7 @@ setTimeout(function(){
 tabSignal.connect("polemarch.start", function()
 {
     // hosts
+    /*
     spajs.addMenu({
         id:"hosts",
         urlregexp:[/^hosts$/, /^host$/, /^hosts\/search\/?$/, /^hosts\/page\/([0-9]+)$/],
@@ -419,7 +462,7 @@ tabSignal.connect("polemarch.start", function()
         urlregexp:[/^([A-z0-9_\/]+)\/hosts\/search\/([A-z0-9 %\-.:,=]+)$/,
             /^([A-z0-9_\/]+)\/hosts\/search\/([A-z0-9 %\-.:,=]+)\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmHosts.showSearchResultsForParent(holder, menuInfo, data);}
-    })
+    })*/
 })
 
 //изменение типа input'a на file при выборе

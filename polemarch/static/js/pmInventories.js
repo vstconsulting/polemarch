@@ -1,4 +1,61 @@
+tabSignal.connect("openapi.factory.inventory", function(data)
+{
+    apiinventory.one.copy = function()
+    {
+        var def = new $.Deferred();
+        var thisObj = this;
 
+        $.when(this.loadItem(this.model.data.id)).done(function()
+        {
+            var data = thisObj.model.items[this.model.data.id];
+            delete data.id;
+            data.name = "copy from " + data.name
+
+            $.when(encryptedCopyModal.replace(data)).done(function(data)
+            {
+                spajs.ajax.Call({
+                    url: hostname + "/api/v2/"+thisObj.model.name+"/",
+                    type: "POST",
+                    contentType:'application/json',
+                    data: JSON.stringify(data),
+                    success: function(newItem)
+                    {
+                        thisObj.model.items[newItem.id] = newItem
+
+                        var groups = []
+                        for(var i in data.groups)
+                        {
+                            groups.push(data.groups[i].id)
+                        }
+
+                        var hosts = []
+                        for(var i in data.hosts)
+                        {
+                            hosts.push(data.hosts[i].id)
+                        }
+
+                        $.when(thisObj.setSubGroups(newItem.id, groups), thisObj.setSubHosts(newItem.id, hosts)).always(function(){
+                            def.resolve(newItem.id)
+                        })
+                    },
+                    error:function(e)
+                    {
+                        def.reject(e)
+                    }
+                });
+            }).fail(function(e)
+            {
+                def.reject(e)
+            })
+        }).fail(function(e)
+        {
+            def.reject(e)
+        })
+
+
+        return def.promise();
+    }
+})
 
 var pmInventories = inheritance(pmItems)
 pmInventories.model.name = "inventories"
@@ -561,7 +618,7 @@ pmInventories.openChooseMatchingModal = function(subItemType, index)
     }
     return $.when(
         spajs.ajax.Call({
-            url: hostname + "/api/v1/_bulk/",
+            url: hostname + "/api/v2/_bulk/",
             type: "POST",
             contentType:'application/json',
             data:JSON.stringify(bulkHosts),
@@ -914,7 +971,7 @@ pmInventories.getAllGroupDataBulk = function()
         })
     }
     spajs.ajax.Call({
-        url: hostname + "/api/v1/_bulk/",
+        url: hostname + "/api/v2/_bulk/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(bulkArr),
@@ -949,7 +1006,7 @@ pmInventories.getAllHostDataBulk = function()
         })
     }
     spajs.ajax.Call({
-        url: hostname + "/api/v1/_bulk/",
+        url: hostname + "/api/v2/_bulk/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(bulkArr),
@@ -1776,7 +1833,7 @@ pmInventories.importInventory = function(inventory)
 
         // Добавление новых хостов вложенных к инвенторию
         spajs.ajax.Call({
-            url: hostname + "/api/v1/_bulk/",
+            url: hostname + "/api/v2/_bulk/",
             type: "POST",
             contentType:'application/json',
             data:JSON.stringify(bulkHosts),
@@ -1893,7 +1950,7 @@ pmInventories.importInventory = function(inventory)
                 {
                     // Добавление групп и вложенных в них хостов
                     spajs.ajax.Call({
-                        url: hostname + "/api/v1/_bulk/",
+                        url: hostname + "/api/v2/_bulk/",
                         type: "POST",
                         contentType:'application/json',
                         data:JSON.stringify(bulkdata),
@@ -2025,7 +2082,7 @@ pmInventories.importInventory = function(inventory)
                                 if(bulk_update.length)
                                 {
                                     spajs.ajax.Call({
-                                        url: hostname + "/api/v1/_bulk/",
+                                        url: hostname + "/api/v2/_bulk/",
                                         type: "POST",
                                         contentType:'application/json',
                                         data:JSON.stringify(bulk_update),
@@ -2104,7 +2161,7 @@ pmInventories.importInventory = function(inventory)
     }).fail(function(delete_bulk)
     {
         $.when(spajs.ajax.Call({
-            url: hostname + "/api/v1/_bulk/",
+            url: hostname + "/api/v2/_bulk/",
             type: "POST",
             contentType:'application/json',
             data:JSON.stringify(delete_bulk),
@@ -2153,7 +2210,7 @@ pmInventories.copyItem = function(item_id)
         $.when(encryptedCopyModal.replace(data)).done(function(data)
         {
             spajs.ajax.Call({
-                url: hostname + "/api/v1/"+thisObj.model.name+"/",
+                url: hostname + "/api/v2/"+thisObj.model.name+"/",
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
@@ -2543,7 +2600,7 @@ pmInventories.setSubGroups = function(item_id, groups_ids)
     }
 
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/inventories/"+item_id+"/groups/",
+        url: hostname + "/api/v2/inventorie/"+item_id+"/groups/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
@@ -2582,7 +2639,7 @@ pmInventories.setSubHosts = function(item_id, hosts_ids)
     }
 
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/inventories/"+item_id+"/hosts/",
+        url: hostname + "/api/v2/inventorie/"+item_id+"/hosts/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
@@ -2617,7 +2674,7 @@ pmInventories.addSubGroups = function(item_id, groups_ids)
 
     var def = new $.Deferred();
     spajs.ajax.Call({
-        url: hostname + "/api/v1/inventories/"+item_id+"/groups/",
+        url: hostname + "/api/v2/inventorie/"+item_id+"/groups/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
@@ -2674,7 +2731,7 @@ pmInventories.addSubHosts = function(item_id, hosts_ids)
     }
 
     spajs.ajax.Call({
-        url: hostname + "/api/v1/inventories/"+item_id+"/hosts/",
+        url: hostname + "/api/v2/inventorie/"+item_id+"/hosts/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
@@ -2783,7 +2840,7 @@ pmInventories.filed.inventoriesAutocomplete.render = function(pmObj, filed, item
 tabSignal.connect("polemarch.start", function()
 {
     // inventories
-    spajs.addMenu({
+    /*spajs.addMenu({
         id:"inventories",
         urlregexp:[/^inventories$/, /^inventory$/, /^inventories\/search\/?$/, /^inventories\/page\/([0-9]+)$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showList(holder, menuInfo, data);}
@@ -2812,5 +2869,5 @@ tabSignal.connect("polemarch.start", function()
         id:"newInventory",
         urlregexp:[/^new-inventory$/, /^([A-z0-9_]+)\/([0-9]+)\/new-inventory$/],
         onOpen:function(holder, menuInfo, data){return pmInventories.showNewItemPage(holder, menuInfo, data);}
-    })
+    })*/
 })

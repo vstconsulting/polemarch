@@ -56,7 +56,7 @@ pmDashboard.model.widgets = [
  */
 pmDashboard.model.defaultWidgets = [
     [
-        {
+        /*{
             name:'pmwTemplatesCounter',
             title:'Templates Counter',
             sortNum:0,
@@ -64,7 +64,7 @@ pmDashboard.model.defaultWidgets = [
             opt:{},
             type:1,
             collapse:false,
-        },
+        },*/
         {
             name:'pmwProjectsCounter',
             title:'Projects Counter',
@@ -128,7 +128,7 @@ pmDashboard.model.defaultWidgets = [
             type:0,
             collapse:false,
         },
-        {
+        /*{
             name:'pmwTasksTemplatesWidget',
             title:'Templates Task',
             sortNum:8,
@@ -145,7 +145,7 @@ pmDashboard.model.defaultWidgets = [
             opt:{},
             type:0,
             collapse:false,
-        },/**/
+        },*//**/
     ],
 ]
 
@@ -371,7 +371,7 @@ pmDashboard.getUserDashboardSettingsFromAPI = function()
         pmDashboard.checkNecessityToLoadDashboardSettingsFromApi(pmDashboard.model.defaultChartLineSettings, pmDashboard.model.ChartLineSettings))
     {
         return spajs.ajax.Call({
-            url: hostname + "/api/v1/users/" + userId + "/settings/",
+            url: hostname + "/api/v2/user/" + userId + "/settings/",
             type: "GET",
             contentType: 'application/json',
             success: function (data)
@@ -426,7 +426,7 @@ pmDashboard.putUserDashboardSettingsToAPI = function()
         chartLineSettings[objName]={active: pmDashboard.model.ChartLineSettings[i].active};
     }
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/users/" + userId + "/settings/",
+        url: hostname + "/api/v2/user/" + userId + "/settings/",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify({widgetSettings:widgetSettings, chartLineSettings:chartLineSettings}),
@@ -639,7 +639,7 @@ pmDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
 }
 
 /**
- * Функция, отправляющая запрос /api/v1/stats/,
+ * Функция, отправляющая запрос /api/v2/stats/,
  * который дает нам информацию для виджетов класса pmwItemsCounter,
  * а также для графика на странице Dashboard.
  */
@@ -648,7 +648,7 @@ pmDashboard.loadStats=function()
     var limit=1;
     var thisObj = this;
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/stats/?last="+pmDashboard.statsDataLastQuery,
+        url: hostname + "/api/v2/stats/?last="+pmDashboard.statsDataLastQuery,
         type: "GET",
         contentType: 'application/json',
         data: "limit=" + encodeURIComponent(limit)+"&rand="+Math.random(),
@@ -666,7 +666,7 @@ pmDashboard.loadStats=function()
 
 /**
  *Функция вызывается, когда происходит изменение периода на графике(пользователь выбрал другой option в select).
- *Функция обновляет значения переменных, которые в дальнейшем используются для запроса к api/v1/stats и отрисовки графика.
+ *Функция обновляет значения переменных, которые в дальнейшем используются для запроса к api/v2/stats и отрисовки графика.
  */
 pmDashboard.updateStatsDataLast=function(thisEl)
 {
@@ -769,24 +769,24 @@ pmDashboard.getDataForDashboardFromBulk = function ()
     var bulkArr = [
         {
             type:"get",
-            item: "projects",
+            item: "project",
             filters: "limit=1"
         },
         {
             type:"get",
-            item: "inventories",
+            item: "inventory",
             filters: "limit=1"
         },
-        {
+        /*{
             type:"get",
-            item: "templates",
+            item: "template",
             filters: "limit=1"
-        },
+        },*/
     ];
 
     spajs.ajax.Call({
-        url: hostname + "/api/v1/_bulk/",
-        type: "POST",
+        url: hostname + "/api/v2/_bulk/",
+        type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(bulkArr),
         success: function (data)
@@ -846,7 +846,7 @@ pmDashboard.updateData = function()
     {
         //обновляем счетчики для виджетов
         pmwHostsCounter.updateCount();
-        pmwTemplatesCounter.updateCount();
+        //pmwTemplatesCounter.updateCount();
         pmwGroupsCounter.updateCount();
         pmwProjectsCounter.updateCount();
         pmwInventoriesCounter.updateCount();
@@ -871,12 +871,12 @@ pmDashboard.updateData = function()
                 startTimeOrg=yearNum+"-"+monthNum+"-"+dayNum+hourNum;
                 break;
         }
-
+       
         //задаем стартовую дату для графика.
         //pmDashboard.statsDataLast - количество периодов назад
         //pmDashboard.statsDataMomentType - тип периода - месяц/год
         var startTime =+ moment(startTimeOrg).subtract(pmDashboard.statsDataLast-1, pmDashboard.statsDataMomentType).tz(window.timeZone).format("x");
-
+        
         tasks_data = {};
         tasks_data_t = [];
 
@@ -963,6 +963,12 @@ pmDashboard.open  = function(holder, menuInfo, data)
             {
                 if(pmDashboard.model.widgets[i][j].widget === undefined  )
                 {
+                    let name = pmDashboard.model.widgets[i][j]['name']
+                    if(!window[name])
+                    {
+                        console.warn("widget name="+name+" not defined")
+                        continue;
+                    }
                     pmDashboard.model.widgets[i][j].widget = new window[pmDashboard.model.widgets[i][j]['name']](pmDashboard.model.widgets[i][j].opt);
                 }
             }
@@ -971,8 +977,8 @@ pmDashboard.open  = function(holder, menuInfo, data)
         thisObj.updateData()
         $(holder).insertTpl(spajs.just.render('dashboard_page', {}))
 
-        pmwTasksTemplatesWidget.render();
-        pmwModulesTemplatesWidget.render();
+        //pmwTasksTemplatesWidget.render();
+        //pmwModulesTemplatesWidget.render();
         pmwAnsibleModuleWidget.render();
         pmwChartWidget.render();
 
@@ -1087,6 +1093,7 @@ pmDashboardWidget = {
  * @type Object
  */
 
+/*
 var pmwTasksTemplatesWidget = inheritance(pmDashboardWidget);
 pmwTasksTemplatesWidget.render = function()
 {
@@ -1101,7 +1108,7 @@ pmwModulesTemplatesWidget.render = function()
     var div_id="#pmwModulesTemplatesWidget";
     pmTasksTemplates.showModuleWidget($(div_id));
     return "";
-}
+}*/
 
 var pmwAnsibleModuleWidget = inheritance(pmDashboardWidget);
 pmwAnsibleModuleWidget.render = function()

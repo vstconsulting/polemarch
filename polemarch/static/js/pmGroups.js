@@ -1,4 +1,67 @@
+tabSignal.connect("openapi.factory.group", function(data)
+{
+  apigroup.one.copy = function()
+  {
+        var def = new $.Deferred();
+        var thisObj = this;
 
+        $.when(this.loadItem(this.model.data.id)).done(function()
+        {
+            var data = thisObj.model.items[this.model.data.id];
+            delete data.id;
+            data.name = "copy-from-" + data.name
+            $.when(encryptedCopyModal.replace(data)).done(function(data)
+            {
+                spajs.ajax.Call({
+                    url: hostname + "/api/v2/"+thisObj.model.name+"/",
+                    type: "POST",
+                    contentType:'application/json',
+                    data: JSON.stringify(data),
+                    success: function(newItem)
+                    {
+                        thisObj.model.items[newItem.id] = newItem
+
+                        if(data.children)
+                        {
+                            var groups = []
+                            for(var i in data.groups)
+                            {
+                                groups.push(data.groups[i].id)
+                            }
+                            $.when(thisObj.setSubGroups(newItem.id, groups)).always(function(){
+                                def.resolve(newItem.id)
+                            })
+                        }
+                        else
+                        {
+                            var hosts = []
+                            for(var i in data.hosts)
+                            {
+                                hosts.push(data.hosts[i].id)
+                            }
+
+                            $.when(thisObj.setSubHosts(newItem.id, hosts)).always(function(){
+                                def.resolve(newItem.id)
+                            })
+                        }
+                    },
+                    error:function(e)
+                    {
+                        def.reject(e)
+                    }
+                });
+            }).fail(function(e)
+            {
+                def.reject(e)
+            })
+        }).fail(function(e)
+        {
+            def.reject(e)
+        })
+
+        return def.promise();
+  }
+})
 var pmGroups = inheritance(pmItems)
 pmGroups.model.name = "groups"
 pmGroups.model.page_name = "group"
@@ -18,7 +81,7 @@ pmGroups.copyItem = function(item_id)
         $.when(encryptedCopyModal.replace(data)).done(function(data)
         {
             spajs.ajax.Call({
-                url: hostname + "/api/v1/"+thisObj.model.name+"/",
+                url: hostname + "/api/v2/"+thisObj.model.name+"/",
                 type: "POST",
                 contentType:'application/json',
                 data: JSON.stringify(data),
@@ -488,7 +551,7 @@ pmGroups.setSubGroups = function(item_id, groups_ids)
     }
 
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/groups/"+item_id+"/groups/",
+        url: hostname + "/api/v2/groups/"+item_id+"/groups/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
@@ -529,7 +592,7 @@ pmGroups.setSubHosts = function(item_id, hosts_ids)
     }
 
     return spajs.ajax.Call({
-        url: hostname + "/api/v1/groups/"+item_id+"/hosts/",
+        url: hostname + "/api/v2/groups/"+item_id+"/hosts/",
         type: "PUT",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
@@ -563,7 +626,7 @@ pmGroups.addSubGroups = function(item_id, groups_ids)
 
     var def = new $.Deferred();
     spajs.ajax.Call({
-        url: hostname + "/api/v1/groups/"+item_id+"/groups/",
+        url: hostname + "/api/v2/groups/"+item_id+"/groups/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(groups_ids),
@@ -619,7 +682,7 @@ pmGroups.addSubHosts = function(item_id, hosts_ids)
 
     var def = new $.Deferred();
     spajs.ajax.Call({
-        url: hostname + "/api/v1/groups/"+item_id+"/hosts/",
+        url: hostname + "/api/v2/groups/"+item_id+"/hosts/",
         type: "POST",
         contentType:'application/json',
         data:JSON.stringify(hosts_ids),
@@ -962,6 +1025,7 @@ pmGroups.groupsAutocompleteMatcher = function(original_term, response, inventory
     }
 }
 
+/*
 tabSignal.connect("polemarch.start", function()
 {
     // groups
@@ -1010,4 +1074,4 @@ tabSignal.connect("polemarch.start", function()
         onOpen:function(holder, menuInfo, data){return pmGroups.showSearchResultsForParent(holder, menuInfo, data);}
     })
 
-})
+})*/
