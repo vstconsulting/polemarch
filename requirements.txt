@@ -1,6 +1,6 @@
 # Main
 vstutils[rpc,ldap,doc,prod]==1.2.0
-pyyaml
+pyyaml==3.12 --global-option="--with-libyaml"
 docutils==0.14
 markdown2==2.3.5
 
