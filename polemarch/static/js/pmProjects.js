@@ -788,12 +788,21 @@ pmProjects.syncSelectedProjects = function()
 
 }
 
-/*
 tabSignal.connect("openapi.factory.project", function(data)
 { 
+    
     // Добавляет к странице ещё один блок
-    apiproject.one.addSection('renderAsPage', function(){
-        return "ABC"
-    }) 
+    // apiproject.one.addSection('renderAsPage', function(){
+    //    return "ABC"
+    // }) 
+}) 
+
+tabSignal.connect("openapi.loaded", function(){
+
+    /**
+     * Переопределит параметры возвращаемые от openapi так чтоб у проектов поле repository было enum и чтоб с вариантами ["GIT", "MANUAL", "TAR"]
+     **/
+    // let OneProject = window.api.openapi.definitions.OneProject;
+    // OneProject.properties.repository.type = "enum"
+    // OneProject.properties.repository.enum = ["GIT", "MANUAL", "TAR"]
 })
-*/
