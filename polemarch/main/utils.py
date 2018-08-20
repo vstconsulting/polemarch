@@ -261,7 +261,7 @@ class AnsibleArgumentsReference(PMAnsible):
     _EXCLUDE_ARGS = [
         # Excluded because we use this differently in code
         # 'verbose', 'inventory-file', 'inventory', 'module-name',
-        'inventory-file', 'module-name', 'verbose',
+        'inventory-file', 'module-name',
         # Excluded because now we could not send any to worker proccess
         'ask-sudo-pass', 'ask-su-pass', 'ask-pass',
         'ask-vault-pass', 'ask-become-pass',
@@ -270,7 +270,7 @@ class AnsibleArgumentsReference(PMAnsible):
     def __init__(self):
         self.raw_dict = self._extract_from_cli()
 
-    def _cli_to_gui_type(self, argument, type_name):  # nocv
+    def _cli_to_gui_type(self, argument, type_name):
         if argument in self._GUI_TYPES_CONVERSION_DIFFERENT:
             return self._GUI_TYPES_CONVERSION_DIFFERENT[argument]
         if argument is not None and argument.endswith("-file"):
@@ -290,7 +290,8 @@ class AnsibleArgumentsReference(PMAnsible):
 
     def is_valid_value(self, command, argument, value):
         argument = argument.replace('_', '-')
-        mtype = self.raw_dict[command][argument]["type"]
+        argument_data = self.raw_dict[command][argument]
+        mtype = argument_data["type"]
         if mtype == 'int':
             int(value)
         elif mtype is not None and value is None:  # nocv

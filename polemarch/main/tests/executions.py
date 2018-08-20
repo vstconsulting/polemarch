@@ -48,7 +48,7 @@ class BaseExecutionsTestCase(BaseTestCase):
                 ),
             ),
             options=dict(
-                one=dict(module='shell', args='uname'),
+                one=dict(module='shell', args='uname', verbose=3),
                 two=dict(vars=dict(forks=1))
             )
         )
@@ -63,7 +63,8 @@ class BaseExecutionsTestCase(BaseTestCase):
                 inventory='localhost',
                 vars=dict(
                     forks=8,
-                    connection='local'
+                    connection='local',
+                    verbose=4,
                 ),
             ),
             options=dict(
@@ -363,7 +364,8 @@ class BaseExecutionsTestCase(BaseTestCase):
 
     def project_execute(self, project_data, exec_data=None, type='playbook'):
         exec_data = exec_data or dict(
-            playbook='main.yml', inventory='inventory.ini', save_result=False
+            playbook='main.yml', inventory='inventory.ini',
+            save_result=False, verbose=4
         )
         exec_data['check'] = True
         return self.make_bulk([

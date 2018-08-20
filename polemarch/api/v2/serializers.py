@@ -729,7 +729,10 @@ def generate_fileds(ansible_type):
             continue
         ref_type = settings.get('type', None)
         kwargs = dict(help_text=settings.get('help', ''), required=False)
-        if ref_type is None:
+        if ref == 'verbose':
+            field = serializers.IntegerField
+            kwargs.update(dict(max_value=4, default=0))
+        elif ref_type is None:
             field = serializers.BooleanField
             kwargs['default'] = False
         elif ref in models.PeriodicTask.HIDDEN_VARS:
