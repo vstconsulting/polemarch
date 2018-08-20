@@ -130,7 +130,8 @@ function setActiveMenuLi()
  * Добавление класса происходит не сразу, а после небольшой паузы.
  * Это необходимо для того, чтобы выпавшее подменю быстро не пропадало
  * при попытке навести курсор на него.
- */``
+ */
+$(".sidebar-menu > li").mouseenter(function () {
     var thisEl = this;
     setTimeout(function () {
         var pmTreeviewMenues = $(".pm-treeview-menu");
