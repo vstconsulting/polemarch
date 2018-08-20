@@ -162,9 +162,11 @@ class AnsibleCommand(object):
 
     def __parse_extra_args(self, **extra):
         extra_args, files = list(), list()
-        extra.pop("verbose", None)
         for key, value in extra.items():
             key = key.replace('_', '-')
+            if key == 'verbose':
+                extra_args += ['-' + ('v' * value)]
+                continue
             result = [value, list()]
             if key in ["key-file", "private-key"]:
                 result = self.__parse_key(key, value)
@@ -233,7 +235,6 @@ class AnsibleCommand(object):
         return (
             [self.path_to_ansible] +
             self.get_inventory_arg(target, extra_args) +
-            ['-v'] +
             extra_args
         )
 
