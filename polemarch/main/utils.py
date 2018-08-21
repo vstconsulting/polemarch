@@ -243,20 +243,6 @@ class PMAnsible(object):
 
 class AnsibleArgumentsReference(PMAnsible):
     ref_name = 'reference'
-    # Type conversion for GUI fields
-    _GUI_TYPES_CONVERSION = {
-        "string": "text",
-        "int": "integer",
-        None: "boolean",
-        "choice": "text",
-    }
-    # Types with different conversion to fields
-    _GUI_TYPES_CONVERSION_DIFFERENT = {
-        "private-key": "keyfile",
-        "key-file": "keyfile",
-    }
-    # Args for using in code, but hidden for users
-    _HIDDEN_ARGS = ['group']
     # Excluded args from user calls
     _EXCLUDE_ARGS = [
         # Excluded because we use this differently in code
@@ -269,24 +255,6 @@ class AnsibleArgumentsReference(PMAnsible):
 
     def __init__(self):
         self.raw_dict = self._extract_from_cli()
-
-    def _cli_to_gui_type(self, argument, type_name):
-        if argument in self._GUI_TYPES_CONVERSION_DIFFERENT:
-            return self._GUI_TYPES_CONVERSION_DIFFERENT[argument]
-        if argument is not None and argument.endswith("-file"):
-            return "textfile"
-        return self._GUI_TYPES_CONVERSION[type_name]
-
-    def _as_gui_dict_command(self, args):  # nocv
-        cmd_result = {}
-        for arg, info in args.items():
-            if arg in self._HIDDEN_ARGS:
-                continue
-            cmd_result[arg] = dict(
-                type=self._cli_to_gui_type(arg, info['type']),
-                shortopts=info['shortopts'], help=info['help']
-            )
-        return cmd_result
 
     def is_valid_value(self, command, argument, value):
         argument = argument.replace('_', '-')
@@ -307,13 +275,6 @@ class AnsibleArgumentsReference(PMAnsible):
                 command: "Incorrect argument: {}.".format(str(e)),
                 'argument': argument
             })
-
-    def as_gui_dict(self, wanted=""):  # nocv
-        result = {}
-        for cmd, args in self.raw_dict.items():
-            if wanted == "" or cmd == wanted:
-                result[cmd] = self._as_gui_dict_command(args)
-        return result
 
     def get_args(self):
         cmd = super(AnsibleArgumentsReference, self).get_args()
