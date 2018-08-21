@@ -276,13 +276,6 @@ class AnsibleArgumentsReference(PMAnsible):
                 'argument': argument
             })
 
-    def as_gui_dict(self, wanted=""):  # nocv
-        result = {}
-        for cmd, args in self.raw_dict.items():
-            if wanted == "" or cmd == wanted:
-                result[cmd] = self._as_gui_dict_command(args)
-        return result
-
     def get_args(self):
         cmd = super(AnsibleArgumentsReference, self).get_args()
         for cmd_name in self._EXCLUDE_ARGS:

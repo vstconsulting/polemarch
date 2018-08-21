@@ -1,7 +1,6 @@
 import six
 from django.test import TestCase
 from django.core.management import call_command
-from ..utils import AnsibleArgumentsReference
 
 
 class AnsibleTestCase(TestCase):
