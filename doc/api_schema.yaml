@@ -8,9 +8,9 @@ info:
   contact:
     name: System Administrator
   x-versions:
-    application: 0.1.13
-    library: 0.1.13
-    vstutils: 1.2.0
+    application: 0.2.0
+    library: 0.2.0
+    vstutils: 1.2.0.dev1
     django: 1.11.15
     ansible: 2.6.2
   version: v2
@@ -5458,38 +5458,6 @@ paths:
             $ref: '#/definitions/Error'
       tags:
         - project
-    post:
-      operationId: project_history_add
-      description: ''
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/History'
-      responses:
-        '201':
-          description: Action accepted.
-          schema:
-            $ref: '#/definitions/History'
-        '400':
-          description: Validation error or some data error.
-          schema:
-            $ref: '#/definitions/Error'
-        '404':
-          description: Not found error.
-          schema:
-            $ref: '#/definitions/Error'
-        '403':
-          description: Permission denied error.
-          schema:
-            $ref: '#/definitions/Error'
-        '401':
-          description: Unauthorized access error.
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-        - project
     parameters:
       - name: pk
         in: path
@@ -5501,70 +5469,6 @@ paths:
       operationId: project_history_get
       description: ''
       parameters: []
-      responses:
-        '200':
-          description: Action accepted.
-          schema:
-            $ref: '#/definitions/OneHistory'
-        '400':
-          description: Validation error or some data error.
-          schema:
-            $ref: '#/definitions/Error'
-        '404':
-          description: Not found error.
-          schema:
-            $ref: '#/definitions/Error'
-        '403':
-          description: Permission denied error.
-          schema:
-            $ref: '#/definitions/Error'
-        '401':
-          description: Unauthorized access error.
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-        - project
-    put:
-      operationId: project_history_update
-      description: ''
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/OneHistory'
-      responses:
-        '200':
-          description: Action accepted.
-          schema:
-            $ref: '#/definitions/OneHistory'
-        '400':
-          description: Validation error or some data error.
-          schema:
-            $ref: '#/definitions/Error'
-        '404':
-          description: Not found error.
-          schema:
-            $ref: '#/definitions/Error'
-        '403':
-          description: Permission denied error.
-          schema:
-            $ref: '#/definitions/Error'
-        '401':
-          description: Unauthorized access error.
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-        - project
-    patch:
-      operationId: project_history_edit
-      description: ''
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/OneHistory'
       responses:
         '200':
           description: Action accepted.
@@ -10996,11 +10900,13 @@ definitions:
       readme_content:
         title: Readme content
         type: string
+        format: html
         readOnly: true
       readme_ext:
         title: Readme ext
         type: string
         readOnly: true
+        minLength: 1
       url:
         title: Url
         type: string
@@ -11009,6 +10915,7 @@ definitions:
   AnsibleModule:
     required:
       - module
+      - inventory
     type: object
     properties:
       module:
@@ -11188,6 +11095,12 @@ definitions:
         description: vault password file
         type: string
         format: secretfile
+      verbose:
+        title: Verbose
+        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
+        type: integer
+        default: 0
+        maximum: 4
       group:
         title: Group
         type: string
@@ -11210,6 +11123,7 @@ definitions:
   AnsiblePlaybook:
     required:
       - playbook
+      - inventory
     type: object
     properties:
       playbook:
@@ -11399,6 +11313,12 @@ definitions:
         description: vault password file
         type: string
         format: secretfile
+      verbose:
+        title: Verbose
+        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
+        type: integer
+        default: 0
+        maximum: 4
   HistoryLines:
     type: object
     properties:
