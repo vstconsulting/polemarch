@@ -108,7 +108,7 @@
                     <div class="box-body">
                         <div class="row">
                             <% for(var i in opt.fileds){ %>
-                            <!--     <%= i %> = <%= JSON.stringify(opt.fileds[i]) %> -->
+                                <!--<%= i %> = <%= JSON.stringify(opt.fileds[i]) %>  -->
                                 <%= guiObj.renderFiled(opt.fileds[i], opt) %>
                             <% } %>
                         </div>
@@ -720,14 +720,16 @@
             <label class="control-label"><%- guiObj.view.bulk_name %></label>
             <div class="form-control disabled" disabled="" maxlength="255">
                 <a href="<%- hostname %>/?<%- guiObj.getBulkName() %>/<%- guiObj.model.data.id %>" onclick="return spajs.openURL(this.href);">
-                    <%- guiObj.model.data.name || guiObj.model.data.username || (guiObj.view.bulk_name + "/"+guiObj.model.data.id) %>
+                    <%- guiObj.parent.data[guiObj.parent.getObjectNameFiled()] || (guiObj.view.bulk_name + "/"+guiObj.model.data.id) %>
                 </a>
             </div>
             <div class="help-block"></div>
         </div>
+    <% }else{ %> 
+        <%= guiObj.renderAllFileds(opt) %> 
     <% } %>
 </script>
-
+  
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="items_list">
     <!-- items_list -->
