@@ -1,4 +1,3 @@
- 
 if(window.moment && window.moment.tz)
 { 
     window.moment.tz.setDefault(window.timeZone);
@@ -37,7 +36,6 @@ if(guiLocalSettings.get('hideMenu'))
     }
 }
 
-
 function setActiveMenuLiBase()
 {
     if(/\?projects/.test(window.location.href) || /\?project/.test(window.location.href) ||
@@ -45,13 +43,6 @@ function setActiveMenuLiBase()
     {
         $("#menu-projects").addClass("pm-treeview-active active active-li active-bold");
         $("#menu-projects-projects").addClass("active-bold");
-        $("#menu-projects").removeClass("pm-treeview");
-    }
-    else if(/\?templates/.test(window.location.href) ||
-        /\?template/.test(window.location.href))
-    {
-        $("#menu-projects").addClass("pm-treeview-active active active-li");
-        $("#menu-projects-templates").addClass("active-bold");
         $("#menu-projects").removeClass("pm-treeview");
     }
     else if(/\?hosts/.test(window.location.href) || /\?host/.test(window.location.href) ||
@@ -99,6 +90,7 @@ function setActiveMenuLiBase()
     }
 }
 
+
 function setActiveMenuLi()
 {
     if($('li').is('.pm-treeview-active'))
@@ -123,6 +115,8 @@ function setActiveMenuLi()
 
     return setActiveMenuLiBase();
 }
+
+tabSignal.connect("spajs.open", setActiveMenuLi);
 
 /*
  * Функция добавляет элементу меню (при наведении на него)
