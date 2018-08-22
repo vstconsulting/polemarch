@@ -192,7 +192,7 @@ class TeamSerializer(_WithPermissionsSerializer):
 
 class OneTeamSerializer(TeamSerializer):
     owner = OwnerSerializer(read_only=True)
-    notes = serializers.CharField(required=False, allow_blank=True)
+    notes = serializers.TextareaField(required=False, allow_blank=True)
 
     class Meta:
         model = models.UserGroup
@@ -367,7 +367,7 @@ class HostSerializer(_WithVariablesSerializer):
 
 class OneHostSerializer(HostSerializer):
     owner = OwnerSerializer(read_only=True)
-    notes = serializers.CharField(required=False, allow_blank=True)
+    notes = serializers.TextareaField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Host
@@ -461,7 +461,7 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
     project = ModelRelatedField(required=False, model=models.Project)
-    notes = serializers.CharField(required=False, allow_blank=True)
+    notes = serializers.TextareaField(required=False, allow_blank=True)
 
     class Meta:
         model = models.PeriodicTask
@@ -546,7 +546,7 @@ class OneTemplateSerializer(TemplateSerializer):
     data = DataSerializer(required=True)
     options = DataSerializer(required=False)
     options_list = serializers.ListField(read_only=True)
-    notes = serializers.CharField(required=False, allow_blank=True)
+    notes = serializers.TextareaField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Template
@@ -596,7 +596,7 @@ class GroupSerializer(_WithVariablesSerializer):
 
 class OneGroupSerializer(GroupSerializer, _InventoryOperations):
     owner = OwnerSerializer(read_only=True)
-    notes = serializers.CharField(required=False, allow_blank=True)
+    notes = serializers.TextareaField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Group
@@ -622,7 +622,7 @@ class InventorySerializer(_WithVariablesSerializer):
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
     owner = OwnerSerializer(read_only=True)
-    notes = serializers.CharField(required=False, allow_blank=True)
+    notes = serializers.TextareaField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Inventory
@@ -654,7 +654,7 @@ class ProjectSerializer(_InventoryOperations):
 class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     repository  = serializers.CharField(default='MANUAL')
     owner = OwnerSerializer(read_only=True)
-    notes = serializers.CharField(required=False, allow_blank=True)
+    notes = serializers.TextareaField(required=False, allow_blank=True)
     readme_content = vst_fields.HtmlField(read_only=True)
     readme_ext = serializers.CharField(read_only=True)
 
