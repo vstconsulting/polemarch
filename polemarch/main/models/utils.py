@@ -2,10 +2,8 @@
 from __future__ import unicode_literals
 
 import re
-import sys
 import logging
 import traceback
-from os.path import dirname
 from collections import namedtuple, OrderedDict
 
 import six

@@ -39,12 +39,14 @@ def project_path():
 class PMObject(object):
 
     def pm_ansible(self, *args):
+        # pylint: disable=access-member-before-definition
         if hasattr(self, '__pm_ansible__'):
             return list(self.__pm_ansible__) + list(args)
         self.__pm_ansible__ = self.get_django_settings('EXECUTOR')
         return self.pm_ansible(*args)
 
     def get_django_settings(self, name, default=None):
+        # pylint: disable=access-member-before-definition
         if hasattr(self, '__django_settings__'):
             return getattr(self.__django_settings__, name, default)
         from django.conf import settings
