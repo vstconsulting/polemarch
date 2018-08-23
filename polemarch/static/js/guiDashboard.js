@@ -59,7 +59,7 @@ pmDashboard.model.defaultWidgets = [
         /*{
             name:'pmwTemplatesCounter',
             title:'Templates Counter',
-            sortNum:0,
+            sort:0,
             active:true,
             opt:{},
             type:1,
@@ -68,7 +68,7 @@ pmDashboard.model.defaultWidgets = [
         {
             name:'pmwProjectsCounter',
             title:'Projects Counter',
-            sortNum:1,
+            sort:1,
             active:true,
             opt:{},
             type:1,
@@ -77,7 +77,7 @@ pmDashboard.model.defaultWidgets = [
         {
             name:'pmwInventoriesCounter',
             title:'Inventories Counter',
-            sortNum:2,
+            sort:2,
             active:true,
             opt:{},
             type:1,
@@ -86,7 +86,7 @@ pmDashboard.model.defaultWidgets = [
         {
             name:'pmwHostsCounter',
             title:'Hosts Counter',
-            sortNum:3,
+            sort:3,
             active:true,
             opt:{},
             type:1,
@@ -95,7 +95,7 @@ pmDashboard.model.defaultWidgets = [
         {
             name:'pmwGroupsCounter',
             title:'Groups Counter',
-            sortNum:4,
+            sort:4,
             active:true,
             opt:{},
             type:1,
@@ -104,7 +104,7 @@ pmDashboard.model.defaultWidgets = [
         {
             name:'pmwUsersCounter',
             title:'Users Counter',
-            sortNum:5,
+            sort:5,
             active:true,
             opt:{},
             type:1,
@@ -113,7 +113,7 @@ pmDashboard.model.defaultWidgets = [
         {
             name:'pmwAnsibleModuleWidget',
             title:'Run shell command',
-            sortNum:6,
+            sort:6,
             active:true,
             opt:{},
             type:0,
@@ -122,7 +122,7 @@ pmDashboard.model.defaultWidgets = [
         {
             name:'pmwChartWidget',
             title:'Tasks history',
-            sortNum:7,
+            sort:7,
             active:true,
             opt:{},
             type:0,
@@ -131,7 +131,7 @@ pmDashboard.model.defaultWidgets = [
         /*{
             name:'pmwTasksTemplatesWidget',
             title:'Templates Task',
-            sortNum:8,
+            sort:8,
             active:true,
             opt:{},
             type:0,
@@ -140,7 +140,7 @@ pmDashboard.model.defaultWidgets = [
         {
             name:'pmwModulesTemplatesWidget',
             title:'Templates Module',
-            sortNum:9,
+            sort:9,
             active:true,
             opt:{},
             type:0,
@@ -353,7 +353,7 @@ pmDashboard.checkNecessityToLoadDashboardSettingsFromApi = function(defaultObj, 
 pmDashboard.getNewWidgetSettings = function(localObj)
 {
     var obj={};
-    obj.sortNum=localObj.sortNum;
+    obj.sort=localObj.sort;
     obj.active=localObj.active;
     obj.collapse=localObj.collapse;
     return obj;
@@ -449,7 +449,7 @@ pmDashboard.putUserDashboardSettingsToAPI = function()
  */
 pmDashboard.sortCountWidget=function(Obj1, Obj2)
 {
-    return Obj1.sortNum-Obj2.sortNum;
+    return Obj1.sort-Obj2.sort;
 }
 
 /**
@@ -1046,7 +1046,7 @@ pmDashboard.open  = function(holder, menuInfo, data)
                         {
                             if(idArr[i].toLowerCase()==pmDashboard.model.widgets[0][j].name.toLowerCase())
                             {
-                                pmDashboard.model.widgets[0][j].sortNum=i;
+                                pmDashboard.model.widgets[0][j].sort=i;
                                 pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
                             }
                         }

@@ -108,7 +108,7 @@ class UserViewSet(views.UserViewSet, base.CopyMixin):
 
     @deco.action(
         ["post", "delete", "get"], url_path="settings",
-        detail=yes, serializer_class=sers.DataSerializer
+        detail=yes, serializer_class=sers.UserSettingsSerializer
     )
     def user_settings(self, request, *args, **kwargs):
         '''

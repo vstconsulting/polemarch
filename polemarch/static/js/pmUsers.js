@@ -742,3 +742,37 @@ tabSignal.connect("polemarch.start", function()
 
 })
 */
+
+//создание страницы профиля текущего пользователя
+//@todo нужно доделать
+tabSignal.connect("openapi.completed", function()
+{
+    let api_path_value = api.openapi.paths['/user/{pk}/settings/'];
+    api_path_value.api_path = '/user/{pk}/settings/'
+
+    var page = new guiPage();
+
+    // Настроили страницу
+    page.blocks.push({
+        id:'itemOne',
+        prioritet:0,
+        render:(menuInfo, data)=> {
+
+
+        var pageItem = new apisettings.one({api:api_path_value, url:data.reg})
+
+        var def = new $.Deferred();
+    $.when(pageItem.load(my_user_id)).done(function()
+    {
+        def.resolve(pageItem.renderAsPage())
+    }).fail(function(err)
+    {
+        def.resolve(renderErrorAsPage(err));
+    })
+
+    return def.promise();
+}
+})
+
+    page.registerURL([/profile/], "profile");
+})
