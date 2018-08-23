@@ -411,6 +411,7 @@ class History(BModel):
         data['start_time'] = self.start_time.isoformat()
         if when == "after_execution":
             data['stop_time'] = self.stop_time.isoformat()
+            data['status'] = self.status
         data["initiator"] = dict(
             initiator_type=self.initiator_type,
             initiator_id=self.initiator,

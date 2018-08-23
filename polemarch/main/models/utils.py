@@ -12,7 +12,9 @@ import six
 from django.utils import timezone
 from vstutils.utils import tmp_file, KVExchanger
 from .hosts import Inventory
-from ...main.utils import CmdExecutor, CalledProcessError, AnsibleArgumentsReference
+from ...main.utils import (
+    CmdExecutor, CalledProcessError, AnsibleArgumentsReference, PMObject
+)
 
 
 logger = logging.getLogger("polemarch")
@@ -89,7 +91,7 @@ class Executor(CmdExecutor):
         return super(Executor, self).execute(cmd, cwd)
 
 
-class AnsibleCommand(object):
+class AnsibleCommand(PMObject):
     ref_types = {
         'ansible-playbook': 'playbook',
         'ansible': 'module',
@@ -190,7 +192,7 @@ class AnsibleCommand(object):
 
     @property
     def path_to_ansible(self):
-        return dirname(sys.executable) + "/" + self.command_type
+        return self.pm_ansible(self.command_type)
 
     def hide_passwords(self, raw):
         regex = r""
@@ -233,7 +235,7 @@ class AnsibleCommand(object):
 
     def get_args(self, target, extra_args):
         return (
-            [self.path_to_ansible] +
+            self.path_to_ansible +
             self.get_inventory_arg(target, extra_args) +
             extra_args
         )
