@@ -154,15 +154,14 @@ py36-django111-install:
 ###########################################
 pages_docs:
   stage: release
-  only:
-    - developer
   script:
     - tox -e build
-    - mv polemarch/doc/html public/
+    - mv polemarch/doc/html/ public/
   artifacts:
     paths:
     - public
-    - dist
+  only:
+    - developer
 
 release_rpm:
   stage: release
