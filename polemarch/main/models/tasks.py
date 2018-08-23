@@ -512,7 +512,7 @@ class History(BModel):
         lines = re.findall(r'.+\n{0,}', output)
         counter = 0
         if raw_count >= len(lines):
-            return
+            return  # nocv
         for line in lines[raw_count:]:
             counter += 1
             self.write_line(number=counter, value=line)
@@ -528,8 +528,8 @@ class History(BModel):
         for line in iter(partial(out.read, 2 * 1024 - 100), ''):
             nline += 1
             yield self.__create_line(number, nline, line)
-        if endl:  # nocv
-            yield self.__create_line(number, nline, endl, hidden=True)
+        if endl:
+            yield self.__create_line(number, nline, endl)
 
     def write_line(self, value, number, endl=""):
         self.raw_history_line.bulk_create([

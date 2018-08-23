@@ -88,6 +88,14 @@ class CmdExecutor(PMObject):
         finally:
             out.close()
 
+    def working_handler(self, proc):
+        # pylint: disable=unused-argument
+        '''
+        Additional handler for executions.
+
+        :type proc: subprocess.Popen
+        '''
+
     def _unbuffered(self, proc, stream='stdout'):
         stream = getattr(proc, stream)
         q = Queue()
@@ -97,6 +105,7 @@ class CmdExecutor(PMObject):
         working = True
         while working:
             try:
+                self.working_handler(proc)
                 line = q.get(timeout=timeout).rstrip()
                 timeout = 0
             except Empty:
@@ -128,7 +137,7 @@ class CmdExecutor(PMObject):
         )
         for line in self._unbuffered(proc):
             if self.line_handler(proc, line):
-                break
+                break  # nocv
         retcode = proc.poll()
         if retcode:
             raise CalledProcessError(retcode, cmd, output=self.output)

@@ -53,9 +53,6 @@ class DummyHistory(object):
         # pylint: disable=unused-argument
         logger.info(value)
 
-    def check_output(self, output):
-        pass
-
     def save(self):
         pass
 
@@ -68,19 +65,18 @@ class Executor(CmdExecutor):
 
     @property
     def output(self):
-        return self.history.raw_stdout  # nocv
+        return self.history.raw_stdout
 
     @output.setter
     def output(self, value):
         pass  # nocv
 
-    def line_handler(self, proc, line):
+    def working_handler(self, proc):
         if KVExchanger(self.CANCEL_PREFIX + str(self.history.id)).get() is not None:
             self.write_output("\n[ERROR]: User interrupted execution")
             proc.kill()
             proc.wait()
-            return True
-        return super(Executor, self).line_handler(proc, line)
+        super(Executor, self).working_handler(proc)
 
     def write_output(self, line):
         self.counter += 1
@@ -260,7 +256,7 @@ class AnsibleCommand(PMObject):
             self.history.status = "OK"
             extra = self.__parse_extra_args(**extra_args)
             args = self.get_args(self.target, extra.args)
-            self.history.check_output(self.executor.execute(args, self.workdir))
+            self.executor.execute(args, self.workdir)
         except Exception as exception:
             logger.error(traceback.format_exc())
             self.error_handler(exception)
