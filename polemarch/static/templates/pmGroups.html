@@ -20,3 +20,103 @@
         </div>
     </div>
 </script>
+
+
+
+
+<script type="text/x-just" data-just="group_one">
+
+    <%[ sublink_buttons %>
+        <% for(var k in guiObj.model.sublinks){   %>
+            <% if (guiObj.model.data.children && k == "host"){ %>
+                <% continue; %>
+            <% } else if (k == "group" && !guiObj.model.data.children) {%>
+                <% continue; %>
+            <% } %>
+            <a
+                href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents+'/'+ guiObj.model.sublinks[k].name %>"
+                onclick="return spajs.openURL(this.href);"
+            >
+                <%- k %> <%- guiObj.model.sublinks[k].description %>
+            </a>
+        <% } %>
+    <%] %>
+
+    <%! entity_one %>
+</script>
+
+<script type="text/x-just" data-just="group_list">
+    <%[ data_list %>
+        <table class="table table-bordered multiple-select">
+            <tbody>
+                <tr>
+                    <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- guiObj.model.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                        <div class="ico-on fa fa-toggle-on"></div>
+                        <div class="ico-off fa  fa-toggle-off"></div>
+                    </th>
+                    <% for(var j in opt.fileds){ %>
+                        <th
+                            <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
+                            <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
+                                <%- opt.fileds[j].title %>
+                        </th>
+                    <% } %>
+                    <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
+                        <th style="width: 95px;" >Actions</th>
+                    <% } %>
+                </tr>
+                <% for(var i in guiObj.model.data.results){ %>
+                    <tr
+                        class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- window.guiListSelections.selectionControll(guiObj.model.selectionTag, guiObj.model.data.results[i].id) %>"
+                        data-id="<%- guiObj.model.data.results[i].id %>" >
+                        <td class=""  onclick="window.guiListSelections.toggleSelection('<%- guiObj.model.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
+                            <div class="ico-on fa fa-toggle-on"></div>
+                            <div class="ico-off fa  fa-toggle-off"></div>
+                        </td>
+                        <% for(var j in opt.fileds){ %>
+                            <td
+                                <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                            >
+                                <% if(!opt.fileds[j].value){ %>
+                                    <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id %>" class="item-name"
+                                        onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][opt.fileds[j].name] %></a>
+                                <% }else{ %>
+                                    <%= opt.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fileds[j].name, opt]) %>
+                                <% } %>
+                            </td>
+                        <% } %>
+                        <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Actions
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right">
+                                        <% for(var k in guiObj.model.sublinks){   %>
+                                            <% if (guiObj.model.data.results[i].children && k == "host"){ %>
+                                                <% continue; %>
+                                            <% } else if (k == "group" && !guiObj.model.data.results[i].children) {%>
+                                                <% continue; %>
+                                            <% } %>
+                                            <li>
+                                                <a
+                                                    href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>"
+                                                    onclick="return spajs.openURL(this.href);">
+                                                        <%- k %> <%- guiObj.model.sublinks[k].description %>
+                                                </a>
+                                            </li>
+                                        <% } %>
+                                    </ul>
+                                </div>
+                            </td>
+                        <% } %>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    <%] %>
+
+    <%! entity_list %>
+</script>
