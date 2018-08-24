@@ -655,6 +655,8 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     repository  = serializers.CharField(default='MANUAL')
     owner = OwnerSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
+    readme_content = vst_fields.HtmlField(read_only=True)
+    readme_ext = serializers.CharField(read_only=True)
 
     class Meta:
         model = models.Project
@@ -729,7 +731,12 @@ def generate_fileds(ansible_type):
             continue
         ref_type = settings.get('type', None)
         kwargs = dict(help_text=settings.get('help', ''), required=False)
-        if ref_type is None:
+        if ref == 'inventory':
+            kwargs['required'] = True
+        if ref == 'verbose':
+            field = serializers.IntegerField
+            kwargs.update(dict(max_value=4, default=0))
+        elif ref_type is None:
             field = serializers.BooleanField
             kwargs['default'] = False
         elif ref in models.PeriodicTask.HIDDEN_VARS:

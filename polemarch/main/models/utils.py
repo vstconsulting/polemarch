@@ -2,17 +2,17 @@
 from __future__ import unicode_literals
 
 import re
-import sys
 import logging
 import traceback
-from os.path import dirname
 from collections import namedtuple, OrderedDict
 
 import six
 from django.utils import timezone
 from vstutils.utils import tmp_file, KVExchanger
 from .hosts import Inventory
-from ...main.utils import CmdExecutor, CalledProcessError, AnsibleArgumentsReference
+from ...main.utils import (
+    CmdExecutor, CalledProcessError, AnsibleArgumentsReference, PMObject
+)
 
 
 logger = logging.getLogger("polemarch")
@@ -51,9 +51,6 @@ class DummyHistory(object):
         # pylint: disable=unused-argument
         logger.info(value)
 
-    def check_output(self, output):
-        pass
-
     def save(self):
         pass
 
@@ -66,19 +63,18 @@ class Executor(CmdExecutor):
 
     @property
     def output(self):
-        return self.history.raw_stdout  # nocv
+        return self.history.raw_stdout
 
     @output.setter
     def output(self, value):
         pass  # nocv
 
-    def line_handler(self, proc, line):
+    def working_handler(self, proc):
         if KVExchanger(self.CANCEL_PREFIX + str(self.history.id)).get() is not None:
             self.write_output("\n[ERROR]: User interrupted execution")
             proc.kill()
             proc.wait()
-            return True
-        return super(Executor, self).line_handler(proc, line)
+        super(Executor, self).working_handler(proc)
 
     def write_output(self, line):
         self.counter += 1
@@ -89,7 +85,7 @@ class Executor(CmdExecutor):
         return super(Executor, self).execute(cmd, cwd)
 
 
-class AnsibleCommand(object):
+class AnsibleCommand(PMObject):
     ref_types = {
         'ansible-playbook': 'playbook',
         'ansible': 'module',
@@ -162,9 +158,11 @@ class AnsibleCommand(object):
 
     def __parse_extra_args(self, **extra):
         extra_args, files = list(), list()
-        extra.pop("verbose", None)
         for key, value in extra.items():
             key = key.replace('_', '-')
+            if key == 'verbose':
+                extra_args += ['-' + ('v' * value)]
+                continue
             result = [value, list()]
             if key in ["key-file", "private-key"]:
                 result = self.__parse_key(key, value)
@@ -188,7 +186,7 @@ class AnsibleCommand(object):
 
     @property
     def path_to_ansible(self):
-        return dirname(sys.executable) + "/" + self.command_type
+        return self.pm_ansible(self.command_type)
 
     def hide_passwords(self, raw):
         regex = r""
@@ -231,9 +229,8 @@ class AnsibleCommand(object):
 
     def get_args(self, target, extra_args):
         return (
-            [self.path_to_ansible] +
+            self.path_to_ansible +
             self.get_inventory_arg(target, extra_args) +
-            ['-v'] +
             extra_args
         )
 
@@ -257,7 +254,7 @@ class AnsibleCommand(object):
             self.history.status = "OK"
             extra = self.__parse_extra_args(**extra_args)
             args = self.get_args(self.target, extra.args)
-            self.history.check_output(self.executor.execute(args, self.workdir))
+            self.executor.execute(args, self.workdir)
         except Exception as exception:
             logger.error(traceback.format_exc())
             self.error_handler(exception)

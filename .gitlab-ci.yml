@@ -47,35 +47,35 @@ stages:
     - tags
   retry: 2
 
-.pack_tamplate: &packing-test
-  stage: packaging-test
-  image: onegreyonewhite/tox:tox
-  variables:
-    MYSQL_ROOT_PASSWORD: 'polemarch'
-    MYSQL_DATABASE: 'polemarch'
-    MYSQL_USER: 'polemarch'
-    MYSQL_PASSWORD: 'polemarch'
-    RABBITMQ_DEFAULT_USER: 'polemarch'
-    RABBITMQ_DEFAULT_PASS: 'polemarch'
-    RABBITMQ_DEFAULT_VHOST: 'polemarch'
-  services:
-    - name: 'mysql:latest'
-      alias: 'db-server'
-    - name: 'memcached'
-      alias: 'cache-server'
-    - name: 'memcached'
-      alias: 'locks-server'
-    - name: 'rabbitmq:latest'
-      alias: 'rabbitmq-server'
-  artifacts:
-    name: "package($CI_BUILD_NAME)"
-    expire_in: 1 hour
-    paths:
-    - dist/
-  allow_failure: false
-  only:
-    - master
-  retry: 2
+#.pack_tamplate: &packing-test
+#  stage: packaging-test
+#  image: onegreyonewhite/tox:tox
+#  variables:
+#    MYSQL_ROOT_PASSWORD: 'polemarch'
+#    MYSQL_DATABASE: 'polemarch'
+#    MYSQL_USER: 'polemarch'
+#    MYSQL_PASSWORD: 'polemarch'
+#    RABBITMQ_DEFAULT_USER: 'polemarch'
+#    RABBITMQ_DEFAULT_PASS: 'polemarch'
+#    RABBITMQ_DEFAULT_VHOST: 'polemarch'
+#  services:
+#    - name: 'mysql:latest'
+#      alias: 'db-server'
+#    - name: 'memcached'
+#      alias: 'cache-server'
+#    - name: 'memcached'
+#      alias: 'locks-server'
+#    - name: 'rabbitmq:latest'
+#      alias: 'rabbitmq-server'
+#  artifacts:
+#    name: "package($CI_BUILD_NAME)"
+#    expire_in: 1 hour
+#    paths:
+#    - dist/
+#  allow_failure: false
+#  only:
+#    - master
+#  retry: 2
 
 .publish_template: &publishing
   stage: publish
@@ -112,44 +112,57 @@ py36-django111-install:
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
-default_rpm_tests:
-  <<: *packing-test
-  script:
-   - cat /etc/hosts
-   - tox -e rpm RELEASE=${CI_BUILD_ID}
-   - sudo yum install dist/*.rpm -y -q
-   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
-   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
-   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
-   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
-
-default_oracle_tests:
-  <<: *packing-test
-  image: onegreyonewhite/tox:oracle
-  script:
-   - cat /etc/hosts
-   - tox -e rpm RELEASE=${CI_BUILD_ID}
-   - sudo yum install dist/*.rpm -y -q
-   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
-   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
-   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
-   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
-
-default_deb_tests:
-  <<: *packing-test
-  image: onegreyonewhite/tox:ubuntu
-  script:
-   - cat /etc/hosts
-   - tox -e deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
-   - echo "echo 'hello'" > /bin/systemctl
-   - sudo apt install ./dist/*.deb -y -q
-   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
-   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
-   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
-   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
+####################################################
+# DEPRECATED
+#default_rpm_tests:
+#  <<: *packing-test
+#  script:
+#   - cat /etc/hosts
+#   - tox -e rpm RELEASE=${CI_BUILD_ID}
+#   - sudo yum install dist/*.rpm -y -q
+#   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
+#   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
+#   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
+#   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
+#
+#default_oracle_tests:
+#  <<: *packing-test
+#  image: onegreyonewhite/tox:oracle
+#  script:
+#   - cat /etc/hosts
+#   - tox -e rpm RELEASE=${CI_BUILD_ID}
+#   - sudo yum install dist/*.rpm -y -q
+#   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
+#   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
+#   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
+#   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
+#
+#default_deb_tests:
+#  <<: *packing-test
+#  image: onegreyonewhite/tox:ubuntu
+#  script:
+#   - cat /etc/hosts
+#   - tox -e deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
+#   - echo "echo 'hello'" > /bin/systemctl
+#   - sudo apt install ./dist/*.deb -y -q
+#   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
+#   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
+#   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
+#   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
 
 # Realese
 ###########################################
+pages_docs:
+  stage: release
+  script:
+    - tox -e build
+    - mv polemarch/doc/html/ public/
+  artifacts:
+    paths:
+    - public
+  only:
+    - master
+
 release_rpm:
   stage: release
   only:
