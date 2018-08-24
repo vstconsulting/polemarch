@@ -711,7 +711,7 @@
         </div>
     </section>
 </script>
-<!-- Отрисует объект как паоле в другом объекте -->
+<!-- Отрисует объект как поле в другом объекте -->
 <script type="text/x-just" data-just="entity_one_as_filed">
     <!-- entity_one_as_filed -->
    
@@ -747,6 +747,72 @@
 </script>
 
 
+
+<!-- Секция настройки виджета -->
+<script type="text/x-just" data-just="widgetsettings_one_as_filed">
+    <!-- widgetsettings_one_as_filed -->
+
+    <% for (var i in opt.fileds) { %>
+         <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
+            <label class="control-label">
+                <% if(opt.fileds[i].name !== undefined) { %>
+                    <%- opt.fileds[i].name %>
+                <% } %>
+            </label>
+        </div>
+        <br>
+        <% if(opt.fileds[i].$ref !== undefined) { %>
+
+           <%= guiObj.renderFiled(opt.fileds[i], opt) %>
+
+        <% } %>
+    <% } %>
+
+</script>
+
+<!-- Секция настройки виджета -->
+<script type="text/x-just" data-just="widgetsetting_one_as_filed">
+    <!-- widgetsetting_one_as_filed -->
+
+   <% for (var i in opt.fileds) { %>
+        <% if(opt.fileds[i].name == 'active' || opt.fileds[i].name == 'collapse'  || opt.fileds[i].name == 'sort') { %>
+
+           <%= guiObj.renderFiled(opt.fileds[i], opt) %>
+
+        <% } %>
+    <% } %>
+
+</script>
+
+<!-- Секция настройки виджета счетчика -->
+<script type="text/x-just" data-just="counterwidgetsetting_one_as_filed">
+    <!-- counterwidgetsetting_one_as_filed -->
+
+    <%! widgetsetting_one_as_filed %>
+
+</script>
+
+<!-- Секция настройки линий графика -->
+<script type="text/x-just" data-just="chartlinesettings_one_as_filed">
+    <!-- chartlinesettings_one_as_filed -->
+
+     <%! widgetsettings_one_as_filed %>
+
+</script>
+
+<!-- Секция настройки линий графика -->
+<script type="text/x-just" data-just="chartlinesetting_one_as_filed">
+    <!-- chartlinesetting_one_as_filed -->
+
+     <% for (var i in opt.fileds) { %>
+        <% if(opt.fileds[i].name == 'active') { %>
+
+           <%= guiObj.renderFiled(opt.fileds[i], opt) %>
+
+        <% } %>
+    <% } %>
+
+</script>
 
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="items_list">

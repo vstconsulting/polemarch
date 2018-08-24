@@ -179,6 +179,44 @@ class OneOwnerSerializer(OwnerSerializer):
         pass
 
 
+class ChartLineSettingSerializer(vst_serializers.JsonObjectSerializer):
+    active = serializers.BooleanField(default=True)
+
+
+class ChartLineSettingsSerializer(vst_serializers.JsonObjectSerializer):
+    all_tasks = ChartLineSettingSerializer()
+    delay = ChartLineSettingSerializer()
+    ok = ChartLineSettingSerializer()
+    error = ChartLineSettingSerializer()
+    interrupted = ChartLineSettingSerializer()
+    offline = ChartLineSettingSerializer()
+
+
+class WidgetSettingSerializer(vst_serializers.JsonObjectSerializer):
+    active = serializers.BooleanField(default=True)
+    collapse = serializers.BooleanField(default=False)
+    sort = serializers.IntegerField(default=0)
+
+
+class CounterWidgetSettingSerializer(WidgetSettingSerializer):
+    collapse = serializers.BooleanField(default=False, read_only=True)
+
+
+class WidgetSettingsSerializer(vst_serializers.JsonObjectSerializer):
+    pmwUsersCounter = CounterWidgetSettingSerializer()
+    pmwProjectsCounter = CounterWidgetSettingSerializer()
+    pmwInventoriesCounter = CounterWidgetSettingSerializer()
+    pmwGroupsCounter = CounterWidgetSettingSerializer()
+    pmwHostsCounter = CounterWidgetSettingSerializer()
+    pmwChartWidget = WidgetSettingSerializer()
+    pmwAnsibleModuleWidget = WidgetSettingSerializer()
+
+
+class UserSettingsSerializer(vst_serializers.JsonObjectSerializer):
+    chartLineSettings = ChartLineSettingsSerializer()
+    widgetSettings = WidgetSettingsSerializer()
+
+
 class TeamSerializer(_WithPermissionsSerializer):
 
     class Meta:
