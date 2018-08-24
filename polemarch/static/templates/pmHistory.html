@@ -207,23 +207,26 @@
                        </div>
                        
                         <% if(guiObj.model.data.inventory!=null) { %>
-                            <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
-                                <label class="control-label" >Inventory</label>
-                                <div
-                                        class="form-control disabled"
-                                        disabled=""
-                                        maxlength="255">
+                            <!--<div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">-->
+                                <!--<label class="control-label" >Inventory</label>-->
+                                <!--<div-->
+                                        <!--class="form-control disabled"-->
+                                        <!--disabled=""-->
+                                        <!--maxlength="255">-->
 
-                                        <a href="<%- polemarch.opt.host %>/?inventory/<%- guiObj.model.data.inventory %>" onclick="return spajs.openURL(this.href);" >
-                                            <% if(opt.inventory){ %>
-                                                <%- opt.inventory.model.data.name %>
-                                            <% }else{ %>
-                                                <%= guiObj.model.data.inventory %>
-                                            <% } %>
-                                        </a>
-                                </div>
-                                <div class="help-block"></div>
-                            </div>
+                                        <!--<a href="<%- polemarch.opt.host %>/?inventory/<%- guiObj.model.data.inventory %>" onclick="return spajs.openURL(this.href);" >-->
+                                            <!--<% if(opt.inventory){ %>-->
+                                                <!--<%- opt.inventory.model.data.name %>-->
+                                            <!--<% }else{ %>-->
+                                                <!--<%= guiObj.model.data.inventory %>-->
+                                            <!--<% } %>-->
+                                        <!--</a>-->
+                                <!--</div>-->
+                                <!--<div class="help-block"></div>-->
+                            <!--</div>-->
+                            <% var inventory = new window.guiElements.inventoryNameById(guiObj.model.data.inventory) %>
+                            <%= inventory.render({}) %>
+
                         <%   } %>
                        
                         <% if(

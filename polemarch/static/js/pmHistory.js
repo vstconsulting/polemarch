@@ -288,32 +288,13 @@ tabSignal.connect("openapi.factory.history", function(data)
 
     apihistory.one.renderAsPage = function ()
     {
-        var def = new $.Deferred();
-
-        var thisObj = this;
-        var tpl = this.view.bulk_name + '_one'
+        var tpl = this.view.bulk_name + '_one';
         if (!spajs.just.isTplExists(tpl))
         {
             tpl = 'entity_one'
         }
 
-        if (this.model.data.inventory != null)
-        {
-            let inventory = new apiinventory.one()
-            $.when(inventory.load(this.model.data.inventory)).done(function ()
-            {
-                thisObj.bindStdoutUpdates(thisObj.model.data.id)
-                def.resolve(spajs.just.render(tpl, {guiObj: thisObj, opt: {inventory:inventory}}))
-            }).fail(function (e)
-            {
-                def.reject(e)
-            });
-
-            let promise = def.promise();
-           
-            return promise
-        }
- 
+        this.bindStdoutUpdates(this.model.data.id);
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: {}});
     }
     
