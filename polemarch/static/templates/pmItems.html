@@ -720,7 +720,7 @@
             <label class="control-label"><%- guiObj.view.bulk_name %></label>
             <div class="form-control disabled" disabled="" maxlength="255">
                 <a href="<%- hostname %>/?<%- guiObj.getBulkName() %>/<%- guiObj.model.data.id %>" onclick="return spajs.openURL(this.href);">
-                    <%- guiObj.parent.data[guiObj.parent.getObjectNameFiled()] || (guiObj.view.bulk_name + "/"+guiObj.model.data.id) %>
+                    <%- guiObj.model.data[guiObj.parent.getObjectNameFiled()] || (guiObj.view.bulk_name + "/"+guiObj.model.data.id) %>
                 </a>
             </div>
             <div class="help-block"></div>
@@ -730,6 +730,24 @@
     <% } %>
 </script>
   
+
+<!-- show_not_required_fileds -->
+<script type="text/x-just" data-just="show_not_required_fileds">  
+    <!-- show_not_required_fileds -->
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label">Add filed</label>
+        <select class="form-control" onchange="$('#'+this.value).show(); this.options[this.selectedIndex].disabled = true;" >
+            <option disabled selected >Select filed</option>
+            <% for(var i = 0; i < fileds.length; i++){  %>
+                <option value="<%- $(fileds[i]).attr('id') %>" ><%- $(fileds[i]).attr('data-title') %></option>
+            <% } %>
+        </select> 
+        <div class="help-block"><%- opt.description || '' %></div>
+    </div>
+</script>
+
+
+
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="items_list">
     <!-- items_list -->

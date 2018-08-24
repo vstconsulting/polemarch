@@ -2,33 +2,7 @@ if(window.moment && window.moment.tz)
 { 
     window.moment.tz.setDefault(window.timeZone);
 }
- 
-var guiLocalSettings = {
-    __settings:{},
-    get:function(name){
-        return this.__settings[name];
-    },
-    set:function(name, value){
-        this.__settings[name] = value;
-        window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings)
-        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
-    }
-}
-
-
-if(window.localStorage['guiLocalSettings'])
-{
-    try{
-        guiLocalSettings.__settings = window.localStorage['guiLocalSettings'];
-        guiLocalSettings.__settings = JSON.parse(guiLocalSettings.__settings)
-
-    }catch (e)
-    {
-
-    }
-}
-
-
+  
 if(guiLocalSettings.get('hideMenu'))
 {
     if(window.innerWidth>767){
