@@ -19,37 +19,6 @@ function getCookie(name)
     return cookieValue;
 }
 
-function loadTpl(name)
-{
-    return jQuery.ajax({
-       url:  hostname + window.guiStaticPath+""+name+".html?v="+window.gui_version,
-       type: "GET",
-       success: function(res)
-       {
-            $("body").append(res)
-       }
-    })
-}
-
-function loadTplArray(templatesArray)
-{
-    var def = new $.Deferred();
-    var promiseArr = []
-    for(var i in templatesArray)
-    {
-        promiseArr.push(loadTpl(templatesArray[i]))
-    }
-
-    $.when.apply($, promiseArr).done(function()
-    {
-        def.resolve();
-    }).fail(function(e){
-        def.reject(e);
-    })
-
-    return def.promise()
-}
-
 var polemarch = {
 
 }

@@ -19,8 +19,6 @@ try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
 except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
-from django.core.cache import caches, InvalidCacheBackendError
-from django.core.validators import ValidationError
 
 from . import __file__ as file
 
@@ -38,7 +36,25 @@ def project_path():
     return dirname(dirname(file))  # nocv
 
 
-class CmdExecutor(object):
+class PMObject(object):
+
+    def pm_ansible(self, *args):
+        # pylint: disable=access-member-before-definition
+        if hasattr(self, '__pm_ansible__'):
+            return list(self.__pm_ansible__) + list(args)
+        self.__pm_ansible__ = self.get_django_settings('EXECUTOR')
+        return self.pm_ansible(*args)
+
+    def get_django_settings(self, name, default=None):
+        # pylint: disable=access-member-before-definition
+        if hasattr(self, '__django_settings__'):
+            return getattr(self.__django_settings__, name, default)
+        from django.conf import settings
+        self.__django_settings__ = settings
+        return self.get_django_settings(name)
+
+
+class CmdExecutor(PMObject):
     # pylint: disable=no-member
     '''
     Command executor with realtime output write
@@ -47,6 +63,11 @@ class CmdExecutor(object):
     newlines = ['\n', '\r\n', '\r']
 
     def __init__(self, stdout=PIPE, stderr=STDOUT):
+        '''
+
+        :type stdout: BinaryIO,int
+        :type stderr: BinaryIO,int
+        '''
         self.output = ''
         self._stdout = stdout
         self._stderr = stderr
@@ -61,11 +82,21 @@ class CmdExecutor(object):
         self.output += str(line)
 
     def _enqueue_output(self, out, queue):
-        line = out.readline()
-        while len(line):
-            queue.put(line)
+        try:
             line = out.readline()
-        out.close()
+            while len(line):
+                queue.put(line)
+                line = out.readline()
+        finally:
+            out.close()
+
+    def working_handler(self, proc):
+        # pylint: disable=unused-argument
+        '''
+        Additional handler for executions.
+
+        :type proc: subprocess.Popen
+        '''
 
     def _unbuffered(self, proc, stream='stdout'):
         stream = getattr(proc, stream)
@@ -76,11 +107,12 @@ class CmdExecutor(object):
         working = True
         while working:
             try:
+                self.working_handler(proc)
                 line = q.get(timeout=timeout).rstrip()
                 timeout = 0
             except Empty:
                 line = None
-                timeout = 1
+                timeout = 0.1
                 working = not stream.closed
             yield line
 
@@ -107,7 +139,7 @@ class CmdExecutor(object):
         )
         for line in self._unbuffered(proc):
             if self.line_handler(proc, line):
-                break
+                break  # nocv
         retcode = proc.poll()
         if retcode:
             raise CalledProcessError(retcode, cmd, output=self.output)
@@ -155,7 +187,7 @@ class task(object):
         return wrapper
 
 
-class BaseTask(object):
+class BaseTask(PMObject):
     '''
     BaseTask class for all tasks.
     '''
@@ -181,8 +213,9 @@ class BaseTask(object):
         raise NotImplemented
 
 
-class AnsibleCache(object):
+class AnsibleCache(PMObject):
     def __init__(self, prefix, timeout=86400*7):
+        from django.core.cache import caches, InvalidCacheBackendError
         self.prefix = prefix
         self.timeout = timeout
         try:
@@ -204,7 +237,7 @@ class AnsibleCache(object):
         self.set(None)
 
 
-class PMAnsible(object):
+class PMAnsible(PMObject):
     # Json regex
     _regex = re.compile(r"([\{\[][^\w\d\.].*[\}\]]$)", re.MULTILINE)
     ref_name = 'object'
@@ -222,8 +255,7 @@ class PMAnsible(object):
         return ref
 
     def get_args(self):
-        python_exec = sys.executable or 'python'
-        return [python_exec, '-m', 'pm_ansible', self.get_ref()]
+        return self.pm_ansible(self.get_ref())
 
     def get_data(self):
         cache = self.get_ansible_cache()
@@ -267,6 +299,7 @@ class AnsibleArgumentsReference(PMAnsible):
         return True
 
     def validate_args(self, command, args):
+        from django.core.validators import ValidationError
         try:
             for argument, value in args.items():
                 self.is_valid_value(command, argument, value)

@@ -161,7 +161,7 @@ pages_docs:
     paths:
     - public
   only:
-    - developer
+    - master
 
 release_rpm:
   stage: release
