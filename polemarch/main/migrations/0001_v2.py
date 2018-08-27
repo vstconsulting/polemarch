@@ -155,7 +155,7 @@ class Migration(migrations.Migration):
                 ('type', models.CharField(max_length=32)),
                 ('when', models.CharField(default=None, max_length=32, null=True)),
                 ('enable', models.BooleanField(default=True)),
-                ('recipients', models.CharField(max_length=20000)),
+                ('recipients', models.CharField(max_length=16383)),
             ],
             options={
                 'abstract': False,
