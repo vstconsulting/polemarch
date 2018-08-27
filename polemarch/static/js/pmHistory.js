@@ -2,7 +2,7 @@
 tabSignal.connect("openapi.factory.history", function(data)
 {
     //apihistory.view.defaultName = ''
-     
+
     apihistory.one.loadLines = function(item_id, opt)
     {
         var thisObj = this;
@@ -143,7 +143,7 @@ tabSignal.connect("openapi.factory.history", function(data)
 
 
     apihistory.one.stopUpdates = function()
-    { 
+    {
         clearTimeout(this.model.loadNewLines_timeoutId)
         this.model.loadNewLines_timeoutId = undefined;
     }
@@ -188,12 +188,12 @@ tabSignal.connect("openapi.factory.history", function(data)
 
 
     apihistory.one.bindStdoutUpdates = function(item_id)
-    { 
+    {
         var thisObj = this;
-        tabSignal.once("spajs.open", function(){ 
+        tabSignal.once("spajs.open", function(){
             thisObj.stopUpdates()
         })
-         
+
         $.when(this.loadNewLines(item_id, 0)).always(function()
         {
             var content = $('#history-stdout')
@@ -288,35 +288,16 @@ tabSignal.connect("openapi.factory.history", function(data)
 
     apihistory.one.renderAsPage = function ()
     {
-        var def = new $.Deferred();
-
-        var thisObj = this;
-        var tpl = this.view.bulk_name + '_one'
+        var tpl = this.view.bulk_name + '_one';
         if (!spajs.just.isTplExists(tpl))
         {
             tpl = 'entity_one'
         }
 
-        if (this.model.data.inventory != null)
-        {
-            let inventory = new apiinventory.one()
-            $.when(inventory.load(this.model.data.inventory)).done(function ()
-            {
-                thisObj.bindStdoutUpdates(thisObj.model.data.id)
-                def.resolve(spajs.just.render(tpl, {guiObj: thisObj, opt: {inventory:inventory}}))
-            }).fail(function (e)
-            {
-                def.reject(e)
-            });
-
-            let promise = def.promise();
-           
-            return promise
-        }
- 
+        this.bindStdoutUpdates(this.model.data.id);
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: {}});
     }
-    
+
     // Переопределяет список полей которые будут показаны в списке истории
     apihistory.list.getFiledsFor_renderAsPage = function()
     {
@@ -324,13 +305,37 @@ tabSignal.connect("openapi.factory.history", function(data)
         for(let i in this.model.fileds)
         {
             let val = this.model.fileds[i]
-          
+
             if($.inArray(val.name, ['id', 'mode', 'kind', 'status']) != -1)
             {
                 fileds.push(val)
             }
         }
-        
+
         return fileds;
-    } 
+    }
 })
+
+
+tabSignal.connect("openapi.loaded", function()
+{
+   let definitions = window.api.openapi.definitions;
+   definitions['History'].properties['project']['prefetch'] = {
+       path: "/project/",
+       properties: [],
+       view_field: "",
+       link: true
+   }
+   definitions['History'].properties['inventory']['prefetch'] = {
+       path: "/inventory/",
+       properties: [],
+       view_field: "",
+       link: true
+   }
+   definitions['History'].properties['executor']['prefetch'] = {
+       path: "/user/",
+       properties: [],
+       view_field: "",
+       link: true
+   }
+});
