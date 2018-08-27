@@ -246,9 +246,17 @@
                                                         <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                         <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                     >
-                                                        <% if(!opt.fileds[j].value){ %>
+                                                        <% if(!opt.fileds[j].value){  %>
                                                             <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id %>" class="item-name"
-                                                                onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][opt.fileds[j].name] %></a>
+                                                                onclick="return spajs.openURL(this.href);" >
+                                                                <% if(opt.fileds[j].prefetch && guiObj.model.data.results[i][opt.fileds[j].name + '_info']) { %>
+                                                                    <%- guiObj.model.data.results[i][opt.fileds[j].name + '_info'].name
+                                                                     || guiObj.model.data.results[i][opt.fileds[j].name + '_info'].username %>
+                                                                <% } else { %>
+                                                                    <%- guiObj.model.data.results[i][opt.fileds[j].name] %>
+                                                                <% } %>
+
+                                                            </a>
                                                         <% }else{ %>
                                                             <%= opt.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fileds[j].name, opt]) %>
                                                         <% } %>
