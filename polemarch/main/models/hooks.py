@@ -54,7 +54,7 @@ class Hook(BModel):
     type       = models.CharField(max_length=32, null=False)
     when       = models.CharField(max_length=32, null=True, default=None)
     enable     = models.BooleanField(default=True)
-    recipients = models.CharField(max_length=20000)
+    recipients = models.CharField(max_length=16383)
 
     @property
     def reps(self):
