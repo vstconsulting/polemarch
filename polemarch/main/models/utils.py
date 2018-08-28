@@ -70,8 +70,10 @@ class Executor(CmdExecutor):
         pass  # nocv
 
     def working_handler(self, proc):
-        if KVExchanger(self.CANCEL_PREFIX + str(self.history.id)).get() is not None:
+        exchanger = KVExchanger(self.CANCEL_PREFIX + str(self.history.id))
+        if exchanger.get() is not None:
             self.write_output("\n[ERROR]: User interrupted execution")
+            exchanger.delete()
             proc.kill()
             proc.wait()
         super(Executor, self).working_handler(proc)
