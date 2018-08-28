@@ -35,6 +35,7 @@ RUN mkdir /tmp/polemarch
 ADD . /tmp/polemarch/
 RUN cd /tmp/polemarch && tox -e build && \
     /opt/polemarch/bin/pip install /tmp/polemarch/dist/*.tar.gz && \
+    rm -rf /tmp/polemarch/dist /tmp/polemarch/.tox && \
     mkdir -p /etc/polemarch/ && \
     cp -vf /tmp/polemarch/test_settings.ini /etc/polemarch/settings.ini
 
