@@ -319,23 +319,51 @@ tabSignal.connect("openapi.factory.history", function(data)
 
 tabSignal.connect("openapi.loaded", function()
 {
-   let definitions = window.api.openapi.definitions;
-   definitions['History'].properties['project']['prefetch'] = {
-       path: "/project/",
-       properties: [],
-       view_field: "",
-       link: true
-   }
-   definitions['History'].properties['inventory']['prefetch'] = {
-       path: "/inventory/",
-       properties: [],
-       view_field: "",
-       link: true
-   }
-   definitions['History'].properties['executor']['prefetch'] = {
-       path: "/user/",
-       properties: [],
-       view_field: "",
-       link: true
-   }
+    let definitions = window.api.openapi.definitions;
+    definitions['History'].properties['project']['prefetch'] = {
+        path: function (obj) {
+            return "/project/";
+        },
+        properties: [],
+        view_field: "",
+        link: true
+    }
+    definitions['History'].properties['inventory']['prefetch'] = {
+        path: function (obj) {
+            return "/inventory/";
+        },
+        properties: [],
+        view_field: "",
+        link: true
+    }
+    definitions['History'].properties['executor']['prefetch'] = {
+        path: function (obj) {
+            return "/user/";
+        },
+        properties: [],
+        view_field: "",
+        link: true
+    }
+    definitions['History'].properties['initiator']['prefetch'] = {
+        path: function (obj) {
+            if(obj.initiator_type == 'project')
+            {
+                return "/project/";
+            }
+            else if(obj.initiator_type == 'template')
+            {
+                return "/project/"+obj["project"]+"/template";
+
+            }
+            else
+            {
+                return false;
+            }
+        },
+        properties: [],
+        view_field: "",
+        link: true
+    }
+
+
 });
