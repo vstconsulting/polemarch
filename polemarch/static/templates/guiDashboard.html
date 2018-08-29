@@ -106,14 +106,14 @@
                     <% if(pmDashboard.model.widgets[i][j].title){ %>
                         <td><%= pmDashboard.model.widgets[i][j].title %></td>
                     <% } %>
-                    <td class="boolean-select" valuename="active">
-                    <div class="form-control <% if(pmDashboard.model.widgets[i][j].active){ %> selected <% } %>" onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" style="cursor: pointer;">
+                    <td valuename="active">
+                    <div class="form-control boolean-select <% if(pmDashboard.model.widgets[i][j].active){ %> selected <% } %>" onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" style="cursor: pointer;">
                         <div class="ico-on fa fa-toggle-on"></div>
                         <div class="ico-off fa  fa-toggle-off"></div>
                      </div>
                     </td>
-                    <td class="boolean-select" valuename="collapse">
-                        <div class="form-control <% if(pmDashboard.model.widgets[i][j].collapse){ %> selected <% } %>" <% if(pmDashboard.model.widgets[i][j].type==0){ %> onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" <% } %>>
+                    <td valuename="collapse">
+                        <div class="form-control boolean-select <% if(pmDashboard.model.widgets[i][j].collapse){ %> selected <% } %>" <% if(pmDashboard.model.widgets[i][j].type==0){ %> onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" <% } %>>
                             <div class="ico-on fa fa-toggle-on" <% if(pmDashboard.model.widgets[i][j].type==1){ %> style="cursor: not-allowed!important;"<% } %>></div>
                             <div class="ico-off fa  fa-toggle-off" <% if(pmDashboard.model.widgets[i][j].type==1){ %> style="cursor: not-allowed!important;"<% } %>></div>
                          </div>
