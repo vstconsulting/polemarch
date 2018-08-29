@@ -2,7 +2,7 @@ if(window.moment && window.moment.tz)
 { 
     window.moment.tz.setDefault(window.timeZone);
 }
-  
+ 
 if(guiLocalSettings.get('hideMenu'))
 {
     if(window.innerWidth>767){
