@@ -19,6 +19,9 @@ no = False
 
 class _VariablesCopyMixin(base.CopyMixin):
     def copy_instance(self, instance):
+        '''
+        Copy instance with variables.
+        '''
         new_instance = super(_VariablesCopyMixin, self).copy_instance(instance)
         new_instance.variables.bulk_create([
             sers.models.Variable(key=key, value=value, content_object=new_instance)
@@ -32,10 +35,10 @@ class OwnedView(base.ModelViewSetSet, base.CopyMixin):
 
     @deco.action(methods=["post"], detail=True, serializer_class=sers.SetOwnerSerializer)
     def set_owner(self, request, pk=None):
+        # pylint: disable=unused-argument
         '''
         Change instance owner.
         '''
-        # pylint: disable=unused-argument
         serializer = sers.SetOwnerSerializer(
             self.get_object(), data=request.data, context=self.get_serializer_context()
         )
@@ -284,6 +287,7 @@ class _GroupMixin(_VariablesCopyMixin, OwnedView):
 
 
 class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
+    __doc__ = _BaseGroupViewSet.__doc__
 
     def nested_allow_check(self):
         exception = _BaseGroupViewSet.serializer_class_one.ValidationException
@@ -324,6 +328,9 @@ class InventoryViewSet(_GroupMixin):
 
 
 class __PlaybookViewSet(base.ReadOnlyModelViewSet):
+    '''
+    Ansible playbook for project.
+    '''
     lookup_field = 'id'
     model = sers.models.Task
     serializer_class = sers.PlaybookSerializer
