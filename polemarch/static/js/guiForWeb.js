@@ -135,20 +135,20 @@ polemarch.showErrors = function(res)
     if(res && res.info && res.info.message)
     {
         console.error('showErrors:' + res.info.message)
-        $.notify(res.info.message, "error");
+        guiPopUp.error(res.info.message);
         return res.info.message;
     }
     else if(res && res.message)
     {
         console.error('showErrors:' + res.message)
-        $.notify(res.message, "error");
+        guiPopUp.error(res.message);
         return res.message;
     }
 
     if(typeof res === "string")
     {
         console.error('showErrors:' + res)
-        $.notify(res, "error");
+        guiPopUp.error(res)
         return res;
     }
 
@@ -162,7 +162,7 @@ polemarch.showErrors = function(res)
         if(typeof res[i] === "string")
         {
             console.error('showErrors:' + res[i])
-            $.notify(res[i], "error");
+            guiPopUp.error(res[i])
             return res[i];
         }
         else if(typeof res[i] === "object")
