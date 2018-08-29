@@ -10,9 +10,9 @@ info:
   x-versions:
     application: 0.2.0
     library: 0.2.0
-    vstutils: 1.2.0.dev1
+    vstutils: 1.2.0.dev2
     django: 1.11.15
-    ansible: 2.6.2
+    ansible: 2.6.3
   version: v2
 host: localhost:8080
 schemes:
@@ -571,7 +571,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -598,12 +598,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -642,7 +642,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -669,12 +669,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -701,12 +701,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -1116,7 +1116,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -1143,12 +1143,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -1187,7 +1187,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -1214,12 +1214,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -1246,12 +1246,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -1413,7 +1413,7 @@ paths:
               results:
                 type: array
                 items:
-                  $ref: '#/definitions/Variable'
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -1440,12 +1440,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -1479,7 +1479,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -1506,12 +1506,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -1538,12 +1538,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -2500,7 +2500,7 @@ paths:
               results:
                 type: array
                 items:
-                  $ref: '#/definitions/Variable'
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -2527,12 +2527,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -2566,7 +2566,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -2593,12 +2593,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -2625,12 +2625,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -3022,7 +3022,7 @@ paths:
         type: integer
   /inventory/{pk}/all_groups/{all_groups_id}/:
     get:
-      operationId: inventory_all_groups_detail
+      operationId: inventory_all_groupsget
       description: ''
       parameters: []
       responses:
@@ -3157,7 +3157,7 @@ paths:
         type: integer
   /inventory/{pk}/all_hosts/{all_hosts_id}/:
     get:
-      operationId: inventory_all_hosts_detail
+      operationId: inventory_all_hostsget
       description: ''
       parameters: []
       responses:
@@ -3493,7 +3493,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -3520,12 +3520,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -3564,7 +3564,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -3591,12 +3591,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -3623,12 +3623,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4043,7 +4043,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4070,12 +4070,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4114,7 +4114,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4141,12 +4141,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4173,12 +4173,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4340,7 +4340,7 @@ paths:
               results:
                 type: array
                 items:
-                  $ref: '#/definitions/Variable'
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4367,12 +4367,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4406,7 +4406,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4433,12 +4433,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4465,12 +4465,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5156,7 +5156,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5183,12 +5183,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5227,7 +5227,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5254,12 +5254,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5286,12 +5286,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6080,7 +6080,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6107,12 +6107,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6151,7 +6151,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6178,12 +6178,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6210,12 +6210,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6571,7 +6571,7 @@ paths:
         type: integer
   /project/{pk}/inventory/{inventory_id}/all_groups/{all_groups_id}/:
     get:
-      operationId: project_inventory_all_groups_detail
+      operationId: project_inventory_all_groupsget
       description: ''
       parameters: []
       responses:
@@ -6655,7 +6655,7 @@ paths:
         type: integer
   /project/{pk}/inventory/{inventory_id}/all_hosts/{all_hosts_id}/:
     get:
-      operationId: project_inventory_all_hosts_detail
+      operationId: project_inventory_all_hostsget
       description: ''
       parameters: []
       responses:
@@ -6957,7 +6957,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6984,12 +6984,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7034,7 +7034,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7061,12 +7061,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7093,12 +7093,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7480,7 +7480,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7507,12 +7507,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7557,7 +7557,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7584,12 +7584,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7616,12 +7616,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7742,7 +7742,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7769,12 +7769,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7814,7 +7814,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7841,12 +7841,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7873,12 +7873,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8017,7 +8017,7 @@ paths:
         type: integer
   /project/{pk}/module/{module_id}/:
     get:
-      operationId: project_module_detail
+      operationId: project_moduleget
       description: ''
       parameters: []
       responses:
@@ -8672,7 +8672,7 @@ paths:
         type: integer
   /project/{pk}/playbook/{playbook_id}/:
     get:
-      operationId: project_playbook_detail
+      operationId: project_playbookget
       description: ''
       parameters: []
       responses:
@@ -10531,7 +10531,7 @@ definitions:
         type: string
         format: uri
         readOnly: true
-  Variable:
+  InventoryVariable:
     required:
       - key
     type: object
@@ -10543,8 +10543,31 @@ definitions:
       key:
         title: Key
         type: string
-        maxLength: 128
-        minLength: 1
+        format: autocomplete
+        enum:
+          - ansible_host
+          - ansible_port
+          - ansible_user
+          - ansible_connection
+          - ansible_ssh_pass
+          - ansible_ssh_private_key_file
+          - ansible_ssh_common_args
+          - ansible_sftp_extra_args
+          - ansible_scp_extra_args
+          - ansible_ssh_extra_args
+          - ansible_ssh_executable
+          - ansible_ssh_pipelining
+          - ansible_become
+          - ansible_become_method
+          - ansible_become_user
+          - ansible_become_pass
+          - ansible_become_exe
+          - ansible_become_flags
+          - ansible_shell_type
+          - ansible_python_interpreter
+          - ansible_ruby_interpreter
+          - ansible_perl_interpreter
+          - ansible_shell_executable
       value:
         title: Value
         type: string
@@ -10794,7 +10817,7 @@ definitions:
       recipients:
         title: Recipients
         type: string
-        maxLength: 20000
+        maxLength: 16383
         minLength: 1
   Inventory:
     type: object
@@ -11484,6 +11507,24 @@ definitions:
       enabled:
         title: Enabled
         type: boolean
+  Variable:
+    required:
+      - key
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      key:
+        title: Key
+        type: string
+        maxLength: 128
+        minLength: 1
+      value:
+        title: Value
+        type: string
+        default: ''
   Playbook:
     required:
       - playbook

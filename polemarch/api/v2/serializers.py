@@ -306,6 +306,10 @@ class VariableSerializer(_SignalSerializer):
         return result
 
 
+class InventoryVariableSerializer(VariableSerializer):
+    key = vst_fields.AutoCompletionField(autocomplete=models.Variable.variables_keys)
+
+
 class ProjectVariableSerializer(VariableSerializer):
     project_keys = (
         ('repo_type', 'Types of repo. Default="MANUAL".'),

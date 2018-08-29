@@ -53,6 +53,10 @@ class __VarsViewSet(base.ModelViewSetSet):
     filter_class = filters.VariableFilter
 
 
+class __InvVarsViewSet(__VarsViewSet):
+    serializer_class = sers.InventoryVariableSerializer
+
+
 class __ProjectVarsViewSet(__VarsViewSet):
     '''
     Project settings variables.
@@ -212,7 +216,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
         return base.Response(result, status.HTTP_204_NO_CONTENT).resp
 
 
-@deco.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__InvVarsViewSet)
 class HostViewSet(OwnedView, _VariablesCopyMixin):
     '''
     retrieve:
@@ -239,7 +243,7 @@ class HostViewSet(OwnedView, _VariablesCopyMixin):
     filter_class = filters.HostFilter
 
 
-@deco.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__InvVarsViewSet)
 class _BaseGroupViewSet(base.ModelViewSetSet):
     '''
     retrieve:
@@ -291,7 +295,7 @@ class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
 
 @deco.nested_view('all_groups', 'id', methods=['get'], view=GroupViewSet, subs=None)
 @deco.nested_view('all_hosts', 'id', methods=['get'], view=HostViewSet, subs=None)
-@deco.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__InvVarsViewSet)
 class InventoryViewSet(_GroupMixin):
     '''
     retrieve:
