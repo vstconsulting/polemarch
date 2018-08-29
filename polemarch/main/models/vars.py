@@ -19,19 +19,15 @@ class VariablesQuerySet(BQuerySet):
     use_for_related_fields = True
 
     def sort_by_key(self):
-        return self.annotate(
-            name_sorter=Case(
-                When(key="ansible_host", then=Value(0)),
-                When(key="ansible_port", then=Value(1)),
-                When(key="ansible_user", then=Value(2)),
-                When(key="ansible_connection", then=Value(3)),
-                When(key="ansible_ssh_pass", then=Value(4)),
-                When(key="ansible_ssh_private_key_file", then=Value(5)),
-                When(key__startswith="ansible_", then=Value(6)),
-                default=100,
-                output_field=models.IntegerField(),
-            ),
-        ).order_by("name_sorter", "key")
+        args, kwargs = [], dict()
+        for key in self.model.variables_keys:
+            args.append(
+                When(key=key, then=Value(self.model.variables_keys.index(key)))
+            )
+        args.append(When(key__startswith="ansible_", then=Value(99)))
+        kwargs['default'] = 100
+        kwargs['output_field'] = models.IntegerField()
+        return self.annotate(sort_idx=Case(*args, **kwargs)).order_by("sort_idx", "key")
 
     def cleared(self):
         return super(VariablesQuerySet, self).cleared().sort_by_key()
@@ -44,6 +40,35 @@ class Variable(BModel):
     content_object = GenericForeignKey('content_type', 'object_id')
     key            = models.CharField(max_length=128)
     value          = models.CharField(max_length=2*1024, null=True)
+
+    variables_keys = [
+        "ansible_host",
+        'ansible_port',
+        'ansible_user',
+        'ansible_connection',
+
+        'ansible_ssh_pass',
+        'ansible_ssh_private_key_file',
+        'ansible_ssh_common_args',
+        'ansible_sftp_extra_args',
+        'ansible_scp_extra_args',
+        'ansible_ssh_extra_args',
+        'ansible_ssh_executable',
+        'ansible_ssh_pipelining',
+
+        'ansible_become',
+        'ansible_become_method',
+        'ansible_become_user',
+        'ansible_become_pass',
+        'ansible_become_exe',
+        'ansible_become_flags',
+
+        'ansible_shell_type',
+        'ansible_python_interpreter',
+        'ansible_ruby_interpreter',
+        'ansible_perl_interpreter',
+        'ansible_shell_executable',
+    ]
 
     def __unicode__(self):  # pragma: no cover
         return "{}={}".format(self.key, self.value)
