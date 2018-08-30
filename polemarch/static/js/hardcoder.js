@@ -33,6 +33,7 @@ tabSignal.connect("openapi.factory.setowner", function(data)
     
 })
   
+  
 // Исключения харкод для назвпний в апи
 tabSignal.connect("openapi.factory.ansiblemodule", function(data)
 {
@@ -77,4 +78,4 @@ tabSignal.connect("openapi.factory.ansiblemodule", function(data)
  
         return def.promise();
     };
-})
+}) 

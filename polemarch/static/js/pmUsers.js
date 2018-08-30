@@ -747,32 +747,65 @@ tabSignal.connect("polemarch.start", function()
 //@todo нужно доделать
 tabSignal.connect("openapi.completed", function()
 {
-    let api_path_value = api.openapi.paths['/user/{pk}/settings/'];
-    api_path_value.api_path = '/user/{pk}/settings/'
+    let api_path_value = api.openapi.paths['/user/{pk}/settings/']; 
 
     var page = new guiPage();
 
     // Настроили страницу
     page.blocks.push({
-        id:'itemOne',
-        prioritet:0,
-        render:(menuInfo, data)=> {
+        id:'itemOne', 
+        render:(menuInfo, data)=> 
+        { 
+            var pageItem = new apisettings.one({api:api_path_value, url:{
+                    page:'user/'+my_user_id+'/settings',
+                    api_pk:my_user_id
+            }})
 
+            var def = new $.Deferred();
+            $.when(pageItem.load(my_user_id)).done(function()
+            {
+                def.resolve(pageItem.renderAsPage())
+            }).fail(function(err)
+            {
+                def.resolve(renderErrorAsPage(err));
+            })
 
-        var pageItem = new apisettings.one({api:api_path_value, url:data.reg})
-
-        var def = new $.Deferred();
-    $.when(pageItem.load(my_user_id)).done(function()
-    {
-        def.resolve(pageItem.renderAsPage())
-    }).fail(function(err)
-    {
-        def.resolve(renderErrorAsPage(err));
+            return def.promise();
+        }
     })
 
-    return def.promise();
-}
+    page.registerURL([/^profile\/settings$/], "profile_settings");
 })
 
-    page.registerURL([/profile/], "profile");
+
+tabSignal.connect("openapi.completed", function()
+{
+    let api_path_value = api.openapi.paths['/user/{pk}/']; 
+
+    var page = new guiPage();
+
+    // Настроили страницу
+    page.blocks.push({
+        id:'itemOne', 
+        render:(menuInfo, data)=> 
+        { 
+            var pageItem = new apiuser.one({api:api_path_value, url:{
+                    page:'user/'+my_user_id,
+                    api_pk:my_user_id
+            }})
+
+            var def = new $.Deferred();
+            $.when(pageItem.load(my_user_id)).done(function()
+            {
+                def.resolve(pageItem.renderAsPage())
+            }).fail(function(err)
+            {
+                def.resolve(renderErrorAsPage(err));
+            })
+
+            return def.promise();
+        }
+    })
+
+    page.registerURL([/^profile$/], "profile");
 })
