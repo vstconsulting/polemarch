@@ -747,19 +747,19 @@ tabSignal.connect("polemarch.start", function()
 //@todo нужно доделать
 tabSignal.connect("openapi.completed", function()
 {
-    let api_path_value = api.openapi.paths['/user/{pk}/settings/']; 
-
     var page = new guiPage();
 
     // Настроили страницу
     page.blocks.push({
-        id:'itemOne', 
-        render:(menuInfo, data)=> 
-        { 
-            var pageItem = new apisettings.one({api:api_path_value, url:{
+        id:'itemOne',
+        render:(menuInfo, data)=>
+        {
+            var pageItem = new apisettings.one({
+                url:{
                     page:'user/'+my_user_id+'/settings',
                     api_pk:my_user_id
-            }})
+                }
+            })
 
             var def = new $.Deferred();
             $.when(pageItem.load(my_user_id)).done(function()
@@ -780,19 +780,19 @@ tabSignal.connect("openapi.completed", function()
 
 tabSignal.connect("openapi.completed", function()
 {
-    let api_path_value = api.openapi.paths['/user/{pk}/']; 
-
     var page = new guiPage();
 
     // Настроили страницу
     page.blocks.push({
-        id:'itemOne', 
-        render:(menuInfo, data)=> 
-        { 
-            var pageItem = new apiuser.one({api:api_path_value, url:{
+        id:'itemOne',
+        render:(menuInfo, data)=>
+        {
+            var pageItem = new apiuser.one({
+                url:{
                     page:'user/'+my_user_id,
                     api_pk:my_user_id
-            }})
+                }
+            })
 
             var def = new $.Deferred();
             $.when(pageItem.load(my_user_id)).done(function()
