@@ -1,5 +1,10 @@
 
  
+tabSignal.connect("openapi.factory.inventoryvariable", function(data)
+{ 
+    api.openapi.definitions.InventoryVariable.properties.key.format = "enum"
+})
+
 tabSignal.connect("openapi.factory.setowner", function(data)
 { 
     let filed = apisetowner.one.view.definition.properties.user_id;
