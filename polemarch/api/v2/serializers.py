@@ -319,6 +319,10 @@ class ProjectVariableSerializer(VariableSerializer):
         ('repo_key', "[Only for GIT repos] Key to fetch access."),
     )
     key = serializers.ChoiceField(choices=project_keys)
+    value = vst_fields.DependEnumField(allow_blank=True, field='key', choices={
+        'repo_type': list(models.Project.repo_handlers.keys()),
+        'repo_sync_on_run': ['Enable']
+    })
 
 
 class _WithVariablesSerializer(_WithPermissionsSerializer):

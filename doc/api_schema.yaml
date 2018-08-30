@@ -10,7 +10,7 @@ info:
   x-versions:
     application: 0.2.0
     library: 0.2.0
-    vstutils: 1.2.0.dev2
+    vstutils: 1.2.0.dev3
     django: 1.11.15
     ansible: 2.6.3
   version: v2
@@ -10946,7 +10946,10 @@ definitions:
         type: string
         format: autocomplete
         additionalProperties:
-          $ref: '#/definitions/Module/properties/id'
+          model:
+            $ref: '#/definitions/Module'
+          value_field: id
+          view_field: name
       args:
         title: Args
         description: module arguments
@@ -11154,7 +11157,10 @@ definitions:
         type: string
         format: autocomplete
         additionalProperties:
-          $ref: '#/definitions/Playbook/properties/id'
+          model:
+            $ref: '#/definitions/Playbook'
+          value_field: id
+          view_field: name
       become:
         title: Become
         description: run operations with become (does not imply password prompting)
@@ -11650,6 +11656,7 @@ definitions:
   ProjectVariable:
     required:
       - key
+      - value
     type: object
     properties:
       id:
@@ -11666,9 +11673,16 @@ definitions:
           - repo_password
           - repo_key
       value:
-        title: Value
-        type: string
-        default: ''
+        type: array
+        additionalProperties:
+          field: key
+          choices:
+            repo_type:
+              - GIT
+              - TAR
+              - MANUAL
+            repo_sync_on_run:
+              - Enable
   Team:
     required:
       - name

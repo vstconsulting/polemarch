@@ -811,7 +811,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 dict(
                     name=str(uuid.uuid1()),
                     repository='http://localhost:8000/test_repo.tar.gz',
-                    variables=dict(repo_type="TAR", repo_sync_on_run=True)
+                    variables=dict(repo_type="TAR", repo_sync_on_run='Enable')
                 )
             ])
             project_data = result[0]['data']
