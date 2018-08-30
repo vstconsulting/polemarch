@@ -19,6 +19,9 @@ no = False
 
 class _VariablesCopyMixin(base.CopyMixin):
     def copy_instance(self, instance):
+        '''
+        Copy instance with variables.
+        '''
         new_instance = super(_VariablesCopyMixin, self).copy_instance(instance)
         new_instance.variables.bulk_create([
             sers.models.Variable(key=key, value=value, content_object=new_instance)
@@ -32,10 +35,10 @@ class OwnedView(base.ModelViewSetSet, base.CopyMixin):
 
     @deco.action(methods=["post"], detail=True, serializer_class=sers.SetOwnerSerializer)
     def set_owner(self, request, pk=None):
+        # pylint: disable=unused-argument
         '''
         Change instance owner.
         '''
-        # pylint: disable=unused-argument
         serializer = sers.SetOwnerSerializer(
             self.get_object(), data=request.data, context=self.get_serializer_context()
         )
@@ -51,6 +54,10 @@ class __VarsViewSet(base.ModelViewSetSet):
     model = sers.models.Variable
     serializer_class = sers.VariableSerializer
     filter_class = filters.VariableFilter
+
+
+class __InvVarsViewSet(__VarsViewSet):
+    serializer_class = sers.InventoryVariableSerializer
 
 
 class __ProjectVarsViewSet(__VarsViewSet):
@@ -212,7 +219,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
         return base.Response(result, status.HTTP_204_NO_CONTENT).resp
 
 
-@deco.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__InvVarsViewSet)
 class HostViewSet(OwnedView, _VariablesCopyMixin):
     '''
     retrieve:
@@ -239,7 +246,7 @@ class HostViewSet(OwnedView, _VariablesCopyMixin):
     filter_class = filters.HostFilter
 
 
-@deco.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__InvVarsViewSet)
 class _BaseGroupViewSet(base.ModelViewSetSet):
     '''
     retrieve:
@@ -280,6 +287,7 @@ class _GroupMixin(_VariablesCopyMixin, OwnedView):
 
 
 class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
+    __doc__ = _BaseGroupViewSet.__doc__
 
     def nested_allow_check(self):
         exception = _BaseGroupViewSet.serializer_class_one.ValidationException
@@ -291,7 +299,7 @@ class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
 
 @deco.nested_view('all_groups', 'id', methods=['get'], view=GroupViewSet, subs=None)
 @deco.nested_view('all_hosts', 'id', methods=['get'], view=HostViewSet, subs=None)
-@deco.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__InvVarsViewSet)
 class InventoryViewSet(_GroupMixin):
     '''
     retrieve:
@@ -320,6 +328,9 @@ class InventoryViewSet(_GroupMixin):
 
 
 class __PlaybookViewSet(base.ReadOnlyModelViewSet):
+    '''
+    Ansible playbook for project.
+    '''
     lookup_field = 'id'
     model = sers.models.Task
     serializer_class = sers.PlaybookSerializer
