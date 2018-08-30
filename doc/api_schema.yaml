@@ -117,7 +117,7 @@ paths:
         - group
     post:
       operationId: group_add
-      description: API endpoint to create instance.
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -151,7 +151,7 @@ paths:
   /group/{pk}/:
     get:
       operationId: group_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -178,7 +178,7 @@ paths:
         - group
     put:
       operationId: group_update
-      description: API endpoint to update all instance fields.
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -210,7 +210,7 @@ paths:
         - group
     patch:
       operationId: group_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -242,7 +242,7 @@ paths:
         - group
     delete:
       operationId: group_remove
-      description: API endpoint to instance.
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -313,7 +313,7 @@ paths:
   /group/{pk}/group/:
     get:
       operationId: group_group_list
-      description: ''
+      description: Return all groups.
       parameters:
         - name: id
           in: query
@@ -398,7 +398,7 @@ paths:
         - group
     post:
       operationId: group_group_add
-      description: API endpoint to create instance.
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -437,7 +437,7 @@ paths:
   /group/{pk}/group/{group_id}/:
     get:
       operationId: group_group_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -464,7 +464,7 @@ paths:
         - group
     put:
       operationId: group_group_update
-      description: API endpoint to update all instance fields.
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -496,7 +496,7 @@ paths:
         - group
     patch:
       operationId: group_group_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -528,7 +528,7 @@ paths:
         - group
     delete:
       operationId: group_group_remove
-      description: API endpoint to instance.
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -770,7 +770,7 @@ paths:
   /group/{pk}/host/:
     get:
       operationId: group_host_list
-      description: ''
+      description: Return all hosts.
       parameters:
         - name: id
           in: query
@@ -855,7 +855,7 @@ paths:
         - group
     post:
       operationId: group_host_add
-      description: API endpoint to create instance.
+      description: Create a new host.
       parameters:
         - name: data
           in: body
@@ -894,7 +894,7 @@ paths:
   /group/{pk}/host/{host_id}/:
     get:
       operationId: group_host_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a host instance.
       parameters: []
       responses:
         '200':
@@ -921,7 +921,7 @@ paths:
         - group
     put:
       operationId: group_host_update
-      description: API endpoint to update all instance fields.
+      description: Update a host.
       parameters:
         - name: data
           in: body
@@ -953,7 +953,7 @@ paths:
         - group
     patch:
       operationId: group_host_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing host.
       parameters:
         - name: data
           in: body
@@ -985,7 +985,7 @@ paths:
         - group
     delete:
       operationId: group_host_remove
-      description: API endpoint to instance.
+      description: Remove an existing host.
       parameters: []
       responses:
         '204':
@@ -1354,7 +1354,7 @@ paths:
   /group/{pk}/variables/:
     get:
       operationId: group_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters:
         - name: id
           in: query
@@ -1434,7 +1434,7 @@ paths:
         - group
     post:
       operationId: group_variables_add
-      description: API endpoint to create instance.
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -1473,7 +1473,7 @@ paths:
   /group/{pk}/variables/{variables_id}/:
     get:
       operationId: group_variables_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -1500,7 +1500,7 @@ paths:
         - group
     put:
       operationId: group_variables_update
-      description: API endpoint to update all instance fields.
+      description: Update a user.
       parameters:
         - name: data
           in: body
@@ -1532,7 +1532,7 @@ paths:
         - group
     patch:
       operationId: group_variables_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -1564,7 +1564,7 @@ paths:
         - group
     delete:
       operationId: group_variables_remove
-      description: API endpoint to instance.
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -1602,7 +1602,7 @@ paths:
   /history/:
     get:
       operationId: history_list
-      description: Executions history.
+      description: Return all history of executions.
       parameters:
         - name: id
           in: query
@@ -1709,7 +1709,7 @@ paths:
   /history/{pk}/:
     get:
       operationId: history_get
-      description: Executions history.
+      description: Return a execution history instance.
       parameters: []
       responses:
         '200':
@@ -1736,7 +1736,7 @@ paths:
         - history
     delete:
       operationId: history_remove
-      description: Executions history.
+      description: Remove an existing history record.
       parameters: []
       responses:
         '204':
@@ -1959,7 +1959,7 @@ paths:
         - hook
     post:
       operationId: hook_add
-      description: API endpoint to create instance.
+      description: Create a new hook.
       parameters:
         - name: data
           in: body
@@ -1993,7 +1993,7 @@ paths:
   /hook/{pk}/:
     get:
       operationId: hook_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a hook instance.
       parameters: []
       responses:
         '200':
@@ -2020,7 +2020,7 @@ paths:
         - hook
     put:
       operationId: hook_update
-      description: API endpoint to update all instance fields.
+      description: Update a hook.
       parameters:
         - name: data
           in: body
@@ -2052,7 +2052,7 @@ paths:
         - hook
     patch:
       operationId: hook_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing hook.
       parameters:
         - name: data
           in: body
@@ -2084,7 +2084,7 @@ paths:
         - hook
     delete:
       operationId: hook_remove
-      description: API endpoint to instance.
+      description: Remove an existing hook.
       parameters: []
       responses:
         '204':
@@ -2206,7 +2206,7 @@ paths:
         - host
     post:
       operationId: host_add
-      description: API endpoint to create instance.
+      description: Create a new host.
       parameters:
         - name: data
           in: body
@@ -2240,7 +2240,7 @@ paths:
   /host/{pk}/:
     get:
       operationId: host_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a host instance.
       parameters: []
       responses:
         '200':
@@ -2267,7 +2267,7 @@ paths:
         - host
     put:
       operationId: host_update
-      description: API endpoint to update all instance fields.
+      description: Update a host.
       parameters:
         - name: data
           in: body
@@ -2299,7 +2299,7 @@ paths:
         - host
     patch:
       operationId: host_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing host.
       parameters:
         - name: data
           in: body
@@ -2331,7 +2331,7 @@ paths:
         - host
     delete:
       operationId: host_remove
-      description: API endpoint to instance.
+      description: Remove an existing host.
       parameters: []
       responses:
         '204':
@@ -2441,7 +2441,7 @@ paths:
   /host/{pk}/variables/:
     get:
       operationId: host_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters:
         - name: id
           in: query
@@ -2521,7 +2521,7 @@ paths:
         - host
     post:
       operationId: host_variables_add
-      description: API endpoint to create instance.
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -2560,7 +2560,7 @@ paths:
   /host/{pk}/variables/{variables_id}/:
     get:
       operationId: host_variables_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -2587,7 +2587,7 @@ paths:
         - host
     put:
       operationId: host_variables_update
-      description: API endpoint to update all instance fields.
+      description: Update a user.
       parameters:
         - name: data
           in: body
@@ -2619,7 +2619,7 @@ paths:
         - host
     patch:
       operationId: host_variables_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -2651,7 +2651,7 @@ paths:
         - host
     delete:
       operationId: host_variables_remove
-      description: API endpoint to instance.
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -2774,7 +2774,7 @@ paths:
         - inventory
     post:
       operationId: inventory_add
-      description: API endpoint to create instance.
+      description: Create a new inventory.
       parameters:
         - name: data
           in: body
@@ -2808,7 +2808,7 @@ paths:
   /inventory/{pk}/:
     get:
       operationId: inventory_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a inventory instance.
       parameters: []
       responses:
         '200':
@@ -2835,7 +2835,7 @@ paths:
         - inventory
     put:
       operationId: inventory_update
-      description: API endpoint to update all instance fields.
+      description: Update a inventory.
       parameters:
         - name: data
           in: body
@@ -2867,7 +2867,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing inventory.
       parameters:
         - name: data
           in: body
@@ -2899,7 +2899,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_remove
-      description: API endpoint to instance.
+      description: Remove an existing inventory.
       parameters: []
       responses:
         '204':
@@ -2931,7 +2931,7 @@ paths:
   /inventory/{pk}/all_groups/:
     get:
       operationId: inventory_all_groups_list
-      description: ''
+      description: Return all groups.
       parameters:
         - name: id
           in: query
@@ -3023,7 +3023,7 @@ paths:
   /inventory/{pk}/all_groups/{all_groups_id}/:
     get:
       operationId: inventory_all_groups_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -3061,7 +3061,7 @@ paths:
   /inventory/{pk}/all_hosts/:
     get:
       operationId: inventory_all_hosts_list
-      description: ''
+      description: Return all hosts.
       parameters:
         - name: id
           in: query
@@ -3158,7 +3158,7 @@ paths:
   /inventory/{pk}/all_hosts/{all_hosts_id}/:
     get:
       operationId: inventory_all_hosts_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a host instance.
       parameters: []
       responses:
         '200':
@@ -3235,7 +3235,7 @@ paths:
   /inventory/{pk}/group/:
     get:
       operationId: inventory_group_list
-      description: ''
+      description: Return all groups.
       parameters:
         - name: id
           in: query
@@ -3320,7 +3320,7 @@ paths:
         - inventory
     post:
       operationId: inventory_group_add
-      description: API endpoint to create instance.
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -3359,7 +3359,7 @@ paths:
   /inventory/{pk}/group/{group_id}/:
     get:
       operationId: inventory_group_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -3386,7 +3386,7 @@ paths:
         - inventory
     put:
       operationId: inventory_group_update
-      description: API endpoint to update all instance fields.
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -3418,7 +3418,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -3450,7 +3450,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_remove
-      description: API endpoint to instance.
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -3692,7 +3692,7 @@ paths:
   /inventory/{pk}/host/:
     get:
       operationId: inventory_host_list
-      description: ''
+      description: Return all hosts.
       parameters:
         - name: id
           in: query
@@ -3782,7 +3782,7 @@ paths:
         - inventory
     post:
       operationId: inventory_host_add
-      description: API endpoint to create instance.
+      description: Create a new host.
       parameters:
         - name: data
           in: body
@@ -3821,7 +3821,7 @@ paths:
   /inventory/{pk}/host/{host_id}/:
     get:
       operationId: inventory_host_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a host instance.
       parameters: []
       responses:
         '200':
@@ -3848,7 +3848,7 @@ paths:
         - inventory
     put:
       operationId: inventory_host_update
-      description: API endpoint to update all instance fields.
+      description: Update a host.
       parameters:
         - name: data
           in: body
@@ -3880,7 +3880,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_host_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing host.
       parameters:
         - name: data
           in: body
@@ -3912,7 +3912,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_host_remove
-      description: API endpoint to instance.
+      description: Remove an existing host.
       parameters: []
       responses:
         '204':
@@ -4281,7 +4281,7 @@ paths:
   /inventory/{pk}/variables/:
     get:
       operationId: inventory_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters:
         - name: id
           in: query
@@ -4361,7 +4361,7 @@ paths:
         - inventory
     post:
       operationId: inventory_variables_add
-      description: API endpoint to create instance.
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -4400,7 +4400,7 @@ paths:
   /inventory/{pk}/variables/{variables_id}/:
     get:
       operationId: inventory_variables_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -4427,7 +4427,7 @@ paths:
         - inventory
     put:
       operationId: inventory_variables_update
-      description: API endpoint to update all instance fields.
+      description: Update a user.
       parameters:
         - name: data
           in: body
@@ -4459,7 +4459,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_variables_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -4491,7 +4491,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_variables_remove
-      description: API endpoint to instance.
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -4624,7 +4624,7 @@ paths:
         - project
     post:
       operationId: project_add
-      description: API endpoint to create instance.
+      description: Create a new project.
       parameters:
         - name: data
           in: body
@@ -4658,7 +4658,7 @@ paths:
   /project/{pk}/:
     get:
       operationId: project_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a project instance.
       parameters: []
       responses:
         '200':
@@ -4685,7 +4685,7 @@ paths:
         - project
     put:
       operationId: project_update
-      description: API endpoint to update all instance fields.
+      description: Update a project.
       parameters:
         - name: data
           in: body
@@ -4717,7 +4717,7 @@ paths:
         - project
     patch:
       operationId: project_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing project.
       parameters:
         - name: data
           in: body
@@ -4749,7 +4749,7 @@ paths:
         - project
     delete:
       operationId: project_remove
-      description: API endpoint to instance.
+      description: Remove an existing project.
       parameters: []
       responses:
         '204':
@@ -4898,7 +4898,7 @@ paths:
   /project/{pk}/group/:
     get:
       operationId: project_group_list
-      description: ''
+      description: Return all groups.
       parameters:
         - name: id
           in: query
@@ -4983,7 +4983,7 @@ paths:
         - project
     post:
       operationId: project_group_add
-      description: API endpoint to create instance.
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -5022,7 +5022,7 @@ paths:
   /project/{pk}/group/{group_id}/:
     get:
       operationId: project_group_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -5049,7 +5049,7 @@ paths:
         - project
     put:
       operationId: project_group_update
-      description: API endpoint to update all instance fields.
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -5081,7 +5081,7 @@ paths:
         - project
     patch:
       operationId: project_group_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -5113,7 +5113,7 @@ paths:
         - project
     delete:
       operationId: project_group_remove
-      description: API endpoint to instance.
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -5355,7 +5355,7 @@ paths:
   /project/{pk}/history/:
     get:
       operationId: project_history_list
-      description: Executions history.
+      description: Return all history of executions.
       parameters:
         - name: id
           in: query
@@ -5467,7 +5467,7 @@ paths:
   /project/{pk}/history/{history_id}/:
     get:
       operationId: project_history_get
-      description: Executions history.
+      description: Return a execution history instance.
       parameters: []
       responses:
         '200':
@@ -5494,7 +5494,7 @@ paths:
         - project
     delete:
       operationId: project_history_remove
-      description: Executions history.
+      description: Remove an existing history record.
       parameters: []
       responses:
         '204':
@@ -5729,7 +5729,7 @@ paths:
   /project/{pk}/host/:
     get:
       operationId: project_host_list
-      description: ''
+      description: Return all hosts.
       parameters:
         - name: id
           in: query
@@ -5819,7 +5819,7 @@ paths:
         - project
     post:
       operationId: project_host_add
-      description: API endpoint to create instance.
+      description: Create a new host.
       parameters:
         - name: data
           in: body
@@ -5858,7 +5858,7 @@ paths:
   /project/{pk}/host/{host_id}/:
     get:
       operationId: project_host_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a host instance.
       parameters: []
       responses:
         '200':
@@ -5885,7 +5885,7 @@ paths:
         - project
     put:
       operationId: project_host_update
-      description: API endpoint to update all instance fields.
+      description: Update a host.
       parameters:
         - name: data
           in: body
@@ -5917,7 +5917,7 @@ paths:
         - project
     patch:
       operationId: project_host_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing host.
       parameters:
         - name: data
           in: body
@@ -5949,7 +5949,7 @@ paths:
         - project
     delete:
       operationId: project_host_remove
-      description: API endpoint to instance.
+      description: Remove an existing host.
       parameters: []
       responses:
         '204':
@@ -6279,7 +6279,7 @@ paths:
   /project/{pk}/inventory/:
     get:
       operationId: project_inventory_list
-      description: ''
+      description: Return all inventories.
       parameters:
         - name: id
           in: query
@@ -6364,7 +6364,7 @@ paths:
         - project
     post:
       operationId: project_inventory_add
-      description: API endpoint to create instance.
+      description: Create a new inventory.
       parameters:
         - name: data
           in: body
@@ -6403,7 +6403,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/:
     get:
       operationId: project_inventory_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a inventory instance.
       parameters: []
       responses:
         '200':
@@ -6430,7 +6430,7 @@ paths:
         - project
     put:
       operationId: project_inventory_update
-      description: API endpoint to update all instance fields.
+      description: Update a inventory.
       parameters:
         - name: data
           in: body
@@ -6462,7 +6462,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing inventory.
       parameters:
         - name: data
           in: body
@@ -6494,7 +6494,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_remove
-      description: API endpoint to instance.
+      description: Remove an existing inventory.
       parameters: []
       responses:
         '204':
@@ -7943,7 +7943,7 @@ paths:
   /project/{pk}/module/:
     get:
       operationId: project_module_list
-      description: ''
+      description: Return all available modules of project.
       parameters:
         - name: path
           in: query
@@ -8018,7 +8018,7 @@ paths:
   /project/{pk}/module/{module_id}/:
     get:
       operationId: project_module_get
-      description: ''
+      description: Return a module details of project instance.
       parameters: []
       responses:
         '200':
@@ -8056,7 +8056,7 @@ paths:
   /project/{pk}/periodic_task/:
     get:
       operationId: project_periodic_task_list
-      description: ''
+      description: Return all periodic tasks in project.
       parameters:
         - name: id
           in: query
@@ -8156,7 +8156,7 @@ paths:
         - project
     post:
       operationId: project_periodic_task_add
-      description: API endpoint to create instance.
+      description: Create a new periodic task.
       parameters:
         - name: data
           in: body
@@ -8195,7 +8195,7 @@ paths:
   /project/{pk}/periodic_task/{periodic_task_id}/:
     get:
       operationId: project_periodic_task_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a perodic task instance.
       parameters: []
       responses:
         '200':
@@ -8222,7 +8222,7 @@ paths:
         - project
     put:
       operationId: project_periodic_task_update
-      description: API endpoint to update all instance fields.
+      description: Update a periodic task.
       parameters:
         - name: data
           in: body
@@ -8254,7 +8254,7 @@ paths:
         - project
     patch:
       operationId: project_periodic_task_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing periodic task.
       parameters:
         - name: data
           in: body
@@ -8286,7 +8286,7 @@ paths:
         - project
     delete:
       operationId: project_periodic_task_remove
-      description: API endpoint to instance.
+      description: Remove an existing periodic task.
       parameters: []
       responses:
         '204':
@@ -8576,7 +8576,7 @@ paths:
   /project/{pk}/playbook/:
     get:
       operationId: project_playbook_list
-      description: Ansible playbook for project.
+      description: Return all playbooks of project.
       parameters:
         - name: id
           in: query
@@ -8673,7 +8673,7 @@ paths:
   /project/{pk}/playbook/{playbook_id}/:
     get:
       operationId: project_playbook_get
-      description: Ansible playbook for project.
+      description: Return a playbook of project instance.
       parameters: []
       responses:
         '200':
@@ -8791,7 +8791,7 @@ paths:
   /project/{pk}/template/:
     get:
       operationId: project_template_list
-      description: ''
+      description: Return all execute templates in project.
       parameters:
         - name: id
           in: query
@@ -8881,7 +8881,7 @@ paths:
         - project
     post:
       operationId: project_template_add
-      description: API endpoint to create instance.
+      description: Create a new execute template.
       parameters:
         - name: data
           in: body
@@ -8920,7 +8920,7 @@ paths:
   /project/{pk}/template/{template_id}/:
     get:
       operationId: project_template_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a execute template instance.
       parameters: []
       responses:
         '200':
@@ -8947,7 +8947,7 @@ paths:
         - project
     put:
       operationId: project_template_update
-      description: API endpoint to update all instance fields.
+      description: Update a execute template.
       parameters:
         - name: data
           in: body
@@ -8979,7 +8979,7 @@ paths:
         - project
     patch:
       operationId: project_template_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing execute template.
       parameters:
         - name: data
           in: body
@@ -9011,7 +9011,7 @@ paths:
         - project
     delete:
       operationId: project_template_remove
-      description: API endpoint to instance.
+      description: Remove an existing execute template.
       parameters: []
       responses:
         '204':
@@ -9094,7 +9094,7 @@ paths:
   /project/{pk}/variables/:
     get:
       operationId: project_variables_list
-      description: Project settings variables.
+      description: Return all variables of instance.
       parameters:
         - name: id
           in: query
@@ -9174,7 +9174,7 @@ paths:
         - project
     post:
       operationId: project_variables_add
-      description: API endpoint to create instance.
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -9213,7 +9213,7 @@ paths:
   /project/{pk}/variables/{variables_id}/:
     get:
       operationId: project_variables_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -9240,7 +9240,7 @@ paths:
         - project
     put:
       operationId: project_variables_update
-      description: API endpoint to update all instance fields.
+      description: Update a user.
       parameters:
         - name: data
           in: body
@@ -9272,7 +9272,7 @@ paths:
         - project
     patch:
       operationId: project_variables_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -9304,7 +9304,7 @@ paths:
         - project
     delete:
       operationId: project_variables_remove
-      description: API endpoint to instance.
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -9422,7 +9422,7 @@ paths:
         - team
     post:
       operationId: team_add
-      description: API endpoint to create instance.
+      description: Create a new team.
       parameters:
         - name: data
           in: body
@@ -9456,7 +9456,7 @@ paths:
   /team/{pk}/:
     get:
       operationId: team_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a team instance.
       parameters: []
       responses:
         '200':
@@ -9483,7 +9483,7 @@ paths:
         - team
     put:
       operationId: team_update
-      description: API endpoint to update all instance fields.
+      description: Update a team.
       parameters:
         - name: data
           in: body
@@ -9515,7 +9515,7 @@ paths:
         - team
     patch:
       operationId: team_edit
-      description: API endpoint to update part of all instance fields.
+      description: Update one or more fields on an existing team.
       parameters:
         - name: data
           in: body
@@ -9547,7 +9547,7 @@ paths:
         - team
     delete:
       operationId: team_remove
-      description: API endpoint to instance.
+      description: Remove an existing team.
       parameters: []
       responses:
         '204':
@@ -9657,7 +9657,7 @@ paths:
   /team/{pk}/user/:
     get:
       operationId: team_user_list
-      description: ''
+      description: Return all users.
       parameters:
         - name: id
           in: query
@@ -9757,7 +9757,7 @@ paths:
         - team
     post:
       operationId: team_user_add
-      description: API endpoint to create instance.
+      description: Create a new user.
       parameters:
         - name: data
           in: body
@@ -9796,7 +9796,7 @@ paths:
   /team/{pk}/user/{user_id}/:
     get:
       operationId: team_user_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a user instance.
       parameters: []
       responses:
         '200':
@@ -9823,7 +9823,7 @@ paths:
         - team
     put:
       operationId: team_user_update
-      description: ''
+      description: Update a user.
       parameters:
         - name: data
           in: body
@@ -9855,7 +9855,7 @@ paths:
         - team
     patch:
       operationId: team_user_edit
-      description: ''
+      description: Update one or more fields on an existing user.
       parameters:
         - name: data
           in: body
@@ -9887,7 +9887,7 @@ paths:
         - team
     delete:
       operationId: team_user_remove
-      description: ''
+      description: Remove an existing user.
       parameters: []
       responses:
         '204':
@@ -10164,7 +10164,7 @@ paths:
         - user
     post:
       operationId: user_add
-      description: API endpoint to create instance.
+      description: Create a new user.
       parameters:
         - name: data
           in: body
@@ -10198,7 +10198,7 @@ paths:
   /user/{pk}/:
     get:
       operationId: user_get
-      description: API endpoint to represent instance detailed data.
+      description: Return a user instance.
       parameters: []
       responses:
         '200':
@@ -10289,7 +10289,7 @@ paths:
         - user
     delete:
       operationId: user_remove
-      description: ''
+      description: Remove an existing user.
       parameters: []
       responses:
         '204':
