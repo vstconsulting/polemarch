@@ -805,35 +805,36 @@ tabSignal.connect("openapi.loaded", function(){
     // let OneProject = window.api.openapi.definitions.OneProject;
     // OneProject.properties.repository.type = "enum"
     // OneProject.properties.repository.enum = ["GIT", "MANUAL", "TAR"]
-    
-    api.openapi.definitions.ProjectVariable.properties.value.format = 'dynamic'
-    api.openapi.definitions.ProjectVariable.properties.value.dependsOn = ['key']
-    api.openapi.definitions.ProjectVariable.properties.value.onUpdateOptions = []
-    api.openapi.definitions.ProjectVariable.properties.value.onUpdateOptions.push(function(filedObj, newValue)
-    { 
-        let override_opt = undefined
-        let newtype = 'string'
-        if($.inArray(newValue.value, ["repo_sync_on_run"]) != -1)
-        {
-            newtype = 'boolean'
-        } 
-        
-        if($.inArray(newValue.value, ["repo_password"]) != -1)
-        {
-            newtype = 'password'
-        } 
-        
-        if($.inArray(newValue.value, ["repo_key"]) != -1)
-        {
-            newtype = 'file'
-        } 
-        
-        if($.inArray(newValue.value, ["repo_type"]) != -1)
-        {
-            newtype = 'enum'
-            override_opt = {enum:["GIT", "MANUAL", "TAR"]}
-        } 
-         
-        filedObj.setType(newtype, override_opt);
-    })
+    //
+    // api.openapi.definitions.ProjectVariable.properties.value.format = 'dynamic'
+    // api.openapi.definitions.ProjectVariable.properties.value.dependsOn = ['key']
+    // api.openapi.definitions.ProjectVariable.properties.value.onUpdateOptions = []
+    // api.openapi.definitions.ProjectVariable.properties.value.onUpdateOptions.push(function(filedObj, newValue)
+    // {
+    //     debugger;
+    //     let override_opt = undefined
+    //     let newtype = 'string'
+    //     if($.inArray(newValue.value, ["repo_sync_on_run"]) != -1)
+    //     {
+    //         newtype = 'boolean'
+    //     }
+    //
+    //     if($.inArray(newValue.value, ["repo_password"]) != -1)
+    //     {
+    //         newtype = 'password'
+    //     }
+    //
+    //     if($.inArray(newValue.value, ["repo_key"]) != -1)
+    //     {
+    //         newtype = 'file'
+    //     }
+    //
+    //     if($.inArray(newValue.value, ["repo_type"]) != -1)
+    //     {
+    //         newtype = 'enum'
+    //         override_opt = {enum:["GIT", "MANUAL", "TAR"]}
+    //     }
+    //
+    //     filedObj.setType(newtype, override_opt);
+    // })
 })
