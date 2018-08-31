@@ -19,9 +19,6 @@ no = False
 
 class _VariablesCopyMixin(base.CopyMixin):
     def copy_instance(self, instance):
-        '''
-        Copy instance with variables.
-        '''
         new_instance = super(_VariablesCopyMixin, self).copy_instance(instance)
         new_instance.variables.bulk_create([
             sers.models.Variable(key=key, value=value, content_object=new_instance)
@@ -50,6 +47,24 @@ class OwnedView(base.ModelViewSetSet, base.CopyMixin):
 class __VarsViewSet(base.ModelViewSetSet):
     '''
     Instance execution variables.
+
+    list:
+        Return all variables of instance.
+
+    create:
+        Create a new variable of instance.
+
+    retrieve:
+        Return a variable of instance.
+
+    partial_update:
+        Update one or more fields on an existing variable.
+
+    update:
+        Update a user.
+
+    destroy:
+        Remove an existing variable.
     '''
     model = sers.models.Variable
     serializer_class = sers.VariableSerializer
@@ -57,12 +72,51 @@ class __VarsViewSet(base.ModelViewSetSet):
 
 
 class __InvVarsViewSet(__VarsViewSet):
+    '''
+    Inventory hosts variables.
+
+    retrieve:
+        Return a variable of instance.
+
+    list:
+        Return all variables of instance.
+
+    create:
+        Create a new variable of instance.
+
+    destroy:
+        Remove an existing variable.
+
+    partial_update:
+        Update one or more fields on an existing variable.
+
+    update:
+        Update a user.
+    '''
     serializer_class = sers.InventoryVariableSerializer
 
 
 class __ProjectVarsViewSet(__VarsViewSet):
     '''
     Project settings variables.
+
+    retrieve:
+        Return a variable of instance.
+
+    list:
+        Return all variables of instance.
+
+    create:
+        Create a new variable of instance.
+
+    destroy:
+        Remove an existing variable.
+
+    partial_update:
+        Update one or more fields on an existing variable.
+
+    update:
+        Update a user.
     '''
     serializer_class = sers.ProjectVariableSerializer
 
@@ -92,7 +146,7 @@ class UserViewSet(views.UserViewSet, base.CopyMixin):
     create:
         Create a new user.
 
-    delete:
+    destroy:
         Remove an existing user.
 
     partial_update:
@@ -141,7 +195,7 @@ class TeamViewSet(OwnedView):
     create:
         Create a new team.
 
-    delete:
+    destroy:
         Remove an existing team.
 
     partial_update:
@@ -168,7 +222,16 @@ class __HistoryLineViewSet(base.ReadOnlyModelViewSet):
 @deco.nested_view('lines', manager_name='raw_history_line', view=__HistoryLineViewSet)
 class HistoryViewSet(base.HistoryModelViewSet):
     '''
-    Executions history.
+
+    retrieve:
+        Return a execution history instance.
+
+    list:
+        Return all history of executions.
+
+    destroy:
+        Remove an existing history record.
+
     '''
     model = sers.models.History
     serializer_class = sers.HistorySerializer
@@ -231,7 +294,7 @@ class HostViewSet(OwnedView, _VariablesCopyMixin):
     create:
         Create a new host.
 
-    delete:
+    destroy:
         Remove an existing host.
 
     partial_update:
@@ -258,7 +321,7 @@ class _BaseGroupViewSet(base.ModelViewSetSet):
     create:
         Create a new group.
 
-    delete:
+    destroy:
         Remove an existing group.
 
     partial_update:
@@ -311,7 +374,7 @@ class InventoryViewSet(_GroupMixin):
     create:
         Create a new inventory.
 
-    delete:
+    destroy:
         Remove an existing inventory.
 
     partial_update:
@@ -330,6 +393,12 @@ class InventoryViewSet(_GroupMixin):
 class __PlaybookViewSet(base.ReadOnlyModelViewSet):
     '''
     Ansible playbook for project.
+
+    retrieve:
+        Return a playbook of project instance.
+
+    list:
+        Return all playbooks of project.
     '''
     lookup_field = 'id'
     model = sers.models.Task
@@ -339,6 +408,15 @@ class __PlaybookViewSet(base.ReadOnlyModelViewSet):
 
 
 class __ModuleViewSet(base.ReadOnlyModelViewSet):
+    '''
+    Ansible module for project.
+
+    retrieve:
+        Return a module details of project instance.
+
+    list:
+        Return all available modules of project.
+    '''
     lookup_field = 'id'
     model = sers.models.Module
     serializer_class = sers.ModuleSerializer
@@ -348,6 +426,26 @@ class __ModuleViewSet(base.ReadOnlyModelViewSet):
 
 @deco.nested_view('variables', 'id', view=__VarsViewSet)
 class __PeriodicTaskViewSet(base.ModelViewSetSet):
+    '''
+    retrieve:
+        Return a perodic task instance.
+
+    list:
+        Return all periodic tasks in project.
+
+    create:
+        Create a new periodic task.
+
+    destroy:
+        Remove an existing periodic task.
+
+    partial_update:
+        Update one or more fields on an existing periodic task.
+
+    update:
+        Update a periodic task.
+
+    '''
     lookup_field = 'id'
     model = sers.models.PeriodicTask
     serializer_class = sers.PeriodictaskSerializer
@@ -364,12 +462,31 @@ class __PeriodicTaskViewSet(base.ModelViewSetSet):
 
 
 @method_decorator(name='execute', decorator=swagger_auto_schema(
-    operation_description='Execute template.',
+    operation_description='Execute template with option.',
     responses={
         status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(),
     }
 ))
 class __TemplateViewSet(base.ModelViewSetSet):
+    '''
+    retrieve:
+        Return a execute template instance.
+
+    list:
+        Return all execute templates in project.
+
+    create:
+        Create a new execute template.
+
+    destroy:
+        Remove an existing execute template.
+
+    partial_update:
+        Update one or more fields on an existing execute template.
+
+    update:
+        Update a execute template.
+    '''
     model = sers.models.Template
     serializer_class = sers.TemplateSerializer
     serializer_class_one = sers.OneTemplateSerializer
@@ -418,7 +535,7 @@ class ProjectViewSet(_GroupMixin):
     create:
         Create a new project.
 
-    delete:
+    destroy:
         Remove an existing project.
 
     partial_update:
@@ -473,7 +590,7 @@ class HookViewSet(base.ModelViewSetSet):
     create:
         Create a new hook.
 
-    delete:
+    destroy:
         Remove an existing hook.
 
     partial_update:
