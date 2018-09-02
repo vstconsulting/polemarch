@@ -102,12 +102,12 @@ code_style:
     - master
   retry: 2
 
-py27-django111-install:
+py27-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
-py36-django111-install:
+py36-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
