@@ -184,6 +184,7 @@ class ChartLineSettingSerializer(vst_serializers.JsonObjectSerializer):
 
 
 class ChartLineSettingsSerializer(vst_serializers.JsonObjectSerializer):
+    # pylint: disable=invalid-name
     all_tasks = ChartLineSettingSerializer()
     delay = ChartLineSettingSerializer()
     ok = ChartLineSettingSerializer()
