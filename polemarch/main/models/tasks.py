@@ -439,8 +439,8 @@ class History(BModel):
         if not isinstance(value, dict):
             raise ValidationError(dict(args="Should be a dict."))
         data = {k: v for k, v in value.items() if k not in ['group']}
-        for key in data.keys():
-            if key in PeriodicTask.HIDDEN_VARS:
+        for key in PeriodicTask.HIDDEN_VARS:
+            if key in data:
                 data[key] = "[~~ENCRYPTED~~]"
         self.json_args = json.dumps(data)
 
@@ -468,9 +468,9 @@ class History(BModel):
 
     @property
     def facts(self):
-        if self.status not in ['OK', 'ERROR', 'OFFLINE']:
+        if self.status not in self.stoped_statuses:
             raise DataNotReady("Execution still in process.")
-        if self.kind != 'MODULE' or self.mode != 'setup':
+        if self.kind != 'MODULE' or self.mode != 'setup' or self.status != 'OK':
             raise self.NoFactsAvailableException()
         data = self.get_raw(
             original=False,
