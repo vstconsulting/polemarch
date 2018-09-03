@@ -139,3 +139,6 @@ tabSignal.connect("loading.completed", function()
 
 //remove this string, when android app code be ready and after that check correct work on PC
 setActiveMenuLiBase();
+
+// Добавляем файл тестов к списку файлов для тестов гуя
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmUnitTest.js')
