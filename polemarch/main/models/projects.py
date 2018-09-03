@@ -108,7 +108,12 @@ class Project(AbstractModel):
 
     @property
     def path(self):
-        return "{}/{}".format(self.PROJECTS_DIR, self.id)
+        project_dir = (
+            self.PROJECTS_DIR
+            if not self.hidden
+            else getattr(settings, 'SELFCARE', self.PROJECTS_DIR)
+        )
+        return "{dir}/{id}".format(id=self.id, dir=project_dir)
 
     @property
     def repo_class(self):

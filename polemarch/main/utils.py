@@ -208,8 +208,8 @@ class BaseTask(PMObject):
         return self.run()
 
     def run(self):  # pragma: no cover
-        ''' Method with task logic. '''
         # pylint: disable=notimplemented-raised,
+        ''' Method with task logic. '''
         raise NotImplemented
 
 
