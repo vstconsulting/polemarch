@@ -361,6 +361,9 @@ class ProjectVariableSerializer(VariableSerializer):
     value = vst_fields.DependEnumField(allow_blank=True, field='key', choices={
         'repo_type': list(models.Project.repo_handlers.keys()),
         'repo_sync_on_run': [True, False]
+    }, types={
+        'repo_password': 'password',
+        'repo_key': 'file'
     })
 
 
