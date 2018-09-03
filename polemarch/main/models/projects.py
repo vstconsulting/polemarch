@@ -259,7 +259,7 @@ class Module(BModel):
         return self.path.split('.')[-1]
 
     def _load_data(self, data):
-        return load(data, Loader=Loader)
+        return load(data, Loader=Loader) if data and data != '{}' else {}
 
     def _get_module_data_from_cli(self):
         modules = AnsibleModules(detailed=True)
@@ -274,7 +274,7 @@ class Module(BModel):
 
     @property
     def data(self):
-        data = self._load_data(self._data)
+        data = self._load_data(self._data) if self._data != '{}' else {}
         if not data:
             data = self._get_module_data_from_cli()
         return data

@@ -112,7 +112,7 @@ class CmdExecutor(PMObject):
                 timeout = 0
             except Empty:
                 line = None
-                timeout = 0.1
+                timeout = 0.01
                 working = not stream.closed
             yield line
 
@@ -231,7 +231,8 @@ class AnsibleCache(PMObject):
         self.cache.set(self.key, dump(value, Dumper=Dumper), self.timeout)
 
     def get(self):
-        return load(self.cache.get(self.key) or '', Loader=Loader)
+        cache = self.cache.get(self.key)
+        return load(cache, Loader=Loader) if cache else None
 
     def clear(self):
         self.set(None)

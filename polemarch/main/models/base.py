@@ -21,15 +21,14 @@ class BQuerySet(_BQSet):
         return wrapper
 
     def __getattribute__(self, item):
-        model = super(BQuerySet, self).__getattribute__("model")
-        if model and model.acl_handler and item in model.acl_handler.qs_methods:  # noce
-            return self.__decorator(getattr(model.acl_handler, "qs_{}".format(item)))
+        if item not in ['create', 'user_filter']:
+            model = super(BQuerySet, self).__getattribute__("model")
+            if model and item in model.acl_handler.qs_methods:  # noce
+                return self.__decorator(getattr(model.acl_handler, "qs_{}".format(item)))
         return super(BQuerySet, self).__getattribute__(item)
 
     def create(self, **kwargs):
-        return self.model.acl_handler.qs_create(
-            super(BQuerySet, self).create, **kwargs
-        )
+        return self.model.acl_handler.qs_create(super(BQuerySet, self).create, **kwargs)
 
     def user_filter(self, user, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -59,8 +58,8 @@ class BaseModel(_BM):
 
     @classproperty
     def acl_handler(self):
-        classObj = self.__class__
         if isinstance(self, BaseModel):
+            classObj = self.__class__
             return classObj.get_acl(classObj, self)
         return self.get_acl(self)
 
