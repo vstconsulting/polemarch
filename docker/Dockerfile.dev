@@ -1,39 +1,12 @@
-FROM alpine:3.8
+FROM onegreyonewhite/tox:python
 
 MAINTAINER sergey.k@vstconsulting.net
 
-# Install dep packages
-RUN apk --update add python \
-                     python-dev \
-                     py-pip \
-                     bash \
-                     make \
-                     perl \
-                     ca-certificates \
-                     sshpass \
-                     build-base \
-                     linux-headers \
-                     openldap \
-                     openldap-dev \
-                     libffi \
-                     libffi-dev \
-                     libsasl \
-                     curl \
-                     coreutils \
-                     git \
-                     krb5 \
-                     krb5-dev \
-                     yaml \
-                     yaml-dev && \
-    pip install -U pip setuptools wheel tox && \
-    virtualenv /opt/polemarch && \
-    curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh | tee /usr/bin/wait-for-it.sh && \
-    chmod +x /usr/bin/wait-for-it.sh && \
-    mkdir -p /run/openldap && \
-    rm -rf /var/cache/apk/*
-RUN mkdir /tmp/polemarch
+RUN mkdir /tmp/polemarch && \
+    virtualenv /opt/polemarch
 ADD . /tmp/polemarch/
-RUN cd /tmp/polemarch && tox -e build && \
+RUN cd /tmp/polemarch && \
+    tox -e build && \
     /opt/polemarch/bin/pip install /tmp/polemarch/dist/*.tar.gz && \
     rm -rf /tmp/polemarch/dist /tmp/polemarch/.tox && \
     mkdir -p /etc/polemarch/ && \
@@ -43,4 +16,4 @@ RUN cd /tmp/polemarch && tox -e build && \
 ENV DJANGO_DEBUG=true
 EXPOSE 8080
 
-ENTRYPOINT sudo -u polemarch /opt/polemarch/bin/polemarchctl webserver
+ENTRYPOINT /opt/polemarch/bin/polemarchctl webserver

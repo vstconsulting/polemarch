@@ -837,4 +837,9 @@ tabSignal.connect("openapi.loaded", function(){
     //
     //     filedObj.setType(newtype, override_opt);
     // })
+
+    // api.openapi.definitions.ProjectVariable.properties.value.additionalProperties.choices.repo_sync_on_run = [false];
+    // api.openapi.definitions.ProjectVariable.properties.value.additionalProperties.types.repo_password = "password";
+    // api.openapi.definitions.ProjectVariable.properties.value.additionalProperties.types.repo_key = "file";
+
 })
