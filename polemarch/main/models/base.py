@@ -21,11 +21,13 @@ class BQuerySet(_BQSet):
         return wrapper
 
     def __getattribute__(self, item):
-        if item not in ['create', 'user_filter']:
+        try:
+            return super(BQuerySet, self).__getattribute__(item)
+        except:
             model = super(BQuerySet, self).__getattribute__("model")
             if model and item in model.acl_handler.qs_methods:  # noce
                 return self.__decorator(getattr(model.acl_handler, "qs_{}".format(item)))
-        return super(BQuerySet, self).__getattribute__(item)
+            raise
 
     def create(self, **kwargs):
         return self.model.acl_handler.qs_create(super(BQuerySet, self).create, **kwargs)

@@ -300,11 +300,11 @@ class AnsibleArgumentsReference(PMAnsible):
         return True
 
     def validate_args(self, command, args):
-        from django.core.validators import ValidationError
         try:
             for argument, value in args.items():
                 self.is_valid_value(command, argument, value)
         except (KeyError, ValueError, AssertionError) as e:
+            from django.core.validators import ValidationError
             raise ValidationError({
                 command: "Incorrect argument: {}.".format(str(e)),
                 'argument': argument
