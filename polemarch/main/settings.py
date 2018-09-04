@@ -57,15 +57,59 @@ SWAGGER_SETTINGS['DEFAULT_INFO'] = 'polemarch.api.v2.swagger.api_info'
 # Polemarch handlers
 
 # Repos
+class GitSectionConfig(SectionConfig):
+    section = 'git'
+    subsections = ['clone', 'fetch']
+    section_defaults = {
+        'fetch': {
+            "force": True,
+        }
+    }
+    types_map = {
+        'fetch.all': SectionConfig.bool,
+        'fetch.append': SectionConfig.bool,
+        'fetch.multiple': SectionConfig.bool,
+        'fetch.unshallow': SectionConfig.bool,
+        'fetch.update-shallow': SectionConfig.bool,
+        'fetch.force': SectionConfig.bool,
+        'fetch.keep': SectionConfig.bool,
+        'fetch.prune': SectionConfig.bool,
+        'fetch.prune-tags': SectionConfig.bool,
+        'fetch.no-tags': SectionConfig.bool,
+        'fetch.tags': SectionConfig.bool,
+        'fetch.no-recurse-submodules': SectionConfig.bool,
+        'fetch.update-head-ok': SectionConfig.bool,
+        'fetch.quiet': SectionConfig.bool,
+        'fetch.verbose': SectionConfig.bool,
+        'fetch.ipv4': SectionConfig.bool,
+        'fetch.ipv6': SectionConfig.bool,
+        'fetch.depth': SectionConfig.int,
+        'fetch.deepen': SectionConfig.int,
+        'fetch.jobs': SectionConfig.int,
+        'clone.local': SectionConfig.bool,
+        'clone.no-hardlinks': SectionConfig.bool,
+        'clone.shared': SectionConfig.bool,
+        'clone.dissociate': SectionConfig.bool,
+        'clone.quiet': SectionConfig.bool,
+        'clone.verbose': SectionConfig.bool,
+        'clone.single-branch': SectionConfig.bool,
+        'clone.no-single-branch': SectionConfig.bool,
+        'clone.no-tags': SectionConfig.bool,
+        'clone.shallow-submodules': SectionConfig.bool,
+        'clone.no-shallow-submodules': SectionConfig.bool,
+        'clone.depth': SectionConfig.int,
+        'clone.jobs': SectionConfig.int,
+    }
+
+
+git = GitSectionConfig()
+
 REPO_BACKENDS = {
     "GIT": {
         "BACKEND": "polemarch.main.repo.Git",
         "OPTIONS": {
-            "CLONE_KWARGS": {
-                "depth": 1
-            },
-            "FETCH_KWARGS": {
-            },
+            "CLONE_KWARGS": git.get('CLONE', {}),
+            "FETCH_KWARGS": git.get('FETCH', {}),
             "GIT_ENV": {
                 "GLOBAL": {
                     "GIT_SSL_NO_VERIFY": "true"
@@ -126,6 +170,9 @@ SELFCARE = '/tmp/'
 
 # TEST settings
 if "test" in sys.argv:
+    REPO_BACKENDS['GIT']['OPTIONS']['CLONE_KWARGS']['jobs'] = 4
+    REPO_BACKENDS['GIT']['OPTIONS']['FETCH_KWARGS']['jobs'] = 4
+    REPO_BACKENDS['GIT']['OPTIONS']['CLONE_KWARGS']['local'] = True
     CLONE_RETRY = 0
     PROJECTS_DIR = '/tmp/polemarch_projects' + str(PY_VER)
     HOOKS_DIR = '/tmp/polemarch_hooks' + str(PY_VER)
