@@ -70,7 +70,9 @@ window.qunitTestsArray['crontabEditor'] = {
             crontabEditor.setMinutes("1,2,3,4,5/5,45-51,170-38/2")
             assert.ok("*/5,*/12,*/16,1-4,6,8,14,18,22,26,28,34,38,46,47,49,51 1,2 1,2 1,2 1,2" == crontabEditor.getCronString(), 'getCronString');
 
-            render(done)
+            testdone(done)
         });
     }
 } 
+ 
+ 
