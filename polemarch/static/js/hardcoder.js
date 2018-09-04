@@ -8,7 +8,8 @@ tabSignal.connect("openapi.factory.inventoryvariable", function(data)
 tabSignal.connect("openapi.factory.setowner", function(data)
 { 
     let filed = apisetowner.one.view.definition.properties.user_id;
-    filed.type = "select2"
+    
+    filed.format = "select2"
     filed.search = function(params, filed, filed_value, parent_object)
     {
         let def = new $.Deferred(); 
