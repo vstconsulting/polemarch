@@ -821,11 +821,13 @@ class _AnsibleSerializer(DataSerializer):
 
 
 class AnsiblePlaybookSerializer(_AnsibleSerializer):
-    playbook = vst_fields.AutoCompletionField(required=True, autocomplete='Playbook')
+    playbook = vst_fields.AutoCompletionField(required=True, autocomplete='Playbook',
+                                              autocomplete_property='playbook')
 
 
 class AnsibleModuleSerializer(_AnsibleSerializer):
-    module = vst_fields.AutoCompletionField(required=True, autocomplete='Module')
+    module = vst_fields.AutoCompletionField(required=True, autocomplete='Module',
+                                            autocomplete_property='name')
 
 
 class BaseDashboardJobSerializer(DataSerializer):
