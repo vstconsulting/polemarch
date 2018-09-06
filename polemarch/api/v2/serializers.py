@@ -98,7 +98,8 @@ class ExecuteResponseSerializer(ActionResponseSerializer):
 
 
 class SetOwnerSerializer(DataSerializer):
-    user_id = serializers.IntegerField(required=True)
+    user_id = vst_fields.Select2Field(required=True, select='Owner',
+                                      autocomplete_represent='username')
 
     def update(self, instance, validated_data):
         if not self.instance.acl_handler.owned_by(self.current_user()):  # noce
@@ -781,8 +782,6 @@ def generate_fileds(ansible_type):
             continue
         ref_type = settings.get('type', None)
         kwargs = dict(help_text=settings.get('help', ''), required=False)
-        if ref == 'inventory':
-            kwargs['required'] = True
         if ref == 'verbose':
             field = serializers.IntegerField
             kwargs.update(dict(max_value=4, default=0))
@@ -793,6 +792,10 @@ def generate_fileds(ansible_type):
             field = vst_fields.SecretFileInString
         elif ref_type == 'int':
             field = serializers.IntegerField
+        elif ref == 'inventory':
+            kwargs['required'] = True
+            kwargs['autocomplete'] = 'Inventory'
+            field = vst_fields.AutoCompletionField
         elif ref_type == 'string' or 'choice':
             field = serializers.CharField
         else:  # nocv
@@ -827,7 +830,8 @@ class AnsiblePlaybookSerializer(_AnsibleSerializer):
 
 class AnsibleModuleSerializer(_AnsibleSerializer):
     module = vst_fields.AutoCompletionField(required=True, autocomplete='Module',
-                                            autocomplete_property='name')
+                                            autocomplete_property='name',
+                                            autocomplete_represent='path')
 
 
 class BaseDashboardJobSerializer(DataSerializer):
