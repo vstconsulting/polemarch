@@ -9,11 +9,12 @@ import sys
 import os
 import re
 import json
+import time
 from os.path import dirname
 try:
-    from Queue import Queue, Empty
+    from Queue import Queue
 except ImportError:  # nocv
-    from queue import Queue, Empty
+    from queue import Queue
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
@@ -85,7 +86,7 @@ class CmdExecutor(PMObject):
         try:
             line = out.readline()
             while len(line):
-                queue.put(line)
+                queue.put_nowait(line)
                 line = out.readline()
         finally:
             out.close()
@@ -100,20 +101,21 @@ class CmdExecutor(PMObject):
 
     def _unbuffered(self, proc, stream='stdout'):
         stream = getattr(proc, stream)
-        q = Queue()
-        t = Thread(target=self._enqueue_output, args=(stream, q))
+        queue = Queue()
+        t = Thread(target=self._enqueue_output, args=(stream, queue))
         t.start()
-        timeout = 0
-        working = True
-        while working:
-            try:
-                self.working_handler(proc)
-                line = q.get(timeout=timeout).rstrip()
-                timeout = 0
-            except Empty:
-                line = None
-                timeout = 0.01
-                working = not stream.closed
+        empty_counter = 1
+        while not (stream.closed and queue.empty()):
+            if queue.empty():
+                empty_counter += 1
+                if not empty_counter % 100:
+                    self.working_handler(proc)
+                elif not empty_counter % 10:
+                    time.sleep(0.001)
+                continue  # nocv
+            empty_counter = 0
+            self.working_handler(proc)
+            line = queue.get_nowait().rstrip()
             yield line
 
     def line_handler(self, proc, line):
@@ -140,9 +142,9 @@ class CmdExecutor(PMObject):
         for line in self._unbuffered(proc):
             if self.line_handler(proc, line):
                 break  # nocv
-        retcode = proc.poll()
-        if retcode:
-            raise CalledProcessError(retcode, cmd, output=self.output)
+        return_code = proc.poll()
+        if return_code:
+            raise CalledProcessError(return_code, cmd, output=self.output)
         return self.output
 
 
