@@ -1,0 +1,24 @@
+
+
+<!-- 
+{
+"requirements":["boto3"],
+"description":["Retrieve facts for ACM certificates"],
+"author":["Will Thames (@willthames)"],
+"module":"aws_acm_facts",
+"options":{
+    "status":{"description":["Status to filter the certificate results"],
+    "choices":["PENDING_VALIDATION","ISSUED","INACTIVE","EXPIRED","VALIDATION_TIMED_OUT"]},
+    "domain_name":{
+        "description":["The domain name of an ACM certificate to limit the search to"],
+        "aliases":["name"]
+    }
+},
+"version_added":"2.5",
+"short_description":"Retrieve certificate facts from AWS Certificate Manager service",
+"extends_documentation_fragment":["aws","ec2"]
+}
+-->
+<script type="text/x-just" data-just="guiElements.module_data">   
+  <%- value.short_description %>
+</script>

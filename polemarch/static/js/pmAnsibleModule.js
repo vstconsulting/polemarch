@@ -67,7 +67,7 @@ pmAnsibleModule.fastCommandWidget = function(holder)
     $.when(projects.loadAllItems(), inventory.loadAllItems()).always(function()
     {
         $(holder).insertTpl(spajs.just.render('fastcommand_widget', {projects:projects, inventory:inventory}))
-        debugger;
+        //debugger;
         
         $("#projects-autocomplete").select2({ width: '100%' });
         $("#inventories-autocomplete").select2({ width: '100%' });
