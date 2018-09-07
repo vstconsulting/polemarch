@@ -170,8 +170,6 @@ SELFCARE = '/tmp/'
 
 # TEST settings
 if "test" in sys.argv:
-    REPO_BACKENDS['GIT']['OPTIONS']['CLONE_KWARGS']['jobs'] = 4
-    REPO_BACKENDS['GIT']['OPTIONS']['FETCH_KWARGS']['jobs'] = 4
     REPO_BACKENDS['GIT']['OPTIONS']['CLONE_KWARGS']['local'] = True
     CLONE_RETRY = 0
     PROJECTS_DIR = '/tmp/polemarch_projects' + str(PY_VER)
