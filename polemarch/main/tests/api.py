@@ -183,7 +183,7 @@ class ApiUsersTestCase(BaseTestCase):
         self.result(client.post, self.get_url('user'), 409, data)
         self._logout(client)
 
-    @patch('polemarch.main.hooks.http.Backend._execute')
+    @patch('polemarch.main.hooks.http.Backend.execute')
     def test_api_users_insert_and_delete(self, execute_method):
         self.sended = False
         hook_url = 'http://ex.com'
