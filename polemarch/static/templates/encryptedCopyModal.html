@@ -5,35 +5,35 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Copy object with encrypted fileds</h4>
+                <h4 class="modal-title">Copy object with encrypted fields</h4>
             </div>
             <div class="modal-body"> 
                 <p>This object has encrypted variables. For copy this object you need insert new values for encrypted variables.</p> 
                 <div class="row">
                     <div class="col-lg-12"> 
-                        <% for(var i in encryptedFileds){ %> 
-                            <div class="row" id="encryptedFileds_<%- toIdString(i) %>">
+                        <% for(var i in encryptedFields){ %> 
+                            <div class="row" id="encryptedFields_<%- toIdString(i) %>">
 
                                 <div class="form-group col-lg-12" >
 
                                     <div class="input-group col-xs-12 col-sm-12 col-lg-12">
                                         <label class="control-label ansible_var" style="word-wrap: break-word;">
-                                            <%- encryptedFileds[i] %>
+                                            <%- encryptedFields[i] %>
                                         </label>
                                         <span class="btn btn-default btn-right" 
-                                        onclick="$('#encryptedFileds_<%- toIdString(i) %>').hide()" style="float: right; margin-left: 10px;">
+                                        onclick="$('#encryptedFields_<%- toIdString(i) %>').hide()" style="float: right; margin-left: 10px;">
                                             <span class="glyphicon glyphicon-remove"></span>
                                         </span>
                                         <span class="btn btn-default btn-right textfile" style="float: right; margin-left: 10px;" >
-                                            <input type="file" class="input-file"  onchange="encryptedCopyModal.loadFile(event, '#encryptedFileds_<%- toIdString(i) %> textarea');"  >
+                                            <input type="file" class="input-file"  onchange="encryptedCopyModal.loadFile(event, '#encryptedFields_<%- toIdString(i) %> textarea');"  >
                                             <span class="glyphicon glyphicon-file"></span>
                                         </span>
 
                                         <div style="clear: both; padding-top: 10px;"></div>
                                         <textarea data-type="keyfile" 
                                                     placeholder="Enter value"  
-                                                    class="form-control encryptedFiled" 
-                                                    data-key-name="<%- encryptedFileds[i] %>" 
+                                                    class="form-control encryptedField" 
+                                                    data-key-name="<%- encryptedFields[i] %>" 
                                                     rows="4" 
                                                     style="resize:vertical;" 
                                                     value=""></textarea>

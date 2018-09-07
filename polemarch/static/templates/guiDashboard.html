@@ -247,59 +247,59 @@
 </script>
 
 <!-- Шаблон для поля настроек виджетов-->
-<script type="text/x-just" data-just="widgetsettings_one_as_filed">
-    <!-- widgetsettings_one_as_filed -->
+<script type="text/x-just" data-just="widgetsettings_one_as_field">
+    <!-- widgetsettings_one_as_field -->
 
-    <% for(var i in guiObj.model.fileds) { %>
+    <% for(var i in guiObj.model.fields) { %>
 
         <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
                 <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
-                    <label class="control-label"><%- guiObj.model.fileds[i].name || guiObj.view.bulk_name %></label>
+                    <label class="control-label"><%- guiObj.model.fields[i].name || guiObj.view.bulk_name %></label>
                 </div>
-                <%= guiObj.renderFiled(guiObj.model.fileds[i], opt) %>
+                <%= guiObj.renderField(guiObj.model.fields[i], opt) %>
         </div>
     <% } %>
 
 </script>
 
 <!-- Шаблон для поля настроек одного виджета-->
-<script type="text/x-just" data-just="widgetsetting_one_as_filed">
-    <!-- widgetsetting_one_as_filed -->
+<script type="text/x-just" data-just="widgetsetting_one_as_field">
+    <!-- widgetsetting_one_as_field -->
 
-    <% for(var i in guiObj.model.fileds) { %>
-        <%= guiObj.renderFiled(guiObj.model.fileds[i], opt) %>
+    <% for(var i in guiObj.model.fields) { %>
+        <%= guiObj.renderField(guiObj.model.fields[i], opt) %>
     <% } %>
 
 </script>
 
 <!-- Шаблон для поля настроек виджетов-->
-<script type="text/x-just" data-just="counterwidgetsettings_one_as_filed">
-    <!-- counterwidgetsettings_one_as_filed -->
+<script type="text/x-just" data-just="counterwidgetsettings_one_as_field">
+    <!-- counterwidgetsettings_one_as_field -->
 
-    <%! widgetsettings_one_as_filed %>
+    <%! widgetsettings_one_as_field %>
 
 </script>
 
 <!-- Шаблон для поля настроек одного виджета-->
-<script type="text/x-just" data-just="counterwidgetsetting_one_as_filed">
-    <!-- counterwidgetsetting_one_as_filed -->
+<script type="text/x-just" data-just="counterwidgetsetting_one_as_field">
+    <!-- counterwidgetsetting_one_as_field -->
 
-     <%! widgetsetting_one_as_filed %>
+     <%! widgetsetting_one_as_field %>
 
 </script>
 
 <!-- Шаблон для поля настроек линий графика -->
-<script type="text/x-just" data-just="chartlinesettings_one_as_filed">
-    <!-- chartlinesettings_one_as_filed -->
+<script type="text/x-just" data-just="chartlinesettings_one_as_field">
+    <!-- chartlinesettings_one_as_field -->
 
-    <%! widgetsettings_one_as_filed %>
+    <%! widgetsettings_one_as_field %>
 
 </script>
 
 <!-- Шаблон для поля настроек одной линии графика-->
-<script type="text/x-just" data-just="chartlinesetting_one_as_filed">
-    <!-- chartlinesetting_one_as_filed -->
+<script type="text/x-just" data-just="chartlinesetting_one_as_field">
+    <!-- chartlinesetting_one_as_field -->
 
-    <%! widgetsetting_one_as_filed %>
+    <%! widgetsetting_one_as_field %>
 
 </script>

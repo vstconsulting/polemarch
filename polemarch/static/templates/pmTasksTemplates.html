@@ -99,7 +99,7 @@
 
 
 <!-- Шаблон полей  Project Inventory и Playbook  -->
-<script type="text/x-just" data-just="filed_type_selectProjectInventoryAndPlaybook"> 
+<script type="text/x-just" data-just="field_type_selectProjectInventoryAndPlaybook"> 
     <% if(item_id){ %> 
         
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
@@ -119,10 +119,10 @@
             </select> 
         </div>
         
-        <%= pmTasksTemplates.inventoriesAutocompletefiled.render(pmTasksTemplates, {
+        <%= pmTasksTemplates.inventoriesAutocompletefield.render(pmTasksTemplates, {
             name:'inventory',
             title:'Inventory',
-            getFiledValue:function(item_id){ 
+            getFieldValue:function(item_id){ 
                 return this.model.items[item_id].data.inventory;
             },
         }, item_id, {}) %>
@@ -140,7 +140,7 @@
 </script>
 
 <!-- Шаблон полей  Project Inventory и Playbook for new option  -->
-<script type="text/x-just" data-just="filed_type_selectProjectInventoryAndPlaybookForNewOption">
+<script type="text/x-just" data-just="field_type_selectProjectInventoryAndPlaybookForNewOption">
     <% if(item_id){ %>
 
 
@@ -157,7 +157,7 @@
 </script>
 
 <!-- Шаблон полей  Project Inventory и Playbook for  option  -->
-<script type="text/x-just" data-just="filed_type_selectProjectInventoryAndPlaybookForOption">
+<script type="text/x-just" data-just="field_type_selectProjectInventoryAndPlaybookForOption">
     <% if(item_id){ %>
 
 
@@ -269,10 +269,10 @@
                         </div>
                         <div class="row">
                          
-                            <%= pmTasksTemplates.inventoriesAutocompletefiled.render(pmTasksTemplates, {
+                            <%= pmTasksTemplates.inventoriesAutocompletefield.render(pmTasksTemplates, {
                                 name:'inventory',
                                 title:'Inventory',
-                                getFiledValue:function(item_id){ 
+                                getFieldValue:function(item_id){ 
                                     return this.model.items[item_id].data.inventory;
                                 },
                             }, null, {}) %>
@@ -289,7 +289,7 @@
                             <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
                                 <label class="control-label">Notes</label>
                                 <textarea class="form-control" style="resize:vertical; min-height:75px;"
-                                placeholder="Not required field, just for your notes" id="filed_notes"></textarea>
+                                placeholder="Not required field, just for your notes" id="field_notes"></textarea>
                                 <div class="help-block"></div>
                             </div>
                         </div>
@@ -380,7 +380,7 @@
             <section class="col-lg-12">
                 <div class="box box-info" id="options_list">
                     <div class="box-header with-border">
-                         <%= pmObj.searchFiledForTemplateOptions({query:query, template_id:item_id}) %>
+                         <%= pmObj.searchFieldForTemplateOptions({query:query, template_id:item_id}) %>
 
                     </div>
                     <div class="box-body">
@@ -511,7 +511,7 @@
 </script>
 
 <!-- Поле поиска для страницы списка опций шаблона-->
-<script  type="text/x-just" style="display: none;" data-just="searchFiledForTemplateOptions">
+<script  type="text/x-just" style="display: none;" data-just="searchFieldForTemplateOptions">
     <div class="input-group col-lg-2" style="float: right;">
         <input
             type="text"

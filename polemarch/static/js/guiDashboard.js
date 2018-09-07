@@ -566,9 +566,9 @@ pmDashboard.saveWigdetsOptionsFromModal = function()
 pmDashboard.saveWigdetsOptionsFromProfile = function()
 {
     return $.when(pmDashboard.saveWigdetsOptions()).done(function(){
-        return $.notify("Dashboard widget options were successfully saved", "success");
+        return guiPopUp.success("Dashboard widget options were successfully saved");
     }).fail(function(){
-        return $.notify("Dashboard widget options were not saved", "error");
+        return guiPopUp.error("Dashboard widget options were not saved");
     }).promise();
 }
 
@@ -588,9 +588,9 @@ pmDashboard.saveChartLineSettings = function()
 pmDashboard.saveChartLineSettingsFromProfile = function()
 {
     return $.when(pmDashboard.saveChartLineSettings()).done(function(){
-        return $.notify("Dashboard chart lines settings were successfully saved", "success");
+        return guiPopUp.success("Dashboard chart lines settings were successfully saved");
     }).fail(function(){
-        return $.notify("Dashboard chart lines settings were not saved", "error");
+        return guiPopUp.error("Dashboard chart lines settings were not saved");
     }).promise();
 }
 
@@ -601,9 +601,9 @@ pmDashboard.saveAllDashboardSettingsFromProfile = function(){
     pmDashboard.getOptionsFromTable("modal-table",pmDashboard.model.widgets[0]);
     pmDashboard.getOptionsFromTable("chart_line_settings_table", pmDashboard.model.ChartLineSettings);
     return $.when(pmDashboard.putUserDashboardSettingsToAPI()).done(function(){
-        return $.notify("Dashboard settings were successfully saved", "success");
+        return guiPopUp.success("Dashboard settings were successfully saved");
     }).fail(function(){
-        return $.notify("Dashboard settings were not saved", "error");
+        return guiPopUp.error("Dashboard settings were not saved");
     }).promise();
 }
 
@@ -791,8 +791,9 @@ pmDashboard.getDataForDashboardFromBulk = function ()
         data: JSON.stringify(bulkArr),
         success: function (data)
         {
-            for(var i in data)
+            /*for(var i in data)
             {
+                debugger;
                 var pmObj = pmItems.definePmObject(bulkArr[i].item);
                 pmObj.model.itemslist = data[i].data;
                 for(var j in data[i].data.results)
@@ -801,11 +802,12 @@ pmDashboard.getDataForDashboardFromBulk = function ()
                     pmObj.model.items.justWatch(val.id);
                     pmObj.model.items[val.id] = mergeDeep(pmObj.model.items[val.id], val)
                 }
-            }
+            }*/
             def.resolve();
+            return;
         },
         error: function (e) {
-            $.notify("Error " + e, "error");
+            guiPopUp.error("Error " + e, "error");
             def.reject();
         }
     })
@@ -1135,13 +1137,12 @@ pmwChartWidget.render = function()
 var pmwItemsCounter = inheritance(pmDashboardWidget);
 
 pmwItemsCounter.model.count = '-';
-pmwItemsCounter.model.countObject = pmItems;
+//pmwItemsCounter.model.countObject = pmItems;
 pmwItemsCounter.model.nameInStats = "";
 
 pmwItemsCounter.render = function()
 {
-
-    var thisObj = this;
+    return "" 
     var html = spajs.just.render('pmwItemsCounter', {model:this.model});
     return window.JUST.onInsert(html, function(){});
 }
@@ -1157,7 +1158,7 @@ pmwItemsCounter.updateCount = function()
  * @type Object
  */
 var pmwHostsCounter = inheritance(pmwItemsCounter);
-pmwHostsCounter.model.countObject = pmHosts;
+//pmwHostsCounter.model.countObject = pmHosts;
 pmwHostsCounter.model.nameInStats = "hosts";
 
 /**
@@ -1165,7 +1166,7 @@ pmwHostsCounter.model.nameInStats = "hosts";
  * @type Object
  */
 var pmwTemplatesCounter = inheritance(pmwItemsCounter);
-pmwTemplatesCounter.model.countObject = pmTemplates;
+//pmwTemplatesCounter.model.countObject = pmTemplates;
 pmwTemplatesCounter.model.nameInStats = "templates";
 
 /**
@@ -1173,7 +1174,7 @@ pmwTemplatesCounter.model.nameInStats = "templates";
  * @type Object
  */
 var pmwGroupsCounter = inheritance(pmwItemsCounter);
-pmwGroupsCounter.model.countObject = pmGroups;
+//pmwGroupsCounter.model.countObject = pmGroups;
 pmwGroupsCounter.model.nameInStats = "groups";
 
 /**
@@ -1181,7 +1182,7 @@ pmwGroupsCounter.model.nameInStats = "groups";
  * @type Object
  */
 var pmwProjectsCounter = inheritance(pmwItemsCounter);
-pmwProjectsCounter.model.countObject = pmProjects;
+//pmwProjectsCounter.model.countObject = pmProjects;
 pmwProjectsCounter.model.nameInStats = "projects";
 
 /**
@@ -1189,7 +1190,7 @@ pmwProjectsCounter.model.nameInStats = "projects";
  * @type Object
  */
 var pmwInventoriesCounter = inheritance(pmwItemsCounter);
-pmwInventoriesCounter.model.countObject = pmInventories;
+//pmwInventoriesCounter.model.countObject = pmInventories;
 pmwInventoriesCounter.model.nameInStats = "inventories";
 
 /**
@@ -1197,5 +1198,5 @@ pmwInventoriesCounter.model.nameInStats = "inventories";
  * @type Object
  */
 var pmwUsersCounter = inheritance(pmwItemsCounter);
-pmwUsersCounter.model.countObject = pmUsers;
+//pmwUsersCounter.model.countObject = pmUsers;
 pmwUsersCounter.model.nameInStats = "users";

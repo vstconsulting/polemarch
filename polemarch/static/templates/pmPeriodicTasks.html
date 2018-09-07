@@ -25,7 +25,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        <%= pmPeriodicTasks.searchFiled({query:query, project_id:project_id}) %>
+                        <%= pmPeriodicTasks.searchField({query:query, project_id:project_id}) %>
                         <% if(pmPeriodicTasks.getTotalPages(pmPeriodicTasks.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
                                 <%= pmPeriodicTasks.paginationHtml(pmPeriodicTasks.model.itemslist) %>
@@ -194,7 +194,7 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                         <%= pmPeriodicTasks.searchFiled({query:query, project_id:project_id, template_id:item_id, template_kind:pmObj.model.kind}) %>
+                         <%= pmPeriodicTasks.searchField({query:query, project_id:project_id, template_id:item_id, template_kind:pmObj.model.kind}) %>
                         <% if(pmPeriodicTasks.getTotalPages(pmPeriodicTasks.model.itemslist)){ %>
                             <div style="float: right; margin-right: 20px;" class="hidden-xs">
                                 <%= pmPeriodicTasks.paginationHtml(pmPeriodicTasks.model.itemslist) %>
@@ -303,7 +303,7 @@
 </script>
 
 <!-- Шаблон полей  Project Inventory и Playbook  -->
-<script type="text/x-just" data-just="filed_type_selectInventoryKindPlaybookGroupModuleAndTime"> 
+<script type="text/x-just" data-just="field_type_selectInventoryKindPlaybookGroupModuleAndTime"> 
     <% if(item_id){ %>
 
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
@@ -338,7 +338,7 @@
         </div>
 
         <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
-            <%= moduleArgsEditor.moduleFileds({
+            <%= moduleArgsEditor.moduleFields({
                     module:{value:pmPeriodicTasks.model.items[item_id].mode },
                     args:{value:pmPeriodicTasks.model.items[item_id].args }
                 })
@@ -346,10 +346,10 @@
         </div>
 
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.items[item_id].justClass('kind', 'hide', function(v){ return v != 'TEMPLATE' }) %>">
-            <%= pmPeriodicTasks.projectTemplatesAutocompletefiled.render(pmPeriodicTasks, {
+            <%= pmPeriodicTasks.projectTemplatesAutocompletefield.render(pmPeriodicTasks, {
                 name:'template',
                 title:'Template',
-                getFiledValue:function(item_id){
+                getFieldValue:function(item_id){
                     if(pmPeriodicTasks.model.items[item_id].template_opt != null)
                     {
                         return pmPeriodicTasks.model.items[item_id].template + '/' + pmPeriodicTasks.model.items[item_id].template_opt;
@@ -377,10 +377,10 @@
             <% if (pmPeriodicTasks.model.items[item_id].kind != "TEMPLATE") { %>
                 <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
                     <div class="row">
-                        <%= pmPeriodicTasks.inventoriesAutocompletefiled.render(pmPeriodicTasks, {
+                        <%= pmPeriodicTasks.inventoriesAutocompletefield.render(pmPeriodicTasks, {
                             name:'inventory',
                             title:'Inventory',
-                            getFiledValue:function(item_id){
+                            getFieldValue:function(item_id){
                                 return pmPeriodicTasks.model.items[item_id].inventory;
                             },
                             onchange:function(event){
@@ -455,7 +455,7 @@
     <% } %>
 </script>
 
-<script type="text/x-just" data-just="filed_type_selectTemplateFromProjectToPT">
+<script type="text/x-just" data-just="field_type_selectTemplateFromProjectToPT">
     <% if(item_id !== undefined) { %>
 
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
@@ -651,7 +651,7 @@
                             </div>
 
                             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 <%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'TEMPLATE' }) %>">
-                                <%= pmPeriodicTasks.projectTemplatesAutocompletefiled.render(pmPeriodicTasks, {
+                                <%= pmPeriodicTasks.projectTemplatesAutocompletefield.render(pmPeriodicTasks, {
                                 name:'template',
                                 title:'Template',
                                 onchange:function(event){
@@ -670,7 +670,7 @@
                         </div>
                         
                         <div class="<%- pmPeriodicTasks.model.newitem.justClass('kind', 'hide', function(v){ return v != 'MODULE' }) %>">
-                            <%= moduleArgsEditor.moduleFileds() %> 
+                            <%= moduleArgsEditor.moduleFields() %> 
                         </div>
 
 
@@ -678,10 +678,10 @@
                             <% if(pmPeriodicTasks.model.newitem.kind != "TEMPLATE") { %>
                                 <div class="row">
 
-                                    <%= pmPeriodicTasks.inventoriesAutocompletefiled.render(pmPeriodicTasks, {
+                                    <%= pmPeriodicTasks.inventoriesAutocompletefield.render(pmPeriodicTasks, {
                                         name:'inventory',
                                         title:'Inventory',
-                                        getFiledValue:function(item_id){
+                                        getFieldValue:function(item_id){
                                             return this.model.items[item_id].data.inventory;
                                         },
                                         onchange:function(event){
@@ -742,7 +742,7 @@
                             <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
                                 <label class="control-label">Notes</label>
                                 <textarea class="form-control" style="resize:vertical; min-height:75px;"
-                                placeholder="Not required field, just for your notes" id="filed_notes"></textarea>
+                                placeholder="Not required field, just for your notes" id="field_notes"></textarea>
                                 <div class="help-block"></div>
                             </div>
                         </div>
@@ -903,7 +903,7 @@
                             <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
                                 <label class="control-label">Notes</label>
                                 <textarea class="form-control" style="resize:vertical; min-height:75px;"
-                                placeholder="Not required field, just for your notes" id="filed_notes"></textarea>
+                                placeholder="Not required field, just for your notes" id="field_notes"></textarea>
                                 <div class="help-block"></div>
                             </div>
                         </div>
@@ -916,10 +916,10 @@
 </script>
 
 <!-- Шаблон для автокоплита шаблонов текущего проекта -->
-<script type="text/x-just" data-just="filed_type_projectTemplatesAutocomplete">
+<script type="text/x-just" data-just="field_type_projectTemplatesAutocomplete">
     <% if(item_id){ %>
         <label class="control-label" >Template from project</label>
-        <select class="form-control select2 inventory-source-value" id="templates-autocomplete" data-placeholder="Select template" style="width:100%"  onchange="if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:this.value})" >
+        <select class="form-control select2 inventory-source-value" id="templates-autocomplete" data-placeholder="Select template" style="width:100%"  onchange="if(<%- justCall(field) %>.onchange) <%- justCall(field) %>.onchange({value:this.value})" >
             <% for(var i in pmTasksTemplates.model.itemslist.results){ var val = pmTasksTemplates.model.itemslist.results[i] %>
                 <option
                     <% if(pmObj.model.items[item_id].template == val.id && pmObj.model.items[item_id].template_opt == null){ %>  selected  <% } %>
@@ -938,7 +938,7 @@
         <div class="help-block"></div>
     <% }else{ %>
         <label class="control-label" >Template from project</label>
-        <select class="form-control select2 inventory-source-value" id="templates-autocomplete"  data-placeholder="Select template" style="width:100%"  onchange="if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:this.value})">
+        <select class="form-control select2 inventory-source-value" id="templates-autocomplete"  data-placeholder="Select template" style="width:100%"  onchange="if(<%- justCall(field) %>.onchange) <%- justCall(field) %>.onchange({value:this.value})">
             <% for(var i in pmTasksTemplates.model.itemslist.results){ var val = pmTasksTemplates.model.itemslist.results[i] %>
                 <option value="<%- val.id %>"><%- val.name %></option>
                 <% if(val.options_list.length != 0) { %>
@@ -1022,10 +1022,10 @@
                         </div>
                     </div>
                     <div class="box-body">
-                        <% for(var i in pmObj.model.page_item_from_template.fileds){ %>
+                        <% for(var i in pmObj.model.page_item_from_template.fields){ %>
                             <div class="row">
-                                <% for(var j in pmObj.model.page_item_from_template.fileds[i]){ var filed = pmObj.model.page_item_from_template.fileds[i][j]; %>
-                                        <%= filed.filed.render(pmObj, filed, item_id, opt) %>
+                                <% for(var j in pmObj.model.page_item_from_template.fields[i]){ var field = pmObj.model.page_item_from_template.fields[i][j]; %>
+                                        <%= field.field.render(pmObj, field, item_id, opt) %>
                                 <% } %>
                             </div>
                         <% } %>

@@ -299,20 +299,20 @@ tabSignal.connect("openapi.factory.history", function(data)
     }
 
     // Переопределяет список полей которые будут показаны в списке истории
-    apihistory.list.getFiledsFor_renderAsPage = function()
+    apihistory.list.getFieldsFor_renderAsPage = function()
     {
-        let fileds = []
-        for(let i in this.model.fileds)
+        let fields = []
+        for(let i in this.model.fields)
         {
-            let val = this.model.fileds[i]
+            let val = this.model.fields[i]
 
             if($.inArray(val.name, ['id', 'mode', 'kind', 'status']) != -1)
             {
-                fileds.push(val)
+                fields.push(val)
             }
         }
 
-        return fileds;
+        return fields;
     }
 })
 

@@ -11,7 +11,7 @@ encryptedCopyModal.find = function(data, prefix)
     {
         if(typeof data[i] == "string" && data[i] == "[~~ENCRYPTED~~]")
         {
-            this.encryptedFileds.push(prefix+i)
+            this.encryptedFields.push(prefix+i)
         }
         else if(typeof data[i] == "object" && data[i] != null)
         {
@@ -19,27 +19,27 @@ encryptedCopyModal.find = function(data, prefix)
         }
     }
 
-    return this.encryptedFileds;
+    return this.encryptedFields;
 }
 
 encryptedCopyModal.setNewValues = function()
 {
-    var encryptedFileds = $(".encryptedFiled")
+    var encryptedFields = $(".encryptedField")
 
     this.newObjectData = $.extend(true, {}, this.objectData)
 
-    for(var i = 0; i<encryptedFileds.length; i++)
+    for(var i = 0; i<encryptedFields.length; i++)
     {
-        var key = $(encryptedFileds[i]).attr('data-key-name')
+        var key = $(encryptedFields[i]).attr('data-key-name')
         key = "['"+key.replace(/\./mg, "']['") + "']"
         
-        if($(encryptedFileds[i]).val() == "")
+        if($(encryptedFields[i]).val() == "")
         {
             eval('delete encryptedCopyModal.newObjectData'+key+'')
         }
         else
         {
-            eval('encryptedCopyModal.newObjectData'+key+'=$(".encryptedFiled")['+i+'].value')
+            eval('encryptedCopyModal.newObjectData'+key+'=$(".encryptedField")['+i+'].value')
         }
     }
 
@@ -59,15 +59,15 @@ encryptedCopyModal.replace = function(objectData)
     this.objectData = objectData
     this.def = new $.Deferred();
 
-    this.encryptedFileds = []
-    this.encryptedFileds = this.find(objectData)
-    if(!this.encryptedFileds.length)
+    this.encryptedFields = []
+    this.encryptedFields = this.find(objectData)
+    if(!this.encryptedFields.length)
     {
         this.def.resolve(objectData)
         return this.def.promise();
     }
 
-    $("body").appendTpl(spajs.just.render("replaceEncryptedModal", {encryptedFileds:this.encryptedFileds}))
+    $("body").appendTpl(spajs.just.render("replaceEncryptedModal", {encryptedFields:this.encryptedFields}))
     $('#replaceEncryptedModal').modal()
 
     var thisObj = this;

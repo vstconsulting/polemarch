@@ -33,7 +33,7 @@ moduleArgsEditor.loadAllModule = function()
  * @returns HTML templte
  * @private
  */
-moduleArgsEditor.moduleAutocompleteFiled = function(opt)
+moduleArgsEditor.moduleAutocompleteField = function(opt)
 {
     if(opt === undefined)
     {
@@ -45,7 +45,7 @@ moduleArgsEditor.moduleAutocompleteFiled = function(opt)
         opt.value = ""
     }
      
-    var html = spajs.just.render('moduleAutocompleteFiled_template', opt)
+    var html = spajs.just.render('moduleAutocompleteField_template', opt)
     
     html = spajs.just.onInsert(html, function()
     {
@@ -97,7 +97,7 @@ moduleArgsEditor.moduleAutocompleteFiled = function(opt)
  * @returns HTML templte
  * @private
  */
-moduleArgsEditor.argsAutocompleteFiled = function(opt)
+moduleArgsEditor.argsAutocompleteField = function(opt)
 {
     if(opt === undefined)
     {
@@ -109,7 +109,7 @@ moduleArgsEditor.argsAutocompleteFiled = function(opt)
         opt.value = ""
     }
      
-    var html = spajs.just.render('moduleArgsFiled_template', opt) 
+    var html = spajs.just.render('moduleArgsField_template', opt) 
     return html;
 }
 
@@ -118,7 +118,7 @@ moduleArgsEditor.argsAutocompleteFiled = function(opt)
  * @param {String} id
  * @returns HTML templte
  */
-moduleArgsEditor.moduleFileds = function(opt)
+moduleArgsEditor.moduleFields = function(opt)
 {
     if(opt === undefined)
     {
@@ -135,7 +135,7 @@ moduleArgsEditor.moduleFileds = function(opt)
         opt.args = {}
     } 
     
-    var html = spajs.just.render('moduleFileds_template', opt) 
+    var html = spajs.just.render('moduleFields_template', opt) 
     return html;
 }
 

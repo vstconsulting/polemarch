@@ -1,6 +1,6 @@
 
 <!-- Шаблон поля Repository type  -->
-<script type="text/x-just" data-just="filed_type_selectRepositoryType"> 
+<script type="text/x-just" data-just="field_type_selectRepositoryType"> 
     <% if(!item_id){ %>
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
             <label class="control-label" >Repository type</label>
@@ -111,7 +111,7 @@
                                     <% if(pmObj.model.items[item_id].vars.repo_type == "TAR"){ %>
                                         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                             <label class="control-label">Revision</label>
-                                            <input type="text" class="form-control" placeholder="undefined" disabled id="filed_revision"  value="<%- pmObj.model.items[item_id].revision %>">
+                                            <input type="text" class="form-control" placeholder="undefined" disabled id="field_revision"  value="<%- pmObj.model.items[item_id].revision %>">
                                             <div class="help-block"></div>
                                         </div>
                                     <% } %>
@@ -139,7 +139,7 @@
 
                                     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
                                         <label class="control-label">Revision</label>
-                                        <input type="text" class="form-control" placeholder="undefined" disabled id="filed_revision"  value="<%- pmObj.model.items[item_id].revision %>">
+                                        <input type="text" class="form-control" placeholder="undefined" disabled id="field_revision"  value="<%- pmObj.model.items[item_id].revision %>">
                                         <div class="help-block"></div>
                                     </div>
                                 <% } %>
@@ -201,10 +201,10 @@
                                         value="">
                             </div>
 
-                            <%= pmProjects.inventoriesAutocompletefiled.render(pmProjects, {
+                            <%= pmProjects.inventoriesAutocompletefield.render(pmProjects, {
                                 name:'inventory',
                                 title:'Inventory',
-                                getFiledValue:function(item_id){ 
+                                getFieldValue:function(item_id){ 
                                     return this.model.items[item_id].data.inventory;
                                 },
                                 onchange:function(event){ 
@@ -324,7 +324,7 @@
 
 
 <!-- Шаблон boolean repo_sync_on_run -->
-<script type="text/x-just" data-just="filed_type_repo_sync_on_run">
+<script type="text/x-just" data-just="field_type_repo_sync_on_run">
     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
         <label class="control-label" >Update before execution</label>
         <div class="form-control <% if(item_id && pmObj.model.items[item_id].vars.repo_sync_on_run
@@ -335,12 +335,12 @@
                 onselectstart="return false"
                 onmousedown="return false"
                 style="cursor: pointer;"
-                id="filed_<%- filed.name %>">
+                id="field_<%- field.name %>">
             <div class="ico-on fa fa-toggle-on"></div>
             <div class="ico-off fa  fa-toggle-off"></div>
             <div class="boolean-title" >Boolean value</div>
         </div>
-        <div class="help-block"><%- filed.help || '' %></div>
+        <div class="help-block"><%- field.help || '' %></div>
     </div>
 </script>
 

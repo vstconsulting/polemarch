@@ -1,6 +1,6 @@
 
-<!-- Шаблон поля автокомплита по списку доступных модуйлей, вызывается функцией moduleArgsEditor.moduleAutocompleteFiled -->
-<script type="text/x-just" data-just="moduleAutocompleteFiled_template">
+<!-- Шаблон поля автокомплита по списку доступных модуйлей, вызывается функцией moduleArgsEditor.moduleAutocompleteField -->
+<script type="text/x-just" data-just="moduleAutocompleteField_template">
     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
         <label class="control-label" >Module</label>
         <input type="text"
@@ -11,8 +11,8 @@
 </script>
 
 
-<!-- Шаблон поля ввода аргументов к модулю, вызывается функцией moduleArgsEditor.argsAutocompleteFiled -->
-<script type="text/x-just" data-just="moduleArgsFiled_template">
+<!-- Шаблон поля ввода аргументов к модулю, вызывается функцией moduleArgsEditor.argsAutocompleteField -->
+<script type="text/x-just" data-just="moduleArgsField_template">
     <div class="col-lg-12">
         <div class="">
             <label class="control-label" >Args</label>
@@ -32,13 +32,13 @@
     </div>
 </script>
 
-<!-- Шаблон полей выбора модуля и аргументов к выполнению модуля, вызывается функцией moduleArgsEditor.moduleFileds -->
-<script type="text/x-just" data-just="moduleFileds_template"> 
+<!-- Шаблон полей выбора модуля и аргументов к выполнению модуля, вызывается функцией moduleArgsEditor.moduleFields -->
+<script type="text/x-just" data-just="moduleFields_template"> 
     <div class="row">
-        <%= moduleArgsEditor.moduleAutocompleteFiled(module) %> 
+        <%= moduleArgsEditor.moduleAutocompleteField(module) %> 
     </div>
 
     <div class="row" >
-        <%= moduleArgsEditor.argsAutocompleteFiled(args) %> 
+        <%= moduleArgsEditor.argsAutocompleteField(args) %> 
     </div>
 </script>

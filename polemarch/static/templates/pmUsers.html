@@ -89,10 +89,10 @@
                         </div>
                     </div>
                     <div class="box-body">
-                        <% for(var i in pmObj.model.profile_page.fileds){ %>
+                        <% for(var i in pmObj.model.profile_page.fields){ %>
                             <div class="row">
-                                <% for(var j in pmObj.model.profile_page.fileds[i]){ var filed = pmObj.model.profile_page.fileds[i][j]; %>
-                                        <%= filed.filed.render(pmObj, filed, item_id, opt) %>
+                                <% for(var j in pmObj.model.profile_page.fields[i]){ var field = pmObj.model.profile_page.fields[i][j]; %>
+                                        <%= field.field.render(pmObj, field, item_id, opt) %>
                                 <% } %>
                             </div>
                         <% } %>

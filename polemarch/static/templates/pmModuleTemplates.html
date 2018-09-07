@@ -1,6 +1,6 @@
 
 <!-- Шаблон полей  Project Inventory и Playbook  -->
-<script type="text/x-just" data-just="filed_type_selectProjectInventoryGroupAndModule"> 
+<script type="text/x-just" data-just="field_type_selectProjectInventoryGroupAndModule"> 
     <% if(item_id){ %>  
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
             <label class="control-label" >Project</label>
@@ -14,10 +14,10 @@
             </select>
         </div>
         
-        <%= pmModuleTemplates.inventoriesAutocompletefiled.render(pmModuleTemplates, {
+        <%= pmModuleTemplates.inventoriesAutocompletefield.render(pmModuleTemplates, {
             name:'inventory',
             title:'Inventory',
-            getFiledValue:function(item_id){ 
+            getFieldValue:function(item_id){ 
                 return this.model.items[item_id].data.inventory;
             },
             onchange:function(event){ 
@@ -38,7 +38,7 @@
         <~>
 
         <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
-            <%= moduleArgsEditor.moduleFileds({
+            <%= moduleArgsEditor.moduleFields({
                     module:{value:pmModuleTemplates.model.items[item_id].data.module },
                     args:{value:pmModuleTemplates.model.items[item_id].data.args }
                 }) 
@@ -113,10 +113,10 @@
                         </div>
                         <div class="row">
                         
-                            <%= pmModuleTemplates.inventoriesAutocompletefiled.render(pmPeriodicTasks, {
+                            <%= pmModuleTemplates.inventoriesAutocompletefield.render(pmPeriodicTasks, {
                                 name:'inventory',
                                 title:'Inventory',
-                                getFiledValue:function(item_id){ 
+                                getFieldValue:function(item_id){ 
                                     return this.model.items[item_id].data.inventory;
                                 },
                                 onchange:function(event){ 
@@ -137,13 +137,13 @@
                             <~>
                         </div>
 
-                        <%= moduleArgsEditor.moduleFileds() %>
+                        <%= moduleArgsEditor.moduleFields() %>
 
                         <div class="row">
                             <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
                                 <label class="control-label">Notes</label>
                                 <textarea class="form-control" style="resize:vertical; min-height:75px;"
-                                placeholder="Not required field, just for your notes" id="filed_notes"></textarea>
+                                placeholder="Not required field, just for your notes" id="field_notes"></textarea>
                                 <div class="help-block"></div>
                             </div>
                         </div>
@@ -225,10 +225,10 @@
                         </div>
                     </div>
                     <div class="box-body">
-                        <% for(var i in pmObj.model.page_item_new_option.fileds){ %>
+                        <% for(var i in pmObj.model.page_item_new_option.fields){ %>
                             <div class="row">
-                                <% for(var j in pmObj.model.page_item_new_option.fileds[i]){ var filed = pmObj.model.page_item_new_option.fileds[i][j]; %>
-                                        <%= filed.filed.render(pmObj, filed, item_id, opt) %>
+                                <% for(var j in pmObj.model.page_item_new_option.fields[i]){ var field = pmObj.model.page_item_new_option.fields[i][j]; %>
+                                        <%= field.field.render(pmObj, field, item_id, opt) %>
                                 <% } %>
                             </div>
                         <% } %>
@@ -312,10 +312,10 @@
                         </div>
                     </div>
                     <div class="box-body">
-                        <% for(var i in pmObj.model.page_item_option.fileds){ %>
+                        <% for(var i in pmObj.model.page_item_option.fields){ %>
                             <div class="row">
-                                <% for(var j in pmObj.model.page_item_option.fileds[i]){ var filed = pmObj.model.page_item_option.fileds[i][j]; %>
-                                        <%= filed.filed.render(pmObj, filed, item_id, opt) %>
+                                <% for(var j in pmObj.model.page_item_option.fields[i]){ var field = pmObj.model.page_item_option.fields[i][j]; %>
+                                        <%= field.field.render(pmObj, field, item_id, opt) %>
                                 <% } %>
                             </div>
                         <% } %>
@@ -334,7 +334,7 @@
 
 
 <!-- Шаблон полей  Project Inventory и Playbook  для new option page -->
-<script type="text/x-just" data-just="filed_type_selectProjectInventoryGroupAndModuleForNewOption">
+<script type="text/x-just" data-just="field_type_selectProjectInventoryGroupAndModuleForNewOption">
     <% if(item_id){ %>
         <~ pmModuleTemplates.model.selectedInventory>
             <% if(pmModuleTemplates.model.items[item_id].data){ %>
@@ -343,7 +343,7 @@
         <~>
 
         <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
-            <%= moduleArgsEditor.moduleFileds({
+            <%= moduleArgsEditor.moduleFields({
                     module:{value:pmModuleTemplates.model.items[item_id].data.module },
                     args:{value:pmModuleTemplates.model.items[item_id].data.args }
                 })
@@ -357,7 +357,7 @@
 
 
 <!-- Шаблон полей  Project Inventory и Playbook  для option page -->
-<script type="text/x-just" data-just="filed_type_selectProjectInventoryGroupAndModuleForOption">
+<script type="text/x-just" data-just="field_type_selectProjectInventoryGroupAndModuleForOption">
     <% if(item_id){ %>
         <~ pmModuleTemplates.model.selectedInventory>
             <% if(pmModuleTemplates.model.items[item_id].dataForOption){ %>
@@ -366,7 +366,7 @@
         <~>
 
         <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
-            <%= moduleArgsEditor.moduleFileds({
+            <%= moduleArgsEditor.moduleFields({
                     module:{value:pmModuleTemplates.model.items[item_id].dataForOption.module },
                     args:{value:pmModuleTemplates.model.items[item_id].dataForOption.args }
                 })

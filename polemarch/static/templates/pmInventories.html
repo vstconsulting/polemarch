@@ -1,41 +1,41 @@
 
 <!-- Поля ввода инвентория -->
-<script type="text/x-just" data-just="filed_type_inventoriesAutocomplete">  
+<script type="text/x-just" data-just="field_type_inventoriesAutocomplete">  
     
     <% if(item_id){ %>  
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
             <label class="control-label" >Inventory source</label>
-            <select class="form-control select2" id="inventory-source" style="width:100%" onchange="$('.inventory-source-type').toggle(); if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:$('.inventory-source-'+this.value+' .inventory-source-value').val()})" >  
-                    <option value="file" <% if(/[^0-9]/mg.test(filed.getFiledValue.apply(pmObj, [item_id]))){ %>selected<% } %> >From file in project dir</option>
-                    <option value="db" <% if(!/[^0-9]/mg.test(filed.getFiledValue.apply(pmObj, [item_id]))){ %>selected<% } %> >From database</option> 
+            <select class="form-control select2" id="inventory-source" style="width:100%" onchange="$('.inventory-source-type').toggle(); if(<%- justCall(field) %>.onchange) <%- justCall(field) %>.onchange({value:$('.inventory-source-'+this.value+' .inventory-source-value').val()})" >  
+                    <option value="file" <% if(/[^0-9]/mg.test(field.getFieldValue.apply(pmObj, [item_id]))){ %>selected<% } %> >From file in project dir</option>
+                    <option value="db" <% if(!/[^0-9]/mg.test(field.getFieldValue.apply(pmObj, [item_id]))){ %>selected<% } %> >From database</option> 
             </select>
         </div> 
 
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 inventory-source-file inventory-source-type" 
-                    style="<% if(!/[^0-9]/mg.test(filed.getFiledValue.apply(pmObj, [item_id]))){ %>display:none;<% } %>">
+                    style="<% if(!/[^0-9]/mg.test(field.getFieldValue.apply(pmObj, [item_id]))){ %>display:none;<% } %>">
             <label class="control-label" >Inventory file</label>
-            <input type="text" onchange="if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:this.value})"
+            <input type="text" onchange="if(<%- justCall(field) %>.onchange) <%- justCall(field) %>.onchange({value:this.value})"
                     class="form-control inventory-source-value"
                     id="inventories-file"
-                    value="<% if(/[^0-9]/mg.test(filed.getFiledValue.apply(pmObj, [item_id]))){ %><%- filed.getFiledValue.apply(pmObj, [item_id]) %><% } %>">
+                    value="<% if(/[^0-9]/mg.test(field.getFieldValue.apply(pmObj, [item_id]))){ %><%- field.getFieldValue.apply(pmObj, [item_id]) %><% } %>">
         </div>
 
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 inventory-source-db inventory-source-type"
-            style="<% if(/[^0-9]/mg.test(filed.getFiledValue.apply(pmObj, [item_id]))){ %>display:none;<% } %>">
+            style="<% if(/[^0-9]/mg.test(field.getFieldValue.apply(pmObj, [item_id]))){ %>display:none;<% } %>">
             <label class="control-label" >Inventory from project</label>
-            <select class="form-control select2 inventory-source-value" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%"  onchange="if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:this.value})" >  
+            <select class="form-control select2 inventory-source-value" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%"  onchange="if(<%- justCall(field) %>.onchange) <%- justCall(field) %>.onchange({value:this.value})" >  
                 
                 <% if(!opt.project_id){ %>
                     <% for(var i in pmInventories.model.itemslist.results){ var val = pmInventories.model.itemslist.results[i] %>
                         <option
-                            <% if(filed.getFiledValue.apply(pmObj, [item_id]) == val.id){ %>  selected  <% } %>
+                            <% if(field.getFieldValue.apply(pmObj, [item_id]) == val.id){ %>  selected  <% } %>
                             value="<%- val.id %>"
                             ><%- val.name %></option>
                     <% } %>
                 <% }else{ %>
                     <% for(var i in pmProjects.model.items[opt.project_id].inventories){ var val = pmProjects.model.items[opt.project_id].inventories[i] %>
                         <option
-                            <% if(filed.getFiledValue.apply(pmObj, [item_id]) == val.id){ %>  selected  <% } %>
+                            <% if(field.getFieldValue.apply(pmObj, [item_id]) == val.id){ %>  selected  <% } %>
                             value="<%- val.id %>"
                             ><%- val.name %></option>
                     <% } %>
@@ -46,7 +46,7 @@
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
             <label class="control-label" >Inventory source</label>
             <select class="form-control select2" id="inventory-source" style="width:100%"
-                    onchange="$('.inventory-source-type').toggle(); if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:$('.inventory-source-'+this.value+' .inventory-source-value').val()})" >  
+                    onchange="$('.inventory-source-type').toggle(); if(<%- justCall(field) %>.onchange) <%- justCall(field) %>.onchange({value:$('.inventory-source-'+this.value+' .inventory-source-value').val()})" >  
                     <option value="file" >From file in project dir</option>
                     <option value="db" selected>From database</option> 
             </select>
@@ -55,7 +55,7 @@
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 inventory-source-file inventory-source-type" 
                     style="display:none;">
             <label class="control-label" >Inventory file</label>
-            <input type="text" onchange="if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:this.value})"
+            <input type="text" onchange="if(<%- justCall(field) %>.onchange) <%- justCall(field) %>.onchange({value:this.value})"
                     class="form-control inventory-source-value"
                     id="inventories-file"
                     value="">
@@ -63,7 +63,7 @@
 
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 inventory-source-db inventory-source-type">
             <label class="control-label" >Inventory from project</label>
-            <select class="form-control select2 inventory-source-value" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%"  onchange="if(<%- justCall(filed) %>.onchange) <%- justCall(filed) %>.onchange({value:this.value})">  
+            <select class="form-control select2 inventory-source-value" id="inventories-autocomplete" data-placeholder="Select inventory" style="width:100%"  onchange="if(<%- justCall(field) %>.onchange) <%- justCall(field) %>.onchange({value:this.value})">  
                 <% if(!opt.project_id){ %>
                     <% for(var i in pmInventories.model.itemslist.results){ var val = pmInventories.model.itemslist.results[i] %>
                         <option value="<%- val.id %>"
@@ -168,7 +168,7 @@
             <div class="form-group col-lg-12 col-xs-12 col-sm-12 col-md-12">
                 <label class="control-label">Notes</label>
                 <textarea class="form-control" style="resize:vertical; min-height:75px;"
-                placeholder="Not required field, just for your notes" id="filed_notes"
+                placeholder="Not required field, just for your notes" id="field_notes"
                 onchange="pmInventories.model.importedInventories.inventory.notes=this.value;"><%- inventory.notes %></textarea>
                 <div class="help-block"></div>
             </div>
