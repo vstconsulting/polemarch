@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 import uuid
 
+from functools import reduce
 from collections import OrderedDict
 from django.db.models import Case, When, Value
 from django.contrib.contenttypes.models import ContentType
@@ -13,6 +14,17 @@ from .base import ACLModel, BQuerySet, BModel, models
 
 
 logger = logging.getLogger("polemarch")
+
+
+def update_boolean(items, item):
+    value = items.get(item, None)
+    if value is None:
+        pass
+    if value == 'True':
+        items[item] = True
+    elif value == 'False':
+        items[item] = False
+    return items
 
 
 class VariablesQuerySet(BQuerySet):
@@ -117,13 +129,7 @@ class AbstractModel(ACLModel):
 
     def get_vars(self):
         qs = self.variables.all().sort_by_key().values_list('key', 'value')
-        vars_dict = OrderedDict(qs)
-        for bool_var in self.BOOLEAN_VARS:
-            value = vars_dict.get(bool_var, None)
-            if value is None:
-                continue
-            vars_dict[bool_var] = True if value == "True" else False
-        return vars_dict
+        return reduce(update_boolean, self.BOOLEAN_VARS, OrderedDict(qs))
 
     def get_generated_vars(self):
         tmp = None

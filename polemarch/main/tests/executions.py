@@ -605,7 +605,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results[2]['status'], 400)
         self.assertEqual(results[3]['status'], 400)
         self.assertEqual(
-            results[3]['data']['detail']['options'],
+            results[3]['data']['detail']['inventory'],
             ["Disallowed to override inventory."]
         )
 
