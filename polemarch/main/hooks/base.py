@@ -24,9 +24,19 @@ class BaseHook(object):
                               "Should be {}".format(self.when_types))
         return errors
 
+    def modify_message(self, message):
+        return message
+
+    def execute(self, recipient, when, message):  # nocv
+        raise NotImplementedError
+
     def send(self, message, when):
-        # pylint: disable=unused-argument
         self.when = when
+        filtered = filter(lambda r: r, self.conf['recipients'])
+        execute = self.execute
+        message = self.modify_message(message)
+        mapping = map(lambda r: execute(r, when, message), filtered)
+        return '\n'.join(mapping)
 
     def on_execution(self, message):
         return self.send(message, when='on_execution')

@@ -20,10 +20,10 @@ class VariablesQuerySet(BQuerySet):
 
     def sort_by_key(self):
         args, kwargs = [], dict()
-        for key in self.model.variables_keys:
-            args.append(
-                When(key=key, then=Value(self.model.variables_keys.index(key)))
-            )
+        keys = self.model.variables_keys
+        index = keys.index
+        for key in keys:
+            args.append(When(key=key, then=Value(index(key))))
         args.append(When(key__startswith="ansible_", then=Value(99)))
         kwargs['default'] = 100
         kwargs['output_field'] = models.IntegerField()
@@ -111,9 +111,9 @@ class AbstractModel(ACLModel):
         return OrderedDict(id=self.id, name=self.name)
 
     def vars_string(self, variables, separator=" "):
-        return separator.join([
-            "{}={}".format(key, value) for key, value in variables.items()
-        ])
+        return separator.join(
+            map(lambda kv: "{}={}".format(kv[0], kv[1]), variables.items())
+        )
 
     def get_vars(self):
         qs = self.variables.all().sort_by_key().values_list('key', 'value')

@@ -135,8 +135,7 @@ class AnsibleCommand(PMObject):
 
         def close(self):
             # pylint: disable=no-member
-            for key_file in self.keys:
-                key_file.close()
+            map(lambda key_file: key_file.close(), self.keys) if self.keys else None
             if not isinstance(self.file, (six.string_types, six.text_type)):
                 self._file.close()
 
