@@ -110,7 +110,7 @@ class CmdExecutor(PMObject):
                 empty_counter += 1
                 if not empty_counter % 100:
                     self.working_handler(proc)
-                elif not empty_counter % 10^6:
+                elif not empty_counter % 10 ^ 6:
                     time.sleep(0.001)
                 continue  # nocv
             empty_counter = 0

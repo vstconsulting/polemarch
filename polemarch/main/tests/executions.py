@@ -1,5 +1,3 @@
-import os
-import json
 from collections import OrderedDict
 import tempfile
 import shutil
@@ -10,7 +8,6 @@ from datetime import timedelta
 from django.utils.timezone import now
 from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
-from .. import utils
 
 
 test_playbook_content = '''
