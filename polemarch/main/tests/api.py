@@ -12,11 +12,15 @@ except ImportError:  # nocv
 
 from vstutils.utils import redirect_stdany
 from ._base import BaseTestCase, json
-from .hosts import InventoriesTestCase
-from .executions import ProjectTestCase
+from .hosts import InventoriesTestCase, InvBaseTestCase
+from .executions import ProjectTestCase, BaseExecutionsTestCase
 
 
-class ApiUsersTestCase(BaseTestCase):
+class ApiBaseTestCase(InvBaseTestCase, BaseExecutionsTestCase, BaseTestCase):
+    pass
+
+
+class ApiUsersTestCase(ApiBaseTestCase):
     def test_login(self):
         User = self.get_model_class('django.contrib.auth.models.User')
         response = self.client.get('/')
