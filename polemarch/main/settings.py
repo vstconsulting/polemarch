@@ -105,6 +105,9 @@ class GitSectionConfig(SectionConfig):
 git = GitSectionConfig()
 
 REPO_BACKENDS = {
+    "MANUAL": {
+        "BACKEND": "polemarch.main.repo.Manual",
+    },
     "GIT": {
         "BACKEND": "polemarch.main.repo.Git",
         "OPTIONS": {
@@ -120,9 +123,6 @@ REPO_BACKENDS = {
     "TAR": {
         "BACKEND": "polemarch.main.repo.Tar",
     },
-    "MANUAL": {
-        "BACKEND": "polemarch.main.repo.Manual",
-    }
 }
 
 # RPC tasks settings

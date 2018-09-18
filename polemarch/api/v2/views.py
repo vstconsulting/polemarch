@@ -334,6 +334,9 @@ class _BaseGroupViewSet(base.ModelViewSetSet):
     serializer_class = sers.GroupSerializer
     serializer_class_one = sers.OneGroupSerializer
     filter_class = filters.GroupFilter
+    action_serializers = {
+        'create': sers.GroupCreateMasterSerializer
+    }
 
 
 @deco.nested_view(
@@ -550,6 +553,9 @@ class ProjectViewSet(_GroupMixin):
     filter_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
     copy_related = _GroupMixin.copy_related + ['inventories']
+    action_serializers = {
+        'create': sers.ProjectCreateMasterSerializer
+    }
 
     def copy_instance(self, instance):
         instance.status = instance.__class__._meta.get_field('status').default

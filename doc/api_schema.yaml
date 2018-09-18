@@ -123,12 +123,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneGroup'
+            $ref: '#/definitions/GroupCreateMaster'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneGroup'
+            $ref: '#/definitions/GroupCreateMaster'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4630,12 +4630,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneProject'
+            $ref: '#/definitions/ProjectCreateMaster'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneProject'
+            $ref: '#/definitions/ProjectCreateMaster'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10386,6 +10386,7 @@ definitions:
       children:
         title: Children
         type: boolean
+        readOnly: true
       url:
         title: Url
         type: string
@@ -10428,6 +10429,32 @@ definitions:
         format: uri
         readOnly: true
     readOnly: true
+  GroupCreateMaster:
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      notes:
+        title: Notes
+        type: string
+      children:
+        title: Children
+        type: boolean
+        default: false
+      owner:
+        $ref: '#/definitions/Owner'
+      url:
+        title: Url
+        type: string
+        format: uri
+        readOnly: true
   OneGroup:
     type: object
     properties:
@@ -10446,6 +10473,7 @@ definitions:
       children:
         title: Children
         type: boolean
+        readOnly: true
       owner:
         $ref: '#/definitions/Owner'
       url:
@@ -10807,6 +10835,55 @@ definitions:
         type: string
         format: uri
         readOnly: true
+  ProjectCreateMaster:
+    required:
+      - name
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        minLength: 1
+      status:
+        title: Status
+        type: string
+        readOnly: true
+        minLength: 1
+      type:
+        title: Type
+        type: string
+        enum:
+          - MANUAL
+          - GIT
+          - TAR
+        default: MANUAL
+      repository:
+        title: Repository
+        type: string
+        default: MANUAL
+        minLength: 1
+      repo_auth:
+        title: Repo auth
+        type: string
+        enum:
+          - NONE
+          - KEY
+          - PASSWORD
+        default: NONE
+      auth_data:
+        title: Auth data
+        type: string
+        format: dynamic
+        default: ''
+        additionalProperties:
+          field: repo_auth
+          choices:
+            NONE: null
+          types: {}
   OneProject:
     type: object
     properties:
@@ -11588,9 +11665,9 @@ definitions:
           field: key
           choices:
             repo_type:
+              - MANUAL
               - GIT
               - TAR
-              - MANUAL
             repo_sync_on_run:
               - true
               - false
