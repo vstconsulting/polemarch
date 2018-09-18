@@ -232,8 +232,8 @@ class InventoriesTestCase(InvBaseTestCase):
 
         # Check update children
         self.get_result(
-            'patch', self.get_url('group', group_id), 400,
-            data=json.dumps(dict(children=False))
+            'patch', self.get_url('group', group_id), 200,
+            data=json.dumps(dict(children=True))
         )
 
     def test_inventories(self):

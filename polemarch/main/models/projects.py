@@ -124,7 +124,7 @@ class Project(AbstractModel):
     def type(self):
         try:
             return self.variables.get(key="repo_type").value
-        except self.variables.model.DoesNotExist:
+        except self.variables.model.DoesNotExist:  # nocv
             return 'MANUAL'
 
     def check_path(self, inventory):
