@@ -113,9 +113,9 @@ class Template(ACLModel):
 
     def __encrypt(self, new_vars, data_name='data'):
         old_vars = getattr(self, data_name).get('vars', {})
-        for key in new_vars.keys():
-            if new_vars[key] == '[~~ENCRYPTED~~]':
-                new_vars[key] = old_vars.get(key, new_vars[key])
+        secrets = filter(lambda key: new_vars[key] == '[~~ENCRYPTED~~]', new_vars.keys())
+        for key in secrets:
+            new_vars[key] = old_vars.get(key, new_vars[key])
         return new_vars
 
     def keep_encrypted_data(self, new_vars):
@@ -124,10 +124,11 @@ class Template(ACLModel):
         return self.__encrypt(new_vars)
 
     def _validate_option_data(self, data):
-        errors = {}
-        for name in data.keys():
-            if name in self.excepted_execution_fields:
-                errors['options'] = ['Disallowed to override {}.'.format(name)]
+        excepted = self.excepted_execution_fields
+        errors = {
+            name: ['Disallowed to override {}.'.format(name)]
+            for name in data.keys() if name in excepted
+        }
         if errors:
             raise ValidationError(errors)
 
@@ -532,9 +533,9 @@ class History(BModel):
             yield self.__create_line(number, nline, endl)
 
     def write_line(self, value, number, endl=""):
-        self.raw_history_line.bulk_create([
-            line for line in self.__bulking_lines(value, number, endl)
-        ])
+        self.raw_history_line.bulk_create(
+            map(lambda l: l, self.__bulking_lines(value, number, endl))
+        )
 
 
 class HistoryLines(BModel):

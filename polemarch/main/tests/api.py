@@ -12,11 +12,15 @@ except ImportError:  # nocv
 
 from vstutils.utils import redirect_stdany
 from ._base import BaseTestCase, json
-from .hosts import InventoriesTestCase
-from .executions import ProjectTestCase
+from .hosts import InventoriesTestCase, InvBaseTestCase
+from .executions import ProjectTestCase, BaseExecutionsTestCase
 
 
-class ApiUsersTestCase(BaseTestCase):
+class ApiBaseTestCase(InvBaseTestCase, BaseExecutionsTestCase, BaseTestCase):
+    pass
+
+
+class ApiUsersTestCase(ApiBaseTestCase):
     def test_login(self):
         User = self.get_model_class('django.contrib.auth.models.User')
         response = self.client.get('/')
@@ -183,7 +187,7 @@ class ApiUsersTestCase(BaseTestCase):
         self.result(client.post, self.get_url('user'), 409, data)
         self._logout(client)
 
-    @patch('polemarch.main.hooks.http.Backend._execute')
+    @patch('polemarch.main.hooks.http.Backend.execute')
     def test_api_users_insert_and_delete(self, execute_method):
         self.sended = False
         hook_url = 'http://ex.com'

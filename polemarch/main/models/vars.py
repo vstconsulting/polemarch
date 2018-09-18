@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 import uuid
 
+from functools import reduce
 from collections import OrderedDict
 from django.db.models import Case, When, Value
 from django.contrib.contenttypes.models import ContentType
@@ -15,15 +16,26 @@ from .base import ACLModel, BQuerySet, BModel, models
 logger = logging.getLogger("polemarch")
 
 
+def update_boolean(items, item):
+    value = items.get(item, None)
+    if value is None:
+        pass
+    if value == 'True':
+        items[item] = True
+    elif value == 'False':
+        items[item] = False
+    return items
+
+
 class VariablesQuerySet(BQuerySet):
     use_for_related_fields = True
 
     def sort_by_key(self):
         args, kwargs = [], dict()
-        for key in self.model.variables_keys:
-            args.append(
-                When(key=key, then=Value(self.model.variables_keys.index(key)))
-            )
+        keys = self.model.variables_keys
+        index = keys.index
+        for key in keys:
+            args.append(When(key=key, then=Value(index(key))))
         args.append(When(key__startswith="ansible_", then=Value(99)))
         kwargs['default'] = 100
         kwargs['output_field'] = models.IntegerField()
@@ -111,19 +123,13 @@ class AbstractModel(ACLModel):
         return OrderedDict(id=self.id, name=self.name)
 
     def vars_string(self, variables, separator=" "):
-        return separator.join([
-            "{}={}".format(key, value) for key, value in variables.items()
-        ])
+        return separator.join(
+            map(lambda kv: "{}={}".format(kv[0], kv[1]), variables.items())
+        )
 
     def get_vars(self):
         qs = self.variables.all().sort_by_key().values_list('key', 'value')
-        vars_dict = OrderedDict(qs)
-        for bool_var in self.BOOLEAN_VARS:
-            value = vars_dict.get(bool_var, None)
-            if value is None:
-                continue
-            vars_dict[bool_var] = True if value == "True" else False
-        return vars_dict
+        return reduce(update_boolean, self.BOOLEAN_VARS, OrderedDict(qs))
 
     def get_generated_vars(self):
         tmp = None

@@ -5,7 +5,7 @@ import re
 import logging
 import traceback
 from collections import namedtuple, OrderedDict
-
+from functools import reduce
 import six
 from django.utils import timezone
 from vstutils.utils import tmp_file, KVExchanger
@@ -135,8 +135,7 @@ class AnsibleCommand(PMObject):
 
         def close(self):
             # pylint: disable=no-member
-            for key_file in self.keys:
-                key_file.close()
+            map(lambda key_file: key_file.close(), self.keys) if self.keys else None
             if not isinstance(self.file, (six.string_types, six.text_type)):
                 self._file.close()
 
@@ -158,26 +157,32 @@ class AnsibleCommand(PMObject):
         else:
             return "{}/{}".format(self.workdir, value), []
 
-    def __parse_extra_args(self, **extra):
-        extra_args, files = list(), list()
-        for key, value in extra.items():
-            key = key.replace('_', '-')
-            if key == 'verbose':
-                extra_args += ['-' + ('v' * value)]
-                continue
-            result = [value, list()]
-            if key in ["key-file", "private-key"]:
-                result = self.__parse_key(key, value)
-            elif key in ["vault-password-file", "new-vault-password-file"]:
-                result = self.__generate_arg_file(value)  # nocv
-            value = result[0]
-            files = files + result[1]
+    def __convert_arg(self, ansible_extra, item):
+        extra_args, files = ansible_extra
+        key, value = item
+        key = key.replace('_', '-')
+        if key == 'verbose':
+            extra_args += ['-' + ('v' * value)]
+            return extra_args, files
+        result = [value, list()]
+        if key in ["key-file", "private-key"]:
+            result = self.__parse_key(key, value)
+        elif key in ["vault-password-file", "new-vault-password-file"]:
+            result = self.__generate_arg_file(value)  # nocv
+        value = result[0]
+        files += result[1]
 
-            key_type = self.ansible_ref[key].get('type', None)
-            if (key_type is None and value) or key_type:
-                extra_args.append("--{}".format(key))
-            extra_args += [str(value)] if key_type else []
-        return AnsibleExtra(extra_args, files)
+        key_type = self.ansible_ref[key].get('type', None)
+        if (key_type is None and value) or key_type:
+            extra_args.append("--{}".format(key))
+        extra_args += [str(value)] if key_type else []
+        return extra_args, files
+
+    def __parse_extra_args(self, **extra):
+        handler_func = self.__convert_arg
+        return AnsibleExtra(*reduce(
+            handler_func, extra.items(), ([], [])
+        ))
 
     def get_workdir(self):
         return self.project.path
@@ -191,10 +196,10 @@ class AnsibleCommand(PMObject):
         return self.pm_ansible(self.command_type)
 
     def hide_passwords(self, raw):
-        regex = r""
-        for hide in self.inventory_object.hidden_vars:
-            regex += r"|" if regex else r""
-            regex += r"(?<=" + hide + r"=).{1,}?(?=[\n\t\s])"
+        regex = r'|'.join((
+            r"(?<=" + hide + r"=).{1,}?(?=[\n\t\s])"
+            for hide in self.inventory_object.hidden_vars
+        ))
         subst = "[~~ENCRYPTED~~]"
         raw = re.sub(regex, subst, raw, 0, re.MULTILINE)
         return raw

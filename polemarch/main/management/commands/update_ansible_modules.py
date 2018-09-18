@@ -12,6 +12,7 @@ class Command(ServiceCommand):
     def update_modules(self):
         try:
             modules = AnsibleModules(detailed=False)
+            modules.clear_cache()
             modules_list = modules.all()
             modules_list.sort()
             Module.objects.filter(project=None).delete()

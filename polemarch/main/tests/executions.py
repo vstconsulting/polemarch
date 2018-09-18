@@ -8,7 +8,6 @@ from datetime import timedelta
 from django.utils.timezone import now
 from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
-from .. import utils
 
 
 test_playbook_content = '''
@@ -19,7 +18,7 @@ test_playbook_content = '''
     ansible_connection: local
   tasks:
     - name: Some local task
-      command: uname
+      ping:
 '''
 
 
@@ -306,8 +305,6 @@ class BaseExecutionsTestCase(BaseTestCase):
             self.assertEqual(value['value'], obj.vars[value['key']] or '[~~ENCRYPTED~~]')
 
     def project_workflow(self, repo_type, **kwargs):
-        utils.AnsibleModules(detailed=True).clear_cache()
-        utils.AnsibleArgumentsReference().clear_cache()
         execute = kwargs.pop('execute', False)
         project_data = self.create_project_test(str(uuid.uuid1()), repo_type, **kwargs)
         self.remove_project_dir(**project_data)
@@ -368,6 +365,7 @@ class BaseExecutionsTestCase(BaseTestCase):
             save_result=False, verbose=4
         )
         exec_data['check'] = True
+        exec_data['syntax-check'] = True
         return self.make_bulk([
             self.get_mod_bulk(
                 'project', project_data['id'], exec_data, 'execute_{}'.format(type)
@@ -605,7 +603,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results[2]['status'], 400)
         self.assertEqual(results[3]['status'], 400)
         self.assertEqual(
-            results[3]['data']['detail']['options'],
+            results[3]['data']['detail']['inventory'],
             ["Disallowed to override inventory."]
         )
 

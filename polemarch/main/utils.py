@@ -110,7 +110,7 @@ class CmdExecutor(PMObject):
                 empty_counter += 1
                 if not empty_counter % 100:
                     self.working_handler(proc)
-                elif not empty_counter % 10:
+                elif not empty_counter % 10 ^ 6:
                     time.sleep(0.001)
                 continue  # nocv
             empty_counter = 0
@@ -137,7 +137,7 @@ class CmdExecutor(PMObject):
         self.output = ""
         proc = Popen(
             cmd, stdout=self._stdout, stderr=self._stderr,
-            universal_newlines=True, cwd=cwd
+            bufsize=0, universal_newlines=True, cwd=cwd
         )
         for line in self._unbuffered(proc):
             if self.line_handler(proc, line):
