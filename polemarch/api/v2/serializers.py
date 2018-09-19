@@ -715,7 +715,6 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     owner = UserSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
     readme_content = vst_fields.HtmlField(read_only=True)
-    readme_ext = serializers.CharField(read_only=True)
 
     class Meta:
         model = models.Project
@@ -728,7 +727,6 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'revision',
                   'branch',
                   'readme_content',
-                  'readme_ext',
                   'url',)
 
     @transaction.atomic()

@@ -205,7 +205,7 @@ class Project(AbstractModel):
         readme = getattr(self, 'readme', None)
         if readme is None:
             self.readme = self.ReadMe(self)
-            return self.readme
+            readme = self.readme
         return readme
 
     @property
@@ -214,7 +214,7 @@ class Project(AbstractModel):
 
     @property
     def readme_ext(self):
-        return self.__get_readme().ext
+        return self.__get_readme().ext  # nocv
 
 
 class TaskFilterQuerySet(BQuerySet):
