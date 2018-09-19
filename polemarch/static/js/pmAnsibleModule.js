@@ -166,7 +166,7 @@ pmAnsibleModule.execute = function(project_id, inventory_id, group, module, data
         error:function(e)
         {
             def.reject(e)
-            polemarch.showErrors(e.responseJSON)
+            webGui.showErrors(e.responseJSON)
         }
     })
 

@@ -240,7 +240,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
     POST_WHITE_LIST = ['cancel']
 
     @swagger_auto_schema(auto_schema=None)
-    @deco.action(["get"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["get"], detail=yes, serializer_class=sers.EmptySerializer)
     def raw(self, request, *args, **kwargs):
         '''
         RAW executions output.
@@ -248,7 +248,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
         result = self.get_serializer(self.get_object()).get_raw(request)
         return HttpResponse(result, content_type="text/plain")
 
-    @deco.action(["post"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["post"], detail=yes, serializer_class=sers.EmptySerializer)
     def cancel(self, request, *args, **kwargs):
         '''
         Cencel working task.

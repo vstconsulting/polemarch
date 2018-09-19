@@ -64,7 +64,7 @@ tabSignal.connect("openapi.factory.history", function(data)
             error:function(e)
             {
                 console.warn(e)
-                polemarch.showErrors(e)
+                webGui.showErrors(e)
                 def.reject(e)
             }
         });
@@ -261,7 +261,7 @@ tabSignal.connect("openapi.factory.history", function(data)
             },
             error:function(e)
             {
-                polemarch.showErrors(e.responseJSON)
+                webGui.showErrors(e.responseJSON)
             }
         })
     }
@@ -281,7 +281,7 @@ tabSignal.connect("openapi.factory.history", function(data)
             },
             error:function(e)
             {
-                polemarch.showErrors(e.responseJSON)
+                webGui.showErrors(e.responseJSON)
             }
         });
     }

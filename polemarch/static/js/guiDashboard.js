@@ -398,7 +398,7 @@ pmDashboard.getUserDashboardSettingsFromAPI = function()
             error: function (e)
             {
                 console.warn(e)
-                polemarch.showErrors(e)
+                webGui.showErrors(e)
             }
         });
     }
@@ -438,7 +438,7 @@ pmDashboard.putUserDashboardSettingsToAPI = function()
         error: function (e)
         {
             console.warn(e)
-            polemarch.showErrors(e)
+            webGui.showErrors(e)
         }
     });
 
@@ -659,7 +659,7 @@ pmDashboard.loadStats=function()
         error: function (e)
         {
             console.warn(e)
-            polemarch.showErrors(e)
+            webGui.showErrors(e)
         }
     });
 }

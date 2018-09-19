@@ -9,7 +9,7 @@ from django.db import transaction
 from rest_framework import serializers, exceptions, status
 from rest_framework.exceptions import PermissionDenied
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
-from vstutils.api.serializers import DataSerializer
+from vstutils.api.serializers import DataSerializer, EmptySerializer
 from vstutils.api.base import Response
 from ...main.utils import AnsibleArgumentsReference
 
@@ -88,7 +88,7 @@ def with_signals(func):
 
 
 # Serializers
-class ActionResponseSerializer(DataSerializer):
+class ActionResponseSerializer(DataSerializer, EmptySerializer):
     detail = serializers.CharField()
 
 
