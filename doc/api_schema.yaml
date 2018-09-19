@@ -7,6 +7,13 @@ info:
   termsOfService: ''
   contact:
     name: System Administrator
+  x-links:
+    Documentation:
+      url: http://polemarch.readthedocs.io/
+      name: Official documentation
+    Repository:
+      url: https://gitlab.com/vstconsulting/polemarch.git
+      name: Official repository
   x-versions:
     application: 0.2.0
     library: 0.2.0

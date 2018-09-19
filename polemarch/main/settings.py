@@ -54,6 +54,16 @@ API = {
 
 SWAGGER_SETTINGS['DEFAULT_INFO'] = 'polemarch.api.v2.swagger.api_info'
 
+OPENAPI_EXTRA_LINKS = dict()
+OPENAPI_EXTRA_LINKS['Documentation'] = {
+    'url': 'http://polemarch.readthedocs.io/',
+    'name': 'Official documentation'
+}
+OPENAPI_EXTRA_LINKS['Repository'] = {
+    'url': 'https://gitlab.com/vstconsulting/polemarch.git',
+    'name': 'Official repository'
+}
+
 # Polemarch handlers
 
 # Repos
