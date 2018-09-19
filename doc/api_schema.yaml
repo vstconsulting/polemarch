@@ -10920,15 +10920,10 @@ definitions:
         type: string
         readOnly: true
       readme_content:
-        title: Readme content
+        title: Information
         type: string
         format: html
         readOnly: true
-      readme_ext:
-        title: Readme ext
-        type: string
-        readOnly: true
-        minLength: 1
       url:
         title: Url
         type: string

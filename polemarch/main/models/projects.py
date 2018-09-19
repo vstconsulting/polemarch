@@ -202,11 +202,9 @@ class Project(AbstractModel):
         return Module.objects.filter(Q(project=self) | Q(project=None))
 
     def __get_readme(self):
-        readme = getattr(self, 'readme', None)
-        if readme is None:
+        if not hasattr(self, 'readme'):
             self.readme = self.ReadMe(self)
-            readme = self.readme
-        return readme
+        return self.readme
 
     @property
     def readme_content(self):

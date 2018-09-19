@@ -714,7 +714,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     repository  = serializers.CharField(default='MANUAL')
     owner = UserSerializer(read_only=True)
     notes = serializers.CharField(required=False, allow_blank=True)
-    readme_content = vst_fields.HtmlField(read_only=True)
+    readme_content = vst_fields.HtmlField(read_only=True, label='Information')
 
     class Meta:
         model = models.Project
