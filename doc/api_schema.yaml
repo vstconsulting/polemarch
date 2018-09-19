@@ -10,9 +10,9 @@ info:
   x-versions:
     application: 0.2.0
     library: 0.2.0
-    vstutils: 1.2.0.dev7
+    vstutils: 1.2.0.dev8
     django: 1.11.15
-    ansible: 2.6.3
+    ansible: 2.6.2
   version: v2
 host: localhost:8080
 schemes:
@@ -123,12 +123,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneGroup'
+            $ref: '#/definitions/GroupCreateMaster'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneGroup'
+            $ref: '#/definitions/GroupCreateMaster'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4630,12 +4630,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneProject'
+            $ref: '#/definitions/ProjectCreateMaster'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneProject'
+            $ref: '#/definitions/ProjectCreateMaster'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5612,84 +5612,6 @@ paths:
   /project/{pk}/history/{history_id}/facts/:
     get:
       operationId: project_history_facts
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: Action accepted.
-          schema:
-            $ref: '#/definitions/Data'
-        '400':
-          description: Validation error or some data error.
-          schema:
-            $ref: '#/definitions/Error'
-        '404':
-          description: Not found error.
-          schema:
-            $ref: '#/definitions/Error'
-        '403':
-          description: Permission denied error.
-          schema:
-            $ref: '#/definitions/Error'
-        '401':
-          description: Unauthorized access error.
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-        - project
-    parameters:
-      - name: history_id
-        in: path
-        required: true
-        type: integer
-        description: A unique integer value identifying instance of this history sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/history/{history_id}/lines/:
-    get:
-      operationId: project_history_lines_list
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: Action accepted.
-          schema:
-            $ref: '#/definitions/HistoryLines'
-        '400':
-          description: Validation error or some data error.
-          schema:
-            $ref: '#/definitions/Error'
-        '404':
-          description: Not found error.
-          schema:
-            $ref: '#/definitions/Error'
-        '403':
-          description: Permission denied error.
-          schema:
-            $ref: '#/definitions/Error'
-        '401':
-          description: Unauthorized access error.
-          schema:
-            $ref: '#/definitions/Error'
-      tags:
-        - project
-    parameters:
-      - name: history_id
-        in: path
-        required: true
-        type: integer
-        description: A unique integer value identifying instance of this history sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/history/{history_id}/raw/:
-    get:
-      operationId: project_history_raw
       description: ''
       parameters: []
       responses:
@@ -9049,7 +8971,7 @@ paths:
   /project/{pk}/template/{template_id}/execute/:
     post:
       operationId: project_template_execute
-      description: ''
+      description: Execute template with option.
       parameters:
         - name: data
           in: body
@@ -9060,7 +8982,7 @@ paths:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/TemplateExec'
+            $ref: '#/definitions/ExecuteResponse'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10464,6 +10386,7 @@ definitions:
       children:
         title: Children
         type: boolean
+        readOnly: true
       url:
         title: Url
         type: string
@@ -10506,6 +10429,32 @@ definitions:
         format: uri
         readOnly: true
     readOnly: true
+  GroupCreateMaster:
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      notes:
+        title: Notes
+        type: string
+      children:
+        title: Children
+        type: boolean
+        default: false
+      owner:
+        $ref: '#/definitions/Owner'
+      url:
+        title: Url
+        type: string
+        format: uri
+        readOnly: true
   OneGroup:
     type: object
     properties:
@@ -10524,6 +10473,7 @@ definitions:
       children:
         title: Children
         type: boolean
+        readOnly: true
       owner:
         $ref: '#/definitions/Owner'
       url:
@@ -10885,6 +10835,55 @@ definitions:
         type: string
         format: uri
         readOnly: true
+  ProjectCreateMaster:
+    required:
+      - name
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        minLength: 1
+      status:
+        title: Status
+        type: string
+        readOnly: true
+        minLength: 1
+      type:
+        title: Type
+        type: string
+        enum:
+          - MANUAL
+          - GIT
+          - TAR
+        default: MANUAL
+      repository:
+        title: Repository
+        type: string
+        default: MANUAL
+        minLength: 1
+      repo_auth:
+        title: Repo auth
+        type: string
+        enum:
+          - NONE
+          - KEY
+          - PASSWORD
+        default: NONE
+      auth_data:
+        title: Auth data
+        type: string
+        format: dynamic
+        default: ''
+        additionalProperties:
+          field: repo_auth
+          choices:
+            NONE: null
+          types: {}
   OneProject:
     type: object
     properties:
@@ -11348,20 +11347,6 @@ definitions:
         type: integer
         default: 0
         maximum: 4
-  HistoryLines:
-    type: object
-    properties:
-      line_number:
-        title: Line number
-        type: integer
-      line_gnumber:
-        title: Line gnumber
-        type: integer
-      line:
-        title: Line
-        type: string
-        maxLength: 2048
-        minLength: 1
   Module:
     required:
       - path
@@ -11680,9 +11665,9 @@ definitions:
           field: key
           choices:
             repo_type:
+              - MANUAL
               - GIT
               - TAR
-              - MANUAL
             repo_sync_on_run:
               - true
               - false

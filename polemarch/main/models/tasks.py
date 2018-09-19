@@ -124,10 +124,11 @@ class Template(ACLModel):
         return self.__encrypt(new_vars)
 
     def _validate_option_data(self, data):
-        errors = {}
-        for name in data.keys():
-            if name in self.excepted_execution_fields:
-                errors['options'] = ['Disallowed to override {}.'.format(name)]
+        excepted = self.excepted_execution_fields
+        errors = {
+            name: ['Disallowed to override {}.'.format(name)]
+            for name in data.keys() if name in excepted
+        }
         if errors:
             raise ValidationError(errors)
 

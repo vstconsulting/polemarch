@@ -379,12 +379,7 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
         return self._do_with_vars("create", validated_data=validated_data)
 
     def update(self, instance, validated_data):
-        children_instance = getattr(instance, "children", False)
-        if validated_data.get("children", children_instance) != children_instance:
-            raise exceptions.ValidationError("Children not allowed to update.")
-        return self._do_with_vars(
-            "update", instance, validated_data=validated_data
-        )
+        return self._do_with_vars("update", instance, validated_data=validated_data)
 
     def get_vars(self, representation):
         return representation.get('vars', None)
@@ -636,6 +631,7 @@ class _InventoryOperations(_WithVariablesSerializer):
 ###################################
 
 class GroupSerializer(_WithVariablesSerializer):
+    children = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = models.Group
@@ -662,6 +658,10 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
         status_code = 409
 
 
+class GroupCreateMasterSerializer(OneGroupSerializer):
+    children = serializers.BooleanField(write_only=True, default=False)
+
+
 class InventorySerializer(_WithVariablesSerializer):
 
     class Meta:
@@ -682,6 +682,55 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
                   'notes',
                   'owner',
                   'url',)
+
+
+def list_to_choices(items_list):
+    def handler(item):
+        return (item, item)
+
+    return list(map(handler, items_list))
+
+
+class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
+    types = list_to_choices(models.Project.repo_handlers.keys())
+    auth_types = list_to_choices(['NONE', 'KEY', 'PASSWORD'])
+
+    name = serializers.CharField(required=True)
+    status = serializers.CharField(read_only=True)
+    type = serializers.ChoiceField(choices=types, default='MANUAL')
+    repository = serializers.CharField(default='MANUAL')
+    repo_auth = serializers.ChoiceField(choices=auth_types,
+                                        default='NONE',
+                                        write_only=True)
+    auth_data = vst_fields.DependEnumField(allow_blank=True,
+                                           write_only=True,
+                                           default='',
+                                           field='repo_auth',
+                                           choices={'NONE': None})
+
+    class Meta:
+        model = models.Project
+        fields = (
+            'id',
+            'name',
+            'status',
+            'type',
+            'repository',
+            'repo_auth',
+            'auth_data',
+        )
+
+    def create(self, validated_data):
+        repo_type = validated_data.pop('type')
+        repo_auth_type = validated_data.pop('repo_auth')
+        repo_auth_data = validated_data.pop('auth_data')
+
+        instance = super(ProjectCreateMasterSerializer, self).create(validated_data)
+        instance.variables.create(key='repo_type', value=repo_type)
+        if repo_auth_type != 'NONE':  # nocv
+            key = 'repo_{}'.format(repo_auth_type.lower())
+            instance.variables.create(key=key, value=repo_auth_data)
+        return instance
 
 
 class ProjectSerializer(_InventoryOperations):
