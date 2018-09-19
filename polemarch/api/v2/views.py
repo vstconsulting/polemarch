@@ -155,8 +155,8 @@ class UserViewSet(views.UserViewSet, base.CopyMixin):
     update:
         Update a user.
     '''
-    serializer_class = sers.OwnerSerializer
-    serializer_class_one = sers.OneOwnerSerializer
+    serializer_class = sers.UserSerializer
+    serializer_class_one = sers.OneUserSerializer
 
     copy_related = ['groups']
     copy_field_name = 'username'

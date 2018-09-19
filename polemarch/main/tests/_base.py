@@ -10,6 +10,7 @@ echo "OK"
 
 
 class BaseTestCase(VSTBaseTestCase):
+    server_name = 'polemarch-testserver'
     models = models
     tests_path = os.path.dirname(os.path.abspath(__file__))
 

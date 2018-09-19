@@ -9658,7 +9658,7 @@ paths:
               results:
                 type: array
                 items:
-                  $ref: '#/definitions/Owner'
+                  $ref: '#/definitions/User'
         '400':
           description: Validation error or some data error.
           schema:
@@ -9685,12 +9685,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Owner'
+            $ref: '#/definitions/User'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Owner'
+            $ref: '#/definitions/User'
         '400':
           description: Validation error or some data error.
           schema:
@@ -9724,7 +9724,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
         '400':
           description: Validation error or some data error.
           schema:
@@ -9751,12 +9751,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
         '400':
           description: Validation error or some data error.
           schema:
@@ -9783,12 +9783,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
         '400':
           description: Validation error or some data error.
           schema:
@@ -9852,12 +9852,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Owner'
+            $ref: '#/definitions/User'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Owner'
+            $ref: '#/definitions/User'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10065,7 +10065,7 @@ paths:
               results:
                 type: array
                 items:
-                  $ref: '#/definitions/Owner'
+                  $ref: '#/definitions/User'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10092,12 +10092,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10126,7 +10126,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10153,12 +10153,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10185,12 +10185,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneOwner'
+            $ref: '#/definitions/OneUser'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10249,12 +10249,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Owner'
+            $ref: '#/definitions/User'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Owner'
+            $ref: '#/definitions/User'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10401,7 +10401,7 @@ definitions:
         title: Detail
         type: string
         minLength: 1
-  Owner:
+  User:
     title: Owner
     required:
       - username
@@ -10445,11 +10445,11 @@ definitions:
         title: Notes
         type: string
       children:
-        title: Children
+        title: Contains groups
         type: boolean
         default: false
       owner:
-        $ref: '#/definitions/Owner'
+        $ref: '#/definitions/User'
       url:
         title: Url
         type: string
@@ -10475,7 +10475,7 @@ definitions:
         type: boolean
         readOnly: true
       owner:
-        $ref: '#/definitions/Owner'
+        $ref: '#/definitions/User'
       url:
         title: Url
         type: string
@@ -10565,7 +10565,7 @@ definitions:
         maxLength: 5
         minLength: 1
       owner:
-        $ref: '#/definitions/Owner'
+        $ref: '#/definitions/User'
       url:
         title: Url
         type: string
@@ -10577,7 +10577,7 @@ definitions:
     type: object
     properties:
       user_id:
-        title: User id
+        title: New owner
         type: integer
   History:
     required:
@@ -10802,7 +10802,7 @@ definitions:
         title: Notes
         type: string
       owner:
-        $ref: '#/definitions/Owner'
+        $ref: '#/definitions/User'
       url:
         title: Url
         type: string
@@ -10854,7 +10854,7 @@ definitions:
         readOnly: true
         minLength: 1
       type:
-        title: Type
+        title: Repo type
         type: string
         enum:
           - MANUAL
@@ -10862,12 +10862,12 @@ definitions:
           - TAR
         default: MANUAL
       repository:
-        title: Repository
+        title: Repo url
         type: string
         default: MANUAL
         minLength: 1
       repo_auth:
-        title: Repo auth
+        title: Repo auth type
         type: string
         enum:
           - NONE
@@ -10875,7 +10875,7 @@ definitions:
           - PASSWORD
         default: NONE
       auth_data:
-        title: Auth data
+        title: Repo auth data
         type: string
         format: dynamic
         default: ''
@@ -10910,7 +10910,7 @@ definitions:
         default: MANUAL
         minLength: 1
       owner:
-        $ref: '#/definitions/Owner'
+        $ref: '#/definitions/User'
       revision:
         title: Revision
         type: string
@@ -11401,7 +11401,7 @@ definitions:
         maxLength: 512
         minLength: 1
       type:
-        title: Type
+        title: Interval type
         type: string
         enum:
           - CRONTAB
@@ -11415,7 +11415,7 @@ definitions:
         type: string
         minLength: 1
       kind:
-        title: Kind
+        title: Task type
         type: string
         enum:
           - PLAYBOOK
@@ -11457,7 +11457,7 @@ definitions:
         title: Notes
         type: string
       type:
-        title: Type
+        title: Interval type
         type: string
         enum:
           - CRONTAB
@@ -11471,7 +11471,7 @@ definitions:
         type: string
         minLength: 1
       kind:
-        title: Kind
+        title: Task type
         type: string
         enum:
           - PLAYBOOK
@@ -11581,7 +11581,7 @@ definitions:
         maxLength: 512
         minLength: 1
       kind:
-        title: Kind
+        title: Type
         type: string
         enum:
           - Task
@@ -11615,7 +11615,7 @@ definitions:
         title: Notes
         type: string
       kind:
-        title: Kind
+        title: Type
         type: string
         enum:
           - Task
@@ -11709,13 +11709,13 @@ definitions:
         title: Notes
         type: string
       owner:
-        $ref: '#/definitions/Owner'
+        $ref: '#/definitions/User'
       url:
         title: Url
         type: string
         format: uri
         readOnly: true
-  OneOwner:
+  OneUser:
     required:
       - username
     type: object
