@@ -231,7 +231,7 @@ class TeamSerializer(_WithPermissionsSerializer):
 
 class OneTeamSerializer(TeamSerializer):
     owner = UserSerializer(read_only=True)
-    notes = serializers.CharField(required=False, allow_blank=True)
+    notes = vst_fields.TextareaField(required=False, allow_blank=True)
 
     class Meta:
         model = models.UserGroup
@@ -412,7 +412,7 @@ class HostSerializer(_WithVariablesSerializer):
 
 class OneHostSerializer(HostSerializer):
     owner = UserSerializer(read_only=True)
-    notes = serializers.CharField(required=False, allow_blank=True)
+    notes = vst_fields.TextareaField(required=False, allow_blank=True)
 
     class Meta:
         model = models.Host
