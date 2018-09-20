@@ -9,7 +9,7 @@ from django.db import transaction
 from rest_framework import serializers, exceptions, status
 from rest_framework.exceptions import PermissionDenied
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
-from vstutils.api.serializers import DataSerializer
+from vstutils.api.serializers import DataSerializer, EmptySerializer
 from vstutils.api.base import Response
 from ...main.utils import AnsibleArgumentsReference
 
@@ -88,7 +88,7 @@ def with_signals(func):
 
 
 # Serializers
-class ActionResponseSerializer(DataSerializer):
+class ActionResponseSerializer(DataSerializer, EmptySerializer):
     detail = serializers.CharField()
 
 
@@ -98,7 +98,9 @@ class ExecuteResponseSerializer(ActionResponseSerializer):
 
 
 class SetOwnerSerializer(DataSerializer):
-    user_id = serializers.IntegerField(required=True, label='New owner')
+    user_id = vst_fields.Select2Field(required=True, select='Owner',
+                                      label='New owner',
+                                      autocomplete_represent='username')
 
     def update(self, instance, validated_data):
         if not self.instance.acl_handler.owned_by(self.current_user()):  # noce
@@ -225,7 +227,6 @@ class TeamSerializer(_WithPermissionsSerializer):
         fields = (
             'id',
             "name",
-            'url',
         )
 
 
@@ -240,7 +241,6 @@ class OneTeamSerializer(TeamSerializer):
             "name",
             "notes",
             "owner",
-            'url',
         )
 
 
@@ -248,19 +248,35 @@ class HistorySerializer(_SignalSerializer):
     class Meta:
         model = models.History
         fields = ("id",
-                  "project",
-                  "mode",
-                  "kind",
                   "status",
+                  "executor",
+                  "project",
+                  "kind",
+                  "mode",
                   "inventory",
                   "start_time",
                   "stop_time",
                   "initiator",
                   "initiator_type",
-                  "executor",
-                  "revision",
-                  "options",
-                  "url")
+                  "options",)
+
+
+class ProjectHistorySerializer(HistorySerializer):
+    class Meta(HistorySerializer.Meta):
+        fields = (
+            "id",
+            "status",
+            "revision",
+            "executor",
+            "kind",
+            "mode",
+            "inventory",
+            "start_time",
+            "stop_time",
+            "initiator",
+            "initiator_type",
+            "options",
+        )
 
 
 class OneHistorySerializer(_SignalSerializer):
@@ -269,24 +285,23 @@ class OneHistorySerializer(_SignalSerializer):
     class Meta:
         model = models.History
         fields = ("id",
-                  "project",
-                  "mode",
-                  "kind",
                   "status",
+                  "executor",
+                  "project",
+                  "revision",
+                  "inventory",
+                  "kind",
+                  "mode",
+                  "execute_args",
+                  "execution_time",
                   "start_time",
                   "stop_time",
-                  "execution_time",
-                  "inventory",
-                  "raw_inventory",
-                  "raw_args",
-                  "raw_stdout",
                   "initiator",
                   "initiator_type",
-                  "executor",
-                  "execute_args",
-                  "revision",
                   "options",
-                  "url")
+                  "raw_args",
+                  "raw_stdout",
+                  "raw_inventory",)
 
     def get_raw(self, request):
         return self.instance.get_raw(request.query_params.get("color", "no") == "yes")
@@ -406,8 +421,7 @@ class HostSerializer(_WithVariablesSerializer):
         model = models.Host
         fields = ('id',
                   'name',
-                  'type',
-                  'url',)
+                  'type',)
 
 
 class OneHostSerializer(HostSerializer):
@@ -420,8 +434,7 @@ class OneHostSerializer(HostSerializer):
                   'name',
                   'notes',
                   'type',
-                  'owner',
-                  'url',)
+                  'owner',)
 
 
 class PlaybookSerializer(_WithVariablesSerializer):
@@ -639,8 +652,7 @@ class GroupSerializer(_WithVariablesSerializer):
         model = models.Group
         fields = ('id',
                   'name',
-                  'children',
-                  'url',)
+                  'children',)
 
 
 class OneGroupSerializer(GroupSerializer, _InventoryOperations):
@@ -653,8 +665,7 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
                   'name',
                   'notes',
                   'children',
-                  'owner',
-                  'url',)
+                  'owner',)
 
     class ValidationException(exceptions.ValidationError):
         status_code = 409
@@ -671,8 +682,7 @@ class InventorySerializer(_WithVariablesSerializer):
     class Meta:
         model = models.Inventory
         fields = ('id',
-                  'name',
-                  'url',)
+                  'name',)
 
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
@@ -684,8 +694,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
         fields = ('id',
                   'name',
                   'notes',
-                  'owner',
-                  'url',)
+                  'owner',)
 
 
 def list_to_choices(items_list):
@@ -712,7 +721,11 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
                                            default='',
                                            field='repo_auth',
                                            label='Repo auth data',
-                                           choices={'NONE': None})
+                                           types={
+                                               'KEY': 'secretfile',
+                                               'PASSWORD': 'password',
+                                               'NONE': 'disabled'
+                                           })
 
     class Meta:
         model = models.Project
@@ -747,9 +760,8 @@ class ProjectSerializer(_InventoryOperations):
         model = models.Project
         fields = ('id',
                   'name',
-                  'status',
                   'type',
-                  'url',)
+                  'status',)
 
     @transaction.atomic
     def _do_with_vars(self, *args, **kw):
@@ -767,14 +779,13 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         model = models.Project
         fields = ('id',
                   'name',
-                  'notes',
-                  'status',
                   'repository',
-                  'owner',
+                  'status',
                   'revision',
                   'branch',
-                  'readme_content',
-                  'url',)
+                  'owner',
+                  'notes',
+                  'readme_content',)
 
     @transaction.atomic()
     def sync(self):
@@ -785,9 +796,9 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         serializer.is_valid(True)
         return Response(serializer.data, status.HTTP_200_OK)
 
-    def _execution(self, kind, data, user, **kwargs):
-        template = kwargs.pop("template", None)
-        inventory = data.pop("inventory")
+    def _get_execution_inventory(self, template, inventory, user):
+        if template or inventory is None:
+            return inventory
         try:
             inventory = Inventory.objects.get(id=int(inventory))
             if not inventory.acl_handler.viewable_by(user):  # nocv
@@ -796,19 +807,40 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                 )
         except ValueError:
             pass
+        return inventory
+
+    def _execution(self, kind, data, user, **kwargs):
+        template = kwargs.pop("template", None)
+        inventory = self._get_execution_inventory(
+            template, data.pop("inventory", None), user
+        )
+        msg = "Started in the inventory {}.".format(
+            inventory if inventory else 'specified in the project configuration.'
+        )
         if template is not None:
             init_type = "template"
             obj_id = template
             data['template_option'] = kwargs.get('template_option', None)
+            msg = 'Start template [id={}].'.format(template)
         else:
             init_type = "project"
             obj_id = self.instance.id
+            if kind.lower() == 'module':
+                serializer = AnsibleModuleSerializer()
+            elif kind.lower() == 'playbook':
+                serializer = AnsiblePlaybookSerializer()
+            else:  # nocv
+                raise Exception('Unknown kind')
+            data = {
+                k: v for k, v in serializer.to_internal_value(data).items()
+                if k in data.keys() or v
+            }
         history_id = self.instance.execute(
             kind, str(data.pop(kind)), inventory,
             initiator=obj_id, initiator_type=init_type, executor=user, **data
         )
         rdata = ExecuteResponseSerializer(data=dict(
-            detail="Started at inventory {}.".format(inventory),
+            detail=msg,
             history_id=history_id, executor=user.id
         ))
         rdata.is_valid(raise_exception=True)
@@ -835,24 +867,32 @@ def generate_fileds(ansible_type):
             continue
         ref_type = settings.get('type', None)
         kwargs = dict(help_text=settings.get('help', ''), required=False)
+        field = None
+        if ref_type is None:
+            field = serializers.BooleanField
+            kwargs['default'] = False
+        elif ref_type == 'int':
+            field = serializers.IntegerField
+        elif ref_type == 'string' or 'choice':
+            field = serializers.CharField
+            kwargs['allow_blank'] = True
+
         if ref == 'verbose':
             field = serializers.IntegerField
             kwargs.update(dict(max_value=4, default=0))
-        elif ref_type is None:
-            field = serializers.BooleanField
-            kwargs['default'] = False
-        elif ref in models.PeriodicTask.HIDDEN_VARS:
+        if ref in models.PeriodicTask.HIDDEN_VARS:
             field = vst_fields.SecretFileInString
-        elif ref_type == 'int':
-            field = serializers.IntegerField
-        elif ref == 'inventory':
-            kwargs['required'] = True
+        if ref == 'inventory':
             kwargs['autocomplete'] = 'Inventory'
             field = vst_fields.AutoCompletionField
-        elif ref_type == 'string' or 'choice':
-            field = serializers.CharField
-        else:  # nocv
+
+        if field is None:  # nocv
             continue
+
+        if ansible_type == 'module':
+            if ref == 'group':
+                kwargs['default'] = 'all'
+
         field_name = ref.replace('-', '_')
         fields[field_name] = field(**kwargs)
 
@@ -860,6 +900,7 @@ def generate_fileds(ansible_type):
 
 
 class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
+    # pylint: disable=super-on-old-class
     @staticmethod
     def __new__(cls, name, bases, attrs):
         ansible_type = None
@@ -872,7 +913,7 @@ class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
 
 
 @six.add_metaclass(AnsibleSerializerMetaclass)
-class _AnsibleSerializer(DataSerializer):
+class _AnsibleSerializer(serializers.Serializer):
     pass
 
 

@@ -1788,12 +1788,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/Empty'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/Empty'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5369,7 +5369,7 @@ paths:
   /project/{pk}/history/:
     get:
       operationId: project_history_list
-      description: Return all history of executions.
+      description: ''
       parameters:
         - name: id
           in: query
@@ -5453,7 +5453,7 @@ paths:
               results:
                 type: array
                 items:
-                  $ref: '#/definitions/History'
+                  $ref: '#/definitions/ProjectHistory'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5481,7 +5481,7 @@ paths:
   /project/{pk}/history/{history_id}/:
     get:
       operationId: project_history_get
-      description: Return a execution history instance.
+      description: ''
       parameters: []
       responses:
         '200':
@@ -5508,7 +5508,7 @@ paths:
         - project
     delete:
       operationId: project_history_remove
-      description: Remove an existing history record.
+      description: ''
       parameters: []
       responses:
         '204':
@@ -5551,12 +5551,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/Empty'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/Empty'
         '400':
           description: Validation error or some data error.
           schema:
@@ -9910,7 +9910,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/UserSettings'
         '400':
           description: Validation error or some data error.
           schema:
@@ -9937,12 +9937,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/UserSettings'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/UserSettings'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10302,7 +10302,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/UserSettings'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10329,12 +10329,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/UserSettings'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/UserSettings'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10401,11 +10401,6 @@ definitions:
         title: Children
         type: boolean
         readOnly: true
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
   Error:
     required:
       - detail
@@ -10437,12 +10432,6 @@ definitions:
         title: Is active
         type: boolean
         default: true
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
-    readOnly: true
   GroupCreateMaster:
     type: object
     properties:
@@ -10458,17 +10447,13 @@ definitions:
       notes:
         title: Notes
         type: string
+        format: textarea
       children:
         title: Contains groups
         type: boolean
         default: false
       owner:
         $ref: '#/definitions/User'
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
   OneGroup:
     type: object
     properties:
@@ -10484,17 +10469,13 @@ definitions:
       notes:
         title: Notes
         type: string
+        format: textarea
       children:
         title: Children
         type: boolean
         readOnly: true
       owner:
         $ref: '#/definitions/User'
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
   InventoryVariable:
     required:
       - key
@@ -10551,13 +10532,10 @@ definitions:
       type:
         title: Type
         type: string
-        maxLength: 5
-        minLength: 1
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
+        enum:
+          - HOST
+          - RANGE
+        default: HOST
   OneHost:
     type: object
     properties:
@@ -10573,18 +10551,16 @@ definitions:
       notes:
         title: Notes
         type: string
+        format: textarea
       type:
         title: Type
         type: string
-        maxLength: 5
-        minLength: 1
+        enum:
+          - HOST
+          - RANGE
+        default: HOST
       owner:
         $ref: '#/definitions/User'
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
   SetOwner:
     required:
       - user_id
@@ -10593,33 +10569,42 @@ definitions:
       user_id:
         title: New owner
         type: integer
+        format: select2
+        additionalProperties:
+          model:
+            $ref: '#/definitions/Owner'
+          value_field: id
+          view_field: username
   History:
     required:
-      - mode
       - status
+      - mode
     type: object
     properties:
       id:
         title: Id
         type: integer
         readOnly: true
+      status:
+        title: Status
+        type: string
+        maxLength: 50
+        minLength: 1
+      executor:
+        title: Executor
+        type: integer
       project:
         title: Project
         type: integer
-      mode:
-        title: Mode
-        type: string
-        maxLength: 256
-        minLength: 1
       kind:
         title: Kind
         type: string
         maxLength: 50
         minLength: 1
-      status:
-        title: Status
+      mode:
+        title: Mode
         type: string
-        maxLength: 50
+        maxLength: 256
         minLength: 1
       inventory:
         title: Inventory
@@ -10640,50 +10625,56 @@ definitions:
         type: string
         maxLength: 50
         minLength: 1
-      executor:
-        title: Executor
-        type: integer
-      revision:
-        title: Revision
-        type: string
-        maxLength: 256
       options:
         title: Options
         type: string
         readOnly: true
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
   OneHistory:
     required:
-      - mode
       - status
+      - mode
     type: object
     properties:
       id:
         title: Id
         type: integer
         readOnly: true
-      project:
-        title: Project
-        type: integer
-      mode:
-        title: Mode
-        type: string
-        maxLength: 256
-        minLength: 1
-      kind:
-        title: Kind
-        type: string
-        maxLength: 50
-        minLength: 1
       status:
         title: Status
         type: string
         maxLength: 50
         minLength: 1
+      executor:
+        title: Executor
+        type: integer
+      project:
+        title: Project
+        type: integer
+      revision:
+        title: Revision
+        type: string
+        maxLength: 256
+      inventory:
+        title: Inventory
+        type: integer
+      kind:
+        title: Kind
+        type: string
+        maxLength: 50
+        minLength: 1
+      mode:
+        title: Mode
+        type: string
+        maxLength: 256
+        minLength: 1
+      execute_args:
+        title: Execute args
+        type: string
+        readOnly: true
+      execution_time:
+        title: Execution time
+        type: string
+        readOnly: true
       start_time:
         title: Start time
         type: string
@@ -10692,17 +10683,18 @@ definitions:
         title: Stop time
         type: string
         format: date-time
-      execution_time:
-        title: Execution time
+      initiator:
+        title: Initiator
+        type: integer
+      initiator_type:
+        title: Initiator type
+        type: string
+        maxLength: 50
+        minLength: 1
+      options:
+        title: Options
         type: string
         readOnly: true
-      inventory:
-        title: Inventory
-        type: integer
-      raw_inventory:
-        title: Raw inventory
-        type: string
-        minLength: 1
       raw_args:
         title: Raw args
         type: string
@@ -10711,34 +10703,13 @@ definitions:
         title: Raw stdout
         type: string
         readOnly: true
-      initiator:
-        title: Initiator
-        type: integer
-      initiator_type:
-        title: Initiator type
+      raw_inventory:
+        title: Raw inventory
         type: string
-        maxLength: 50
         minLength: 1
-      executor:
-        title: Executor
-        type: integer
-      execute_args:
-        title: Execute args
-        type: string
-        readOnly: true
-      revision:
-        title: Revision
-        type: string
-        maxLength: 256
-      options:
-        title: Options
-        type: string
-        readOnly: true
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
+  Empty:
+    type: object
+    properties: {}
   Data:
     type: object
     properties: {}
@@ -10795,11 +10766,6 @@ definitions:
         type: string
         maxLength: 512
         minLength: 1
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
   OneInventory:
     type: object
     properties:
@@ -10815,13 +10781,9 @@ definitions:
       notes:
         title: Notes
         type: string
+        format: textarea
       owner:
         $ref: '#/definitions/User'
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
   Project:
     type: object
     properties:
@@ -10834,21 +10796,16 @@ definitions:
         type: string
         maxLength: 512
         minLength: 1
-      status:
-        title: Status
-        type: string
-        readOnly: true
-        minLength: 1
       type:
         title: Type
         type: string
         readOnly: true
         minLength: 1
-      url:
-        title: Url
+      status:
+        title: Status
         type: string
-        format: uri
         readOnly: true
+        minLength: 1
   ProjectCreateMaster:
     required:
       - name
@@ -10895,9 +10852,11 @@ definitions:
         default: ''
         additionalProperties:
           field: repo_auth
-          choices:
-            NONE: null
-          types: {}
+          choices: {}
+          types:
+            KEY: secretfile
+            PASSWORD: password
+            NONE: disabled
   OneProject:
     type: object
     properties:
@@ -10910,21 +10869,16 @@ definitions:
         type: string
         maxLength: 512
         minLength: 1
-      notes:
-        title: Notes
-        type: string
-      status:
-        title: Status
-        type: string
-        readOnly: true
-        minLength: 1
       repository:
         title: Repository
         type: string
         default: MANUAL
         minLength: 1
-      owner:
-        $ref: '#/definitions/User'
+      status:
+        title: Status
+        type: string
+        readOnly: true
+        minLength: 1
       revision:
         title: Revision
         type: string
@@ -10933,20 +10887,20 @@ definitions:
         title: Branch
         type: string
         readOnly: true
+      owner:
+        $ref: '#/definitions/User'
+      notes:
+        title: Notes
+        type: string
+        format: textarea
       readme_content:
         title: Information
         type: string
         format: html
         readOnly: true
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
   AnsibleModule:
     required:
       - module
-      - inventory
     type: object
     properties:
       module:
@@ -10956,13 +10910,12 @@ definitions:
         additionalProperties:
           model:
             $ref: '#/definitions/Module'
-          value_field: id
-          view_field: name
+          value_field: name
+          view_field: path
       args:
         title: Args
         description: module arguments
         type: string
-        minLength: 1
       background:
         title: Background
         description: run asynchronously, failing after X seconds (default=N/A)
@@ -10978,12 +10931,10 @@ definitions:
           [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
           | machinectl ]'
         type: string
-        minLength: 1
       become_user:
         title: Become user
         description: run operations as this user (default=root)
         type: string
-        minLength: 1
       check:
         title: Check
         description: don't make any changes; instead, try to predict some of the changes
@@ -10994,7 +10945,6 @@ definitions:
         title: Connection
         description: connection type to use (default=smart)
         type: string
-        minLength: 1
       diff:
         title: Diff
         description: when changing (small) files and templates, show the differences
@@ -11006,7 +10956,6 @@ definitions:
         description: set additional variables as key=value or YAML/JSON, if filename
           prepend with @
         type: string
-        minLength: 1
       forks:
         title: Forks
         description: specify number of parallel processes to use (default=5)
@@ -11016,7 +10965,12 @@ definitions:
         description: specify inventory host path or comma separated host list. --inventory-file
           is deprecated
         type: string
-        minLength: 1
+        format: autocomplete
+        additionalProperties:
+          model:
+            $ref: '#/definitions/Inventory'
+          value_field: id
+          view_field: name
       key_file:
         title: Key file
         description: use this file to authenticate the connection
@@ -11026,7 +10980,6 @@ definitions:
         title: Limit
         description: further limit selected hosts to an additional pattern
         type: string
-        minLength: 1
       list_hosts:
         title: List hosts
         description: outputs a list of matching hosts; does not execute anything else
@@ -11037,7 +10990,6 @@ definitions:
         description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
           '/usr/share/ansible/plugins/modules'])
         type: string
-        minLength: 1
       one_line:
         title: One line
         description: condense output
@@ -11049,7 +11001,6 @@ definitions:
           playbook directory.This sets the relative path for many features including
           roles/ group_vars/ etc.
         type: string
-        minLength: 1
       poll:
         title: Poll
         description: set the poll interval if using -B (default=15)
@@ -11063,22 +11014,18 @@ definitions:
         title: Scp extra args
         description: specify extra arguments to pass to scp only (e.g. -l)
         type: string
-        minLength: 1
       sftp_extra_args:
         title: Sftp extra args
         description: specify extra arguments to pass to sftp only (e.g. -f, -l)
         type: string
-        minLength: 1
       ssh_common_args:
         title: Ssh common args
         description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
         type: string
-        minLength: 1
       ssh_extra_args:
         title: Ssh extra args
         description: specify extra arguments to pass to ssh only (e.g. -R)
         type: string
-        minLength: 1
       su:
         title: Su
         description: run operations with su (deprecated, use become)
@@ -11089,7 +11036,6 @@ definitions:
         description: run operations with su as this user (default=None) (deprecated,
           use become)
         type: string
-        minLength: 1
       sudo:
         title: Sudo
         description: run operations with sudo (nopasswd) (deprecated, use become)
@@ -11099,7 +11045,6 @@ definitions:
         title: Sudo user
         description: desired sudo user (default=root) (deprecated, use become)
         type: string
-        minLength: 1
       syntax_check:
         title: Syntax check
         description: perform a syntax check on the playbook, but do not execute it
@@ -11113,17 +11058,14 @@ definitions:
         title: Tree
         description: log output to this directory
         type: string
-        minLength: 1
       user:
         title: User
         description: connect as this user (default=None)
         type: string
-        minLength: 1
       vault_id:
         title: Vault id
         description: the vault identity to use
         type: string
-        minLength: 1
       vault_password_file:
         title: Vault password file
         description: vault password file
@@ -11138,7 +11080,7 @@ definitions:
       group:
         title: Group
         type: string
-        minLength: 1
+        default: all
   ExecuteResponse:
     required:
       - detail
@@ -11157,7 +11099,6 @@ definitions:
   AnsiblePlaybook:
     required:
       - playbook
-      - inventory
     type: object
     properties:
       playbook:
@@ -11167,7 +11108,7 @@ definitions:
         additionalProperties:
           model:
             $ref: '#/definitions/Playbook'
-          value_field: id
+          value_field: playbook
           view_field: name
       become:
         title: Become
@@ -11180,12 +11121,10 @@ definitions:
           [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | pmrun | enable
           | machinectl ]'
         type: string
-        minLength: 1
       become_user:
         title: Become user
         description: run operations as this user (default=root)
         type: string
-        minLength: 1
       check:
         title: Check
         description: don't make any changes; instead, try to predict some of the changes
@@ -11196,7 +11135,6 @@ definitions:
         title: Connection
         description: connection type to use (default=smart)
         type: string
-        minLength: 1
       diff:
         title: Diff
         description: when changing (small) files and templates, show the differences
@@ -11208,7 +11146,6 @@ definitions:
         description: set additional variables as key=value or YAML/JSON, if filename
           prepend with @
         type: string
-        minLength: 1
       flush_cache:
         title: Flush cache
         description: clear the fact cache for every host in inventory
@@ -11228,7 +11165,12 @@ definitions:
         description: specify inventory host path or comma separated host list. --inventory-file
           is deprecated
         type: string
-        minLength: 1
+        format: autocomplete
+        additionalProperties:
+          model:
+            $ref: '#/definitions/Inventory'
+          value_field: id
+          view_field: name
       key_file:
         title: Key file
         description: use this file to authenticate the connection
@@ -11238,7 +11180,6 @@ definitions:
         title: Limit
         description: further limit selected hosts to an additional pattern
         type: string
-        minLength: 1
       list_hosts:
         title: List hosts
         description: outputs a list of matching hosts; does not execute anything else
@@ -11259,7 +11200,6 @@ definitions:
         description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
           '/usr/share/ansible/plugins/modules'])
         type: string
-        minLength: 1
       private_key:
         title: Private key
         description: use this file to authenticate the connection
@@ -11269,32 +11209,26 @@ definitions:
         title: Scp extra args
         description: specify extra arguments to pass to scp only (e.g. -l)
         type: string
-        minLength: 1
       sftp_extra_args:
         title: Sftp extra args
         description: specify extra arguments to pass to sftp only (e.g. -f, -l)
         type: string
-        minLength: 1
       skip_tags:
         title: Skip tags
         description: only run plays and tasks whose tags do not match these values
         type: string
-        minLength: 1
       ssh_common_args:
         title: Ssh common args
         description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
         type: string
-        minLength: 1
       ssh_extra_args:
         title: Ssh extra args
         description: specify extra arguments to pass to ssh only (e.g. -R)
         type: string
-        minLength: 1
       start_at_task:
         title: Start at task
         description: start the playbook at the task matching this name
         type: string
-        minLength: 1
       step:
         title: Step
         description: 'one-step-at-a-time: confirm each task before running'
@@ -11310,7 +11244,6 @@ definitions:
         description: run operations with su as this user (default=None) (deprecated,
           use become)
         type: string
-        minLength: 1
       sudo:
         title: Sudo
         description: run operations with sudo (nopasswd) (deprecated, use become)
@@ -11320,7 +11253,6 @@ definitions:
         title: Sudo user
         description: desired sudo user (default=root) (deprecated, use become)
         type: string
-        minLength: 1
       syntax_check:
         title: Syntax check
         description: perform a syntax check on the playbook, but do not execute it
@@ -11330,7 +11262,6 @@ definitions:
         title: Tags
         description: only run plays and tasks tagged with these values
         type: string
-        minLength: 1
       timeout:
         title: Timeout
         description: override the connection timeout in seconds (default=10)
@@ -11339,12 +11270,10 @@ definitions:
         title: User
         description: connect as this user (default=None)
         type: string
-        minLength: 1
       vault_id:
         title: Vault id
         description: the vault identity to use
         type: string
-        minLength: 1
       vault_password_file:
         title: Vault password file
         description: vault password file
@@ -11356,6 +11285,61 @@ definitions:
         type: integer
         default: 0
         maximum: 4
+  ProjectHistory:
+    required:
+      - status
+      - mode
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      status:
+        title: Status
+        type: string
+        maxLength: 50
+        minLength: 1
+      revision:
+        title: Revision
+        type: string
+        maxLength: 256
+      executor:
+        title: Executor
+        type: integer
+      kind:
+        title: Kind
+        type: string
+        maxLength: 50
+        minLength: 1
+      mode:
+        title: Mode
+        type: string
+        maxLength: 256
+        minLength: 1
+      inventory:
+        title: Inventory
+        type: integer
+      start_time:
+        title: Start time
+        type: string
+        format: date-time
+      stop_time:
+        title: Stop time
+        type: string
+        format: date-time
+      initiator:
+        title: Initiator
+        type: integer
+      initiator_type:
+        title: Initiator type
+        type: string
+        maxLength: 50
+        minLength: 1
+      options:
+        title: Options
+        type: string
+        readOnly: true
   Module:
     required:
       - path
@@ -11465,6 +11449,7 @@ definitions:
       notes:
         title: Notes
         type: string
+        format: textarea
       type:
         title: Interval type
         type: string
@@ -11561,9 +11546,6 @@ definitions:
         type: string
         readOnly: true
         minLength: 1
-  Empty:
-    type: object
-    properties: {}
   ActionResponse:
     required:
       - detail
@@ -11623,6 +11605,7 @@ definitions:
       notes:
         title: Notes
         type: string
+        format: textarea
       kind:
         title: Type
         type: string
@@ -11680,7 +11663,9 @@ definitions:
             repo_sync_on_run:
               - true
               - false
-          types: {}
+          types:
+            repo_password: password
+            repo_key: file
   Team:
     required:
       - name
@@ -11695,11 +11680,6 @@ definitions:
         type: string
         maxLength: 80
         minLength: 1
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
   OneTeam:
     required:
       - name
@@ -11717,13 +11697,9 @@ definitions:
       notes:
         title: Notes
         type: string
+        format: textarea
       owner:
         $ref: '#/definitions/User'
-      url:
-        title: Url
-        type: string
-        format: uri
-        readOnly: true
   OneUser:
     required:
       - username
@@ -11762,8 +11738,103 @@ definitions:
         type: string
         format: email
         minLength: 1
-      url:
-        title: Url
-        type: string
-        format: uri
+  ChartLineSetting:
+    title: All tasks
+    type: object
+    properties:
+      active:
+        title: Active
+        type: boolean
+        default: true
+  ChartLineSettings:
+    title: Chartlinesettings
+    required:
+      - all_tasks
+      - delay
+      - ok
+      - error
+      - interrupted
+      - offline
+    type: object
+    properties:
+      all_tasks:
+        $ref: '#/definitions/ChartLineSetting'
+      delay:
+        $ref: '#/definitions/ChartLineSetting'
+      ok:
+        $ref: '#/definitions/ChartLineSetting'
+      error:
+        $ref: '#/definitions/ChartLineSetting'
+      interrupted:
+        $ref: '#/definitions/ChartLineSetting'
+      offline:
+        $ref: '#/definitions/ChartLineSetting'
+  CounterWidgetSetting:
+    title: Pmwuserscounter
+    type: object
+    properties:
+      active:
+        title: Active
+        type: boolean
+        default: true
+      collapse:
+        title: Collapse
+        type: boolean
         readOnly: true
+        default: false
+      sort:
+        title: Sort
+        type: integer
+        default: 0
+  WidgetSetting:
+    title: Pmwchartwidget
+    type: object
+    properties:
+      active:
+        title: Active
+        type: boolean
+        default: true
+      collapse:
+        title: Collapse
+        type: boolean
+        default: false
+      sort:
+        title: Sort
+        type: integer
+        default: 0
+  WidgetSettings:
+    title: Widgetsettings
+    required:
+      - pmwUsersCounter
+      - pmwProjectsCounter
+      - pmwInventoriesCounter
+      - pmwGroupsCounter
+      - pmwHostsCounter
+      - pmwChartWidget
+      - pmwAnsibleModuleWidget
+    type: object
+    properties:
+      pmwUsersCounter:
+        $ref: '#/definitions/CounterWidgetSetting'
+      pmwProjectsCounter:
+        $ref: '#/definitions/CounterWidgetSetting'
+      pmwInventoriesCounter:
+        $ref: '#/definitions/CounterWidgetSetting'
+      pmwGroupsCounter:
+        $ref: '#/definitions/CounterWidgetSetting'
+      pmwHostsCounter:
+        $ref: '#/definitions/CounterWidgetSetting'
+      pmwChartWidget:
+        $ref: '#/definitions/WidgetSetting'
+      pmwAnsibleModuleWidget:
+        $ref: '#/definitions/WidgetSetting'
+  UserSettings:
+    required:
+      - chartLineSettings
+      - widgetSettings
+    type: object
+    properties:
+      chartLineSettings:
+        $ref: '#/definitions/ChartLineSettings'
+      widgetSettings:
+        $ref: '#/definitions/WidgetSettings'

@@ -20,7 +20,7 @@ moduleArgsEditor.loadAllModule = function()
         error:function(e)
         {
             console.warn(e)
-            polemarch.showErrors(e)
+            webGui.showErrors(e)
             def.reject(e);
         }
     });

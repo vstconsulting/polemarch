@@ -59,7 +59,7 @@
 //        error: function (e)
 //        {
 //            console.warn(e)
-//            polemarch.showErrors(e)
+//            webGui.showErrors(e)
 //            def.reject(e);
 //        }
 //    });
@@ -93,7 +93,7 @@
 //                            var fieldata = JSON.parse(e.target.result);
 //                            if (fieldata.version / 1 > 1)
 //                            {
-//                                polemarch.showErrors("Error file version is " + fieldata.version)
+//                                webGui.showErrors("Error file version is " + fieldata.version)
 //                                def.reject({text: "Error file version is " + fieldata.version});
 //                                return;
 //                            }
@@ -121,7 +121,7 @@
 //                                error: function (e)
 //                                {
 //                                    console.warn(e)
-//                                    polemarch.showErrors(e)
+//                                    webGui.showErrors(e)
 //                                    def.reject(e);
 //                                }
 //                            });
@@ -207,7 +207,7 @@
 //    }).fail(function(e)
 //    {
 //        def.reject(e);
-//        polemarch.showErrors(e.responseJSON);
+//        webGui.showErrors(e.responseJSON);
 //    }).promise();
 //
 //    return def.promise();
@@ -262,7 +262,7 @@
 //        error: function (e)
 //        {
 //            def.reject(e)
-//            polemarch.showErrors(e.responseJSON)
+//            webGui.showErrors(e.responseJSON)
 //        }
 //    });
 //    return def.promise();
@@ -295,7 +295,7 @@
 //        error: function (e)
 //        {
 //            console.warn(e)
-//            polemarch.showErrors(e)
+//            webGui.showErrors(e)
 //        }
 //    });
 //}
@@ -328,7 +328,7 @@
 //        error: function (e)
 //        {
 //            console.warn(e)
-//            polemarch.showErrors(e)
+//            webGui.showErrors(e)
 //        }
 //    });
 //}
@@ -362,7 +362,7 @@
 //                def.resolve();
 //            }).fail(function (e)
 //            {
-//                polemarch.showErrors(e);
+//                webGui.showErrors(e);
 //                def.reject(e);
 //            });
 //        }
@@ -373,7 +373,7 @@
 //        }
 //    }).fail(function (e)
 //    {
-//        polemarch.showErrors(e);
+//        webGui.showErrors(e);
 //        def.reject(e);
 //    })
 //    return def.promise();
@@ -470,13 +470,13 @@
 //                def.resolve();
 //            }).fail(function (e)
 //            {
-//                polemarch.showErrors(e.responseJSON);
+//                webGui.showErrors(e.responseJSON);
 //                def.reject(e)
 //            });
 //        },
 //        error: function (e)
 //        {
-//            polemarch.showErrors(e.responseJSON);
+//            webGui.showErrors(e.responseJSON);
 //            def.reject(e)
 //        }
 //    });
@@ -514,7 +514,7 @@
 //
 //            }).fail(function (e)
 //            {
-//                polemarch.showErrors(e.responseJSON);
+//                webGui.showErrors(e.responseJSON);
 //                def.reject(e);
 //            });
 //        }
@@ -526,7 +526,7 @@
 //        }
 //    }).fail(function (e)
 //    {
-//        polemarch.showErrors(e.responseJSON);
+//        webGui.showErrors(e.responseJSON);
 //        def.reject(e);
 //    })
 //    return def.promise();
@@ -565,7 +565,7 @@
 //                def.resolve();
 //            }).fail(function (e)
 //            {
-//                polemarch.showErrors(e.responseJSON);
+//                webGui.showErrors(e.responseJSON);
 //                def.reject(e);
 //            });
 //        }
@@ -576,7 +576,7 @@
 //        }
 //    }).fail(function(e)
 //    {
-//        polemarch.showErrors(e.responseJSON);
+//        webGui.showErrors(e.responseJSON);
 //        def.reject(e);
 //    })
 //
@@ -659,7 +659,7 @@
 //                def.resolve();
 //            }).fail(function (e)
 //            {
-//                polemarch.showErrors(e.responseJSON);
+//                webGui.showErrors(e.responseJSON);
 //                def.reject(e);
 //            })
 //        }
@@ -672,7 +672,7 @@
 //
 //    }).fail(function (e)
 //    {
-//        polemarch.showErrors(e.responseJSON);
+//        webGui.showErrors(e.responseJSON);
 //        def.reject(e);
 //    })
 //    return def.promise();
@@ -729,13 +729,13 @@
 //            },
 //            error:function(e)
 //            {
-//                polemarch.showErrors(e.responseJSON)
+//                webGui.showErrors(e.responseJSON)
 //                def.reject(e)
 //            }
 //        });
 //    }).fail(function (e)
 //    {
-//        polemarch.showErrors(e.responseJSON)
+//        webGui.showErrors(e.responseJSON)
 //        def.reject(e)
 //    });
 //
@@ -794,13 +794,13 @@
 //            },
 //            error:function(e)
 //            {
-//                polemarch.showErrors(e.responseJSON);
+//                webGui.showErrors(e.responseJSON);
 //                def.reject(e);
 //            }
 //        });
 //    }).fail(function (e)
 //    {
-//        polemarch.showErrors(e.responseJSON);
+//        webGui.showErrors(e.responseJSON);
 //        def.reject(e);
 //    });
 //

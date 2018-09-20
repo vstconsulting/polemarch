@@ -120,7 +120,9 @@ polemarch.start = function(options)
     }
 }
 
-polemarch.showErrors = function(res)
+if(!window.webGui) webGui = {}
+
+webGui.showErrors = function(res)
 {
     if(!res)
     {
@@ -167,7 +169,7 @@ polemarch.showErrors = function(res)
         }
         else if(typeof res[i] === "object")
         {
-            return polemarch.showErrors(res[i])
+            return webGui.showErrors(res[i])
         }
     }
 }

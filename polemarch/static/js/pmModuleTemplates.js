@@ -93,7 +93,7 @@
 //            error: function (e)
 //            {
 //                def.reject(e)
-//                polemarch.showErrors(e.responseJSON)
+//                webGui.showErrors(e.responseJSON)
 //            }
 //        });
 //    }

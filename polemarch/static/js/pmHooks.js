@@ -473,7 +473,7 @@
 //            error:function(e)
 //            {
 //                console.warn("Hook "+item_id+" update error - " + JSON.stringify(e));
-//                polemarch.showErrors(e.responseJSON)
+//                webGui.showErrors(e.responseJSON)
 //            }
 //        });
 //    }
@@ -511,7 +511,7 @@
 //        error:function(e)
 //        {
 //            console.warn("Hook "+item_id+" update error - " + JSON.stringify(e));
-//            polemarch.showErrors(e.responseJSON)
+//            webGui.showErrors(e.responseJSON)
 //        }
 //    });
 //}
@@ -582,7 +582,7 @@
 //        error:function(e)
 //        {
 //            console.warn("Hook "+item_id+" update error - " + JSON.stringify(e));
-//            polemarch.showErrors(e.responseJSON)
+//            webGui.showErrors(e.responseJSON)
 //        }
 //    });
 //}

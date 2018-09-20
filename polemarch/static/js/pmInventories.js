@@ -1674,7 +1674,7 @@ tabSignal.connect("openapi.factory.inventory", function(data)
 //        spajs.open({ menuId:"inventory/"+inventory_id})
 //    }).fail(function(e){
 //        console.warn(e)
-//        polemarch.showErrors(e)
+//        webGui.showErrors(e)
 //    }).promise()
 //}
 //
@@ -2113,7 +2113,7 @@ tabSignal.connect("openapi.factory.inventory", function(data)
 //                                        error:function(e)
 //                                        {
 //                                            console.warn(e)
-//                                            polemarch.showErrors(e)
+//                                            webGui.showErrors(e)
 //                                            def.reject(deleteBulk);
 //                                        }
 //                                    })
@@ -2124,34 +2124,34 @@ tabSignal.connect("openapi.factory.inventory", function(data)
 //                                }
 //                            }).fail(function(e){
 //                                console.warn(e)
-//                                polemarch.showErrors(e)
+//                                webGui.showErrors(e)
 //                                def.reject(deleteBulk);
 //                            })
 //                        },
 //                        error:function(e)
 //                        {
 //                            console.warn(e)
-//                            polemarch.showErrors(e)
+//                            webGui.showErrors(e)
 //                            def.reject(deleteBulk);
 //                        }
 //                    });
 //                }).fail(function(e){
 //                    console.warn(e)
-//                    polemarch.showErrors(e)
+//                    webGui.showErrors(e)
 //                    def.reject(deleteBulk);
 //                })
 //            },
 //            error:function(e)
 //            {
 //                console.warn(e)
-//                polemarch.showErrors(e)
+//                webGui.showErrors(e)
 //                def.reject(deleteBulk);
 //            }
 //        })
 //    }).fail(function(e)
 //    {
 //        console.warn(e)
-//        polemarch.showErrors(e)
+//        webGui.showErrors(e)
 //        def.reject(deleteBulk);
 //    })
 //
