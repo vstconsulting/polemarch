@@ -773,7 +773,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
         with open(project.path+"/readme.md", "w") as f:
             f.write("# test README.md \n **bold** \n *italic* \n")
 
-        self.assertEqual(get_bulk_readme()['readme_ext'], '.md')
         self.assertEqual(
             get_bulk_readme()['readme_content'],
             "<h1>test README.md</h1>\n\n<p><strong>bold</strong>" +
@@ -782,7 +781,6 @@ class ProjectTestCase(BaseExecutionsTestCase):
         with open(project.path+"/readme.rst", "w") as f:
             f.write("test README.rst \n **bold** \n *italic* \n")
 
-        self.assertEqual(get_bulk_readme()['readme_ext'], '.rst')
         self.assertEqual(
             get_bulk_readme()['readme_content'],
             '<div class="document">\n<dl class="docutils">\n<dt>' +

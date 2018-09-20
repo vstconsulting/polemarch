@@ -99,6 +99,7 @@ class ExecuteResponseSerializer(ActionResponseSerializer):
 
 class SetOwnerSerializer(DataSerializer):
     user_id = vst_fields.Select2Field(required=True, select='Owner',
+                                      label='New owner',
                                       autocomplete_represent='username')
 
     def update(self, instance, validated_data):
@@ -160,19 +161,19 @@ class _WithPermissionsSerializer(_SignalSerializer):
         return self.context['request'].user
 
 
-class OwnerSerializer(vst_serializers.UserSerializer):
-    is_staff = serializers.HiddenField(default=True)
+class UserSerializer(vst_serializers.UserSerializer):
+    is_staff = serializers.HiddenField(default=True, label='Staff')
 
     @with_signals
     def create(self, data):
-        return super(OwnerSerializer, self).create(data)
+        return super(UserSerializer, self).create(data)
 
     @with_signals
     def update(self, instance, validated_data):
-        return super(OwnerSerializer, self).update(instance, validated_data)
+        return super(UserSerializer, self).update(instance, validated_data)
 
 
-class OneOwnerSerializer(OwnerSerializer):
+class OneUserSerializer(UserSerializer):
     password = serializers.CharField(write_only=True, required=False)
     email = serializers.EmailField(required=False)
 
@@ -231,7 +232,7 @@ class TeamSerializer(_WithPermissionsSerializer):
 
 
 class OneTeamSerializer(TeamSerializer):
-    owner = OwnerSerializer(read_only=True)
+    owner = UserSerializer(read_only=True)
     notes = vst_fields.TextareaField(required=False, allow_blank=True)
 
     class Meta:
@@ -412,7 +413,7 @@ class HostSerializer(_WithVariablesSerializer):
 
 
 class OneHostSerializer(HostSerializer):
-    owner = OwnerSerializer(read_only=True)
+    owner = UserSerializer(read_only=True)
     notes = vst_fields.TextareaField(required=False, allow_blank=True)
 
     class Meta:
@@ -470,12 +471,14 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
     kind = serializers.ChoiceField(
         choices=[(k, k) for k in models.PeriodicTask.kinds],
         required=False,
-        default=models.PeriodicTask.kinds[0]
+        default=models.PeriodicTask.kinds[0],
+        label='Task type'
     )
     type = serializers.ChoiceField(
         choices=[(k, k) for k in models.PeriodicTask.types],
         required=False,
-        default=models.PeriodicTask.types[0]
+        default=models.PeriodicTask.types[0],
+        label='Interval type'
     )
     schedule = serializers.CharField(allow_blank=True)
     inventory = serializers.CharField(required=False)
@@ -542,7 +545,8 @@ class TemplateSerializer(_WithVariablesSerializer):
     kind = serializers.ChoiceField(
         choices=[(k, k) for k in models.Template.kinds],
         required=False,
-        default=models.Template.kinds[0]
+        default=models.Template.kinds[0],
+        label='Type'
     )
 
     class Meta:
@@ -642,7 +646,7 @@ class GroupSerializer(_WithVariablesSerializer):
 
 
 class OneGroupSerializer(GroupSerializer, _InventoryOperations):
-    owner = OwnerSerializer(read_only=True)
+    owner = UserSerializer(read_only=True)
     notes = vst_fields.TextareaField(required=False, allow_blank=True)
 
     class Meta:
@@ -659,7 +663,9 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
 
 
 class GroupCreateMasterSerializer(OneGroupSerializer):
-    children = serializers.BooleanField(write_only=True, default=False)
+    children = serializers.BooleanField(write_only=True,
+                                        label='Contains groups',
+                                        default=False)
 
 
 class InventorySerializer(_WithVariablesSerializer):
@@ -672,7 +678,7 @@ class InventorySerializer(_WithVariablesSerializer):
 
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
-    owner = OwnerSerializer(read_only=True)
+    owner = UserSerializer(read_only=True)
     notes = vst_fields.TextareaField(required=False, allow_blank=True)
 
     class Meta:
@@ -697,15 +703,17 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
 
     name = serializers.CharField(required=True)
     status = serializers.CharField(read_only=True)
-    type = serializers.ChoiceField(choices=types, default='MANUAL')
-    repository = serializers.CharField(default='MANUAL')
+    type = serializers.ChoiceField(choices=types, default='MANUAL', label='Repo type')
+    repository = serializers.CharField(default='MANUAL', label='Repo url')
     repo_auth = serializers.ChoiceField(choices=auth_types,
                                         default='NONE',
+                                        label='Repo auth type',
                                         write_only=True)
     auth_data = vst_fields.DependEnumField(allow_blank=True,
                                            write_only=True,
                                            default='',
                                            field='repo_auth',
+                                           label='Repo auth data',
                                            choices={'NONE': None})
 
     class Meta:
@@ -753,10 +761,9 @@ class ProjectSerializer(_InventoryOperations):
 
 class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     repository  = serializers.CharField(default='MANUAL')
-    owner = OwnerSerializer(read_only=True)
+    owner = UserSerializer(read_only=True)
     notes = vst_fields.TextareaField(required=False, allow_blank=True)
-    readme_content = vst_fields.HtmlField(read_only=True)
-    readme_ext = serializers.CharField(read_only=True)
+    readme_content = vst_fields.HtmlField(read_only=True, label='Information')
 
     class Meta:
         model = models.Project
@@ -769,7 +776,6 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'revision',
                   'branch',
                   'readme_content',
-                  'readme_ext',
                   'url',)
 
     @transaction.atomic()

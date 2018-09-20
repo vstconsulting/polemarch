@@ -54,6 +54,41 @@ API = {
 
 SWAGGER_SETTINGS['DEFAULT_INFO'] = 'polemarch.api.v2.swagger.api_info'
 
+OPENAPI_EXTRA_LINKS = dict()
+OPENAPI_EXTRA_LINKS['Request'] = [
+    {
+        'url': (
+            'https://gitlab.com/vstconsulting/polemarch/issues/new?'
+            'issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%20'
+            +str(POLEMARCH_VERSION)
+        ),
+        'name': 'Question'
+    },
+    {
+        'url': (
+            'https://gitlab.com/vstconsulting/polemarch/issues/new?'
+            'issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20'
+            + str(POLEMARCH_VERSION)
+        ),
+        'name': 'Bug report'
+    },
+    {
+        'url': (
+            'https://gitlab.com/vstconsulting/polemarch/issues/new?'
+            'issuable_template%5D=Feature%20request&issue%5Btitle%5D='
+        ),
+        'name': 'Feature request'
+    },
+]
+OPENAPI_EXTRA_LINKS['Documentation'] = {
+    'url': 'http://polemarch.readthedocs.io/',
+    'name': 'Official documentation'
+}
+OPENAPI_EXTRA_LINKS['Repository'] = {
+    'url': 'https://gitlab.com/vstconsulting/polemarch.git',
+    'name': 'Official repository'
+}
+
 # Polemarch handlers
 
 # Repos
