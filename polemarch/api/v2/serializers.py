@@ -749,8 +749,8 @@ class ProjectSerializer(_InventoryOperations):
         model = models.Project
         fields = ('id',
                   'name',
-                  'status',
                   'type',
+                  'status',
                   'url',)
 
     @transaction.atomic
@@ -769,14 +769,13 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         model = models.Project
         fields = ('id',
                   'name',
-                  'notes',
-                  'status',
                   'repository',
-                  'owner',
+                  'status',
                   'revision',
                   'branch',
-                  'readme_content',
-                  'url',)
+                  'owner',
+                  'notes',
+                  'readme_content',)
 
     @transaction.atomic()
     def sync(self):
@@ -837,24 +836,31 @@ def generate_fileds(ansible_type):
             continue
         ref_type = settings.get('type', None)
         kwargs = dict(help_text=settings.get('help', ''), required=False)
+        field = None
+        if ref_type is None:
+            field = serializers.BooleanField
+            kwargs['default'] = False
+        elif ref_type == 'int':
+            field = serializers.IntegerField
+        elif ref_type == 'string' or 'choice':
+            field = serializers.CharField
+
         if ref == 'verbose':
             field = serializers.IntegerField
             kwargs.update(dict(max_value=4, default=0))
-        elif ref_type is None:
-            field = serializers.BooleanField
-            kwargs['default'] = False
-        elif ref in models.PeriodicTask.HIDDEN_VARS:
+        if ref in models.PeriodicTask.HIDDEN_VARS:
             field = vst_fields.SecretFileInString
-        elif ref_type == 'int':
-            field = serializers.IntegerField
-        elif ref == 'inventory':
+        if ref == 'inventory':
             kwargs['required'] = True
             kwargs['autocomplete'] = 'Inventory'
             field = vst_fields.AutoCompletionField
-        elif ref_type == 'string' or 'choice':
-            field = serializers.CharField
-        else:  # nocv
+
+        if field is None:
             continue
+
+        if ansible_type == 'module' and ref == 'group':
+            kwargs['default'] = 'all'
+
         field_name = ref.replace('-', '_')
         fields[field_name] = field(**kwargs)
 
