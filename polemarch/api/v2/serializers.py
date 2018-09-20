@@ -786,9 +786,9 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         serializer.is_valid(True)
         return Response(serializer.data, status.HTTP_200_OK)
 
-    def _execution(self, kind, data, user, **kwargs):
-        template = kwargs.pop("template", None)
-        inventory = data.pop("inventory")
+    def _get_execution_inventory(self, template, inventory, user):
+        if template or inventory is None:
+            return inventory
         try:
             inventory = Inventory.objects.get(id=int(inventory))
             if not inventory.acl_handler.viewable_by(user):  # nocv
@@ -797,19 +797,40 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                 )
         except ValueError:
             pass
+        return inventory
+
+    def _execution(self, kind, data, user, **kwargs):
+        template = kwargs.pop("template", None)
+        inventory = self._get_execution_inventory(
+            template, data.pop("inventory", None), user
+        )
+        msg = "Started in the inventory {}.".format(
+            inventory if inventory else 'specified in the project configuration.'
+        )
         if template is not None:
             init_type = "template"
             obj_id = template
             data['template_option'] = kwargs.get('template_option', None)
+            msg = 'Start template [id={}].'.format(template)
         else:
             init_type = "project"
             obj_id = self.instance.id
+            if kind.lower() == 'module':
+                serializer = AnsibleModuleSerializer()
+            elif kind.lower() == 'playbook':
+                serializer = AnsiblePlaybookSerializer()
+            else:  # nocv
+                raise Exception('Unknown kind')
+            data = {
+                k:v for k,v in serializer.to_internal_value(data).items()
+                if k in data.keys() or v
+            }
         history_id = self.instance.execute(
             kind, str(data.pop(kind)), inventory,
             initiator=obj_id, initiator_type=init_type, executor=user, **data
         )
         rdata = ExecuteResponseSerializer(data=dict(
-            detail="Started at inventory {}.".format(inventory),
+            detail=msg,
             history_id=history_id, executor=user.id
         ))
         rdata.is_valid(raise_exception=True)
@@ -844,6 +865,7 @@ def generate_fileds(ansible_type):
             field = serializers.IntegerField
         elif ref_type == 'string' or 'choice':
             field = serializers.CharField
+            kwargs['allow_blank'] = True
 
         if ref == 'verbose':
             field = serializers.IntegerField
@@ -851,15 +873,15 @@ def generate_fileds(ansible_type):
         if ref in models.PeriodicTask.HIDDEN_VARS:
             field = vst_fields.SecretFileInString
         if ref == 'inventory':
-            kwargs['required'] = True
             kwargs['autocomplete'] = 'Inventory'
             field = vst_fields.AutoCompletionField
 
-        if field is None:
+        if field is None:  # nocv
             continue
 
-        if ansible_type == 'module' and ref == 'group':
-            kwargs['default'] = 'all'
+        if ansible_type == 'module':
+            if ref == 'group':
+                kwargs['default'] = 'all'
 
         field_name = ref.replace('-', '_')
         fields[field_name] = field(**kwargs)
@@ -868,6 +890,7 @@ def generate_fileds(ansible_type):
 
 
 class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
+    # pylint: disable=super-on-old-class
     @staticmethod
     def __new__(cls, name, bases, attrs):
         ansible_type = None
@@ -880,7 +903,7 @@ class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
 
 
 @six.add_metaclass(AnsibleSerializerMetaclass)
-class _AnsibleSerializer(DataSerializer):
+class _AnsibleSerializer(serializers.Serializer):
     pass
 
 
