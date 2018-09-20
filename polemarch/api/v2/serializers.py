@@ -248,19 +248,35 @@ class HistorySerializer(_SignalSerializer):
     class Meta:
         model = models.History
         fields = ("id",
-                  "project",
-                  "mode",
-                  "kind",
                   "status",
+                  "executor",
+                  "project",
+                  "kind",
+                  "mode",
                   "inventory",
                   "start_time",
                   "stop_time",
                   "initiator",
                   "initiator_type",
-                  "executor",
-                  "revision",
-                  "options",
-                  "url")
+                  "options",)
+
+
+class ProjectHistorySerializer(HistorySerializer):
+    class Meta(HistorySerializer.Meta):
+        fields = (
+            "id",
+            "status",
+            "revision",
+            "executor",
+            "kind",
+            "mode",
+            "inventory",
+            "start_time",
+            "stop_time",
+            "initiator",
+            "initiator_type",
+            "options",
+        )
 
 
 class OneHistorySerializer(_SignalSerializer):
@@ -269,24 +285,23 @@ class OneHistorySerializer(_SignalSerializer):
     class Meta:
         model = models.History
         fields = ("id",
-                  "project",
-                  "mode",
-                  "kind",
                   "status",
+                  "executor",
+                  "project",
+                  "revision",
+                  "inventory",
+                  "kind",
+                  "mode",
+                  "execute_args",
+                  "execution_time",
                   "start_time",
                   "stop_time",
-                  "execution_time",
-                  "inventory",
-                  "raw_inventory",
-                  "raw_args",
-                  "raw_stdout",
                   "initiator",
                   "initiator_type",
-                  "executor",
-                  "execute_args",
-                  "revision",
                   "options",
-                  "url")
+                  "raw_args",
+                  "raw_stdout",
+                  "raw_inventory",)
 
     def get_raw(self, request):
         return self.instance.get_raw(request.query_params.get("color", "no") == "yes")
@@ -706,7 +721,11 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
                                            default='',
                                            field='repo_auth',
                                            label='Repo auth data',
-                                           choices={'NONE': None})
+                                           types={
+                                               'KEY': 'secretfile',
+                                               'PASSWORD': 'password',
+                                               'NONE': 'disabled'
+                                           })
 
     class Meta:
         model = models.Project
