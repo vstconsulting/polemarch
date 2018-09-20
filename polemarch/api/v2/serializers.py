@@ -227,7 +227,6 @@ class TeamSerializer(_WithPermissionsSerializer):
         fields = (
             'id',
             "name",
-            'url',
         )
 
 
@@ -242,7 +241,6 @@ class OneTeamSerializer(TeamSerializer):
             "name",
             "notes",
             "owner",
-            'url',
         )
 
 
@@ -408,8 +406,7 @@ class HostSerializer(_WithVariablesSerializer):
         model = models.Host
         fields = ('id',
                   'name',
-                  'type',
-                  'url',)
+                  'type',)
 
 
 class OneHostSerializer(HostSerializer):
@@ -422,8 +419,7 @@ class OneHostSerializer(HostSerializer):
                   'name',
                   'notes',
                   'type',
-                  'owner',
-                  'url',)
+                  'owner',)
 
 
 class PlaybookSerializer(_WithVariablesSerializer):
@@ -641,8 +637,7 @@ class GroupSerializer(_WithVariablesSerializer):
         model = models.Group
         fields = ('id',
                   'name',
-                  'children',
-                  'url',)
+                  'children',)
 
 
 class OneGroupSerializer(GroupSerializer, _InventoryOperations):
@@ -655,8 +650,7 @@ class OneGroupSerializer(GroupSerializer, _InventoryOperations):
                   'name',
                   'notes',
                   'children',
-                  'owner',
-                  'url',)
+                  'owner',)
 
     class ValidationException(exceptions.ValidationError):
         status_code = 409
@@ -673,8 +667,7 @@ class InventorySerializer(_WithVariablesSerializer):
     class Meta:
         model = models.Inventory
         fields = ('id',
-                  'name',
-                  'url',)
+                  'name',)
 
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
@@ -686,8 +679,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
         fields = ('id',
                   'name',
                   'notes',
-                  'owner',
-                  'url',)
+                  'owner',)
 
 
 def list_to_choices(items_list):
@@ -750,8 +742,7 @@ class ProjectSerializer(_InventoryOperations):
         fields = ('id',
                   'name',
                   'type',
-                  'status',
-                  'url',)
+                  'status',)
 
     @transaction.atomic
     def _do_with_vars(self, *args, **kw):
@@ -822,7 +813,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
             else:  # nocv
                 raise Exception('Unknown kind')
             data = {
-                k:v for k,v in serializer.to_internal_value(data).items()
+                k: v for k, v in serializer.to_internal_value(data).items()
                 if k in data.keys() or v
             }
         history_id = self.instance.execute(
