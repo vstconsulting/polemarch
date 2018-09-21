@@ -2,8 +2,9 @@ PY = python2
 PIP = $(PY) -m pip
 PYTHON_BIN = $(shell $(PY) -c 'import sys, os; print(os.path.dirname(sys.executable))')
 RELOCATE_BIN = $(PYTHON_BIN)/venvctrl-relocate
-LOC_TEST_ENVS = py27-django111-install,py34-django111-install,flake,pylint
+LOC_TEST_ENVS = py27-install,py36-install,flake,pylint
 ENVS = $(LOC_TEST_ENVS)
+TOX_ARGS =
 TESTS =
 NAMEBASE = polemarch
 USER = $(NAMEBASE)
@@ -74,7 +75,7 @@ docs: print_vars
 	$(PY) setup.py build_sphinx --build-dir doc/_build -W
 
 test:
-	tox -e $(ENVS) $(TESTS)
+	tox $(TOX_ARGS) -e $(ENVS) $(TESTS)
 
 flake:
 	tox -e flake
