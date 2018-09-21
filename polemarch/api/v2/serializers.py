@@ -281,6 +281,7 @@ class ProjectHistorySerializer(HistorySerializer):
 
 class OneHistorySerializer(_SignalSerializer):
     raw_stdout = serializers.SerializerMethodField(read_only=True)
+    execution_time = vst_fields.UptimeField()
 
     class Meta:
         model = models.History
