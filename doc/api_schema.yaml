@@ -418,12 +418,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCreateMaster'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCreateMaster'
         '400':
           description: Validation error or some data error.
           schema:
@@ -875,12 +875,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
         '400':
           description: Validation error or some data error.
           schema:
@@ -3340,12 +3340,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCreateMaster'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCreateMaster'
         '400':
           description: Validation error or some data error.
           schema:
@@ -3802,12 +3802,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5003,12 +5003,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCreateMaster'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCreateMaster'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5761,12 +5761,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6306,12 +6306,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Inventory'
+            $ref: '#/definitions/OneInventory'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Inventory'
+            $ref: '#/definitions/OneInventory'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8098,12 +8098,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Periodictask'
+            $ref: '#/definitions/OnePeriodictask'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Periodictask'
+            $ref: '#/definitions/OnePeriodictask'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8823,12 +8823,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Template'
+            $ref: '#/definitions/OneTemplate'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Template'
+            $ref: '#/definitions/OneTemplate'
         '400':
           description: Validation error or some data error.
           schema:
@@ -9699,12 +9699,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/OneUser'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/OneUser'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10572,7 +10572,7 @@ definitions:
         format: select2
         additionalProperties:
           model:
-            $ref: '#/definitions/Owner'
+            $ref: '#/definitions/User'
           value_field: id
           view_field: username
   History:
