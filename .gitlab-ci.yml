@@ -92,7 +92,7 @@ code_style:
   variables:
     TOX_WORKDIR: "/cache/.tox_polemarch_code"
   script:
-   - make test ENVS=flake,pylint
+   - make test TOX_ARGS=$TOX_ARGS ENVS=flake,pylint
   only:
     - /^.{0,}issue_.*$/
     - developer
