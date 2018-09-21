@@ -91,6 +91,7 @@ code_style:
   image: onegreyonewhite/tox:tox
   variables:
     TOX_WORKDIR: "/cache/.tox_polemarch_code"
+    TOX_ARGS: "--workdir ${TOX_WORKDIR}"
   script:
    - make test TOX_ARGS=$TOX_ARGS ENVS=flake,pylint
   only:
