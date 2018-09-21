@@ -4,7 +4,9 @@ PYTHON_BIN = $(shell $(PY) -c 'import sys, os; print(os.path.dirname(sys.executa
 RELOCATE_BIN = $(PYTHON_BIN)/venvctrl-relocate
 LOC_TEST_ENVS = py27-install,py36-install,flake,pylint
 ENVS = $(LOC_TEST_ENVS)
-TOX_ARGS =
+ifndef TOX_ARGS
+	TOX_ARGS =
+endif
 TESTS =
 NAMEBASE = polemarch
 USER = $(NAMEBASE)

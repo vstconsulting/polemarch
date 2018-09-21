@@ -34,7 +34,7 @@ stages:
   variables:
     TOX_ENVS: ""
   script:
-   - make test TOX_ARGS=$TOX_ARGS ENVS=$TOX_ENVS
+   - make test ENVS=$TOX_ENVS
    - make build-clean
   except:
     - GUI
@@ -91,7 +91,7 @@ code_style:
   variables:
     TOX_ARGS: "--workdir /cache/.tox_polemarch_code"
   script:
-   - make test TOX_ARGS=$TOX_ARGS ENVS=flake,pylint
+   - make test ENVS=flake,pylint
   only:
     - /^.{0,}issue_.*$/
     - developer
