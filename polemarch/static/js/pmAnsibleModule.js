@@ -59,7 +59,7 @@ pmAnsibleModule.showInProject = function(holder, menuInfo, data)
 pmAnsibleModule.fastCommandWidget = function(holder)
 {
     console.error("Виджет fastCommandWidget не готов ещё!")
-    
+    return;
     let projects = new apiproject.list()
     let inventory = new apiinventory.list()
     
