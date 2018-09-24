@@ -101,6 +101,11 @@ class AnsibleCommand(PMObject):
         "other": "ERROR"
     }
 
+    class ExecutorClass(Executor):
+        '''
+        Default executor class.
+        '''
+
     class Inventory(object):
         def __init__(self, inventory, cwd="/tmp"):
             self.cwd = cwd
@@ -220,7 +225,7 @@ class AnsibleCommand(PMObject):
             self.inventory_object = None
         self.history.revision = project.revision
         self.history.save()
-        self.executor = Executor(self.history)
+        self.executor = self.ExecutorClass(self.history)
 
     def _send_hook(self, when):
         msg = OrderedDict(execution_type=self.history.kind, when=when)
