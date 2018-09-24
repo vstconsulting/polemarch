@@ -4834,7 +4834,7 @@ paths:
   /project/{pk}/execute_module/:
     post:
       operationId: project_execute_module
-      description: Execute ansible module.
+      description: Execute `ansible -m [module]` with arguments.
       parameters:
         - name: data
           in: body
@@ -4873,7 +4873,7 @@ paths:
   /project/{pk}/execute_playbook/:
     post:
       operationId: project_execute_playbook
-      description: Execute ansible module.
+      description: Execute `ansible-playbook` with arguments.
       parameters:
         - name: data
           in: body

@@ -15,6 +15,11 @@ from ...main import utils
 
 yes = True
 no = False
+execute_kw = dict(
+    methods=["post"], detail=yes,
+    response_serializer=sers.ExecuteResponseSerializer,
+    response_code=status.HTTP_201_CREATED
+)
 
 
 class _VariablesCopyMixin(base.CopyMixin):
@@ -464,12 +469,6 @@ class __PeriodicTaskViewSet(base.ModelViewSetSet):
         return serializer.execute().resp
 
 
-@method_decorator(name='execute', decorator=swagger_auto_schema(
-    operation_description='Execute template with option.',
-    responses={
-        status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(),
-    }
-))
 class __TemplateViewSet(base.ModelViewSetSet):
     '''
     retrieve:
@@ -496,7 +495,7 @@ class __TemplateViewSet(base.ModelViewSetSet):
     filter_class = filters.TemplateFilter
     POST_WHITE_LIST = ['execute']
 
-    @deco.action(["post"], detail=yes, serializer_class=sers.TemplateExecSerializer)
+    @deco.subaction(serializer_class=sers.TemplateExecSerializer, **execute_kw)
     def execute(self, request, *args, **kwargs):
         '''
         Execute template with option.
@@ -509,14 +508,6 @@ class __ProjectHistoryViewSet(HistoryViewSet):
     serializer_class = sers.ProjectHistorySerializer
 
 
-@method_decorator(name='execute_module', decorator=swagger_auto_schema(
-    operation_description='Execute ansible module.',
-    responses={status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(), }
-))
-@method_decorator(name='execute_playbook', decorator=swagger_auto_schema(
-    operation_description='Execute ansible module.',
-    responses={status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(), }
-))
 @method_decorator(name='sync', decorator=swagger_auto_schema(
     operation_description='Sync project repository.',
     responses={status.HTTP_200_OK: sers.ActionResponseSerializer(), }
@@ -572,7 +563,7 @@ class ProjectViewSet(_GroupMixin):
         '''
         return self.get_serializer(self.get_object()).sync().resp
 
-    @deco.action(["post"], detail=yes, serializer_class=sers.AnsiblePlaybookSerializer)
+    @deco.subaction(serializer_class=sers.AnsiblePlaybookSerializer, **execute_kw)
     def execute_playbook(self, request, *args, **kwargs):
         '''
         Execute `ansible-playbook` with arguments.
@@ -580,7 +571,7 @@ class ProjectViewSet(_GroupMixin):
         serializer = self.get_serializer(self.get_object())
         return serializer.execute_playbook(request).resp
 
-    @deco.action(["post"], detail=yes, serializer_class=sers.AnsibleModuleSerializer)
+    @deco.subaction(serializer_class=sers.AnsibleModuleSerializer, **execute_kw)
     def execute_module(self, request, *args, **kwargs):
         '''
         Execute `ansible -m [module]` with arguments.
