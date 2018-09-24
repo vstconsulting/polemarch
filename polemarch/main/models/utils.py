@@ -82,7 +82,8 @@ class Executor(CmdExecutor):
         self.history.write_line(line, self.counter, '\n')
 
     def execute(self, cmd, cwd):
-        self.history.raw_args = " ".join(cmd)
+        pm_ansible_path = ' '.join(self.pm_ansible())
+        self.history.raw_args = " ".join(cmd).replace(pm_ansible_path, '').lstrip()
         self.exchanger = KVExchanger(self.CANCEL_PREFIX + str(self.history.id))
         return super(Executor, self).execute(cmd, cwd)
 
@@ -162,7 +163,7 @@ class AnsibleCommand(PMObject):
         key, value = item
         key = key.replace('_', '-')
         if key == 'verbose':
-            extra_args += ['-' + ('v' * value)]
+            extra_args += ['-' + ('v' * value)] if value else []
             return extra_args, files
         result = [value, list()]
         if key in ["key-file", "private-key"]:
@@ -205,15 +206,18 @@ class AnsibleCommand(PMObject):
         return raw
 
     def prepare(self, target, inventory, history, project):
-        project.check_path(inventory)
+        project.check_path(inventory) if inventory else None
         self.target, self.project = target, project
         self.history = history if history else DummyHistory()
         self.history.status = "RUN"
         self.project.sync_on_execution_handler(self.history)
-        self.inventory_object = self.Inventory(inventory, cwd=self.workdir)
-        self.history.raw_inventory = self.hide_passwords(
-            self.inventory_object.raw
-        )
+        if inventory:
+            self.inventory_object = self.Inventory(inventory, cwd=self.workdir)
+            self.history.raw_inventory = self.hide_passwords(
+                self.inventory_object.raw
+            )
+        else:  # nocv
+            self.inventory_object = None
         self.history.revision = project.revision
         self.history.save()
         self.executor = Executor(self.history)
@@ -232,7 +236,10 @@ class AnsibleCommand(PMObject):
 
     def get_inventory_arg(self, target, extra_args):
         # pylint: disable=unused-argument
-        return [target, '-i', self.inventory_object.file_name]
+        args = [target]
+        if self.inventory_object is not None:
+            args += ['-i', self.inventory_object.file_name]
+        return args
 
     def get_args(self, target, extra_args):
         return (
@@ -297,7 +304,7 @@ class AnsibleModule(AnsibleCommand):
         self.ansible_ref['module-name'] = {'type': 'string'}
 
     def get_inventory_arg(self, target, extra_args):
-        if not self.inventory_object.is_file:
+        if self.inventory_object is not None and not self.inventory_object.is_file:
             return [self.inventory_object.file]
         return super(AnsibleModule, self).get_inventory_arg(target, extra_args)
 

@@ -320,31 +320,22 @@ tabSignal.connect("openapi.factory.history", function(data)
 tabSignal.connect("openapi.loaded", function()
 {
     let definitions = window.api.openapi.definitions;
-    definitions['History'].properties['project']['prefetch'] = {
-        path: function (obj) {
-            return "/project/";
-        },
-        properties: [],
-        view_field: "",
-        link: true
-    }
-    definitions['History'].properties['inventory']['prefetch'] = {
-        path: function (obj) {
-            return "/inventory/";
-        },
-        properties: [],
-        view_field: "",
-        link: true
-    }
-    definitions['History'].properties['executor']['prefetch'] = {
+    var executor_prefetch = {
         path: function (obj) {
             return "/user/";
-        },
-        properties: [],
-        view_field: "",
-        link: true
-    }
-    definitions['History'].properties['initiator']['prefetch'] = {
+        }
+    };
+    var inventory_prefetch = {
+        path: function (obj) {
+            return "/inventory/";
+        }
+    };
+    var project_prefetch = {
+        path: function (obj) {
+            return "/project/";
+        }
+    };
+    var initiator_prefetch = {
         path: function (obj) {
             if(obj.initiator_type == 'project')
             {
@@ -352,18 +343,48 @@ tabSignal.connect("openapi.loaded", function()
             }
             else if(obj.initiator_type == 'template')
             {
-                return "/project/"+obj["project"]+"/template";
-
+                return "/project/"+obj["project"]+"/template/";
             }
             else
             {
                 return false;
             }
-        },
-        properties: [],
-        view_field: "",
-        link: true
-    }
+        }
+    };
+    var prefetch_definitions = ['History', 'OneHistory', 'ProjectHistory'];
+    prefetch_definitions.forEach(function (value) {
+        if (definitions[value] && definitions[value].properties['executor']) {
+            definitions[value].properties['executor']['prefetch'] = executor_prefetch
+        }
+        if (definitions[value] && definitions[value].properties['initiator']) {
+            definitions[value].properties['initiator']['prefetch'] = initiator_prefetch
+        }
+        if (definitions[value] && definitions[value].properties['inventory']) {
+            definitions[value].properties['inventory']['prefetch'] = inventory_prefetch
+        }
+        if (definitions[value] && definitions[value].properties['project']) {
+            definitions[value].properties['project']['prefetch'] = project_prefetch
+        }
+    });
 
+    if (definitions['ProjectHistory'] && definitions['ProjectHistory'].properties['initiator']) {
+        definitions['ProjectHistory'].properties['initiator']['prefetch'] =  {
+            path: function (obj) {
+                if(obj.initiator_type == 'project')
+                {
+                    return "/project/";
+                }
+                else if(obj.initiator_type == 'template')
+                {
+                    var project_id = spajs.urlInfo.data.reg.parent_id;
+                    return "/project/"+project_id+"/template/";
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        };
+    }
 
 });

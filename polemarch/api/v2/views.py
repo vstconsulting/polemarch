@@ -505,6 +505,10 @@ class __TemplateViewSet(base.ModelViewSetSet):
         return self.get_serializer(obj).execute(request).resp
 
 
+class __ProjectHistoryViewSet(HistoryViewSet):
+    serializer_class = sers.ProjectHistorySerializer
+
+
 @method_decorator(name='execute_module', decorator=swagger_auto_schema(
     operation_description='Execute ansible module.',
     responses={status.HTTP_201_CREATED: sers.ExecuteResponseSerializer(), }
@@ -525,7 +529,7 @@ class __TemplateViewSet(base.ModelViewSetSet):
 @deco.nested_view('module', 'id', view=__ModuleViewSet, methods=['get'])
 @deco.nested_view('template', 'id', manager_name='template', view=__TemplateViewSet)
 @deco.nested_view('periodic_task', 'id', view=__PeriodicTaskViewSet)
-@deco.nested_view('history', 'id', manager_name='history', view=HistoryViewSet)
+@deco.nested_view('history', 'id', manager_name='history', view=__ProjectHistoryViewSet)
 @deco.nested_view('variables', 'id', view=__ProjectVarsViewSet)
 class ProjectViewSet(_GroupMixin):
     '''
