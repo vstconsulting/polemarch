@@ -15,11 +15,17 @@ from ...main import utils
 
 yes = True
 no = False
-execute_kw = dict(
-    methods=["post"], detail=yes,
+default_action = dict(methods=["post"], detail=yes)
+action_kw = dict(**default_action)
+action_kw.update(dict(
+response_serializer=sers.ActionResponseSerializer,
+    response_code=status.HTTP_200_OK
+))
+execute_kw = dict(**default_action)
+execute_kw.update(dict(
     response_serializer=sers.ExecuteResponseSerializer,
     response_code=status.HTTP_201_CREATED
-)
+))
 
 
 class _VariablesCopyMixin(base.CopyMixin):
@@ -224,6 +230,7 @@ class __HistoryLineViewSet(base.ReadOnlyModelViewSet):
 
 
 @method_decorator(name='lines_list', decorator=swagger_auto_schema(auto_schema=None))
+@method_decorator(name='raw', decorator=swagger_auto_schema(auto_schema=None))
 @deco.nested_view('lines', manager_name='raw_history_line', view=__HistoryLineViewSet)
 class HistoryViewSet(base.HistoryModelViewSet):
     '''
@@ -244,7 +251,6 @@ class HistoryViewSet(base.HistoryModelViewSet):
     filter_class = filters.HistoryFilter
     POST_WHITE_LIST = ['cancel']
 
-    @swagger_auto_schema(auto_schema=None)
     @deco.action(["get"], detail=yes, serializer_class=sers.EmptySerializer)
     def raw(self, request, *args, **kwargs):
         '''
@@ -253,7 +259,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
         result = self.get_serializer(self.get_object()).get_raw(request)
         return HttpResponse(result, content_type="text/plain")
 
-    @deco.action(["post"], detail=yes, serializer_class=sers.EmptySerializer)
+    @deco.subaction(serializer_class=sers.EmptySerializer, **action_kw)
     def cancel(self, request, *args, **kwargs):
         '''
         Cencel working task.
@@ -271,7 +277,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
         objs = self.get_serializer(self.get_object()).get_facts(request)
         return base.Response(objs, status.HTTP_200_OK).resp
 
-    @deco.action(["delete"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.subaction(["delete"], detail=yes, serializer_class=sers.EmptySerializer)
     def clear(self, request, *args, **kwargs):
         '''
         Clear history output.
@@ -460,7 +466,7 @@ class __PeriodicTaskViewSet(base.ModelViewSetSet):
     serializer_class_one = sers.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
 
-    @deco.action(methods=["post"], detail=yes)
+    @deco.subaction(serializer_class=sers.EmptySerializer, **execute_kw)
     def execute(self, request, *args, **kwargs):
         '''
         Ad-hoc execute periodic task.
@@ -508,10 +514,6 @@ class __ProjectHistoryViewSet(HistoryViewSet):
     serializer_class = sers.ProjectHistorySerializer
 
 
-@method_decorator(name='sync', decorator=swagger_auto_schema(
-    operation_description='Sync project repository.',
-    responses={status.HTTP_200_OK: sers.ActionResponseSerializer(), }
-))
 @deco.nested_view(
     'inventory', 'id', manager_name='inventories',
     allow_append=yes, view=InventoryViewSet
@@ -556,7 +558,7 @@ class ProjectViewSet(_GroupMixin):
         instance.status = instance.__class__._meta.get_field('status').default
         return super(ProjectViewSet, self).copy_instance(instance)
 
-    @deco.action(methods=["post"], detail=yes, serializer_class=vstsers.EmptySerializer)
+    @deco.subaction(serializer_class=vstsers.EmptySerializer, **action_kw)
     def sync(self, request, *args, **kwargs):
         '''
         Sync project with repository.
