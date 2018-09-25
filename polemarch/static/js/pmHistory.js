@@ -337,21 +337,20 @@ tabSignal.connect("openapi.loaded", function()
     };
     var initiator_prefetch = {
         path: function (obj) {
-            if(obj.initiator_type == 'project')
-            {
+            if (obj.initiator_type == 'project') {
                 return "/project/";
             }
-            else if(obj.initiator_type == 'template')
-            {
-                return "/project/"+obj["project"]+"/template";
+            else if (obj.initiator_type == 'template') {
+                return "/project/" + obj["project"] + "/template";
 
             }
-            else
-            {
+            else {
                 return false;
-            return "/project/";
+                return "/project/";
+            }
         }
     };
+
     var initiator_prefetch = {
         path: function (obj) {
             if(obj.initiator_type == 'project')
@@ -401,42 +400,6 @@ tabSignal.connect("openapi.loaded", function()
                     return false;
                 }
             }
-        }
-    };
-    var prefetch_definitions = ['History', 'OneHistory', 'ProjectHistory'];
-    prefetch_definitions.forEach(function (value) {
-        if (definitions[value] && definitions[value].properties['executor']) {
-            definitions[value].properties['executor']['prefetch'] = executor_prefetch
-        }
-        if (definitions[value] && definitions[value].properties['initiator']) {
-            definitions[value].properties['initiator']['prefetch'] = initiator_prefetch
-        }
-        if (definitions[value] && definitions[value].properties['inventory']) {
-            definitions[value].properties['inventory']['prefetch'] = inventory_prefetch
-        }
-        if (definitions[value] && definitions[value].properties['project']) {
-            definitions[value].properties['project']['prefetch'] = project_prefetch
-        }
-    });
-
-    if (definitions['ProjectHistory'] && definitions['ProjectHistory'].properties['initiator']) {
-        definitions['ProjectHistory'].properties['initiator']['prefetch'] =  {
-            path: function (obj) {
-                if(obj.initiator_type == 'project')
-                {
-                    return "/project/";
-                }
-                else if(obj.initiator_type == 'template')
-                {
-                    var project_id = spajs.urlInfo.data.reg.parent_id;
-                    return "/project/"+project_id+"/template/";
-                }
-                else
-                {
-                    return false;
-                }
-            }
         };
     }
-
 });
