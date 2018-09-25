@@ -98,7 +98,7 @@ class ExecuteResponseSerializer(ActionResponseSerializer):
 
 
 class SetOwnerSerializer(DataSerializer):
-    user_id = vst_fields.Select2Field(required=True, select='Owner',
+    user_id = vst_fields.Select2Field(required=True, select='User',
                                       label='New owner',
                                       autocomplete_represent='username')
 
@@ -281,7 +281,6 @@ class ProjectHistorySerializer(HistorySerializer):
 
 class OneHistorySerializer(_SignalSerializer):
     raw_stdout = serializers.SerializerMethodField(read_only=True)
-    execution_time = vst_fields.UptimeField()
 
     class Meta:
         model = models.History
