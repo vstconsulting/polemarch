@@ -337,14 +337,29 @@ tabSignal.connect("openapi.loaded", function()
     };
     var initiator_prefetch = {
         path: function (obj) {
+            if (obj.initiator_type == 'project') {
+                return "/project/";
+            }
+            else if (obj.initiator_type == 'template') {
+                return "/project/" + obj["project"] + "/template";
+
+            }
+            else {
+                return false;
+                return "/project/";
+            }
+        }
+    };
+
+    var initiator_prefetch = {
+        path: function (obj) {
             if(obj.initiator_type == 'project')
             {
                 return "/project/";
             }
             else if(obj.initiator_type == 'template')
             {
-                return "/project/"+obj["project"]+"/template";
-
+                return "/project/"+obj["project"]+"/template/";
             }
             else
             {
@@ -368,4 +383,25 @@ tabSignal.connect("openapi.loaded", function()
         }
     });
 
+    if (definitions['ProjectHistory'] && definitions['ProjectHistory'].properties['initiator']) {
+        definitions['ProjectHistory'].properties['initiator']['prefetch'] =  {
+            path: function (obj) {
+                if(obj.initiator_type == 'project')
+                {
+                    return "/project/";
+                }
+                else if(obj.initiator_type == 'template')
+                {
+                    var project_id = spajs.urlInfo.data.reg.parent_id;
+                    return "/project/"+project_id+"/template/";
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        };
+    }
+
+    definitions['OneHistory'].properties['execute_args'].format = 'json';
 });

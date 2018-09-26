@@ -1790,10 +1790,10 @@ paths:
           schema:
             $ref: '#/definitions/Empty'
       responses:
-        '201':
+        '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Empty'
+            $ref: '#/definitions/ActionResponse'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4834,7 +4834,7 @@ paths:
   /project/{pk}/execute_module/:
     post:
       operationId: project_execute_module
-      description: Execute ansible module.
+      description: Execute `ansible -m [module]` with arguments.
       parameters:
         - name: data
           in: body
@@ -4873,7 +4873,7 @@ paths:
   /project/{pk}/execute_playbook/:
     post:
       operationId: project_execute_playbook
-      description: Execute ansible module.
+      description: Execute `ansible-playbook` with arguments.
       parameters:
         - name: data
           in: body
@@ -5545,7 +5545,7 @@ paths:
   /project/{pk}/history/{history_id}/cancel/:
     post:
       operationId: project_history_cancel
-      description: ''
+      description: Cencel working task.
       parameters:
         - name: data
           in: body
@@ -5553,10 +5553,10 @@ paths:
           schema:
             $ref: '#/definitions/Empty'
       responses:
-        '201':
+        '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Empty'
+            $ref: '#/definitions/ActionResponse'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5589,7 +5589,7 @@ paths:
   /project/{pk}/history/{history_id}/clear/:
     delete:
       operationId: project_history_clear
-      description: ''
+      description: Clear history output.
       parameters: []
       responses:
         '204':
@@ -8260,18 +8260,18 @@ paths:
   /project/{pk}/periodic_task/{periodic_task_id}/execute/:
     post:
       operationId: project_periodic_task_execute
-      description: ''
+      description: Ad-hoc execute periodic task.
       parameters:
         - name: data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Periodictask'
+            $ref: '#/definitions/Empty'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Periodictask'
+            $ref: '#/definitions/ExecuteResponse'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8688,7 +8688,7 @@ paths:
   /project/{pk}/sync/:
     post:
       operationId: project_sync
-      description: Sync project repository.
+      description: Sync project with repository.
       parameters:
         - name: data
           in: body
@@ -10710,6 +10710,15 @@ definitions:
   Empty:
     type: object
     properties: {}
+  ActionResponse:
+    required:
+      - detail
+    type: object
+    properties:
+      detail:
+        title: Detail
+        type: string
+        minLength: 1
   Data:
     type: object
     properties: {}
@@ -11545,15 +11554,6 @@ definitions:
         title: Playbook
         type: string
         readOnly: true
-        minLength: 1
-  ActionResponse:
-    required:
-      - detail
-    type: object
-    properties:
-      detail:
-        title: Detail
-        type: string
         minLength: 1
   Template:
     required:

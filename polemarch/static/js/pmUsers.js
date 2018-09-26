@@ -1,47 +1,3 @@
-tabSignal.connect("openapi.factory.user", function(data)
-{
-    apiuser.one.copy = function()
-    {
-        var def = new $.Deferred();
-        var thisObj = this;
-
-        $.when(this.loadItem(this.model.data.id)).done(function()
-        {
-            var data = thisObj.model.items[this.model.data.id];
-            delete data.id;
-            data.username = "copy-from-" + data.username
-
-            $.when(encryptedCopyModal.replace(data)).done(function(data)
-            {
-                spajs.ajax.Call({
-                    url: hostname + "/api/v2/"+thisObj.model.name+"/",
-                    type: "POST",
-                    contentType:'application/json',
-                    data: JSON.stringify(data),
-                    success: function(data)
-                    {
-                        thisObj.model.items[data.id] = data
-                        def.resolve(data.id)
-                    },
-                    error:function(e)
-                    {
-                        def.reject(e)
-                    }
-                });
-            }).fail(function(e)
-            {
-                def.reject(e)
-            })
-        }).fail(function(e)
-        {
-            def.reject(e)
-        })
-
-
-        return def.promise();
-    }
-})
-
 var pmUsers = {}
 
 
@@ -129,70 +85,10 @@ pmUsers.changePassword = function(item_id)
     }
     return def.promise();
 }
- 
-//создание страницы профиля текущего пользователя
-//@todo нужно доделать
-tabSignal.connect("openapi.completed", function()
-{
-    var page = new guiPage();
-
-    // Настроили страницу
-    page.blocks.push({
-        id:'itemOne',
-        render:(menuInfo, data)=>
-        {
-            var pageItem = new apisettings.one({
-                url:{
-                    page:'user/'+my_user_id+'/settings',
-                    api_pk:my_user_id
-                }
-            })
-
-            var def = new $.Deferred();
-            $.when(pageItem.load(my_user_id)).done(function()
-            {
-                def.resolve(pageItem.renderAsPage())
-            }).fail(function(err)
-            {
-                def.resolve(renderErrorAsPage(err));
-            })
-
-            return def.promise();
-        }
-    })
-
-    page.registerURL([/^profile\/settings$/], "profile_settings");
-})
-
 
 tabSignal.connect("openapi.completed", function()
 {
-    var page = new guiPage();
-
-    // Настроили страницу
-    page.blocks.push({
-        id:'itemOne',
-        render:(menuInfo, data)=>
-        {
-            var pageItem = new apiuser.one({
-                url:{
-                    page:'user/'+my_user_id,
-                    api_pk:my_user_id
-                }
-            })
-
-            var def = new $.Deferred();
-            $.when(pageItem.load(my_user_id)).done(function()
-            {
-                def.resolve(pageItem.renderAsPage())
-            }).fail(function(err)
-            {
-                def.resolve(renderErrorAsPage(err));
-            })
-
-            return def.promise();
-        }
-    })
-
-    page.registerURL([/^profile$/], "profile");
+    let user_settings = guiSchema.path['/user/{pk}/settings/'];
+    user_settings.canEdit = true;
+    user_settings.methodEdit = 'post';
 })

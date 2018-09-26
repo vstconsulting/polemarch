@@ -93,12 +93,12 @@ class ActionResponseSerializer(DataSerializer, EmptySerializer):
 
 
 class ExecuteResponseSerializer(ActionResponseSerializer):
-    history_id = vst_fields.RedirectIntegerField(default=None, allow_null=True)
+    history_id = serializers.IntegerField(default=None, allow_null=True)
     executor = serializers.IntegerField(default=None, allow_null=True)
 
 
 class SetOwnerSerializer(DataSerializer):
-    user_id = vst_fields.Select2Field(required=True, select='Owner',
+    user_id = vst_fields.Select2Field(required=True, select='User',
                                       label='New owner',
                                       autocomplete_represent='username')
 
