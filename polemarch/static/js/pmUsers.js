@@ -85,3 +85,10 @@ pmUsers.changePassword = function(item_id)
     }
     return def.promise();
 }
+
+tabSignal.connect("openapi.completed", function()
+{
+    let user_settings = guiSchema.path['/user/{pk}/settings/'];
+    user_settings.canEdit = true;
+    user_settings.methodEdit = 'post';
+})
