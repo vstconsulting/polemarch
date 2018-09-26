@@ -402,4 +402,6 @@ tabSignal.connect("openapi.loaded", function()
             }
         };
     }
+
+    definitions['OneHistory'].properties['execute_args'].format = 'json';
 });
