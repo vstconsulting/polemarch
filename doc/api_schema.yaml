@@ -26,7 +26,7 @@ info:
     library: 0.2.0
     vstutils: 1.2.0.dev8
     django: 1.11.15
-    ansible: 2.6.2
+    ansible: 2.6.4
   version: v2
 host: localhost:8080
 schemes:
@@ -576,10 +576,98 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
+  /group/{pk}/group/{group_id}/copy/:
+    post:
+      operationId: group_group_copy
+      description: Copy instance with deps.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Group'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - group
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+  /group/{pk}/group/{group_id}/set_owner/:
+    post:
+      operationId: group_group_set_owner
+      description: Change instance owner.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SetOwner'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/SetOwner'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - group
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
   /group/{pk}/group/{group_id}/variables/:
     get:
       operationId: group_group_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters: []
       responses:
         '200':
@@ -606,7 +694,7 @@ paths:
         - group
     post:
       operationId: group_group_variables_add
-      description: ''
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -650,7 +738,7 @@ paths:
   /group/{pk}/group/{group_id}/variables/{variables_id}/:
     get:
       operationId: group_group_variables_get
-      description: ''
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -677,7 +765,7 @@ paths:
         - group
     put:
       operationId: group_group_variables_update
-      description: ''
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -709,7 +797,7 @@ paths:
         - group
     patch:
       operationId: group_group_variables_edit
-      description: ''
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -741,7 +829,7 @@ paths:
         - group
     delete:
       operationId: group_group_variables_remove
-      description: ''
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -1036,7 +1124,7 @@ paths:
   /group/{pk}/host/{host_id}/copy/:
     post:
       operationId: group_host_copy
-      description: ''
+      description: Copy instance with deps.
       parameters:
         - name: data
           in: body
@@ -1080,7 +1168,7 @@ paths:
   /group/{pk}/host/{host_id}/set_owner/:
     post:
       operationId: group_host_set_owner
-      description: ''
+      description: Change instance owner.
       parameters:
         - name: data
           in: body
@@ -1124,7 +1212,7 @@ paths:
   /group/{pk}/host/{host_id}/variables/:
     get:
       operationId: group_host_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters: []
       responses:
         '200':
@@ -1151,7 +1239,7 @@ paths:
         - group
     post:
       operationId: group_host_variables_add
-      description: ''
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -1195,7 +1283,7 @@ paths:
   /group/{pk}/host/{host_id}/variables/{variables_id}/:
     get:
       operationId: group_host_variables_get
-      description: ''
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -1222,7 +1310,7 @@ paths:
         - group
     put:
       operationId: group_host_variables_update
-      description: ''
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -1254,7 +1342,7 @@ paths:
         - group
     patch:
       operationId: group_host_variables_edit
-      description: ''
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -1286,7 +1374,7 @@ paths:
         - group
     delete:
       operationId: group_host_variables_remove
-      description: ''
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -1514,7 +1602,7 @@ paths:
         - group
     put:
       operationId: group_variables_update
-      description: Update a user.
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -2601,7 +2689,7 @@ paths:
         - host
     put:
       operationId: host_variables_update
-      description: Update a user.
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -3043,7 +3131,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneGroup'
+            $ref: '#/definitions/Group'
         '400':
           description: Validation error or some data error.
           schema:
@@ -3178,7 +3266,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneHost'
+            $ref: '#/definitions/Host'
         '400':
           description: Validation error or some data error.
           schema:
@@ -3498,10 +3586,98 @@ paths:
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
+  /inventory/{pk}/group/{group_id}/copy/:
+    post:
+      operationId: inventory_group_copy
+      description: Copy instance with deps.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Group'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - inventory
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
+  /inventory/{pk}/group/{group_id}/set_owner/:
+    post:
+      operationId: inventory_group_set_owner
+      description: Change instance owner.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SetOwner'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/SetOwner'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - inventory
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
   /inventory/{pk}/group/{group_id}/variables/:
     get:
       operationId: inventory_group_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters: []
       responses:
         '200':
@@ -3528,7 +3704,7 @@ paths:
         - inventory
     post:
       operationId: inventory_group_variables_add
-      description: ''
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -3572,7 +3748,7 @@ paths:
   /inventory/{pk}/group/{group_id}/variables/{variables_id}/:
     get:
       operationId: inventory_group_variables_get
-      description: ''
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -3599,7 +3775,7 @@ paths:
         - inventory
     put:
       operationId: inventory_group_variables_update
-      description: ''
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -3631,7 +3807,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_variables_edit
-      description: ''
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -3663,7 +3839,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_variables_remove
-      description: ''
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -3963,7 +4139,7 @@ paths:
   /inventory/{pk}/host/{host_id}/copy/:
     post:
       operationId: inventory_host_copy
-      description: ''
+      description: Copy instance with deps.
       parameters:
         - name: data
           in: body
@@ -4007,7 +4183,7 @@ paths:
   /inventory/{pk}/host/{host_id}/set_owner/:
     post:
       operationId: inventory_host_set_owner
-      description: ''
+      description: Change instance owner.
       parameters:
         - name: data
           in: body
@@ -4051,7 +4227,7 @@ paths:
   /inventory/{pk}/host/{host_id}/variables/:
     get:
       operationId: inventory_host_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters: []
       responses:
         '200':
@@ -4078,7 +4254,7 @@ paths:
         - inventory
     post:
       operationId: inventory_host_variables_add
-      description: ''
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -4122,7 +4298,7 @@ paths:
   /inventory/{pk}/host/{host_id}/variables/{variables_id}/:
     get:
       operationId: inventory_host_variables_get
-      description: ''
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -4149,7 +4325,7 @@ paths:
         - inventory
     put:
       operationId: inventory_host_variables_update
-      description: ''
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -4181,7 +4357,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_host_variables_edit
-      description: ''
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -4213,7 +4389,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_host_variables_remove
-      description: ''
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -4441,7 +4617,7 @@ paths:
         - inventory
     put:
       operationId: inventory_variables_update
-      description: Update a user.
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -5161,10 +5337,98 @@ paths:
         description: A unique integer value identifying this project.
         required: true
         type: integer
+  /project/{pk}/group/{group_id}/copy/:
+    post:
+      operationId: project_group_copy
+      description: Copy instance with deps.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Group'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - project
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+  /project/{pk}/group/{group_id}/set_owner/:
+    post:
+      operationId: project_group_set_owner
+      description: Change instance owner.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SetOwner'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/SetOwner'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - project
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
   /project/{pk}/group/{group_id}/variables/:
     get:
       operationId: project_group_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters: []
       responses:
         '200':
@@ -5191,7 +5455,7 @@ paths:
         - project
     post:
       operationId: project_group_variables_add
-      description: ''
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -5235,7 +5499,7 @@ paths:
   /project/{pk}/group/{group_id}/variables/{variables_id}/:
     get:
       operationId: project_group_variables_get
-      description: ''
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -5262,7 +5526,7 @@ paths:
         - project
     put:
       operationId: project_group_variables_update
-      description: ''
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -5294,7 +5558,7 @@ paths:
         - project
     patch:
       operationId: project_group_variables_edit
-      description: ''
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -5326,7 +5590,7 @@ paths:
         - project
     delete:
       operationId: project_group_variables_remove
-      description: ''
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -5626,7 +5890,8 @@ paths:
   /project/{pk}/history/{history_id}/facts/:
     get:
       operationId: project_history_facts
-      description: ''
+      description: Get compilated history facts (only for execution 'module' with
+        module 'setup').
       parameters: []
       responses:
         '200':
@@ -5922,7 +6187,7 @@ paths:
   /project/{pk}/host/{host_id}/copy/:
     post:
       operationId: project_host_copy
-      description: ''
+      description: Copy instance with deps.
       parameters:
         - name: data
           in: body
@@ -5966,7 +6231,7 @@ paths:
   /project/{pk}/host/{host_id}/set_owner/:
     post:
       operationId: project_host_set_owner
-      description: ''
+      description: Change instance owner.
       parameters:
         - name: data
           in: body
@@ -6010,7 +6275,7 @@ paths:
   /project/{pk}/host/{host_id}/variables/:
     get:
       operationId: project_host_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters: []
       responses:
         '200':
@@ -6037,7 +6302,7 @@ paths:
         - project
     post:
       operationId: project_host_variables_add
-      description: ''
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -6081,7 +6346,7 @@ paths:
   /project/{pk}/host/{host_id}/variables/{variables_id}/:
     get:
       operationId: project_host_variables_get
-      description: ''
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -6108,7 +6373,7 @@ paths:
         - project
     put:
       operationId: project_host_variables_update
-      description: ''
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -6140,7 +6405,7 @@ paths:
         - project
     patch:
       operationId: project_host_variables_edit
-      description: ''
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -6172,7 +6437,7 @@ paths:
         - project
     delete:
       operationId: project_host_variables_remove
-      description: ''
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -6468,7 +6733,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/all_groups/:
     get:
       operationId: project_inventory_all_groups_list
-      description: ''
+      description: Return all groups.
       parameters: []
       responses:
         '200':
@@ -6508,13 +6773,13 @@ paths:
   /project/{pk}/inventory/{inventory_id}/all_groups/{all_groups_id}/:
     get:
       operationId: project_inventory_all_groups_get
-      description: ''
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneGroup'
+            $ref: '#/definitions/Group'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6552,7 +6817,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/all_hosts/:
     get:
       operationId: project_inventory_all_hosts_list
-      description: ''
+      description: Return all hosts.
       parameters: []
       responses:
         '200':
@@ -6592,13 +6857,13 @@ paths:
   /project/{pk}/inventory/{inventory_id}/all_hosts/{all_hosts_id}/:
     get:
       operationId: project_inventory_all_hosts_get
-      description: ''
+      description: Return a host instance.
       parameters: []
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneHost'
+            $ref: '#/definitions/Host'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6636,7 +6901,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/copy/:
     post:
       operationId: project_inventory_copy
-      description: ''
+      description: Copy instance with deps.
       parameters:
         - name: data
           in: body
@@ -6681,7 +6946,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/group/:
     get:
       operationId: project_inventory_group_list
-      description: ''
+      description: Return all groups.
       parameters: []
       responses:
         '200':
@@ -6708,7 +6973,7 @@ paths:
         - project
     post:
       operationId: project_inventory_group_add
-      description: ''
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -6753,13 +7018,13 @@ paths:
   /project/{pk}/inventory/{inventory_id}/group/{group_id}/:
     get:
       operationId: project_inventory_group_get
-      description: ''
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneGroup'
+            $ref: '#/definitions/Group'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6780,18 +7045,18 @@ paths:
         - project
     put:
       operationId: project_inventory_group_update
-      description: ''
+      description: Update a group.
       parameters:
         - name: data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneGroup'
+            $ref: '#/definitions/Group'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneGroup'
+            $ref: '#/definitions/Group'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6812,18 +7077,18 @@ paths:
         - project
     patch:
       operationId: project_inventory_group_edit
-      description: ''
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneGroup'
+            $ref: '#/definitions/Group'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneGroup'
+            $ref: '#/definitions/Group'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6844,7 +7109,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_group_remove
-      description: ''
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -6884,10 +7149,110 @@ paths:
         description: A unique integer value identifying this project.
         required: true
         type: integer
+  /project/{pk}/inventory/{inventory_id}/group/{group_id}/copy/:
+    post:
+      operationId: project_inventory_group_inventory_copy
+      description: Copy instance with deps.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Group'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - project
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+  /project/{pk}/inventory/{inventory_id}/group/{group_id}/set_owner/:
+    post:
+      operationId: project_inventory_group_inventory_set_owner
+      description: Change instance owner.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/Group'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - project
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+      - name: pk
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
   /project/{pk}/inventory/{inventory_id}/group/{group_id}/variables/:
     get:
       operationId: project_inventory_group_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters: []
       responses:
         '200':
@@ -6914,7 +7279,7 @@ paths:
         - project
     post:
       operationId: project_inventory_group_variables_add
-      description: ''
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -6964,7 +7329,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/group/{group_id}/variables/{variables_id}/:
     get:
       operationId: project_inventory_group_variables_get
-      description: ''
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -6991,7 +7356,7 @@ paths:
         - project
     put:
       operationId: project_inventory_group_variables_update
-      description: ''
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -7023,7 +7388,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_group_variables_edit
-      description: ''
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -7055,7 +7420,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_group_variables_remove
-      description: ''
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -7104,7 +7469,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/host/:
     get:
       operationId: project_inventory_host_list
-      description: ''
+      description: Return all hosts.
       parameters: []
       responses:
         '200':
@@ -7131,7 +7496,7 @@ paths:
         - project
     post:
       operationId: project_inventory_host_add
-      description: ''
+      description: Create a new host.
       parameters:
         - name: data
           in: body
@@ -7176,13 +7541,13 @@ paths:
   /project/{pk}/inventory/{inventory_id}/host/{host_id}/:
     get:
       operationId: project_inventory_host_get
-      description: ''
+      description: Return a host instance.
       parameters: []
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneHost'
+            $ref: '#/definitions/Host'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7203,18 +7568,18 @@ paths:
         - project
     put:
       operationId: project_inventory_host_update
-      description: ''
+      description: Update a host.
       parameters:
         - name: data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneHost'
+            $ref: '#/definitions/Host'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneHost'
+            $ref: '#/definitions/Host'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7235,18 +7600,18 @@ paths:
         - project
     patch:
       operationId: project_inventory_host_edit
-      description: ''
+      description: Update one or more fields on an existing host.
       parameters:
         - name: data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneHost'
+            $ref: '#/definitions/Host'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneHost'
+            $ref: '#/definitions/Host'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7267,7 +7632,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_host_remove
-      description: ''
+      description: Remove an existing host.
       parameters: []
       responses:
         '204':
@@ -7310,7 +7675,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/host/{host_id}/copy/:
     post:
       operationId: project_inventory_host_inventory_copy
-      description: ''
+      description: Copy instance with deps.
       parameters:
         - name: data
           in: body
@@ -7360,18 +7725,18 @@ paths:
   /project/{pk}/inventory/{inventory_id}/host/{host_id}/set_owner/:
     post:
       operationId: project_inventory_host_inventory_set_owner
-      description: ''
+      description: Change instance owner.
       parameters:
         - name: data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/SetOwner'
+            $ref: '#/definitions/Host'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/SetOwner'
+            $ref: '#/definitions/Host'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7410,7 +7775,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/host/{host_id}/variables/:
     get:
       operationId: project_inventory_host_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters: []
       responses:
         '200':
@@ -7437,7 +7802,7 @@ paths:
         - project
     post:
       operationId: project_inventory_host_variables_add
-      description: ''
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -7487,7 +7852,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/host/{host_id}/variables/{variables_id}/:
     get:
       operationId: project_inventory_host_variables_get
-      description: ''
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -7514,7 +7879,7 @@ paths:
         - project
     put:
       operationId: project_inventory_host_variables_update
-      description: ''
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -7546,7 +7911,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_host_variables_edit
-      description: ''
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -7578,7 +7943,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_host_variables_remove
-      description: ''
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -7627,7 +7992,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/set_owner/:
     post:
       operationId: project_inventory_set_owner
-      description: ''
+      description: Change instance owner.
       parameters:
         - name: data
           in: body
@@ -7672,7 +8037,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/variables/:
     get:
       operationId: project_inventory_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters: []
       responses:
         '200':
@@ -7699,7 +8064,7 @@ paths:
         - project
     post:
       operationId: project_inventory_variables_add
-      description: ''
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -7744,7 +8109,7 @@ paths:
   /project/{pk}/inventory/{inventory_id}/variables/{variables_id}/:
     get:
       operationId: project_inventory_variables_get
-      description: ''
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -7771,7 +8136,7 @@ paths:
         - project
     put:
       operationId: project_inventory_variables_update
-      description: ''
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -7803,7 +8168,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_variables_edit
-      description: ''
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -7835,7 +8200,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_variables_remove
-      description: ''
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -8098,12 +8463,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OnePeriodictask'
+            $ref: '#/definitions/Periodictask'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OnePeriodictask'
+            $ref: '#/definitions/Periodictask'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8137,7 +8502,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OnePeriodictask'
+            $ref: '#/definitions/Periodictask'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8164,12 +8529,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OnePeriodictask'
+            $ref: '#/definitions/Periodictask'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OnePeriodictask'
+            $ref: '#/definitions/Periodictask'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8196,12 +8561,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OnePeriodictask'
+            $ref: '#/definitions/Periodictask'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OnePeriodictask'
+            $ref: '#/definitions/Periodictask'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8305,7 +8670,7 @@ paths:
   /project/{pk}/periodic_task/{periodic_task_id}/variables/:
     get:
       operationId: project_periodic_task_variables_list
-      description: ''
+      description: Return all variables of instance.
       parameters: []
       responses:
         '200':
@@ -8332,7 +8697,7 @@ paths:
         - project
     post:
       operationId: project_periodic_task_variables_add
-      description: ''
+      description: Create a new variable of instance.
       parameters:
         - name: data
           in: body
@@ -8377,7 +8742,7 @@ paths:
   /project/{pk}/periodic_task/{periodic_task_id}/variables/{variables_id}/:
     get:
       operationId: project_periodic_task_variables_get
-      description: ''
+      description: Return a variable of instance.
       parameters: []
       responses:
         '200':
@@ -8404,7 +8769,7 @@ paths:
         - project
     put:
       operationId: project_periodic_task_variables_update
-      description: ''
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -8436,7 +8801,7 @@ paths:
         - project
     patch:
       operationId: project_periodic_task_variables_edit
-      description: ''
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -8468,7 +8833,7 @@ paths:
         - project
     delete:
       operationId: project_periodic_task_variables_remove
-      description: ''
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -9176,7 +9541,7 @@ paths:
         - project
     put:
       operationId: project_variables_update
-      description: Update a user.
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -9860,7 +10225,7 @@ paths:
   /team/{pk}/user/{user_id}/copy/:
     post:
       operationId: team_user_copy
-      description: ''
+      description: Copy instance with deps.
       parameters:
         - name: data
           in: body
@@ -9904,7 +10269,12 @@ paths:
   /team/{pk}/user/{user_id}/settings/:
     get:
       operationId: team_user_settings_get
-      description: ''
+      summary: "A settings object, that allows API settings to be accessed as properties.\n\
+        \    For example:"
+      description: "        from rest_framework.settings import api_settings\n   \
+        \     print(api_settings.DEFAULT_RENDERER_CLASSES)\n\n    Any setting with\
+        \ string import paths will be automatically resolved\n    and return the class,\
+        \ rather than the string literal."
       parameters: []
       responses:
         '200':
@@ -9931,7 +10301,12 @@ paths:
         - team
     post:
       operationId: team_user_settings_add
-      description: ''
+      summary: "A settings object, that allows API settings to be accessed as properties.\n\
+        \    For example:"
+      description: "        from rest_framework.settings import api_settings\n   \
+        \     print(api_settings.DEFAULT_RENDERER_CLASSES)\n\n    Any setting with\
+        \ string import paths will be automatically resolved\n    and return the class,\
+        \ rather than the string literal."
       parameters:
         - name: data
           in: body
@@ -9963,7 +10338,12 @@ paths:
         - team
     delete:
       operationId: team_user_settings_remove
-      description: ''
+      summary: "A settings object, that allows API settings to be accessed as properties.\n\
+        \    For example:"
+      description: "        from rest_framework.settings import api_settings\n   \
+        \     print(api_settings.DEFAULT_RENDERER_CLASSES)\n\n    Any setting with\
+        \ string import paths will be automatically resolved\n    and return the class,\
+        \ rather than the string literal."
       parameters: []
       responses:
         '204':
@@ -10476,6 +10856,20 @@ definitions:
         readOnly: true
       owner:
         $ref: '#/definitions/User'
+  SetOwner:
+    required:
+      - user_id
+    type: object
+    properties:
+      user_id:
+        title: New owner
+        type: integer
+        format: select2
+        additionalProperties:
+          model:
+            $ref: '#/definitions/User'
+          value_field: id
+          view_field: username
   InventoryVariable:
     required:
       - key
@@ -10561,20 +10955,6 @@ definitions:
         default: HOST
       owner:
         $ref: '#/definitions/User'
-  SetOwner:
-    required:
-      - user_id
-    type: object
-    properties:
-      user_id:
-        title: New owner
-        type: integer
-        format: select2
-        additionalProperties:
-          model:
-            $ref: '#/definitions/User'
-          value_field: id
-          view_field: username
   History:
     required:
       - status
@@ -11424,66 +11804,6 @@ definitions:
           - MODULE
           - TEMPLATE
         default: PLAYBOOK
-      inventory:
-        title: Inventory
-        type: string
-        minLength: 1
-      save_result:
-        title: Save result
-        type: boolean
-      template:
-        title: Template
-        type: integer
-      template_opt:
-        title: Template opt
-        type: string
-        maxLength: 256
-      enabled:
-        title: Enabled
-        type: boolean
-  OnePeriodictask:
-    required:
-      - schedule
-    type: object
-    properties:
-      id:
-        title: Id
-        type: integer
-        readOnly: true
-      name:
-        title: Name
-        type: string
-        maxLength: 512
-        minLength: 1
-      notes:
-        title: Notes
-        type: string
-        format: textarea
-      type:
-        title: Interval type
-        type: string
-        enum:
-          - CRONTAB
-          - INTERVAL
-        default: CRONTAB
-      schedule:
-        title: Schedule
-        type: string
-      mode:
-        title: Mode
-        type: string
-        minLength: 1
-      kind:
-        title: Task type
-        type: string
-        enum:
-          - PLAYBOOK
-          - MODULE
-          - TEMPLATE
-        default: PLAYBOOK
-      project:
-        title: Project
-        type: integer
       inventory:
         title: Inventory
         type: string

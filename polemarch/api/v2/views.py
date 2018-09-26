@@ -72,7 +72,7 @@ class __VarsViewSet(base.ModelViewSetSet):
         Update one or more fields on an existing variable.
 
     update:
-        Update a user.
+        Update variable value.
 
     destroy:
         Remove an existing variable.
@@ -102,7 +102,7 @@ class __InvVarsViewSet(__VarsViewSet):
         Update one or more fields on an existing variable.
 
     update:
-        Update a user.
+        Update variable value.
     '''
     serializer_class = sers.InventoryVariableSerializer
 
@@ -127,7 +127,7 @@ class __ProjectVarsViewSet(__VarsViewSet):
         Update one or more fields on an existing variable.
 
     update:
-        Update a user.
+        Update variable value.
     '''
     serializer_class = sers.ProjectVariableSerializer
 
@@ -321,7 +321,7 @@ class HostViewSet(OwnedView, _VariablesCopyMixin):
 
 
 @deco.nested_view('variables', 'id', view=__InvVarsViewSet)
-class _BaseGroupViewSet(base.ModelViewSetSet):
+class _BaseGroupViewSet(OwnedView, base.ModelViewSetSet):
     '''
     retrieve:
         Return a group instance.
@@ -356,7 +356,7 @@ class _BaseGroupViewSet(base.ModelViewSetSet):
 @deco.nested_view(
     'group', 'id', manager_name='groups', allow_append=yes, view=_BaseGroupViewSet
 )
-class _GroupMixin(_VariablesCopyMixin, OwnedView):
+class _GroupMixin(OwnedView, _VariablesCopyMixin):
     '''
     Instance with groups and hosts.
     '''
