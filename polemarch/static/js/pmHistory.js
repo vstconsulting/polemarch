@@ -364,3 +364,18 @@ tabSignal.connect("openapi.schema.definition.History", addHistoryPrefetch)
 tabSignal.connect("openapi.schema.definition.OneHistory", addHistoryPrefetch)
 tabSignal.connect("openapi.schema.definition.ProjectHistory", addHistoryPrefetch) 
  
+tabSignal.connect("guiList.renderLine.history", function(obj)
+{ 
+    //debugger;
+    //obj.opt.fields['options'].hidden = true 
+    if(obj.dataLine.line.kind == "MODULE")
+    {
+        // project/1/module/1
+    }
+    else if(obj.dataLine.line.kind == "PLAYBOOK")
+    {
+        // project/1/playbook/1 
+        obj.dataLine.rendered["mode"] = "<b style='color:#f00' >"+obj.dataLine.line["mode"]+"</b>"
+    }
+   
+})
