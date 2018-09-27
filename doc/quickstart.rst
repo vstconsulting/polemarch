@@ -1,9 +1,8 @@
-
 Installation
-============
+============================
 
 Install from PyPI
------------------
+-----------------------------
 
 
 #. Install dependencies:
@@ -34,6 +33,9 @@ Install from PyPI
 
    * python 2.7 (```libpython2.7```)
 
+
+   Optional package on Ubuntu/Debian:
+
    * SSHPass(```sshpass```) to get working ssh password auth during playbook execution
 
    * GIT (```git```) to get working git import
@@ -54,6 +56,9 @@ Install from PyPI
    * Libs for Kerberos (```krb5-libs```)
 
    * Open LDAP (```openldap-devel```)
+
+
+   Optional package on Red Hat/CentOS:
 
    * GIT (```git```) to get working git import
 
