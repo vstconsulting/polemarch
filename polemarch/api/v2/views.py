@@ -18,7 +18,7 @@ no = False
 default_action = dict(methods=["post"], detail=yes)
 action_kw = dict(**default_action)
 action_kw.update(dict(
-response_serializer=sers.ActionResponseSerializer,
+    response_serializer=sers.ActionResponseSerializer,
     response_code=status.HTTP_200_OK
 ))
 execute_kw = dict(**default_action)

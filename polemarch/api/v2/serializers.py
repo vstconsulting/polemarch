@@ -93,7 +93,7 @@ class ActionResponseSerializer(DataSerializer, EmptySerializer):
 
 
 class ExecuteResponseSerializer(ActionResponseSerializer):
-    history_id = serializers.IntegerField(default=None, allow_null=True)
+    history_id = vst_fields.RedirectIntegerField(default=None, allow_null=True)
     executor = serializers.IntegerField(default=None, allow_null=True)
 
 
@@ -281,6 +281,7 @@ class ProjectHistorySerializer(HistorySerializer):
 
 class OneHistorySerializer(_SignalSerializer):
     raw_stdout = serializers.SerializerMethodField(read_only=True)
+    execution_time = vst_fields.UptimeField()
 
     class Meta:
         model = models.History

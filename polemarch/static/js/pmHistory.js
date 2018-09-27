@@ -316,40 +316,52 @@ tabSignal.connect("openapi.factory.history", function(data)
     }
 })
 
-function addHistoryPrefetch(obj){
-    
+
+tabSignal.connect("openapi.loaded", function()
+{
+    let definitions = window.api.openapi.definitions;
+    definitions['OneHistory'].properties['execute_args'].format = 'json';
+});
+
+function addHistoryPrefetchBase(obj){
     let properties = obj.definition.properties
-    
+
     if(properties['executor'])
     {
         properties['executor']['prefetch'] = {
-            path: function (obj) { return "/user/" },
+            path: function (data_obj) { return "/user/" },
             field_name: "email"
         }
     }
-    
+
     if(properties['inventory'])
     {
         properties['inventory']['prefetch'] = true
     }
-    
+
     if(properties['project'])
     {
         properties['project']['prefetch'] = true
     }
-    
+}
+
+function addHistoryPrefetchCommon(obj)
+{
+    addHistoryPrefetchBase(obj);
+
+    let properties = obj.definition.properties;
+
     if(properties['initiator'])
     {
         properties['initiator']['prefetch'] = {
-            path: function (obj) {
-                if(obj.initiator_type == 'project')
+            path: function (data_obj) {
+                if(data_obj.initiator_type == 'project')
                 {
                     return "/project/";
                 }
-                else if(obj.initiator_type == 'template')
+                else if(data_obj.initiator_type == 'template')
                 {
-                    return "/project/"+obj["project"]+"/template";
-
+                    return "/project/"+data_obj["project"]+"/template/";
                 }
                 else
                 {
@@ -360,22 +372,30 @@ function addHistoryPrefetch(obj){
     }
 }
 
-tabSignal.connect("openapi.schema.definition.History", addHistoryPrefetch)
-tabSignal.connect("openapi.schema.definition.OneHistory", addHistoryPrefetch)
-tabSignal.connect("openapi.schema.definition.ProjectHistory", addHistoryPrefetch) 
- 
-tabSignal.connect("guiList.renderLine.history", function(obj)
-{ 
-    //debugger;
-    //obj.opt.fields['options'].hidden = true 
-    if(obj.dataLine.line.kind == "MODULE")
-    {
-        // project/1/module/1
+function addHistoryPrefetchProjectHistory(obj)
+{
+    addHistoryPrefetchBase(obj);
+
+    let properties = obj.definition.properties;
+
+    if (properties['initiator']) {
+        properties['initiator']['prefetch'] = {
+            path: function (data_obj) {
+                if (data_obj.initiator_type == 'project') {
+                    return "/project/";
+                }
+                else if (data_obj.initiator_type == 'template') {
+                    let project_id = spajs.urlInfo.data.reg.parent_id;
+                    return "/project/" + project_id + "/template/";
+                }
+                else {
+                    return false;
+                }
+            }
+        };
     }
-    else if(obj.dataLine.line.kind == "PLAYBOOK")
-    {
-        // project/1/playbook/1 
-        obj.dataLine.rendered["mode"] = "<b style='color:#f00' >"+obj.dataLine.line["mode"]+"</b>"
-    }
-   
-})
+}
+
+tabSignal.connect("openapi.schema.definition.History", addHistoryPrefetchCommon);
+tabSignal.connect("openapi.schema.definition.OneHistory", addHistoryPrefetchCommon);
+tabSignal.connect("openapi.schema.definition.ProjectHistory", addHistoryPrefetchProjectHistory);

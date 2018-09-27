@@ -78,12 +78,3 @@ class BaseTestCase(VSTBaseTestCase):
         for res in result:
             self.assertEqual(res['status'], 201, res)
         return result
-
-
-class AnsibleArgsValidationTest(BaseTestCase):
-    _MISTAKES = [
-        ("non-existent-ansible-arg", "blablabla"),
-        ("forks", "234bnl"),
-        ("sudo", "makaka"),
-        ("group", "bugaga"),
-    ]
