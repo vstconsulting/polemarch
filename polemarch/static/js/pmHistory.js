@@ -320,64 +320,48 @@ tabSignal.connect("openapi.factory.history", function(data)
 tabSignal.connect("openapi.loaded", function()
 {
     let definitions = window.api.openapi.definitions;
-    var executor_prefetch = {
-        path: function (obj) {
-            return "/user/";
-        }
-    };
-    var inventory_prefetch = {
-        path: function (obj) {
-            return "/inventory/";
-        }
-    };
-    var project_prefetch = {
-        path: function (obj) {
-            return "/project/";
-        }
-    };
-    var initiator_prefetch = {
-        path: function (obj) {
-            if(obj.initiator_type == 'project')
-            {
-                return "/project/";
-            }
-            else if(obj.initiator_type == 'template')
-            {
-                return "/project/"+obj["project"]+"/template/";
-            }
-            else
-            {
-                return false;
-            }
-        }
-    };
-    var prefetch_definitions = ['History', 'OneHistory', 'ProjectHistory'];
-    prefetch_definitions.forEach(function (value) {
-        if (definitions[value] && definitions[value].properties['executor']) {
-            definitions[value].properties['executor']['prefetch'] = executor_prefetch
-        }
-        if (definitions[value] && definitions[value].properties['initiator']) {
-            definitions[value].properties['initiator']['prefetch'] = initiator_prefetch
-        }
-        if (definitions[value] && definitions[value].properties['inventory']) {
-            definitions[value].properties['inventory']['prefetch'] = inventory_prefetch
-        }
-        if (definitions[value] && definitions[value].properties['project']) {
-            definitions[value].properties['project']['prefetch'] = project_prefetch
-        }
-    });
+    definitions['OneHistory'].properties['execute_args'].format = 'json';
+});
 
-    if (definitions['ProjectHistory'] && definitions['ProjectHistory'].properties['initiator']) {
-        definitions['ProjectHistory'].properties['initiator']['prefetch'] =  {
-            path: function (obj) {
-                if(obj.initiator_type == 'project')
+function addHistoryPrefetchBase(obj){
+    let properties = obj.definition.properties
+
+    if(properties['executor'])
+    {
+        properties['executor']['prefetch'] = {
+            path: function (data_obj) { return "/user/" },
+            field_name: "email"
+        }
+    }
+
+    if(properties['inventory'])
+    {
+        properties['inventory']['prefetch'] = true
+    }
+
+    if(properties['project'])
+    {
+        properties['project']['prefetch'] = true
+    }
+}
+
+function addHistoryPrefetchCommon(obj)
+{
+    addHistoryPrefetchBase(obj);
+
+    let properties = obj.definition.properties;
+
+    if(properties['initiator'])
+    {
+        properties['initiator']['prefetch'] = {
+            path: function (data_obj) {
+                if(data_obj.initiator_type == 'project')
                 {
                     return "/project/";
                 }
-                else if(obj.initiator_type == 'template')
+                else if(data_obj.initiator_type == 'template')
                 {
-                    var project_id = spajs.urlInfo.data.reg.parent_id;
-                    return "/project/"+project_id+"/template/";
+                    return "/project/"+data_obj["project"]+"/template/";
                 }
                 else
                 {
@@ -386,6 +370,32 @@ tabSignal.connect("openapi.loaded", function()
             }
         };
     }
+}
 
-    definitions['OneHistory'].properties['execute_args'].format = 'json';
-});
+function addHistoryPrefetchProjectHistory(obj)
+{
+    addHistoryPrefetchBase(obj);
+
+    let properties = obj.definition.properties;
+
+    if (properties['initiator']) {
+        properties['initiator']['prefetch'] = {
+            path: function (data_obj) {
+                if (data_obj.initiator_type == 'project') {
+                    return "/project/";
+                }
+                else if (data_obj.initiator_type == 'template') {
+                    let project_id = spajs.urlInfo.data.reg.parent_id;
+                    return "/project/" + project_id + "/template/";
+                }
+                else {
+                    return false;
+                }
+            }
+        };
+    }
+}
+
+tabSignal.connect("openapi.schema.definition.History", addHistoryPrefetchCommon);
+tabSignal.connect("openapi.schema.definition.OneHistory", addHistoryPrefetchCommon);
+tabSignal.connect("openapi.schema.definition.ProjectHistory", addHistoryPrefetchProjectHistory);
