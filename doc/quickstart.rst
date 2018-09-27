@@ -1,9 +1,143 @@
 
-Installation and quick start
-============================
+Installation
+============
 
-Red Hat/CentOS installation
----------------------------
+Install from PyPI
+-----------------
+
+
+#. Install dependencies:
+
+   Required packages on Ubuntu/Debian:
+
+   * pip (```python-pip```)
+
+   * virtualenv (```python-virtualenv```)
+
+   * python-dev (```python-dev```)
+
+   * GCC (```gcc```)
+
+   * FFI library (```libffi-dev```)
+
+   * Headers and development libraries for MIT Kerberos (```libkrb5-dev```)
+
+   * ffi (```libffi6```)
+
+   * ssl (```libssl-dev```)
+
+   * YAML (```libyaml-dev```)
+
+   * SASL (```libsasl2-dev```)
+
+   * LDAP (```libldap2-dev```)
+
+   * python 2.7 (```libpython2.7```)
+
+   * SSHPass(```sshpass```) to get working ssh password auth during playbook execution
+
+   * GIT (```git```) to get working git import
+
+
+   Required packages on Red Hat/CentOS :
+
+   * python (```python```)
+
+   * OpenSSL (```openssl-devel```)
+
+   * YAML (```libyaml-devel```)
+
+   * virtualenv (```python-virtualenv```)
+
+   * Kerberos (```krb5-devel```)
+
+   * Libs for Kerberos (```krb5-libs```)
+
+   * Open LDAP (```openldap-devel```)
+
+   * GIT (```git```) to get working git import
+
+
+#. Create virtualenv and activate it**:
+
+   .. sourcecode:: bash
+
+       virualenv polemarch
+       cd polemarch
+       source bin/activate
+
+#. Install Polemarch:
+
+   .. sourcecode:: bash
+
+        pip install polemarch
+
+
+#. Make migrations:
+
+   .. sourcecode:: bash
+
+        polemarchctl migrate
+
+
+#. Edit config file:
+
+   #. Open `/etc/polemarch/settings.ini`, if it not exist create it. Polemarch use config from this directory.
+
+   #.  Default used SQLite3 database, recommend use MySQL. Settings needed for correct work database:
+
+       .. code-block:: ini
+
+           [database]
+           engine = django.db.backends.mysql
+           name = db_name
+           user = db_user
+           password = db_password
+           host = db_host
+           port = db_port
+
+   #. Default used file based cashed, recommend use Memcache. Setting needed for correct work Memcache:
+
+      .. code-block:: ini
+
+           [cache]
+           backend = django.core.cache.backends.memcached.MemcachedCache
+           location = cach_location
+
+           [locks]
+           backend = django.core.cache.backends.memcached.MemcachedCache
+           location = cach_location
+
+   #. Default use file Celery broker, recommend use RabbitMQ. Setting for correct work RabbitMQ:
+
+      .. code-block:: ini
+
+           [rpc]
+           connection = rabbitmq-server
+           heartbeat = rabbitmq_heartbeat
+           concurrency = rabbitmq_concurrency
+
+   #. For run worker with Polemarch, you need add attach-daemon to uwsgi section:
+
+      .. code-block:: ini
+
+           [uwsgi]
+           processes = 4
+           threads = 2
+           pidfile = /tmp/web.pid
+           attach-daemon = /home/ubuntu/ce/bin/celery worker -A polemarch.wapp:app -B -l WARNING --pidfile=/tmp/worker.pid --schedule=/tmp/beat-schedule
+
+#. Start polemarch:
+
+   .. sourcecode:: bash
+
+       polemarchctl webserver
+
+Polemarch start with web interface on port 8080.
+
+
+Red Hat/CentOS installation (deprecated)
+----------------------------------------
 
 1. Download rpm from latest `release <https://github.com/vstconsulting/polemarch/releases>`_.
 
@@ -30,8 +164,8 @@ EPEL for Red Hat/CentOS. Also you can use specify ``connection`` command line
 argument during playbook run as ``paramiko``. When ansible uses paramiko to
 make ssh connection, ``sshpass`` not necessary.
 
-Ubuntu/Debian installation
---------------------------
+Ubuntu/Debian installation (deprecated)
+---------------------------------------
 
 1. Download deb from latest `release <https://github.com/vstconsulting/polemarch/releases>`_.
 
