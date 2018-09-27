@@ -93,7 +93,7 @@ class ActionResponseSerializer(DataSerializer, EmptySerializer):
 
 
 class ExecuteResponseSerializer(ActionResponseSerializer):
-    history_id = serializers.IntegerField(default=None, allow_null=True)
+    history_id = vst_fields.RedirectIntegerField(default=None, allow_null=True)
     executor = serializers.IntegerField(default=None, allow_null=True)
 
 

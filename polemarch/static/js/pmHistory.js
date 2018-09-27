@@ -337,22 +337,6 @@ tabSignal.connect("openapi.loaded", function()
     };
     var initiator_prefetch = {
         path: function (obj) {
-            if (obj.initiator_type == 'project') {
-                return "/project/";
-            }
-            else if (obj.initiator_type == 'template') {
-                return "/project/" + obj["project"] + "/template";
-
-            }
-            else {
-                return false;
-                return "/project/";
-            }
-        }
-    };
-
-    var initiator_prefetch = {
-        path: function (obj) {
             if(obj.initiator_type == 'project')
             {
                 return "/project/";
