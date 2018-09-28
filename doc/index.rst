@@ -21,7 +21,6 @@ or `report bugs
    :caption: Contents:
 
    quickstart
-   pipinstall
    config
    gui
    api
