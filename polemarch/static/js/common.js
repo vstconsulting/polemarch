@@ -12,47 +12,47 @@ if(guiLocalSettings.get('hideMenu'))
 
 function setActiveMenuLiBase()
 {
-    if(/\?projects/.test(window.location.href) || /\?project/.test(window.location.href) ||
-        /\?new-project/.test(window.location.href))
+    if(/\#projects/.test(window.location.href) || /\#project/.test(window.location.href) ||
+        /\#new-project/.test(window.location.href))
     {
         $("#menu-projects").addClass("pm-treeview-active active active-li active-bold");
         $("#menu-projects-projects").addClass("active-bold");
         $("#menu-projects").removeClass("pm-treeview");
     }
-    else if(/\?hosts/.test(window.location.href) || /\?host/.test(window.location.href) ||
-        /\?new-host/.test(window.location.href))
+    else if(/\#hosts/.test(window.location.href) || /\#host/.test(window.location.href) ||
+        /\#new-host/.test(window.location.href))
     {
         $("#menu-inventories").addClass("pm-treeview-active active active-li");
         $("#menu-inventories-hosts").addClass("active-bold");
         $("#menu-inventories").removeClass("pm-treeview");
     }
-    else if(/\?new-group/.test(window.location.href) || /\?groups/.test(window.location.href) ||
-        /\?group/.test(window.location.href))
+    else if(/\#new-group/.test(window.location.href) || /\#groups/.test(window.location.href) ||
+        /\#group/.test(window.location.href))
     {
         $("#menu-inventories").addClass("pm-treeview-active active active-li");
         $("#menu-inventories-groups").addClass("active-bold");
         $("#menu-inventories").removeClass("pm-treeview");
     }
-    else if(/\?inventories/.test(window.location.href) || /\?inventory/.test(window.location.href) ||
-        /\?new-inventory/.test(window.location.href))
+    else if(/\#inventories/.test(window.location.href) || /\#inventory/.test(window.location.href) ||
+        /\#new-inventory/.test(window.location.href))
     {
         $("#menu-inventories").addClass("pm-treeview-active active active-li active-bold");
         $("#menu-inventories-inventories").addClass("active-bold");
         $("#menu-inventories").removeClass("pm-treeview");
     }
-    else if(/\?history/.test(window.location.href)){
+    else if(/\#history/.test(window.location.href)){
 
         $("#menu-history").addClass("active active-li active-bold");
     }
-    else if(/\?hooks/.test(window.location.href) || /\?hook/.test(window.location.href) ||
-        /\?new-hook/.test(window.location.href))
+    else if(/\#hooks/.test(window.location.href) || /\#hook/.test(window.location.href) ||
+        /\#new-hook/.test(window.location.href))
     {
         $("#menu-system").addClass("pm-treeview-active active active-li");
         $("#menu-system-hooks").addClass("active-bold");
         $("#menu-system").removeClass("pm-treeview");
     }
-    else if(/\?users/.test(window.location.href) || /\?user/.test(window.location.href) ||
-        /\?new-user/.test(window.location.href) || /\?profile/.test(window.location.href))
+    else if(/\#users/.test(window.location.href) || /\#user/.test(window.location.href) ||
+        /\#new-user/.test(window.location.href) || /\#profile/.test(window.location.href))
     {
         $("#menu-system").addClass("pm-treeview-active active active-li");
         $("#menu-system-users").addClass("active-bold");
