@@ -11208,6 +11208,7 @@ definitions:
       name:
         title: Name
         type: string
+        maxLength: 512
         minLength: 1
       status:
         title: Status
