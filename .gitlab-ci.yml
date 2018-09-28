@@ -151,7 +151,7 @@ py36-install:
 pages:
   stage: release
   script:
-    - tox -e builddoc
+    - make test ENVS=builddoc
     - mv doc/_build/html public
   artifacts:
     paths:
