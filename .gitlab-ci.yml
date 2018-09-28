@@ -148,7 +148,7 @@ py36-install:
 
 # Realese
 ###########################################
-pages_docs:
+pages:
   stage: release
   script:
     - tox -e builddoc
@@ -157,7 +157,7 @@ pages_docs:
     paths:
     - public
   only:
-    - master
+    - developer
 
 release_pypi:
   stage: release
