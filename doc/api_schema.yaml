@@ -8670,13 +8670,13 @@ paths:
   /project/{pk}/periodic_task/{periodic_task_id}/variables/:
     get:
       operationId: project_periodic_task_variables_list
-      description: Return all variables of instance.
+      description: Return all variables of periodic task.
       parameters: []
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/PeriodicTaskVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8697,18 +8697,18 @@ paths:
         - project
     post:
       operationId: project_periodic_task_variables_add
-      description: Create a new variable of instance.
+      description: Create a new variable of periodic task.
       parameters:
         - name: data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/PeriodicTaskVariable'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/PeriodicTaskVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8742,13 +8742,13 @@ paths:
   /project/{pk}/periodic_task/{periodic_task_id}/variables/{variables_id}/:
     get:
       operationId: project_periodic_task_variables_get
-      description: Return a variable of instance.
+      description: Return a variable of periodic task.
       parameters: []
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/PeriodicTaskVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8775,12 +8775,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/PeriodicTaskVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/PeriodicTaskVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8807,12 +8807,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/PeriodicTaskVariable'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Variable'
+            $ref: '#/definitions/PeriodicTaskVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -11825,7 +11825,7 @@ definitions:
       enabled:
         title: Enabled
         type: boolean
-  Variable:
+  PeriodicTaskVariable:
     required:
       - key
     type: object
