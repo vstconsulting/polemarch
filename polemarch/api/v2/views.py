@@ -107,6 +107,31 @@ class __InvVarsViewSet(__VarsViewSet):
     serializer_class = sers.InventoryVariableSerializer
 
 
+class __PeriodicTaskVarsViewSet(__VarsViewSet):
+    '''
+    Periodic task additional execute variables.
+
+    retrieve:
+        Return a variable of periodic task.
+
+    list:
+        Return all variables of periodic task.
+
+    create:
+        Create a new variable of periodic task.
+
+    destroy:
+        Remove an existing variable.
+
+    partial_update:
+        Update one or more fields on an existing variable.
+
+    update:
+        Update variable value.
+    '''
+    serializer_class = sers.PeriodicTaskVariableSerializer
+
+
 class __ProjectVarsViewSet(__VarsViewSet):
     '''
     Project settings variables.
@@ -438,7 +463,7 @@ class __ModuleViewSet(base.ReadOnlyModelViewSet):
     filter_class = filters.ModuleFilter
 
 
-@deco.nested_view('variables', 'id', view=__VarsViewSet)
+@deco.nested_view('variables', 'id', view=__PeriodicTaskVarsViewSet)
 class __PeriodicTaskViewSet(base.ModelViewSetSet):
     '''
     retrieve:
