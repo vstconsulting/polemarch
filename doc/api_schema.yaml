@@ -3131,7 +3131,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/OneGroup'
         '400':
           description: Validation error or some data error.
           schema:
@@ -3266,7 +3266,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8463,12 +8463,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Periodictask'
+            $ref: '#/definitions/OnePeriodictask'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Periodictask'
+            $ref: '#/definitions/OnePeriodictask'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8502,7 +8502,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Periodictask'
+            $ref: '#/definitions/OnePeriodictask'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8529,12 +8529,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Periodictask'
+            $ref: '#/definitions/OnePeriodictask'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Periodictask'
+            $ref: '#/definitions/OnePeriodictask'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8561,12 +8561,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Periodictask'
+            $ref: '#/definitions/OnePeriodictask'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Periodictask'
+            $ref: '#/definitions/OnePeriodictask'
         '400':
           description: Validation error or some data error.
           schema:
@@ -11808,6 +11808,66 @@ definitions:
           - MODULE
           - TEMPLATE
         default: PLAYBOOK
+      inventory:
+        title: Inventory
+        type: string
+        minLength: 1
+      save_result:
+        title: Save result
+        type: boolean
+      template:
+        title: Template
+        type: integer
+      template_opt:
+        title: Template opt
+        type: string
+        maxLength: 256
+      enabled:
+        title: Enabled
+        type: boolean
+  OnePeriodictask:
+    required:
+      - schedule
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      notes:
+        title: Notes
+        type: string
+        format: textarea
+      type:
+        title: Interval type
+        type: string
+        enum:
+          - CRONTAB
+          - INTERVAL
+        default: CRONTAB
+      schedule:
+        title: Schedule
+        type: string
+      mode:
+        title: Mode
+        type: string
+        minLength: 1
+      kind:
+        title: Task type
+        type: string
+        enum:
+          - PLAYBOOK
+          - MODULE
+          - TEMPLATE
+        default: PLAYBOOK
+      project:
+        title: Project
+        type: integer
       inventory:
         title: Inventory
         type: string
