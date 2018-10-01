@@ -733,7 +733,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(
             module['properties']['path'], type='string', minLength=1, maxLength=1024
         )
-        self.check_fields(module['properties']['name'], **name_value)
+        self.check_fields(module['properties']['name'], type='string', readOnly=True)
         del module
 
         oneModule = definitions['OneModule']
@@ -742,14 +742,14 @@ class OApiTestCase(BaseTestCase):
 
         self.check_fields(oneModule['required'], 'path', 'data')
         self.check_fields(oneModule['properties']['id'], **id_value)
-        self.check_fields(oneModule['properties']['name'], **name_value)
+        self.check_fields(oneModule['properties']['name'], type='string', readOnly=True)
         self.check_fields(
             oneModule['properties']['path'], type='string', minLength=1, maxLength=1024
         )
         self.check_fields(oneModule['properties']['data'], **{'$ref': ref})
         del oneModule
 
-        periodicTask = definitions['PeriodicTask']
+        periodicTask = definitions['Periodictask']
         self.check_models(periodicTask)
 
         self.check_fields(periodicTask['required'], 'schedule')
@@ -771,10 +771,40 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(periodicTask['properties']['save_result'], type='boolean')
         self.check_fields(periodicTask['properties']['template'], type='integer')
         self.check_fields(
-            periodicTask['properties']['tempate_opt'], type='string', maxLength=256
+            periodicTask['properties']['template_opt'], type='string', maxLength=256
         )
         self.check_fields(periodicTask['properties']['enabled'], type='boolean')
         del periodicTask
+
+        onePeriodicTask = definitions['OnePeriodictask']
+        self.check_models(onePeriodicTask)
+
+        self.check_fields(onePeriodicTask['required'], 'schedule')
+        self.check_fields(onePeriodicTask['properties']['id'], **id_value)
+        self.check_fields(onePeriodicTask['properties']['name'], **name_value)
+        self.check_fields(onePeriodicTask['properties']['notes'], **notes_value)
+        self.check_fields(
+            onePeriodicTask['properties']['type'],
+            type='string', default='CRONTAB', enum=['CRONTAB', 'INTERVAL']
+        )
+        self.check_fields(onePeriodicTask['properties']['schedule'], type='string')
+        self.check_fields(onePeriodicTask['properties']['mode'], type='string',
+                          minLength=1)
+        self.check_fields(
+            onePeriodicTask['properties']['kind'],
+            type='string', default='PLAYBOOK', enum=['PLAYBOOK', 'MODULE', 'TEMPLATE']
+        )
+        self.check_fields(onePeriodicTask['properties']['project'], type='integer')
+        self.check_fields(
+            onePeriodicTask['properties']['inventory'], type='string', minLength=1
+        )
+        self.check_fields(onePeriodicTask['properties']['save_result'], type='boolean')
+        self.check_fields(onePeriodicTask['properties']['template'], type='integer')
+        self.check_fields(
+            onePeriodicTask['properties']['template_opt'], type='string', maxLength=256
+        )
+        self.check_fields(onePeriodicTask['properties']['enabled'], type='boolean')
+        del onePeriodicTask
 
         periodicTaskVariable = definitions['PeriodicTaskVariable']
         self.check_models(periodicTaskVariable)
@@ -783,7 +813,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(periodicTaskVariable['properties']['id'], **id_value)
         self.check_fields(
             periodicTaskVariable['properties']['key'],
-            type='string', minLength=1, maxLengh=128
+            type='string', minLength=1, maxLength=128
         )
         self.check_fields(
             periodicTaskVariable['properties']['value'], type='string', default=''
@@ -795,7 +825,9 @@ class OApiTestCase(BaseTestCase):
 
         self.check_fields(playbook['required'], 'playbook')
         self.check_fields(playbook['properties']['id'], **id_value)
-        self.check_fields(playbook['properties']['name'], **name_value)
+        self.check_fields(
+            playbook['properties']['name'], type='string', maxLength=256, minLength=1
+        )
         self.check_fields(
             playbook['properties']['playbook'], type='string', minLength=1, maxLength=256
         )
@@ -805,7 +837,9 @@ class OApiTestCase(BaseTestCase):
         self.check_models(onePlaybook)
 
         self.check_fields(onePlaybook['properties']['id'], **id_value)
-        self.check_fields(onePlaybook['properties']['name'], **name_value)
+        self.check_fields(
+            onePlaybook['properties']['name'], type='string', maxLength=256, minLength=1
+        )
         self.check_fields(
             onePlaybook['properties']['playbook'],
             type='string', readOnly=True, minLength=1
@@ -850,7 +884,7 @@ class OApiTestCase(BaseTestCase):
         )
         del oneTemplate
 
-        templateExec = definitions('TemplateExec')
+        templateExec = definitions['TemplateExec']
         self.check_models(templateExec)
 
         self.check_fields(
@@ -971,7 +1005,8 @@ class OApiTestCase(BaseTestCase):
             counterWidgetSetting['properties']['active'], type='boolean', default=True
         )
         self.check_fields(
-            counterWidgetSetting['properties']['collapse'], type='boolean', default=False
+            counterWidgetSetting['properties']['collapse'],
+            type='boolean', default=False, readOnly=True
         )
         self.check_fields(
             counterWidgetSetting['properties']['sort'], type='integer', default=0
@@ -1038,7 +1073,7 @@ class OApiTestCase(BaseTestCase):
         )
         ref = '#/definitions/WidgetSettings'
         self.check_fields(
-            userSettings['properties']['chartLineSettings'], **{'$ref': ref}
+            userSettings['properties']['widgetSettings'], **{'$ref': ref}
         )
         del userSettings
 
@@ -1076,7 +1111,6 @@ class OApiTestCase(BaseTestCase):
         try:
             objKeys.remove('type')
             objKeys.remove('title')
-            objKeys.remove('readOnly') # User have field readOnly ????
         except:
             pass
         for key in objKeys:
