@@ -323,14 +323,46 @@ tabSignal.connect("openapi.loaded", function()
     definitions['OneHistory'].properties['execute_args'].format = 'json';
 });
 
+function get_prefetch_history_executor_path(data_obj)
+{
+    return "/user/"
+}
+
+function get_prefetch_history_initiator_path_1(data_obj)
+{
+    if (data_obj.initiator_type == 'project') {
+        return "/project/";
+    }
+    else if (data_obj.initiator_type == 'template') {
+        return "/project/" + data_obj["project"] + "/template/";
+    }
+    else {
+        return false;
+    }
+}
+
+function get_prefetch_history_initiator_path_2(data_obj)
+{
+    if (data_obj.initiator_type == 'project') {
+        return "/project/";
+    }
+    else if (data_obj.initiator_type == 'template') {
+        let project_id = spajs.urlInfo.data.reg.parent_id;
+        return "/project/" + project_id + "/template/";
+    }
+    else {
+        return false;
+    }
+}
+
 function addHistoryPrefetchBase(obj){
     let properties = obj.definition.properties
 
     if(properties['executor'])
     {
         properties['executor']['prefetch'] = {
-            path: function (data_obj) { return "/user/" },
-            field_name: "email"
+            path: "_func_get_prefetch_history_executor_path",
+            field_name: "email",
         }
     }
 
@@ -354,20 +386,7 @@ function addHistoryPrefetchCommon(obj)
     if(properties['initiator'])
     {
         properties['initiator']['prefetch'] = {
-            path: function (data_obj) {
-                if(data_obj.initiator_type == 'project')
-                {
-                    return "/project/";
-                }
-                else if(data_obj.initiator_type == 'template')
-                {
-                    return "/project/"+data_obj["project"]+"/template/";
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            path: "_func_get_prefetch_history_initiator_path_1",
         };
     }
 }
@@ -380,18 +399,7 @@ function addHistoryPrefetchProjectHistory(obj)
 
     if (properties['initiator']) {
         properties['initiator']['prefetch'] = {
-            path: function (data_obj) {
-                if (data_obj.initiator_type == 'project') {
-                    return "/project/";
-                }
-                else if (data_obj.initiator_type == 'template') {
-                    let project_id = spajs.urlInfo.data.reg.parent_id;
-                    return "/project/" + project_id + "/template/";
-                }
-                else {
-                    return false;
-                }
-            }
+            path: "_func_get_prefetch_history_initiator_path_2",
         };
     }
 }
