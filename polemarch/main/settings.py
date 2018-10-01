@@ -52,6 +52,57 @@ API = {
         stats={'view': 'polemarch.api.v2.views.StatisticViewSet', 'op_types': ['get']})
 }
 
+PROJECT_GUI_MENU = [
+    {
+        'name': 'Projects',
+        'url': '/project',
+        'span_class': 'glyphicon glyphicon-blackboard',
+    },
+    {
+        'name': 'Inventories',
+        'url': '/inventory',
+        'span_class': 'fa fa-folder',
+        'sublinks': [
+            {
+                'name': 'Groups',
+                'url': '/group',
+                'span_class': 'glyphicon glyphicon-tasks',
+            },
+            {
+                'name': 'Hosts',
+                'url': '/host',
+                'span_class': 'glyphicon glyphicon-hdd',
+            },
+        ]
+    },
+    {
+        'name': 'History',
+        'url': '/history',
+        'span_class': 'glyphicon glyphicon-calendar',
+    },
+    {
+        'name': 'System',
+        'span_class': 'glyphicon glyphicon-cog',
+        'sublinks': [
+            {
+                'name': 'Users',
+                'url': '/user',
+                'span_class': 'glyphicon glyphicon-user',
+            },
+            {
+                'name': 'Teams',
+                'url': '/team',
+                'span_class': 'fa fa-users',
+            },
+            {
+                'name': 'Hooks',
+                'url': '/hook',
+                'span_class': 'glyphicon glyphicon-console'
+            },
+        ]
+    },
+]
+
 SWAGGER_SETTINGS['DEFAULT_INFO'] = 'polemarch.api.v2.swagger.api_info'
 
 OPENAPI_EXTRA_LINKS = dict()
