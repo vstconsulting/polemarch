@@ -91,4 +91,7 @@ tabSignal.connect("openapi.completed", function()
     let user_settings = guiSchema.path['/user/{pk}/settings/'];
     user_settings.canEdit = true;
     user_settings.methodEdit = 'post';
+    ['chartLineSettings', 'widgetSettings'].forEach(function (name) {
+        user_settings.schema.get.fields[name].format = 'inner_api_object';
+    })
 })

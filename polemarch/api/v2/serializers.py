@@ -365,6 +365,10 @@ class InventoryVariableSerializer(VariableSerializer):
     key = vst_fields.AutoCompletionField(autocomplete=models.Variable.variables_keys)
 
 
+class PeriodicTaskVariableSerializer(VariableSerializer):
+    pass
+
+
 class ProjectVariableSerializer(VariableSerializer):
     project_keys = (
         ('repo_type', 'Types of repo. Default="MANUAL".'),
@@ -709,7 +713,6 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
     types = list_to_choices(models.Project.repo_handlers.keys())
     auth_types = list_to_choices(['NONE', 'KEY', 'PASSWORD'])
 
-    name = serializers.CharField(required=True)
     status = serializers.CharField(read_only=True)
     type = serializers.ChoiceField(choices=types, default='MANUAL', label='Repo type')
     repository = serializers.CharField(default='MANUAL', label='Repo url')
@@ -739,6 +742,9 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
             'repo_auth',
             'auth_data',
         )
+        extra_kwargs = {
+            'name': {'required': True}
+        }
 
     def create(self, validated_data):
         repo_type = validated_data.pop('type')

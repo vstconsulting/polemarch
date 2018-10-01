@@ -77,14 +77,6 @@ Install from PyPI
 
         pip install polemarch
 
-
-#. Make migrations:
-
-   .. sourcecode:: bash
-
-        polemarchctl migrate
-
-
 #. Edit config file:
 
    #. Open `/etc/polemarch/settings.ini`, if it not exist create it. Polemarch use config from this directory.
@@ -101,36 +93,47 @@ Install from PyPI
            host = db_host
            port = db_port
 
-   #. Default used file based cashed, recommend use Memcache. Setting needed for correct work Memcache:
+   #. Default used file based cashed, recommend use RedisCache. Setting needed for correct work RedisCache:
 
       .. code-block:: ini
 
            [cache]
-           backend = django.core.cache.backends.memcached.MemcachedCache
-           location = cach_location
+           backend = django_redis.cache.RedisCache
+           location = redis://redis-server:6379/1
 
            [locks]
-           backend = django.core.cache.backends.memcached.MemcachedCache
-           location = cach_location
+           backend = django_redis.cache.RedisCache
+           location = redis://redis-server:6379/2
 
-   #. Default use file Celery broker, recommend use RabbitMQ. Setting for correct work RabbitMQ:
+   #. Default use file Celery broker, recommend use Redis. Setting for correct work Redis:
 
       .. code-block:: ini
 
            [rpc]
-           connection = rabbitmq-server
-           heartbeat = rabbitmq_heartbeat
-           concurrency = rabbitmq_concurrency
+           connection = redis://redis-server:6379/3
+           heartbeat = 5
+           concurrency = 8
+           enable_worker = true
 
-   #. For run worker with Polemarch, you need add attach-daemon to uwsgi section:
+   #. For run worker with Polemarch, you need create follow sections:
 
       .. code-block:: ini
 
            [uwsgi]
            processes = 4
-           threads = 2
-           pidfile = /tmp/web.pid
-           attach-daemon = /home/ubuntu/ce/bin/celery worker -A polemarch.wapp:app -B -l WARNING --pidfile=/tmp/worker.pid --schedule=/tmp/beat-schedule
+           threads = 4
+           harakiri = 120
+           vacuum = True
+
+           [worker]
+           pidfile = /tmp/pm_worker.pid
+           logfile = /dev/null
+
+#. Make migrations:
+
+   .. sourcecode:: bash
+
+        polemarchctl migrate
 
 #. Start polemarch:
 
@@ -140,55 +143,6 @@ Install from PyPI
 
 Polemarch start with web interface on port 8080.
 
-
-Red Hat/CentOS installation (deprecated)
-----------------------------------------
-
-1. Download rpm from latest `release <https://github.com/vstconsulting/polemarch/releases>`_.
-
-2. Install it with command
-
-   .. sourcecode:: bash
-
-      sudo yum localinstall polemarch-X.X.X-X.x86_64.rpm.
-
-3. Run services with commands
-
-   .. sourcecode:: bash
-
-      sudo service polemarchweb start
-      sudo service polemarchworker start
-
-That's it. Polemarch web panel on 8080 port. Default administrative account is
-admin/admin.
-
-Note: If you using authentication by password at some of your machines
-managed by Polemarch, you also must install ``sshpass`` package because it
-required for ansible to autheticate via ssh by password. It available in
-EPEL for Red Hat/CentOS. Also you can use specify ``connection`` command line
-argument during playbook run as ``paramiko``. When ansible uses paramiko to
-make ssh connection, ``sshpass`` not necessary.
-
-Ubuntu/Debian installation (deprecated)
----------------------------------------
-
-1. Download deb from latest `release <https://github.com/vstconsulting/polemarch/releases>`_.
-
-2. Install it with command
-
-   .. sourcecode:: bash
-
-      sudo dpkg -i polemarch_X.X.X-X_amd64.deb || sudo apt-get install -f
-
-3. Run services with commands
-
-   .. sourcecode:: bash
-
-      sudo service polemarchweb start
-      sudo service polemarchworker start
-
-That's it. Polemarch web panel on 8080 port. Default administrative account is
-admin/admin.
 
 Quickstart
 ----------
