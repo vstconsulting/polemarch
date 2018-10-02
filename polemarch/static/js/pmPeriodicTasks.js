@@ -1,55 +1,129 @@
-tabSignal.connect("openapi.factory.periodic_rask", function(data)
+
+tabSignal.connect("openapi.schema.definition.Periodictask", function(data)
 {
-    apiperiodic_task.one.copy = function()
-    {
-        if(!this.model.data.id)
-        {
-            throw "Error in pmPeriodicTasks.copyItem with item_id = `" + item_id + "`"
+    //debugger;
+})
+
+tabSignal.connect("openapi.schema.definition.OnePeriodictask", function(data)
+{
+    let projPath = "/project/{pk}"
+    data.definition.properties.mode.dynamic_properties = {}
+    data.definition.properties.mode.required = false
+    data.definition.properties.mode.dynamic_properties.callback = function(fieldObj, newValue){
+
+        let obj = {
+            type:"autocomplete"
         }
-
-        var def = new $.Deferred();
-        var thisObj = this;
-
-        $.when(this.loadItem(this.model.data.id)).done(function()
+        if(newValue.value == "PLAYBOOK")
         {
-            var data = thisObj.model.items[this.model.data.id];
-            delete data.id;
-            data.name = "copy from " + data.name
-            data.vars.group = data.group
-            data.vars.args = data.args
-
-            delete data.group;
-            delete data.args;
-
-            $.when(encryptedCopyModal.replace(data)).done(function(data)
-            {
-                spajs.ajax.Call({
-                    url: hostname + "/api/v2/"+thisObj.model.name+"/",
-                    type: "POST",
-                    contentType:'application/json',
-                    data: JSON.stringify(data),
-                    success: function(data)
-                    {
-                        thisObj.model.items[data.id] = data
-                        def.resolve(data.id)
-                    },
-                    error:function(e)
-                    {
-                        def.reject(e)
-                    }
-                });
-            }).fail(function(e)
-            {
-                def.reject(e)
-            })
-
-        }).fail(function(e)
+            obj.override_opt = {
+                dynamic_properties:{
+                    list_obj:projPath + "/playbook/",
+                    value_field:'id',
+                    view_field:'name',
+                }
+            };
+        }
+        else if(newValue.value == "MODULE")
         {
-            def.reject(e)
-        })
+            obj.override_opt = {
+                dynamic_properties:{
+                    list_obj:projPath + "/module/",
+                    value_field:'id',
+                    view_field:'name',
+                }
+            };
 
+        }
+        else
+        {
+            obj.type = "hidden"
+        }
+        return obj
+    }
 
-        return def.promise();
+    data.definition.properties.template.type = "number"
+    data.definition.properties.template.required = false
+    data.definition.properties.template.dynamic_properties = {}
+    data.definition.properties.template.dynamic_properties.callback = function(fieldObj, newValue)
+    {
+
+        let obj = {
+            type:"select2"
+        }
+        if(newValue.value == "TEMPLATE")
+        {
+            obj.override_opt = {
+                dynamic_properties:{
+                    list_obj:projPath + "/template/",
+                    value_field:'id',
+                    view_field:'name',
+                }
+            };
+        }
+        else
+        {
+            obj.type = "hidden"
+        }
+        return obj
+    }
+
+    data.definition.properties.template_opt.required = false
+    data.definition.properties.template_opt.dynamic_properties = {}
+    data.definition.properties.template_opt.dynamic_properties.callback = function(fieldObj, newValue)
+    {
+        let obj = { 
+            type:"hidden"
+        }
+        
+        if(newValue.value && newValue.value.options_list)
+        { 
+            obj.type = "enum"
+            obj.override_opt = {
+                enum:newValue.value.options_list
+            };
+        }
+        
+        return obj
+    } 
+    
+    data.definition.properties.inventory.type = "number"
+    data.definition.properties.inventory.required = false
+    data.definition.properties.inventory.dynamic_properties = {}
+    data.definition.properties.inventory.dynamic_properties.callback = function(fieldObj, newValue)
+    {
+
+        let obj = {
+            type:"select2"
+        }
+        if(newValue.value != "TEMPLATE")
+        {
+            obj.override_opt = {
+                dynamic_properties:{
+                    list_obj:projPath + "/inventory/",
+                    value_field:'id',
+                    view_field:'name',
+                }
+            };
+        }
+        else
+        {
+            obj.type = "hidden"
+        }
+        return obj
     }
 })
+
+
+guiElements.template_data = function(opt = {})
+{
+    this.name = 'template_data'
+    guiElements.base.apply(this, arguments)
+}
+
+guiElements.template_options = function(opt = {})
+{
+    this.name = 'template_data'
+    guiElements.base.apply(this, arguments)
+}
  
