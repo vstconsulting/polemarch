@@ -514,23 +514,53 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
         default=models.PeriodicTask.types[0],
         label='Interval type'
     )
-    schedule = serializers.CharField(allow_blank=True)
-    inventory = serializers.CharField(required=False)
-    mode = serializers.CharField(required=False)
+
+    template = vst_fields.DependEnumField(allow_blank=True, required=False, field='kind', types={
+        'PLAYBOOK': 'hidden',
+        'MODULE': 'hidden',
+        'TEMPLATE': 'autocomplete',
+    })
+
+    template_opt = vst_fields.DependEnumField(allow_blank=True, required=False, field='kind', types={
+        'PLAYBOOK': 'hidden',
+        'MODULE': 'hidden',
+        'TEMPLATE': 'autocomplete',
+    })
+
+    schedule = vst_fields.DependEnumField(allow_blank=True, field='type', types={
+        'CRONTAB': 'crontab',
+        'INTERVAL': 'integer',
+    })
+
+    mode = vst_fields.DependEnumField(allow_blank=True, required=False, field='kind', types={
+        'PLAYBOOK': 'autocomplete',
+        'MODULE': 'autocomplete',
+        'TEMPLATE': 'hidden',
+    })
+
+    inventory = vst_fields.DependEnumField(allow_blank=True, required=False, field='kind', types={
+        'PLAYBOOK': 'select2',
+        'MODULE': 'select2',
+        'TEMPLATE': 'hidden',
+    })
+
+    #inventory = vst_fields.Select2Field(required=True, select='Inventory',
+    #                                  label='Inventory',
+    #                                  autocomplete_represent='name')
 
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
                   'name',
-                  'type',
-                  'schedule',
-                  'mode',
                   'kind',
+                  'mode',
                   'inventory',
                   'save_result',
                   'template',
                   'template_opt',
-                  'enabled',)
+                  'enabled',
+                  'type',
+                  'schedule',)
 
     @transaction.atomic
     def _do_with_vars(self, *args, **kwargs):
@@ -543,24 +573,22 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
-    project = ModelRelatedField(required=False, model=models.Project)
     notes = vst_fields.TextareaField(required=False, allow_blank=True)
 
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
                   'name',
-                  'notes',
-                  'type',
-                  'schedule',
-                  'mode',
                   'kind',
-                  'project',
+                  'mode',
                   'inventory',
                   'save_result',
                   'template',
                   'template_opt',
-                  'enabled',)
+                  'enabled',
+                  'type',
+                  'schedule',
+                  'notes',)
 
     def execute(self):
         inventory = self.instance.inventory
