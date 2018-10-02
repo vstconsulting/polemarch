@@ -174,11 +174,27 @@ class UserSerializer(vst_serializers.UserSerializer):
 
 
 class OneUserSerializer(UserSerializer):
-    password = serializers.CharField(write_only=True, required=False)
     email = serializers.EmailField(required=False)
 
     class Meta(vst_serializers.OneUserSerializer.Meta):
-        pass
+        fields = tuple(
+            field for field in vst_serializers.OneUserSerializer.Meta.fields
+            if field not in ['password']
+        )
+
+
+class CreateUserSerializer(OneUserSerializer):
+    password = serializers.CharField(write_only=True)
+    password2 = serializers.CharField(write_only=True, label='Repeat password')
+
+    class Meta(OneUserSerializer.Meta):
+        fields = list(OneUserSerializer.Meta.fields) + ['password', 'password2']
+
+    def run_validation(self, data=serializers.empty):
+        validated_data = super(CreateUserSerializer, self).run_validation(data)
+        if validated_data['password'] != validated_data.pop('password2', None):
+            raise exceptions.ValidationError('Passwords do not match.')
+        return validated_data
 
 
 class ChartLineSettingSerializer(vst_serializers.JsonObjectSerializer):

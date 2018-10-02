@@ -75,7 +75,8 @@ class ApiUsersTestCase(ApiBaseTestCase):
                         }
             self.result(client.post, self.get_url('user'), 400, userdata)
         passwd = 'eadgbe'
-        userdata = dict(username="testuser4", password=make_password(passwd),
+        raw_passwd = make_password(passwd)
+        userdata = dict(username="testuser4", password=raw_passwd, password2=raw_passwd,
                         raw_password=True, is_active=False)
         self.result(client.post, self.get_url('user'), 201, userdata)
         client = Client()
@@ -111,26 +112,26 @@ class ApiUsersTestCase(ApiBaseTestCase):
     def test_api_users_password_settings(self):
         User = self.get_model_class('django.contrib.auth.models.User')
         client = self._login()
-        AUTH_PASSWORD_VALIDATORS = settings.AUTH_PASSWORD_VALIDATORS
-        AUTH_PASSWORD_VALIDATORS[1]["OPTIONS"]["min_length"] = 5
-        with self.settings(AUTH_PASSWORD_VALIDATORS=AUTH_PASSWORD_VALIDATORS):
-            userdata = {"username": "test_user2",
-                        "passwords": "ab",
-                        "is_active": True,
-                        "first_name": "user_f_name",
-                        "last_name": "user_l_name",
-                        "email": "test@domain.lan"
-                        }
-            self.result(client.post, self.get_url('user'), 400, userdata)
+        userdata = {"username": "test_user2",
+                    "password": "ab",
+                    "password2": "abc",
+                    "is_active": True,
+                    "first_name": "user_f_name",
+                    "last_name": "user_l_name",
+                    "email": "test@domain.lan"
+                    }
+        self.result(client.post, self.get_url('user'), 400, userdata)
         passwd = 'eadgbe'
-        userdata = dict(username="testuser3", password=make_password(passwd),
+        encr_passwd = make_password(passwd)
+        userdata = dict(username="testuser3",
+                        password=encr_passwd, password2=encr_passwd,
                         raw_password=True, is_active=True)
         self.result(client.post, self.get_url('user'), 201, userdata)
         user = User.objects.get(username=userdata['username'])
         self.assertEqual(user.password, userdata['password'])
         self.assertTrue(user.check_password(passwd))
         user.delete()
-        userdata.update({"raw_password": False, "password": passwd})
+        userdata.update({"raw_password": False, "password": passwd, "password2": passwd})
         self.result(client.post, self.get_url('user'), 201, userdata)
         user = User.objects.get(username=userdata['username'])
         self.assertTrue(user.check_password(userdata['password']))
@@ -142,6 +143,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
         result = self.result(client.post, self.get_url('user'), 201,
                              {"username": "test_user3",
                               "password": "eadgbe",
+                              "password2": "eadgbe",
                               "is_active": True,
                               "first_name": "user_f_name",
                               "last_name": "user_l_name",
@@ -150,7 +152,6 @@ class ApiUsersTestCase(ApiBaseTestCase):
         id = str(result['id'])
         url = self.get_url('user', id)
         data = json.dumps({'last_name': 'some_new_last_name',
-                           'password': "eadgbe123",
                            'email': "test@mail.com"})
         result = self.result(client.patch, url, 200, data,
                              content_type="application/json")
@@ -167,7 +168,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
         self._logout(client)
         client = self.client_class()
         response = client.login(**{'username': "test_user3",
-                                   'password': "eadgbe123"})
+                                   'password': "eadgbe"})
         self.assertTrue(response)
         admin = User.objects.get(username="admin")
         self.result(client.patch, self.get_url('user', admin.id), 403,
@@ -179,6 +180,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
         client = self._login()
         data = {"username": "test_user89",
                 "password": "eadgbe",
+                "password2": "eadgbe",
                 "is_active": True,
                 "first_name": "user_f_name",
                 "last_name": "user_l_name",
@@ -196,7 +198,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
             name="test", type='HTTP', recipients=hook_url, when='on_user_add'
         )
         user_data = {
-            "username": "test_user", "password": "eadgbe",
+            "username": "test_user", "password": "eadgbe", "password2": "eadgbe",
             "is_active": True, "first_name": "user_f_name",
             "last_name": "user_l_name", "email": "test@domain.lan"
         }
@@ -255,11 +257,12 @@ class ApiUsersTestCase(ApiBaseTestCase):
         self.details_test(self.get_url('team', ug.id), name=ug.name, id=ug.id)
 
         # Add users to Team
+        test_user_data = dict(password='123', password2='123')
         bulk_data = [
             self.get_bulk('team', dict(name='test_team'), 'add'),
-            self.get_bulk('user', dict(username='test_user', password='123'), 'add'),
+            self.get_bulk('user', dict(username='test_user', **test_user_data), 'add'),
             self.get_mod_bulk(
-                'team', '<0[data][id]>', dict(username='te', password='123'), 'user'
+                'team', '<0[data][id]>', dict(username='te', **test_user_data), 'user'
             ),
             self.get_mod_bulk(
                 'team', '<0[data][id]>', dict(id='<1[data][id]>'), 'user'

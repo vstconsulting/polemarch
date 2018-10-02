@@ -1,16 +1,72 @@
 
-tabSignal.connect("openapi.schema.definition.Periodictask", function(data)
+let projPath = "/project/{pk}"
+tabSignal.connect("openapi.schema.definition.PeriodicTaskVariable", function(data)
 {
-    //debugger;
+    data.definition.properties.key.dynamic_properties = {}
+    data.definition.properties.key.format = "dynamic"
+    data.definition.properties.key.required = true
+    data.definition.properties.key.onInit = function(opt = {}, value, parent_object)
+    { 
+        let thisObj = this;
+        let periodicTask = new guiObjectFactory(parent_object.api.parent); 
+        $.when(periodicTask.load(parent_object.url_vars.api_periodic_task_id)).done(function(){
+
+            let fields = {}
+            if(periodicTask.model.data.kind == "PLAYBOOK")
+            {
+                fields = window.guiSchema.path["/project/{pk}/execute_playbook/"].schema.exec.fields  
+            }
+            if(periodicTask.model.data.kind == "MODULE")
+            {
+                fields = window.guiSchema.path["/project/{pk}/execute_module/"].schema.exec.fields 
+            }
+
+            delete fields.inventory 
+            thisObj.setType("enum", {
+                enum:Object.keys(fields), 
+            });
+            thisObj.opt.all_fields = fields
+            
+            thisObj._callAllonChangeCallback()
+        }) 
+    }
+    
+    data.definition.properties.value.dynamic_properties = {}
+    data.definition.properties.value.format = "dynamic"
+    data.definition.properties.value.required = true
+    data.definition.properties.value.parent_field = 'key'
+    data.definition.properties.value.dynamic_properties.callback = function(fieldObj, newValue)
+    {
+        if(!newValue.value)
+        {
+            return;
+        }
+        
+        if(!newValue.opt.all_fields)
+        {
+            return;
+        }
+        
+        if(!newValue.opt.all_fields[newValue.value])
+        {
+            return;
+        }
+        
+        let field = newValue.opt.all_fields[newValue.value]
+          
+        field.format = getFieldType(field)
+          
+        return field 
+    }
+     
 })
 
 tabSignal.connect("openapi.schema.definition.OnePeriodictask", function(data)
 {
-    let projPath = "/project/{pk}"
     data.definition.properties.mode.dynamic_properties = {}
     data.definition.properties.mode.required = false
-    data.definition.properties.mode.dynamic_properties.callback = function(fieldObj, newValue){
-
+    data.definition.properties.mode.dynamic_properties.callback = function(fieldObj, newValue)
+    {
         let obj = {
             type:"autocomplete"
         }
@@ -37,7 +93,7 @@ tabSignal.connect("openapi.schema.definition.OnePeriodictask", function(data)
         }
         else
         {
-            obj.type = "hidden"
+            obj.type = "null"
         }
         return obj
     }
@@ -47,7 +103,6 @@ tabSignal.connect("openapi.schema.definition.OnePeriodictask", function(data)
     data.definition.properties.template.dynamic_properties = {}
     data.definition.properties.template.dynamic_properties.callback = function(fieldObj, newValue)
     {
-
         let obj = {
             type:"select2"
         }
@@ -63,7 +118,7 @@ tabSignal.connect("openapi.schema.definition.OnePeriodictask", function(data)
         }
         else
         {
-            obj.type = "hidden"
+            obj.type = "null"
         }
         return obj
     }
@@ -72,27 +127,26 @@ tabSignal.connect("openapi.schema.definition.OnePeriodictask", function(data)
     data.definition.properties.template_opt.dynamic_properties = {}
     data.definition.properties.template_opt.dynamic_properties.callback = function(fieldObj, newValue)
     {
-        let obj = { 
-            type:"hidden"
+        let obj = {
+            type:"null"
         }
-        
+
         if(newValue.value && newValue.value.options_list)
-        { 
+        {
             obj.type = "enum"
             obj.override_opt = {
                 enum:newValue.value.options_list
             };
         }
-        
+
         return obj
-    } 
-    
+    }
+
     data.definition.properties.inventory.type = "number"
     data.definition.properties.inventory.required = false
     data.definition.properties.inventory.dynamic_properties = {}
     data.definition.properties.inventory.dynamic_properties.callback = function(fieldObj, newValue)
     {
-
         let obj = {
             type:"select2"
         }
@@ -108,9 +162,47 @@ tabSignal.connect("openapi.schema.definition.OnePeriodictask", function(data)
         }
         else
         {
-            obj.type = "hidden"
+            obj.type = "null"
         }
         return obj
+    }
+})
+
+tabSignal.connect("guiList.renderLine.periodic_task", function(obj)
+{
+    // Для kind == TEMPLATE прятать ссылку на Variables
+    if(obj.dataLine.line.kind == "TEMPLATE")
+    {
+        if(obj.dataLine.sublinks_l2['variables'])
+        {
+            obj.dataLine.sublinks_l2['variables'].hidden = true
+        }
+    }
+    else
+    {
+        if(obj.dataLine.sublinks_l2['variables'])
+        {
+            obj.dataLine.sublinks_l2['variables'].hidden = false
+        }
+    }
+})
+
+tabSignal.connect("guiList.renderPage.periodic_task", function(obj)
+{
+    // Для kind == TEMPLATE прятать ссылку на Variables
+    if(obj.data.kind == "TEMPLATE")
+    {
+        if(obj.options.links['variables'])
+        {
+            obj.options.links['variables'].hidden = true
+        }
+    }
+    else
+    {
+        if(obj.options.links['variables'])
+        {
+            obj.options.links['variables'].hidden = false
+        }
     }
 })
 
@@ -126,4 +218,3 @@ guiElements.template_options = function(opt = {})
     this.name = 'template_data'
     guiElements.base.apply(this, arguments)
 }
- 
