@@ -93,5 +93,6 @@ tabSignal.connect("openapi.completed", function()
     user_settings.methodEdit = 'post';
     ['chartLineSettings', 'widgetSettings'].forEach(function (name) {
         user_settings.schema.get.fields[name].format = 'inner_api_object';
+        user_settings.schema.get.fields[name].readOnly = false;
     })
 })
