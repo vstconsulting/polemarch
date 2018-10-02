@@ -10064,12 +10064,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneUser'
+            $ref: '#/definitions/CreateUser'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneUser'
+            $ref: '#/definitions/CreateUser'
         '400':
           description: Validation error or some data error.
           schema:
@@ -10486,12 +10486,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneUser'
+            $ref: '#/definitions/CreateUser'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/OneUser'
+            $ref: '#/definitions/CreateUser'
         '400':
           description: Validation error or some data error.
           schema:
@@ -12084,6 +12084,50 @@ definitions:
         format: textarea
       owner:
         $ref: '#/definitions/User'
+  CreateUser:
+    required:
+      - username
+      - password
+      - password2
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      username:
+        title: Username
+        description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+          only.
+        type: string
+        pattern: ^[\w.@+-]+$
+        maxLength: 150
+        minLength: 1
+      is_active:
+        title: Is active
+        type: boolean
+        default: true
+      first_name:
+        title: First name
+        type: string
+        maxLength: 30
+      last_name:
+        title: Last name
+        type: string
+        maxLength: 30
+      email:
+        title: Email
+        type: string
+        format: email
+        minLength: 1
+      password:
+        title: Password
+        type: string
+        minLength: 1
+      password2:
+        title: Repeat password
+        type: string
+        minLength: 1
   OneUser:
     required:
       - username
@@ -12100,10 +12144,6 @@ definitions:
         type: string
         pattern: ^[\w.@+-]+$
         maxLength: 150
-        minLength: 1
-      password:
-        title: Password
-        type: string
         minLength: 1
       is_active:
         title: Is active
