@@ -193,6 +193,9 @@ class UserViewSet(views.UserViewSet, base.CopyMixin):
     '''
     serializer_class = sers.UserSerializer
     serializer_class_one = sers.OneUserSerializer
+    action_serializers = {
+        'create': sers.CreateUserSerializer
+    }
 
     copy_related = ['groups']
     copy_field_name = 'username'
