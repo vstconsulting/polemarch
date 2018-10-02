@@ -668,12 +668,65 @@ paths:
     get:
       operationId: group_group_variables_list
       description: Return all variables of instance.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/InventoryVariable'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -883,6 +936,11 @@ paths:
         - name: name
           in: query
           description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: type
+          in: query
+          description: Instance type.
           required: false
           type: string
         - name: id__not
@@ -1213,12 +1271,65 @@ paths:
     get:
       operationId: group_host_variables_list
       description: Return all variables of instance.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/InventoryVariable'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -3678,12 +3789,65 @@ paths:
     get:
       operationId: inventory_group_variables_list
       description: Return all variables of instance.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/InventoryVariable'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -4228,12 +4392,65 @@ paths:
     get:
       operationId: inventory_host_variables_list
       description: Return all variables of instance.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/InventoryVariable'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -5429,12 +5646,65 @@ paths:
     get:
       operationId: project_group_variables_list
       description: Return all variables of instance.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/InventoryVariable'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6276,12 +6546,65 @@ paths:
     get:
       operationId: project_host_variables_list
       description: Return all variables of instance.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/InventoryVariable'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6734,12 +7057,70 @@ paths:
     get:
       operationId: project_inventory_all_groups_list
       description: Return all groups.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: name
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: name__not
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Group'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6779,7 +7160,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/OneGroup'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6818,12 +7199,75 @@ paths:
     get:
       operationId: project_inventory_all_hosts_list
       description: Return all hosts.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: name
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: type
+          in: query
+          description: Instance type.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: name__not
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Host'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6863,7 +7307,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6947,12 +7391,70 @@ paths:
     get:
       operationId: project_inventory_group_list
       description: Return all groups.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: name
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: name__not
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Group'
         '400':
           description: Validation error or some data error.
           schema:
@@ -6979,12 +7481,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCreateMaster'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCreateMaster'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7024,7 +7526,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/OneGroup'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7051,12 +7553,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/OneGroup'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/OneGroup'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7083,12 +7585,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/OneGroup'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/OneGroup'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7253,12 +7755,65 @@ paths:
     get:
       operationId: project_inventory_group_variables_list
       description: Return all variables of instance.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/InventoryVariable'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7470,12 +8025,75 @@ paths:
     get:
       operationId: project_inventory_host_list
       description: Return all hosts.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: name
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: type
+          in: query
+          description: Instance type.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: name__not
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Host'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7502,12 +8120,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7547,7 +8165,7 @@ paths:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7574,12 +8192,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7606,12 +8224,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/OneHost'
         '400':
           description: Validation error or some data error.
           schema:
@@ -7776,12 +8394,65 @@ paths:
     get:
       operationId: project_inventory_host_variables_list
       description: Return all variables of instance.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/InventoryVariable'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8038,12 +8709,65 @@ paths:
     get:
       operationId: project_inventory_variables_list
       description: Return all variables of instance.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/InventoryVariable'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8671,12 +9395,65 @@ paths:
     get:
       operationId: project_periodic_task_variables_list
       description: Return all variables of periodic task.
-      parameters: []
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
       responses:
         '200':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/PeriodicTaskVariable'
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+              previous:
+                type: string
+                format: uri
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/PeriodicTaskVariable'
         '400':
           description: Validation error or some data error.
           schema:
