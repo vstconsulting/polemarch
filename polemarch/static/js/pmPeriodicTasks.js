@@ -220,16 +220,3 @@ tabSignal.connect("guiList.renderPage.periodic_task", function(obj)
         }
     }
 })
-
-
-guiElements.template_data = function(opt = {})
-{
-    this.name = 'template_data'
-    guiElements.base.apply(this, arguments)
-}
-
-guiElements.template_options = function(opt = {})
-{
-    this.name = 'template_data'
-    guiElements.base.apply(this, arguments)
-}
