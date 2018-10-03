@@ -6,19 +6,21 @@ tabSignal.connect("openapi.schema.definition.PeriodicTaskVariable", function(dat
     data.definition.properties.key.format = "dynamic"
     data.definition.properties.key.required = true
     data.definition.properties.key.onInit = function(opt = {}, value, parent_object)
-    { 
+    {  
         let thisObj = this;
-        let periodicTask = new guiObjectFactory(parent_object.api.parent); 
+        let periodicTask = new guiObjectFactory(projPath + "/periodic_task/{periodic_task_id}/"); 
         $.when(periodicTask.load(parent_object.url_vars.api_periodic_task_id)).done(function(){
 
             let fields = {}
             if(periodicTask.model.data.kind == "PLAYBOOK")
             {
-                fields = window.guiSchema.path["/project/{pk}/execute_playbook/"].schema.exec.fields  
+                fields = window.guiSchema.path[projPath + "/execute_playbook/"].schema.exec.fields  
+                delete fields.playbook 
             }
             if(periodicTask.model.data.kind == "MODULE")
             {
-                fields = window.guiSchema.path["/project/{pk}/execute_module/"].schema.exec.fields 
+                fields = window.guiSchema.path[projPath + "/execute_module/"].schema.exec.fields 
+                delete fields.mode 
             }
 
             delete fields.inventory 
