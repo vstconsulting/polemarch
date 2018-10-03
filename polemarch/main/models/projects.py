@@ -83,6 +83,7 @@ class Project(AbstractModel):
 
     HIDDEN_VARS = [
         'repo_password',
+        'repo_key',
     ]
 
     BOOLEAN_VARS = [
