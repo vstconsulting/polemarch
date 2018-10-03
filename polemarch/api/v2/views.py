@@ -194,7 +194,8 @@ class UserViewSet(views.UserViewSet, base.CopyMixin):
     serializer_class = sers.UserSerializer
     serializer_class_one = sers.OneUserSerializer
     action_serializers = {
-        'create': sers.CreateUserSerializer
+        'create': sers.CreateUserSerializer,
+        'change_password': sers.ChangePasswordSerializer
     }
 
     copy_related = ['groups']
@@ -220,6 +221,13 @@ class UserViewSet(views.UserViewSet, base.CopyMixin):
             obj.settings.data = request.data if method == "POST" else {}
             obj.settings.save()
         return base.Response(obj.settings.data, status.HTTP_200_OK).resp
+
+    @deco.action(["post"], detail=yes)
+    def change_password(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object(), data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return base.Response(serializer.data, status.HTTP_201_CREATED).resp
 
 
 @deco.nested_view('user', 'id', allow_append=yes, manager_name='users', view=UserViewSet)

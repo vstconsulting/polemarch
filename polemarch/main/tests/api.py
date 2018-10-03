@@ -135,6 +135,40 @@ class ApiUsersTestCase(ApiBaseTestCase):
         self.result(client.post, self.get_url('user'), 201, userdata)
         user = User.objects.get(username=userdata['username'])
         self.assertTrue(user.check_password(userdata['password']))
+        # logout
+        self._logout(client)
+        self.client.post('/login/', data=dict(username=user.username, password=passwd))
+        # Change password
+        new_password = 'newpassword'
+        data = {
+            "password": new_password,
+            "password2": new_password,
+            "old_password": passwd,
+        }
+        change_url = self.get_url('user', user.id, 'change_password')
+        # change password with correct data
+        self.result(client.post, change_url, 201, data)
+        # logout
+        self._logout(client)
+        login_data = dict(username=user.username, password=data['old_password'])
+        # login with old password
+        self.client.post('/login/', data=login_data)
+        response = self.client.get('/')
+        self.assertNotEqual(response.status_code, 200)
+        # login with new password
+        login_data['password'] = data['password']
+        self.client.post('/login/', data=login_data)
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        # change password with incorrect data 1
+        self.result(client.post, change_url, 403, data)
+        # change password with incorrect data 2
+        data = {
+            "password": passwd,
+            "password2": passwd + "a",
+            "old_password": new_password,
+        }
+        self.result(client.post, change_url, 400, data)
         self._logout(client)
 
     def test_api_user_update(self):

@@ -122,6 +122,28 @@ class SetOwnerSerializer(DataSerializer):
         return dict(pk=data['user_id'])
 
 
+class ChangePasswordSerializer(DataSerializer):
+    old_password = serializers.CharField(required=True)
+    password = serializers.CharField(required=True, label='New password')
+    password2 = serializers.CharField(required=True, label='Confirm new password')
+
+    def update(self, instance, validated_data):
+        if not instance.check_password(validated_data['old_password']):
+            raise exceptions.PermissionDenied('Password is not correct.')
+        if validated_data['password'] != validated_data['password2']:
+            raise exceptions.ValidationError("New passwords' values are not equal.")
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
+
+    def to_representation(self, value):
+        return dict(
+            old_password='***',
+            password='***',
+            password2='***',
+        )
+
+
 class _SignalSerializer(serializers.ModelSerializer):
     @cached_property
     def _writable_fields(self):
