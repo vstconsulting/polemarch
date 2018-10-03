@@ -302,7 +302,7 @@ class BaseExecutionsTestCase(BaseTestCase):
         self.assertEqual(results[0]['data']['status'], 'NEW')
         self.assertEqual(results[1]['data']['count'], len(obj.vars))
         for value in results[1]['data']['results']:
-            self.assertEqual(value['value'], obj.vars[value['key']] or '[~~ENCRYPTED~~]')
+            self.assertIn(value['value'], [obj.vars[value['key']], '[~~ENCRYPTED~~]'])
 
     def project_workflow(self, repo_type, **kwargs):
         execute = kwargs.pop('execute', False)

@@ -1,4 +1,4 @@
-# pylint: disable=no-member,unused-argument
+# pylint: disable=no-member,unused-argument,too-many-lines
 from __future__ import unicode_literals
 import json
 from collections import OrderedDict
@@ -24,7 +24,7 @@ from ..signals import api_post_save, api_pre_save
 #
 # Serializers field for usability
 class ModelRelatedField(serializers.PrimaryKeyRelatedField):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs):  # nocv
         model = kwargs.pop("model", None)
         assert not ((model is not None or self.queryset is not None) and
                     kwargs.get('read_only', None)), (
@@ -401,7 +401,7 @@ class ProjectVariableSerializer(VariableSerializer):
         'repo_sync_on_run': [True, False]
     }, types={
         'repo_password': 'password',
-        'repo_key': 'file'
+        'repo_key': 'secretfile'
     })
 
 
@@ -515,38 +515,36 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
         label='Interval type'
     )
 
-    template = vst_fields.DependEnumField(allow_blank=True, required=False, field='kind', types={
-        'PLAYBOOK': 'hidden',
-        'MODULE': 'hidden',
-        'TEMPLATE': 'autocomplete',
-    })
+    template_opt = vst_fields.DependEnumField(
+        allow_blank=True, required=False, field='kind', types={
+            'PLAYBOOK': 'hidden',
+            'MODULE': 'hidden',
+            'TEMPLATE': 'autocomplete',
+        }
+    )
 
-    template_opt = vst_fields.DependEnumField(allow_blank=True, required=False, field='kind', types={
-        'PLAYBOOK': 'hidden',
-        'MODULE': 'hidden',
-        'TEMPLATE': 'autocomplete',
-    })
+    schedule = vst_fields.DependEnumField(
+        allow_blank=True, field='type', types={
+            'CRONTAB': 'crontab',
+            'INTERVAL': 'integer',
+        }
+    )
 
-    schedule = vst_fields.DependEnumField(allow_blank=True, field='type', types={
-        'CRONTAB': 'crontab',
-        'INTERVAL': 'integer',
-    })
+    mode = vst_fields.DependEnumField(
+        allow_blank=True, required=False, field='kind', types={
+            'PLAYBOOK': 'autocomplete',
+            'MODULE': 'autocomplete',
+            'TEMPLATE': 'hidden',
+        }
+    )
 
-    mode = vst_fields.DependEnumField(allow_blank=True, required=False, field='kind', types={
-        'PLAYBOOK': 'autocomplete',
-        'MODULE': 'autocomplete',
-        'TEMPLATE': 'hidden',
-    })
-
-    inventory = vst_fields.DependEnumField(allow_blank=True, required=False, field='kind', types={
-        'PLAYBOOK': 'select2',
-        'MODULE': 'select2',
-        'TEMPLATE': 'hidden',
-    })
-
-    #inventory = vst_fields.Select2Field(required=True, select='Inventory',
-    #                                  label='Inventory',
-    #                                  autocomplete_represent='name')
+    inventory = vst_fields.DependEnumField(
+        allow_blank=True, required=False, field='kind', types={
+            'PLAYBOOK': 'select2',
+            'MODULE': 'select2',
+            'TEMPLATE': 'hidden',
+        }
+    )
 
     class Meta:
         model = models.PeriodicTask
