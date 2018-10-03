@@ -1138,7 +1138,7 @@ class OApiTestCase(BaseTestCase):
             '#/definitions/Group'
         )
 
-        paths = schema['paths']
+        # paths = schema['paths']
 
         # group_pk_vars = paths['/group/{pk}/variables/']
         # self.check_variables(group_pk_vars)
