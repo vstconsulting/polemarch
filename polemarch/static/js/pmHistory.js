@@ -382,7 +382,7 @@ function addHistoryPrefetchBase(obj){
     if(properties['executor'])
     {
         properties['executor']['prefetch'] = {
-            path: "__func__get_prefetch_history_executor_path",
+            path__func__: "get_prefetch_history_executor_path",
             field_name: "email",
         }
     }
@@ -407,7 +407,7 @@ function addHistoryPrefetchCommon(obj)
     if(properties['initiator'])
     {
         properties['initiator']['prefetch'] = {
-            path: "__func__get_prefetch_history_initiator_path_1",
+            path__func__: "get_prefetch_history_initiator_path_1",
         };
     }
 }
@@ -420,7 +420,7 @@ function addHistoryPrefetchProjectHistory(obj)
 
     if (properties['initiator']) {
         properties['initiator']['prefetch'] = {
-            path: "__func__get_prefetch_history_initiator_path_2",
+            path__func__: "get_prefetch_history_initiator_path_2",
         };
     }
 }
