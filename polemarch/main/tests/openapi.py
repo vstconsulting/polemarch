@@ -1,8 +1,12 @@
 from ._base import BaseTestCase
 from ... import __version__
+import re
 
 
 class OApiTestCase(BaseTestCase):
+
+    re_path = re.compile(r"(?<={).+?(?=})")
+
     def test_openapi_schema(self):
         api_version = self._settings('VST_API_VERSION')
         api_path = self._settings('API_URL')
@@ -1129,6 +1133,25 @@ class OApiTestCase(BaseTestCase):
         )
         del oneUser
 
+        changePassword = definitions['ChangePassword']
+        objName = 'ChangePassword'
+        self.check_fields(
+            objName, changePassword['required'], 'old_password', 'password', 'password2'
+        )
+        self.check_fields(
+            objName, changePassword['properties']['old_password'],
+            type='string', minLength=1
+        )
+        self.check_fields(
+            objName, changePassword['properties']['password'],
+            type='string', minLength=1
+        )
+        self.check_fields(
+            objName, changePassword['properties']['password2'],
+            type='string', minLength=1
+        )
+        del changePassword
+
         chartLineSetting = definitions['ChartLineSetting']
         objName = 'ChartLineSetting'
 
@@ -1325,5 +1348,5 @@ class OApiTestCase(BaseTestCase):
         for val in path:
             try:
                 obj = obj[val]
-            except:
+            except: # nocv
                 raise Exception('Definition \'#/' + '/'.join(path) + '\' doesn\'t exist')
