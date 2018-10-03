@@ -399,7 +399,7 @@ class ProjectVariableSerializer(VariableSerializer):
         'repo_sync_on_run': [True, False]
     }, types={
         'repo_password': 'password',
-        'repo_key': 'file'
+        'repo_key': 'secretfile'
     })
 
 
