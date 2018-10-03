@@ -818,3 +818,16 @@
 //
 //    return spajs.open({menuId: project_and_id + this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
 //}
+
+
+guiElements.template_data = function(opt = {})
+{
+    this.name = 'template_data'
+    guiElements.base.apply(this, arguments)
+}
+
+guiElements.template_options = function(opt = {})
+{
+    this.name = 'template_data'
+    guiElements.base.apply(this, arguments)
+}

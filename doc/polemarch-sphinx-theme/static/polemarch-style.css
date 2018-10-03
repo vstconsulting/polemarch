@@ -1,15 +1,9 @@
-@import url(bootstrap/css/bootstrap.css);
-@import url(bootstrap/css/bootstrap-theme.css);
-@import url(lte/css/alt/AdminLTE-bootstrap-social.css);
-@import url(lte/css/alt/AdminLTE-fullcalendar.css);
-@import url(lte/css/alt/AdminLTE-select2.css);
-@import url(lte/css/alt/AdminLTE-without-plugins.css);
+@import url(bootstrap/css/bootstrap.min.css);
 @import url(lte/css/AdminLTE.css);
 @import url(lte/css/font-awesome.min.css);
 @import url(lte/css/ionicons.min.css);
 @import url(lte/css/skins/_all-skins.css);
-@import url(lte/css/skins/skin-blue.css);
-@import url(lte/css/skins/skin-blue-light.css);
+
 
 .sidebar-menu ul {
     list-style: none;
@@ -373,17 +367,17 @@ li.toctree-l1.current>a {
 
 /* end of styles for collapsed sidebar */
 
-@media (max-width: 767px) {
 
+@media (max-width: 767px) {
     .bg-logo-doc {
-    background-image: url(img/logo/horizontal-bw.png);
+        background-image: url(img/logo/horizontal-bw.png);
     }
     .bg-logo-min-doc {
-    background-image: url(img/logo/logo-bw.png);
+        background-image: url(img/logo/logo-bw.png);
     }
     .fork-me img {
-    width:112px;
-    height:112px;
+        width:112px;
+        height:112px;
     }
 
     #big-search-input-pm {
