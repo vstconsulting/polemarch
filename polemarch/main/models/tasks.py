@@ -46,7 +46,7 @@ class Template(ACLModel):
             ["id", "name", "kind", "inventory", "project"]
         ]
 
-    template_fields = {}
+    template_fields = OrderedDict()
     template_fields["Task"] = ["playbook", "vars", "inventory"]
     template_fields["Module"] = [
         "inventory", "module", "group", "args", "vars"
