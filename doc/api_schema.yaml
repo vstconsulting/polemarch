@@ -24,7 +24,7 @@ info:
   x-versions:
     application: 0.2.0
     library: 0.2.0
-    vstutils: 1.2.0.dev10
+    vstutils: 1.2.0.dev11
     django: 1.11.15
     ansible: 2.6.4
   version: v2
@@ -12563,6 +12563,56 @@ definitions:
         type: string
         maxLength: 512
         minLength: 1
+      kind:
+        title: Task type
+        type: string
+        enum:
+          - PLAYBOOK
+          - MODULE
+          - TEMPLATE
+        default: PLAYBOOK
+      mode:
+        title: Mode
+        type: string
+        format: dynamic
+        additionalProperties:
+          field: kind
+          choices: {}
+          types:
+            PLAYBOOK: autocomplete
+            MODULE: autocomplete
+            TEMPLATE: hidden
+      inventory:
+        title: Inventory
+        type: string
+        format: dynamic
+        additionalProperties:
+          field: kind
+          choices: {}
+          types:
+            PLAYBOOK: select2
+            MODULE: select2
+            TEMPLATE: hidden
+      save_result:
+        title: Save result
+        type: boolean
+      template:
+        title: Template
+        type: integer
+      template_opt:
+        title: Template opt
+        type: string
+        format: dynamic
+        additionalProperties:
+          field: kind
+          choices: {}
+          types:
+            PLAYBOOK: hidden
+            MODULE: hidden
+            TEMPLATE: autocomplete
+      enabled:
+        title: Enabled
+        type: boolean
       type:
         title: Interval type
         type: string
@@ -12573,35 +12623,13 @@ definitions:
       schedule:
         title: Schedule
         type: string
-      mode:
-        title: Mode
-        type: string
-        minLength: 1
-      kind:
-        title: Task type
-        type: string
-        enum:
-          - PLAYBOOK
-          - MODULE
-          - TEMPLATE
-        default: PLAYBOOK
-      inventory:
-        title: Inventory
-        type: string
-        minLength: 1
-      save_result:
-        title: Save result
-        type: boolean
-      template:
-        title: Template
-        type: integer
-      template_opt:
-        title: Template opt
-        type: string
-        maxLength: 256
-      enabled:
-        title: Enabled
-        type: boolean
+        format: dynamic
+        additionalProperties:
+          field: type
+          choices: {}
+          types:
+            CRONTAB: crontab
+            INTERVAL: integer
   OnePeriodictask:
     required:
       - schedule
@@ -12616,10 +12644,56 @@ definitions:
         type: string
         maxLength: 512
         minLength: 1
-      notes:
-        title: Notes
+      kind:
+        title: Task type
         type: string
-        format: textarea
+        enum:
+          - PLAYBOOK
+          - MODULE
+          - TEMPLATE
+        default: PLAYBOOK
+      mode:
+        title: Mode
+        type: string
+        format: dynamic
+        additionalProperties:
+          field: kind
+          choices: {}
+          types:
+            PLAYBOOK: autocomplete
+            MODULE: autocomplete
+            TEMPLATE: hidden
+      inventory:
+        title: Inventory
+        type: string
+        format: dynamic
+        additionalProperties:
+          field: kind
+          choices: {}
+          types:
+            PLAYBOOK: select2
+            MODULE: select2
+            TEMPLATE: hidden
+      save_result:
+        title: Save result
+        type: boolean
+      template:
+        title: Template
+        type: integer
+      template_opt:
+        title: Template opt
+        type: string
+        format: dynamic
+        additionalProperties:
+          field: kind
+          choices: {}
+          types:
+            PLAYBOOK: hidden
+            MODULE: hidden
+            TEMPLATE: autocomplete
+      enabled:
+        title: Enabled
+        type: boolean
       type:
         title: Interval type
         type: string
@@ -12630,38 +12704,17 @@ definitions:
       schedule:
         title: Schedule
         type: string
-      mode:
-        title: Mode
+        format: dynamic
+        additionalProperties:
+          field: type
+          choices: {}
+          types:
+            CRONTAB: crontab
+            INTERVAL: integer
+      notes:
+        title: Notes
         type: string
-        minLength: 1
-      kind:
-        title: Task type
-        type: string
-        enum:
-          - PLAYBOOK
-          - MODULE
-          - TEMPLATE
-        default: PLAYBOOK
-      project:
-        title: Project
-        type: integer
-      inventory:
-        title: Inventory
-        type: string
-        minLength: 1
-      save_result:
-        title: Save result
-        type: boolean
-      template:
-        title: Template
-        type: integer
-      template_opt:
-        title: Template opt
-        type: string
-        maxLength: 256
-      enabled:
-        title: Enabled
-        type: boolean
+        format: textarea
   PeriodicTaskVariable:
     required:
       - key
@@ -12826,7 +12879,7 @@ definitions:
               - false
           types:
             repo_password: password
-            repo_key: file
+            repo_key: secretfile
   Team:
     required:
       - name

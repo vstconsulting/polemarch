@@ -1,4 +1,4 @@
-# pylint: disable=no-member,unused-argument
+# pylint: disable=no-member,unused-argument,too-many-lines
 from __future__ import unicode_literals
 import json
 from collections import OrderedDict
@@ -24,7 +24,7 @@ from ..signals import api_post_save, api_pre_save
 #
 # Serializers field for usability
 class ModelRelatedField(serializers.PrimaryKeyRelatedField):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs):  # nocv
         model = kwargs.pop("model", None)
         assert not ((model is not None or self.queryset is not None) and
                     kwargs.get('read_only', None)), (
@@ -399,7 +399,7 @@ class ProjectVariableSerializer(VariableSerializer):
         'repo_sync_on_run': [True, False]
     }, types={
         'repo_password': 'password',
-        'repo_key': 'file'
+        'repo_key': 'secretfile'
     })
 
 
@@ -512,23 +512,51 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
         default=models.PeriodicTask.types[0],
         label='Interval type'
     )
-    schedule = serializers.CharField(allow_blank=True)
-    inventory = serializers.CharField(required=False)
-    mode = serializers.CharField(required=False)
+
+    template_opt = vst_fields.DependEnumField(
+        allow_blank=True, required=False, field='kind', types={
+            'PLAYBOOK': 'hidden',
+            'MODULE': 'hidden',
+            'TEMPLATE': 'autocomplete',
+        }
+    )
+
+    schedule = vst_fields.DependEnumField(
+        allow_blank=True, field='type', types={
+            'CRONTAB': 'crontab',
+            'INTERVAL': 'integer',
+        }
+    )
+
+    mode = vst_fields.DependEnumField(
+        allow_blank=True, required=False, field='kind', types={
+            'PLAYBOOK': 'autocomplete',
+            'MODULE': 'autocomplete',
+            'TEMPLATE': 'hidden',
+        }
+    )
+
+    inventory = vst_fields.DependEnumField(
+        allow_blank=True, required=False, field='kind', types={
+            'PLAYBOOK': 'select2',
+            'MODULE': 'select2',
+            'TEMPLATE': 'hidden',
+        }
+    )
 
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
                   'name',
-                  'type',
-                  'schedule',
-                  'mode',
                   'kind',
+                  'mode',
                   'inventory',
                   'save_result',
                   'template',
                   'template_opt',
-                  'enabled',)
+                  'enabled',
+                  'type',
+                  'schedule',)
 
     @transaction.atomic
     def _do_with_vars(self, *args, **kwargs):
@@ -541,24 +569,22 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
-    project = ModelRelatedField(required=False, model=models.Project)
     notes = vst_fields.TextareaField(required=False, allow_blank=True)
 
     class Meta:
         model = models.PeriodicTask
         fields = ('id',
                   'name',
-                  'notes',
-                  'type',
-                  'schedule',
-                  'mode',
                   'kind',
-                  'project',
+                  'mode',
                   'inventory',
                   'save_result',
                   'template',
                   'template_opt',
-                  'enabled',)
+                  'enabled',
+                  'type',
+                  'schedule',
+                  'notes',)
 
     def execute(self):
         inventory = self.instance.inventory
