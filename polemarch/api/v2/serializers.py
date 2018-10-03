@@ -42,8 +42,8 @@ class DictField(serializers.CharField):
         return (
             data
             if (
-                isinstance(data, (six.string_types, six.text_type)) or
-                isinstance(data, (dict, list))
+                    isinstance(data, (six.string_types, six.text_type)) or
+                    isinstance(data, (dict, list))
             )
             else self.fail("Unknown type.")
         )
@@ -120,6 +120,28 @@ class SetOwnerSerializer(DataSerializer):
 
     def to_internal_value(self, data):
         return dict(pk=data['user_id'])
+
+
+class ChangePasswordSerializer(DataSerializer):
+    old_password = serializers.CharField(required=True)
+    password = serializers.CharField(required=True, label='New password')
+    password2 = serializers.CharField(required=True, label='Confirm new password')
+
+    def update(self, instance, validated_data):
+        if not instance.check_password(validated_data['old_password']):
+            raise exceptions.PermissionDenied('Password is not correct.')
+        if validated_data['password'] != validated_data['password2']:
+            raise exceptions.ValidationError("New passwords' values are not equal.")
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
+
+    def to_representation(self, value):
+        return dict(
+            old_password='***',
+            password='***',
+            password2='***',
+        )
 
 
 class _SignalSerializer(serializers.ModelSerializer):
@@ -263,35 +285,37 @@ class OneTeamSerializer(TeamSerializer):
 class HistorySerializer(_SignalSerializer):
     class Meta:
         model = models.History
-        fields = ("id",
-                  "status",
-                  "executor",
-                  "project",
-                  "kind",
-                  "mode",
-                  "inventory",
-                  "start_time",
-                  "stop_time",
-                  "initiator",
-                  "initiator_type",
-                  "options",)
+        fields = (
+            "id",
+            "start_time",
+            "executor",
+            "initiator",
+            "initiator_type",
+            "project",
+            "inventory",
+            "kind",
+            "mode",
+            "options",
+            "status",
+            "stop_time",
+        )
 
 
 class ProjectHistorySerializer(HistorySerializer):
     class Meta(HistorySerializer.Meta):
         fields = (
             "id",
-            "status",
-            "revision",
-            "executor",
-            "kind",
-            "mode",
-            "inventory",
             "start_time",
-            "stop_time",
+            "executor",
             "initiator",
             "initiator_type",
+            "revision",
+            "inventory",
+            "kind",
+            "mode",
             "options",
+            "status",
+            "stop_time",
         )
 
 

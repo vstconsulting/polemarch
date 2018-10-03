@@ -12,7 +12,6 @@ $( document ).ready(function() {
 
     $(".sidebar-menu .toctree-l1 .reference.internal").mouseenter(function () {
         var thisEl = this;
-        setTimeout(function () {
             var docsHeadings = $(".sidebar-menu .docs-heading-wrapper");
             var bool = false;
             for(var i=0; i<docsHeadings.length; i++)
@@ -28,51 +27,20 @@ $( document ).ready(function() {
                 $(".sidebar-menu .docs-heading-wrapper-visible").removeClass("docs-heading-wrapper-visible");
                 $(thisEl).children('span').addClass('docs-heading-wrapper-visible');
             }
-        }, 200);
-
-        $(".content-wrapper").hover(function ()
-        {
-            $(".sidebar-menu .docs-heading-wrapper-visible").removeClass("docs-heading-wrapper-visible");
-        })
-
-        $(".navbar").hover(function ()
-        {
-            $(".sidebar-menu .docs-heading-wrapper-visible").removeClass("docs-heading-wrapper-visible");
-        })
     })
 
-    var guiSettings = JSON.parse(window.localStorage.getItem('guiLocalSettings'));
-
-    if(guiSettings != null)
+    $(".content-wrapper").hover(function ()
     {
-        if(guiSettings.hideMenu !== undefined)
-        {
-            if(guiSettings.hideMenu)
-            {
-                $('body').addClass('sidebar-collapse');
-            }
-        }
-    }
+        $(".sidebar-menu .docs-heading-wrapper-visible").removeClass("docs-heading-wrapper-visible");
+    })
 
-
-    window.onresize=function ()
+    $(".navbar").hover(function ()
     {
-        if(window.innerWidth>767)
-        {
-            if(guiLocalSettings.get('hideMenu'))
-            {
-                $("body").addClass('sidebar-collapse');
-            }
-            if ($("body").hasClass('sidebar-open'))
-            {
-                $("body").removeClass('sidebar-open');
-            }
-        }
-        else
-        {
-            if ($("body").hasClass('sidebar-collapse')){
-                $("body").removeClass('sidebar-collapse');
-            }
-        }
+        $(".sidebar-menu .docs-heading-wrapper-visible").removeClass("docs-heading-wrapper-visible");
+    })
+
+    if(guiLocalSettings.get('hideMenu'))
+    {
+        $('body').addClass('sidebar-collapse');
     }
 });
