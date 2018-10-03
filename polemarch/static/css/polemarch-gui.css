@@ -75,7 +75,7 @@
 @media (max-width: 850px) {
     .td_history_executor,
     .td_project-history_executor {
-       display: none;
+        display: none;
     }
 }
 
