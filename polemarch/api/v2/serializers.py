@@ -42,8 +42,8 @@ class DictField(serializers.CharField):
         return (
             data
             if (
-                isinstance(data, (six.string_types, six.text_type)) or
-                isinstance(data, (dict, list))
+                    isinstance(data, (six.string_types, six.text_type)) or
+                    isinstance(data, (dict, list))
             )
             else self.fail("Unknown type.")
         )
@@ -263,35 +263,37 @@ class OneTeamSerializer(TeamSerializer):
 class HistorySerializer(_SignalSerializer):
     class Meta:
         model = models.History
-        fields = ("id",
-                  "status",
-                  "executor",
-                  "project",
-                  "kind",
-                  "mode",
-                  "inventory",
-                  "start_time",
-                  "stop_time",
-                  "initiator",
-                  "initiator_type",
-                  "options",)
+        fields = (
+            "id",
+            "start_time",
+            "executor",
+            "initiator",
+            "initiator_type",
+            "project",
+            "inventory",
+            "kind",
+            "mode",
+            "options",
+            "status",
+            "stop_time",
+        )
 
 
 class ProjectHistorySerializer(HistorySerializer):
     class Meta(HistorySerializer.Meta):
         fields = (
             "id",
-            "status",
-            "revision",
-            "executor",
-            "kind",
-            "mode",
-            "inventory",
             "start_time",
-            "stop_time",
+            "executor",
             "initiator",
             "initiator_type",
+            "revision",
+            "inventory",
+            "kind",
+            "mode",
             "options",
+            "status",
+            "stop_time",
         )
 
 

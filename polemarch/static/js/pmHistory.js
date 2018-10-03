@@ -317,11 +317,64 @@ tabSignal.connect("openapi.factory.history", function(data)
 })
 
 
-tabSignal.connect("openapi.loaded", function()
+function format_history_time(opt)
 {
-    let definitions = window.api.openapi.definitions;
-    definitions['OneHistory'].properties['execute_args'].format = 'json';
-});
+    if(opt.value)
+    {
+        return moment(opt.value).tz(window.timeZone).format("YYYY-MM-DD HH:mm:ss");
+    }
+
+    return "";
+}
+
+function format_executor(opt)
+{
+    if(opt.value)
+    {
+        return opt.value;
+    }
+
+    return 'system';
+}
+
+function get_prefetch_history_executor_path(data_obj)
+{
+    return "/user/"
+}
+
+function get_prefetch_history_initiator_path_1(data_obj)
+{
+    if (data_obj.initiator_type == 'project') {
+        return "/project/";
+    }
+    else if (data_obj.initiator_type == 'template') {
+        return "/project/" + data_obj["project"] + "/template/";
+    }
+    // else if (data_obj.initiator_type == 'scheduler') {
+    //     return "/project/" + data_obj["project"] + "/periodic_task/";
+    // }
+    else {
+        return false;
+    }
+}
+
+function get_prefetch_history_initiator_path_2(data_obj)
+{
+    if (data_obj.initiator_type == 'project') {
+        return "/project/";
+    }
+    else if (data_obj.initiator_type == 'template') {
+        let project_id = spajs.urlInfo.data.reg.parent_id;
+        return "/project/" + project_id + "/template/";
+    }
+    // else if (data_obj.initiator_type == 'scheduler') {
+    //     let project_id = spajs.urlInfo.data.reg.parent_id;
+    //     return "/project/" + project_id + "/periodic_task/";
+    // }
+    else {
+        return false;
+    }
+}
 
 function addHistoryPrefetchBase(obj){
     let properties = obj.definition.properties
@@ -329,8 +382,8 @@ function addHistoryPrefetchBase(obj){
     if(properties['executor'])
     {
         properties['executor']['prefetch'] = {
-            path: function (data_obj) { return "/user/" },
-            field_name: "email"
+            path: "__func__get_prefetch_history_executor_path",
+            field_name: "email",
         }
     }
 
@@ -354,20 +407,7 @@ function addHistoryPrefetchCommon(obj)
     if(properties['initiator'])
     {
         properties['initiator']['prefetch'] = {
-            path: function (data_obj) {
-                if(data_obj.initiator_type == 'project')
-                {
-                    return "/project/";
-                }
-                else if(data_obj.initiator_type == 'template')
-                {
-                    return "/project/"+data_obj["project"]+"/template/";
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            path: "__func__get_prefetch_history_initiator_path_1",
         };
     }
 }
@@ -380,22 +420,32 @@ function addHistoryPrefetchProjectHistory(obj)
 
     if (properties['initiator']) {
         properties['initiator']['prefetch'] = {
-            path: function (data_obj) {
-                if (data_obj.initiator_type == 'project') {
-                    return "/project/";
-                }
-                else if (data_obj.initiator_type == 'template') {
-                    let project_id = spajs.urlInfo.data.reg.parent_id;
-                    return "/project/" + project_id + "/template/";
-                }
-                else {
-                    return false;
-                }
-            }
+            path: "__func__get_prefetch_history_initiator_path_2",
         };
     }
+}
+
+function addSettingsToHistoryListsFields(obj)
+{
+    let properties = obj.definition.properties;
+    properties['options'].hidden = true;
+    properties['initiator_type'].hidden = true;
+    properties['start_time'].value = format_history_time;
+    properties['stop_time'].value = format_history_time;
+    properties['executor'].value = format_executor;
+}
+
+function addSettingsToOneHistoryFields(obj)
+{
+    let properties = obj.definition.properties;
+    properties['execute_args'].format = 'json';
 }
 
 tabSignal.connect("openapi.schema.definition.History", addHistoryPrefetchCommon);
 tabSignal.connect("openapi.schema.definition.OneHistory", addHistoryPrefetchCommon);
 tabSignal.connect("openapi.schema.definition.ProjectHistory", addHistoryPrefetchProjectHistory);
+
+tabSignal.connect("openapi.schema.definition.History", addSettingsToHistoryListsFields);
+tabSignal.connect("openapi.schema.definition.ProjectHistory", addSettingsToHistoryListsFields);
+
+tabSignal.connect("openapi.schema.definition.OneHistory", addSettingsToOneHistoryFields);
