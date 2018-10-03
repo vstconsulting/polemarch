@@ -21,7 +21,6 @@ class OApiTestCase(BaseTestCase):
         notes_value = dict(type='string', format='textarea')
         # Test definitions
         group = definitions['Group']
-        self.check_models(group)
 
         self.check_fields(group['properties']['id'], **id_value)
 
@@ -33,7 +32,6 @@ class OApiTestCase(BaseTestCase):
         del group
 
         error = definitions['Error']
-        self.check_models(error)
 
         self.check_fields(error['required'], 'detail')
         self.check_fields(
@@ -42,7 +40,6 @@ class OApiTestCase(BaseTestCase):
         del error
 
         user = definitions['User']
-        self.check_models(user)
 
         self.check_fields(user['required'], 'username')
         self.check_fields(user['properties']['id'], **id_value)
@@ -57,7 +54,6 @@ class OApiTestCase(BaseTestCase):
 
         groupCreateMaster = definitions['GroupCreateMaster']
         ref = '#/definitions/User'
-        self.check_models(groupCreateMaster)
 
         self.check_fields(groupCreateMaster['properties']['id'], **id_value)
         self.check_fields(groupCreateMaster['properties']['name'], **name_value)
@@ -71,7 +67,6 @@ class OApiTestCase(BaseTestCase):
         del groupCreateMaster
 
         oneGroup = definitions['OneGroup']
-        self.check_models(oneGroup)
 
         self.check_fields(oneGroup['properties']['id'], **id_value)
         self.check_fields(oneGroup['properties']['name'], **name_value)
@@ -84,7 +79,6 @@ class OApiTestCase(BaseTestCase):
         del oneGroup
 
         setOwner = definitions['SetOwner']
-        self.check_models(setOwner)
 
         self.check_fields(setOwner['required'], 'user_id')
         self.check_fields(
@@ -97,7 +91,6 @@ class OApiTestCase(BaseTestCase):
         del setOwner
 
         inventoryVariable = definitions['InventoryVariable']
-        self.check_models(inventoryVariable)
         enum = [
             'ansible_host', 'ansible_port', 'ansible_user', 'ansible_connection',
             'ansible_ssh_pass', 'ansible_ssh_private_key_file', 'ansible_ssh_common_args',
@@ -121,7 +114,6 @@ class OApiTestCase(BaseTestCase):
         del inventoryVariable
 
         host = definitions['Host']
-        self.check_models(host)
 
         self.check_fields(host['properties']['id'], **id_value)
         self.check_fields(host['properties']['name'], **name_value)
@@ -132,7 +124,6 @@ class OApiTestCase(BaseTestCase):
         del host
 
         oneHost = definitions['OneHost']
-        self.check_models(oneHost)
 
         self.check_fields(oneHost['properties']['id'], **id_value)
         self.check_fields(oneHost['properties']['name'], **name_value)
@@ -146,7 +137,6 @@ class OApiTestCase(BaseTestCase):
         del oneHost
 
         history = definitions['History']
-        self.check_models(history)
 
         self.check_fields(history['required'], 'status', 'mode')
         self.check_fields(history['properties']['id'], **id_value)
@@ -177,7 +167,6 @@ class OApiTestCase(BaseTestCase):
         )
 
         oneHistory = definitions['OneHistory']
-        self.check_models(oneHistory)
 
         self.check_fields(oneHistory['required'], 'status', 'mode', 'execution_time')
         self.check_fields(oneHistory['properties']['id'], **id_value)
@@ -228,12 +217,10 @@ class OApiTestCase(BaseTestCase):
         del oneHistory
 
         empty = definitions['Empty']
-        self.check_models(empty)
         self.assertTrue(not empty['properties'])
         del empty
 
         actionResponse = definitions['ActionResponse']
-        self.check_models(actionResponse)
 
         self.check_fields(actionResponse['required'], 'detail')
         self.check_fields(
@@ -242,12 +229,10 @@ class OApiTestCase(BaseTestCase):
         del actionResponse
 
         data = definitions['Data']
-        self.check_models(data)
         self.assertTrue(not data['properties'])
         del data
 
         hook = definitions['Hook']
-        self.check_models(hook)
         enum = [
             'on_execution', 'after_execution', 'on_user_add', 'on_user_upd',
             'on_user_del', 'on_object_add', 'on_object_upd', 'on_object_del'
@@ -267,14 +252,12 @@ class OApiTestCase(BaseTestCase):
         del hook
 
         inventory = definitions['Inventory']
-        self.check_models(inventory)
 
         self.check_fields(inventory['properties']['id'], **id_value)
         self.check_fields(inventory['properties']['name'], **name_value)
         del inventory
 
         oneInventory = definitions['OneInventory']
-        self.check_models(oneInventory)
 
         self.check_fields(oneInventory['properties']['id'], **id_value)
         self.check_fields(oneInventory['properties']['name'], **name_value)
@@ -284,7 +267,6 @@ class OApiTestCase(BaseTestCase):
         del oneInventory
 
         project = definitions['Project']
-        self.check_models(project)
 
         self.check_fields(project['properties']['id'], **id_value)
         self.check_fields(project['properties']['name'], **name_value)
@@ -297,7 +279,6 @@ class OApiTestCase(BaseTestCase):
         del project
 
         projectCreateMaster = definitions['ProjectCreateMaster']
-        self.check_models(projectCreateMaster)
 
         self.check_fields(projectCreateMaster['required'], 'name')
         self.check_fields(projectCreateMaster['properties']['id'], **id_value)
@@ -332,7 +313,6 @@ class OApiTestCase(BaseTestCase):
         del projectCreateMaster
 
         oneProject = definitions['OneProject']
-        self.check_models(oneProject)
 
         self.check_fields(oneProject['properties']['id'], **id_value)
         self.check_fields(oneProject['properties']['name'], **name_value)
@@ -350,8 +330,8 @@ class OApiTestCase(BaseTestCase):
         )
         self.check_fields(
             oneProject['properties']['branch'],
-                          type='string', readOnly=True
-                          )
+            type='string', readOnly=True
+        )
         self.check_fields(oneProject['properties']['owner'], **{'$ref': ref})
         self.check_ref(schema, ref)
         self.check_fields(oneProject['properties']['notes'], **notes_value)
@@ -366,8 +346,6 @@ class OApiTestCase(BaseTestCase):
         additional_properties = dict(
             value_field='name', view_field='path', model={'$ref': ref}
         )
-
-        self.check_models(ansibleModule)
 
         self.check_fields(ansibleModule['required'], 'module')
         self.check_fields(
@@ -518,7 +496,6 @@ class OApiTestCase(BaseTestCase):
         del ansibleModule
 
         executeResponse = definitions['ExecuteResponse']
-        self.check_models(executeResponse)
 
         self.check_fields(executeResponse['required'], 'detail')
         self.check_fields(
@@ -533,7 +510,6 @@ class OApiTestCase(BaseTestCase):
 
         ansiblePlaybook = definitions['AnsiblePlaybook']
         ref = '#/definitions/Playbook'
-        self.check_models(ansiblePlaybook)
 
         self.check_fields(ansiblePlaybook['required'], 'playbook')
 
@@ -687,8 +663,6 @@ class OApiTestCase(BaseTestCase):
 
         projectHistory = definitions['ProjectHistory']
 
-        self.check_models(projectHistory)
-
         self.check_fields(projectHistory['required'], 'status', 'mode')
         self.check_fields(projectHistory['properties']['id'], **id_value)
         self.check_fields(
@@ -726,7 +700,6 @@ class OApiTestCase(BaseTestCase):
         del projectHistory
 
         module = definitions['Module']
-        self.check_models(module)
 
         self.check_fields(module['required'], 'path')
         self.check_fields(module['properties']['id'], **id_value)
@@ -738,7 +711,6 @@ class OApiTestCase(BaseTestCase):
 
         oneModule = definitions['OneModule']
         ref = '#/definitions/Data'
-        self.check_models(oneModule)
 
         self.check_fields(oneModule['required'], 'path', 'data')
         self.check_fields(oneModule['properties']['id'], **id_value)
@@ -750,7 +722,6 @@ class OApiTestCase(BaseTestCase):
         del oneModule
 
         periodicTask = definitions['Periodictask']
-        self.check_models(periodicTask)
 
         self.check_fields(periodicTask['required'], 'schedule')
         self.check_fields(periodicTask['properties']['id'], **id_value)
@@ -759,25 +730,53 @@ class OApiTestCase(BaseTestCase):
             periodicTask['properties']['type'],
             type='string', default='CRONTAB', enum=['CRONTAB', 'INTERVAL']
         )
-        self.check_fields(periodicTask['properties']['schedule'], type='string')
-        self.check_fields(periodicTask['properties']['mode'], type='string', minLength=1)
+
+        additional_properties = dict(
+            field='type', choices={}, types=dict(CRONTAB='crontab', INTERVAL='integer')
+        )
+        self.check_fields(
+            periodicTask['properties']['schedule'],
+            type='string', format='dynamic', additionalProperties=additional_properties
+        )
+
+        additional_properties = dict(
+            field='kind', choices={},
+            types=dict(PLAYBOOK='autocomplete', MODULE='autocomplete', TEMPLATE='hidden')
+        )
+        self.check_fields(
+            periodicTask['properties']['mode'],
+            type='string', format='dynamic', additionalProperties=additional_properties
+        )
+
         self.check_fields(
             periodicTask['properties']['kind'],
             type='string', default='PLAYBOOK', enum=['PLAYBOOK', 'MODULE', 'TEMPLATE']
         )
-        self.check_fields(
-            periodicTask['properties']['inventory'], type='string', minLength=1
+
+        additional_properties = dict(
+            field='kind', choices={},
+            types=dict(PLAYBOOK='select2', MODULE='select2', TEMPLATE='hidden')
         )
+        self.check_fields(
+            periodicTask['properties']['inventory'],
+            type='string', format='dynamic', additionalProperties=additional_properties
+        )
+
         self.check_fields(periodicTask['properties']['save_result'], type='boolean')
         self.check_fields(periodicTask['properties']['template'], type='integer')
+
+        additional_properties = dict(
+            field='kind', choices={},
+            types=dict(PLAYBOOK='hidden', MODULE='hidden', TEMPLATE='autocomplete')
+        )
         self.check_fields(
-            periodicTask['properties']['template_opt'], type='string', maxLength=256
+            periodicTask['properties']['template_opt'],
+            type='string', format='dynamic', additionalProperties=additional_properties
         )
         self.check_fields(periodicTask['properties']['enabled'], type='boolean')
         del periodicTask
 
         onePeriodicTask = definitions['OnePeriodictask']
-        self.check_models(onePeriodicTask)
 
         self.check_fields(onePeriodicTask['required'], 'schedule')
         self.check_fields(onePeriodicTask['properties']['id'], **id_value)
@@ -787,27 +786,52 @@ class OApiTestCase(BaseTestCase):
             onePeriodicTask['properties']['type'],
             type='string', default='CRONTAB', enum=['CRONTAB', 'INTERVAL']
         )
-        self.check_fields(onePeriodicTask['properties']['schedule'], type='string')
-        self.check_fields(onePeriodicTask['properties']['mode'], type='string',
-                          minLength=1)
+
+        additional_properties = dict(
+            field='type', choices={}, types=dict(CRONTAB='crontab', INTERVAL='integer')
+        )
+        self.check_fields(
+            onePeriodicTask['properties']['schedule'],
+            type='string', format='dynamic', additionalProperties=additional_properties
+        )
+
+        additional_properties = dict(
+            field='kind', choices={},
+            types=dict(PLAYBOOK='autocomplete', MODULE='autocomplete', TEMPLATE='hidden')
+        )
+        self.check_fields(
+            onePeriodicTask['properties']['mode'],
+            type='string', format='dynamic', additionalProperties=additional_properties
+        )
+
         self.check_fields(
             onePeriodicTask['properties']['kind'],
             type='string', default='PLAYBOOK', enum=['PLAYBOOK', 'MODULE', 'TEMPLATE']
         )
-        self.check_fields(onePeriodicTask['properties']['project'], type='integer')
+
+        additional_properties = dict(
+            field='kind', choices={},
+            types=dict(PLAYBOOK='select2', MODULE='select2', TEMPLATE='hidden')
+        )
         self.check_fields(
-            onePeriodicTask['properties']['inventory'], type='string', minLength=1
+            onePeriodicTask['properties']['inventory'],
+            type='string', format='dynamic', additionalProperties=additional_properties
         )
         self.check_fields(onePeriodicTask['properties']['save_result'], type='boolean')
         self.check_fields(onePeriodicTask['properties']['template'], type='integer')
+
+        additional_properties = dict(
+            field='kind', choices={},
+            types=dict(PLAYBOOK='hidden', MODULE='hidden', TEMPLATE='autocomplete')
+        )
         self.check_fields(
-            onePeriodicTask['properties']['template_opt'], type='string', maxLength=256
+            onePeriodicTask['properties']['template_opt'],
+            type='string', format='dynamic', additionalProperties=additional_properties
         )
         self.check_fields(onePeriodicTask['properties']['enabled'], type='boolean')
         del onePeriodicTask
 
         periodicTaskVariable = definitions['PeriodicTaskVariable']
-        self.check_models(periodicTaskVariable)
 
         self.check_fields(periodicTaskVariable['required'], 'key')
         self.check_fields(periodicTaskVariable['properties']['id'], **id_value)
@@ -821,7 +845,6 @@ class OApiTestCase(BaseTestCase):
         del periodicTaskVariable
 
         playbook = definitions['Playbook']
-        self.check_models(playbook)
 
         self.check_fields(playbook['required'], 'playbook')
         self.check_fields(playbook['properties']['id'], **id_value)
@@ -834,7 +857,6 @@ class OApiTestCase(BaseTestCase):
         del playbook
 
         onePlaybook = definitions['OnePlaybook']
-        self.check_models(onePlaybook)
 
         self.check_fields(onePlaybook['properties']['id'], **id_value)
         self.check_fields(
@@ -848,7 +870,6 @@ class OApiTestCase(BaseTestCase):
 
         template = definitions['Template']
         ref = '#/definitions/Data'
-        self.check_models(template)
 
         self.check_fields(template['required'], 'name', 'data', 'options')
         self.check_fields(template['properties']['id'], **id_value)
@@ -857,7 +878,7 @@ class OApiTestCase(BaseTestCase):
             template['properties']['kind'],
             type='string', default='Task', enum=['Task', 'Module']
         )
-        self.check_fields(template['properties']['data'], *{'$ref':ref})
+        self.check_fields(template['properties']['data'], *{'$ref': ref})
         self.check_fields(template['properties']['options'], **{'$ref': ref})
         self.check_fields(
             template['properties']['options_list'],
@@ -866,7 +887,6 @@ class OApiTestCase(BaseTestCase):
         del template
 
         oneTemplate = definitions['OneTemplate']
-        self.check_models(oneTemplate)
 
         self.check_fields(oneTemplate['required'], 'name', 'data')
         self.check_fields(oneTemplate['properties']['id'], **id_value)
@@ -885,7 +905,6 @@ class OApiTestCase(BaseTestCase):
         del oneTemplate
 
         templateExec = definitions['TemplateExec']
-        self.check_models(templateExec)
 
         self.check_fields(
             templateExec['properties']['option'],
@@ -894,11 +913,9 @@ class OApiTestCase(BaseTestCase):
         del templateExec
 
         projectVariable = definitions['ProjectVariable']
-        self.check_models(projectVariable)
 
         self.check_fields(projectVariable['required'], 'key', 'value')
         self.check_fields(projectVariable['properties']['id'], **id_value)
-
 
         key_list = [
             'repo_type', 'repo_sync_on_run', 'repo_branch',
@@ -909,7 +926,7 @@ class OApiTestCase(BaseTestCase):
                           )
         additional_properties = dict(
             field='key',
-            types=dict(repo_password='password', repo_key='file'),
+            types=dict(repo_password='password', repo_key='secretfile'),
             choices=dict(
                 repo_type=['MANUAL', 'GIT', 'TAR'],
                 repo_sync_on_run=[True, False]
@@ -923,7 +940,6 @@ class OApiTestCase(BaseTestCase):
         del projectVariable
 
         team = definitions['Team']
-        self.check_models(team)
 
         self.check_fields(team['required'], 'name')
         self.check_fields(team['properties']['id'], **id_value)
@@ -933,7 +949,6 @@ class OApiTestCase(BaseTestCase):
         del team
 
         oneTeam = definitions['OneTeam']
-        self.check_models(oneTeam)
 
         self.check_fields(oneTeam['required'], 'name')
         self.check_fields(oneTeam['properties']['id'], **id_value)
@@ -945,9 +960,38 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(oneTeam['properties']['owner'], **{'$ref': ref})
         del oneTeam
 
-        oneUser = definitions['OneUser']
-        self.check_models(oneUser)
+        createUser = definitions['CreateUser']
 
+        self.check_fields(createUser['required'], 'username', 'password', 'password2')
+        self.check_fields(createUser['properties']['id'], **id_value)
+        self.check_fields(
+            createUser['properties']['username'],
+            description=True, type='string', pattern='^[\w.@+-]+$',
+            maxLength=150, minLength=1
+        )
+        self.check_fields(
+            createUser['properties']['is_active'], type='boolean', default=True
+        )
+        self.check_fields(
+            createUser['properties']['first_name'], type='string', maxLength=30
+        )
+        self.check_fields(
+            createUser['properties']['last_name'], type='string', maxLength=30
+        )
+        self.check_fields(
+            createUser['properties']['email'], type='string', format='email', minLength=1
+        )
+        self.check_fields(
+            createUser['properties']['password'], type='string', minLength=1
+        )
+        self.check_fields(
+            createUser['properties']['password2'], type='string', minLength=1
+        )
+        del createUser
+
+        oneUser = definitions['OneUser']
+
+        self.check_fields(oneUser['required'], 'username')
         self.check_fields(oneUser['properties']['id'], **id_value)
         self.check_fields(
             oneUser['properties']['username'],
@@ -956,9 +1000,6 @@ class OApiTestCase(BaseTestCase):
             maxLength=150,
             minLength=1,
             pattern='^[\w.@+-]+$'
-        )
-        self.check_fields(
-            oneUser['properties']['password'], type='string', minLength=1
         )
         self.check_fields(
             oneUser['properties']['is_active'], type='boolean', default=True
@@ -975,7 +1016,6 @@ class OApiTestCase(BaseTestCase):
         del oneUser
 
         chartLineSetting = definitions['ChartLineSetting']
-        self.check_models(chartLineSetting)
 
         self.check_fields(
             chartLineSetting['properties']['active'], type='boolean', default=True
@@ -984,7 +1024,6 @@ class OApiTestCase(BaseTestCase):
 
         chartLineSettings = definitions['ChartLineSettings']
         ref = '#/definitions/ChartLineSetting'
-        self.check_models(chartLineSettings)
         chart_line_list = ['all_tasks', 'delay', 'ok', 'error', 'interrupted', 'offline']
 
         self.check_fields(chartLineSettings['required'], *chart_line_list)
@@ -999,7 +1038,6 @@ class OApiTestCase(BaseTestCase):
         del chartLineSettings
 
         counterWidgetSetting = definitions['CounterWidgetSetting']
-        self.check_models(counterWidgetSetting)
 
         self.check_fields(
             counterWidgetSetting['properties']['active'], type='boolean', default=True
@@ -1014,7 +1052,6 @@ class OApiTestCase(BaseTestCase):
         del counterWidgetSetting
 
         widgetSetting = definitions['WidgetSetting']
-        self.check_models(widgetSetting)
 
         self.check_fields(
             widgetSetting['properties']['active'], type='boolean', default=True
@@ -1028,7 +1065,6 @@ class OApiTestCase(BaseTestCase):
         del widgetSetting
 
         widgetSettings = definitions['WidgetSettings']
-        self.check_models(widgetSettings)
 
         widgetList = ['pmwUsersCounter', 'pmwProjectsCounter', 'pmwInventoriesCounter',
                       'pmwGroupsCounter', 'pmwHostsCounter', 'pmwChartWidget',
@@ -1061,7 +1097,6 @@ class OApiTestCase(BaseTestCase):
         del widgetSettings
 
         userSettings = definitions['UserSettings']
-        self.check_models(userSettings)
 
         self.check_fields(
             userSettings['required'], 'chartLineSettings', 'widgetSettings'
@@ -1076,8 +1111,6 @@ class OApiTestCase(BaseTestCase):
             userSettings['properties']['widgetSettings'], **{'$ref': ref}
         )
         del userSettings
-
-
 
         # Test path responses and schemas
         default_params = ['ordering', 'limit', 'offset']
@@ -1105,45 +1138,44 @@ class OApiTestCase(BaseTestCase):
             '#/definitions/Group'
         )
 
-    def check_models(self, obj, *args, **kwargs):
-        self.assertEqual(obj['type'], 'object')
-        objKeys = obj.keys()
-        try:
-            objKeys.remove('type')
-            objKeys.remove('title')
-        except:
-            pass
-        for key in objKeys:
-            self.assertIn(type(obj[key]), [dict, list])
+        paths = schema['paths']
+
+        # group_pk_vars = paths['/group/{pk}/variables/']
+        # self.check_variables(group_pk_vars)
 
     def check_fields(self, obj, *args, **kwargs):
         if args:
-            self.assertTrue(all(val in args for val in obj))
-            self.assertTrue(all(val in obj for val in args))
+            self.assertTrue(
+                all(val in args for val in obj), 'args doesn\'t have enough keys'
+            )
+            self.assertTrue(
+                all(val in obj for val in args), 'object doesn\'t have enough keys'
+            )
         if kwargs:
+
             objKeys = obj.keys()
             try:
                 objKeys.remove('title')
             except:
                 pass
-            if all(key in kwargs for key in objKeys) \
-                    and all(key in obj for key in kwargs.keys()):
+
+            keys_in_kwargs = all(key in kwargs for key in objKeys)
+            keys_in_obj = all(key in obj for key in kwargs.keys())
+            self.assertTrue(keys_in_kwargs, 'kwargs doesn\'t have enough keys')
+            self.assertTrue(keys_in_obj, 'object doesn\'t have enough keys')
+
+            if keys_in_kwargs and keys_in_obj:
                 for key in objKeys:
                     if key == 'description':
-                        self.assertTrue(obj[key])
+                        self.assertTrue(obj[key], 'Description is empty')
                         continue
-                    ###### todo TRY CHECK ADDITIONAL_PROPERTY WITHOUT RECURSIVE ######
-                    elif type(obj[key]) == dict:
+                    elif key == 'additionalProperties' or isinstance(obj[key], dict):
                         self.check_fields(obj[key], **kwargs[key])
-                    elif type(obj[key]) == list:
+                    elif key == 'enum' or isinstance(obj[key], list):
                         self.check_fields(obj[key], *kwargs[key])
-                    ##################################################################
                     else:
-                        self.assertEqual(obj[key], kwargs[key])
-            else:
-                # Amount of keys in openapi and control data not equal
-                raise Exception("Amount of keys not equal")
-        pass
+                        msg = 'Value for \'{}\' in obj and kwargs different'.format(key)
+                        self.assertEqual(obj[key], kwargs[key], msg)
 
     def check_ref(self, schema, ref, *args, **kwargs):
         path = ref[2:].split('/')
