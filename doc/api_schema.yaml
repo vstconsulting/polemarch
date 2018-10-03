@@ -10999,6 +10999,50 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this users sublist.
+  /team/{pk}/user/{user_id}/change_password/:
+    post:
+      operationId: team_user_change_password
+      description: Create a new user.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ChangePassword'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/ChangePassword'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - team
+    parameters:
+      - name: pk
+        in: path
+        description: A unique value identifying this user group.
+        required: true
+        type: string
+      - name: user_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this users sublist.
   /team/{pk}/user/{user_id}/copy/:
     post:
       operationId: team_user_copy
@@ -11411,6 +11455,45 @@ paths:
         description: A unique integer value identifying this user.
         required: true
         type: integer
+  /user/{pk}/change_password/:
+    post:
+      operationId: user_change_password
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ChangePassword'
+      responses:
+        '201':
+          description: Action accepted.
+          schema:
+            $ref: '#/definitions/ChangePassword'
+        '400':
+          description: Validation error or some data error.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Permission denied error.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized access error.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - user
+    parameters:
+      - name: pk
+        in: path
+        description: A unique integer value identifying this user.
+        required: true
+        type: integer
   /user/{pk}/copy/:
     post:
       operationId: user_copy
@@ -11734,24 +11817,34 @@ definitions:
         $ref: '#/definitions/User'
   History:
     required:
-      - status
       - mode
+      - status
     type: object
     properties:
       id:
         title: Id
         type: integer
         readOnly: true
-      status:
-        title: Status
+      start_time:
+        title: Start time
         type: string
-        maxLength: 50
-        minLength: 1
+        format: date-time
       executor:
         title: Executor
         type: integer
+      initiator:
+        title: Initiator
+        type: integer
+      initiator_type:
+        title: Initiator type
+        type: string
+        maxLength: 50
+        minLength: 1
       project:
         title: Project
+        type: integer
+      inventory:
+        title: Inventory
         type: integer
       kind:
         title: Kind
@@ -11763,29 +11856,19 @@ definitions:
         type: string
         maxLength: 256
         minLength: 1
-      inventory:
-        title: Inventory
-        type: integer
-      start_time:
-        title: Start time
-        type: string
-        format: date-time
-      stop_time:
-        title: Stop time
-        type: string
-        format: date-time
-      initiator:
-        title: Initiator
-        type: integer
-      initiator_type:
-        title: Initiator type
-        type: string
-        maxLength: 50
-        minLength: 1
       options:
         title: Options
         type: string
         readOnly: true
+      status:
+        title: Status
+        type: string
+        maxLength: 50
+        minLength: 1
+      stop_time:
+        title: Stop time
+        type: string
+        format: date-time
   OneHistory:
     required:
       - status
@@ -12457,16 +12540,26 @@ definitions:
         maximum: 4
   ProjectHistory:
     required:
-      - status
       - mode
+      - status
     type: object
     properties:
       id:
         title: Id
         type: integer
         readOnly: true
-      status:
-        title: Status
+      start_time:
+        title: Start time
+        type: string
+        format: date-time
+      executor:
+        title: Executor
+        type: integer
+      initiator:
+        title: Initiator
+        type: integer
+      initiator_type:
+        title: Initiator type
         type: string
         maxLength: 50
         minLength: 1
@@ -12474,8 +12567,8 @@ definitions:
         title: Revision
         type: string
         maxLength: 256
-      executor:
-        title: Executor
+      inventory:
+        title: Inventory
         type: integer
       kind:
         title: Kind
@@ -12487,29 +12580,19 @@ definitions:
         type: string
         maxLength: 256
         minLength: 1
-      inventory:
-        title: Inventory
-        type: integer
-      start_time:
-        title: Start time
-        type: string
-        format: date-time
-      stop_time:
-        title: Stop time
-        type: string
-        format: date-time
-      initiator:
-        title: Initiator
-        type: integer
-      initiator_type:
-        title: Initiator type
-        type: string
-        maxLength: 50
-        minLength: 1
       options:
         title: Options
         type: string
         readOnly: true
+      status:
+        title: Status
+        type: string
+        maxLength: 50
+        minLength: 1
+      stop_time:
+        title: Stop time
+        type: string
+        format: date-time
   Module:
     required:
       - path
@@ -12991,6 +13074,25 @@ definitions:
         title: Email
         type: string
         format: email
+        minLength: 1
+  ChangePassword:
+    required:
+      - old_password
+      - password
+      - password2
+    type: object
+    properties:
+      old_password:
+        title: Old password
+        type: string
+        minLength: 1
+      password:
+        title: New password
+        type: string
+        minLength: 1
+      password2:
+        title: Confirm new password
+        type: string
         minLength: 1
   ChartLineSetting:
     title: All tasks
