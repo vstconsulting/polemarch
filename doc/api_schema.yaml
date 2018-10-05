@@ -7710,12 +7710,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/SetOwner'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/SetOwner'
         '400':
           description: Validation error or some data error.
           schema:
@@ -8349,12 +8349,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/SetOwner'
       responses:
         '201':
           description: Action accepted.
           schema:
-            $ref: '#/definitions/Host'
+            $ref: '#/definitions/SetOwner'
         '400':
           description: Validation error or some data error.
           schema:
