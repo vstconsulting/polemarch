@@ -1272,32 +1272,6 @@ class OApiTestCase(BaseTestCase):
         )
         del userSettings
 
-        # Test path responses and schemas
-        default_params = ['ordering', 'limit', 'offset']
-        pm_default_params = ['id', 'name', 'id__not', 'name__not']
-        inv_params = ['variables']
-
-        group = schema['paths']['/group/']
-        self.assertEqual(group['get']['operationId'], 'group_list')
-        self.assertTrue(group['get']['description'])
-        for param in group['get']['parameters']:
-            self.assertIn(param['name'], default_params + pm_default_params + inv_params)
-        self.assertEqual(param['in'], 'query')
-        self.assertEqual(param['required'], False)
-        self.assertIn(param['type'], ['string', 'integer'])
-
-        # Check responses via cycle for path
-        # for key in obj
-
-        response_schema = group['get']['responses']['200']['schema']
-        self.assertEqual(response_schema['required'], ['count', 'results'])
-        self.assertEqual(response_schema['type'], 'object')
-        self.assertEqual(response_schema['properties']['results']['type'], 'array')
-        self.assertEqual(
-            response_schema['properties']['results']['items']['$ref'],
-            '#/definitions/Group'
-        )
-
         for path in schema['paths']:
             p = path.split('/')
             p = list(filter(bool, p))
@@ -1315,8 +1289,6 @@ class OApiTestCase(BaseTestCase):
                 name = p[-1]
                 parent = p[-3] if len(p) > 3 else p[0]
                 type = '_list'
-            if name == 'set_owner':
-                continue
             if name in keys:
                 if name == 'variables' and parent == 'project':
                     ref = '#/definitions/ProjectVariable'
