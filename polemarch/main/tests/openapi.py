@@ -1551,54 +1551,54 @@ class OApiTestCase(BaseTestCase):
         )
 
     def check_path_group_list(self, schema, path, *arg, **kwargs):
-            get_params = [
-                dict(name='variables', description=True, required=False, type='string'),
-                ] + self.pm_filters + self.pm_name_filter + self.default_filters
-            get_schema = dict(
-                required=['count', 'results'],
-                properties=dict(
-                    count=dict(type='integer'), next=dict(type='string', format='uri'),
-                    previous=dict(type='string', format='uri'),
-                    results=dict(type='array', items={'$ref': '#/definitions/Group'})
-                ),
-                type='object'
-            )
-            get_responses = dict(description=True, schema=get_schema)
-            get_value = dict(
-                responses=get_responses, params=get_params, response_code='200'
-            )
+        get_params = [
+            dict(name='variables', description=True, required=False, type='string'),
+            ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        get_schema = dict(
+            required=['count', 'results'],
+            properties=dict(
+                count=dict(type='integer'), next=dict(type='string', format='uri'),
+                previous=dict(type='string', format='uri'),
+                results=dict(type='array', items={'$ref': '#/definitions/Group'})
+            ),
+            type='object'
+        )
+        get_responses = dict(description=True, schema=get_schema)
+        get_value = dict(
+            responses=get_responses, params=get_params, response_code='200'
+        )
 
-            ref = '#/definitions/GroupCreateMaster'
-            post_params = [dict(
-                name='data', required=True, schema={'$ref': ref}
-            )]
-            post_response = dict(
-                description=True, schema={'$ref': ref}
-            )
-            post_value = dict(
-                responses=post_response, params=post_params, response_code='201'
-            )
-            self.check_path(schema, path, post_value=post_value, get_value=get_value)
+        ref = '#/definitions/GroupCreateMaster'
+        post_params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        post_response = dict(
+            description=True, schema={'$ref': ref}
+        )
+        post_value = dict(
+            responses=post_response, params=post_params, response_code='201'
+        )
+        self.check_path(schema, path, post_value=post_value, get_value=get_value)
 
     def check_path_group_detail(self, schema, path, *arg, **kwargs):
-            ref = '#/definitions/OneGroup'
-            # Get data
-            params = [dict(
-                name='data', required=True, schema={'$ref': ref}
-            )]
-            responses = dict(description=True, schema={'$ref': ref})
+        ref = '#/definitions/OneGroup'
+        # Get data
+        params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        responses = dict(description=True, schema={'$ref': ref})
 
-            get_value = dict(responses=responses, params=[], response_code='200')
-            put_value = dict(responses=responses, params=params, response_code='200')
-            patch_value = dict(responses=responses, params=params, response_code='200')
-            delete_value = dict(
-                responses=dict(description=True), params=[], response_code='204'
-            )
+        get_value = dict(responses=responses, params=[], response_code='200')
+        put_value = dict(responses=responses, params=params, response_code='200')
+        patch_value = dict(responses=responses, params=params, response_code='200')
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
 
-            self.check_path(
-                schema, path, get_value=get_value, put_value=put_value,
-                patch_value=patch_value, delete_value=delete_value
-            )
+        self.check_path(
+            schema, path, get_value=get_value, put_value=put_value,
+            patch_value=patch_value, delete_value=delete_value
+        )
 
     def check_path_inventory_list(self, schema, path, *arg, **kwargs):
         get_params = [
