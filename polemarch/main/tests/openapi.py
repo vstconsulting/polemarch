@@ -6,6 +6,19 @@ import re
 class OApiTestCase(BaseTestCase):
 
     re_path = re.compile(r"(?<={).+?(?=})")
+    pm_filters = [
+        dict(name='id', description=True, required=False, type='string'),
+        dict(name='id__not', description=True, required=False, type='string'),
+    ]
+    pm_name_filter = [
+        dict(name='name', description=True, required=False, type='string'),
+        dict(name='name__not', description=True, required=False, type='string'),
+    ]
+    default_filters = [
+        dict(name='ordering', description=True, required=False, type='string'),
+        dict(name='limit', description=True, required=False, type='integer'),
+        dict(name='offset', description=True, required=False, type='integer'),
+    ]
 
     def test_openapi_schema(self):
         api_version = self._settings('VST_API_VERSION')
@@ -1351,6 +1364,11 @@ class OApiTestCase(BaseTestCase):
             except:  # nocv
                 raise Exception('Definition \'#/' + '/'.join(path) + '\' doesn\'t exist')
 
+    def get_params_checked_value_by_name(self, name, checked_value, *args, **kwargs):
+        for index in range(len(checked_value)):
+            if checked_value[index]['name'] == name:
+                return checked_value[index]
+
     def check_parameters(self, object_parameters, *arg, **kwargs):
         checked_values = kwargs.pop('params', None)
         in_values = kwargs.pop('params_in_values', None)
@@ -1359,7 +1377,12 @@ class OApiTestCase(BaseTestCase):
             if object_parameters[index]:
                 self.assertEqual(param_obj['in'], in_values)
                 del param_obj['in']
-            self.check_fields('test', param_obj, **checked_values[index])
+            param_checked_value = self.get_params_checked_value_by_name(
+                param_obj['name'], checked_values
+            )
+            if not param_checked_value:
+                print(index)
+            self.check_fields('test', param_obj, **param_checked_value)
 
     def check_request(self, obj, *args, **kwargs):
         response_code = kwargs.pop('response_code', '200')
@@ -1425,14 +1448,9 @@ class OApiTestCase(BaseTestCase):
             ref = '#/definitions/InventoryVariable'
         # Get data
         get_params = [
-            dict(name='id', description=True, required=False, type='string'),
             dict(name='key', description=True, required=False, type='string'),
             dict(name='value', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        ] + self.pm_filters + self.default_filters
         get_schema = dict(
             required=['count', 'results'],
             properties=dict(
@@ -1478,18 +1496,11 @@ class OApiTestCase(BaseTestCase):
             patch_value=patch_value, delete_value=delete_value
         )
 
-    def check_path_host_list(self, schema, path, *arg, **kwargs):
+    def check_path_host_list(self, schema, path, *args, **kwargs):
         get_params = [
-            dict(name='id', description=True, required=False, type='string'),
-            dict(name='name', description=True, required=False, type='string'),
             dict(name='type', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='name__not', description=True, required=False, type='string'),
             dict(name='variables', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
         get_schema = dict(
             required=['count', 'results'],
             properties=dict(
@@ -1516,7 +1527,7 @@ class OApiTestCase(BaseTestCase):
         )
         self.check_path(schema, path, post_value=post_value, get_value=get_value)
 
-    def check_path_host_detail(self, schema, path, *arg, **kwargs):
+    def check_path_host_detail(self, schema, path, *args, **kwargs):
         ref = '#/definitions/OneHost'
         # Get data
         params = [dict(
@@ -1538,15 +1549,8 @@ class OApiTestCase(BaseTestCase):
 
     def check_path_group_list(self, schema, path, *arg, **kwargs):
             get_params = [
-                dict(name='id', description=True, required=False, type='string'),
-                dict(name='name', description=True, required=False, type='string'),
-                dict(name='id__not', description=True, required=False, type='string'),
-                dict(name='name__not', description=True, required=False, type='string'),
                 dict(name='variables', description=True, required=False, type='string'),
-                dict(name='ordering', description=True, required=False, type='string'),
-                dict(name='limit', description=True, required=False, type='integer'),
-                dict(name='offset', description=True, required=False, type='integer'),
-            ]
+                ] + self.pm_filters + self.pm_name_filter + self.default_filters
             get_schema = dict(
                 required=['count', 'results'],
                 properties=dict(
@@ -1595,15 +1599,8 @@ class OApiTestCase(BaseTestCase):
 
     def check_path_inventory_list(self, schema, path, *arg, **kwargs):
         get_params = [
-            dict(name='id', description=True, required=False, type='string'),
-            dict(name='name', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='name__not', description=True, required=False, type='string'),
             dict(name='variables', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
         get_schema = dict(
             required=['count', 'results'],
             properties=dict(
@@ -1652,17 +1649,10 @@ class OApiTestCase(BaseTestCase):
 
     def check_path_project_list(self, schema, path, *arg, **kwargs):
         get_params = [
-            dict(name='id', description=True, required=False, type='string'),
-            dict(name='name', description=True, required=False, type='string'),
             dict(name='status', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='name__not', description=True, required=False, type='string'),
             dict(name='variables', description=True, required=False, type='string'),
             dict(name='status__not', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
         get_schema = dict(
             required=['count', 'results'],
             properties=dict(
@@ -1733,16 +1723,9 @@ class OApiTestCase(BaseTestCase):
         ref = '#/definitions/Host'
 
         params = [
-            dict(name='id', description=True, required=False, type='string'),
-            dict(name='name', description=True, required=False, type='string'),
             dict(name='type', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='name__not', description=True, required=False, type='string'),
             dict(name='variables', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer')
-        ]
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
         responses = dict(
             description=True,
             schema=dict(
@@ -1769,15 +1752,8 @@ class OApiTestCase(BaseTestCase):
         ref = '#/definitions/Group'
 
         params = [
-            dict(name='id', description=True, required=False, type='string'),
-            dict(name='name', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='name__not', description=True, required=False, type='string'),
             dict(name='variables', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer')
-        ]
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
         responses = dict(
             description=True,
             schema=dict(
@@ -1818,19 +1794,12 @@ class OApiTestCase(BaseTestCase):
             ref = '#/definitions/{}History'.format(parent.capitalize())
 
         params = [
-            dict(name='id', description=True, required=False, type='string'),
             dict(name='mode', description=True, required=False, type='string'),
             dict(name='kind', description=True, required=False, type='string'),
             dict(name='status', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='name__not', description=True, required=False, type='string'),
-            dict(name='name', description=True, required=False, type='string'),
             dict(name='older', description=True, required=False, type='string'),
             dict(name='newer', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
         responses = dict(
             description=True,
             schema=dict(
@@ -1874,16 +1843,9 @@ class OApiTestCase(BaseTestCase):
         ref = '#/definitions/Playbook'
 
         params = [
-            dict(name='id', description=True, required=False, type='string'),
-            dict(name='name', description=True, required=False, type='string'),
             dict(name='playbook', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='name__not', description=True, required=False, type='string'),
             dict(name='playbook__not', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
         responses = dict(
             description=True,
             schema=dict(
@@ -1918,15 +1880,8 @@ class OApiTestCase(BaseTestCase):
         ref = '#/definitions/Hook'
 
         get_params = [
-            dict(name='id', description=True, required=False, type='string'),
-            dict(name='name', description=True, required=False, type='string'),
             dict(name='type', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='name__not', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
         get_responses = dict(
             description=True,
             schema=dict(
@@ -1989,10 +1944,7 @@ class OApiTestCase(BaseTestCase):
         params = [
             dict(name='path', description=True, required=False, type='string'),
             dict(name='path__not', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        ] + self.default_filters
         responses = dict(
             description=True,
             schema=dict(
@@ -2040,18 +1992,13 @@ class OApiTestCase(BaseTestCase):
         ref = '#/definitions/User'
 
         get_params = [
-            dict(name='id', description=True, required=False, type='string'),
             dict(name='username', description=True, required=False, type='string'),
             dict(name='is_active', description=True, required=False, type='string'),
             dict(name='first_name', description=True, required=False, type='string'),
             dict(name='last_name', description=True, required=False, type='string'),
             dict(name='email', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
             dict(name='username__not', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        ] + self.pm_filters + self.default_filters
         get_responses = dict(
             description=True,
             schema=dict(
@@ -2119,15 +2066,7 @@ class OApiTestCase(BaseTestCase):
     def check_path_team_list(self, schema, path, *args, **kwargs):
         ref = '#/definitions/Team'
 
-        get_params = [
-            dict(name='id', description=True, required=False, type='string'),
-            dict(name='name', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='name__not', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        get_params = [] + self.pm_filters + self.pm_name_filter + self.default_filters
         get_responses = dict(
             description=True,
             schema=dict(
@@ -2187,18 +2126,11 @@ class OApiTestCase(BaseTestCase):
         ref = '#/definitions/Periodictask'
 
         get_params = [
-            dict(name='id', description=True, required=False, type='string'),
             dict(name='mode', description=True, required=False, type='string'),
             dict(name='kind', description=True, required=False, type='string'),
             dict(name='type', description=True, required=False, type='string'),
             dict(name='template', description=True, required=False, type='number'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='name__not', description=True, required=False, type='string'),
-            dict(name='name', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
         get_responses = dict(
             description=True,
             schema=dict(
@@ -2257,16 +2189,9 @@ class OApiTestCase(BaseTestCase):
         ref = '#/definitions/Template'
 
         get_params = [
-            dict(name='id', description=True, required=False, type='string'),
-            dict(name='name', description=True, required=False, type='string'),
             dict(name='kind', description=True, required=False, type='string'),
             dict(name='inventory', description=True, required=False, type='string'),
-            dict(name='id__not', description=True, required=False, type='string'),
-            dict(name='name__not', description=True, required=False, type='string'),
-            dict(name='ordering', description=True, required=False, type='string'),
-            dict(name='limit', description=True, required=False, type='integer'),
-            dict(name='offset', description=True, required=False, type='integer'),
-        ]
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
         get_responses = dict(
             description=True,
             schema=dict(
