@@ -1372,6 +1372,7 @@ class OApiTestCase(BaseTestCase):
     def check_parameters(self, object_parameters, *arg, **kwargs):
         checked_values = kwargs.pop('params', None)
         in_values = kwargs.pop('params_in_values', None)
+        path = kwargs.pop('path', None)
         for index in range(len(object_parameters)):
             param_obj = object_parameters[index]
             if object_parameters[index]:
@@ -1382,11 +1383,12 @@ class OApiTestCase(BaseTestCase):
             )
             if not param_checked_value:
                 print(index)
-            self.check_fields('test', param_obj, **param_checked_value)
+            self.check_fields(path, param_obj, **param_checked_value)
 
     def check_request(self, obj, *args, **kwargs):
         response_code = kwargs.pop('response_code', '200')
         request_value = kwargs.pop('request_value', None)
+        path = kwargs.pop('name', None)
         self.assertTrue(request_value, '{} doesn\'t have data for check'.format(obj))
         schema = kwargs.pop('schema', None)
         self.assertTrue(schema)
@@ -1396,12 +1398,13 @@ class OApiTestCase(BaseTestCase):
         params_in_values = kwargs.pop('in_values', None)
         self.check_parameters(
             obj['parameters'],
-            params=params, params_in_values=params_in_values
+            params=params, params_in_values=params_in_values, path=path
         )
 
         # Check responses
         responses = request_value.pop('responses', None)
-        self.check_fields('bla', obj['responses'][response_code], **responses)
+
+        self.check_fields(path, obj['responses'][response_code], **responses)
         if response_code != '204':
             if responses['schema'].get('$ref', None):
                 ref = responses['schema']['$ref']
