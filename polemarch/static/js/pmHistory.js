@@ -251,6 +251,8 @@ gui_history = {
     } 
 }
 
+gui_project_history = gui_history
+
 tabSignal.connect("guiList.renderPage.history", function(params){ 
     params.guiObj.bindStdoutUpdates(params.guiObj.model.data.id);
 });  
