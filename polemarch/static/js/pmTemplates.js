@@ -1,12 +1,222 @@
+gui_project_template = {
+
+    getValue : function (hideReadOnly)
+    {
+        let arr_data_fields = [];
+
+        let template_data = gui_base_object.getValue.apply(this, arguments);
+
+        let data_field = JSON.parse(template_data.data);
+        if(template_data.kind.toLowerCase() == 'module')
+        {
+            arr_data_fields = ['module', 'args', 'inventory', 'group'];
+        }
+        else
+        {
+            arr_data_fields = ['playbook', 'inventory'];
+        }
+
+        arr_data_fields.forEach(function(value)
+        {
+            data_field[value] = template_data[value];
+            delete template_data[value];
+        })
+
+        template_data.data = JSON.stringify(data_field);
+
+        return template_data;
+    },
+
+    prepareDataBeforeRender: function()
+    {
+        let template_data = this.model.data;
+        let arr_data_fields = [];
+        if(template_data)
+        {
+            if(template_data.kind.toLowerCase() == 'module')
+            {
+                arr_data_fields = ['module', 'args', 'inventory', 'group']
+            }
+            else
+            {
+                arr_data_fields = ['playbook', 'inventory'];
+            }
+
+            arr_data_fields.forEach(function(value)
+            {
+                template_data[value] = template_data.data[value];
+            })
+        }
+
+        return template_data;
+    }
+
+}
+
+
+gui_project_template_variables = {
+
+    apiGetDataForQuery : function (query, variable)
+    {
+        if(variable)
+        {
+            if(query.method == "get")
+            {
+                let res =  {
+                    "status": 200,
+                    "item": "variables",
+                    "type": "mod",
+                    "data": {},
+                    "subitem": [
+                        "1",
+                        "template"
+                    ]
+                }
+
+                let val = this.parent_template.model.data.data['vars'];
+                res.data = {
+                    "key": variable,
+                    "value": val[variable],
+                }
+
+                return res;
+            }
+
+            if(query.method == "put")
+            {
+                let template_data = this.parent_template.model.data
+
+                let vars = template_data.data['vars'];
+
+                if(!vars)
+                {
+                    vars = {};
+                }
+
+                vars[query.data.key] = query.data.value;
+
+                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+            }
+        }
+        else
+        {
+            if(query.method == "get")
+            {
+                let res =  {
+                    "status": 200,
+                    "item": "variables",
+                    "type": "mod",
+                    "data": {
+                        "count": 1,
+                        "next": null,
+                        "previous": null,
+                        "results": [ ]
+                    },
+                    "subitem": [
+                        "1",
+                        "template"
+                    ]
+                }
+
+                let vars = this.parent_template.model.data.data['vars'];
+                for(let i in vars)
+                {
+                    let val = vars[i]
+                    res.data.results.push({
+                        "id": i,
+                        "key": i,
+                        "value": vars[i],
+                    })
+                }
+                res.data.count = res.data.results.length
+                return res;
+            }
+
+            if(query.method == "post")
+            {
+                let template_data = this.parent_template.model.data
+
+                let vars = template_data.data['vars'];
+
+                if(!vars)
+                {
+                    vars = {};
+                }
+
+                vars[query.data.key] = query.data.value;
+
+                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+            }
+        }
+    },
+
+    apiQuery : function (query)
+    {
+        let variable;
+        if(query.data_type[query.data_type.length-1] != 'variables')
+        {
+            variable = query.data_type[query.data_type.length-1];
+        }
+        let def = new $.Deferred();
+
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
+        $.when(this.parent_template.load(query.data_type[3])).done(() =>{
+            def.resolve(this.apiGetDataForQuery(query, variable))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    delete: function()
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            delete template_data.data.vars[url_info.api_variables_id]
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    deleteArray : function (ids)
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            for(let i in ids)
+            {
+                let id = ids[i];
+                delete template_data.data.vars[id];
+            }
+            guiPopUp.success("Objects of '"+this.api.bulk_name+"' type were successfully deleted");
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+}
 
 gui_project_template_option = {
 
     apiGetDataForQuery : function (query, option)
     {
-        // debugger;
         if(option)
         {
-            // debugger;
             if(query.method == "get")
             {
                 let res =  {
@@ -45,8 +255,6 @@ gui_project_template_option = {
                     template_data.options[query.data.name][field] = query.data[field];
                 }
 
-                // debugger;
-
                 return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
             }
         }
@@ -73,7 +281,6 @@ gui_project_template_option = {
                 for(let i in this.parent_template.model.data.options)
                 {
                     let val = this.parent_template.model.data.options[i]
-                    //debugger;
                     res.data.results.push({
                         "id": i,
                         "name": val.name || i,
@@ -86,7 +293,6 @@ gui_project_template_option = {
             if(query.method == "post")
             {
                 let template_data = this.parent_template.model.data
-                // debugger;
                 if(template_data.options[query.data.name])
                 {
                     query.data.name+=" copy "+Date()
@@ -101,22 +307,57 @@ gui_project_template_option = {
 
     apiQuery : function (query)
     {
-        //debugger;
         let option;
         if(query.data_type[query.data_type.length-1] != 'option' && query.data_type.length == 6)
         {
-            if(query.data_type[query.data_type.length-1] != 'new')
-            {
-                option = query.data_type[query.data_type.length-1];
-            }
-            //debugger;
+            option = query.data_type[query.data_type.length-1];
         }
         let def = new $.Deferred();
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
-            //debugger;
             def.resolve(this.apiGetDataForQuery(query, option))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    delete: function()
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            delete template_data.options[url_info.api_option_id]
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    deleteArray : function (ids)
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            for(let i in ids)
+            {
+                let id = ids[i];
+                delete template_data.options[id];
+            }
+            guiPopUp.success("Objects of '"+this.api.bulk_name+"' type were successfully deleted");
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
         }).fail((e) =>{
             def.reject(e);
         })
@@ -129,10 +370,8 @@ gui_project_template_option_variables = {
 
     apiGetDataForQuery : function (query, variable)
     {
-        // debugger;
         if(variable)
         {
-            // debugger;
             if(query.method == "get")
             {
                 let res =  {
@@ -148,12 +387,9 @@ gui_project_template_option_variables = {
 
                 let val = this.parent_template.model.data.options[query.data_type[5]];
                 res.data = {
-                    "id": variable,
                     "key": variable,
                     "value": val.vars[variable],
                 }
-
-                debugger;
 
                 return res;
             }
@@ -170,8 +406,6 @@ gui_project_template_option_variables = {
                 }
 
                 option_data.vars[query.data.key] = query.data.value;
-
-                debugger;
 
                 return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
             }
@@ -220,14 +454,8 @@ gui_project_template_option_variables = {
                 {
                     option_data.vars = {};
                 }
-                // option_data.vars = {become:true, check:true};
 
                 option_data.vars[query.data.key] = query.data.value;
-
-
-                // option_data.vars = JSON.stringify(option_data.vars);
-
-                debugger;
 
                 return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
             }
@@ -236,22 +464,57 @@ gui_project_template_option_variables = {
 
     apiQuery : function (query)
     {
-        debugger;
         let variable;
         if(query.data_type[query.data_type.length-1] != 'variables')
         {
-            if(query.data_type[query.data_type.length-1] != 'new')
-            {
-                variable = query.data_type[query.data_type.length-1];
-                debugger;
-            }
+            variable = query.data_type[query.data_type.length-1];
         }
         let def = new $.Deferred();
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
-            //debugger;
             def.resolve(this.apiGetDataForQuery(query, variable))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    delete: function()
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            delete template_data.options[url_info.api_option_id].vars[url_info.api_variables_id]
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    deleteArray : function (ids)
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            for(let i in ids)
+            {
+                let id = ids[i];
+                delete template_data.options[url_info.api_option_id].vars[id];
+            }
+            guiPopUp.success("Objects of '"+this.api.bulk_name+"' type were successfully deleted");
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
         }).fail((e) =>{
             def.reject(e);
         })
@@ -263,6 +526,758 @@ gui_project_template_option_variables = {
 
 tabSignal.connect("openapi.schema", function(obj) {
     // Модификация схемы до сохранения в кеш.
+    obj.schema.path["/project/{pk}/template/{template_id}/variables/"] = {
+        "level": 6,
+        "path": "/project/{pk}/template/{template_id}/variables/",
+        "type": "list",
+        "name": "variables",
+        "bulk_name": "variables",
+        "name_field": "name",
+        "method": {
+            "get": "list",
+            "patch": "",
+            "put": "",
+            "post": "new",
+            "delete": "",
+            // "new": "post"
+        },
+        "buttons": [],
+        "short_name": "project/template/variables",
+        "hide_non_required": 4,
+        "extension_class_name": [
+            "gui_project_template_variables"
+        ],
+        "selectionTag": "_project__pk__template__template_id__variables_",
+        "methodAdd": "post",
+        "canAdd": false,
+        "canRemove": false,
+        "canCreate": true,
+        "schema": {
+            "list": {
+                "fields": {
+                    // "id": {
+                    //     "title": "Id",
+                    //     "type": "string",
+                    //     "readOnly": true,
+                    //     "gui_links": [],
+                    //     "definition": {},
+                    //     "name": "id",
+                    //     "parent_name_format": "variables_id"
+                    // },
+                    "key": {
+                        "title": "Key",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__onInit": "TemplateVariable_key_onInit",
+                        "gui_links": [],
+                        "definition": {},
+                        "name": "key",
+                        "parent_name_format": "variables_key"
+                    },
+                    "value": {
+                        "title": "Value",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__callback": "TemplateVariable_value_callback",
+                        "default": "",
+                        "gui_links": [],
+                        "definition": {},
+                        "name": "value",
+                        "parent_name_format": "variables_value"
+                    }
+                },
+                "filters": {
+                    // "0": {
+                    //     "name": "id",
+                    //     "in": "query",
+                    //     "description": "A unique integer value (or comma separated list) identifying this instance.",
+                    //     "required": false,
+                    //     "type": "string"
+                    // },
+                    "0": {
+                        "name": "key",
+                        "in": "query",
+                        "description": "A key name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    "1": {
+                        "name": "value",
+                        "in": "query",
+                        "description": "A value of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    // "3": {
+                    //     "name": "id__not",
+                    //     "in": "query",
+                    //     "description": "A unique integer value (or comma separated list) identifying this instance.",
+                    //     "required": false,
+                    //     "type": "string"
+                    // },
+                    "2": {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    }
+                },
+                "query_type": "get",
+                "operationId": "project_template_variables_list",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                // "id": {
+                                //     "title": "Id",
+                                //     "type": "integer",
+                                //     "readOnly": true
+                                // },
+                                "key": {
+                                    "title": "Key",
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__onInit": "TemplateVariable_key_onInit",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "key",
+                                    "parent_name_format": "variables_key"
+                                },
+                                "value": {
+                                    "title": "Value",
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__callback": "TemplateVariable_value_callback",
+                                    "default": "",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "value",
+                                    "parent_name_format": "variables_value"
+                                }
+                            },
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error or some data error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Permission denied error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "new": {
+                "fields": {
+                    // "id": {
+                    //     "title": "Id",
+                    //     "type": "string",
+                    //     "readOnly": true,
+                    //     "gui_links": [],
+                    //     "definition": {},
+                    //     "name": "id",
+                    //     "parent_name_format": "variables_id"
+                    // },
+                    "key": {
+                        "title": "Key",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__onInit": "TemplateVariable_key_onInit",
+                        "gui_links": [],
+                        "definition": {},
+                        "name": "key",
+                        "parent_name_format": "variables_key"
+                    },
+                    "value": {
+                        "title": "Value",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__callback": "TemplateVariable_value_callback",
+                        "default": "",
+                        "gui_links": [],
+                        "definition": {},
+                        "name": "value",
+                        "parent_name_format": "variables_value"
+                    }
+                },
+                "query_type": "post",
+                "operationId": "project_template_variables_add",
+                "responses": {
+                    "201": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                // "id": {
+                                //     "title": "Id",
+                                //     "type": "string",
+                                //     "readOnly": true
+                                // },
+                                "key": {
+                                    "title": "Key",
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__onInit": "TemplateVariable_key_onInit",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "key",
+                                    "parent_name_format": "variables_key"
+                                },
+                                "value": {
+                                    "title": "Value",
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__callback": "TemplateVariable_value_callback",
+                                    "default": "",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "value",
+                                    "parent_name_format": "variables_value"
+                                }
+                            },
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error or some data error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Permission denied error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "__link__page": "/project/{pk}/template/{template_id}/variables/{variables_id}/",
+        "page_path": "/project/{pk}/template/{template_id}/variables/{variables_id}/",
+        "sublinks": [],
+        "sublinks_l2": [],
+        "actions": {},
+        "links": {},
+        "multi_actions":{
+            "delete": {
+                "name":"delete",
+                "__func__onClick": "multi_action_delete",
+            }
+        },
+        "__link__parent": "/project/{pk}/template/{template_id}/",
+        "parent_path": "/project/{pk}/template/{template_id}/"
+    }
+
+
+
+    obj.schema.path["/project/{pk}/template/{template_id}/variables/{variables_id}/"] = {
+        "level": 7,
+        "path": "/project/{pk}/template/{template_id}/variables/{variables_id}/",
+        "type": "page",
+        "name": "variables",
+        "bulk_name": "variables",
+        "name_field": "name",
+        "method": {
+            "get": "page",
+            "patch": "edit",
+            "put": "edit",
+            "post": "",
+            "delete": ""
+        },
+        "buttons": [],
+        "short_name": "project/template/variables",
+        "hide_non_required": 4,
+        "extension_class_name": [
+            "gui_project_template_variables"
+        ],
+        "methodEdit": "put",
+        "selectionTag": "_project__pk__template__template_id__variables__variables_id__",
+        "canDelete": true,
+        "methodDelete": "delete",
+        "canEdit": true,
+        "schema": {
+            "get": {
+                "fields": {
+                    // "id": {
+                    //     "title": "Id",
+                    //     "type": "string",
+                    //     "readOnly": true,
+                    //     "gui_links": [],
+                    //     "definition": {},
+                    //     "name": "id",
+                    //     "parent_name_format": "variables_id"
+                    // },
+                    "key": {
+                        "title": "Key",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__onInit": "TemplateVariable_key_onInit",
+                        "gui_links": [],
+                        "definition": {},
+                        "name": "key",
+                        "parent_name_format": "variables_key",
+                        "readOnly": true
+                    },
+                    "value": {
+                        "title": "Value",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__callback": "TemplateVariable_value_callback",
+                        "default": "",
+                        "gui_links": [],
+                        "definition": {},
+                        "name": "value",
+                        "parent_name_format": "variables_value",
+                        "readOnly": true
+                    }
+                },
+                "filters": {},
+                "query_type": "get",
+                "operationId": "project_template_variables_get",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                // "id": {
+                                //     "title": "Id",
+                                //     "type": "string",
+                                //     "readOnly": true
+                                // },
+                                "key": {
+                                    "title": "Key",
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__onInit": "TemplateVariable_key_onInit",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "key",
+                                    "parent_name_format": "variables_key"
+                                },
+                                "value": {
+                                    "title": "Value",
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__callback": "TemplateVariable_value_callback",
+                                    "default": "",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "value",
+                                    "parent_name_format": "variables_value"
+                                }
+                            },
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error or some data error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Permission denied error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "edit": {
+                "fields": {
+                    // "id": {
+                    //     "title": "Id",
+                    //     "type": "string",
+                    //     "readOnly": true,
+                    //     "gui_links": [],
+                    //     "definition": {},
+                    //     "name": "id",
+                    //     "parent_name_format": "variables_id"
+                    // },
+                    "key": {
+                        "title": "Key",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__onInit": "TemplateVariable_key_onInit",
+                        "gui_links": [],
+                        "definition": {},
+                        "name": "key",
+                        "parent_name_format": "variables_key",
+                    },
+                    "value": {
+                        "title": "Value",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__callback": "TemplateVariable_value_callback",
+                        "default": "",
+                        "gui_links": [],
+                        "definition": {},
+                        "name": "value",
+                        "parent_name_format": "variables_value",
+                    }
+                },
+                "query_type": "patch",
+                "operationId": "project_template_variables_edit",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                // "id": {
+                                //     "title": "Id",
+                                //     "type": "string",
+                                //     "readOnly": true
+                                // },
+                                "key": {
+                                    "title": "Key",
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__onInit": "TemplateVariable_key_onInit",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "key",
+                                    "parent_name_format": "variables_key"
+                                },
+                                "value": {
+                                    "title": "Value",
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__callback": "TemplateVariable_value_callback",
+                                    "default": "",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "value",
+                                    "parent_name_format": "variables_value"
+                                }
+                            },
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error or some data error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Permission denied error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found error.",
+                        "schema": {
+                            "required": [
+                                "detail"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "title": "Detail",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "required": true
+                                }
+                            },
+                            "definition_name": "Error",
+                            "definition_ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "__link__list": "/project/{pk}/template/{template_id}/variables/",
+        "list_path": "/project/{pk}/template/{template_id}/variables/",
+        "sublinks": [],
+        "sublinks_l2": [],
+        "actions": {},
+        "links": {},
+        "multi_actions": [],
+        "__link__parent": "/project/{pk}/template/{template_id}/variables/",
+        "parent_path": "/project/{pk}/template/{template_id}/variables/"
+    };
+
     obj.schema.path["/project/{pk}/template/{template_id}/option/"] = {
         "level": 6,
         "path": "/project/{pk}/template/{template_id}/option/",
@@ -279,7 +1294,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "selectionTag": "_project__pk__template__template_id__option_",
         "methodAdd": "post",
         "canAdd": false,
-        "canRemove": true,
+        "canRemove": false,
         "canCreate": true,
         "method": {'get': 'list', 'patch': '', 'put': '', 'post': 'new', 'delete': ''},
         "schema": {
@@ -553,7 +1568,12 @@ tabSignal.connect("openapi.schema", function(obj) {
         "sublinks_l2": [],
         "actions": {},
         "links": {},
-        "multi_actions": [],
+        "multi_actions":{
+            "delete": {
+                "name":"delete",
+                "__func__onClick": "multi_action_delete",
+            }
+        },
         "__link__parent": "/project/{pk}/template/{template_id}/",
         "parent_path": "/project/{pk}/template/{template_id}/"
     }
@@ -587,15 +1607,15 @@ tabSignal.connect("openapi.schema", function(obj) {
         "schema": {
             "get": {
                 "fields": {
-                    "id": {
-                        "title": "Id",
-                        "type": "string",
-                        "readOnly": true,
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "id",
-                        "parent_name_format": "option_id"
-                    },
+                    // "id": {
+                    //     "title": "Id",
+                    //     "type": "string",
+                    //     "readOnly": true,
+                    //     "gui_links": [],
+                    //     "definition": {},
+                    //     "name": "id",
+                    //     "parent_name_format": "option_id"
+                    // },
                     "name": {
                         "title": "Name",
                         "type": "string",
@@ -617,72 +1637,72 @@ tabSignal.connect("openapi.schema", function(obj) {
                         "parent_name_format": "option_notes",
                         "readOnly": true
                     },
-                    "owner": {
-                        "$ref": "#/definitions/User",
-                        "gui_links": [
-                            {
-                                "prop_name": "definition",
-                                "list_name": "list",
-                                "type": "list",
-                                "$ref": "#/definitions/User"
-                            },
-                            {
-                                "prop_name": "definition",
-                                "list_name": "page",
-                                "type": "page",
-                                "$ref": "#/definitions/User"
-                            },
-                            {
-                                "prop_name": "definition",
-                                "list_name": "list",
-                                "type": "list",
-                                "$ref": "#/definitions/User"
-                            },
-                            {
-                                "prop_name": "definition",
-                                "list_name": "page",
-                                "type": "page",
-                                "$ref": "#/definitions/User"
-                            }
-                        ],
-                        "definition": {
-                            "__link__list": "/user/",
-                            "__link__page": "/user/{pk}/"
-                        },
-                        "name": "owner",
-                        "title": "Owner",
-                        "required": [
-                            "username"
-                        ],
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "title": "ID",
-                                "type": "integer",
-                                "readOnly": true
-                            },
-                            "username": {
-                                "title": "Username",
-                                "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
-                                "type": "string",
-                                "pattern": "^[\\w.@+-]+$",
-                                "maxLength": 150,
-                                "minLength": 1,
-                                "required": true
-                            },
-                            "is_active": {
-                                "title": "Is active",
-                                "type": "boolean",
-                                "default": true
-                            }
-                        },
-                        "readOnly": true,
-                        "definition_name": "User",
-                        "definition_ref": "#/definitions/User",
-                        "format": "apiObject",
-                        "api_original_format": "apiUser",
-                        "parent_name_format": "option_owner"
-                    }
+                    // "owner": {
+                    //     "$ref": "#/definitions/User",
+                    //     "gui_links": [
+                    //         {
+                    //             "prop_name": "definition",
+                    //             "list_name": "list",
+                    //             "type": "list",
+                    //             "$ref": "#/definitions/User"
+                    //         },
+                    //         {
+                    //             "prop_name": "definition",
+                    //             "list_name": "page",
+                    //             "type": "page",
+                    //             "$ref": "#/definitions/User"
+                    //         },
+                    //         {
+                    //             "prop_name": "definition",
+                    //             "list_name": "list",
+                    //             "type": "list",
+                    //             "$ref": "#/definitions/User"
+                    //         },
+                    //         {
+                    //             "prop_name": "definition",
+                    //             "list_name": "page",
+                    //             "type": "page",
+                    //             "$ref": "#/definitions/User"
+                    //         }
+                    //     ],
+                    //     "definition": {
+                    //         "__link__list": "/user/",
+                    //         "__link__page": "/user/{pk}/"
+                    //     },
+                    //     "name": "owner",
+                    //     "title": "Owner",
+                    //     "required": [
+                    //         "username"
+                    //     ],
+                    //     "type": "object",
+                    //     "properties": {
+                    //         "id": {
+                    //             "title": "ID",
+                    //             "type": "integer",
+                    //             "readOnly": true
+                    //         },
+                    //         "username": {
+                    //             "title": "Username",
+                    //             "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    //             "type": "string",
+                    //             "pattern": "^[\\w.@+-]+$",
+                    //             "maxLength": 150,
+                    //             "minLength": 1,
+                    //             "required": true
+                    //         },
+                    //         "is_active": {
+                    //             "title": "Is active",
+                    //             "type": "boolean",
+                    //             "default": true
+                    //         }
+                    //     },
+                    //     "readOnly": true,
+                    //     "definition_name": "User",
+                    //     "definition_ref": "#/definitions/User",
+                    //     "format": "apiObject",
+                    //     "api_original_format": "apiUser",
+                    //     "parent_name_format": "option_owner"
+                    // }
                 },
                 "filters": {},
                 "query_type": "get",
@@ -693,11 +1713,11 @@ tabSignal.connect("openapi.schema", function(obj) {
                         "schema": {
                             "type": "object",
                             "properties": {
-                                "id": {
-                                    "title": "Id",
-                                    "type": "string",
-                                    "readOnly": true
-                                },
+                                // "id": {
+                                //     "title": "Id",
+                                //     "type": "string",
+                                //     "readOnly": true
+                                // },
                                 "name": {
                                     "title": "Name",
                                     "type": "string",
@@ -709,9 +1729,9 @@ tabSignal.connect("openapi.schema", function(obj) {
                                     "type": "string",
                                     "format": "textarea"
                                 },
-                                "owner": {
-                                    "$ref": "#/definitions/User"
-                                }
+                                // "owner": {
+                                //     "$ref": "#/definitions/User"
+                                // }
                             },
                             "definition_name": "OneOption",
                             "definition_ref": "#/definitions/OneOption"
@@ -797,15 +1817,15 @@ tabSignal.connect("openapi.schema", function(obj) {
             },
             "edit": {
                 "fields": {
-                    "id": {
-                        "title": "Id",
-                        "type": "string",
-                        "readOnly": true,
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "id",
-                        "parent_name_format": "option_id"
-                    },
+                    // "id": {
+                    //     "title": "Id",
+                    //     "type": "string",
+                    //     "readOnly": true,
+                    //     "gui_links": [],
+                    //     "definition": {},
+                    //     "name": "id",
+                    //     "parent_name_format": "option_id"
+                    // },
                     "name": {
                         "title": "Name",
                         "type": "string",
@@ -825,72 +1845,72 @@ tabSignal.connect("openapi.schema", function(obj) {
                         "name": "notes",
                         "parent_name_format": "option_notes"
                     },
-                    "owner": {
-                        "$ref": "#/definitions/User",
-                        "gui_links": [
-                            {
-                                "prop_name": "definition",
-                                "list_name": "list",
-                                "type": "list",
-                                "$ref": "#/definitions/User"
-                            },
-                            {
-                                "prop_name": "definition",
-                                "list_name": "page",
-                                "type": "page",
-                                "$ref": "#/definitions/User"
-                            },
-                            {
-                                "prop_name": "definition",
-                                "list_name": "list",
-                                "type": "list",
-                                "$ref": "#/definitions/User"
-                            },
-                            {
-                                "prop_name": "definition",
-                                "list_name": "page",
-                                "type": "page",
-                                "$ref": "#/definitions/User"
-                            }
-                        ],
-                        "definition": {
-                            "__link__list": "/user/",
-                            "__link__page": "/user/{pk}/"
-                        },
-                        "name": "owner",
-                        "title": "Owner",
-                        "required": [
-                            "username"
-                        ],
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "title": "ID",
-                                "type": "integer",
-                                "readOnly": true
-                            },
-                            "username": {
-                                "title": "Username",
-                                "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
-                                "type": "string",
-                                "pattern": "^[\\w.@+-]+$",
-                                "maxLength": 150,
-                                "minLength": 1,
-                                "required": true
-                            },
-                            "is_active": {
-                                "title": "Is active",
-                                "type": "boolean",
-                                "default": true
-                            }
-                        },
-                        "readOnly": true,
-                        "definition_name": "User",
-                        "definition_ref": "#/definitions/User",
-                        "format": "apiObject",
-                        "api_original_format": "apiUser",
-                        "parent_name_format": "option_owner"
-                    }
+                    // "owner": {
+                    //     "$ref": "#/definitions/User",
+                    //     "gui_links": [
+                    //         {
+                    //             "prop_name": "definition",
+                    //             "list_name": "list",
+                    //             "type": "list",
+                    //             "$ref": "#/definitions/User"
+                    //         },
+                    //         {
+                    //             "prop_name": "definition",
+                    //             "list_name": "page",
+                    //             "type": "page",
+                    //             "$ref": "#/definitions/User"
+                    //         },
+                    //         {
+                    //             "prop_name": "definition",
+                    //             "list_name": "list",
+                    //             "type": "list",
+                    //             "$ref": "#/definitions/User"
+                    //         },
+                    //         {
+                    //             "prop_name": "definition",
+                    //             "list_name": "page",
+                    //             "type": "page",
+                    //             "$ref": "#/definitions/User"
+                    //         }
+                    //     ],
+                    //     "definition": {
+                    //         "__link__list": "/user/",
+                    //         "__link__page": "/user/{pk}/"
+                    //     },
+                    //     "name": "owner",
+                    //     "title": "Owner",
+                    //     "required": [
+                    //         "username"
+                    //     ],
+                    //     "type": "object",
+                    //     "properties": {
+                    //         "id": {
+                    //             "title": "ID",
+                    //             "type": "integer",
+                    //             "readOnly": true
+                    //         },
+                    //         "username": {
+                    //             "title": "Username",
+                    //             "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    //             "type": "string",
+                    //             "pattern": "^[\\w.@+-]+$",
+                    //             "maxLength": 150,
+                    //             "minLength": 1,
+                    //             "required": true
+                    //         },
+                    //         "is_active": {
+                    //             "title": "Is active",
+                    //             "type": "boolean",
+                    //             "default": true
+                    //         }
+                    //     },
+                    //     "readOnly": true,
+                    //     "definition_name": "User",
+                    //     "definition_ref": "#/definitions/User",
+                    //     "format": "apiObject",
+                    //     "api_original_format": "apiUser",
+                    //     "parent_name_format": "option_owner"
+                    // }
                 },
                 "query_type": "patch",
                 "operationId": "project_template_option_edit",
@@ -900,11 +1920,11 @@ tabSignal.connect("openapi.schema", function(obj) {
                         "schema": {
                             "type": "object",
                             "properties": {
-                                "id": {
-                                    "title": "Id",
-                                    "type": "string",
-                                    "readOnly": true
-                                },
+                                // "id": {
+                                //     "title": "Id",
+                                //     "type": "string",
+                                //     "readOnly": true
+                                // },
                                 "name": {
                                     "title": "Name",
                                     "type": "string",
@@ -916,9 +1936,9 @@ tabSignal.connect("openapi.schema", function(obj) {
                                     "type": "string",
                                     "format": "textarea"
                                 },
-                                "owner": {
-                                    "$ref": "#/definitions/User"
-                                }
+                                // "owner": {
+                                //     "$ref": "#/definitions/User"
+                                // }
                             },
                             "definition_name": "OneOption",
                             "definition_ref": "#/definitions/OneOption"
@@ -1007,164 +2027,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "list_path": "/project/{pk}/template/{template_id}/option/",
         "sublinks": [],
         "sublinks_l2": [],
-        "actions": {
-            "set_owner": {
-                "level": 8,
-                "path": "/project/{pk}/template/{template_id}/option/{option_id}/set_owner/",
-                "type": "action",
-                "name": "set_owner",
-                "bulk_name": "set_owner",
-                "name_field": "name",
-                "method": {
-                    "get": "",
-                    "patch": "",
-                    "put": "",
-                    "post": "",
-                    "delete": "",
-                    "post,put,delete,patch": "exec"
-                },
-                "buttons": [],
-                "hide_non_required": 4,
-                "extension_class_name": [
-                    "gui_project_template_option_set_owner"
-                ],
-                "selectionTag": "_project__pk__template__template_id__option__option_id__set_owner_",
-                "schema": {
-                    "exec": {
-                        "fields": {
-                            "id": {
-                                "title": "Id",
-                                "type": "integer",
-                                "readOnly": true,
-                                "gui_links": [],
-                                "definition": {},
-                                "name": "id",
-                                "parent_name_format": "set_owner_id"
-                            },
-                            "name": {
-                                "title": "Name",
-                                "type": "string",
-                                "maxLength": 512,
-                                "minLength": 1,
-                                "gui_links": [],
-                                "definition": {},
-                                "name": "name",
-                                "parent_name_format": "set_owner_name"
-                            },
-                        },
-                        "query_type": "post",
-                        "operationId": "project_template_option_template_set_owner",
-                        "responses": {
-                            "201": {
-                                "description": "Action accepted.",
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "id": {
-                                            "title": "Id",
-                                            "type": "integer",
-                                            "readOnly": true
-                                        },
-                                        "name": {
-                                            "title": "Name",
-                                            "type": "string",
-                                            "maxLength": 512,
-                                            "minLength": 1
-                                        },
-                                    },
-                                    "definition_name": "Option",
-                                    "definition_ref": "#/definitions/Option"
-                                }
-                            },
-                            "400": {
-                                "description": "Validation error or some data error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            },
-                            "401": {
-                                "description": "Unauthorized access error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            },
-                            "403": {
-                                "description": "Permission denied error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            },
-                            "404": {
-                                "description": "Not found error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            }
-                        }
-                    }
-                },
-                "methodExec": "post",
-                "sublinks": [],
-                "sublinks_l2": [],
-                "actions": {},
-                "links": {},
-                "multi_actions": [],
-                "__link__parent": "/project/{pk}/template/{template_id}/option/{option_id}/",
-                "parent_path": "/project/{pk}/template/{template_id}/option/{option_id}/"
-            }
-        },
+        "actions": {},
         "links": {
             "variables": {
                 "level": 8,
@@ -1642,7 +2505,7 @@ tabSignal.connect("openapi.schema", function(obj) {
             "put": "",
             "post": "new",
             "delete": "",
-            "new": "post"
+            // "new": "post"
         },
         "buttons": [],
         "short_name": "project/template/option/variables",
@@ -1658,45 +2521,21 @@ tabSignal.connect("openapi.schema", function(obj) {
         "schema": {
             "list": {
                 "fields": {
-                    "id": {
-                        "title": "Id",
-                        "type": "string",
-                        "readOnly": true,
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "id",
-                        "parent_name_format": "variables_id"
-                    },
+                    // "id": {
+                    //     "title": "Id",
+                    //     "type": "string",
+                    //     "readOnly": true,
+                    //     "gui_links": [],
+                    //     "definition": {},
+                    //     "name": "id",
+                    //     "parent_name_format": "variables_id"
+                    // },
                     "key": {
                         "title": "Key",
-                        "type": "string",
-                        "format": "enum",
-                        "enum": [
-                            "ansible_host",
-                            "ansible_port",
-                            "ansible_user",
-                            "ansible_connection",
-                            "ansible_ssh_pass",
-                            "ansible_ssh_private_key_file",
-                            "ansible_ssh_common_args",
-                            "ansible_sftp_extra_args",
-                            "ansible_scp_extra_args",
-                            "ansible_ssh_extra_args",
-                            "ansible_ssh_executable",
-                            "ansible_ssh_pipelining",
-                            "ansible_become",
-                            "ansible_become_method",
-                            "ansible_become_user",
-                            "ansible_become_pass",
-                            "ansible_become_exe",
-                            "ansible_become_flags",
-                            "ansible_shell_type",
-                            "ansible_python_interpreter",
-                            "ansible_ruby_interpreter",
-                            "ansible_perl_interpreter",
-                            "ansible_shell_executable"
-                        ],
+                        "type": "dynamic",
+                        "dynamic_properties": {},
                         "required": true,
+                        "__func__onInit": "TemplateVariable_key_onInit",
                         "gui_links": [],
                         "definition": {},
                         "name": "key",
@@ -1704,7 +2543,10 @@ tabSignal.connect("openapi.schema", function(obj) {
                     },
                     "value": {
                         "title": "Value",
-                        "type": "string",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__callback": "TemplateVariable_value_callback",
                         "default": "",
                         "gui_links": [],
                         "definition": {},
@@ -1713,35 +2555,35 @@ tabSignal.connect("openapi.schema", function(obj) {
                     }
                 },
                 "filters": {
+                    // "0": {
+                    //     "name": "id",
+                    //     "in": "query",
+                    //     "description": "A unique integer value (or comma separated list) identifying this instance.",
+                    //     "required": false,
+                    //     "type": "string"
+                    // },
                     "0": {
-                        "name": "id",
-                        "in": "query",
-                        "description": "A unique integer value (or comma separated list) identifying this instance.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    "1": {
                         "name": "key",
                         "in": "query",
                         "description": "A key name string value (or comma separated list) of instance.",
                         "required": false,
                         "type": "string"
                     },
-                    "2": {
+                    "1": {
                         "name": "value",
                         "in": "query",
                         "description": "A value of instance.",
                         "required": false,
                         "type": "string"
                     },
-                    "3": {
-                        "name": "id__not",
-                        "in": "query",
-                        "description": "A unique integer value (or comma separated list) identifying this instance.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    "4": {
+                    // "3": {
+                    //     "name": "id__not",
+                    //     "in": "query",
+                    //     "description": "A unique integer value (or comma separated list) identifying this instance.",
+                    //     "required": false,
+                    //     "type": "string"
+                    // },
+                    "2": {
                         "name": "ordering",
                         "in": "query",
                         "description": "Which field to use when ordering the results.",
@@ -1760,46 +2602,33 @@ tabSignal.connect("openapi.schema", function(obj) {
                             ],
                             "type": "object",
                             "properties": {
-                                "id": {
-                                    "title": "Id",
-                                    "type": "integer",
-                                    "readOnly": true
-                                },
+                                // "id": {
+                                //     "title": "Id",
+                                //     "type": "integer",
+                                //     "readOnly": true
+                                // },
                                 "key": {
                                     "title": "Key",
-                                    "type": "string",
-                                    "format": "autocomplete",
-                                    "enum": [
-                                        "ansible_host",
-                                        "ansible_port",
-                                        "ansible_user",
-                                        "ansible_connection",
-                                        "ansible_ssh_pass",
-                                        "ansible_ssh_private_key_file",
-                                        "ansible_ssh_common_args",
-                                        "ansible_sftp_extra_args",
-                                        "ansible_scp_extra_args",
-                                        "ansible_ssh_extra_args",
-                                        "ansible_ssh_executable",
-                                        "ansible_ssh_pipelining",
-                                        "ansible_become",
-                                        "ansible_become_method",
-                                        "ansible_become_user",
-                                        "ansible_become_pass",
-                                        "ansible_become_exe",
-                                        "ansible_become_flags",
-                                        "ansible_shell_type",
-                                        "ansible_python_interpreter",
-                                        "ansible_ruby_interpreter",
-                                        "ansible_perl_interpreter",
-                                        "ansible_shell_executable"
-                                    ],
-                                    "required": true
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__onInit": "TemplateVariable_key_onInit",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "key",
+                                    "parent_name_format": "variables_key"
                                 },
                                 "value": {
                                     "title": "Value",
-                                    "type": "string",
-                                    "default": ""
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__callback": "TemplateVariable_value_callback",
+                                    "default": "",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "value",
+                                    "parent_name_format": "variables_value"
                                 }
                             },
                             "definition_name": "TemplateVariable",
@@ -1886,45 +2715,21 @@ tabSignal.connect("openapi.schema", function(obj) {
             },
             "new": {
                 "fields": {
-                    "id": {
-                        "title": "Id",
-                        "type": "string",
-                        "readOnly": true,
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "id",
-                        "parent_name_format": "variables_id"
-                    },
+                    // "id": {
+                    //     "title": "Id",
+                    //     "type": "string",
+                    //     "readOnly": true,
+                    //     "gui_links": [],
+                    //     "definition": {},
+                    //     "name": "id",
+                    //     "parent_name_format": "variables_id"
+                    // },
                     "key": {
                         "title": "Key",
-                        "type": "string",
-                        // "format": "enum",
-                        // "enum": [
-                        //     "ansible_host",
-                        //     "ansible_port",
-                        //     "ansible_user",
-                        //     "ansible_connection",
-                        //     "ansible_ssh_pass",
-                        //     "ansible_ssh_private_key_file",
-                        //     "ansible_ssh_common_args",
-                        //     "ansible_sftp_extra_args",
-                        //     "ansible_scp_extra_args",
-                        //     "ansible_ssh_extra_args",
-                        //     "ansible_ssh_executable",
-                        //     "ansible_ssh_pipelining",
-                        //     "ansible_become",
-                        //     "ansible_become_method",
-                        //     "ansible_become_user",
-                        //     "ansible_become_pass",
-                        //     "ansible_become_exe",
-                        //     "ansible_become_flags",
-                        //     "ansible_shell_type",
-                        //     "ansible_python_interpreter",
-                        //     "ansible_ruby_interpreter",
-                        //     "ansible_perl_interpreter",
-                        //     "ansible_shell_executable"
-                        // ],
+                        "type": "dynamic",
+                        "dynamic_properties": {},
                         "required": true,
+                        "__func__onInit": "TemplateVariable_key_onInit",
                         "gui_links": [],
                         "definition": {},
                         "name": "key",
@@ -1932,7 +2737,10 @@ tabSignal.connect("openapi.schema", function(obj) {
                     },
                     "value": {
                         "title": "Value",
-                        "type": "string",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__callback": "TemplateVariable_value_callback",
                         "default": "",
                         "gui_links": [],
                         "definition": {},
@@ -1951,46 +2759,33 @@ tabSignal.connect("openapi.schema", function(obj) {
                             ],
                             "type": "object",
                             "properties": {
-                                "id": {
-                                    "title": "Id",
-                                    "type": "string",
-                                    "readOnly": true
-                                },
+                                // "id": {
+                                //     "title": "Id",
+                                //     "type": "string",
+                                //     "readOnly": true
+                                // },
                                 "key": {
                                     "title": "Key",
-                                    "type": "string",
-                                    "format": "autocomplete",
-                                    "enum": [
-                                        "ansible_host",
-                                        "ansible_port",
-                                        "ansible_user",
-                                        "ansible_connection",
-                                        "ansible_ssh_pass",
-                                        "ansible_ssh_private_key_file",
-                                        "ansible_ssh_common_args",
-                                        "ansible_sftp_extra_args",
-                                        "ansible_scp_extra_args",
-                                        "ansible_ssh_extra_args",
-                                        "ansible_ssh_executable",
-                                        "ansible_ssh_pipelining",
-                                        "ansible_become",
-                                        "ansible_become_method",
-                                        "ansible_become_user",
-                                        "ansible_become_pass",
-                                        "ansible_become_exe",
-                                        "ansible_become_flags",
-                                        "ansible_shell_type",
-                                        "ansible_python_interpreter",
-                                        "ansible_ruby_interpreter",
-                                        "ansible_perl_interpreter",
-                                        "ansible_shell_executable"
-                                    ],
-                                    "required": true
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__onInit": "TemplateVariable_key_onInit",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "key",
+                                    "parent_name_format": "variables_key"
                                 },
                                 "value": {
                                     "title": "Value",
-                                    "type": "string",
-                                    "default": ""
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__callback": "TemplateVariable_value_callback",
+                                    "default": "",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "value",
+                                    "parent_name_format": "variables_value"
                                 }
                             },
                             "definition_name": "TemplateVariable",
@@ -2082,7 +2877,12 @@ tabSignal.connect("openapi.schema", function(obj) {
         "sublinks_l2": [],
         "actions": {},
         "links": {},
-        "multi_actions": [],
+        "multi_actions":{
+            "delete": {
+                "name":"delete",
+                "__func__onClick": "multi_action_delete",
+            }
+        },
         "__link__parent": "/project/{pk}/template/{template_id}/option/{option_id}/",
         "parent_path": "/project/{pk}/template/{template_id}/option/{option_id}/"
     }
@@ -2115,45 +2915,21 @@ tabSignal.connect("openapi.schema", function(obj) {
         "schema": {
             "get": {
                 "fields": {
-                    "id": {
-                        "title": "Id",
-                        "type": "string",
-                        "readOnly": true,
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "id",
-                        "parent_name_format": "variables_id"
-                    },
+                    // "id": {
+                    //     "title": "Id",
+                    //     "type": "string",
+                    //     "readOnly": true,
+                    //     "gui_links": [],
+                    //     "definition": {},
+                    //     "name": "id",
+                    //     "parent_name_format": "variables_id"
+                    // },
                     "key": {
                         "title": "Key",
-                        "type": "string",
-                        "format": "enum",
-                        "enum": [
-                            "ansible_host",
-                            "ansible_port",
-                            "ansible_user",
-                            "ansible_connection",
-                            "ansible_ssh_pass",
-                            "ansible_ssh_private_key_file",
-                            "ansible_ssh_common_args",
-                            "ansible_sftp_extra_args",
-                            "ansible_scp_extra_args",
-                            "ansible_ssh_extra_args",
-                            "ansible_ssh_executable",
-                            "ansible_ssh_pipelining",
-                            "ansible_become",
-                            "ansible_become_method",
-                            "ansible_become_user",
-                            "ansible_become_pass",
-                            "ansible_become_exe",
-                            "ansible_become_flags",
-                            "ansible_shell_type",
-                            "ansible_python_interpreter",
-                            "ansible_ruby_interpreter",
-                            "ansible_perl_interpreter",
-                            "ansible_shell_executable"
-                        ],
+                        "type": "dynamic",
+                        "dynamic_properties": {},
                         "required": true,
+                        "__func__onInit": "TemplateVariable_key_onInit",
                         "gui_links": [],
                         "definition": {},
                         "name": "key",
@@ -2162,7 +2938,10 @@ tabSignal.connect("openapi.schema", function(obj) {
                     },
                     "value": {
                         "title": "Value",
-                        "type": "string",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__callback": "TemplateVariable_value_callback",
                         "default": "",
                         "gui_links": [],
                         "definition": {},
@@ -2183,46 +2962,33 @@ tabSignal.connect("openapi.schema", function(obj) {
                             ],
                             "type": "object",
                             "properties": {
-                                "id": {
-                                    "title": "Id",
-                                    "type": "string",
-                                    "readOnly": true
-                                },
+                                // "id": {
+                                //     "title": "Id",
+                                //     "type": "string",
+                                //     "readOnly": true
+                                // },
                                 "key": {
                                     "title": "Key",
-                                    "type": "string",
-                                    "format": "autocomplete",
-                                    "enum": [
-                                        "ansible_host",
-                                        "ansible_port",
-                                        "ansible_user",
-                                        "ansible_connection",
-                                        "ansible_ssh_pass",
-                                        "ansible_ssh_private_key_file",
-                                        "ansible_ssh_common_args",
-                                        "ansible_sftp_extra_args",
-                                        "ansible_scp_extra_args",
-                                        "ansible_ssh_extra_args",
-                                        "ansible_ssh_executable",
-                                        "ansible_ssh_pipelining",
-                                        "ansible_become",
-                                        "ansible_become_method",
-                                        "ansible_become_user",
-                                        "ansible_become_pass",
-                                        "ansible_become_exe",
-                                        "ansible_become_flags",
-                                        "ansible_shell_type",
-                                        "ansible_python_interpreter",
-                                        "ansible_ruby_interpreter",
-                                        "ansible_perl_interpreter",
-                                        "ansible_shell_executable"
-                                    ],
-                                    "required": true
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__onInit": "TemplateVariable_key_onInit",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "key",
+                                    "parent_name_format": "variables_key"
                                 },
                                 "value": {
                                     "title": "Value",
-                                    "type": "string",
-                                    "default": ""
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__callback": "TemplateVariable_value_callback",
+                                    "default": "",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "value",
+                                    "parent_name_format": "variables_value"
                                 }
                             },
                             "definition_name": "TemplateVariable",
@@ -2309,58 +3075,37 @@ tabSignal.connect("openapi.schema", function(obj) {
             },
             "edit": {
                 "fields": {
-                    "id": {
-                        "title": "Id",
-                        "type": "string",
-                        "readOnly": true,
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "id",
-                        "parent_name_format": "variables_id"
-                    },
+                    // "id": {
+                    //     "title": "Id",
+                    //     "type": "string",
+                    //     "readOnly": true,
+                    //     "gui_links": [],
+                    //     "definition": {},
+                    //     "name": "id",
+                    //     "parent_name_format": "variables_id"
+                    // },
                     "key": {
                         "title": "Key",
-                        "type": "string",
-                        "format": "enum",
-                        "enum": [
-                            "ansible_host",
-                            "ansible_port",
-                            "ansible_user",
-                            "ansible_connection",
-                            "ansible_ssh_pass",
-                            "ansible_ssh_private_key_file",
-                            "ansible_ssh_common_args",
-                            "ansible_sftp_extra_args",
-                            "ansible_scp_extra_args",
-                            "ansible_ssh_extra_args",
-                            "ansible_ssh_executable",
-                            "ansible_ssh_pipelining",
-                            "ansible_become",
-                            "ansible_become_method",
-                            "ansible_become_user",
-                            "ansible_become_pass",
-                            "ansible_become_exe",
-                            "ansible_become_flags",
-                            "ansible_shell_type",
-                            "ansible_python_interpreter",
-                            "ansible_ruby_interpreter",
-                            "ansible_perl_interpreter",
-                            "ansible_shell_executable"
-                        ],
+                        "type": "dynamic",
+                        "dynamic_properties": {},
                         "required": true,
+                        "__func__onInit": "TemplateVariable_key_onInit",
                         "gui_links": [],
                         "definition": {},
                         "name": "key",
-                        "parent_name_format": "variables_key"
+                        "parent_name_format": "variables_key",
                     },
                     "value": {
                         "title": "Value",
-                        "type": "string",
+                        "type": "dynamic",
+                        "dynamic_properties": {},
+                        "required": true,
+                        "__func__callback": "TemplateVariable_value_callback",
                         "default": "",
                         "gui_links": [],
                         "definition": {},
                         "name": "value",
-                        "parent_name_format": "variables_value"
+                        "parent_name_format": "variables_value",
                     }
                 },
                 "query_type": "patch",
@@ -2374,46 +3119,33 @@ tabSignal.connect("openapi.schema", function(obj) {
                             ],
                             "type": "object",
                             "properties": {
-                                "id": {
-                                    "title": "Id",
-                                    "type": "string",
-                                    "readOnly": true
-                                },
+                                // "id": {
+                                //     "title": "Id",
+                                //     "type": "string",
+                                //     "readOnly": true
+                                // },
                                 "key": {
                                     "title": "Key",
-                                    "type": "string",
-                                    "format": "autocomplete",
-                                    "enum": [
-                                        "ansible_host",
-                                        "ansible_port",
-                                        "ansible_user",
-                                        "ansible_connection",
-                                        "ansible_ssh_pass",
-                                        "ansible_ssh_private_key_file",
-                                        "ansible_ssh_common_args",
-                                        "ansible_sftp_extra_args",
-                                        "ansible_scp_extra_args",
-                                        "ansible_ssh_extra_args",
-                                        "ansible_ssh_executable",
-                                        "ansible_ssh_pipelining",
-                                        "ansible_become",
-                                        "ansible_become_method",
-                                        "ansible_become_user",
-                                        "ansible_become_pass",
-                                        "ansible_become_exe",
-                                        "ansible_become_flags",
-                                        "ansible_shell_type",
-                                        "ansible_python_interpreter",
-                                        "ansible_ruby_interpreter",
-                                        "ansible_perl_interpreter",
-                                        "ansible_shell_executable"
-                                    ],
-                                    "required": true
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__onInit": "TemplateVariable_key_onInit",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "key",
+                                    "parent_name_format": "variables_key"
                                 },
                                 "value": {
                                     "title": "Value",
-                                    "type": "string",
-                                    "default": ""
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__callback": "TemplateVariable_value_callback",
+                                    "default": "",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "value",
+                                    "parent_name_format": "variables_value"
                                 }
                             },
                             "definition_name": "TemplateVariable",
@@ -2512,47 +3244,230 @@ tabSignal.connect("openapi.schema", function(obj) {
 
 })
 
-// debugger;
-
-// tabSignal.connect("openapi.paths",  {api: window.api});
-tabSignal.connect("openapi.paths", function()
+function OneTemplate_args_callback(fieldObj, newValue)
 {
-    // for(let i in all_regexp)
-    // {
-    //     if(all_regexp[i].path == "/project/{pk}/template/{template_id}/option/{option_id}/")
-    //     {
-    //         all_regexp[i].regexp = "^(?<parents>[A-z]+\/[0-9]+\/)*(?<page>project\/(?<api_pk>[0-9,]+)\/template\/(?<api_template_id>[0-9,]+)\/option\/(?<api_option_id>[A-z0-9 %\-.:,=]+))$"
-    //         // debugger;
-    //     }
-    // }
+    let obj = {}
 
-    // console.log('spajs.opt.menu', spajs.opt.menu);
-    // for(let i in spajs.opt.menu)
-    // {
-    //     let menu = spajs.opt.menu[i];
-    //     if(menu.id == getMenuIdFromApiPath('/project/{pk}/template/{template_id}/option/{option_id}/'))
-    //     {
-    //         menu.urlregexp = [/^(?<page>project\/(?<api_pk>[0-9,]+)\/template\/(?<api_template_id>[0-9,]+)\/option\/(?<api_option_id>[A-z0-9%\-.:,=]+))$/];
-    //         debugger;
-    //     }
-    // }
+    if(newValue.value.toLowerCase() == "module")
+    {
+        obj.type = "string";
+    }
+    else
+    {
+        obj.type = "null";
+    }
+    return obj
+
+}
+
+function OneTemplate_group_callback(fieldObj, newValue)
+{
+    let obj = {
+        type:"select2"
+    }
+    if(newValue.value.toLowerCase() == "module")
+    {
+        obj.override_opt = {
+            dynamic_properties:{
+                list_obj:projPath + "/group/",
+                // list_obj:projPath + "/inventory/{inventory_id}/group/",
+                value_field:'id',
+                view_field:'name',
+            }
+        };
+    }
+    else
+    {
+        obj.type = "null"
+    }
+    return obj
+}
+
+function OneTemplate_module_callback(fieldObj, newValue)
+{
+    let obj = {
+        type:"select2"
+    }
+    if(newValue.value.toLowerCase() == "module")
+    {
+        obj.override_opt = {
+            dynamic_properties:{
+                list_obj:projPath + "/module/",
+                value_field:'path',
+                view_field:'path',
+            },
+        };
+    }
+    else
+    {
+        obj.type = "null"
+    }
+    return obj
+}
+
+function OneTemplate_playbook_callback(fieldObj, newValue)
+{
+    let obj = {
+        type:"select2"
+    }
+    if(newValue.value.toLowerCase() == "task")
+    {
+        obj.override_opt = {
+            dynamic_properties:{
+                list_obj:projPath + "/playbook/",
+                value_field:'id',
+                view_field:'name',
+            }
+        };
+        obj.required = true;
+    }
+    else
+    {
+        obj.type = "null"
+    }
+    return obj
+}
+
+function OneTemplate_inventory_callback(fieldObj, newValue)
+{
+    let obj = {
+        type:"select2"
+    }
+
+    obj.override_opt = {
+        dynamic_properties:{
+            list_obj:projPath + "/inventory/",
+            value_field:'id',
+            view_field:'name',
+        }
+    };
+
+    return obj;
+}
+
+tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
+    let properties = obj.definition.properties;
+
+    properties.options.hidden = true;
+    properties.options_list.hidden = true;
+    properties.data.hidden = true;
+
+    properties.inventory = {
+        name: 'inventory',
+        title: 'Inventory',
+        required: true,
+        type: 'number',
+        format: 'dynamic',
+        parent_field: 'kind',
+        dynamic_properties: {
+            __func__callback: 'OneTemplate_inventory_callback',
+        }
+    }
+    properties.group = {
+        name: 'group',
+        title: 'Group',
+        type: 'string',
+        format: 'dynamic',
+        default: 'all',
+        parent_field: 'kind',
+        dynamic_properties: {
+            __func__callback: 'OneTemplate_group_callback',
+        }
+    }
+    properties.module = {
+        name: 'module',
+        title: 'Module',
+        type: 'string',
+        format: 'dynamic',
+        parent_field: 'kind',
+        dynamic_properties: {
+            __func__callback: 'OneTemplate_module_callback',
+        }
+    }
+
+    properties.args = {
+        name: 'args',
+        title: 'Arguments',
+        type: 'string',
+        format: 'dynamic',
+        parent_field: 'kind',
+        dynamic_properties: {
+            __func__callback: 'OneTemplate_args_callback',
+        }
+    }
+
+    properties.playbook = {
+        name: 'playbook',
+        title: 'Playbook',
+        type: 'string',
+        format: 'dynamic',
+        parent_field: 'kind',
+        dynamic_properties: {
+            __func__callback: 'OneTemplate_playbook_callback',
+        }
+    }
+
 });
 
 
+tabSignal.connect("openapi.schema",  function(obj)
+{
+    let template = obj.schema.path['/project/{pk}/template/{template_id}/']
+    template.links['options'] = obj.schema.path['/project/{pk}/template/{template_id}/option/'];
+    template.links['variables'] = obj.schema.path['/project/{pk}/template/{template_id}/variables/'];
+});
 
+function TemplateVariable_key_onInit(opt = {}, value, parent_object)
+{
+    let thisObj = this;
+    let template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
 
+    $.when(template.load(parent_object.url_vars.api_periodic_task_id)).done(function(){
+        let fields = {}
+        if(template.model.data.kind.toLowerCase() == "task")
+        {
+            fields = window.guiSchema.path["/project/{pk}/execute_playbook/"].schema.exec.fields
+            delete fields.playbook
+        }
+        if(template.model.data.kind.toLowerCase() == "module")
+        {
+            fields = window.guiSchema.path["/project/{pk}/execute_module/"].schema.exec.fields
+            delete fields.module
+        }
 
+        delete fields.inventory
+        thisObj.setType("enum", {
+            enum:Object.keys(fields),
+        });
+        thisObj.opt.all_fields = fields
 
+        thisObj._callAllonChangeCallback()
+    })
+}
 
+function TemplateVariable_value_callback(fieldObj, newValue)
+{
+    if(!newValue.value)
+    {
+        return;
+    }
 
+    if(!newValue.opt.all_fields)
+    {
+        return;
+    }
 
+    if(!newValue.opt.all_fields[newValue.value])
+    {
+        return;
+    }
 
+    let field = newValue.opt.all_fields[newValue.value]
 
+    field.format = getFieldType(field)
 
-
-
-
-
+    return field
+}
 
 guiElements.template_data = function(opt = {})
 {

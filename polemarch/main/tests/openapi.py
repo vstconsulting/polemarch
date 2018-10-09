@@ -1381,8 +1381,6 @@ class OApiTestCase(BaseTestCase):
             param_checked_value = self.get_params_checked_value_by_name(
                 param_obj['name'], checked_values
             )
-            if not param_checked_value:
-                print(index)
             self.check_fields(path, param_obj, **param_checked_value)
 
     def check_request(self, obj, *args, **kwargs):
@@ -1435,14 +1433,14 @@ class OApiTestCase(BaseTestCase):
         for parameter in parameters:
             if parameter['name'] in path_parameters:
                 path_parameters.remove(parameter['name'])
-            else:
+            else:  # nocv
                 msg = 'In \'{path}\'[parameters], have key \'{key}\' ' \
                       'doesn\'t exist in {path}'
                 self.logging(msg, path=path, key=parameter['name'])
         msg = 'In `{path}`[parameters], not enough keys for path'.format(path=path)
         self.assertEqual(len(path_parameters), 0, msg)
 
-    def logging(self, msg, *args, **kwargs):
+    def logging(self, msg, *args, **kwargs):  # nocv
         output_msg = msg.format(*args, **kwargs)
         print(output_msg)
 
