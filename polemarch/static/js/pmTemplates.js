@@ -249,6 +249,11 @@ gui_project_template_option = {
             {
                 let template_data = this.parent_template.model.data
 
+                if(query.data.name)
+                {
+                    query.data.name = query.data.name.replace(/[\s\/]+/g,'_');
+                }
+
                 if(option != query.data.name)
                 {
                     template_data.options[query.data.name] = template_data.options[option];
@@ -258,6 +263,11 @@ gui_project_template_option = {
                 for(let field in query.data)
                 {
                     template_data.options[query.data.name][field] = query.data[field];
+                }
+
+                if(template_data.options[query.data.name].name)
+                {
+                    template_data.options[query.data.name].name.replace(/[\s\/]+/g,'_');
                 }
 
                 return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
@@ -298,9 +308,14 @@ gui_project_template_option = {
             if(query.method == "post")
             {
                 let template_data = this.parent_template.model.data
+                if(query.data.name)
+                {
+                    query.data.name = query.data.name.replace(/[\s\/]+/g,'_');
+                }
                 if(template_data.options[query.data.name])
                 {
-                    query.data.name+=" copy "+Date()
+                    guiPopUp.error('Option with "' + query.data.name + '" name exists already');
+                    return undefined;
                 }
 
                 template_data.options[query.data.name] = query.data
