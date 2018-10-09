@@ -5,8 +5,13 @@ gui_project_template = {
         let arr_data_fields = [];
 
         let template_data = gui_base_object.getValue.apply(this, arguments);
+        let data_field = {};
 
-        let data_field = JSON.parse(template_data.data);
+        if(template_data.data)
+        {
+            data_field = JSON.parse(template_data.data);
+        }
+
         if(template_data.kind.toLowerCase() == 'module')
         {
             arr_data_fields = ['module', 'args', 'inventory', 'group'];
@@ -3351,6 +3356,7 @@ tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
     properties.options.hidden = true;
     properties.options_list.hidden = true;
     properties.data.hidden = true;
+    properties.data.required = false;
 
     properties.inventory = {
         name: 'inventory',
