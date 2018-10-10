@@ -221,7 +221,7 @@ gui_project_template_option = {
     apiGetDataForQuery : function (query, option)
     {
         if(option)
-        {
+        {               
             if(query.method == "get")
             {
                 let res =  {
@@ -236,11 +236,18 @@ gui_project_template_option = {
                 }
 
                 let val = this.parent_template.model.data.options[option];
-                res.data = {
+ 
+                res.data = { }
+                for(let i in gui_project_template_option_Schema)
+                { 
+                    res.data[i] = val[i]
+                }
+                
+                /*res.data = {
                     "id": option,
                     "name": val.name || option,
                     "notes": val.notes
-                }
+                }*/
 
                 return res;
             }
@@ -543,6 +550,69 @@ gui_project_template_option_variables = {
     },
 }
 
+gui_project_template_option_Schema = { 
+    "name": {
+        "title": "Name",
+        "type": "string",
+        "maxLength": 512,
+        "minLength": 1,
+        "gui_links": [],
+        "definition": {},
+        "name": "name",
+        "parent_name_format": "option_name"
+    },
+    "group": {
+        "title": "Group",
+        "type": "string",
+        "maxLength": 512,
+        "minLength": 1,
+        "gui_links": [],
+        "definition": {},
+        "name": "group",
+        "parent_name_format": "option_group",
+        format:"autocomplete",
+        dynamic_properties:{
+            list_obj:projPath + "/group/",
+            value_field:'name',
+            view_field:'name',
+        },
+    },
+    "module": {
+        "title": "Module",
+        "type": "string",
+        "maxLength": 512,
+        "minLength": 1,
+        "gui_links": [],
+        "definition": {},
+        "name": "module",
+        format:"autocomplete",
+        dynamic_properties:{
+            list_obj:projPath + "/module/",
+            value_field:'path',
+            view_field:'path',
+        },
+        "parent_name_format": "option_module"
+    },
+    "args": {
+        "title": "Args",
+        "type": "string",
+        "maxLength": 512,
+        "minLength": 1,
+        "gui_links": [],
+        "definition": {},
+        "name": "args",
+        "parent_name_format": "option_args"
+    },
+    "notes": {
+        "title": "Notes",
+        "type": "string",
+        "format": "textarea",
+        "gui_links": [],
+        "definition": {},
+        "name": "notes",
+        "parent_name_format": "option_notes"
+    },
+}
 
 tabSignal.connect("openapi.schema", function(obj) {
     // Модификация схемы до сохранения в кеш.
@@ -942,6 +1012,9 @@ tabSignal.connect("openapi.schema", function(obj) {
     }
 
 
+    
+    let optionsSchemaNew = $.extend({}, gui_project_template_option_Schema)
+    delete optionsSchemaNew.id
 
     obj.schema.path["/project/{pk}/template/{template_id}/variables/{variables_id}/"] = {
         "level": 7,
@@ -1320,15 +1393,6 @@ tabSignal.connect("openapi.schema", function(obj) {
         "schema": {
             "list": {
                 "fields": {
-                    "id": {
-                        "title": "Id",
-                        "type": "integer",
-                        "readOnly": true,
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "id",
-                        "parent_name_format": "option_id"
-                    },
                     "name": {
                         "title": "Name",
                         "type": "string",
@@ -1444,36 +1508,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                 }
             },
             "new": {
-                "fields": {
-                    "id": {
-                        "title": "Id",
-                        "type": "integer",
-                        "readOnly": true,
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "id",
-                        "parent_name_format": "option_id"
-                    },
-                    "name": {
-                        "title": "Name",
-                        "type": "string",
-                        "maxLength": 512,
-                        "minLength": 1,
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "name",
-                        "parent_name_format": "option_name"
-                    },
-                    "notes": {
-                        "title": "Notes",
-                        "type": "string",
-                        "format": "textarea",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "notes",
-                        "parent_name_format": "option_notes"
-                    },
-                },
+                "fields": optionsSchemaNew,
                 "query_type": "post",
                 "operationId": "project_template_option_add",
                 "responses": {
@@ -1626,104 +1661,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "canEdit": true,
         "schema": {
             "get": {
-                "fields": {
-                    // "id": {
-                    //     "title": "Id",
-                    //     "type": "string",
-                    //     "readOnly": true,
-                    //     "gui_links": [],
-                    //     "definition": {},
-                    //     "name": "id",
-                    //     "parent_name_format": "option_id"
-                    // },
-                    "name": {
-                        "title": "Name",
-                        "type": "string",
-                        "maxLength": 512,
-                        "minLength": 1,
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "name",
-                        "parent_name_format": "option_name",
-                        "readOnly": true
-                    },
-                    "notes": {
-                        "title": "Notes",
-                        "type": "string",
-                        "format": "textarea",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "notes",
-                        "parent_name_format": "option_notes",
-                        "readOnly": true
-                    },
-                    // "owner": {
-                    //     "$ref": "#/definitions/User",
-                    //     "gui_links": [
-                    //         {
-                    //             "prop_name": "definition",
-                    //             "list_name": "list",
-                    //             "type": "list",
-                    //             "$ref": "#/definitions/User"
-                    //         },
-                    //         {
-                    //             "prop_name": "definition",
-                    //             "list_name": "page",
-                    //             "type": "page",
-                    //             "$ref": "#/definitions/User"
-                    //         },
-                    //         {
-                    //             "prop_name": "definition",
-                    //             "list_name": "list",
-                    //             "type": "list",
-                    //             "$ref": "#/definitions/User"
-                    //         },
-                    //         {
-                    //             "prop_name": "definition",
-                    //             "list_name": "page",
-                    //             "type": "page",
-                    //             "$ref": "#/definitions/User"
-                    //         }
-                    //     ],
-                    //     "definition": {
-                    //         "__link__list": "/user/",
-                    //         "__link__page": "/user/{pk}/"
-                    //     },
-                    //     "name": "owner",
-                    //     "title": "Owner",
-                    //     "required": [
-                    //         "username"
-                    //     ],
-                    //     "type": "object",
-                    //     "properties": {
-                    //         "id": {
-                    //             "title": "ID",
-                    //             "type": "integer",
-                    //             "readOnly": true
-                    //         },
-                    //         "username": {
-                    //             "title": "Username",
-                    //             "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
-                    //             "type": "string",
-                    //             "pattern": "^[\\w.@+-]+$",
-                    //             "maxLength": 150,
-                    //             "minLength": 1,
-                    //             "required": true
-                    //         },
-                    //         "is_active": {
-                    //             "title": "Is active",
-                    //             "type": "boolean",
-                    //             "default": true
-                    //         }
-                    //     },
-                    //     "readOnly": true,
-                    //     "definition_name": "User",
-                    //     "definition_ref": "#/definitions/User",
-                    //     "format": "apiObject",
-                    //     "api_original_format": "apiUser",
-                    //     "parent_name_format": "option_owner"
-                    // }
-                },
+                "fields": gui_project_template_option_Schema,
                 "filters": {},
                 "query_type": "get",
                 "operationId": "project_template_option_get",
@@ -1836,102 +1774,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                 }
             },
             "edit": {
-                "fields": {
-                    // "id": {
-                    //     "title": "Id",
-                    //     "type": "string",
-                    //     "readOnly": true,
-                    //     "gui_links": [],
-                    //     "definition": {},
-                    //     "name": "id",
-                    //     "parent_name_format": "option_id"
-                    // },
-                    "name": {
-                        "title": "Name",
-                        "type": "string",
-                        "maxLength": 512,
-                        "minLength": 1,
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "name",
-                        "parent_name_format": "option_name"
-                    },
-                    "notes": {
-                        "title": "Notes",
-                        "type": "string",
-                        "format": "textarea",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "notes",
-                        "parent_name_format": "option_notes"
-                    },
-                    // "owner": {
-                    //     "$ref": "#/definitions/User",
-                    //     "gui_links": [
-                    //         {
-                    //             "prop_name": "definition",
-                    //             "list_name": "list",
-                    //             "type": "list",
-                    //             "$ref": "#/definitions/User"
-                    //         },
-                    //         {
-                    //             "prop_name": "definition",
-                    //             "list_name": "page",
-                    //             "type": "page",
-                    //             "$ref": "#/definitions/User"
-                    //         },
-                    //         {
-                    //             "prop_name": "definition",
-                    //             "list_name": "list",
-                    //             "type": "list",
-                    //             "$ref": "#/definitions/User"
-                    //         },
-                    //         {
-                    //             "prop_name": "definition",
-                    //             "list_name": "page",
-                    //             "type": "page",
-                    //             "$ref": "#/definitions/User"
-                    //         }
-                    //     ],
-                    //     "definition": {
-                    //         "__link__list": "/user/",
-                    //         "__link__page": "/user/{pk}/"
-                    //     },
-                    //     "name": "owner",
-                    //     "title": "Owner",
-                    //     "required": [
-                    //         "username"
-                    //     ],
-                    //     "type": "object",
-                    //     "properties": {
-                    //         "id": {
-                    //             "title": "ID",
-                    //             "type": "integer",
-                    //             "readOnly": true
-                    //         },
-                    //         "username": {
-                    //             "title": "Username",
-                    //             "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
-                    //             "type": "string",
-                    //             "pattern": "^[\\w.@+-]+$",
-                    //             "maxLength": 150,
-                    //             "minLength": 1,
-                    //             "required": true
-                    //         },
-                    //         "is_active": {
-                    //             "title": "Is active",
-                    //             "type": "boolean",
-                    //             "default": true
-                    //         }
-                    //     },
-                    //     "readOnly": true,
-                    //     "definition_name": "User",
-                    //     "definition_ref": "#/definitions/User",
-                    //     "format": "apiObject",
-                    //     "api_original_format": "apiUser",
-                    //     "parent_name_format": "option_owner"
-                    // }
-                },
+                "fields": gui_project_template_option_Schema,
                 "query_type": "patch",
                 "operationId": "project_template_option_edit",
                 "responses": {
