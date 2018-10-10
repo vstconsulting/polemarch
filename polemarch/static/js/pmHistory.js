@@ -13,64 +13,60 @@ gui_history = {
         {
             opt.offset = 0;
         }
-
-        opt.format = 'json';
-
-        var def = new $.Deferred();
-        spajs.ajax.Call({
-            url: hostname + "/api/v2/history/"+item_id+"/lines/",
-            type: "GET",
-            contentType:'application/json',
-            data: opt,
-            success: function(data)
-            { 
-                if(!thisObj.model.lines_data)
-                {
-                    thisObj.model.lines_data = {}
-                }
-                if(!thisObj.model.lines_data.stdout)
-                {
-                    thisObj.model.lines_data.stdout = {}
-                    thisObj.model.lines_data.stdout_count = 0
-                    thisObj.model.lines_data.stdout_maxline = 0
-                    thisObj.model.lines_data.stdout_minline = 999999999
-                }
-
-                thisObj.model.lines_data.stdout_count = data.count;
-                for(var i in data.results)
-                {
-                    var line_number = data.results[i].line_gnumber
-
-                    if(thisObj.model.lines_data.stdout_maxline < line_number)
-                    {
-                        thisObj.model.lines_data.stdout_maxline = line_number;
-                    }
-
-                    if(thisObj.model.lines_data.stdout_minline > line_number)
-                    {
-                        thisObj.model.lines_data.stdout_minline = line_number;
-                    }
-
-                    if(!thisObj.model.lines_data.stdout[line_number])
-                    {
-                        thisObj.model.lines_data.stdout[line_number] = {id:line_number, text:data.results[i].line}
-                    }
-                    else {
-                        thisObj.model.lines_data.stdout[line_number].text = data.results[i].line + thisObj.model.lines_data.stdout[line_number].text
-                    }
-                }
-
-                def.resolve()
-
-            },
-            error:function(e)
-            {
-                console.warn(e)
-                webGui.showErrors(e)
-                def.reject(e)
+ 
+        let query = {
+                method: "get",
+                data_type: ["history", item_id, "lines"], 
+                filters:"limit="+opt.limit+"&offset="+opt.offset
             }
-        });
+             
+        let def = new $.Deferred();
+        $.when(api.query(query)).done(function(data)
+        {
+            data = data.data
+            if(!thisObj.model.lines_data)
+            {
+                thisObj.model.lines_data = {}
+            }
+            if(!thisObj.model.lines_data.stdout)
+            {
+                thisObj.model.lines_data.stdout = {}
+                thisObj.model.lines_data.stdout_count = 0
+                thisObj.model.lines_data.stdout_maxline = 0
+                thisObj.model.lines_data.stdout_minline = 999999999
+            }
+            
+            thisObj.model.lines_data.stdout_count = data.count;
+            for(var i in data.results)
+            {
+                var line_number = data.results[i].line_gnumber
 
+                if(thisObj.model.lines_data.stdout_maxline < line_number)
+                {
+                    thisObj.model.lines_data.stdout_maxline = line_number;
+                }
+
+                if(thisObj.model.lines_data.stdout_minline > line_number)
+                {
+                    thisObj.model.lines_data.stdout_minline = line_number;
+                }
+
+                if(!thisObj.model.lines_data.stdout[line_number])
+                {
+                    thisObj.model.lines_data.stdout[line_number] = {id:line_number, text:data.results[i].line}
+                }
+                else {
+                    thisObj.model.lines_data.stdout[line_number].text = data.results[i].line + thisObj.model.lines_data.stdout[line_number].text
+                }
+            }
+
+            def.resolve()
+        }).fail(function(e){
+            console.warn(e)
+            webGui.showErrors(e)
+            def.reject(e)
+        })
+  
         return def.promise();
     },
 
@@ -388,5 +384,61 @@ tabSignal.connect("openapi.schema.definition.ProjectHistory", addHistoryPrefetch
 
 tabSignal.connect("openapi.schema.definition.History", addSettingsToHistoryListsFields);
 tabSignal.connect("openapi.schema.definition.ProjectHistory", addSettingsToHistoryListsFields);
-
 tabSignal.connect("openapi.schema.definition.OneHistory", addSettingsToOneHistoryFields);
+
+//tabSignal.connect("openapi.schema.definition.History", hideFields);
+
+function hideFields(obj){
+     
+    let properties = obj.definition.properties;
+     
+    if(properties['options']) properties['options'].type = 'hidden';
+    if(properties['raw_args']) properties['raw_args'].type = 'hidden';
+    if(properties['raw_stdout']) properties['raw_stdout'].type = 'hidden';
+    if(properties['raw_inventory']) properties['raw_inventory'].type = 'hidden';
+    if(properties['initiator_type']) properties['initiator_type'].type = 'hidden';
+    
+}
+
+tabSignal.connect("openapi.schema.definition.ProjectHistory", hideFields);
+tabSignal.connect("openapi.schema.definition.OneHistory", hideFields);
+
+
+
+tabSignal.connect("guiList.renderLine.history", function(obj){
+     
+    if(obj.dataLine.line.status != 'RUN' && obj.dataLine.line.status != 'DELAY')
+    {
+        if(obj.dataLine.sublinks_l2['clear'])
+        {
+            obj.dataLine.sublinks_l2['clear'].hidden = false
+        } 
+    }
+    else
+    { 
+        if(obj.dataLine.sublinks_l2['clear'])
+        {
+            obj.dataLine.sublinks_l2['clear'].hidden = true
+        }
+    }
+     
+})
+
+tabSignal.connect("guiList.renderPage.history", function(obj){
+   
+    if(obj.data.status != 'RUN' && obj.data.status != 'DELAY')
+    {
+        if(obj.options.actions['clear'])
+        {
+            obj.options.actions['clear'].hidden = false
+        } 
+    }
+    else
+    {
+        if(obj.options.actions['clear'])
+        {
+            obj.options.actions['clear'].hidden = true
+        } 
+    }
+     
+})
