@@ -6,6 +6,19 @@ import re
 class OApiTestCase(BaseTestCase):
 
     re_path = re.compile(r"(?<={).+?(?=})")
+    pm_filters = [
+        dict(name='id', description=True, required=False, type='string'),
+        dict(name='id__not', description=True, required=False, type='string'),
+    ]
+    pm_name_filter = [
+        dict(name='name', description=True, required=False, type='string'),
+        dict(name='name__not', description=True, required=False, type='string'),
+    ]
+    default_filters = [
+        dict(name='ordering', description=True, required=False, type='string'),
+        dict(name='limit', description=True, required=False, type='integer'),
+        dict(name='offset', description=True, required=False, type='integer'),
+    ]
 
     def test_openapi_schema(self):
         api_version = self._settings('VST_API_VERSION')
@@ -1272,36 +1285,36 @@ class OApiTestCase(BaseTestCase):
         )
         del userSettings
 
-        # Test path responses and schemas
-        default_params = ['ordering', 'limit', 'offset']
-        pm_default_params = ['id', 'name', 'id__not', 'name__not']
-        inv_params = ['variables']
-
-        group = schema['paths']['/group/']
-        self.assertEqual(group['get']['operationId'], 'group_list')
-        self.assertTrue(group['get']['description'])
-        for param in group['get']['parameters']:
-            self.assertIn(param['name'], default_params + pm_default_params + inv_params)
-        self.assertEqual(param['in'], 'query')
-        self.assertEqual(param['required'], False)
-        self.assertIn(param['type'], ['string', 'integer'])
-
-        # Check responses via cycle for path
-        # for key in obj
-
-        response_schema = group['get']['responses']['200']['schema']
-        self.assertEqual(response_schema['required'], ['count', 'results'])
-        self.assertEqual(response_schema['type'], 'object')
-        self.assertEqual(response_schema['properties']['results']['type'], 'array')
-        self.assertEqual(
-            response_schema['properties']['results']['items']['$ref'],
-            '#/definitions/Group'
-        )
-
-        # paths = schema['paths']
-
-        # group_pk_vars = paths['/group/{pk}/variables/']
-        # self.check_variables(group_pk_vars)
+        for path in schema['paths']:
+            p = path.split('/')
+            p = list(filter(bool, p))
+            keys = [
+                'host', 'inventory', 'group', 'variables', 'project',
+                'all_hosts', 'all_groups', 'history', 'playbook',
+                'module', 'team', 'periodic_task', 'hook', 'user',
+                'template'
+            ]
+            if '{' in p[-1]:
+                name = p[-2]
+                parent = p[-4] if len(p) > 4 else p[0]
+                type = '_detail'
+            else:
+                name = p[-1]
+                parent = p[-3] if len(p) > 3 else p[0]
+                type = '_list'
+            if name in keys:
+                if name == 'variables' and parent == 'project':
+                    ref = '#/definitions/ProjectVariable'
+                    getattr(self, 'check_path_' + name + type)(schema, path, ref=ref)
+                elif parent == 'periodic_task':
+                    ref = '#/definitions/PeriodicTaskVariable'
+                    getattr(self, 'check_path_' + name + type)(schema, path, ref=ref)
+                else:
+                    getattr(self, 'check_path_' + name + type)(
+                        schema, path, parent=parent
+                    )
+            else:
+                getattr(self, 'check_path_' + name)(schema, path, parent=parent)
 
     def check_fields(self, objname, obj, *args, **kwargs):
         if args:
@@ -1348,5 +1361,882 @@ class OApiTestCase(BaseTestCase):
         for val in path:
             try:
                 obj = obj[val]
-            except: # nocv
+            except:  # nocv
                 raise Exception('Definition \'#/' + '/'.join(path) + '\' doesn\'t exist')
+
+    def get_params_checked_value_by_name(self, name, checked_value, *args, **kwargs):
+        for index in range(len(checked_value)):
+            if checked_value[index]['name'] == name:
+                return checked_value[index]
+
+    def check_parameters(self, object_parameters, *arg, **kwargs):
+        checked_values = kwargs.pop('params', None)
+        in_values = kwargs.pop('params_in_values', None)
+        path = kwargs.pop('path', None)
+        for index in range(len(object_parameters)):
+            param_obj = object_parameters[index]
+            if object_parameters[index]:
+                self.assertEqual(param_obj['in'], in_values)
+                del param_obj['in']
+            param_checked_value = self.get_params_checked_value_by_name(
+                param_obj['name'], checked_values
+            )
+            self.check_fields(path, param_obj, **param_checked_value)
+
+    def check_request(self, obj, *args, **kwargs):
+        response_code = kwargs.pop('response_code', '200')
+        request_value = kwargs.pop('request_value', None)
+        path = kwargs.pop('name', None)
+        self.assertTrue(request_value, '{} doesn\'t have data for check'.format(obj))
+        schema = kwargs.pop('schema', None)
+        self.assertTrue(schema)
+
+        # Check parameters
+        params = request_value.pop('params', None)
+        params_in_values = kwargs.pop('in_values', None)
+        self.check_parameters(
+            obj['parameters'],
+            params=params, params_in_values=params_in_values, path=path
+        )
+
+        # Check responses
+        responses = request_value.pop('responses', None)
+
+        self.check_fields(path, obj['responses'][response_code], **responses)
+        if response_code != '204':
+            if responses['schema'].get('$ref', None):
+                ref = responses['schema']['$ref']
+            else:
+                ref = responses['schema']['properties']['results']['items']['$ref']
+            self.check_ref(schema, ref)
+
+    def check_path(self, schema, path, requests=None, *args, **kwargs):
+        path_parameters = self.re_path.findall(path)
+        # If detail: `requests`={'GET', 'PUT', 'PATCH', 'DELETE'}
+        # else this list: `requests`={'GET', 'POST'}
+        if not requests:
+            if path_parameters and path.split(path_parameters[-1])[-1] == '}/':
+                requests = dict(get='query', put='body', patch='body', delete='')
+            else:
+                requests = dict(get='query', post='body')
+
+        for request in requests.keys():
+            request_value = kwargs.pop(request+'_value', None)
+            response_code = request_value.pop('response_code', '200')
+            self.check_request(
+                schema['paths'][path][request],
+                schema=schema, name=path, response_code=response_code,
+                request_value=request_value, in_values=requests[request]
+            )
+
+        parameters = schema['paths'][path]['parameters']
+        for parameter in parameters:
+            if parameter['name'] in path_parameters:
+                path_parameters.remove(parameter['name'])
+            else:  # nocv
+                msg = 'In \'{path}\'[parameters], have key \'{key}\' ' \
+                      'doesn\'t exist in {path}'
+                self.logging(msg, path=path, key=parameter['name'])
+        msg = 'In `{path}`[parameters], not enough keys for path'.format(path=path)
+        self.assertEqual(len(path_parameters), 0, msg)
+
+    def logging(self, msg, *args, **kwargs):  # nocv
+        output_msg = msg.format(*args, **kwargs)
+        print(output_msg)
+
+    def check_path_variables_list(self, schema, path, ref=None, *arg, **kwargs):
+        if not ref:
+            ref = '#/definitions/InventoryVariable'
+        # Get data
+        get_params = [
+            dict(name='key', description=True, required=False, type='string'),
+            dict(name='value', description=True, required=False, type='string'),
+        ] + self.pm_filters + self.default_filters
+        get_schema = dict(
+            required=['count', 'results'],
+            properties=dict(
+                count=dict(type='integer'), next=dict(type='string', format='uri'),
+                previous=dict(type='string', format='uri'),
+                results=dict(type='array', items={'$ref': ref})
+            ),
+            type='object'
+        )
+        get_responses = dict(description=True, schema=get_schema)
+        get_value = dict(
+            responses=get_responses, params=get_params, response_code='200'
+        )
+
+        # Post data
+        post_params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        post_response = dict(
+            description=True, schema={'$ref': ref}
+        )
+        post_value = dict(
+            responses=post_response, params=post_params, response_code='201'
+        )
+        self.check_path(schema, path, post_value=post_value, get_value=get_value)
+
+    def check_path_variables_detail(self, schema, path, ref=None, *arg, **kwargs):
+        if not ref:
+            ref = '#/definitions/InventoryVariable'
+        # Get data
+        params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        responses = dict(description=True, schema={'$ref': ref})
+        get_value = dict(responses=responses, params=[], response_code='200')
+        put_value = dict(responses=responses, params=params, response_code='200')
+        patch_value = dict(responses=responses, params=params, response_code='200')
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
+        self.check_path(
+            schema, path, get_value=get_value, put_value=put_value,
+            patch_value=patch_value, delete_value=delete_value
+        )
+
+    def check_path_host_list(self, schema, path, *args, **kwargs):
+        get_params = [
+            dict(name='type', description=True, required=False, type='string'),
+            dict(name='variables', description=True, required=False, type='string'),
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        get_schema = dict(
+            required=['count', 'results'],
+            properties=dict(
+                count=dict(type='integer'), next=dict(type='string', format='uri'),
+                previous=dict(type='string', format='uri'),
+                results=dict(type='array', items={'$ref': '#/definitions/Host'})
+            ),
+            type='object'
+        )
+        get_responses = dict(description=True, schema=get_schema)
+        get_value = dict(
+            responses=get_responses, params=get_params, response_code='200'
+        )
+
+        ref = '#/definitions/OneHost'
+        post_params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        post_response = dict(
+            description=True, schema={'$ref': ref}
+        )
+        post_value = dict(
+            responses=post_response, params=post_params, response_code='201'
+        )
+        self.check_path(schema, path, post_value=post_value, get_value=get_value)
+
+    def check_path_host_detail(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/OneHost'
+        # Get data
+        params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        responses = dict(description=True, schema={'$ref': ref})
+
+        get_value = dict(responses=responses, params=[], response_code='200')
+        put_value = dict(responses=responses, params=params, response_code='200')
+        patch_value = dict(responses=responses, params=params, response_code='200')
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
+
+        self.check_path(
+            schema, path, get_value=get_value, put_value=put_value,
+            patch_value=patch_value, delete_value=delete_value
+        )
+
+    def check_path_group_list(self, schema, path, *arg, **kwargs):
+        get_params = [
+            dict(name='variables', description=True, required=False, type='string'),
+            ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        get_schema = dict(
+            required=['count', 'results'],
+            properties=dict(
+                count=dict(type='integer'), next=dict(type='string', format='uri'),
+                previous=dict(type='string', format='uri'),
+                results=dict(type='array', items={'$ref': '#/definitions/Group'})
+            ),
+            type='object'
+        )
+        get_responses = dict(description=True, schema=get_schema)
+        get_value = dict(
+            responses=get_responses, params=get_params, response_code='200'
+        )
+
+        ref = '#/definitions/GroupCreateMaster'
+        post_params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        post_response = dict(
+            description=True, schema={'$ref': ref}
+        )
+        post_value = dict(
+            responses=post_response, params=post_params, response_code='201'
+        )
+        self.check_path(schema, path, post_value=post_value, get_value=get_value)
+
+    def check_path_group_detail(self, schema, path, *arg, **kwargs):
+        ref = '#/definitions/OneGroup'
+        # Get data
+        params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        responses = dict(description=True, schema={'$ref': ref})
+
+        get_value = dict(responses=responses, params=[], response_code='200')
+        put_value = dict(responses=responses, params=params, response_code='200')
+        patch_value = dict(responses=responses, params=params, response_code='200')
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
+
+        self.check_path(
+            schema, path, get_value=get_value, put_value=put_value,
+            patch_value=patch_value, delete_value=delete_value
+        )
+
+    def check_path_inventory_list(self, schema, path, *arg, **kwargs):
+        get_params = [
+            dict(name='variables', description=True, required=False, type='string'),
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        get_schema = dict(
+            required=['count', 'results'],
+            properties=dict(
+                count=dict(type='integer'), next=dict(type='string', format='uri'),
+                previous=dict(type='string', format='uri'),
+                results=dict(type='array', items={'$ref': '#/definitions/Inventory'})
+            ),
+            type='object'
+        )
+        get_responses = dict(description=True, schema=get_schema)
+        get_value = dict(
+            responses=get_responses, params=get_params, response_code='200'
+        )
+
+        ref = '#/definitions/OneInventory'
+        post_params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        post_response = dict(
+            description=True, schema={'$ref': ref}
+        )
+        post_value = dict(
+            responses=post_response, params=post_params, response_code='201'
+        )
+        self.check_path(schema, path, post_value=post_value, get_value=get_value)
+
+    def check_path_inventory_detail(self, schema, path, *arg, **kwargs):
+        ref = '#/definitions/OneInventory'
+        # Get data
+        params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        responses = dict(description=True, schema={'$ref': ref})
+
+        get_value = dict(responses=responses, params=[], response_code='200')
+        put_value = dict(responses=responses, params=params, response_code='200')
+        patch_value = dict(responses=responses, params=params, response_code='200')
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
+
+        self.check_path(
+            schema, path, get_value=get_value, put_value=put_value,
+            patch_value=patch_value, delete_value=delete_value
+        )
+
+    def check_path_project_list(self, schema, path, *arg, **kwargs):
+        get_params = [
+            dict(name='status', description=True, required=False, type='string'),
+            dict(name='variables', description=True, required=False, type='string'),
+            dict(name='status__not', description=True, required=False, type='string'),
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        get_schema = dict(
+            required=['count', 'results'],
+            properties=dict(
+                count=dict(type='integer'), next=dict(type='string', format='uri'),
+                previous=dict(type='string', format='uri'),
+                results=dict(type='array', items={'$ref': '#/definitions/Project'})
+            ),
+            type='object'
+        )
+        get_responses = dict(description=True, schema=get_schema)
+        get_value = dict(
+            responses=get_responses, params=get_params, response_code='200'
+        )
+
+        ref = '#/definitions/ProjectCreateMaster'
+        post_params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        post_response = dict(
+            description=True, schema={'$ref': ref}
+        )
+        post_value = dict(
+            responses=post_response, params=post_params, response_code='201'
+        )
+        self.check_path(schema, path, post_value=post_value, get_value=get_value)
+
+    def check_path_project_detail(self, schema, path, *arg, **kwargs):
+        ref = '#/definitions/OneProject'
+        # Get data
+        params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        responses = dict(description=True, schema={'$ref': ref})
+
+        get_value = dict(responses=responses, params=[], response_code='200')
+        put_value = dict(responses=responses, params=params, response_code='200')
+        patch_value = dict(responses=responses, params=params, response_code='200')
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
+
+        self.check_path(
+            schema, path, get_value=get_value, put_value=put_value,
+            patch_value=patch_value, delete_value=delete_value
+        )
+
+    def check_path_copy(self, schema, path, *args, **kwargs):
+        parent = kwargs.pop('parent', None)
+        ref = '#/definitions/' + parent.capitalize()
+        params = [
+            dict(name='data', required=True, schema={'$ref': ref})
+        ]
+        responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(responses=responses, params=params, response_code='201')
+
+        self.check_path(schema, path, requests=dict(post='body'), post_value=post_value)
+
+    def check_path_set_owner(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/SetOwner'
+
+        params = [dict(name='data', required=True, schema={'$ref': ref})]
+        responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(responses=responses, params=params, response_code='201')
+
+        self.check_path(schema, path, requests=dict(post='body'), post_value=post_value)
+
+    def check_path_all_hosts_list(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/Host'
+
+        params = [
+            dict(name='type', description=True, required=False, type='string'),
+            dict(name='variables', description=True, required=False, type='string'),
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        responses = dict(
+            description=True,
+            schema=dict(
+                required=['count', 'results'], type='object',
+                properties=dict(
+                    count=dict(type='integer'),
+                    next=dict(type='string', format='uri'),
+                    previous=dict(type='string', format='uri'),
+                    results=dict(type='array', items={'$ref': ref})
+                )
+            )
+        )
+        get_value = dict(responses=responses, params=params, response_code='200')
+        self.check_path(schema, path, requests=dict(get='query'), get_value=get_value)
+
+    def check_path_all_hosts_detail(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/OneHost'
+
+        responses = dict(description=True, schema={'$ref': ref})
+        get_value = dict(responses=responses, params=[], response_code='200')
+        self.check_path(schema, path, requests=dict(get='query'), get_value=get_value)
+
+    def check_path_all_groups_list(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/Group'
+
+        params = [
+            dict(name='variables', description=True, required=False, type='string'),
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        responses = dict(
+            description=True,
+            schema=dict(
+                required=['count', 'results'], type='object',
+                properties=dict(
+                    count=dict(type='integer'),
+                    next=dict(type='string', format='uri'),
+                    previous=dict(type='string', format='uri'),
+                    results=dict(type='array', items={'$ref': ref})
+                )
+            )
+        )
+        get_value = dict(responses=responses, params=params, response_code='200')
+        self.check_path(schema, path, requests=dict(get='query'), get_value=get_value)
+
+    def check_path_all_groups_detail(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/OneGroup'
+
+        responses = dict(description=True, schema={'$ref': ref})
+        get_value = dict(responses=responses, params=[], response_code='200')
+        self.check_path(schema, path, requests=dict(get='query'), get_value=get_value)
+
+    def check_path_execute_playbook(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/AnsiblePlaybook'
+
+        params = [dict(name='data', required=True, schema={'$ref': ref})]
+
+        ref = '#/definitions/ExecuteResponse'
+        responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(responses=responses, params=params, response_code='201')
+        self.check_path(schema, path, requests=dict(post='body'), post_value=post_value)
+
+    def check_path_history_list(self, schema, path, *args, **kwargs):
+        parent = kwargs.pop('parent', None)
+        if parent == 'history':
+            ref = '#/definitions/History'
+        else:
+            ref = '#/definitions/{}History'.format(parent.capitalize())
+
+        params = [
+            dict(name='mode', description=True, required=False, type='string'),
+            dict(name='kind', description=True, required=False, type='string'),
+            dict(name='status', description=True, required=False, type='string'),
+            dict(name='older', description=True, required=False, type='string'),
+            dict(name='newer', description=True, required=False, type='string'),
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        responses = dict(
+            description=True,
+            schema=dict(
+                required=['count', 'results'], type='object',
+                properties=dict(
+                    count=dict(type='integer'), next=dict(type='string', format='uri'),
+                    previous=dict(type='string', format='uri'),
+                    results=dict(type='array', items={'$ref': ref})
+                )
+            )
+        )
+        get_value = dict(params=params, responses=responses, response_code='200')
+        self.check_path(schema, path, requests=dict(get='query'), get_value=get_value)
+
+    def check_path_history_detail(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/OneHistory'
+        responses = dict(description=True, schema={'$ref': ref})
+
+        get_value = dict(params=[], responses=responses, response_code='200')
+        self.check_path(schema, path, requests=dict(get='query'), get_value=get_value)
+
+    def check_path_settings(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/UserSettings'
+
+        get_responses = dict(description=True, schema={'$ref': ref})
+        get_value = dict(params=[], responses=get_responses, response_code='200')
+
+        post_params = [
+            dict(name='data', required=True, schema={'$ref': ref})
+        ]
+        post_responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(
+            params=post_params, responses=post_responses, response_code='201'
+        )
+        self.check_path(
+            schema, path, requests=dict(get='query', post='body'),
+            get_value=get_value, post_value=post_value
+        )
+
+    def check_path_playbook_list(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/Playbook'
+
+        params = [
+            dict(name='playbook', description=True, required=False, type='string'),
+            dict(name='playbook__not', description=True, required=False, type='string'),
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        responses = dict(
+            description=True,
+            schema=dict(
+                required=['count', 'results'], type='object',
+                properties=dict(
+                    count=dict(type='integer'), next=dict(type='string', format='uri'),
+                    previous=dict(type='string', format='uri'),
+                    results=dict(type='array', items={'$ref': ref})
+                )
+            )
+        )
+        get_value = dict(responses=responses, params=params, response_code='200')
+        self.check_path(schema, path, requests=dict(get='query'), get_value=get_value)
+
+    def check_path_playbook_detail(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/OnePlaybook'
+
+        responses = dict(description=True, schema={'$ref': ref})
+        get_value = dict(params=[], responses=responses, response_code='200')
+        self.check_path(schema, path, requests=dict(get='query'), get_value=get_value)
+
+    def check_path_sync(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/Empty'
+        params = [dict(name='data', required=True, schema={'$ref': ref})]
+        ref = '#/definitions/ActionResponse'
+        responses = dict(description=True, schema={'$ref': ref})
+
+        post_value = dict(responses=responses, params=params, response_code='200')
+        self.check_path(schema, path, requests=dict(post='body'), post_value=post_value)
+
+    def check_path_hook_list(self, schema, path, *args, **kwars):
+        ref = '#/definitions/Hook'
+
+        get_params = [
+            dict(name='type', description=True, required=False, type='string'),
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        get_responses = dict(
+            description=True,
+            schema=dict(
+                required=['count', 'results'], type='object',
+                properties=dict(
+                    count=dict(type='integer'), next=dict(type='string', format='uri'),
+                    previous=dict(type='string', format='uri'),
+                    results=dict(type='array', items={'$ref': ref})
+                )
+            )
+        )
+        get_value = dict(responses=get_responses, params=get_params, response_code='200')
+
+        post_params = [
+            dict(name='data', required=True, schema={'$ref': ref})
+        ]
+        post_responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(
+            responses=post_responses, params=post_params, response_code='201'
+        )
+        self.check_path(
+            schema, path, requests=dict(get='query', post='body'), post_value=post_value,
+            get_value=get_value
+        )
+
+    def check_path_hook_detail(self, schema, path, *arg, **kwargs):
+        ref = '#/definitions/Hook'
+        # Get data
+        params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        responses = dict(description=True, schema={'$ref': ref})
+
+        get_value = dict(responses=responses, params=[], response_code='200')
+        put_value = dict(responses=responses, params=params, response_code='200')
+        patch_value = dict(responses=responses, params=params, response_code='200')
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
+
+        self.check_path(
+            schema, path, get_value=get_value, put_value=put_value,
+            patch_value=patch_value, delete_value=delete_value
+        )
+
+    def check_path_execute_module(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/AnsibleModule'
+
+        params = [
+            dict(name='data', required=True, schema={'$ref': ref})
+        ]
+        ref = '#/definitions/ExecuteResponse'
+        responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(responses=responses, params=params, response_code='201')
+        self.check_path(schema, path, requests=dict(post='body'), post_value=post_value)
+
+    def check_path_module_list(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/Module'
+
+        params = [
+            dict(name='path', description=True, required=False, type='string'),
+            dict(name='path__not', description=True, required=False, type='string'),
+        ] + self.default_filters
+        responses = dict(
+            description=True,
+            schema=dict(
+                required=['count', 'results'], type='object',
+                properties=dict(
+                    count=dict(type='integer'),
+                    next=dict(type='string', format='uri'),
+                    previous=dict(type='string', format='uri'),
+                    results=dict(type='array', items={'$ref': ref})
+                )
+            )
+        )
+        get_value = dict(params=params, responses=responses, response_code='200')
+        self.check_path(schema, path, requests=dict(get='query'), get_value=get_value)
+
+    def check_path_module_detail(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/OneModule'
+
+        responses = dict(description=True, schema={'$ref': ref})
+        get_value = dict(params=[], responses=responses, response_code='200')
+        self.check_path(schema, path, requests=dict(get='query'), get_value=get_value)
+
+    def check_path_cancel(self, schema, path, *arg, **kwargs):
+        ref = '#/definitions/ActionResponse'
+
+        params = [
+            dict(name='data', required=True, schema={'$ref': '#/definitions/Empty'})
+        ]
+        responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(responses=responses, params=params, response_code='200')
+        self.check_path(schema, path, requests=dict(post='body'), post_value=post_value)
+
+    def check_path_change_password(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/ChangePassword'
+
+        params = [
+            dict(name='data', required=True, schema={'$ref': ref})
+        ]
+        responses = dict(description=True, schema={'$ref': ref})
+
+        post_value = dict(responses=responses, params=params, response_code='201')
+        self.check_path(schema, path, requests=dict(post='body'), post_value=post_value)
+
+    def check_path_user_list(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/User'
+
+        get_params = [
+            dict(name='username', description=True, required=False, type='string'),
+            dict(name='is_active', description=True, required=False, type='string'),
+            dict(name='first_name', description=True, required=False, type='string'),
+            dict(name='last_name', description=True, required=False, type='string'),
+            dict(name='email', description=True, required=False, type='string'),
+            dict(name='username__not', description=True, required=False, type='string'),
+        ] + self.pm_filters + self.default_filters
+        get_responses = dict(
+            description=True,
+            schema=dict(
+                required=['count', 'results'], type='object',
+                properties=dict(
+                    count=dict(type='integer'),
+                    next=dict(type='string', format='uri'),
+                    previous=dict(type='string', format='uri'),
+                    results=dict(type='array', items={'$ref': ref})
+                )
+            )
+        )
+        get_value = dict(responses=get_responses, params=get_params, response_code='200')
+
+        ref = '#/definitions/CreateUser'
+        post_params = [
+            dict(name='data', required=True, schema={'$ref': ref})
+        ]
+        post_responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(
+            responses=post_responses, params=post_params, response_code='201'
+        )
+
+        self.check_path(
+            schema, path, requests=dict(get='query', post='body'),
+            post_value=post_value, get_value=get_value
+        )
+
+    def check_path_user_detail(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/OneUser'
+        # Get data
+        params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        responses = dict(description=True, schema={'$ref': ref})
+
+        get_value = dict(responses=responses, params=[], response_code='200')
+        put_value = dict(responses=responses, params=params, response_code='200')
+        patch_value = dict(responses=responses, params=params, response_code='200')
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
+
+        self.check_path(
+            schema, path, get_value=get_value, put_value=put_value,
+            patch_value=patch_value, delete_value=delete_value
+        )
+
+    def check_path_execute(self, schema, path, *args, **kwargs):
+        parent = kwargs.pop('parent', None)
+        if parent == 'template':
+            ref = '#/definitions/TemplateExec'
+        else:
+            ref = '#/definitions/Empty'
+
+        params = [
+            dict(name='data', required=True, schema={'$ref': ref})
+        ]
+
+        ref = '#/definitions/ExecuteResponse'
+        responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(responses=responses, params=params, response_code='201')
+        self.check_path(schema, path, requests=dict(post='body'), post_value=post_value)
+
+    def check_path_team_list(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/Team'
+
+        get_params = [] + self.pm_filters + self.pm_name_filter + self.default_filters
+        get_responses = dict(
+            description=True,
+            schema=dict(
+                required=['count', 'results'], type='object',
+                properties=dict(
+                    count=dict(type='integer'),
+                    next=dict(type='string', format='uri'),
+                    previous=dict(type='string', format='uri'),
+                    results=dict(type='array', items={'$ref': ref})
+                )
+            )
+        )
+        get_value = dict(params=get_params, responses=get_responses, response_code='200')
+
+        ref = '#/definitions/OneTeam'
+        post_params = [
+            dict(name='data', required=True, schema={'$ref': ref})
+        ]
+        post_responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(
+            params=post_params, responses=post_responses, response_code='201'
+        )
+
+        self.check_path(
+            schema, path, requests=dict(get='query', post='body'),
+            post_value=post_value, get_value=get_value
+        )
+
+    def check_path_team_detail(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/OneTeam'
+        # Get data
+        params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        responses = dict(description=True, schema={'$ref': ref})
+
+        get_value = dict(responses=responses, params=[], response_code='200')
+        put_value = dict(responses=responses, params=params, response_code='200')
+        patch_value = dict(responses=responses, params=params, response_code='200')
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
+
+        self.check_path(
+            schema, path, get_value=get_value, put_value=put_value,
+            patch_value=patch_value, delete_value=delete_value
+        )
+
+    def check_path_facts(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/Data'
+
+        responses = dict(description=True, schema={'$ref': ref})
+        get_value = dict(responses=responses, params=[], response_code='200')
+        self.check_path(schema, path, requests=dict(get='query'), get_value=get_value)
+
+    def check_path_periodic_task_list(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/Periodictask'
+
+        get_params = [
+            dict(name='mode', description=True, required=False, type='string'),
+            dict(name='kind', description=True, required=False, type='string'),
+            dict(name='type', description=True, required=False, type='string'),
+            dict(name='template', description=True, required=False, type='number'),
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        get_responses = dict(
+            description=True,
+            schema=dict(
+                required=['count', 'results'], type='object',
+                properties=dict(
+                    count=dict(type='integer'),
+                    next=dict(type='string', format='uri'),
+                    previous=dict(type='string', format='uri'),
+                    results=dict(type='array', items={'$ref': ref})
+                )
+            )
+        )
+
+        get_value = dict(responses=get_responses, params=get_params, response_code='200')
+
+        ref = '#/definitions/OnePeriodictask'
+        post_params = [
+            dict(name='data', required=True, schema={'$ref': ref})
+        ]
+        post_responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(
+            responses=post_responses, params=post_params, response_code='201'
+        )
+        self.check_path(
+            schema, path, requests=dict(get='query', post='body'),
+            post_value=post_value, get_value=get_value
+        )
+
+    def check_path_periodic_task_detail(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/OnePeriodictask'
+        # Get data
+        params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        responses = dict(description=True, schema={'$ref': ref})
+
+        get_value = dict(responses=responses, params=[], response_code='200')
+        put_value = dict(responses=responses, params=params, response_code='200')
+        patch_value = dict(responses=responses, params=params, response_code='200')
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
+
+        self.check_path(
+            schema, path, get_value=get_value, put_value=put_value,
+            patch_value=patch_value, delete_value=delete_value
+        )
+
+    def check_path_clear(self, schema, path, *args, **kwargs):
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
+        self.check_path(schema, path, requests=dict(delete=''), delete_value=delete_value)
+
+    def check_path_template_list(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/Template'
+
+        get_params = [
+            dict(name='kind', description=True, required=False, type='string'),
+            dict(name='inventory', description=True, required=False, type='string'),
+        ] + self.pm_filters + self.pm_name_filter + self.default_filters
+        get_responses = dict(
+            description=True,
+            schema=dict(
+                required=['count', 'results'], type='object',
+                properties=dict(
+                    count=dict(type='integer'),
+                    next=dict(type='string', format='uri'),
+                    previous=dict(type='string', format='uri'),
+                    results=dict(type='array', items={'$ref': ref})
+                )
+            )
+        )
+
+        get_value = dict(responses=get_responses, params=get_params, response_code='200')
+
+        ref = '#/definitions/OneTemplate'
+        post_params = [
+            dict(name='data', required=True, schema={'$ref': ref})
+        ]
+        post_responses = dict(description=True, schema={'$ref': ref})
+        post_value = dict(
+            responses=post_responses, params=post_params, response_code='201'
+        )
+        self.check_path(
+            schema, path, requests=dict(get='query', post='body'),
+            post_value=post_value, get_value=get_value
+        )
+
+    def check_path_template_detail(self, schema, path, *args, **kwargs):
+        ref = '#/definitions/OneTemplate'
+        # Get data
+        params = [dict(
+            name='data', required=True, schema={'$ref': ref}
+        )]
+        responses = dict(description=True, schema={'$ref': ref})
+
+        get_value = dict(responses=responses, params=[], response_code='200')
+        put_value = dict(responses=responses, params=params, response_code='200')
+        patch_value = dict(responses=responses, params=params, response_code='200')
+        delete_value = dict(
+            responses=dict(description=True), params=[], response_code='204'
+        )
+
+        self.check_path(
+            schema, path, get_value=get_value, put_value=put_value,
+            patch_value=patch_value, delete_value=delete_value
+        )
