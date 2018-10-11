@@ -62,7 +62,7 @@ gui_project_template = {
 gui_project_template_variables = {
 
     apiGetDataForQuery : function (query, variable)
-    {
+    { 
         if(variable)
         {
             if(query.method == "get")
@@ -166,7 +166,13 @@ gui_project_template_variables = {
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
-            def.resolve(this.apiGetDataForQuery(query, variable))
+            
+            $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{ 
+                def.resolve(d) 
+            }).fail((e) =>{
+                def.reject(e);
+            })
+              
         }).fail((e) =>{
             def.reject(e);
         })
@@ -219,7 +225,7 @@ gui_project_template_variables = {
 gui_project_template_option = {
 
     apiGetDataForQuery : function (query, option)
-    {
+    { 
         if(option)
         {               
             if(query.method == "get")
@@ -343,7 +349,13 @@ gui_project_template_option = {
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
-            def.resolve(this.apiGetDataForQuery(query, option))
+            
+            $.when(this.apiGetDataForQuery(query, option)).done((d) =>{ 
+                def.resolve(d) 
+            }).fail((e) =>{
+                def.reject(e);
+            })
+            
         }).fail((e) =>{
             def.reject(e);
         })
@@ -396,7 +408,7 @@ gui_project_template_option = {
 gui_project_template_option_variables = {
 
     apiGetDataForQuery : function (query, variable)
-    {
+    { 
         if(variable)
         {
             if(query.method == "get")
@@ -500,7 +512,13 @@ gui_project_template_option_variables = {
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
-            def.resolve(this.apiGetDataForQuery(query, variable))
+          
+            $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{ 
+                def.resolve(d) 
+            }).fail((e) =>{
+                def.reject(e);
+            })
+            
         }).fail((e) =>{
             def.reject(e);
         })
@@ -614,6 +632,111 @@ gui_project_template_option_Schema = {
     },
 }
 
+gui_project_template_option_variables_fields_Schema = {
+    "key": {
+        "title": "Key",
+        "type": "dynamic",
+        "dynamic_properties": {},
+        "required": true,
+        "__func__onInit": "TemplateVariable_key_onInit",
+        "gui_links": [],
+        "definition": {},
+        "name": "key",
+        "parent_name_format": "variables_key"
+    },
+    "value": {
+        "title": "Value",
+        "type": "dynamic",
+        "dynamic_properties": {"__func__callback": "TemplateVariable_value_callback",},
+        "required": true, 
+        "default": "",
+        "gui_links": [],
+        "definition": {},
+        "name": "value",
+        "parent_name_format": "variables_value",
+        "parent_field":"key"
+    }
+}
+
+let api_error_responses = {
+    "400": {
+        "description": "Validation error or some data error.",
+        "schema": {
+            "required": [
+                "detail"
+            ],
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "title": "Detail",
+                    "type": "string",
+                    "minLength": 1,
+                    "required": true
+                }
+            },
+            "definition_name": "Error",
+            "definition_ref": "#/definitions/Error"
+        }
+    },
+    "401": {
+        "description": "Unauthorized access error.",
+        "schema": {
+            "required": [
+                "detail"
+            ],
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "title": "Detail",
+                    "type": "string",
+                    "minLength": 1,
+                    "required": true
+                }
+            },
+            "definition_name": "Error",
+            "definition_ref": "#/definitions/Error"
+        }
+    },
+    "403": {
+        "description": "Permission denied error.",
+        "schema": {
+            "required": [
+                "detail"
+            ],
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "title": "Detail",
+                    "type": "string",
+                    "minLength": 1,
+                    "required": true
+                }
+            },
+            "definition_name": "Error",
+            "definition_ref": "#/definitions/Error"
+        }
+    },
+    "404": {
+        "description": "Not found error.",
+        "schema": {
+            "required": [
+                "detail"
+            ],
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "title": "Detail",
+                    "type": "string",
+                    "minLength": 1,
+                    "required": true
+                }
+            },
+            "definition_name": "Error",
+            "definition_ref": "#/definitions/Error"
+        }
+    }
+} 
+
 tabSignal.connect("openapi.schema", function(obj) {
     // Модификация схемы до сохранения в кеш.
     obj.schema.path["/project/{pk}/template/{template_id}/variables/"] = {
@@ -629,7 +752,6 @@ tabSignal.connect("openapi.schema", function(obj) {
             "put": "",
             "post": "new",
             "delete": "",
-            // "new": "post"
         },
         "buttons": [],
         "short_name": "project/template/variables",
@@ -644,77 +766,8 @@ tabSignal.connect("openapi.schema", function(obj) {
         "canCreate": true,
         "schema": {
             "list": {
-                "fields": {
-                    // "id": {
-                    //     "title": "Id",
-                    //     "type": "string",
-                    //     "readOnly": true,
-                    //     "gui_links": [],
-                    //     "definition": {},
-                    //     "name": "id",
-                    //     "parent_name_format": "variables_id"
-                    // },
-                    "key": {
-                        "title": "Key",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__onInit": "TemplateVariable_key_onInit",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "key",
-                        "parent_name_format": "variables_key"
-                    },
-                    "value": {
-                        "title": "Value",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__callback": "TemplateVariable_value_callback",
-                        "default": "",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "value",
-                        "parent_name_format": "variables_value"
-                    }
-                },
-                "filters": {
-                    // "0": {
-                    //     "name": "id",
-                    //     "in": "query",
-                    //     "description": "A unique integer value (or comma separated list) identifying this instance.",
-                    //     "required": false,
-                    //     "type": "string"
-                    // },
-                    "0": {
-                        "name": "key",
-                        "in": "query",
-                        "description": "A key name string value (or comma separated list) of instance.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    "1": {
-                        "name": "value",
-                        "in": "query",
-                        "description": "A value of instance.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    // "3": {
-                    //     "name": "id__not",
-                    //     "in": "query",
-                    //     "description": "A unique integer value (or comma separated list) identifying this instance.",
-                    //     "required": false,
-                    //     "type": "string"
-                    // },
-                    "2": {
-                        "name": "ordering",
-                        "in": "query",
-                        "description": "Which field to use when ordering the results.",
-                        "required": false,
-                        "type": "string"
-                    }
-                },
+                "fields": gui_project_template_option_variables_fields_Schema,
+                "filters": { },
                 "query_type": "get",
                 "operationId": "project_template_variables_list",
                 "responses": {
@@ -725,153 +778,19 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": {
-                                // "id": {
-                                //     "title": "Id",
-                                //     "type": "integer",
-                                //     "readOnly": true
-                                // },
-                                "key": {
-                                    "title": "Key",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__onInit": "TemplateVariable_key_onInit",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "key",
-                                    "parent_name_format": "variables_key"
-                                },
-                                "value": {
-                                    "title": "Value",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__callback": "TemplateVariable_value_callback",
-                                    "default": "",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "value",
-                                    "parent_name_format": "variables_value"
-                                }
-                            },
+                            "properties": gui_project_template_option_variables_fields_Schema,
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             },
             "new": {
-                "fields": {
-                    // "id": {
-                    //     "title": "Id",
-                    //     "type": "string",
-                    //     "readOnly": true,
-                    //     "gui_links": [],
-                    //     "definition": {},
-                    //     "name": "id",
-                    //     "parent_name_format": "variables_id"
-                    // },
-                    "key": {
-                        "title": "Key",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__onInit": "TemplateVariable_key_onInit",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "key",
-                        "parent_name_format": "variables_key"
-                    },
-                    "value": {
-                        "title": "Value",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__callback": "TemplateVariable_value_callback",
-                        "default": "",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "value",
-                        "parent_name_format": "variables_value"
-                    }
-                },
+                "fields": gui_project_template_option_variables_fields_Schema,
                 "query_type": "post",
                 "operationId": "project_template_variables_add",
                 "responses": {
@@ -882,116 +801,15 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": {
-                                // "id": {
-                                //     "title": "Id",
-                                //     "type": "string",
-                                //     "readOnly": true
-                                // },
-                                "key": {
-                                    "title": "Key",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__onInit": "TemplateVariable_key_onInit",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "key",
-                                    "parent_name_format": "variables_key"
-                                },
-                                "value": {
-                                    "title": "Value",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__callback": "TemplateVariable_value_callback",
-                                    "default": "",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "value",
-                                    "parent_name_format": "variables_value"
-                                }
-                            },
+                            "properties": gui_project_template_option_variables_fields_Schema,
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             }
         },
@@ -1010,12 +828,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "__link__parent": "/project/{pk}/template/{template_id}/",
         "parent_path": "/project/{pk}/template/{template_id}/"
     }
-
-
-    
-    let optionsSchemaNew = $.extend({}, gui_project_template_option_Schema)
-    delete optionsSchemaNew.id
-
+ 
     obj.schema.path["/project/{pk}/template/{template_id}/variables/{variables_id}/"] = {
         "level": 7,
         "path": "/project/{pk}/template/{template_id}/variables/{variables_id}/",
@@ -1043,42 +856,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "canEdit": true,
         "schema": {
             "get": {
-                "fields": {
-                    // "id": {
-                    //     "title": "Id",
-                    //     "type": "string",
-                    //     "readOnly": true,
-                    //     "gui_links": [],
-                    //     "definition": {},
-                    //     "name": "id",
-                    //     "parent_name_format": "variables_id"
-                    // },
-                    "key": {
-                        "title": "Key",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__onInit": "TemplateVariable_key_onInit",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "key",
-                        "parent_name_format": "variables_key",
-                        "readOnly": true
-                    },
-                    "value": {
-                        "title": "Value",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__callback": "TemplateVariable_value_callback",
-                        "default": "",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "value",
-                        "parent_name_format": "variables_value",
-                        "readOnly": true
-                    }
-                },
+                "fields": gui_project_template_option_variables_fields_Schema,
                 "filters": {},
                 "query_type": "get",
                 "operationId": "project_template_variables_get",
@@ -1090,153 +868,19 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": {
-                                // "id": {
-                                //     "title": "Id",
-                                //     "type": "string",
-                                //     "readOnly": true
-                                // },
-                                "key": {
-                                    "title": "Key",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__onInit": "TemplateVariable_key_onInit",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "key",
-                                    "parent_name_format": "variables_key"
-                                },
-                                "value": {
-                                    "title": "Value",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__callback": "TemplateVariable_value_callback",
-                                    "default": "",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "value",
-                                    "parent_name_format": "variables_value"
-                                }
-                            },
+                            "properties": gui_project_template_option_variables_fields_Schema,
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             },
             "edit": {
-                "fields": {
-                    // "id": {
-                    //     "title": "Id",
-                    //     "type": "string",
-                    //     "readOnly": true,
-                    //     "gui_links": [],
-                    //     "definition": {},
-                    //     "name": "id",
-                    //     "parent_name_format": "variables_id"
-                    // },
-                    "key": {
-                        "title": "Key",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__onInit": "TemplateVariable_key_onInit",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "key",
-                        "parent_name_format": "variables_key",
-                    },
-                    "value": {
-                        "title": "Value",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__callback": "TemplateVariable_value_callback",
-                        "default": "",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "value",
-                        "parent_name_format": "variables_value",
-                    }
-                },
+                "fields": gui_project_template_option_variables_fields_Schema,
                 "query_type": "patch",
                 "operationId": "project_template_variables_edit",
                 "responses": {
@@ -1281,82 +925,10 @@ tabSignal.connect("openapi.schema", function(obj) {
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             }
         },
@@ -1429,86 +1001,14 @@ tabSignal.connect("openapi.schema", function(obj) {
                             "definition_ref": "#/definitions/Option"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             },
             "new": {
-                "fields": optionsSchemaNew,
+                "fields": gui_project_template_option_Schema,
                 "query_type": "post",
                 "operationId": "project_template_option_add",
                 "responses": {
@@ -1516,104 +1016,15 @@ tabSignal.connect("openapi.schema", function(obj) {
                         "description": "Action accepted.",
                         "schema": {
                             "type": "object",
-                            "properties": {
-                                "id": {
-                                    "title": "Id",
-                                    "type": "integer",
-                                    "readOnly": true
-                                },
-                                "name": {
-                                    "title": "Name",
-                                    "type": "string",
-                                    "maxLength": 512,
-                                    "minLength": 1
-                                },
-                                "notes": {
-                                    "title": "Notes",
-                                    "type": "string",
-                                    "format": "textarea"
-                                },
-                            },
+                            "properties": gui_project_template_option_Schema,
                             "definition_name": "OneOption",
                             "definition_ref": "#/definitions/OneOption"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             }
         },
@@ -1670,107 +1081,15 @@ tabSignal.connect("openapi.schema", function(obj) {
                         "description": "Action accepted.",
                         "schema": {
                             "type": "object",
-                            "properties": {
-                                // "id": {
-                                //     "title": "Id",
-                                //     "type": "string",
-                                //     "readOnly": true
-                                // },
-                                "name": {
-                                    "title": "Name",
-                                    "type": "string",
-                                    "maxLength": 512,
-                                    "minLength": 1
-                                },
-                                "notes": {
-                                    "title": "Notes",
-                                    "type": "string",
-                                    "format": "textarea"
-                                },
-                                // "owner": {
-                                //     "$ref": "#/definitions/User"
-                                // }
-                            },
+                            "properties": gui_project_template_option_Schema,
                             "definition_name": "OneOption",
                             "definition_ref": "#/definitions/OneOption"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             },
             "edit": {
@@ -1782,107 +1101,15 @@ tabSignal.connect("openapi.schema", function(obj) {
                         "description": "Action accepted.",
                         "schema": {
                             "type": "object",
-                            "properties": {
-                                // "id": {
-                                //     "title": "Id",
-                                //     "type": "string",
-                                //     "readOnly": true
-                                // },
-                                "name": {
-                                    "title": "Name",
-                                    "type": "string",
-                                    "maxLength": 512,
-                                    "minLength": 1
-                                },
-                                "notes": {
-                                    "title": "Notes",
-                                    "type": "string",
-                                    "format": "textarea"
-                                },
-                                // "owner": {
-                                //     "$ref": "#/definitions/User"
-                                // }
-                            },
+                            "properties": gui_project_template_option_Schema,
                             "definition_name": "OneOption",
                             "definition_ref": "#/definitions/OneOption"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             }
         },
@@ -1891,464 +1118,8 @@ tabSignal.connect("openapi.schema", function(obj) {
         "sublinks": [],
         "sublinks_l2": [],
         "actions": {},
-        "links": {
-            "variables": {
-                "level": 8,
-                "path": "/project/{pk}/template/{template_id}/option/{option_id}/variables/",
-                "type": "list",
-                "name": "variables",
-                "bulk_name": "variables",
-                "name_field": "name",
-                "method": {
-                    "get": "list",
-                    "patch": "",
-                    "put": "",
-                    "post": "",
-                    "delete": "",
-                    "new": "post"
-                },
-                "buttons": [],
-                "short_name": "project/template/option/variables",
-                "hide_non_required": 4,
-                "extension_class_name": [
-                    "gui_project_template_option_variables"
-                ],
-                "selectionTag": "_project__pk__template__template_id__option__option_id__variables_",
-                "methodAdd": "post",
-                "canAdd": false,
-                "canRemove": false,
-                "canCreate": true,
-                "schema": {
-                    "list": {
-                        "fields": {
-                            "id": {
-                                "title": "Id",
-                                "type": "integer",
-                                "readOnly": true,
-                                "gui_links": [],
-                                "definition": {},
-                                "name": "id",
-                                "parent_name_format": "variables_id"
-                            },
-                            "key": {
-                                "title": "Key",
-                                "type": "string",
-                                "format": "enum",
-                                "enum": [
-                                    "ansible_host",
-                                    "ansible_port",
-                                    "ansible_user",
-                                    "ansible_connection",
-                                    "ansible_ssh_pass",
-                                    "ansible_ssh_private_key_file",
-                                    "ansible_ssh_common_args",
-                                    "ansible_sftp_extra_args",
-                                    "ansible_scp_extra_args",
-                                    "ansible_ssh_extra_args",
-                                    "ansible_ssh_executable",
-                                    "ansible_ssh_pipelining",
-                                    "ansible_become",
-                                    "ansible_become_method",
-                                    "ansible_become_user",
-                                    "ansible_become_pass",
-                                    "ansible_become_exe",
-                                    "ansible_become_flags",
-                                    "ansible_shell_type",
-                                    "ansible_python_interpreter",
-                                    "ansible_ruby_interpreter",
-                                    "ansible_perl_interpreter",
-                                    "ansible_shell_executable"
-                                ],
-                                "required": true,
-                                "gui_links": [],
-                                "definition": {},
-                                "name": "key",
-                                "parent_name_format": "variables_key"
-                            },
-                            "value": {
-                                "title": "Value",
-                                "type": "string",
-                                "default": "",
-                                "gui_links": [],
-                                "definition": {},
-                                "name": "value",
-                                "parent_name_format": "variables_value"
-                            }
-                        },
-                        "filters": {
-                            "0": {
-                                "name": "id",
-                                "in": "query",
-                                "description": "A unique integer value (or comma separated list) identifying this instance.",
-                                "required": false,
-                                "type": "string"
-                            },
-                            "1": {
-                                "name": "key",
-                                "in": "query",
-                                "description": "A key name string value (or comma separated list) of instance.",
-                                "required": false,
-                                "type": "string"
-                            },
-                            "2": {
-                                "name": "value",
-                                "in": "query",
-                                "description": "A value of instance.",
-                                "required": false,
-                                "type": "string"
-                            },
-                            "3": {
-                                "name": "id__not",
-                                "in": "query",
-                                "description": "A unique integer value (or comma separated list) identifying this instance.",
-                                "required": false,
-                                "type": "string"
-                            },
-                            "4": {
-                                "name": "ordering",
-                                "in": "query",
-                                "description": "Which field to use when ordering the results.",
-                                "required": false,
-                                "type": "string"
-                            }
-                        },
-                        "query_type": "get",
-                        "operationId": "project_template_option_variables_list",
-                        "responses": {
-                            "200": {
-                                "description": "Action accepted.",
-                                "schema": {
-                                    "required": [
-                                        "key"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "id": {
-                                            "title": "Id",
-                                            "type": "integer",
-                                            "readOnly": true
-                                        },
-                                        "key": {
-                                            "title": "Key",
-                                            "type": "string",
-                                            "format": "autocomplete",
-                                            "enum": [
-                                                "ansible_host",
-                                                "ansible_port",
-                                                "ansible_user",
-                                                "ansible_connection",
-                                                "ansible_ssh_pass",
-                                                "ansible_ssh_private_key_file",
-                                                "ansible_ssh_common_args",
-                                                "ansible_sftp_extra_args",
-                                                "ansible_scp_extra_args",
-                                                "ansible_ssh_extra_args",
-                                                "ansible_ssh_executable",
-                                                "ansible_ssh_pipelining",
-                                                "ansible_become",
-                                                "ansible_become_method",
-                                                "ansible_become_user",
-                                                "ansible_become_pass",
-                                                "ansible_become_exe",
-                                                "ansible_become_flags",
-                                                "ansible_shell_type",
-                                                "ansible_python_interpreter",
-                                                "ansible_ruby_interpreter",
-                                                "ansible_perl_interpreter",
-                                                "ansible_shell_executable"
-                                            ],
-                                            "required": true
-                                        },
-                                        "value": {
-                                            "title": "Value",
-                                            "type": "string",
-                                            "default": ""
-                                        }
-                                    },
-                                    "definition_name": "TemplateVariable",
-                                    "definition_ref": "#/definitions/TemplateVariable"
-                                }
-                            },
-                            "400": {
-                                "description": "Validation error or some data error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            },
-                            "401": {
-                                "description": "Unauthorized access error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            },
-                            "403": {
-                                "description": "Permission denied error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            },
-                            "404": {
-                                "description": "Not found error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            }
-                        }
-                    },
-                    "new": {
-                        "fields": {
-                            "id": {
-                                "title": "Id",
-                                "type": "integer",
-                                "readOnly": true,
-                                "gui_links": [],
-                                "definition": {},
-                                "name": "id",
-                                "parent_name_format": "variables_id"
-                            },
-                            "key": {
-                                "title": "Key",
-                                "type": "string",
-                                "format": "enum",
-                                "enum": [
-                                    "ansible_host",
-                                    "ansible_port",
-                                    "ansible_user",
-                                    "ansible_connection",
-                                    "ansible_ssh_pass",
-                                    "ansible_ssh_private_key_file",
-                                    "ansible_ssh_common_args",
-                                    "ansible_sftp_extra_args",
-                                    "ansible_scp_extra_args",
-                                    "ansible_ssh_extra_args",
-                                    "ansible_ssh_executable",
-                                    "ansible_ssh_pipelining",
-                                    "ansible_become",
-                                    "ansible_become_method",
-                                    "ansible_become_user",
-                                    "ansible_become_pass",
-                                    "ansible_become_exe",
-                                    "ansible_become_flags",
-                                    "ansible_shell_type",
-                                    "ansible_python_interpreter",
-                                    "ansible_ruby_interpreter",
-                                    "ansible_perl_interpreter",
-                                    "ansible_shell_executable"
-                                ],
-                                "required": true,
-                                "gui_links": [],
-                                "definition": {},
-                                "name": "key",
-                                "parent_name_format": "variables_key"
-                            },
-                            "value": {
-                                "title": "Value",
-                                "type": "string",
-                                "default": "",
-                                "gui_links": [],
-                                "definition": {},
-                                "name": "value",
-                                "parent_name_format": "variables_value"
-                            }
-                        },
-                        "query_type": "post",
-                        "operationId": "project_template_option_variables_add",
-                        "responses": {
-                            "201": {
-                                "description": "Action accepted.",
-                                "schema": {
-                                    "required": [
-                                        "key"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "id": {
-                                            "title": "Id",
-                                            "type": "integer",
-                                            "readOnly": true
-                                        },
-                                        "key": {
-                                            "title": "Key",
-                                            "type": "string",
-                                            "format": "autocomplete",
-                                            "enum": [
-                                                "ansible_host",
-                                                "ansible_port",
-                                                "ansible_user",
-                                                "ansible_connection",
-                                                "ansible_ssh_pass",
-                                                "ansible_ssh_private_key_file",
-                                                "ansible_ssh_common_args",
-                                                "ansible_sftp_extra_args",
-                                                "ansible_scp_extra_args",
-                                                "ansible_ssh_extra_args",
-                                                "ansible_ssh_executable",
-                                                "ansible_ssh_pipelining",
-                                                "ansible_become",
-                                                "ansible_become_method",
-                                                "ansible_become_user",
-                                                "ansible_become_pass",
-                                                "ansible_become_exe",
-                                                "ansible_become_flags",
-                                                "ansible_shell_type",
-                                                "ansible_python_interpreter",
-                                                "ansible_ruby_interpreter",
-                                                "ansible_perl_interpreter",
-                                                "ansible_shell_executable"
-                                            ],
-                                            "required": true
-                                        },
-                                        "value": {
-                                            "title": "Value",
-                                            "type": "string",
-                                            "default": ""
-                                        }
-                                    },
-                                    "definition_name": "TemplateVariable",
-                                    "definition_ref": "#/definitions/TemplateVariable"
-                                }
-                            },
-                            "400": {
-                                "description": "Validation error or some data error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            },
-                            "401": {
-                                "description": "Unauthorized access error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            },
-                            "403": {
-                                "description": "Permission denied error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            },
-                            "404": {
-                                "description": "Not found error.",
-                                "schema": {
-                                    "required": [
-                                        "detail"
-                                    ],
-                                    "type": "object",
-                                    "properties": {
-                                        "detail": {
-                                            "title": "Detail",
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "required": true
-                                        }
-                                    },
-                                    "definition_name": "Error",
-                                    "definition_ref": "#/definitions/Error"
-                                }
-                            }
-                        }
-                    }
-                },
-                "__link__page": "/project/{pk}/template/{template_id}/option/{option_id}/variables/{variables_id}/",
-                "page_path": "/project/{pk}/template/{template_id}/option/{option_id}/variables/{variables_id}/",
-                "sublinks": [],
-                "sublinks_l2": [],
-                "actions": {},
-                "links": {},
-                "multi_actions": [],
-                "__link__parent": "/project/{pk}/template/{template_id}/option/{option_id}/",
-                "parent_path": "/project/{pk}/template/{template_id}/option/{option_id}/"
-            }
+        "links": { 
+            "__link__variables": "/project/{pk}/template/{template_id}/option/{option_id}/variables/", 
         },
         "multi_actions": [],
         "__link__parent": "/project/{pk}/template/{template_id}/option/",
@@ -2383,77 +1154,8 @@ tabSignal.connect("openapi.schema", function(obj) {
         "canCreate": true,
         "schema": {
             "list": {
-                "fields": {
-                    // "id": {
-                    //     "title": "Id",
-                    //     "type": "string",
-                    //     "readOnly": true,
-                    //     "gui_links": [],
-                    //     "definition": {},
-                    //     "name": "id",
-                    //     "parent_name_format": "variables_id"
-                    // },
-                    "key": {
-                        "title": "Key",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__onInit": "TemplateVariable_key_onInit",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "key",
-                        "parent_name_format": "variables_key"
-                    },
-                    "value": {
-                        "title": "Value",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__callback": "TemplateVariable_value_callback",
-                        "default": "",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "value",
-                        "parent_name_format": "variables_value"
-                    }
-                },
-                "filters": {
-                    // "0": {
-                    //     "name": "id",
-                    //     "in": "query",
-                    //     "description": "A unique integer value (or comma separated list) identifying this instance.",
-                    //     "required": false,
-                    //     "type": "string"
-                    // },
-                    "0": {
-                        "name": "key",
-                        "in": "query",
-                        "description": "A key name string value (or comma separated list) of instance.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    "1": {
-                        "name": "value",
-                        "in": "query",
-                        "description": "A value of instance.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    // "3": {
-                    //     "name": "id__not",
-                    //     "in": "query",
-                    //     "description": "A unique integer value (or comma separated list) identifying this instance.",
-                    //     "required": false,
-                    //     "type": "string"
-                    // },
-                    "2": {
-                        "name": "ordering",
-                        "in": "query",
-                        "description": "Which field to use when ordering the results.",
-                        "required": false,
-                        "type": "string"
-                    }
-                },
+                "fields": gui_project_template_option_variables_fields_Schema,
+                "filters": { },
                 "query_type": "get",
                 "operationId": "project_template_option_variables_list",
                 "responses": {
@@ -2464,153 +1166,19 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": {
-                                // "id": {
-                                //     "title": "Id",
-                                //     "type": "integer",
-                                //     "readOnly": true
-                                // },
-                                "key": {
-                                    "title": "Key",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__onInit": "TemplateVariable_key_onInit",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "key",
-                                    "parent_name_format": "variables_key"
-                                },
-                                "value": {
-                                    "title": "Value",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__callback": "TemplateVariable_value_callback",
-                                    "default": "",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "value",
-                                    "parent_name_format": "variables_value"
-                                }
-                            },
+                            "properties": gui_project_template_option_variables_fields_Schema,
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             },
             "new": {
-                "fields": {
-                    // "id": {
-                    //     "title": "Id",
-                    //     "type": "string",
-                    //     "readOnly": true,
-                    //     "gui_links": [],
-                    //     "definition": {},
-                    //     "name": "id",
-                    //     "parent_name_format": "variables_id"
-                    // },
-                    "key": {
-                        "title": "Key",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__onInit": "TemplateVariable_key_onInit",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "key",
-                        "parent_name_format": "variables_key"
-                    },
-                    "value": {
-                        "title": "Value",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__callback": "TemplateVariable_value_callback",
-                        "default": "",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "value",
-                        "parent_name_format": "variables_value"
-                    }
-                },
+                "fields": gui_project_template_option_variables_fields_Schema,
                 "query_type": "post",
                 "operationId": "project_template_option_variables_add",
                 "responses": {
@@ -2621,116 +1189,15 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": {
-                                // "id": {
-                                //     "title": "Id",
-                                //     "type": "string",
-                                //     "readOnly": true
-                                // },
-                                "key": {
-                                    "title": "Key",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__onInit": "TemplateVariable_key_onInit",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "key",
-                                    "parent_name_format": "variables_key"
-                                },
-                                "value": {
-                                    "title": "Value",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__callback": "TemplateVariable_value_callback",
-                                    "default": "",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "value",
-                                    "parent_name_format": "variables_value"
-                                }
-                            },
+                            "properties": gui_project_template_option_variables_fields_Schema,
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             }
         },
@@ -2777,42 +1244,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "canEdit": true,
         "schema": {
             "get": {
-                "fields": {
-                    // "id": {
-                    //     "title": "Id",
-                    //     "type": "string",
-                    //     "readOnly": true,
-                    //     "gui_links": [],
-                    //     "definition": {},
-                    //     "name": "id",
-                    //     "parent_name_format": "variables_id"
-                    // },
-                    "key": {
-                        "title": "Key",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__onInit": "TemplateVariable_key_onInit",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "key",
-                        "parent_name_format": "variables_key",
-                        "readOnly": true
-                    },
-                    "value": {
-                        "title": "Value",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__callback": "TemplateVariable_value_callback",
-                        "default": "",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "value",
-                        "parent_name_format": "variables_value",
-                        "readOnly": true
-                    }
-                },
+                "fields": gui_project_template_option_variables_fields_Schema,
                 "filters": {},
                 "query_type": "get",
                 "operationId": "project_template_option_variables_get",
@@ -2824,153 +1256,19 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": {
-                                // "id": {
-                                //     "title": "Id",
-                                //     "type": "string",
-                                //     "readOnly": true
-                                // },
-                                "key": {
-                                    "title": "Key",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__onInit": "TemplateVariable_key_onInit",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "key",
-                                    "parent_name_format": "variables_key"
-                                },
-                                "value": {
-                                    "title": "Value",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__callback": "TemplateVariable_value_callback",
-                                    "default": "",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "value",
-                                    "parent_name_format": "variables_value"
-                                }
-                            },
+                            "properties": gui_project_template_option_variables_fields_Schema,
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             },
             "edit": {
-                "fields": {
-                    // "id": {
-                    //     "title": "Id",
-                    //     "type": "string",
-                    //     "readOnly": true,
-                    //     "gui_links": [],
-                    //     "definition": {},
-                    //     "name": "id",
-                    //     "parent_name_format": "variables_id"
-                    // },
-                    "key": {
-                        "title": "Key",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__onInit": "TemplateVariable_key_onInit",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "key",
-                        "parent_name_format": "variables_key",
-                    },
-                    "value": {
-                        "title": "Value",
-                        "type": "dynamic",
-                        "dynamic_properties": {},
-                        "required": true,
-                        "__func__callback": "TemplateVariable_value_callback",
-                        "default": "",
-                        "gui_links": [],
-                        "definition": {},
-                        "name": "value",
-                        "parent_name_format": "variables_value",
-                    }
-                },
+                "fields": gui_project_template_option_variables_fields_Schema,
                 "query_type": "patch",
                 "operationId": "project_template_option_variables_edit",
                 "responses": {
@@ -2981,116 +1279,15 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": {
-                                // "id": {
-                                //     "title": "Id",
-                                //     "type": "string",
-                                //     "readOnly": true
-                                // },
-                                "key": {
-                                    "title": "Key",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__onInit": "TemplateVariable_key_onInit",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "key",
-                                    "parent_name_format": "variables_key"
-                                },
-                                "value": {
-                                    "title": "Value",
-                                    "type": "dynamic",
-                                    "dynamic_properties": {},
-                                    "required": true,
-                                    "__func__callback": "TemplateVariable_value_callback",
-                                    "default": "",
-                                    "gui_links": [],
-                                    "definition": {},
-                                    "name": "value",
-                                    "parent_name_format": "variables_value"
-                                }
-                            },
+                            "properties": gui_project_template_option_variables_fields_Schema,
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
                     },
-                    "400": {
-                        "description": "Validation error or some data error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized access error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "403": {
-                        "description": "Permission denied error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found error.",
-                        "schema": {
-                            "required": [
-                                "detail"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "detail": {
-                                    "title": "Detail",
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "required": true
-                                }
-                            },
-                            "definition_name": "Error",
-                            "definition_ref": "#/definitions/Error"
-                        }
-                    }
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
                 }
             }
         },
