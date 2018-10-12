@@ -1381,6 +1381,8 @@ class OApiTestCase(BaseTestCase):
             param_checked_value = self.get_params_checked_value_by_name(
                 param_obj['name'], checked_values
             )
+            if not param_checked_value:
+                print(index)
             self.check_fields(path, param_obj, **param_checked_value)
 
     def check_request(self, obj, *args, **kwargs):
