@@ -90,11 +90,6 @@ PROJECT_GUI_MENU = [
                 'span_class': 'glyphicon glyphicon-user',
             },
             {
-                'name': 'Teams',
-                'url': '/team',
-                'span_class': 'fa fa-users',
-            },
-            {
                 'name': 'Hooks',
                 'url': '/hook',
                 'span_class': 'glyphicon glyphicon-console'

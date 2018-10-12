@@ -1,4 +1,9 @@
 
+tabSignal.connect("openapi.schema", function(data)
+{ 
+    window.guiSchema.path["/group/{pk}/"].schema.edit.fields.children.readOnly = true 
+})
+
 tabSignal.connect("guiList.renderLine.group", function(obj){
     
     if(obj.dataLine.line.children)

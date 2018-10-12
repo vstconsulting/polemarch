@@ -1,6 +1,9 @@
  
-tabSignal.connect("openapi.schema", function(data)
+tabSignal.connect("openapi.schema.is_multi_action",  function(data)
 { 
-    window.guiSchema.path["/group/{pk}/"].schema.edit.fields.children.readOnly = true 
+    // {path:action.path, action:action});
+    if(data.action.name == "set_owner")
+    {
+        data.action.is_multi_action = true
+    }
 })
- 
