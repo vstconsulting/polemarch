@@ -371,7 +371,7 @@ guiDashboard.getUserDashboardSettingsFromAPI = function()
         }
 
         let def = new $.Deferred();
-        $.when(api.query(query)).done(function(answer)
+        $.when(api.query(query, true)).done(function(answer)
         { 
             let data = answer.data
             if ($.isEmptyObject(data.widgetSettings))
@@ -434,7 +434,7 @@ guiDashboard.putUserDashboardSettingsToAPI = function()
 
      let def = new $.Deferred();
 
-     $.when(api.query(query)).fail(e => {
+     $.when(api.query(query, true)).fail(e => {
          console.warn(e)
          webGui.showErrors(e)
          def.reject()
@@ -670,7 +670,7 @@ guiDashboard.loadStats=function()
         }
 
     let def = new $.Deferred();
-    $.when(api.query(query)).done(function(answer)
+    $.when(api.query(query, true)).done(function(answer)
     { 
         thisObj.statsData=answer.data; 
         def.resolve()
