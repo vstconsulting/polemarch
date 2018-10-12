@@ -1,5 +1,5 @@
 var widget_sort={};
-  
+
 guiDashboard.model.className = "guiDashboard"
 
 guiDashboard.model.count = {
@@ -21,7 +21,7 @@ guiDashboard.statsData={
 }
 
 guiDashboard.tpl_name = 'pmDashboard'
- 
+
 guiDashboard.statsDataLast=14;
 guiDashboard.statsDataLastQuery=14;
 guiDashboard.statsDataMomentType='day';
@@ -365,7 +365,41 @@ guiDashboard.getUserDashboardSettingsFromAPI = function()
     if(guiDashboard.checkNecessityToLoadDashboardSettingsFromApi(guiDashboard.model.defaultWidgets[0], guiDashboard.model.widgets[0]) ||
         guiDashboard.checkNecessityToLoadDashboardSettingsFromApi(guiDashboard.model.defaultChartLineSettings, guiDashboard.model.ChartLineSettings))
     {
-        
+        /*let query = {
+            method: "get",
+            data_type: ["user", userId, "settings"],  
+        }
+
+        let def = new $.Deferred();
+        $.when(api.query(query)).done(function(data)
+        { 
+            if ($.isEmptyObject(data.widgetSettings))
+            {
+                guiDashboard.cloneDefaultWidgetsTotally();
+            }
+            else
+            {
+                guiDashboard.clonetWidgetsSettingsFromApiAndVerify(data.widgetSettings);
+                guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
+            }
+
+            if ($.isEmptyObject(data.chartLineSettings))
+            {
+                guiDashboard.cloneChartLineSettingsTotally();
+            }
+            else
+            {
+                guiDashboard.cloneChartLineSettingsFromApi(data.chartLineSettings);
+            }
+            
+            def.resolve()
+        }).fail(e => { 
+            console.warn(e)
+            webGui.showErrors(e)
+            def.reject()
+        })
+       
+        return def.promise() */
         return spajs.ajax.Call({
             url: hostname + "/api/v2/user/" + userId + "/settings/",
             type: "GET",
@@ -421,23 +455,22 @@ guiDashboard.putUserDashboardSettingsToAPI = function()
         var objName=guiDashboard.model.ChartLineSettings[i].name;
         chartLineSettings[objName]={active: guiDashboard.model.ChartLineSettings[i].active};
     }
-    return spajs.ajax.Call({
-        url: hostname + "/api/v2/user/" + userId + "/settings/",
-        type: "POST",
-        contentType: 'application/json',
-        data: JSON.stringify({widgetSettings:widgetSettings, chartLineSettings:chartLineSettings}),
-        success: function (data)
-        {
-            //console.log("Data was posted");
 
-        },
-        error: function (e)
-        {
-            console.warn(e)
-            webGui.showErrors(e)
-        }
-    });
+    let query = {
+         method: "post",
+         data_type: ["user", userId, "settings"],
+         data:{widgetSettings:widgetSettings, chartLineSettings:chartLineSettings}
+     }
 
+     let def = new $.Deferred();
+
+     $.when(api.query(query)).fail(e => {
+         console.warn(e)
+         webGui.showErrors(e)
+         def.reject()
+     })
+
+     return def.promise()  
 }
 
 /**
@@ -824,11 +857,11 @@ tabSignal.connect('guiLocalSettings.hideMenu', function(){
     }, 200)
 })
 
-tabSignal.connect('hideLoadingProgress', function(){ 
+tabSignal.connect('hideLoadingProgress', function(){
     if(spajs.currentOpenMenu && spajs.currentOpenMenu.id == 'home')
     {
         guiDashboard.updateData()
-    } 
+    }
 })
 
 guiDashboard.updateData = function()
@@ -869,12 +902,12 @@ guiDashboard.updateData = function()
                 startTimeOrg=yearNum+"-"+monthNum+"-"+dayNum+hourNum;
                 break;
         }
-       
+
         //задаем стартовую дату для графика.
         //guiDashboard.statsDataLast - количество периодов назад
         //guiDashboard.statsDataMomentType - тип периода - месяц/год
         var startTime =+ moment(startTimeOrg).subtract(guiDashboard.statsDataLast-1, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
-        
+
         tasks_data = {};
         tasks_data_t = [];
 
@@ -1138,7 +1171,7 @@ pmwItemsCounter.model.nameInStats = "";
 
 pmwItemsCounter.render = function()
 {
-    return "" 
+    return ""
     var html = spajs.just.render('pmwItemsCounter', {model:this.model});
     return window.JUST.onInsert(html, function(){});
 }
