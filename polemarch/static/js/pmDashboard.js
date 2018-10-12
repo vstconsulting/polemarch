@@ -51,7 +51,7 @@ guiDashboard.model.widgets = [
  */
 guiDashboard.model.defaultWidgets = [
     [
-        /*{
+        /**/{
             name:'pmwTemplatesCounter',
             title:'Templates Counter',
             sort:0,
@@ -59,7 +59,7 @@ guiDashboard.model.defaultWidgets = [
             opt:{},
             type:1,
             collapse:false,
-        },*/
+        },
         {
             name:'pmwProjectsCounter',
             title:'Projects Counter',
@@ -365,14 +365,15 @@ guiDashboard.getUserDashboardSettingsFromAPI = function()
     if(guiDashboard.checkNecessityToLoadDashboardSettingsFromApi(guiDashboard.model.defaultWidgets[0], guiDashboard.model.widgets[0]) ||
         guiDashboard.checkNecessityToLoadDashboardSettingsFromApi(guiDashboard.model.defaultChartLineSettings, guiDashboard.model.ChartLineSettings))
     {
-        /*let query = {
+        let query = {
             method: "get",
             data_type: ["user", userId, "settings"],  
         }
 
         let def = new $.Deferred();
-        $.when(api.query(query)).done(function(data)
+        $.when(api.query(query)).done(function(answer)
         { 
+            let data = answer.data
             if ($.isEmptyObject(data.widgetSettings))
             {
                 guiDashboard.cloneDefaultWidgetsTotally();
@@ -399,38 +400,7 @@ guiDashboard.getUserDashboardSettingsFromAPI = function()
             def.reject()
         })
        
-        return def.promise() */
-        return spajs.ajax.Call({
-            url: hostname + "/api/v2/user/" + userId + "/settings/",
-            type: "GET",
-            contentType: 'application/json',
-            success: function (data)
-            {
-                if ($.isEmptyObject(data.widgetSettings))
-                {
-                    guiDashboard.cloneDefaultWidgetsTotally();
-                }
-                else
-                {
-                    guiDashboard.clonetWidgetsSettingsFromApiAndVerify(data.widgetSettings);
-                    guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
-                }
-
-                if ($.isEmptyObject(data.chartLineSettings))
-                {
-                    guiDashboard.cloneChartLineSettingsTotally();
-                }
-                else
-                {
-                    guiDashboard.cloneChartLineSettingsFromApi(data.chartLineSettings);
-                }
-            },
-            error: function (e)
-            {
-                console.warn(e)
-                webGui.showErrors(e)
-            }
-        });
+        return def.promise()
     }
     else
     {
@@ -674,8 +644,9 @@ guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
  */
 guiDashboard.loadStats=function()
 {
-    var limit=1;
     var thisObj = this;
+    
+    /*var limit=1;
     return spajs.ajax.Call({
         url: hostname + "/api/v2/stats/?last="+guiDashboard.statsDataLastQuery,
         type: "GET",
@@ -683,14 +654,32 @@ guiDashboard.loadStats=function()
         data: "limit=" + encodeURIComponent(limit)+"&rand="+Math.random(),
         success: function (data)
         {
-            guiDashboard.statsData=data;
+            thisObj.statsData=data;
         },
         error: function (e)
         {
             console.warn(e)
             webGui.showErrors(e)
         }
-    });
+    });*/
+   
+    let query = {
+            type: "get",
+            item: "stats", 
+            filter:"last="+guiDashboard.statsDataLastQuery
+        }
+
+    let def = new $.Deferred();
+    $.when(api.query(query)).done(function(answer)
+    { 
+        thisObj.statsData=answer.data; 
+        def.resolve()
+    }).fail(function(e){ 
+        
+        def.reject(e)
+    })
+
+    return def.promise();  /**/
 }
 
 /**
@@ -762,6 +751,9 @@ guiDashboard.stopUpdates = function()
     this.model.updateTimeoutId = undefined;
 }
 
+/**
+ * Для перетаскивания виджетов и изменения их порядка
+ */
 guiDashboard.toggleSortable = function(thisButton)
 {
     var state = widget_sort.option("disabled");
@@ -787,65 +779,7 @@ guiDashboard.toggleSortable = function(thisButton)
         }
     }
 }
-
-/**
- * Функция подгружает данные необходимые для отрисовки страницы Dashboard'a
- * одним bulk запросом.
- */
-guiDashboard.getDataForDashboardFromBulk = function ()
-{
-    var def = new $.Deferred();
-    var bulkArr = [
-        {
-            type:"get",
-            item: "project",
-            filters: "limit=1"
-        },
-        {
-            type:"get",
-            item: "inventory",
-            filters: "limit=1"
-        },
-        /*{
-            type:"get",
-            item: "template",
-            filters: "limit=1"
-        },*/
-    ];
-
-    spajs.ajax.Call({
-        url: hostname + "/api/v2/_bulk/",
-        type: "PUT",
-        contentType: 'application/json',
-        data: JSON.stringify(bulkArr),
-        success: function (data)
-        {
-            /*for(var i in data)
-            {
-                debugger;
-                var pmObj = pmItems.definePmObject(bulkArr[i].item);
-                pmObj.model.itemslist = data[i].data;
-                for(var j in data[i].data.results)
-                {
-                    var val = pmObj.afterItemLoad(data[i].data.results[j])
-                    pmObj.model.items.justWatch(val.id);
-                    pmObj.model.items[val.id] = mergeDeep(pmObj.model.items[val.id], val)
-                }
-            }*/
-            def.resolve();
-            return;
-        },
-        error: function (e) {
-            guiPopUp.error("Error " + e, "error");
-            def.reject();
-        }
-    })
-
-    return def.promise();
-}
-
-
-
+  
 tabSignal.connect('guiLocalSettings.hideMenu', function(){
 
     setTimeout(function(){
@@ -857,12 +791,13 @@ tabSignal.connect('guiLocalSettings.hideMenu', function(){
     }, 200)
 })
 
+/*
 tabSignal.connect('hideLoadingProgress', function(){
     if(spajs.currentOpenMenu && spajs.currentOpenMenu.id == 'home')
     {
         guiDashboard.updateData()
     }
-})
+})*/
 
 guiDashboard.updateData = function()
 {
@@ -877,7 +812,7 @@ guiDashboard.updateData = function()
     {
         //обновляем счетчики для виджетов
         pmwHostsCounter.updateCount();
-        //pmwTemplatesCounter.updateCount();
+        pmwTemplatesCounter.updateCount();
         pmwGroupsCounter.updateCount();
         pmwProjectsCounter.updateCount();
         pmwInventoriesCounter.updateCount();
@@ -984,8 +919,7 @@ guiDashboard.open  = function(holder, menuInfo, data)
     setActiveMenuLi();
     var thisObj = this;
 
-    return $.when(guiDashboard.getUserDashboardSettingsFromAPI(),
-        guiDashboard.getDataForDashboardFromBulk()).always(function()
+    return $.when(guiDashboard.getUserDashboardSettingsFromAPI()).always(function()
     {
         // Инициализация всех виджетов на странице
         for(var i in guiDashboard.model.widgets)
@@ -1090,18 +1024,6 @@ guiDashboard.open  = function(holder, menuInfo, data)
 
 }
 
-tabSignal.connect("polemarch.start", function()
-{
-    spajs.addMenu({
-        id:"home",
-        urlregexp:[/^(home|)$/],
-        onOpen:function(holder, menuInfo, data){return guiDashboard.open(holder, menuInfo, data);},
-        onClose:function(){return guiDashboard.stopUpdates();},
-    })
-
-})
-
-
 /**
  * Базовый класс виджета
  * @type Object
@@ -1112,7 +1034,7 @@ guiDashboardWidget = {
         test:1
     },
     render:function(){
-
+        
     },
     init:function(opt){
         mergeDeep(this.model, opt)
@@ -1143,15 +1065,15 @@ pmwModulesTemplatesWidget.render = function()
 
 var pmwAnsibleModuleWidget = inheritance(guiDashboardWidget);
 pmwAnsibleModuleWidget.render = function()
-{
+{ 
     var div_id="#pmwAnsibleModuleWidget";
-    //pmAnsibleModule.fastCommandWidget($(div_id));
+    pmAnsibleModule.fastCommandWidget($(div_id));
     return "";
 }
 
 var pmwChartWidget=inheritance(guiDashboardWidget);
 pmwChartWidget.render = function()
-{
+{ 
     var div_id="#pmwChartWidget";
     var html=spajs.just.render('pmwChartWidget');
     $(div_id).html(html);
@@ -1170,8 +1092,7 @@ pmwItemsCounter.model.count = '-';
 pmwItemsCounter.model.nameInStats = "";
 
 pmwItemsCounter.render = function()
-{
-    return ""
+{ 
     var html = spajs.just.render('pmwItemsCounter', {model:this.model});
     return window.JUST.onInsert(html, function(){});
 }
@@ -1189,6 +1110,7 @@ pmwItemsCounter.updateCount = function()
 var pmwHostsCounter = inheritance(pmwItemsCounter);
 //pmwHostsCounter.model.countObject = pmHosts;
 pmwHostsCounter.model.nameInStats = "hosts";
+pmwHostsCounter.model.path = "host";
 
 /**
  * Класс виджета показывающий количество шаблонов
@@ -1197,6 +1119,7 @@ pmwHostsCounter.model.nameInStats = "hosts";
 var pmwTemplatesCounter = inheritance(pmwItemsCounter);
 //pmwTemplatesCounter.model.countObject = pmTemplates;
 pmwTemplatesCounter.model.nameInStats = "templates";
+pmwTemplatesCounter.model.path = "";
 
 /**
  * Класс виджета показывающий количество групп
@@ -1205,6 +1128,7 @@ pmwTemplatesCounter.model.nameInStats = "templates";
 var pmwGroupsCounter = inheritance(pmwItemsCounter);
 //pmwGroupsCounter.model.countObject = pmGroups;
 pmwGroupsCounter.model.nameInStats = "groups";
+pmwGroupsCounter.model.path = "group";
 
 /**
  * Класс виджета показывающий количество проектов
@@ -1213,6 +1137,7 @@ pmwGroupsCounter.model.nameInStats = "groups";
 var pmwProjectsCounter = inheritance(pmwItemsCounter);
 //pmwProjectsCounter.model.countObject = pmProjects;
 pmwProjectsCounter.model.nameInStats = "projects";
+pmwProjectsCounter.model.path = "project";
 
 /**
  * Класс виджета показывающий количество инвенториев
@@ -1221,6 +1146,7 @@ pmwProjectsCounter.model.nameInStats = "projects";
 var pmwInventoriesCounter = inheritance(pmwItemsCounter);
 //pmwInventoriesCounter.model.countObject = pmInventories;
 pmwInventoriesCounter.model.nameInStats = "inventories";
+pmwInventoriesCounter.model.path = "inventory";
 
 /**
  * Класс виджета показывающий количество пользователей
@@ -1229,3 +1155,4 @@ pmwInventoriesCounter.model.nameInStats = "inventories";
 var pmwUsersCounter = inheritance(pmwItemsCounter);
 //pmwUsersCounter.model.countObject = pmUsers;
 pmwUsersCounter.model.nameInStats = "users";
+pmwUsersCounter.model.path = "user";

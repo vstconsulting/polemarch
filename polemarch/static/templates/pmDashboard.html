@@ -1,16 +1,20 @@
 
 <!-- Шаблон виджета -->
 <script type="text/x-just" data-just="pmwItemsCounter">
-    <div class="col-lg-2 col-sm-4 col-xs-6 dnd-block" id="pmw<%- model.countObject.model.name %>Counter">
+    <div class="col-lg-2 col-sm-4 col-xs-6 dnd-block" id="pmw<%- model.nameInStats %>Counter">
         <div class="small-box bg-aqua cursor-move1">
             <div class="inner">
                 <h3><%= model.justText('count') %>&nbsp;</h3>
-                <p style="text-transform: capitalize"><%- model.countObject.model.name %></p>
+                <p style="text-transform: capitalize"><%- model.nameInStats %></p>
             </div>
             <div class="icon hidden-xs" style="top: 0px;">
                 <i class="glyphicon glyphicon-cog"></i>
             </div>
-            <a href="?<%- model.countObject.model.page_name %>" onclick="return spajs.openURL(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <% if(model.path){ %>
+                <a href="<%- vstMakeLocalUrl([model.path]) %>" onclick="return vstGO(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <% }else{ %>
+                <i  class="small-box-footer" >&nbsp;</i>
+            <% } %>
         </div>
     </div>
 </script>
