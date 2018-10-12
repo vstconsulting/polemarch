@@ -163,7 +163,7 @@
     overflow: auto;
     max-height: calc(100vh - 338px);
     min-height: 400px;
-    background: #fff;
+    background: #000;
 }
 
 @media (min-width: 767px) {
@@ -226,3 +226,13 @@
 *::-webkit-scrollbar {
     width: 0px;
 }
+
+#menu-system-hooks {
+    display: none;
+}
+
+#RealBody.is_superuser #menu-system-hooks,
+#RealBody.is_staff #menu-system-hooks {
+    display: block;
+}
+
