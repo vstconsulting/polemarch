@@ -1,824 +1,1534 @@
-// 
-//pmTemplates.exportToFile = function (item_ids)
-//{
-//    var def = new $.Deferred();
-//    if (!item_ids)
-//    {
-//        $.notify("No data for export", "error");
-//        def.reject("No data for export");
-//        return def.promise();
-//    }
-//
-//    var data = {
-//        "filter": {
-//            "id__in": item_ids,
-//        },
-//    }
-//
-//    var thisObj = this;
-//    spajs.ajax.Call({
-//        url: hostname + "/api/v2/" + this.model.name + "/filter/?detail=1",
-//        type: "POST",
-//        contentType: 'application/json',
-//        data: JSON.stringify(data),
-//        success: function (data)
-//        {
-//            var fieldata = []
-//            for (var i in data.results)
-//            {
-//                var val = data.results[i]
-//                delete val['id'];
-//                delete val['url'];
-//
-//                fieldata.push({
-//                    item: thisObj.model.page_name,
-//                    data: val
-//                })
-//            }
-//
-//            var fileInfo = {
-//                data: fieldata,
-//                count: fieldata.length,
-//                version: "1"
-//            }
-//
-//            var textFileAsBlob = new Blob([JSON.stringify(fileInfo)], {
-//                type: 'text/plain'
-//            });
-//
-//            var newLink = document.createElement('a')
-//            newLink.href = window.URL.createObjectURL(textFileAsBlob)
-//            newLink.download = thisObj.model.name + "-" + Date() + ".json"
-//            newLink.target = "_blanl"
-//            var event = new MouseEvent("click");
-//            newLink.dispatchEvent(event);
-//
-//
-//            def.resolve();
-//        },
-//        error: function (e)
-//        {
-//            console.warn(e)
-//            webGui.showErrors(e)
-//            def.reject(e);
-//        }
-//    });
-//
-//    return def.promise();
-//}
-//
-//pmTemplates.importFromFile = function (files_event, project_id)
-//{
-//    var def = new $.Deferred();
-//    this.model.files = files_event
-//
-//    for (var i = 0; i < files_event.target.files.length; i++)
-//    {
-//        var t1 = $(".input-file")[0].files[0];
-//        var fileParts = t1.name.split(".");
-//        var fileExt = fileParts[fileParts.length - 1].toLowerCase();
-//        var fileSize = t1.size;
-//        if (fileExt == "txt" || fileExt == "json")
-//        {
-//            if (fileSize <= 2000000) {
-//                var reader = new FileReader();
-//                reader.onload = (function (index_in_files_array)
-//                {
-//                    return function (e)
-//                    {
-//                        console.log(e)
-//                        var bulkdata = []
-//                        try
-//                        {
-//                            var fieldata = JSON.parse(e.target.result);
-//                            if (fieldata.version / 1 > 1)
-//                            {
-//                                webGui.showErrors("Error file version is " + fieldata.version)
-//                                def.reject({text: "Error file version is " + fieldata.version});
-//                                return;
-//                            }
-//
-//                            for (var i in fieldata.data)
-//                            {
-//                                var val = fieldata.data[i]
-//                                val.data.data.project = project_id
-//                                val.type = "add"
-//                                bulkdata.push(val)
-//                            }
-//                            console.log(bulkdata)
-//
-//                            spajs.ajax.Call({
-//                                url: hostname + "/api/v2/_bulk/",
-//                                type: "POST",
-//                                contentType: 'application/json',
-//                                data: JSON.stringify(bulkdata),
-//                                success: function (data)
-//                                {
-//                                    def.resolve();
-//                                    $.notify("JSON-file was imported", "success");
-//                                    spajs.openURL(window.location.href);
-//                                },
-//                                error: function (e)
-//                                {
-//                                    console.warn(e)
-//                                    webGui.showErrors(e)
-//                                    def.reject(e);
-//                                }
-//                            });
-//                        } catch (e)
-//                        {
-//                            $.notify("Invalid/incorrect JSON-file", "error");
-//                            def.reject();
-//                        }
-//                    };
-//                })(i);
-//                reader.readAsText(files_event.target.files[i]);
-//            } else
-//            {
-//                $.notify("File's size has to be less, than 2MB", "error");
-//                def.reject();
-//            }
-//
-//        } else
-//        {
-//            $.notify("File has to be .txt or .json format", "error");
-//            def.reject();
-//        }
-//        // Нет поддержки загрузки более одного файла за раз.
-//        break;
-//    }
-//
-//    return def.promise();
-//}
-//
-//pmTemplates.saveAndExecute = function(item_id)
-//{
-//    var def = new $.Deferred();
-//    var thisObj = this;
-//    $.when(thisObj.updateItem(item_id)).done(function()
-//    {
-//        $.when(thisObj.execute(item_id)).always(function(){
-//            def.resolve();
-//        })
-//    }).fail(function(e){
-//        def.reject(e);
-//    })
-//    return def.promise()
-//}
-//
-///**
-// *Функция сохраняет новую опцию.
-// */
-//pmTemplates.saveNewOption = function(item_id)
-//{
-//    var def = new $.Deferred();
-//    var thisObj = this;
-//    var optionName=$('#field_option_name').val();
-//    optionName=optionName.trim();
-//    optionName=optionName.replace( /\s/g, "-" );
-//    var templateOptionList=thisObj.model.items[item_id].options_list;
-//    for (var i=0; i<templateOptionList.length; i++)
-//    {
-//        if(templateOptionList[i]==optionName)
-//        {
-//            $.notify("Option with this name already exists", "error");
-//            def.reject({text:"Option with this name already exists"});
-//            return def.promise();
-//        }
-//    }
-//
-//    return thisObj.saveOption(item_id);
-//}
-//
-//
-///**
-// *Функция сохраняет изменения в уже существующей опции
-// *и запускает выполнение шаблона с этой опцией.
-// */
-//pmTemplates.saveAndExecuteOption = function(item_id)
-//{
-//    var def = new $.Deferred();
-//    var thisObj = this;
-//    $.when(thisObj.saveOption(item_id)).done(function()
-//    {
-//        var tpl_kind = thisObj.model.kind;
-//        pmTemplates.model.kindObjects[tpl_kind].execute(item_id, thisObj.model.items[item_id].option_name);
-//        def.resolve();
-//    }).fail(function(e)
-//    {
-//        def.reject(e);
-//        webGui.showErrors(e.responseJSON);
-//    }).promise();
-//
-//    return def.promise();
-//}
-//
-//pmTemplates.defineProjectInUrl = function ()
-//{
-//    var project_and_id = "";
-//    var link = window.location.href.split(/[&?]/g)[1];
-//    if(/project\/([0-9]+)/.test(link))
-//    {
-//        project_and_id = "project/" + link.split(/project\/([0-9]+)/g)[1] + "/";
-//    }
-//
-//    return project_and_id;
-//}
-//
-///**
-// *Функция удаляет опцию.
-// */
-//pmTemplates.removeOption = function(item_id, option_name)
-//{
-//    var def = new $.Deferred();
-//    var thisObj = this;
-//    var optionName=option_name;
-//    delete thisObj.model.items[item_id].optionsCopyForDelete[optionName];
-//    var dataToAdd1={options:{}};
-//    dataToAdd1['options']=thisObj.model.items[item_id].optionsCopyForDelete;
-//    spajs.ajax.Call({
-//        url: hostname + "/api/v2/" + thisObj.model.name + "/" + item_id + "/",
-//        type: "PATCH",
-//        contentType: 'application/json',
-//        data: JSON.stringify(dataToAdd1),
-//        success: function (data)
-//        {
-//            $.notify('Option "'+optionName+'" was successfully deleted', "success");
-//            if(/\/search\//i.test(window.location.href))
-//            {
-//                $.when(spajs.openURL(window.location.href)).always(function(){
-//                    def.resolve();
-//                });
-//            }
-//            else
-//            {
-//                var project_and_id = thisObj.defineProjectInUrl();
-//                $.when(spajs.open({ menuId:project_and_id + "template/"+thisObj.model.kind+"/"+data.id+"/options"})).always(function(){
-//                    def.resolve();
-//                });
-//            }
-//
-//        },
-//        error: function (e)
-//        {
-//            def.reject(e)
-//            webGui.showErrors(e.responseJSON)
-//        }
-//    });
-//    return def.promise();
-//}
-//
-///**
-// * Функция предназначена для загрузки всех шаблонов(task, module),
-// * привязанных к определенному проекту.
-// * @param number project_id - id of project
-// */
-//pmTemplates.loadAllItemsFromProject = function(project_id)
-//{
-//    var thisObj = this;
-//    return spajs.ajax.Call({
-//        url: hostname + "/api/v2/" + this.model.name + "/",
-//        type: "GET",
-//        contentType: 'application/json',
-//        data: "project="+project_id,
-//        success: function (data)
-//        {
-//            thisObj.model.itemslist = data
-//
-//            for (var i in data.results)
-//            {
-//                var val = thisObj.afterItemLoad(data.results[i])
-//                thisObj.model.items.justWatch(val.id);
-//                thisObj.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
-//            }
-//        },
-//        error: function (e)
-//        {
-//            console.warn(e)
-//            webGui.showErrors(e)
-//        }
-//    });
-//}
-//
-///**
-// * Функция предназначена для загрузки всех периодических тасок,
-// * ссылающихся на данный шаблон.
-// * @param number template_id - id of template
-// */
-//pmTemplates.loadLinkedPeriodicTasks = function(template_id)
-//{
-//    var thisObj = this;
-//    return spajs.ajax.Call({
-//        url: hostname + "/api/v2/periodic-tasks/",
-//        type: "GET",
-//        contentType: 'application/json',
-//        data: "template="+template_id,
-//        success: function (data)
-//        {
-//            pmPeriodicTasks.model.itemslist = data
-//            pmPeriodicTasks.model.items = {}
-//
-//            for (var i in data.results)
-//            {
-//                var val = pmPeriodicTasks.afterItemLoad(data.results[i])
-//                pmPeriodicTasks.model.items.justWatch(val.id);
-//                pmPeriodicTasks.model.items[val.id] = mergeDeep(thisObj.model.items[val.id], val)
-//            }
-//        },
-//        error: function (e)
-//        {
-//            console.warn(e)
-//            webGui.showErrors(e)
-//        }
-//    });
-//}
-//
-///**
-// * Функция открывает страницу со списком опций шаблона
-// */
-//pmTemplates.showOptionsList = function (holder, menuInfo, data)
-//{
-//    setActiveMenuLi();
-//    var thisObj = this;
-//    var def = new $.Deferred();
-//    var project_id = undefined;
-//    var item_id = data.reg[1];
-//    if(data.reg[2] !== undefined)
-//    {
-//        project_id = data.reg[1];
-//        item_id = data.reg[2];
-//    }
-//    $.when(thisObj.loadItem(item_id)).done(function ()
-//    {
-//        thisObj.model.items[item_id].optionsCopyForDelete = JSON.parse(JSON.stringify(thisObj.model.items[item_id].options));
-//        var tpl = 'template_options_list'
-//        var project_name = undefined;
-//        if(project_id !== undefined)
-//        {
-//            $.when(pmProjects.loadItem(project_id)).done(function ()
-//            {
-//                project_name = pmProjects.model.items[project_id].name;
-//                $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, item_id:item_id, opt: {project_id:project_id, project_name:project_name}}))
-//                def.resolve();
-//            }).fail(function (e)
-//            {
-//                webGui.showErrors(e);
-//                def.reject(e);
-//            });
-//        }
-//        else
-//        {
-//            $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, item_id:item_id, opt: {project_id:project_id, project_name:project_name}}))
-//            def.resolve();
-//        }
-//    }).fail(function (e)
-//    {
-//        webGui.showErrors(e);
-//        def.reject(e);
-//    })
-//    return def.promise();
-//}
-//
-///**
-// * Функция выделяет/снимает выделение с опций в таблице списка опций.
-// * @param {array} elements - массив выделенных элементов
-// * @param {boolean} mode - true - добавить выделение, false - снять выделение
-// * @param {string} div_id - id блока, в котором находятся данные элементы
-// */
-//pmTemplates.toggleSelectAllOptions = function (elements, mode, div_id)
-//{
-//    for (var i = 0; i < elements.length; i++)
-//    {
-//        if($(elements[i]).hasClass('item-row'))
-//        {
-//            $(elements[i]).toggleClass('selected', mode);
-//        }
-//    }
-//    this.countSelectedOptions(div_id);
-//}
-//
-///**
-// * Функция выделяет/снимает выделение с одного конкретного элемента в определенной таблице.
-// * В данном случае в таблице со списком опций.
-// * @param {object} thisEl - конкретный элемент
-// * @param {string} div_id - id блока, в котором находится данный элемент
-// */
-//pmTemplates.toggleSelectOption = function (thisEl, div_id)
-//{
-//    $(thisEl).parent().toggleClass('selected');
-//    this.countSelectedOptions(div_id);
-//}
-//
-///**
-// * Функция подсчитывает количество выделенных элементов в определенной таблице элементов.
-// * И запоминает данное число в pmTemplates.model.selectedOptionsCount,
-// * а сами элементы в pmTemplates.model.selectedOptions.
-// * В зависимости от нового значения pmTemplates.model.selectedOptionsCount
-// * часть кнопок отображается либо скрывается.
-// * @param {string} div_id - id блока, в котором находятся данные элементы
-// */
-//pmTemplates.countSelectedOptions = function (div_id)
-//{
-//    var elements=$("#"+div_id+"_table tr");
-//    var count=0;
-//    var thisObj = this;
-//    thisObj.model.selectedOptions = [];
-//    for (var i = 0; i < elements.length; i++)
-//    {
-//        if($(elements[i]).hasClass('item-row') && $(elements[i]).hasClass('selected'))
-//        {
-//            count+=1;
-//            thisObj.model.selectedOptions.push($(elements[i]).attr('data-id'));
-//        }
-//    }
-//
-//    if(count==0)
-//    {
-//        $($("#"+div_id+" .actions_button")[0]).addClass("hide");
-//    }
-//    else
-//    {
-//        $($("#"+div_id+" .actions_button")[0]).removeClass("hide");
-//    }
-//    thisObj.model.selectedOptionsCount=count;
-//}
-//
-///**
-// *Функция удаляет все выделенные опции.
-// */
-//pmTemplates.removeSelectedOptions = function(item_id, option_names)
-//{
-//    var def = new $.Deferred();
-//    var thisObj = this;
-//    for(var i in option_names)
-//    {
-//        var optionName=option_names[i];
-//        delete thisObj.model.items[item_id].optionsCopyForDelete[optionName];
-//    }
-//    var dataToAdd1={options:{}};
-//    dataToAdd1['options']=thisObj.model.items[item_id].optionsCopyForDelete;
-//    spajs.ajax.Call({
-//        url: hostname + "/api/v2/" + thisObj.model.name + "/" + item_id + "/",
-//        type: "PATCH",
-//        contentType: 'application/json',
-//        data: JSON.stringify(dataToAdd1),
-//        success: function (data)
-//        {
-//            $.when(spajs.openURL(window.location.href)).done(function ()
-//            {
-//                $.notify('Options were successfully deleted', "success");
-//                def.resolve();
-//            }).fail(function (e)
-//            {
-//                webGui.showErrors(e.responseJSON);
-//                def.reject(e)
-//            });
-//        },
-//        error: function (e)
-//        {
-//            webGui.showErrors(e.responseJSON);
-//            def.reject(e)
-//        }
-//    });
-//    return def.promise();
-//}
-//
-///**
-// *Функция открывает список периодических тасок, созданных на основе данного шаблона.
-// */
-//pmTemplates.showPeriodicTasksList = function (holder, menuInfo, data)
-//{
-//    setActiveMenuLi();
-//    var thisObj = this;
-//    var def = new $.Deferred();
-//    var url_project_id = undefined;
-//    var template_id = data.reg[1];
-//    if(data.reg[2] !== undefined)
-//    {
-//        url_project_id = data.reg[1];
-//        template_id = data.reg[2];
-//    }
-//    $.when(thisObj.loadItem(template_id), thisObj.loadLinkedPeriodicTasks(template_id)).done(function ()
-//    {
-//        var tpl = 'linked-to-template-periodic-tasks_list';
-//        var project_id = thisObj.model.items[template_id].data.project;
-//        var url_project_name = undefined;
-//        if(url_project_id !== undefined)
-//        {
-//            $.when(pmProjects.loadItem(url_project_id)).done(function ()
-//            {
-//                url_project_name = pmProjects.model.items[url_project_id].name;
-//                $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj,
-//                    project_id:project_id, item_id:template_id, opt: {project_id:url_project_id, project_name: url_project_name}}))
-//                def.resolve();
-//
-//            }).fail(function (e)
-//            {
-//                webGui.showErrors(e.responseJSON);
-//                def.reject(e);
-//            });
-//        }
-//        else
-//        {
-//            $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj,
-//                project_id:project_id, item_id:template_id, opt: {project_id:url_project_id, project_name: url_project_name}}))
-//            def.resolve();
-//        }
-//    }).fail(function (e)
-//    {
-//        webGui.showErrors(e.responseJSON);
-//        def.reject(e);
-//    })
-//    return def.promise();
-//}
-//
-///**
-// *Функция открывает страницу создания новой периодической таски для шаблона.
-// */
-//pmTemplates.showNewPeriodicTaskFromTemplate = function (holder, menuInfo, data)
-//{
-//    var def = new $.Deferred();
-//    var thisObj = this;
-//    var url_project_id = undefined;
-//    var item_id = data.reg[1];
-//    if(data.reg[2] !== undefined)
-//    {
-//        url_project_id = data.reg[1];
-//        item_id = data.reg[2];
-//    }
-//    $.when(thisObj.loadItem(item_id), pmInventories.loadAllItems()).done(function()
-//    {
-//        var project_id = thisObj.model.items[item_id].data.project;
-//        var url_project_name = undefined;
-//        pmPeriodicTasks.model.newitem = {type:'INTERVAL', kind:'TEMPLATE'}
-//        var tpl = 'from-template-periodic-tasks_new_page';
-//        if(!spajs.just.isTplExists(tpl))
-//        {
-//            tpl = 'items_page';
-//        }
-//        if(url_project_id !== undefined)
-//        {
-//            $.when(pmProjects.loadItem(url_project_id)).done(function ()
-//            {
-//                url_project_name = pmProjects.model.items[url_project_id].name;
-//                $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, project_id:project_id, pmObj:thisObj, opt:{project_id:url_project_id, project_name:url_project_name}}))
-//                def.resolve();
-//            }).fail(function (e)
-//            {
-//                webGui.showErrors(e.responseJSON);
-//                def.reject(e);
-//            });
-//        }
-//        else
-//        {
-//            $(holder).insertTpl(spajs.just.render(tpl, {item_id:item_id, project_id:project_id, pmObj:thisObj, opt:{project_id:url_project_id, project_name:url_project_name}}))
-//            def.resolve();
-//        }
-//    }).fail(function(e)
-//    {
-//        webGui.showErrors(e.responseJSON);
-//        def.reject(e);
-//    })
-//
-//    return def.promise();
-//}
-//
-//
-///**
-// * Функция рендерит шаблон для поля поиска на странице списка опций шаблона.
-// */
-//pmTemplates.searchFieldForTemplateOptions = function (options)
-//{
-//    options.className = this.model.className;
-//    this.model.searchAdditionalData = options
-//    return spajs.just.render('searchFieldForTemplateOptions', {opt: options});
-//}
-//
-///**
-// * Функция для поиска опций на странице списка опций шаблона.
-// */
-//pmTemplates.searchTemplateOptions = function (query, options)
-//{
-//    var thisObj = this;
-//    var project_and_id = thisObj.defineProjectInUrl();
-//    if (thisObj.isEmptySearchQuery(query))
-//    {
-//        return spajs.open({menuId: project_and_id + 'template/' + thisObj.model.kind + '/' + options.template_id +'/options', reopen: true});
-//    }
-//
-//    return spajs.open({menuId: project_and_id + 'template/' + thisObj.model.kind + '/' + options.template_id +'/options' + '/search/' + this.searchObjectToString(trim(query)), reopen: true});
-//}
-//
-//
-///**
-// * Функция показывает результаты поиска опций шаблона.
-// */
-//pmTemplates.showOptionsSearchResult = function (holder, menuInfo, data)
-//{
-//    setActiveMenuLi();
-//    var thisObj = this;
-//    var def = new $.Deferred();
-//    var project_id = undefined;
-//    var template_id = data.reg[1];
-//    var search = this.searchStringToObject(decodeURIComponent(data.reg[2]));
-//    if(data.reg[3] !== undefined)
-//    {
-//        project_id = data.reg[1];
-//        template_id = data.reg[2];
-//        search = this.searchStringToObject(decodeURIComponent(data.reg[3]));
-//    }
-//    $.when(thisObj.loadItem(template_id)).done(function ()
-//    {
-//        thisObj.model.items[template_id].optionsCopyForDelete = JSON.parse(JSON.stringify(thisObj.model.items[template_id].options));
-//        var unvalidSearchOptions = [];
-//        for (var i in thisObj.model.items[template_id].options_list)
-//        {
-//            var option_name = thisObj.model.items[template_id].options_list[i];
-//            if(option_name.match(search.name) == null)
-//            {
-//                unvalidSearchOptions.push(option_name);
-//                delete thisObj.model.items[template_id].options_list[i];
-//            }
-//
-//        }
-//
-//        for(var i in unvalidSearchOptions)
-//        {
-//            delete thisObj.model.items[template_id].options[unvalidSearchOptions[i]];
-//        }
-//
-//        var tpl = 'template_options_list';
-//        var project_name = undefined;
-//
-//        if(project_id !== undefined)
-//        {
-//            $.when(pmProjects.loadItem(project_id)).done(function ()
-//            {
-//                project_name = pmProjects.model.items[project_id].name;
-//                $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(search.name), pmObj: thisObj, item_id:template_id, opt: {project_id:project_id, project_name:project_name}}))
-//                def.resolve();
-//            }).fail(function (e)
-//            {
-//                webGui.showErrors(e.responseJSON);
-//                def.reject(e);
-//            })
-//        }
-//        else
-//        {
-//            $(holder).insertTpl(spajs.just.render(tpl, {query:decodeURIComponent(search.name), pmObj: thisObj, item_id:template_id, opt: {project_id:project_id, project_name:project_name}}))
-//            def.resolve();
-//        }
-//
-//
-//    }).fail(function (e)
-//    {
-//        webGui.showErrors(e.responseJSON);
-//        def.reject(e);
-//    })
-//    return def.promise();
-//}
-//
-//pmTemplates.showListForProject = function (holder, menuInfo, data)
-//{
-//    setActiveMenuLi();
-//    var thisObj = this;
-//    var def = new $.Deferred();
-//    var offset = 0
-//    var limit = this.pageSize;
-//    if (data.reg && data.reg[2] > 0)
-//    {
-//        offset = this.pageSize * (data.reg[2] - 1);
-//    }
-//    var project_id = data.reg[1];
-//    $.when(pmProjects.loadItem(project_id)).done(function ()
-//    {
-//        var project_name = pmProjects.model.items[project_id].name;
-//        thisObj.model.parentObjectsData = [
-//            {
-//                item_name: project_name,
-//                parent_item: project_id,
-//                parent_type: pmProjects.model.page_name,
-//                parent_type_plural: pmProjects.model.name
-//            }
-//        ];
-//        spajs.ajax.Call({
-//            url: hostname + "/api/v2/templates/",
-//            type: "GET",
-//            contentType:'application/json',
-//            data:"project="+project_id,
-//            success: function(data)
-//            {
-//                thisObj.model.itemsForParent = {};
-//                thisObj.model.itemslistForParent = {};
-//                data.limit = limit
-//                data.offset = offset
-//                thisObj.model.itemslistForParent = data
-//
-//                for (var i in data.results)
-//                {
-//                    var val = thisObj.afterItemLoad(data.results[i])
-//                    thisObj.model.itemsForParent.justWatch(val.id);
-//                    thisObj.model.itemsForParent[val.id] = mergeDeep(thisObj.model.itemsForParent[val.id], val)
-//                }
-//
-//                var tpl = 'items_list_from_another_class';
-//
-//                $(holder).insertTpl(spajs.just.render(tpl, {query: "", pmObj: thisObj, parentObj:pmProjects, opt: {project_id:project_id, project_name:project_name,
-//                        parent_item: project_id, parent_type: pmProjects.model.page_name, back_link: 'project/'+project_id, link_with_parents:'project/'+project_id  }}))
-//                def.resolve();
-//            },
-//            error:function(e)
-//            {
-//                webGui.showErrors(e.responseJSON)
-//                def.reject(e)
-//            }
-//        });
-//    }).fail(function (e)
-//    {
-//        webGui.showErrors(e.responseJSON)
-//        def.reject(e)
-//    });
-//
-//    return def.promise();
-//}
-//
-//pmTemplates.showSearchResultsForProject = function (holder, menuInfo, data)
-//{
-//    setActiveMenuLi();
-//    var thisObj = this;
-//    var def = new $.Deferred();
-//    var offset = 0
-//    var limit = this.pageSize;
-//    if (data.reg && data.reg[3] > 0)
-//    {
-//        offset = this.pageSize * (data.reg[3] - 1);
-//    }
-//    var project_id = data.reg[1];
-//    var search_query = decodeURIComponent(data.reg[2]);
-//    $.when(pmProjects.loadItem(project_id)).done(function ()
-//    {
-//        var project_name = pmProjects.model.items[project_id].name;
-//        thisObj.model.parentObjectsData = [
-//            {
-//                item_name: project_name,
-//                parent_item: project_id,
-//                parent_type: pmProjects.model.page_name,
-//                parent_type_plural: pmProjects.model.name
-//            }
-//        ];
-//        spajs.ajax.Call({
-//            url: hostname + "/api/v2/templates/",
-//            type: "GET",
-//            contentType:'application/json',
-//            data:"project=" + project_id + "&name=" + search_query,
-//            success: function(data)
-//            {
-//                thisObj.model.itemsForParent = {};
-//                thisObj.model.itemslistForParent = {};
-//                data.limit = limit
-//                data.offset = offset
-//                thisObj.model.itemslistForParent = data
-//
-//                for (var i in data.results)
-//                {
-//                    var val = thisObj.afterItemLoad(data.results[i])
-//                    thisObj.model.itemsForParent.justWatch(val.id);
-//                    thisObj.model.itemsForParent[val.id] = mergeDeep(thisObj.model.itemsForParent[val.id], val)
-//                }
-//
-//                var tpl = 'items_list_from_another_class';
-//
-//                $(holder).insertTpl(spajs.just.render(tpl, {query: search_query, pmObj: thisObj, parentObj:pmProjects,
-//                    opt: {parent_item: project_id, parent_type: pmProjects.model.page_name, back_link: 'project/'+project_id, link_with_parents:'project/'+project_id  }}))
-//                def.resolve();
-//            },
-//            error:function(e)
-//            {
-//                webGui.showErrors(e.responseJSON);
-//                def.reject(e);
-//            }
-//        });
-//    }).fail(function (e)
-//    {
-//        webGui.showErrors(e.responseJSON);
-//        def.reject(e);
-//    });
-//
-//    return def.promise();
-//}
-//
-//pmTemplates.search = function (query, options)
-//{
-//    var project_and_id = this.defineProjectInUrl();
-//
-//    if (this.isEmptySearchQuery(query))
-//    {
-//        return spajs.open({menuId: project_and_id + this.model.name, reopen: true});
-//    }
-//
-//    return spajs.open({menuId: project_and_id + this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
-//}
+gui_project_template = {
 
+    getValue : function (hideReadOnly)
+    {
+        let arr_data_fields = [];
+
+        let template_data = gui_base_object.getValue.apply(this, arguments);
+        let data_field = {};
+
+        if(template_data.data)
+        {
+            data_field = JSON.parse(template_data.data);
+        }
+
+        if(template_data.kind.toLowerCase() == 'module')
+        {
+            arr_data_fields = ['module', 'args', 'inventory', 'group'];
+        }
+        else
+        {
+            arr_data_fields = ['playbook', 'inventory'];
+        }
+
+        arr_data_fields.forEach(function(value)
+        {
+            data_field[value] = template_data[value];
+            delete template_data[value];
+        })
+
+        template_data.data = JSON.stringify(data_field);
+
+        return template_data;
+    },
+
+    prepareDataBeforeRender: function()
+    {
+        let template_data = this.model.data;
+        let arr_data_fields = [];
+        if(template_data)
+        {
+            if(template_data.kind.toLowerCase() == 'module')
+            {
+                arr_data_fields = ['module', 'args', 'inventory', 'group']
+            }
+            else
+            {
+                arr_data_fields = ['playbook', 'inventory'];
+            }
+
+            arr_data_fields.forEach(function(value)
+            {
+                template_data[value] = template_data.data[value];
+            })
+        }
+
+        return template_data;
+    }
+
+}
+
+
+gui_project_template_variables = {
+
+    apiGetDataForQuery : function (query, variable)
+    { 
+        if(variable)
+        {
+            if(query.method == "get")
+            {
+                let res =  {
+                    "status": 200,
+                    "item": "variables",
+                    "type": "mod",
+                    "data": {},
+                    "subitem": [
+                        "1",
+                        "template"
+                    ]
+                }
+
+                let val = this.parent_template.model.data.data['vars'];
+                res.data = {
+                    "key": variable,
+                    "value": val[variable],
+                }
+
+                return res;
+            }
+
+            if(query.method == "put")
+            {
+                let template_data = this.parent_template.model.data
+
+                let vars = template_data.data['vars'];
+
+                if(!vars)
+                {
+                    vars = {};
+                }
+
+                vars[query.data.key] = query.data.value;
+
+                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+            }
+        }
+        else
+        {
+            if(query.method == "get")
+            {
+                let res =  {
+                    "status": 200,
+                    "item": "variables",
+                    "type": "mod",
+                    "data": {
+                        "count": 1,
+                        "next": null,
+                        "previous": null,
+                        "results": [ ]
+                    },
+                    "subitem": [
+                        "1",
+                        "template"
+                    ]
+                }
+
+                let vars = this.parent_template.model.data.data['vars'];
+                for(let i in vars)
+                {
+                    let val = vars[i]
+                    res.data.results.push({
+                        "id": i,
+                        "key": i,
+                        "value": vars[i],
+                    })
+                }
+                res.data.count = res.data.results.length
+                return res;
+            }
+
+            if(query.method == "post")
+            {
+                let template_data = this.parent_template.model.data
+
+                let vars = template_data.data['vars'];
+
+                if(!vars)
+                {
+                    vars = {};
+                }
+
+                vars[query.data.key] = query.data.value;
+
+                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+            }
+        }
+    },
+
+    apiQuery : function (query)
+    {
+        let variable;
+        if(query.data_type[query.data_type.length-1] != 'variables')
+        {
+            variable = query.data_type[query.data_type.length-1];
+        }
+        let def = new $.Deferred();
+
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
+        $.when(this.parent_template.load(query.data_type[3])).done(() =>{
+            
+            $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{ 
+                def.resolve(d) 
+            }).fail((e) =>{
+                def.reject(e);
+            })
+              
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    delete: function()
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            delete template_data.data.vars[url_info.api_variables_id]
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    deleteArray : function (ids)
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            for(let i in ids)
+            {
+                let id = ids[i];
+                delete template_data.data.vars[id];
+            }
+            guiPopUp.success("Objects of '"+this.api.bulk_name+"' type were successfully deleted");
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+}
+
+gui_project_template_option = {
+
+    apiGetDataForQuery : function (query, option)
+    { 
+        if(option)
+        {               
+            if(query.method == "get")
+            {
+                let res =  {
+                    "status": 200,
+                    "item": "option",
+                    "type": "mod",
+                    "data": {},
+                    "subitem": [
+                        "1",
+                        "template"
+                    ]
+                }
+
+                let val = this.parent_template.model.data.options[option];
+ 
+                res.data = { }
+                for(let i in gui_project_template_option_Schema)
+                { 
+                    res.data[i] = val[i]
+                }
+                
+                /*res.data = {
+                    "id": option,
+                    "name": val.name || option,
+                    "notes": val.notes
+                }*/
+
+                return res;
+            }
+
+            if(query.method == "put")
+            {
+                let template_data = this.parent_template.model.data
+
+                if(query.data.name)
+                {
+                    query.data.name = query.data.name.replace(/[\s\/]+/g,'_');
+                }
+
+                if(option != query.data.name)
+                {
+                    template_data.options[query.data.name] = template_data.options[option];
+                    delete template_data.options[option];
+                }
+
+                for(let field in query.data)
+                {
+                    template_data.options[query.data.name][field] = query.data[field];
+                }
+
+                if(template_data.options[query.data.name].name)
+                {
+                    template_data.options[query.data.name].name.replace(/[\s\/]+/g,'_');
+                }
+
+                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+            }
+        }
+        else
+        {
+            if(query.method == "get")
+            {
+                let res =  {
+                    "status": 200,
+                    "item": "option",
+                    "type": "mod",
+                    "data": {
+                        "count": 1,
+                        "next": null,
+                        "previous": null,
+                        "results": [ ]
+                    },
+                    "subitem": [
+                        "1",
+                        "template"
+                    ]
+                }
+
+                for(let i in this.parent_template.model.data.options)
+                {
+                    let val = this.parent_template.model.data.options[i]
+                    res.data.results.push({
+                        "id": i,
+                        "name": val.name || i,
+                    })
+                }
+                res.data.count = res.data.results.length
+                return res;
+            }
+
+            if(query.method == "post")
+            {
+                let template_data = this.parent_template.model.data
+                if(query.data.name)
+                {
+                    query.data.name = query.data.name.replace(/[\s\/]+/g,'_');
+                }
+                if(template_data.options[query.data.name])
+                {
+                    guiPopUp.error('Option with "' + query.data.name + '" name exists already');
+                    return undefined;
+                }
+
+                template_data.options[query.data.name] = query.data
+
+                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+            }
+        }
+    },
+
+    apiQuery : function (query)
+    {
+        let option;
+        if(query.data_type[query.data_type.length-1] != 'option' && query.data_type.length == 6)
+        {
+            option = query.data_type[query.data_type.length-1];
+        }
+        let def = new $.Deferred();
+
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
+        $.when(this.parent_template.load(query.data_type[3])).done(() =>{
+            
+            $.when(this.apiGetDataForQuery(query, option)).done((d) =>{ 
+                def.resolve(d) 
+            }).fail((e) =>{
+                def.reject(e);
+            })
+            
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    delete: function()
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            delete template_data.options[url_info.api_option_id]
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    deleteArray : function (ids)
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            for(let i in ids)
+            {
+                let id = ids[i];
+                delete template_data.options[id];
+            }
+            guiPopUp.success("Objects of '"+this.api.bulk_name+"' type were successfully deleted");
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+}
+
+gui_project_template_option_variables = {
+
+    apiGetDataForQuery : function (query, variable)
+    { 
+        if(variable)
+        {
+            if(query.method == "get")
+            {
+                let res =  {
+                    "status": 200,
+                    "item": "option",
+                    "type": "mod",
+                    "data": {},
+                    "subitem": [
+                        "1",
+                        "template"
+                    ]
+                }
+
+                let val = this.parent_template.model.data.options[query.data_type[5]];
+                res.data = {
+                    "key": variable,
+                    "value": val.vars[variable],
+                }
+
+                return res;
+            }
+
+            if(query.method == "put")
+            {
+                let template_data = this.parent_template.model.data
+
+                let option_data = template_data.options[query.data_type[5]];
+
+                if(!option_data.vars)
+                {
+                    option_data.vars = {};
+                }
+
+                option_data.vars[query.data.key] = query.data.value;
+
+                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+            }
+        }
+        else
+        {
+            if(query.method == "get")
+            {
+                let res =  {
+                    "status": 200,
+                    "item": "option",
+                    "type": "mod",
+                    "data": {
+                        "count": 1,
+                        "next": null,
+                        "previous": null,
+                        "results": [ ]
+                    },
+                    "subitem": [
+                        "1",
+                        "template"
+                    ]
+                }
+
+                let option_data = this.parent_template.model.data.options[query.data_type[5]];
+                for(let i in option_data.vars)
+                {
+                    let val = option_data.vars[i]
+                    res.data.results.push({
+                        "id": i,
+                        "key": i,
+                        "value": option_data.vars[i],
+                    })
+                }
+                res.data.count = res.data.results.length
+                return res;
+            }
+
+            if(query.method == "post")
+            {
+                let template_data = this.parent_template.model.data
+
+                let option_data = template_data.options[query.data_type[5]];
+
+                if(!option_data.vars)
+                {
+                    option_data.vars = {};
+                }
+
+                option_data.vars[query.data.key] = query.data.value;
+
+                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+            }
+        }
+    },
+
+    apiQuery : function (query)
+    {
+        let variable;
+        if(query.data_type[query.data_type.length-1] != 'variables')
+        {
+            variable = query.data_type[query.data_type.length-1];
+        }
+        let def = new $.Deferred();
+
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
+        $.when(this.parent_template.load(query.data_type[3])).done(() =>{
+          
+            $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{ 
+                def.resolve(d) 
+            }).fail((e) =>{
+                def.reject(e);
+            })
+            
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    delete: function()
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            delete template_data.options[url_info.api_option_id].vars[url_info.api_variables_id]
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+
+    deleteArray : function (ids)
+    {
+        let url_info = spajs.urlInfo.data.reg;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+        let def = new $.Deferred();
+
+        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
+            let template_data = data.data;
+            for(let i in ids)
+            {
+                let id = ids[i];
+                delete template_data.options[url_info.api_option_id].vars[id];
+            }
+            guiPopUp.success("Objects of '"+this.api.bulk_name+"' type were successfully deleted");
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
+        }).fail((e) =>{
+            def.reject(e);
+        })
+
+        return def.promise();
+    },
+}
+
+gui_project_template_option_Schema = { 
+    "name": {
+        "title": "Name",
+        "type": "string",
+        "maxLength": 512,
+        "minLength": 1,
+        "gui_links": [],
+        "definition": {},
+        "name": "name",
+        "parent_name_format": "option_name"
+    },
+    "group": {
+        "title": "Group",
+        "type": "string",
+        "maxLength": 512,
+        "minLength": 1,
+        "gui_links": [],
+        "definition": {},
+        "name": "group",
+        "parent_name_format": "option_group",
+        format:"autocomplete",
+        dynamic_properties:{
+            list_obj:projPath + "/group/",
+            value_field:'name',
+            view_field:'name',
+        },
+    },
+    "module": {
+        "title": "Module",
+        "type": "string",
+        "maxLength": 512,
+        "minLength": 1,
+        "gui_links": [],
+        "definition": {},
+        "name": "module",
+        format:"autocomplete",
+        dynamic_properties:{
+            list_obj:projPath + "/module/",
+            value_field:'path',
+            view_field:'path',
+        },
+        "parent_name_format": "option_module"
+    },
+    "args": {
+        "title": "Args",
+        "type": "string",
+        "maxLength": 512,
+        "minLength": 1,
+        "gui_links": [],
+        "definition": {},
+        "name": "args",
+        "parent_name_format": "option_args"
+    },
+    "notes": {
+        "title": "Notes",
+        "type": "string",
+        "format": "textarea",
+        "gui_links": [],
+        "definition": {},
+        "name": "notes",
+        "parent_name_format": "option_notes"
+    },
+}
+
+gui_project_template_option_variables_fields_Schema = {
+    "key": {
+        "title": "Key",
+        "type": "dynamic",
+        "dynamic_properties": {},
+        "required": true,
+        "__func__onInit": "TemplateVariable_key_onInit",
+        "gui_links": [],
+        "definition": {},
+        "name": "key",
+        "parent_name_format": "variables_key"
+    },
+    "value": {
+        "title": "Value",
+        "type": "dynamic",
+        "dynamic_properties": {"__func__callback": "TemplateVariable_value_callback",},
+        "required": true, 
+        "default": "",
+        "gui_links": [],
+        "definition": {},
+        "name": "value",
+        "parent_name_format": "variables_value",
+        "parent_field":"key"
+    }
+}
+
+let api_error_responses = {
+    "400": {
+        "description": "Validation error or some data error.",
+        "schema": {
+            "required": [
+                "detail"
+            ],
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "title": "Detail",
+                    "type": "string",
+                    "minLength": 1,
+                    "required": true
+                }
+            },
+            "definition_name": "Error",
+            "definition_ref": "#/definitions/Error"
+        }
+    },
+    "401": {
+        "description": "Unauthorized access error.",
+        "schema": {
+            "required": [
+                "detail"
+            ],
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "title": "Detail",
+                    "type": "string",
+                    "minLength": 1,
+                    "required": true
+                }
+            },
+            "definition_name": "Error",
+            "definition_ref": "#/definitions/Error"
+        }
+    },
+    "403": {
+        "description": "Permission denied error.",
+        "schema": {
+            "required": [
+                "detail"
+            ],
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "title": "Detail",
+                    "type": "string",
+                    "minLength": 1,
+                    "required": true
+                }
+            },
+            "definition_name": "Error",
+            "definition_ref": "#/definitions/Error"
+        }
+    },
+    "404": {
+        "description": "Not found error.",
+        "schema": {
+            "required": [
+                "detail"
+            ],
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "title": "Detail",
+                    "type": "string",
+                    "minLength": 1,
+                    "required": true
+                }
+            },
+            "definition_name": "Error",
+            "definition_ref": "#/definitions/Error"
+        }
+    }
+} 
+
+tabSignal.connect("openapi.schema", function(obj) {
+    // Модификация схемы до сохранения в кеш.
+    obj.schema.path["/project/{pk}/template/{template_id}/variables/"] = {
+        "level": 6,
+        "path": "/project/{pk}/template/{template_id}/variables/",
+        "type": "list",
+        "name": "variables",
+        "bulk_name": "variables",
+        "name_field": "name",
+        "method": {
+            "get": "list",
+            "patch": "",
+            "put": "",
+            "post": "new",
+            "delete": "",
+        },
+        "buttons": [],
+        "short_name": "project/template/variables",
+        "hide_non_required": 4,
+        "extension_class_name": [
+            "gui_project_template_variables"
+        ],
+        "selectionTag": "_project__pk__template__template_id__variables_",
+        "methodAdd": "post",
+        "canAdd": false,
+        "canRemove": false,
+        "canCreate": true,
+        "schema": {
+            "list": {
+                "fields": gui_project_template_option_variables_fields_Schema,
+                "filters": { },
+                "query_type": "get",
+                "operationId": "project_template_variables_list",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            },
+            "new": {
+                "fields": gui_project_template_option_variables_fields_Schema,
+                "query_type": "post",
+                "operationId": "project_template_variables_add",
+                "responses": {
+                    "201": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            }
+        },
+        "__link__page": "/project/{pk}/template/{template_id}/variables/{variables_id}/",
+        "page_path": "/project/{pk}/template/{template_id}/variables/{variables_id}/",
+        "sublinks": [],
+        "sublinks_l2": [],
+        "actions": {},
+        "links": {},
+        "multi_actions":{
+            "delete": {
+                "name":"delete",
+                "__func__onClick": "multi_action_delete",
+            }
+        },
+        "__link__parent": "/project/{pk}/template/{template_id}/",
+        "parent_path": "/project/{pk}/template/{template_id}/"
+    }
+ 
+    obj.schema.path["/project/{pk}/template/{template_id}/variables/{variables_id}/"] = {
+        "level": 7,
+        "path": "/project/{pk}/template/{template_id}/variables/{variables_id}/",
+        "type": "page",
+        "name": "variables",
+        "bulk_name": "variables",
+        "name_field": "name",
+        "method": {
+            "get": "page",
+            "patch": "edit",
+            "put": "edit",
+            "post": "",
+            "delete": ""
+        },
+        "buttons": [],
+        "short_name": "project/template/variables",
+        "hide_non_required": 4,
+        "extension_class_name": [
+            "gui_project_template_variables"
+        ],
+        "methodEdit": "put",
+        "selectionTag": "_project__pk__template__template_id__variables__variables_id__",
+        "canDelete": true,
+        "methodDelete": "delete",
+        "canEdit": true,
+        "schema": {
+            "get": {
+                "fields": gui_project_template_option_variables_fields_Schema,
+                "filters": {},
+                "query_type": "get",
+                "operationId": "project_template_variables_get",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            },
+            "edit": {
+                "fields": gui_project_template_option_variables_fields_Schema,
+                "query_type": "patch",
+                "operationId": "project_template_variables_edit",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                // "id": {
+                                //     "title": "Id",
+                                //     "type": "string",
+                                //     "readOnly": true
+                                // },
+                                "key": {
+                                    "title": "Key",
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__onInit": "TemplateVariable_key_onInit",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "key",
+                                    "parent_name_format": "variables_key"
+                                },
+                                "value": {
+                                    "title": "Value",
+                                    "type": "dynamic",
+                                    "dynamic_properties": {},
+                                    "required": true,
+                                    "__func__callback": "TemplateVariable_value_callback",
+                                    "default": "",
+                                    "gui_links": [],
+                                    "definition": {},
+                                    "name": "value",
+                                    "parent_name_format": "variables_value"
+                                }
+                            },
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            }
+        },
+        "__link__list": "/project/{pk}/template/{template_id}/variables/",
+        "list_path": "/project/{pk}/template/{template_id}/variables/",
+        "sublinks": [],
+        "sublinks_l2": [],
+        "actions": {},
+        "links": {},
+        "multi_actions": [],
+        "__link__parent": "/project/{pk}/template/{template_id}/variables/",
+        "parent_path": "/project/{pk}/template/{template_id}/variables/"
+    };
+
+    obj.schema.path["/project/{pk}/template/{template_id}/option/"] = {
+        "level": 6,
+        "path": "/project/{pk}/template/{template_id}/option/",
+        "type": "list",
+        "name": "option",
+        "bulk_name": "option",
+        "name_field": "name",
+        "buttons": [],
+        "short_name": "project/template/option",
+        "hide_non_required": 4,
+        "extension_class_name": [
+            "gui_project_template_option"
+        ],
+        "selectionTag": "_project__pk__template__template_id__option_",
+        "methodAdd": "post",
+        "canAdd": false,
+        "canRemove": false,
+        "canCreate": true,
+        "method": {'get': 'list', 'patch': '', 'put': '', 'post': 'new', 'delete': ''},
+        "schema": {
+            "list": {
+                "fields": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string",
+                        "maxLength": 512,
+                        "minLength": 1,
+                        "gui_links": [],
+                        "definition": {},
+                        "name": "name",
+                        "parent_name_format": "option_name"
+                    },
+                },
+                "filters": {},
+                "query_type": "get",
+                "operationId": "project_template_option_list",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "title": "Id",
+                                    "type": "integer",
+                                    "readOnly": true
+                                },
+                                "name": {
+                                    "title": "Name",
+                                    "type": "string",
+                                    "maxLength": 512,
+                                    "minLength": 1
+                                },
+                            },
+                            "definition_name": "Option",
+                            "definition_ref": "#/definitions/Option"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            },
+            "new": {
+                "fields": gui_project_template_option_Schema,
+                "query_type": "post",
+                "operationId": "project_template_option_add",
+                "responses": {
+                    "201": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "type": "object",
+                            "properties": gui_project_template_option_Schema,
+                            "definition_name": "OneOption",
+                            "definition_ref": "#/definitions/OneOption"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            }
+        },
+        "__link__page": "/project/{pk}/template/{template_id}/option/{option_id}/",
+        "page_path": "/project/{pk}/template/{template_id}/option/{option_id}/",
+        "sublinks": [],
+        "sublinks_l2": [],
+        "actions": {},
+        "links": {},
+        "multi_actions":{
+            "delete": {
+                "name":"delete",
+                "__func__onClick": "multi_action_delete",
+            }
+        },
+        "__link__parent": "/project/{pk}/template/{template_id}/",
+        "parent_path": "/project/{pk}/template/{template_id}/"
+    }
+
+
+    obj.schema.path["/project/{pk}/template/{template_id}/option/{option_id}/"] = {
+        "level": 7,
+        "path": "/project/{pk}/template/{template_id}/option/{option_id}/",
+        "type": "page",
+        "name": "option",
+        "bulk_name": "option",
+        "name_field": "name",
+        "method": {
+            "get": "page",
+            "patch": "edit",
+            "put": "edit",
+            "post": "",
+            "delete": ""
+        },
+        "buttons": [],
+        "short_name": "project/template/option",
+        "hide_non_required": 4,
+        "extension_class_name": [
+            "gui_project_template_option"
+        ],
+        "methodEdit": "put",
+        "selectionTag": "_project__pk__template__template_id__option__option_id__",
+        "canDelete": true,
+        "methodDelete": "delete",
+        "canEdit": true,
+        "schema": {
+            "get": {
+                "fields": gui_project_template_option_Schema,
+                "filters": {},
+                "query_type": "get",
+                "operationId": "project_template_option_get",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "type": "object",
+                            "properties": gui_project_template_option_Schema,
+                            "definition_name": "OneOption",
+                            "definition_ref": "#/definitions/OneOption"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            },
+            "edit": {
+                "fields": gui_project_template_option_Schema,
+                "query_type": "patch",
+                "operationId": "project_template_option_edit",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "type": "object",
+                            "properties": gui_project_template_option_Schema,
+                            "definition_name": "OneOption",
+                            "definition_ref": "#/definitions/OneOption"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            }
+        },
+        "__link__list": "/project/{pk}/template/{template_id}/option/",
+        "list_path": "/project/{pk}/template/{template_id}/option/",
+        "sublinks": [],
+        "sublinks_l2": [],
+        "actions": {},
+        "links": { 
+            "__link__variables": "/project/{pk}/template/{template_id}/option/{option_id}/variables/", 
+        },
+        "multi_actions": [],
+        "__link__parent": "/project/{pk}/template/{template_id}/option/",
+        "parent_path": "/project/{pk}/template/{template_id}/option/"
+    }
+
+    obj.schema.path["/project/{pk}/template/{template_id}/option/{option_id}/variables/"] = {
+        "level": 8,
+        "path": "/project/{pk}/template/{template_id}/option/{option_id}/variables/",
+        "type": "list",
+        "name": "variables",
+        "bulk_name": "variables",
+        "name_field": "name",
+        "method": {
+            "get": "list",
+            "patch": "",
+            "put": "",
+            "post": "new",
+            "delete": "",
+            // "new": "post"
+        },
+        "buttons": [],
+        "short_name": "project/template/option/variables",
+        "hide_non_required": 4,
+        "extension_class_name": [
+            "gui_project_template_option_variables"
+        ],
+        "selectionTag": "_project__pk__template__template_id__option__option_id__variables_",
+        "methodAdd": "post",
+        "canAdd": false,
+        "canRemove": false,
+        "canCreate": true,
+        "schema": {
+            "list": {
+                "fields": gui_project_template_option_variables_fields_Schema,
+                "filters": { },
+                "query_type": "get",
+                "operationId": "project_template_option_variables_list",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            },
+            "new": {
+                "fields": gui_project_template_option_variables_fields_Schema,
+                "query_type": "post",
+                "operationId": "project_template_option_variables_add",
+                "responses": {
+                    "201": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            }
+        },
+        "__link__page": "/project/{pk}/template/{template_id}/option/{option_id}/variables/{variables_id}/",
+        "page_path": "/project/{pk}/template/{template_id}/option/{option_id}/variables/{variables_id}/",
+        "sublinks": [],
+        "sublinks_l2": [],
+        "actions": {},
+        "links": {},
+        "multi_actions":{
+            "delete": {
+                "name":"delete",
+                "__func__onClick": "multi_action_delete",
+            }
+        },
+        "__link__parent": "/project/{pk}/template/{template_id}/option/{option_id}/",
+        "parent_path": "/project/{pk}/template/{template_id}/option/{option_id}/"
+    }
+
+    obj.schema.path["/project/{pk}/template/{template_id}/option/{option_id}/variables/{variables_id}/"] = {
+        "level": 9,
+        "path": "/project/{pk}/template/{template_id}/option/{option_id}/variables/{variables_id}/",
+        "type": "page",
+        "name": "variables",
+        "bulk_name": "variables",
+        "name_field": "name",
+        "method": {
+            "get": "page",
+            "patch": "edit",
+            "put": "edit",
+            "post": "",
+            "delete": ""
+        },
+        "buttons": [],
+        "short_name": "project/template/option/variables",
+        "hide_non_required": 4,
+        "extension_class_name": [
+            "gui_project_template_option_variables"
+        ],
+        "methodEdit": "put",
+        "selectionTag": "_project__pk__template__template_id__option__option_id__variables__variables_id__",
+        "canDelete": true,
+        "methodDelete": "delete",
+        "canEdit": true,
+        "schema": {
+            "get": {
+                "fields": gui_project_template_option_variables_fields_Schema,
+                "filters": {},
+                "query_type": "get",
+                "operationId": "project_template_option_variables_get",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            },
+            "edit": {
+                "fields": gui_project_template_option_variables_fields_Schema,
+                "query_type": "patch",
+                "operationId": "project_template_option_variables_edit",
+                "responses": {
+                    "200": {
+                        "description": "Action accepted.",
+                        "schema": {
+                            "required": [
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "definition_name": "TemplateVariable",
+                            "definition_ref": "#/definitions/TemplateVariable"
+                        }
+                    },
+                    "400": api_error_responses["400"],
+                    "401": api_error_responses["401"],
+                    "403": api_error_responses["403"],
+                    "404": api_error_responses["404"]
+                }
+            }
+        },
+        "__link__list": "/project/{pk}/template/{template_id}/option/{option_id}/variables/",
+        "list_path": "/project/{pk}/template/{template_id}/option/{option_id}/variables/",
+        "sublinks": [],
+        "sublinks_l2": [],
+        "actions": {},
+        "links": {},
+        "multi_actions": [],
+        "__link__parent": "/project/{pk}/template/{template_id}/option/{option_id}/variables/",
+        "parent_path": "/project/{pk}/template/{template_id}/option/{option_id}/variables/"
+    };
+
+})
+
+function OneTemplate_args_callback(fieldObj, newValue)
+{
+    let obj = {}
+
+    if(newValue.value.toLowerCase() == "module")
+    {
+        obj.type = "string";
+    }
+    else
+    {
+        obj.type = "null";
+    }
+    return obj
+
+}
+
+function OneTemplate_group_callback(fieldObj, newValue)
+{
+    let obj = {
+        type:"select2"
+    }
+    if(newValue.value.toLowerCase() == "module")
+    {
+        obj.override_opt = {
+            dynamic_properties:{
+                list_obj:projPath + "/group/",
+                // list_obj:projPath + "/inventory/{inventory_id}/group/",
+                value_field:'id',
+                view_field:'name',
+            }
+        };
+    }
+    else
+    {
+        obj.type = "null"
+    }
+    return obj
+}
+
+function OneTemplate_module_callback(fieldObj, newValue)
+{
+    let obj = {
+        type:"select2"
+    }
+    if(newValue.value.toLowerCase() == "module")
+    {
+        obj.override_opt = {
+            dynamic_properties:{
+                list_obj:projPath + "/module/",
+                value_field:'path',
+                view_field:'path',
+            },
+        };
+    }
+    else
+    {
+        obj.type = "null"
+    }
+    return obj
+}
+
+function OneTemplate_playbook_callback(fieldObj, newValue)
+{
+    let obj = {
+        type:"select2"
+    }
+    if(newValue.value.toLowerCase() == "task")
+    {
+        obj.override_opt = {
+            dynamic_properties:{
+                list_obj:projPath + "/playbook/",
+                value_field:'id',
+                view_field:'name',
+            }
+        };
+        obj.required = true;
+    }
+    else
+    {
+        obj.type = "null"
+    }
+    return obj
+}
+
+function OneTemplate_inventory_callback(fieldObj, newValue)
+{
+    let obj = {
+        type:"select2"
+    }
+
+    obj.override_opt = {
+        dynamic_properties:{
+            list_obj:projPath + "/inventory/",
+            value_field:'id',
+            view_field:'name',
+        }
+    };
+
+    return obj;
+}
+
+tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
+    let properties = obj.definition.properties;
+
+    properties.options.hidden = true;
+    properties.options_list.hidden = true;
+    properties.data.hidden = true;
+    properties.data.required = false;
+
+    properties.inventory = {
+        name: 'inventory',
+        title: 'Inventory',
+        required: true,
+        type: 'number',
+        format: 'dynamic',
+        parent_field: 'kind',
+        dynamic_properties: {
+            __func__callback: 'OneTemplate_inventory_callback',
+        }
+    }
+    properties.group = {
+        name: 'group',
+        title: 'Group',
+        type: 'string',
+        format: 'dynamic',
+        default: 'all',
+        parent_field: 'kind',
+        dynamic_properties: {
+            __func__callback: 'OneTemplate_group_callback',
+        }
+    }
+    properties.module = {
+        name: 'module',
+        title: 'Module',
+        type: 'string',
+        format: 'dynamic',
+        parent_field: 'kind',
+        dynamic_properties: {
+            __func__callback: 'OneTemplate_module_callback',
+        }
+    }
+
+    properties.args = {
+        name: 'args',
+        title: 'Arguments',
+        type: 'string',
+        format: 'dynamic',
+        parent_field: 'kind',
+        dynamic_properties: {
+            __func__callback: 'OneTemplate_args_callback',
+        }
+    }
+
+    properties.playbook = {
+        name: 'playbook',
+        title: 'Playbook',
+        type: 'string',
+        format: 'dynamic',
+        parent_field: 'kind',
+        dynamic_properties: {
+            __func__callback: 'OneTemplate_playbook_callback',
+        }
+    }
+
+});
+
+
+tabSignal.connect("openapi.schema",  function(obj)
+{
+    let template = obj.schema.path['/project/{pk}/template/{template_id}/']
+    template.links['options'] = obj.schema.path['/project/{pk}/template/{template_id}/option/'];
+    template.links['variables'] = obj.schema.path['/project/{pk}/template/{template_id}/variables/'];
+});
+
+function TemplateVariable_key_onInit(opt = {}, value, parent_object)
+{
+    let thisObj = this;
+    let template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+
+    $.when(template.load(parent_object.url_vars.api_periodic_task_id)).done(function(){
+        let fields = {}
+        if(template.model.data.kind.toLowerCase() == "task")
+        {
+            fields = window.guiSchema.path["/project/{pk}/execute_playbook/"].schema.exec.fields
+            delete fields.playbook
+        }
+        if(template.model.data.kind.toLowerCase() == "module")
+        {
+            fields = window.guiSchema.path["/project/{pk}/execute_module/"].schema.exec.fields
+            delete fields.module
+        }
+
+        delete fields.inventory
+        thisObj.setType("enum", {
+            enum:Object.keys(fields),
+        });
+        thisObj.opt.all_fields = fields
+
+        thisObj._callAllonChangeCallback()
+    })
+}
+
+function TemplateVariable_value_callback(fieldObj, newValue)
+{
+    if(!newValue.value)
+    {
+        return;
+    }
+
+    if(!newValue.opt.all_fields)
+    {
+        return;
+    }
+
+    if(!newValue.opt.all_fields[newValue.value])
+    {
+        return;
+    }
+
+    let field = newValue.opt.all_fields[newValue.value]
+
+    field.format = getFieldType(field)
+
+    return field
+}
 
 guiElements.template_data = function(opt = {})
 {

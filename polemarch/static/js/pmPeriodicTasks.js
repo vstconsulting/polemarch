@@ -10,7 +10,7 @@ function PeriodicTaskVariable_key_onInit(opt = {}, value, parent_object)
         let fields = {}
         if(periodicTask.model.data.kind == "PLAYBOOK")
         {
-            fields = window.guiSchema.path[projPath + "/execute_playbook/"].schema.exec.fields  
+            fields = window.guiSchema.path[projPath + "/execute_playbook/"].schema.exec.fields
             delete fields.playbook 
         }
         if(periodicTask.model.data.kind == "MODULE")
@@ -163,7 +163,7 @@ function OnePeriodictask_inventory_callback (fieldObj, newValue)
 }
 
 tabSignal.connect("openapi.schema.definition.OnePeriodictask", function(data)
-{  
+{
     data.definition.properties.mode.dynamic_properties = {}
     data.definition.properties.mode.required = false
     data.definition.properties.mode.dynamic_properties.__func__callback = "OnePeriodictask_mode_callback"

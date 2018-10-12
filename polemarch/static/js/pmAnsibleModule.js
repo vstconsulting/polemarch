@@ -60,8 +60,9 @@ pmAnsibleModule.fastCommandWidget = function(holder)
 {
     console.error("Виджет fastCommandWidget не готов ещё!")
     return;
-    let projects = new apiproject.list()
-    let inventory = new apiinventory.list()
+   
+    let projects = new guiObjectFactory("/project/")
+    let inventory = new guiObjectFactory("/inventory/") 
     
     
     $.when(projects.loadAllItems(), inventory.loadAllItems()).always(function()

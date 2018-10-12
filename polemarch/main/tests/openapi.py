@@ -1435,14 +1435,14 @@ class OApiTestCase(BaseTestCase):
         for parameter in parameters:
             if parameter['name'] in path_parameters:
                 path_parameters.remove(parameter['name'])
-            else:
+            else:  # nocv
                 msg = 'In \'{path}\'[parameters], have key \'{key}\' ' \
                       'doesn\'t exist in {path}'
                 self.logging(msg, path=path, key=parameter['name'])
         msg = 'In `{path}`[parameters], not enough keys for path'.format(path=path)
         self.assertEqual(len(path_parameters), 0, msg)
 
-    def logging(self, msg, *args, **kwargs):
+    def logging(self, msg, *args, **kwargs):  # nocv
         output_msg = msg.format(*args, **kwargs)
         print(output_msg)
 
