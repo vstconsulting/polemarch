@@ -1,0 +1,248 @@
+
+<!-- Шаблон виджета -->
+<script type="text/x-just" data-just="pmwItemsCounter">
+    <div class="col-lg-2 col-sm-4 col-xs-6 dnd-block" id="pmw<%- model.nameInStats %>Counter">
+        <div class="small-box bg-aqua cursor-move1">
+            <div class="inner">
+                <h3><%= model.justText('count') %>&nbsp;</h3>
+                <p style="text-transform: capitalize"><%- model.nameInStats %></p>
+            </div>
+            <div class="icon hidden-xs" style="top: 0px;">
+                <i class="glyphicon glyphicon-cog"></i>
+            </div>
+            <% if(model.path){ %>
+                <a href="<%- vstMakeLocalUrl([model.path]) %>" onclick="return vstGO(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <% }else{ %>
+                <i  class="small-box-footer" >&nbsp;</i>
+            <% } %>
+        </div>
+    </div>
+</script>
+
+<!--Шаблон графика -->
+<script type="text/x-just" data-just="pmwChartWidget">
+    <div class="col-lg-12 col-xs-12">
+        <div class="box box-info
+        <% for(var j in guiDashboard.model.widgets[0]){  %>
+            <% if(guiDashboard.model.widgets[0][j].name == 'pmwChartWidget' && guiDashboard.model.widgets[0][j].collapse) { %>
+              collapsed-box
+            <% } %>
+        <% } %>
+        ">
+        <div class="box-header ui-sortable-handle cursor-move1">
+        <!--
+        <i class="fa fa-th"></i>
+        <h3 class="box-title">Tasks history</h3>
+    -->
+    Tasks history
+
+    <!--<div class="box-tools pull-right"> -->
+    <div class="pull-right">
+        <button type="button" class="btn btn-sm w-btn" data-widget="collapse" id="collapse-chart" onclick="guiDashboard.setNewWidgetCollapseValue(this)">
+            <i
+                <% for(var j in guiDashboard.model.widgets[0]){  %>
+                    <% if(guiDashboard.model.widgets[0][j].name == 'pmwChartWidget' && guiDashboard.model.widgets[0][j].collapse==true) { %>
+                       class="fa fa-plus"
+                    <% } %>
+                    <% if(guiDashboard.model.widgets[0][j].name == 'pmwChartWidget' && guiDashboard.model.widgets[0][j].collapse==false) { %>
+                       class="fa fa-minus"
+                    <% } %>
+                <% } %>
+            ></i>
+        </button>
+    <button type="button" class="btn btn-sm w-btn" data-widget="remove"  onclick="guiDashboard.setNewWidgetActiveValue(this)">
+        <i class="fa fa-times"></i>
+    </button>
+    </div>
+
+    <div class="pull-right" id="period-list" style="width:200px; min-width:130px;
+        <% for(var j in guiDashboard.model.widgets[0]){  %>
+            <% if(guiDashboard.model.widgets[0][j].name == 'pmwChartWidget' && guiDashboard.model.widgets[0][j].collapse==true) { %>
+                display:none;
+            <% } %>
+        <% } %>
+    ">
+        <label  style="float:left; margin-right:10px; line-height:26px;">Period</label>
+        <select id="chart-period" class="form-control" style="max-width:130px; height:26px; line-height:26px; padding:3px 12px; display:inline-block; float:left;" onchange="guiDashboard.updateStatsDataLast(this)">
+        <option value="1095">last 3 years</option>
+    <option value="365">last year</option>
+    <option value="90">last 3 months</option>
+    <option value="30">last month</option>
+    <option value="14">last 2 weeks</option>
+    <option value="7">last week</option>
+    <option value="3">last 3 days</option>
+    </select>
+    </div>
+
+
+
+    </div>
+    <div class="box-body border-radius-none">
+        <div id="c3-history-chart"></div>
+        </div>
+        <!-- /.box-body -->
+        </div>
+        </div>
+</script>
+
+<!-- Шаблон модального окна настройки виджетов -->
+<script type="text/x-just" data-just="modalWidgetsSettings">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Widgets options</h4>
+      </div>
+      <!-- Основное содержимое модального окна -->
+      <div class="modal-body">
+       <table class="table table-bordered" id="modal-table">
+        <tbody>
+            <tr>
+                <th>Name</th>
+                <th>Is active</th>
+                <th>Collapsed</th>
+                <!--<th>Order</th>-->
+            </tr>
+
+             <% for(var i in guiDashboard.model.widgets){ %>
+                <% for(var j in guiDashboard.model.widgets[i]){  %>
+                    <tr rowname="<%= guiDashboard.model.widgets[i][j].name %>">
+                    <% if(guiDashboard.model.widgets[i][j].title){ %>
+                        <td><%= guiDashboard.model.widgets[i][j].title %></td>
+                    <% } %>
+                    <td valuename="active">
+                    <div class="form-control boolean-select <% if(guiDashboard.model.widgets[i][j].active){ %> selected <% } %>" onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" style="cursor: pointer;">
+                        <div class="ico-on fa fa-toggle-on"></div>
+                        <div class="ico-off fa  fa-toggle-off"></div>
+                     </div>
+                    </td>
+                    <td valuename="collapse">
+                        <div class="form-control boolean-select <% if(guiDashboard.model.widgets[i][j].collapse){ %> selected <% } %>" <% if(guiDashboard.model.widgets[i][j].type==0){ %> onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" <% } %>>
+                            <div class="ico-on fa fa-toggle-on" <% if(guiDashboard.model.widgets[i][j].type==1){ %> style="cursor: not-allowed!important;"<% } %>></div>
+                            <div class="ico-off fa  fa-toggle-off" <% if(guiDashboard.model.widgets[i][j].type==1){ %> style="cursor: not-allowed!important;"<% } %>></div>
+                         </div>
+                    </td>
+                   <!-- <td><input type="number" value="<%= guiDashboard.model.widgets[i][j].sort%>" class="form-control"></td>-->
+                    </tr>
+                 <% } %>
+
+            <% } %>
+        </tbody>
+    </table>
+      </div>
+      <!-- Футер модального окна -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="spajs.showLoader(guiDashboard.saveWigdetsOptionsFromModal());  return false;">Save</button>
+      </div>
+    </div>
+  </div>
+</script>
+
+<!-- Шаблон настройки виджетов из профайла -->
+<script type="text/x-just" data-just="WidgetsSettingsFromProfile">
+    <section class="col-lg-12">
+        <div class="box box-info collapsed-box">
+            <div class="box-header with-border">
+                Dashboard widgets options<br>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                </div>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered" id="modal-table">
+                    <tbody>
+                        <tr>
+                            <th>Name</th>
+                            <th>Is active</th>
+                            <th>Collapsed</th>
+                            <!--<th>Order</th>-->
+                        </tr>
+
+                         <% for(var i in guiDashboard.model.widgets){ %>
+                            <% for(var j in guiDashboard.model.widgets[i]){  %>
+                                <tr rowname="<%= guiDashboard.model.widgets[i][j].name %>">
+                                <% if(guiDashboard.model.widgets[i][j].title){ %>
+                                    <td><%= guiDashboard.model.widgets[i][j].title %></td>
+                                <% } %>
+                                <td class="boolean-select" valuename="active">
+                                <div class="form-control <% if(guiDashboard.model.widgets[i][j].active){ %> selected <% } %>" onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" style="cursor: pointer;">
+                                    <div class="ico-on fa fa-toggle-on"></div>
+                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                 </div>
+                                </td>
+                                <td class="boolean-select" valuename="collapse">
+                                    <div class="form-control <% if(guiDashboard.model.widgets[i][j].collapse){ %> selected <% } %>" <% if(guiDashboard.model.widgets[i][j].type==0){ %> onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" <% } %>>
+                                        <div class="ico-on fa fa-toggle-on" <% if(guiDashboard.model.widgets[i][j].type==1){ %> style="cursor: not-allowed!important;"<% } %>></div>
+                                        <div class="ico-off fa  fa-toggle-off" <% if(guiDashboard.model.widgets[i][j].type==1){ %> style="cursor: not-allowed!important;"<% } %>></div>
+                                     </div>
+                                </td>
+                               <!-- <td><input type="number" value="<%= guiDashboard.model.widgets[i][j].sort%>" class="form-control"></td>-->
+                                </tr>
+                             <% } %>
+
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+            <div class="box-footer">
+                <div class="row">
+                    <div class="form-group col-lg-1">
+                        <span class="btn btn-primary" onclick="spajs.showLoader(guiDashboard.saveWigdetsOptionsFromProfile());  return false;">Save</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</script>
+
+<!-- Страница dashboard -->
+<script type="text/x-just" data-just="pmDashboard">
+    
+    <%[ buttons_row %>
+    
+        <button class="btn btn-default" onclick="guiDashboard.showModalWindow();" style="margin-left: 10px; margin-top:-7px;">
+           <i class="glyphicon glyphicon-cog"></i>
+        </button>
+        <button class="btn btn-default" onclick="guiDashboard.toggleSortable(this);" style="margin-left: 5px; margin-top:-7px;">
+           <i class="fa fa-lock"></i>
+        </button>
+
+        <div id="modal-widgets-settings" class="modal fade">
+            <%= guiDashboard.renderModalWindow() %>
+        </div>
+ 
+        <%* buttons %>
+    <%] %>
+
+    <%[ main_content_row %>
+        
+        <section class="content row" >
+
+            <!-- Вывод списка виджетов -->
+            <% for(var i in guiDashboard.model.widgets){ %>
+                <div class="row" id="dnd-container">
+                    <% for(var j in guiDashboard.model.widgets[i]){  %>
+                        <% if (guiDashboard.model.widgets[i][j].active) { %>
+                            <% if(guiDashboard.model.widgets[i][j].widget && guiDashboard.model.widgets[i][j].type==1){ %>
+                                <% if(guiDashboard.model.widgets[i][j].widget){ %>
+                                    <%= guiDashboard.model.widgets[i][j].widget.render() %>
+                                <% } %>
+                            <% } %>
+                            <% if(guiDashboard.model.widgets[i][j].type==0){ %>
+                                <% if(guiDashboard.model.widgets[i][j].widget){ %>
+                                    <div class="dnd-block" id="<%= guiDashboard.model.widgets[i][j].name %>"></div>
+                                    <%= guiDashboard.model.widgets[i][j].widget.render() %>
+                                <% } %>
+                            <% } %>
+                        <% } %>
+                    <% } %>
+                   </div>
+            <% } %>
+
+        </section>
+    <%] %> 
+
+    <%! guiDashboard %>
+</script>
+

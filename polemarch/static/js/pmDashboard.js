@@ -1,15 +1,8 @@
 var widget_sort={};
 
-var pmDashboard = {
-    pageSize:20,
-    model:{
-        name:"module"
-    }
-}
+guiDashboard.model.className = "guiDashboard"
 
-pmDashboard.model.className = "pmDashboard"
-
-pmDashboard.model.count = {
+guiDashboard.model.count = {
     projects:'-',
     inventories:'-',
     hosts:'-',
@@ -18,7 +11,7 @@ pmDashboard.model.count = {
     history:'-',
 }
 
-pmDashboard.statsData={
+guiDashboard.statsData={
     projects:'-',
     inventories:'-',
     hosts:'-',
@@ -27,9 +20,11 @@ pmDashboard.statsData={
     templates:'-'
 }
 
-pmDashboard.statsDataLast=14;
-pmDashboard.statsDataLastQuery=14;
-pmDashboard.statsDataMomentType='day';
+guiDashboard.tpl_name = 'pmDashboard'
+
+guiDashboard.statsDataLast=14;
+guiDashboard.statsDataLastQuery=14;
+guiDashboard.statsDataMomentType='day';
 
 
 /**
@@ -45,7 +40,7 @@ pmDashboard.statsDataMomentType='day';
  *
  * @type Array
  */
-pmDashboard.model.widgets = [
+guiDashboard.model.widgets = [
     [
 
     ],
@@ -54,9 +49,9 @@ pmDashboard.model.widgets = [
 /*
 *Двумерный массив, хранящий в себе настройки виджетов по умолчанию.
  */
-pmDashboard.model.defaultWidgets = [
+guiDashboard.model.defaultWidgets = [
     [
-        /*{
+        /**/{
             name:'pmwTemplatesCounter',
             title:'Templates Counter',
             sort:0,
@@ -64,7 +59,7 @@ pmDashboard.model.defaultWidgets = [
             opt:{},
             type:1,
             collapse:false,
-        },*/
+        },
         {
             name:'pmwProjectsCounter',
             title:'Projects Counter',
@@ -152,14 +147,14 @@ pmDashboard.model.defaultWidgets = [
 /*
  * Массив, хранящий в себе настройки линий графика на странице Dashboard'а.
  */
-pmDashboard.model.ChartLineSettings = [
+guiDashboard.model.ChartLineSettings = [
 
 ]
 
 /*
  * Массив, хранящий в себе настройки по умолчанию линий графика на странице Dashboard'а.
  */
-pmDashboard.model.defaultChartLineSettings = [
+guiDashboard.model.defaultChartLineSettings = [
     {
         name: "all_tasks",
         title: "All tasks",
@@ -202,51 +197,51 @@ pmDashboard.model.defaultChartLineSettings = [
  * Функция полностью копирует настройки для линий графика.
  * Подразумевается, что данная функция вызывается, когда пришел из API пустой JSON.
  */
-pmDashboard.cloneChartLineSettingsTotally = function(){
-    pmDashboard.model.ChartLineSettings = JSON.parse(JSON.stringify(pmDashboard.model.defaultChartLineSettings));
-    return pmDashboard.model.ChartLineSettings;
+guiDashboard.cloneChartLineSettingsTotally = function(){
+    guiDashboard.model.ChartLineSettings = JSON.parse(JSON.stringify(guiDashboard.model.defaultChartLineSettings));
+    return guiDashboard.model.ChartLineSettings;
 }
 
 /**
  * Функция обновляет часть настроек линий графика, данные по которым пришли из API.
  * Подразумевается, что данная функция вызывается, когда пришел из API непустой JSON.
  */
-pmDashboard.cloneChartLineSettingsFromApi = function(data){
-    pmDashboard.model.ChartLineSettings = JSON.parse(JSON.stringify(pmDashboard.model.defaultChartLineSettings));
-    for(var i in pmDashboard.model.ChartLineSettings)
+guiDashboard.cloneChartLineSettingsFromApi = function(data){
+    guiDashboard.model.ChartLineSettings = JSON.parse(JSON.stringify(guiDashboard.model.defaultChartLineSettings));
+    for(var i in guiDashboard.model.ChartLineSettings)
     {
         for(var j in data)
         {
-            if(pmDashboard.model.ChartLineSettings[i].name == j)
+            if(guiDashboard.model.ChartLineSettings[i].name == j)
             {
                 for(var k in data[j])
                 {
-                    if(pmDashboard.model.ChartLineSettings[i].hasOwnProperty(k))
+                    if(guiDashboard.model.ChartLineSettings[i].hasOwnProperty(k))
                     {
-                        pmDashboard.model.ChartLineSettings[i][k] = data[j][k];
+                        guiDashboard.model.ChartLineSettings[i][k] = data[j][k];
                     }
                 }
             }
         }
     }
-    return pmDashboard.model.ChartLineSettings;
+    return guiDashboard.model.ChartLineSettings;
 }
 
 /**
  * Функция полностью копирует настройки по умолчанию для виджетов.
  * Подразумевается, что данная функция вызывается, когда пришел из API пустой JSON.
  */
-pmDashboard.cloneDefaultWidgetsTotally = function(){
-    for(var i in pmDashboard.model.defaultWidgets[0])
+guiDashboard.cloneDefaultWidgetsTotally = function(){
+    for(var i in guiDashboard.model.defaultWidgets[0])
     {
-        pmDashboard.model.widgets[0][i]={};
-        for (var j in pmDashboard.model.defaultWidgets[0][i])
+        guiDashboard.model.widgets[0][i]={};
+        for (var j in guiDashboard.model.defaultWidgets[0][i])
         {
-            pmDashboard.model.widgets[0][i][j]=pmDashboard.model.defaultWidgets[0][i][j];
+            guiDashboard.model.widgets[0][i][j]=guiDashboard.model.defaultWidgets[0][i][j];
         }
     }
-    console.log(pmDashboard.model.widgets[0]);
-    return pmDashboard.model.widgets[0];
+    console.log(guiDashboard.model.widgets[0]);
+    return guiDashboard.model.widgets[0];
 }
 
 /**
@@ -255,16 +250,16 @@ pmDashboard.cloneDefaultWidgetsTotally = function(){
  * Данные настройки не меняются в ходе работы пользователя с интерфейсом.
  * Подразумевается, что данная функция вызывается, когда пришел из API непустой JSON.
  */
-pmDashboard.cloneDefaultWidgetsStaticSettingsOnly = function(){
-    for(var i in pmDashboard.model.defaultWidgets[0])
+guiDashboard.cloneDefaultWidgetsStaticSettingsOnly = function(){
+    for(var i in guiDashboard.model.defaultWidgets[0])
     {
-        pmDashboard.model.widgets[0][i]={};
-        pmDashboard.model.widgets[0][i].name=pmDashboard.model.defaultWidgets[0][i].name;
-        pmDashboard.model.widgets[0][i].title=pmDashboard.model.defaultWidgets[0][i].title;
-        pmDashboard.model.widgets[0][i].opt=pmDashboard.model.defaultWidgets[0][i].opt;
-        pmDashboard.model.widgets[0][i].type=pmDashboard.model.defaultWidgets[0][i].type;
+        guiDashboard.model.widgets[0][i]={};
+        guiDashboard.model.widgets[0][i].name=guiDashboard.model.defaultWidgets[0][i].name;
+        guiDashboard.model.widgets[0][i].title=guiDashboard.model.defaultWidgets[0][i].title;
+        guiDashboard.model.widgets[0][i].opt=guiDashboard.model.defaultWidgets[0][i].opt;
+        guiDashboard.model.widgets[0][i].type=guiDashboard.model.defaultWidgets[0][i].type;
     }
-    return pmDashboard.model.widgets[0];
+    return guiDashboard.model.widgets[0];
 }
 
 /**
@@ -274,28 +269,28 @@ pmDashboard.cloneDefaultWidgetsStaticSettingsOnly = function(){
  * Если данное свойство соответсвует, то его значение присваивается настройкам виджета.
  * В противном случае ему присваивается настройка по умолчанию.
  */
-pmDashboard.clonetWidgetsSettingsFromApiAndVerify = function(data){
-    pmDashboard.cloneDefaultWidgetsStaticSettingsOnly();
-    for(var i in pmDashboard.model.defaultWidgets[0])
+guiDashboard.clonetWidgetsSettingsFromApiAndVerify = function(data){
+    guiDashboard.cloneDefaultWidgetsStaticSettingsOnly();
+    for(var i in guiDashboard.model.defaultWidgets[0])
     {
         for(var j in data)
         {
-            if(pmDashboard.model.defaultWidgets[0][i].name==j)
+            if(guiDashboard.model.defaultWidgets[0][i].name==j)
             {
-                for (var k in pmDashboard.model.defaultWidgets[0][i])
+                for (var k in guiDashboard.model.defaultWidgets[0][i])
                 {
                     if(k in data[j]){
-                        pmDashboard.model.widgets[0][i][k]=data[j][k];
+                        guiDashboard.model.widgets[0][i][k]=data[j][k];
                     }
                     else
                     {
-                        pmDashboard.model.widgets[0][i][k]=pmDashboard.model.defaultWidgets[0][i][k];
+                        guiDashboard.model.widgets[0][i][k]=guiDashboard.model.defaultWidgets[0][i][k];
                     }
                 }
             }
         }
     }
-    return pmDashboard.model.widgets[0];
+    return guiDashboard.model.widgets[0];
 }
 
 /**
@@ -308,7 +303,7 @@ pmDashboard.clonetWidgetsSettingsFromApiAndVerify = function(data){
  * @param {Object} currentObj - объект с текущими настройками
  *
  */
-pmDashboard.checkNecessityToLoadDashboardSettingsFromApi = function(defaultObj, currentObj)
+guiDashboard.checkNecessityToLoadDashboardSettingsFromApi = function(defaultObj, currentObj)
 {
     var bool1 = false, bool2 = false;
     for (var i in defaultObj){
@@ -346,11 +341,11 @@ pmDashboard.checkNecessityToLoadDashboardSettingsFromApi = function(defaultObj, 
 
 /**
  *Функция создает объект, в который вносит актуальные настройки виджета,
- *на основе изменений, внесенных в pmDashboard.model.widgets[0][i].
- *localObj- pmDashboard.model.widgets[0][i]
+ *на основе изменений, внесенных в guiDashboard.model.widgets[0][i].
+ *localObj- guiDashboard.model.widgets[0][i]
  * @type Object
  */
-pmDashboard.getNewWidgetSettings = function(localObj)
+guiDashboard.getNewWidgetSettings = function(localObj)
 {
     var obj={};
     obj.sort=localObj.sort;
@@ -362,45 +357,50 @@ pmDashboard.getNewWidgetSettings = function(localObj)
 /**
  *Функция заправшивает у API пользовательские настройки Dashboard'a
  *(настройки виджетов, настройки линий графика).
- *Если они есть(пришел не пустой объект), то данные настройки добавляются в pmDashboard.model.
+ *Если они есть(пришел не пустой объект), то данные настройки добавляются в guiDashboard.model.
  */
-pmDashboard.getUserDashboardSettingsFromAPI = function()
+guiDashboard.getUserDashboardSettingsFromAPI = function()
 {
     var userId=window.my_user_id;
-    if(pmDashboard.checkNecessityToLoadDashboardSettingsFromApi(pmDashboard.model.defaultWidgets[0], pmDashboard.model.widgets[0]) ||
-        pmDashboard.checkNecessityToLoadDashboardSettingsFromApi(pmDashboard.model.defaultChartLineSettings, pmDashboard.model.ChartLineSettings))
+    if(guiDashboard.checkNecessityToLoadDashboardSettingsFromApi(guiDashboard.model.defaultWidgets[0], guiDashboard.model.widgets[0]) ||
+        guiDashboard.checkNecessityToLoadDashboardSettingsFromApi(guiDashboard.model.defaultChartLineSettings, guiDashboard.model.ChartLineSettings))
     {
-        return spajs.ajax.Call({
-            url: hostname + "/api/v2/user/" + userId + "/settings/",
-            type: "GET",
-            contentType: 'application/json',
-            success: function (data)
-            {
-                if ($.isEmptyObject(data.widgetSettings))
-                {
-                    pmDashboard.cloneDefaultWidgetsTotally();
-                }
-                else
-                {
-                    pmDashboard.clonetWidgetsSettingsFromApiAndVerify(data.widgetSettings);
-                    pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
-                }
+        let query = {
+            method: "get",
+            data_type: ["user", userId, "settings"],  
+        }
 
-                if ($.isEmptyObject(data.chartLineSettings))
-                {
-                    pmDashboard.cloneChartLineSettingsTotally();
-                }
-                else
-                {
-                    pmDashboard.cloneChartLineSettingsFromApi(data.chartLineSettings);
-                }
-            },
-            error: function (e)
+        let def = new $.Deferred();
+        $.when(api.query(query, true)).done(function(answer)
+        { 
+            let data = answer.data
+            if ($.isEmptyObject(data.widgetSettings))
             {
-                console.warn(e)
-                webGui.showErrors(e)
+                guiDashboard.cloneDefaultWidgetsTotally();
             }
-        });
+            else
+            {
+                guiDashboard.clonetWidgetsSettingsFromApiAndVerify(data.widgetSettings);
+                guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
+            }
+
+            if ($.isEmptyObject(data.chartLineSettings))
+            {
+                guiDashboard.cloneChartLineSettingsTotally();
+            }
+            else
+            {
+                guiDashboard.cloneChartLineSettingsFromApi(data.chartLineSettings);
+            }
+            
+            def.resolve()
+        }).fail(e => { 
+            console.warn(e)
+            webGui.showErrors(e)
+            def.reject()
+        })
+       
+        return def.promise()
     }
     else
     {
@@ -412,42 +412,41 @@ pmDashboard.getUserDashboardSettingsFromAPI = function()
  *Функция сохраняет в API пользовательские настройки Dashboard'a
  *(настройки виджетов, настройки линий графика).
  */
-pmDashboard.putUserDashboardSettingsToAPI = function()
+guiDashboard.putUserDashboardSettingsToAPI = function()
 {
     var userId=window.my_user_id;
     var widgetSettings= {};
-    for(var i in  pmDashboard.model.widgets[0]){
-        var objName=pmDashboard.model.widgets[0][i].name;
-        widgetSettings[objName]=pmDashboard.getNewWidgetSettings(pmDashboard.model.widgets[0][i]);
+    for(var i in  guiDashboard.model.widgets[0]){
+        var objName=guiDashboard.model.widgets[0][i].name;
+        widgetSettings[objName]=guiDashboard.getNewWidgetSettings(guiDashboard.model.widgets[0][i]);
     }
     var chartLineSettings = {};
-    for(var i in pmDashboard.model.ChartLineSettings){
-        var objName=pmDashboard.model.ChartLineSettings[i].name;
-        chartLineSettings[objName]={active: pmDashboard.model.ChartLineSettings[i].active};
+    for(var i in guiDashboard.model.ChartLineSettings){
+        var objName=guiDashboard.model.ChartLineSettings[i].name;
+        chartLineSettings[objName]={active: guiDashboard.model.ChartLineSettings[i].active};
     }
-    return spajs.ajax.Call({
-        url: hostname + "/api/v2/user/" + userId + "/settings/",
-        type: "POST",
-        contentType: 'application/json',
-        data: JSON.stringify({widgetSettings:widgetSettings, chartLineSettings:chartLineSettings}),
-        success: function (data)
-        {
-            //console.log("Data was posted");
 
-        },
-        error: function (e)
-        {
-            console.warn(e)
-            webGui.showErrors(e)
-        }
-    });
+    let query = {
+         method: "post",
+         data_type: ["user", userId, "settings"],
+         data:{widgetSettings:widgetSettings, chartLineSettings:chartLineSettings}
+     }
 
+     let def = new $.Deferred();
+
+     $.when(api.query(query, true)).fail(e => {
+         console.warn(e)
+         webGui.showErrors(e)
+         def.reject()
+     })
+
+     return def.promise()  
 }
 
 /**
  *Функция, сортирующая массив объектов.
  */
-pmDashboard.sortCountWidget=function(Obj1, Obj2)
+guiDashboard.sortCountWidget=function(Obj1, Obj2)
 {
     return Obj1.sort-Obj2.sort;
 }
@@ -455,35 +454,35 @@ pmDashboard.sortCountWidget=function(Obj1, Obj2)
 /**
  *Функция, меняющая свойство виджета active на false.
  */
-pmDashboard.setNewWidgetActiveValue = function(thisButton)
+guiDashboard.setNewWidgetActiveValue = function(thisButton)
 {
     var widgetName=thisButton.parentElement.parentElement.parentElement.parentElement.parentElement.getAttribute("id");
-    for(var i in pmDashboard.model.widgets[0])
+    for(var i in guiDashboard.model.widgets[0])
     {
-        if(pmDashboard.model.widgets[0][i].name==widgetName)
+        if(guiDashboard.model.widgets[0][i].name==widgetName)
         {
-            pmDashboard.model.widgets[0][i].active=false;
+            guiDashboard.model.widgets[0][i].active=false;
         }
     }
-    pmDashboard.putUserDashboardSettingsToAPI();
+    guiDashboard.putUserDashboardSettingsToAPI();
 }
 
 /**
  *Функция, меняющая свойство виджета collapse на противоположное (true-false).
  */
-pmDashboard.setNewWidgetCollapseValue = function(thisButton)
+guiDashboard.setNewWidgetCollapseValue = function(thisButton)
 {
     var widgetName=thisButton.parentElement.parentElement.parentElement.parentElement.parentElement.getAttribute("id");
-    for(var i in pmDashboard.model.widgets[0])
+    for(var i in guiDashboard.model.widgets[0])
     {
-        if(pmDashboard.model.widgets[0][i].name==widgetName)
+        if(guiDashboard.model.widgets[0][i].name==widgetName)
         {
-            pmDashboard.model.widgets[0][i].collapse=!pmDashboard.model.widgets[0][i].collapse;
+            guiDashboard.model.widgets[0][i].collapse=!guiDashboard.model.widgets[0][i].collapse;
 
             //скрываем селект с выбором периода на виджете-графике при его сворачивании
             if(widgetName=="pmwChartWidget")
             {
-                if(pmDashboard.model.widgets[0][i].collapse==false)
+                if(guiDashboard.model.widgets[0][i].collapse==false)
                 {
                     $("#period-list").slideDown(400);
                 }
@@ -494,20 +493,20 @@ pmDashboard.setNewWidgetCollapseValue = function(thisButton)
             }
         }
     }
-    pmDashboard.putUserDashboardSettingsToAPI();
+    guiDashboard.putUserDashboardSettingsToAPI();
 }
 
 /**
  *Функция, сохраняющая настройки виджетов/линий графика,
  *внесенные в таблицу редактирования настроек Dashboard'a.
  */
-pmDashboard.getOptionsFromTable = function(table_id, pmDashboard_obj)
+guiDashboard.getOptionsFromTable = function(table_id, guiDashboard_obj)
 {
     var modalTable=document.getElementById(table_id);
     var modalTableTr=modalTable.getElementsByTagName("tr");
     for(var i=1; i<modalTableTr.length; i++)
     {
-        var pmDashboard_obj_name=modalTableTr[i].getAttribute("rowname");
+        var guiDashboard_obj_name=modalTableTr[i].getAttribute("rowname");
         var modalTableTrTds=modalTableTr[i].children;
         for(var j=0; j<modalTableTrTds.length; j++)
         {
@@ -524,11 +523,11 @@ pmDashboard.getOptionsFromTable = function(table_id, pmDashboard_obj)
                         selected=true;
                     }
                 }
-                for(var z in  pmDashboard_obj)
+                for(var z in  guiDashboard_obj)
                 {
-                    if(pmDashboard_obj[z].name==pmDashboard_obj_name)
+                    if(guiDashboard_obj[z].name==guiDashboard_obj_name)
                     {
-                        pmDashboard_obj[z][valueName]=selected;
+                        guiDashboard_obj[z][valueName]=selected;
                     }
                 }
             }
@@ -539,20 +538,20 @@ pmDashboard.getOptionsFromTable = function(table_id, pmDashboard_obj)
 /**
  *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a.
  */
-pmDashboard.saveWigdetsOptions = function()
+guiDashboard.saveWigdetsOptions = function()
 {
-    pmDashboard.getOptionsFromTable("modal-table",pmDashboard.model.widgets[0]);
-    pmDashboard.putUserDashboardSettingsToAPI();
+    guiDashboard.getOptionsFromTable("modal-table",guiDashboard.model.widgets[0]);
+    guiDashboard.putUserDashboardSettingsToAPI();
 }
 
 /**
  *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a,
  *из модального окна на странице Dashboard'a.
  */
-pmDashboard.saveWigdetsOptionsFromModal = function()
+guiDashboard.saveWigdetsOptionsFromModal = function()
 {
-    return $.when(pmDashboard.saveWigdetsOptions()).done(function(){
-        return $.when(hidemodal(), pmDashboard.HideAfterSaveModalWindow()).done(function(){
+    return $.when(guiDashboard.saveWigdetsOptions()).done(function(){
+        return $.when(hidemodal(), guiDashboard.HideAfterSaveModalWindow()).done(function(){
             return spajs.openURL("/");
         }).promise();
     }).promise();
@@ -563,9 +562,9 @@ pmDashboard.saveWigdetsOptionsFromModal = function()
  *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a,
  *из секции на странице профиля пользователя.
  */
-pmDashboard.saveWigdetsOptionsFromProfile = function()
+guiDashboard.saveWigdetsOptionsFromProfile = function()
 {
-    return $.when(pmDashboard.saveWigdetsOptions()).done(function(){
+    return $.when(guiDashboard.saveWigdetsOptions()).done(function(){
         return guiPopUp.success("Dashboard widget options were successfully saved");
     }).fail(function(){
         return guiPopUp.error("Dashboard widget options were not saved");
@@ -575,19 +574,19 @@ pmDashboard.saveWigdetsOptionsFromProfile = function()
 /**
  *Функция, сохраняющая настройки линий графика Dashboard'a.
  */
-pmDashboard.saveChartLineSettings = function()
+guiDashboard.saveChartLineSettings = function()
 {
-    pmDashboard.getOptionsFromTable("chart_line_settings_table", pmDashboard.model.ChartLineSettings);
-    pmDashboard.putUserDashboardSettingsToAPI();
+    guiDashboard.getOptionsFromTable("chart_line_settings_table", guiDashboard.model.ChartLineSettings);
+    guiDashboard.putUserDashboardSettingsToAPI();
 }
 
 /**
  *Функция, сохраняющая настройки линий графика, внесенных в форму настроек виджетов Dashboard'a,
  *из секции на странице профиля пользователя.
  */
-pmDashboard.saveChartLineSettingsFromProfile = function()
+guiDashboard.saveChartLineSettingsFromProfile = function()
 {
-    return $.when(pmDashboard.saveChartLineSettings()).done(function(){
+    return $.when(guiDashboard.saveChartLineSettings()).done(function(){
         return guiPopUp.success("Dashboard chart lines settings were successfully saved");
     }).fail(function(){
         return guiPopUp.error("Dashboard chart lines settings were not saved");
@@ -597,10 +596,10 @@ pmDashboard.saveChartLineSettingsFromProfile = function()
 /**
  *Функция, сохраняющая все настройки, касающиеся Dashboard'a, со страницы профиля пользователя.
  */
-pmDashboard.saveAllDashboardSettingsFromProfile = function(){
-    pmDashboard.getOptionsFromTable("modal-table",pmDashboard.model.widgets[0]);
-    pmDashboard.getOptionsFromTable("chart_line_settings_table", pmDashboard.model.ChartLineSettings);
-    return $.when(pmDashboard.putUserDashboardSettingsToAPI()).done(function(){
+guiDashboard.saveAllDashboardSettingsFromProfile = function(){
+    guiDashboard.getOptionsFromTable("modal-table",guiDashboard.model.widgets[0]);
+    guiDashboard.getOptionsFromTable("chart_line_settings_table", guiDashboard.model.ChartLineSettings);
+    return $.when(guiDashboard.putUserDashboardSettingsToAPI()).done(function(){
         return guiPopUp.success("Dashboard settings were successfully saved");
     }).fail(function(){
         return guiPopUp.error("Dashboard settings were not saved");
@@ -610,16 +609,16 @@ pmDashboard.saveAllDashboardSettingsFromProfile = function(){
 /**
  * Функция, которая формирует массив данных для кривых графика по отдельному статусу
  */
-pmDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
+guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
 {
     for(var i in tasks_data) {
         tasks_data[i]=0;
     }
 
-    for(var i in pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType])
+    for(var i in guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType])
     {
-        var val = pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType][i];
-        var time =+ moment(val[pmDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
+        var val = guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType][i];
+        var time =+ moment(val[guiDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
 
         if(val.status==status){
             tasks_data[time] = val.sum;
@@ -643,74 +642,93 @@ pmDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
  * который дает нам информацию для виджетов класса pmwItemsCounter,
  * а также для графика на странице Dashboard.
  */
-pmDashboard.loadStats=function()
+guiDashboard.loadStats=function()
 {
-    var limit=1;
     var thisObj = this;
+    
+    /*var limit=1;
     return spajs.ajax.Call({
-        url: hostname + "/api/v2/stats/?last="+pmDashboard.statsDataLastQuery,
+        url: hostname + "/api/v2/stats/?last="+guiDashboard.statsDataLastQuery,
         type: "GET",
         contentType: 'application/json',
         data: "limit=" + encodeURIComponent(limit)+"&rand="+Math.random(),
         success: function (data)
         {
-            pmDashboard.statsData=data;
+            thisObj.statsData=data;
         },
         error: function (e)
         {
             console.warn(e)
             webGui.showErrors(e)
         }
-    });
+    });*/
+   
+    let query = {
+            type: "get",
+            item: "stats", 
+            filter:"last="+guiDashboard.statsDataLastQuery
+        }
+
+    let def = new $.Deferred();
+    $.when(api.query(query, true)).done(function(answer)
+    { 
+        thisObj.statsData=answer.data; 
+        def.resolve()
+    }).fail(function(e){ 
+        
+        def.reject(e)
+    })
+
+    return def.promise();  /**/
 }
 
 /**
  *Функция вызывается, когда происходит изменение периода на графике(пользователь выбрал другой option в select).
  *Функция обновляет значения переменных, которые в дальнейшем используются для запроса к api/v2/stats и отрисовки графика.
  */
-pmDashboard.updateStatsDataLast=function(thisEl)
+guiDashboard.updateStatsDataLast=function(thisEl)
 {
     var newLast=thisEl.value;
     switch(newLast) {
         case '1095':
-            pmDashboard.statsDataLast=3;
-            pmDashboard.statsDataMomentType="year";
+            guiDashboard.statsDataLast=3;
+            guiDashboard.statsDataMomentType="year";
             break;
         case '365':
-            pmDashboard.statsDataLast=13;
-            pmDashboard.statsDataMomentType="month";
+            guiDashboard.statsDataLast=13;
+            guiDashboard.statsDataMomentType="month";
             break;
         case '90':
-            pmDashboard.statsDataLast=3;
-            pmDashboard.statsDataMomentType="month";
+            guiDashboard.statsDataLast=3;
+            guiDashboard.statsDataMomentType="month";
             break;
         default:
-            pmDashboard.statsDataLast=+newLast;
-            pmDashboard.statsDataMomentType="day";
+            guiDashboard.statsDataLast=+newLast;
+            guiDashboard.statsDataMomentType="day";
             break;
     }
-    pmDashboard.statsDataLastQuery=+newLast;
-    pmDashboard.updateData();
+    guiDashboard.statsDataLastQuery=+newLast;
+    guiDashboard.updateData();
 }
 
 /**
  * Ниже представлены 3 функции для работы с модальным окном - Set widget options
- * pmDashboard.showModalWindow - открывает модальное окно, предварительно обновляя данные
- * pmDashboard.HideAfterSaveModalWindow - скрывает модальное окно
- * pmDashboard.renderModalWindow - отрисовывает модальное окно
+ * guiDashboard.showModalWindow - открывает модальное окно, предварительно обновляя данные
+ * guiDashboard.HideAfterSaveModalWindow - скрывает модальное окно
+ * guiDashboard.renderModalWindow - отрисовывает модальное окно
  */
-pmDashboard.showModalWindow = function()
+guiDashboard.showModalWindow = function()
 {
     if($('div').is('#modal-widgets-settings'))
     {
-        pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
+        guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
         $('#modal-widgets-settings').empty();
-        $('#modal-widgets-settings').html(pmDashboard.renderModalWindow());
+        $('#modal-widgets-settings').html(guiDashboard.renderModalWindow());
         $("#modal-widgets-settings").modal('show');
     }
 }
 
-pmDashboard.HideAfterSaveModalWindow = function()
+guiDashboard.HideAfterSaveModalWindow = function()
 {
     if($('div').is('#modal-widgets-settings'))
     {
@@ -719,7 +737,7 @@ pmDashboard.HideAfterSaveModalWindow = function()
 
 }
 
-pmDashboard.renderModalWindow = function()
+guiDashboard.renderModalWindow = function()
 {
     var html=spajs.just.render('modalWidgetsSettings');
     return html;
@@ -727,13 +745,16 @@ pmDashboard.renderModalWindow = function()
 
 
 
-pmDashboard.stopUpdates = function()
+guiDashboard.stopUpdates = function()
 {
     clearTimeout(this.model.updateTimeoutId)
     this.model.updateTimeoutId = undefined;
 }
 
-pmDashboard.toggleSortable = function(thisButton)
+/**
+ * Для перетаскивания виджетов и изменения их порядка
+ */
+guiDashboard.toggleSortable = function(thisButton)
 {
     var state = widget_sort.option("disabled");
     widget_sort.option("disabled", !state);
@@ -758,84 +779,27 @@ pmDashboard.toggleSortable = function(thisButton)
         }
     }
 }
-
-/**
- * Функция подгружает данные необходимые для отрисовки страницы Dashboard'a
- * одним bulk запросом.
- */
-pmDashboard.getDataForDashboardFromBulk = function ()
-{
-    var def = new $.Deferred();
-    var bulkArr = [
-        {
-            type:"get",
-            item: "project",
-            filters: "limit=1"
-        },
-        {
-            type:"get",
-            item: "inventory",
-            filters: "limit=1"
-        },
-        /*{
-            type:"get",
-            item: "template",
-            filters: "limit=1"
-        },*/
-    ];
-
-    spajs.ajax.Call({
-        url: hostname + "/api/v2/_bulk/",
-        type: "PUT",
-        contentType: 'application/json',
-        data: JSON.stringify(bulkArr),
-        success: function (data)
-        {
-            /*for(var i in data)
-            {
-                debugger;
-                var pmObj = pmItems.definePmObject(bulkArr[i].item);
-                pmObj.model.itemslist = data[i].data;
-                for(var j in data[i].data.results)
-                {
-                    var val = pmObj.afterItemLoad(data[i].data.results[j])
-                    pmObj.model.items.justWatch(val.id);
-                    pmObj.model.items[val.id] = mergeDeep(pmObj.model.items[val.id], val)
-                }
-            }*/
-            def.resolve();
-            return;
-        },
-        error: function (e) {
-            guiPopUp.error("Error " + e, "error");
-            def.reject();
-        }
-    })
-
-    return def.promise();
-}
-
-
-
+  
 tabSignal.connect('guiLocalSettings.hideMenu', function(){
 
     setTimeout(function(){
 
         if(spajs.currentOpenMenu && spajs.currentOpenMenu.id == 'home')
         {
-            pmDashboard.updateData()
+            guiDashboard.updateData()
         }
     }, 200)
 })
 
-tabSignal.connect('hideLoadingProgress', function(){ 
+/*
+tabSignal.connect('hideLoadingProgress', function(){
     if(spajs.currentOpenMenu && spajs.currentOpenMenu.id == 'home')
     {
-        pmDashboard.updateData()
-    } 
-})
+        guiDashboard.updateData()
+    }
+})*/
 
-pmDashboard.updateData = function()
+guiDashboard.updateData = function()
 {
     var thisObj = this
     if(this.model.updateTimeoutId)
@@ -844,11 +808,11 @@ pmDashboard.updateData = function()
         this.model.updateTimeoutId = undefined
     }
 
-    $.when(pmDashboard.loadStats()).done(function()
+    $.when(guiDashboard.loadStats()).done(function()
     {
         //обновляем счетчики для виджетов
         pmwHostsCounter.updateCount();
-        //pmwTemplatesCounter.updateCount();
+        pmwTemplatesCounter.updateCount();
         pmwGroupsCounter.updateCount();
         pmwProjectsCounter.updateCount();
         pmwInventoriesCounter.updateCount();
@@ -862,7 +826,7 @@ pmDashboard.updateData = function()
         var hourNum=",T00:00:00";
         var startTimeOrg="";
 
-        switch (pmDashboard.statsDataMomentType) {
+        switch (guiDashboard.statsDataMomentType) {
             case "year":
                 startTimeOrg=yearNum+"-01-01"+hourNum;
                 break;
@@ -873,20 +837,20 @@ pmDashboard.updateData = function()
                 startTimeOrg=yearNum+"-"+monthNum+"-"+dayNum+hourNum;
                 break;
         }
-       
+
         //задаем стартовую дату для графика.
-        //pmDashboard.statsDataLast - количество периодов назад
-        //pmDashboard.statsDataMomentType - тип периода - месяц/год
-        var startTime =+ moment(startTimeOrg).subtract(pmDashboard.statsDataLast-1, pmDashboard.statsDataMomentType).tz(window.timeZone).format("x");
-        
+        //guiDashboard.statsDataLast - количество периодов назад
+        //guiDashboard.statsDataMomentType - тип периода - месяц/год
+        var startTime =+ moment(startTimeOrg).subtract(guiDashboard.statsDataLast-1, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
+
         tasks_data = {};
         tasks_data_t = [];
 
         //формируем в цикле временные отрезки для графика относительно стартовой даты
-        for(var i = 0; i< pmDashboard.statsDataLast; i++)
+        for(var i = 0; i< guiDashboard.statsDataLast; i++)
         {
             //идем на период вперед
-            var time=+moment(startTime).add(i, pmDashboard.statsDataMomentType).tz(window.timeZone).format("x");
+            var time=+moment(startTime).add(i, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
             tasks_data[time] = 0;
             tasks_data_t.push(time);
         }
@@ -895,16 +859,16 @@ pmDashboard.updateData = function()
         var linesForChartArr = [];
         //объект, хранящий в себе цвета этих линий
         var colorPaternForLines = {};
-        for(var i in pmDashboard.model.ChartLineSettings)
+        for(var i in guiDashboard.model.ChartLineSettings)
         {
-            var lineChart = pmDashboard.model.ChartLineSettings[i];
+            var lineChart = guiDashboard.model.ChartLineSettings[i];
 
             //формируем массив значений для кривой all tasks
             if(lineChart.name == 'all_tasks')
             {
-                for (var i in pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType]) {
-                    var val = pmDashboard.statsData.jobs[pmDashboard.statsDataMomentType][i];
-                    var time = +moment(val[pmDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
+                for (var i in guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType]) {
+                    var val = guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType][i];
+                    var time = +moment(val[guiDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
                     if (!tasks_data[time]) {
                         tasks_data[time] = val.all;
                         tasks_data_t.push(time)
@@ -929,62 +893,61 @@ pmDashboard.updateData = function()
             //формируем массив значений для кривой каждого статуса
             if(lineChart.name != 'all_tasks' && lineChart.active == true)
             {
-                var chart_tasks_data_var = pmDashboard.getDataForStatusChart(tasks_data, tasks_data_t, lineChart.title);
+                var chart_tasks_data_var = guiDashboard.getDataForStatusChart(tasks_data, tasks_data_t, lineChart.title);
                 linesForChartArr.push(chart_tasks_data_var);
                 colorPaternForLines[lineChart.title]=lineChart.color;
             }
         }
 
         //загружаем график, перечисляем массивы данных для графика и необходимые цвета для графиков
-        pmDashboard.model.historyChart.load({
+        guiDashboard.model.historyChart.load({
             columns: linesForChartArr,
             colors: colorPaternForLines
         });
     });
 
     this.model.updateTimeoutId = setTimeout(function(){
-        pmDashboard.updateData()
+        guiDashboard.updateData()
     }, 1000*30)
 }
 
 
 
 
-pmDashboard.open  = function(holder, menuInfo, data)
+guiDashboard.open  = function(holder, menuInfo, data)
 {
     setActiveMenuLi();
     var thisObj = this;
 
-    return $.when(pmDashboard.getUserDashboardSettingsFromAPI(),
-        pmDashboard.getDataForDashboardFromBulk()).always(function()
+    return $.when(guiDashboard.getUserDashboardSettingsFromAPI()).always(function()
     {
         // Инициализация всех виджетов на странице
-        for(var i in pmDashboard.model.widgets)
+        for(var i in guiDashboard.model.widgets)
         {
-            for(var j in pmDashboard.model.widgets[i])
+            for(var j in guiDashboard.model.widgets[i])
             {
-                if(pmDashboard.model.widgets[i][j].widget === undefined  )
+                if(guiDashboard.model.widgets[i][j].widget === undefined  )
                 {
-                    let name = pmDashboard.model.widgets[i][j]['name']
+                    let name = guiDashboard.model.widgets[i][j]['name']
                     if(!window[name])
                     {
                         console.warn("widget name="+name+" not defined")
                         continue;
                     }
-                    pmDashboard.model.widgets[i][j].widget = new window[pmDashboard.model.widgets[i][j]['name']](pmDashboard.model.widgets[i][j].opt);
+                    guiDashboard.model.widgets[i][j].widget = new window[guiDashboard.model.widgets[i][j]['name']](guiDashboard.model.widgets[i][j].opt);
                 }
             }
         }
 
         thisObj.updateData()
-        $(holder).insertTpl(spajs.just.render('dashboard_page', {}))
+        $(holder).insertTpl(spajs.just.render(thisObj.tpl_name, {guiObj:thisObj}))
 
         //pmwTasksTemplatesWidget.render();
         //pmwModulesTemplatesWidget.render();
         pmwAnsibleModuleWidget.render();
         pmwChartWidget.render();
 
-        pmDashboard.model.historyChart = c3.generate({
+        guiDashboard.model.historyChart = c3.generate({
             bindto: '#c3-history-chart',
             data: {
                 x: 'time',
@@ -1020,7 +983,7 @@ pmDashboard.open  = function(holder, menuInfo, data)
         });
         if($('select').is('#chart-period'))
         {
-            $('#chart-period').val(pmDashboard.statsDataLastQuery).change();
+            $('#chart-period').val(guiDashboard.statsDataLastQuery).change();
         }
 
         //drag and drop для виджетов
@@ -1044,16 +1007,16 @@ pmDashboard.open  = function(holder, menuInfo, data)
                     }
                     for(var i=0; i<idArr.length; i++)
                     {
-                        for(var j=0; j<pmDashboard.model.widgets[0].length; j++)
+                        for(var j=0; j<guiDashboard.model.widgets[0].length; j++)
                         {
-                            if(idArr[i].toLowerCase()==pmDashboard.model.widgets[0][j].name.toLowerCase())
+                            if(idArr[i].toLowerCase()==guiDashboard.model.widgets[0][j].name.toLowerCase())
                             {
-                                pmDashboard.model.widgets[0][j].sort=i;
-                                pmDashboard.model.widgets[0].sort(pmDashboard.sortCountWidget);
+                                guiDashboard.model.widgets[0][j].sort=i;
+                                guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
                             }
                         }
                     }
-                    pmDashboard.putUserDashboardSettingsToAPI();
+                    guiDashboard.putUserDashboardSettingsToAPI();
                 }
             });
         }
@@ -1061,29 +1024,17 @@ pmDashboard.open  = function(holder, menuInfo, data)
 
 }
 
-tabSignal.connect("polemarch.start", function()
-{
-    spajs.addMenu({
-        id:"home",
-        urlregexp:[/^(home|)$/],
-        onOpen:function(holder, menuInfo, data){return pmDashboard.open(holder, menuInfo, data);},
-        onClose:function(){return pmDashboard.stopUpdates();},
-    })
-
-})
-
-
 /**
  * Базовый класс виджета
  * @type Object
  */
-pmDashboardWidget = {
+guiDashboardWidget = {
     id:'',
     model:{
         test:1
     },
     render:function(){
-
+        
     },
     init:function(opt){
         mergeDeep(this.model, opt)
@@ -1096,7 +1047,7 @@ pmDashboardWidget = {
  */
 
 /*
-var pmwTasksTemplatesWidget = inheritance(pmDashboardWidget);
+var pmwTasksTemplatesWidget = inheritance(guiDashboardWidget);
 pmwTasksTemplatesWidget.render = function()
 {
     var div_id="#pmwTasksTemplatesWidget";
@@ -1104,7 +1055,7 @@ pmwTasksTemplatesWidget.render = function()
     return "";
 }
 
-var pmwModulesTemplatesWidget = inheritance(pmDashboardWidget);
+var pmwModulesTemplatesWidget = inheritance(guiDashboardWidget);
 pmwModulesTemplatesWidget.render = function()
 {
     var div_id="#pmwModulesTemplatesWidget";
@@ -1112,17 +1063,17 @@ pmwModulesTemplatesWidget.render = function()
     return "";
 }*/
 
-var pmwAnsibleModuleWidget = inheritance(pmDashboardWidget);
+var pmwAnsibleModuleWidget = inheritance(guiDashboardWidget);
 pmwAnsibleModuleWidget.render = function()
-{
+{ 
     var div_id="#pmwAnsibleModuleWidget";
     pmAnsibleModule.fastCommandWidget($(div_id));
     return "";
 }
 
-var pmwChartWidget=inheritance(pmDashboardWidget);
+var pmwChartWidget=inheritance(guiDashboardWidget);
 pmwChartWidget.render = function()
-{
+{ 
     var div_id="#pmwChartWidget";
     var html=spajs.just.render('pmwChartWidget');
     $(div_id).html(html);
@@ -1134,22 +1085,21 @@ pmwChartWidget.render = function()
  * Базовый класс виджета показывающего количество элементов
  * @type Object
  */
-var pmwItemsCounter = inheritance(pmDashboardWidget);
+var pmwItemsCounter = inheritance(guiDashboardWidget);
 
 pmwItemsCounter.model.count = '-';
 //pmwItemsCounter.model.countObject = pmItems;
 pmwItemsCounter.model.nameInStats = "";
 
 pmwItemsCounter.render = function()
-{
-    return "" 
+{ 
     var html = spajs.just.render('pmwItemsCounter', {model:this.model});
     return window.JUST.onInsert(html, function(){});
 }
 pmwItemsCounter.updateCount = function()
 {
     var thisObj = this;
-    var statsData=pmDashboard.statsData;
+    var statsData=guiDashboard.statsData;
     thisObj.model.count=statsData[thisObj.model.nameInStats];
 }
 
@@ -1160,6 +1110,7 @@ pmwItemsCounter.updateCount = function()
 var pmwHostsCounter = inheritance(pmwItemsCounter);
 //pmwHostsCounter.model.countObject = pmHosts;
 pmwHostsCounter.model.nameInStats = "hosts";
+pmwHostsCounter.model.path = "host";
 
 /**
  * Класс виджета показывающий количество шаблонов
@@ -1168,6 +1119,7 @@ pmwHostsCounter.model.nameInStats = "hosts";
 var pmwTemplatesCounter = inheritance(pmwItemsCounter);
 //pmwTemplatesCounter.model.countObject = pmTemplates;
 pmwTemplatesCounter.model.nameInStats = "templates";
+pmwTemplatesCounter.model.path = "";
 
 /**
  * Класс виджета показывающий количество групп
@@ -1176,6 +1128,7 @@ pmwTemplatesCounter.model.nameInStats = "templates";
 var pmwGroupsCounter = inheritance(pmwItemsCounter);
 //pmwGroupsCounter.model.countObject = pmGroups;
 pmwGroupsCounter.model.nameInStats = "groups";
+pmwGroupsCounter.model.path = "group";
 
 /**
  * Класс виджета показывающий количество проектов
@@ -1184,6 +1137,7 @@ pmwGroupsCounter.model.nameInStats = "groups";
 var pmwProjectsCounter = inheritance(pmwItemsCounter);
 //pmwProjectsCounter.model.countObject = pmProjects;
 pmwProjectsCounter.model.nameInStats = "projects";
+pmwProjectsCounter.model.path = "project";
 
 /**
  * Класс виджета показывающий количество инвенториев
@@ -1192,6 +1146,7 @@ pmwProjectsCounter.model.nameInStats = "projects";
 var pmwInventoriesCounter = inheritance(pmwItemsCounter);
 //pmwInventoriesCounter.model.countObject = pmInventories;
 pmwInventoriesCounter.model.nameInStats = "inventories";
+pmwInventoriesCounter.model.path = "inventory";
 
 /**
  * Класс виджета показывающий количество пользователей
@@ -1200,3 +1155,4 @@ pmwInventoriesCounter.model.nameInStats = "inventories";
 var pmwUsersCounter = inheritance(pmwItemsCounter);
 //pmwUsersCounter.model.countObject = pmUsers;
 pmwUsersCounter.model.nameInStats = "users";
+pmwUsersCounter.model.path = "user";

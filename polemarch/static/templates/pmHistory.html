@@ -6,7 +6,7 @@
     <!-- history_one -->
  
     <%[ main_content_row %>
-         
+        
         <div class="history-mode">
         <section class="col-lg-8 history-LeftInfo">  
             <div class="box box-info collapsed-box">
@@ -39,8 +39,16 @@
 
                             <~ guiObj.model.data.status>
                                 <% if(guiObj.model.data.status != 'RUN' && guiObj.model.data.status != 'DELAY'){ %>
-
-                                        <button type="button"  class="btn btn-default" id="clear_output" style="margin-right:5px; padding: 3px 9px;" onclick="pmHistory.clearOutput(<%- guiObj.model.data.id %>);">
+                                        
+                                        <button type="button"
+                                                class="btn btn-default"
+                                                id="clear_output" 
+                                                style="margin-right:5px; padding: 3px 9px;"  
+                                                <%= justOn('click', emptyAction(guiObj.api.actions['clear']), 'clear_output') %>
+                                        >
+                                                
+                                                
+                                                
                                             <span class="fa fa-trash" style="font-size:20px;"></span> <span class="hidden-sm hidden-xs" ></span>
                                         </button>
 
@@ -52,14 +60,14 @@
                             <i class="glyphicon glyphicon-resize-small"></i> 
                         </button>
 
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse" onclick="pmHistory.hideClearOutputButton()"><i class="fa fa-minus"></i> </button>
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse" ><i class="fa fa-minus"></i> </button>
                     </div>
                 </div>
                 <div class="box-body">
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <label class="control-label" >stdout
-                                (<a href="<%- guiObj.model.data.url %>raw/"
+                                (<a href="<%- guiObj.model.data.raw_stdout %>"
                                         target="_blank"
                                         download="stdout-<%- guiObj.model.data.mode %>-<%- guiObj.model.data.start_time %>.log"
                                         >Full raw stdout</a>)</label> 
