@@ -246,6 +246,7 @@ class CounterWidgetSettingSerializer(WidgetSettingSerializer):
 class WidgetSettingsSerializer(vst_serializers.JsonObjectSerializer):
     pmwUsersCounter = CounterWidgetSettingSerializer()
     pmwProjectsCounter = CounterWidgetSettingSerializer()
+    pmwTemplatesCounter = CounterWidgetSettingSerializer()
     pmwInventoriesCounter = CounterWidgetSettingSerializer()
     pmwGroupsCounter = CounterWidgetSettingSerializer()
     pmwHostsCounter = CounterWidgetSettingSerializer()
