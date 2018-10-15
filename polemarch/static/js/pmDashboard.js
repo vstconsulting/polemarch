@@ -1011,7 +1011,7 @@ guiDashboard.open  = function(holder, menuInfo, data)
                         {
                             if(idArr[i].toLowerCase()==guiDashboard.model.widgets[0][j].name.toLowerCase())
                             {
-                                guiDashboard.model.widgets[0][j].sort=i;
+                                guiDashboard.model.widgets[0][j].sort=i+1;
                                 guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
                             }
                         }
