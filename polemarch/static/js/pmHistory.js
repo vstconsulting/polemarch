@@ -422,6 +422,20 @@ tabSignal.connect("guiList.renderLine.history", function(obj){
         }
     }
      
+    if(obj.dataLine.line.status == 'OK' && obj.dataLine.line.kind == 'MODULE' && obj.dataLine.line.mode == "setup")
+    {
+        if(obj.dataLine.sublinks_l2['facts'])
+        {
+            obj.dataLine.sublinks_l2['facts'].hidden = false
+        } 
+    }
+    else
+    { 
+        if(obj.dataLine.sublinks_l2['facts'])
+        {
+            obj.dataLine.sublinks_l2['facts'].hidden = true
+        }
+    }
 })
 
 tabSignal.connect("guiList.renderPage.history", function(obj){
@@ -441,4 +455,18 @@ tabSignal.connect("guiList.renderPage.history", function(obj){
         } 
     }
      
+    if(obj.data.status == 'OK' && obj.data.kind == 'MODULE' && obj.data.mode == "setup")
+    {
+        if(obj.options.links['facts'])
+        {
+            obj.options.links['facts'].hidden = false
+        } 
+    }
+    else
+    { 
+        if(obj.options.links['facts'])
+        {
+            obj.options.links['facts'].hidden = true
+        }
+    }
 })
