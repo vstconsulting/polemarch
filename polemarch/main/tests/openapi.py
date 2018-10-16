@@ -1,3 +1,5 @@
+from unittest import skipUnless
+from django.conf import settings
 from ._base import BaseTestCase
 from ... import __version__
 import re
@@ -20,6 +22,7 @@ class OApiTestCase(BaseTestCase):
         dict(name='offset', description=True, required=False, type='integer'),
     ]
 
+    @skipUnless(settings.VST_PROJECT == 'polemarch', 'Check only on CE.')
     def test_openapi_schema(self):
         api_version = self._settings('VST_API_VERSION')
         api_path = self._settings('API_URL')
@@ -1236,10 +1239,9 @@ class OApiTestCase(BaseTestCase):
         widgetSettings = definitions['WidgetSettings']
         objName = 'WidgetSettings'
 
-        widgetList = ['pmwUsersCounter', 'pmwProjectsCounter', 'pmwInventoriesCounter',
-                      'pmwGroupsCounter', 'pmwHostsCounter', 'pmwChartWidget',
-                      'pmwAnsibleModuleWidget'
-                      ]
+        widgetList = ['pmwUsersCounter', 'pmwProjectsCounter', 'pmwTemplatesCounter',
+                      'pmwInventoriesCounter', 'pmwGroupsCounter', 'pmwHostsCounter',
+                      'pmwChartWidget', 'pmwAnsibleModuleWidget' ]
         self.check_fields(objName, widgetSettings['required'], *widgetList)
         ref = '#/definitions/CounterWidgetSetting'
         self.check_fields(
@@ -1314,12 +1316,20 @@ class OApiTestCase(BaseTestCase):
                         schema, path, parent=parent
                     )
             else:
-                getattr(self, 'check_path_' + name)(schema, path, parent=parent)
+                getattr(
+                    self, 'check_path_' + name, self.check_path_default
+                )(schema, path, parent=parent)
+
+    def check_path_default(self, schema, path, *args, **kwargs):  # nocv
+        self.models.logger.warning(
+            "There are no checks for this path [{}]".format(path)
+        )
 
     def check_fields(self, objname, obj, *args, **kwargs):
         if args:
             self.assertTrue(
-                all(val in args for val in obj), 'input_data doesn\'t have enough keys'
+                all(val in args for val in obj),
+                'input_data doesn\'t have enough keys\nargs={}\nobj={}'.format(args, obj)
             )
             msg = '{} doesn\'t have enough keys'.format(objname)
             self.assertTrue(
@@ -1342,7 +1352,9 @@ class OApiTestCase(BaseTestCase):
             if keys_in_kwargs and keys_in_obj:
                 for key in objKeys:
                     if key == 'description':
-                        self.assertTrue(obj[key], 'Description is empty')
+                        self.assertTrue(
+                            obj[key], 'Description is empty. [{}]'.format(objName)
+                        )
                         continue
                     elif key == 'additionalProperties' or isinstance(obj[key], dict):
                         self.check_fields(objName, obj[key], **kwargs[key])
@@ -1381,8 +1393,6 @@ class OApiTestCase(BaseTestCase):
             param_checked_value = self.get_params_checked_value_by_name(
                 param_obj['name'], checked_values
             )
-            if not param_checked_value:
-                print(index)
             self.check_fields(path, param_obj, **param_checked_value)
 
     def check_request(self, obj, *args, **kwargs):
