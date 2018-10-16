@@ -287,9 +287,9 @@ function get_prefetch_history_initiator_path_1(data_obj)
     else if (data_obj.initiator_type == 'template') {
         return "/project/" + data_obj["project"] + "/template/";
     }
-    // else if (data_obj.initiator_type == 'scheduler') {
-    //     return "/project/" + data_obj["project"] + "/periodic_task/";
-    // }
+    else if (data_obj.initiator_type == 'scheduler') {
+        return "/project/" + data_obj["project"] + "/periodic_task/";
+    }
     else {
         return false;
     }
@@ -304,10 +304,10 @@ function get_prefetch_history_initiator_path_2(data_obj)
         let project_id = spajs.urlInfo.data.reg.parent_id;
         return "/project/" + project_id + "/template/";
     }
-    // else if (data_obj.initiator_type == 'scheduler') {
-    //     let project_id = spajs.urlInfo.data.reg.parent_id;
-    //     return "/project/" + project_id + "/periodic_task/";
-    // }
+    else if (data_obj.initiator_type == 'scheduler') {
+        let project_id = spajs.urlInfo.data.reg.parent_id;
+        return "/project/" + project_id + "/periodic_task/";
+    }
     else {
         return false;
     }
