@@ -33,9 +33,6 @@ Install from PyPI
 
    * python 2.7 (```libpython2.7```)
 
-
-   Optional package on Ubuntu/Debian:
-
    * SSHPass(```sshpass```) to get working ssh password auth during playbook execution
 
    * GIT (```git```) to get working git import
@@ -57,9 +54,6 @@ Install from PyPI
 
    * Open LDAP (```openldap-devel```)
 
-
-   Optional package on Red Hat/CentOS:
-
    * GIT (```git```) to get working git import
 
 
@@ -79,9 +73,9 @@ Install from PyPI
 
 #. Edit config file:
 
-   #. Open `/etc/polemarch/settings.ini`, if it not exist create it. Polemarch use config from this directory.
+   #. Open `/etc/polemarch/settings.ini`, if it does not exist, create it. Polemarch uses config from this directory.
 
-   #.  Default used SQLite3 database, recommend use MySQL. Settings needed for correct work database:
+   #.  The default database is SQLite3, but MySQL is recommended. Settings needed for correct work database:
 
        .. code-block:: ini
 
@@ -93,7 +87,7 @@ Install from PyPI
            host = db_host
            port = db_port
 
-   #. Default used file based cashed, recommend use RedisCache. Setting needed for correct work RedisCache:
+   #. The default cache system is file based cache, but RedisCache is recommended. Settings needed for correct RedisCache work:
 
       .. code-block:: ini
 
@@ -105,7 +99,7 @@ Install from PyPI
            backend = django_redis.cache.RedisCache
            location = redis://redis-server:6379/2
 
-   #. Default use file Celery broker, recommend use Redis. Setting for correct work Redis:
+   #. The default celery broker is file Celery broker, but Redis is recommended. Settings needed for correct Redis work:
 
       .. code-block:: ini
 
@@ -115,7 +109,7 @@ Install from PyPI
            concurrency = 8
            enable_worker = true
 
-   #. For run worker with Polemarch, you need create follow sections:
+   #. For running Polemarch with worker, you need to create follow sections:
 
       .. code-block:: ini
 
@@ -135,26 +129,26 @@ Install from PyPI
 
         polemarchctl migrate
 
-#. Start polemarch:
+#. Start Polemarch:
 
    .. sourcecode:: bash
 
        polemarchctl webserver
 
-Polemarch start with web interface on port 8080.
+Polemarch starts with web interface on port 8080.
 
 
 Quickstart
 ----------
 
 After you install Polemarch by instructions above you can use it without any
-further configurations. Interface is pretty intuitive and common for any web
+further configuration. Interface is pretty intuitive and common for any web
 application.
 
 Default installation is suitable for most simple and common cases, but
 Polemarch is highly configurable system. If you need something more advanced
 (scalability, dedicated DB, custom cache, logging or directories) you can
-always configure Polemarch like said in :doc:`Configuration manual </config>`.
+always configure Polemarch like it is said in :doc:`Configuration manual </config>`.
 
 
 Backup
@@ -213,14 +207,14 @@ Uploading of backup in PostgreSQL:
 Update
 ------
 
-Before updating any type of package strongly recommended to stop all services and create backup for safe.
+Before updating of package of any type it is strongly recommended to stop all services and create backup for safety.
 
 
 Migrate
 -------
 
 Migrations are Django’s way of propagating changes you make to your models (adding a field, deleting a model, etc.)
-into your database schema. They’re designed to be mostly automatic, but you’ll need to know when to make migrations,
+into your database schema. They’re designed to be mostly automatic, but you need to know when to make migrations,
 when to run them, and the common problems you might run into.
 
 To run a ``migrate`` command you should run follow code:
@@ -240,7 +234,7 @@ To create a superuser account use the follow command:
 
    sudo -u polemarch /opt/polemarch/bin/polemarchctl createsuperuser
 
-This command will promt for all required user's options.
+This command prompts for all required user's options.
 
 Change password
 ---------------
@@ -253,5 +247,5 @@ To change password use the follow command:
 
 It prompts you to enter a new password twice for the given user.
 If the entries are identical, this immediately becomes the new password.
-If you do not supply a user, the command will attempt to change the password whose username matches
+If you do not supply a user, the command will attempt to change the password of user whose username matches
 the current user.

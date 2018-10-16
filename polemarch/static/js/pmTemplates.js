@@ -14,17 +14,30 @@ gui_project_template = {
 
         if(template_data.kind.toLowerCase() == 'module')
         {
-            arr_data_fields = ['module', 'args', 'inventory', 'group'];
+            arr_data_fields = ['module', 'args', 'inventory', 'group', 'vars'];
         }
         else
         {
-            arr_data_fields = ['playbook', 'inventory'];
+            arr_data_fields = ['playbook', 'inventory', 'vars'];
         }
 
         arr_data_fields.forEach(function(value)
         {
-            data_field[value] = template_data[value];
-            delete template_data[value];
+            if(template_data[value])
+            {
+                data_field[value] = template_data[value];
+                delete template_data[value];
+            }
+            else
+            {
+                data_field[value] = "";
+
+                if(value == 'vars')
+                {
+                    data_field[value] = {};
+                }
+            }
+
         })
 
         template_data.data = JSON.stringify(data_field);
@@ -62,7 +75,7 @@ gui_project_template = {
 gui_project_template_variables = {
 
     apiGetDataForQuery : function (query, variable)
-    { 
+    {
         if(variable)
         {
             if(query.method == "get")
@@ -166,13 +179,13 @@ gui_project_template_variables = {
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
-            
-            $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{ 
-                def.resolve(d) 
+
+            $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{
+                def.resolve(d)
             }).fail((e) =>{
                 def.reject(e);
             })
-              
+
         }).fail((e) =>{
             def.reject(e);
         })
@@ -225,9 +238,9 @@ gui_project_template_variables = {
 gui_project_template_option = {
 
     apiGetDataForQuery : function (query, option)
-    { 
+    {
         if(option)
-        {               
+        {
             if(query.method == "get")
             {
                 let res =  {
@@ -242,13 +255,13 @@ gui_project_template_option = {
                 }
 
                 let val = this.parent_template.model.data.options[option];
- 
+
                 res.data = { }
                 for(let i in gui_project_template_option_Schema)
-                { 
+                {
                     res.data[i] = val[i]
                 }
-                
+
                 /*res.data = {
                     "id": option,
                     "name": val.name || option,
@@ -349,13 +362,13 @@ gui_project_template_option = {
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
-            
-            $.when(this.apiGetDataForQuery(query, option)).done((d) =>{ 
-                def.resolve(d) 
+
+            $.when(this.apiGetDataForQuery(query, option)).done((d) =>{
+                def.resolve(d)
             }).fail((e) =>{
                 def.reject(e);
             })
-            
+
         }).fail((e) =>{
             def.reject(e);
         })
@@ -408,7 +421,7 @@ gui_project_template_option = {
 gui_project_template_option_variables = {
 
     apiGetDataForQuery : function (query, variable)
-    { 
+    {
         if(variable)
         {
             if(query.method == "get")
@@ -512,13 +525,13 @@ gui_project_template_option_variables = {
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
-          
-            $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{ 
-                def.resolve(d) 
+
+            $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{
+                def.resolve(d)
             }).fail((e) =>{
                 def.reject(e);
             })
-            
+
         }).fail((e) =>{
             def.reject(e);
         })
@@ -568,7 +581,7 @@ gui_project_template_option_variables = {
     },
 }
 
-gui_project_template_option_Schema = { 
+gui_project_template_option_Schema = {
     "name": {
         "title": "Name",
         "type": "string",
@@ -648,7 +661,7 @@ gui_project_template_option_variables_fields_Schema = {
         "title": "Value",
         "type": "dynamic",
         "dynamic_properties": {"__func__callback": "TemplateVariable_value_callback",},
-        "required": true, 
+        "required": true,
         "default": "",
         "gui_links": [],
         "definition": {},
@@ -735,7 +748,7 @@ let api_error_responses = {
             "definition_ref": "#/definitions/Error"
         }
     }
-} 
+}
 
 tabSignal.connect("openapi.schema", function(obj) {
     // Модификация схемы до сохранения в кеш.
@@ -828,7 +841,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "__link__parent": "/project/{pk}/template/{template_id}/",
         "parent_path": "/project/{pk}/template/{template_id}/"
     }
- 
+
     obj.schema.path["/project/{pk}/template/{template_id}/variables/{variables_id}/"] = {
         "level": 7,
         "path": "/project/{pk}/template/{template_id}/variables/{variables_id}/",
@@ -1118,8 +1131,8 @@ tabSignal.connect("openapi.schema", function(obj) {
         "sublinks": [],
         "sublinks_l2": [],
         "actions": {},
-        "links": { 
-            "__link__variables": "/project/{pk}/template/{template_id}/option/{option_id}/variables/", 
+        "links": {
+            "__link__variables": "/project/{pk}/template/{template_id}/option/{option_id}/variables/",
         },
         "multi_actions": [],
         "__link__parent": "/project/{pk}/template/{template_id}/option/",

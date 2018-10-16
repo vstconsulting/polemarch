@@ -54,7 +54,7 @@ guiDashboard.model.defaultWidgets = [
         /**/{
             name:'pmwTemplatesCounter',
             title:'Templates Counter',
-            sort:0,
+            sort:1,
             active:true,
             opt:{},
             type:1,
@@ -63,7 +63,7 @@ guiDashboard.model.defaultWidgets = [
         {
             name:'pmwProjectsCounter',
             title:'Projects Counter',
-            sort:1,
+            sort:2,
             active:true,
             opt:{},
             type:1,
@@ -72,7 +72,7 @@ guiDashboard.model.defaultWidgets = [
         {
             name:'pmwInventoriesCounter',
             title:'Inventories Counter',
-            sort:2,
+            sort:3,
             active:true,
             opt:{},
             type:1,
@@ -81,7 +81,7 @@ guiDashboard.model.defaultWidgets = [
         {
             name:'pmwHostsCounter',
             title:'Hosts Counter',
-            sort:3,
+            sort:4,
             active:true,
             opt:{},
             type:1,
@@ -90,7 +90,7 @@ guiDashboard.model.defaultWidgets = [
         {
             name:'pmwGroupsCounter',
             title:'Groups Counter',
-            sort:4,
+            sort:5,
             active:true,
             opt:{},
             type:1,
@@ -99,7 +99,7 @@ guiDashboard.model.defaultWidgets = [
         {
             name:'pmwUsersCounter',
             title:'Users Counter',
-            sort:5,
+            sort:6,
             active:true,
             opt:{},
             type:1,
@@ -108,7 +108,7 @@ guiDashboard.model.defaultWidgets = [
         {
             name:'pmwAnsibleModuleWidget',
             title:'Run shell command',
-            sort:6,
+            sort:7,
             active:true,
             opt:{},
             type:0,
@@ -117,7 +117,7 @@ guiDashboard.model.defaultWidgets = [
         {
             name:'pmwChartWidget',
             title:'Tasks history',
-            sort:7,
+            sort:8,
             active:true,
             opt:{},
             type:0,
@@ -1011,7 +1011,7 @@ guiDashboard.open  = function(holder, menuInfo, data)
                         {
                             if(idArr[i].toLowerCase()==guiDashboard.model.widgets[0][j].name.toLowerCase())
                             {
-                                guiDashboard.model.widgets[0][j].sort=i;
+                                guiDashboard.model.widgets[0][j].sort=i+1;
                                 guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
                             }
                         }

@@ -1,13 +1,14 @@
 How to participate
 ==================
 
-If you found some bug in the codebase or documentation or want some
-improvement in project, you can easily do it myself. Here is how to proceed:
+If you found some bug in the codebase or documentation, or you want some
+improvement in 'Polemarch' project, you can easily inform us about it.
+Here is how to proceed:
 
-1. Create (or find if already exist) an
+1. Create (or find if it already exists) an
    `issue <https://gitlab.com/vstconsulting/polemarch/issues>`_
-   for problem you want to solve. Maybe somebody is working on that or maybe
-   during discussion will become clear that is not a problem.
+   for problem you want to solve. Maybe somebody is already working on it or maybe
+   during discussion becomes clear that it is not a problem at all.
 
 2. To investigate problem, you probably must be able to run cloned project.
    To do so install required dependencies. See
@@ -42,7 +43,7 @@ improvement in project, you can easily do it myself. Here is how to proceed:
       virtualenv venv
       source venv/bin/activate
 
-5. Make your fork of our repository and clone it to your local development
+5. Make fork of our repository and clone it to your local development
    machine.
 
    .. sourcecode:: bash
@@ -73,7 +74,7 @@ improvement in project, you can easily do it myself. Here is how to proceed:
    but make sure that changes in that file does not goes to you commit. Or you
    can copy ``polemarch/main/settings.ini`` to ``/etc/polemarch/settings.ini``
    (default settings location for Polemarch). Type ``debug = true`` in section
-   ``[main]``. Otherwise there will no available static files and debug
+   ``[main]``. Otherwise there will be no available static files and debug
    features when you start development web-server.
 
 10. Run Polemarch GUI with development web-server and investigate with your
@@ -92,26 +93,27 @@ improvement in project, you can easily do it myself. Here is how to proceed:
 11. You may also want to change ``./polemarch/main/settings.ini``
     to change ``log_level`` for easy debugging.
 
-12. Write tests for your changes and changes itself (we prefer TDD approach).
+12. Write tests for your changes (we prefer TDD approach).
     Execute those tests with all other Polemarch's tests by:
 
     .. sourcecode:: bash
 
        make test
 
-    This command also doing PEP8 check of codebase and static analyzing with
-    pylint and flake. Make sure that your code meet those checks.
+    This command also do PEP8 check of codebase and static analyzing with
+    pylint and flake. Make sure that your code meets those checks.
 
 13. Reflect your changes in documentation (if needed). Build documentation,
-    read what you changed and make sure that all right. To build documentation
+    read what you have changed and make sure that all is right. To build documentation
     use:
 
     .. sourcecode:: bash
 
        make docs
 
-14. Make commit. We prefer commit messages with briefly explains your
-    changes. Bad: "issue #1" or "fix". Good: "fix end slashes for GET in docs".
+14. Make commit. We prefer commit messages with briefly explanations of your
+    changes. Unacceptable: "issue #1" or "fix".
+    Acceptable: "fix end slashes for GET in docs".
 
 15. Create pull request and refer it in issue.
 
