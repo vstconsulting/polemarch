@@ -132,11 +132,20 @@ class OApiTestCase(BaseTestCase):
             'ansible_python_interpreter', 'ansible_ruby_interpreter',
             'ansible_perl_interpreter', 'ansible_shell_executable'
         ]
+        additional_properties = dict(
+            field='key', choices={},
+            types=dict(
+                ansible_become='boolean',
+                ansible_ssh_private_key_file='secretfile',
+                ansible_ssh_pass='password'
+            )
+        )
 
-        self.check_fields(objName, inventoryVariable['required'], 'key')
+        self.check_fields(objName, inventoryVariable['required'], 'key', 'value')
         self.check_fields(objName, inventoryVariable['properties']['id'], **id_value)
         self.check_fields(
-            objName, inventoryVariable['properties']['value'], type='string', default=''
+            objName, inventoryVariable['properties']['value'],
+            type='string', format='dynamic', additionalProperties=additional_properties
         )
         self.check_fields(
             objName, inventoryVariable['properties']['key'],
@@ -1241,7 +1250,7 @@ class OApiTestCase(BaseTestCase):
 
         widgetList = ['pmwUsersCounter', 'pmwProjectsCounter', 'pmwTemplatesCounter',
                       'pmwInventoriesCounter', 'pmwGroupsCounter', 'pmwHostsCounter',
-                      'pmwChartWidget', 'pmwAnsibleModuleWidget' ]
+                      'pmwChartWidget', 'pmwAnsibleModuleWidget']
         self.check_fields(objName, widgetSettings['required'], *widgetList)
         ref = '#/definitions/CounterWidgetSetting'
         self.check_fields(

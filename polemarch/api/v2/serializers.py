@@ -404,6 +404,14 @@ class VariableSerializer(_SignalSerializer):
 
 class InventoryVariableSerializer(VariableSerializer):
     key = vst_fields.AutoCompletionField(autocomplete=models.Variable.variables_keys)
+    value = vst_fields.DependEnumField(
+        allow_blank=True, field='key',
+        types={
+            'ansible_ssh_pass': 'password',
+            'ansible_ssh_private_key_file': 'secretfile',
+            'ansible_become': 'boolean'
+        }
+    )
 
 
 class PeriodicTaskVariableSerializer(VariableSerializer):
