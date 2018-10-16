@@ -1628,12 +1628,18 @@ function prepareOptionFields(template_data, schema)
 {
     if(template_data.kind.toLowerCase() == 'task')
     {
-        delete schema.fields['module'];
-        delete schema.fields['args'];
-        delete schema.fields['group'];
+        schema.fields['module'].hidden = true;
+        schema.fields['args'].hidden = true;
+        schema.fields['group'].hidden = true;
+
+        schema.fields['playbook'].hidden = false;
     }
     else
     {
-        delete schema.fields['playbook'];
+        schema.fields['module'].hidden = false;
+        schema.fields['args'].hidden = false;
+        schema.fields['group'].hidden = false;
+
+        schema.fields['playbook'].hidden = true;
     }
 }
