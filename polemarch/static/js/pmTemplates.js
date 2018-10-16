@@ -1336,7 +1336,7 @@ function OneTemplate_args_callback(fieldObj, newValue)
 function OneTemplate_group_callback(fieldObj, newValue)
 {
     let obj = {
-        type:"select2"
+        type:"autocomplete"
     }
     if(newValue.value.toLowerCase() == "module")
     {
@@ -1404,7 +1404,7 @@ function OneTemplate_playbook_callback(fieldObj, newValue)
 function OneTemplate_inventory_callback(fieldObj, newValue)
 {
     let obj = {
-        type:"select2"
+        type:"autocomplete"
     }
 
     obj.override_opt = {
