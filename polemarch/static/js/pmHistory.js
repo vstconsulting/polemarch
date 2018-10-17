@@ -422,6 +422,21 @@ tabSignal.connect("guiList.renderLine.history", function(obj){
         }
     }
      
+    if(obj.dataLine.line.status == 'RUN' && obj.dataLine.line.status == 'DELAY')
+    {
+        if(obj.dataLine.sublinks_l2['cancel'])
+        {
+            obj.dataLine.sublinks_l2['cancel'].hidden = false
+        } 
+    }
+    else
+    { 
+        if(obj.dataLine.sublinks_l2['cancel'])
+        {
+            obj.dataLine.sublinks_l2['cancel'].hidden = true
+        }
+    }
+    
     if(obj.dataLine.line.status == 'OK' && obj.dataLine.line.kind == 'MODULE' && obj.dataLine.line.mode == "setup")
     {
         if(obj.dataLine.sublinks_l2['facts'])
@@ -467,6 +482,21 @@ tabSignal.connect("guiList.renderPage.history", function(obj){
         if(obj.options.links['facts'])
         {
             obj.options.links['facts'].hidden = true
+        }
+    }
+    
+    if(obj.data.status == 'DELAY' || obj.data.status == 'RUN')
+    {
+        if(obj.options.links['cancel'])
+        {
+            obj.options.links['cancel'].hidden = false
+        } 
+    }
+    else
+    { 
+        if(obj.options.links['cancel'])
+        {
+            obj.options.links['cancel'].hidden = true
         }
     }
 })
