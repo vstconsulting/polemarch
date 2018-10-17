@@ -12,7 +12,7 @@ Here is how to proceed:
 
 2. To investigate problem, you probably must be able to run cloned project.
    To do so install required dependencies. See
-   :doc:`"Run from source distribution" </pipinstall>` for more detailed
+   :doc:`"Install from PyPI" </quickstart>` for more detailed
    explanation, which dependencies and why they are needed. System packages
    (example for Ubuntu 16.04):
 
@@ -77,18 +77,25 @@ Here is how to proceed:
    ``[main]``. Otherwise there will be no available static files and debug
    features when you start development web-server.
 
-10. Run Polemarch GUI with development web-server and investigate with your
+10. Run Polemarch GUI with web-server and investigate with your
     debugger how it works to find out what need to be changed:
 
     .. sourcecode:: bash
 
        # run web-server
-       python polemarchctl runserver  0.0.0.0:8080
+       python polemarchctl webserver
 
-    .. sourcecode:: bash
+    This command also starts worker, if you have added worker options
+    in ``/etc/polemarch/settings.ini``. More about worker section you can
+    find on :doc:`"Install from PyPI" </quickstart>`.
 
-       # run worker
-       python ../venv/bin/celery -A polemarch.wapp:app worker -l INFO -B -S schedule_file
+    If you want to see console output of Polemarch webserver during it work,
+    you need to add following option in ``/etc/polemarch/settings.ini``:
+
+    .. sourcecode:: ini
+
+      [uwsgi]
+      daemon = false
 
 11. You may also want to change ``./polemarch/main/settings.ini``
     to change ``log_level`` for easy debugging.
@@ -98,9 +105,9 @@ Here is how to proceed:
 
     .. sourcecode:: bash
 
-       make test
+       make test ENVS=flake,pylint
 
-    This command also do PEP8 check of codebase and static analyzing with
+    This command do PEP8 check of codebase and static analyzing with
     pylint and flake. Make sure that your code meets those checks.
 
 13. Reflect your changes in documentation (if needed). Build documentation,

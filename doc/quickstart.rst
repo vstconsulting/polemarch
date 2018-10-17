@@ -2,7 +2,7 @@ Installation
 ============================
 
 Install from PyPI
------------------------------
+-----------------
 
 
 #. Install dependencies:
@@ -137,6 +137,25 @@ Install from PyPI
 
 Polemarch starts with web interface on port 8080.
 
+If you need to restart Polemarch use following command:
+
+    .. sourcecode:: bash
+
+           polemarchctl webserver reload=/var/run/polemarch/web.pid
+
+If you use another directory for storing Polemarch pid file, use path to this file
+instead of default ``/var/run/polemarch/web.pid``.
+
+
+If you need to stop Polemarch use following command:
+
+    .. sourcecode:: bash
+
+           polemarchctl webserver stop=/var/run/polemarch/web.pid
+
+If you use another directory for storing Polemarch pid file, use path to this file
+instead of default ``/var/run/polemarch/web.pid``.
+
 
 Quickstart
 ----------
@@ -208,6 +227,15 @@ Update
 ------
 
 Before updating of package of any type it is strongly recommended to stop all services and create backup for safety.
+
+Update to 0.2.x
+---------------
+
+1. Firstly, we strongly recommend you to create a database backup and to stop all Polemarch services for safety.
+
+2. Secondly, if you are updating from 0.1.x to 0.2.x, you need to update you current 0.1.x version to 0.1.13 version.
+
+3. Then update 0.1.13 version to 0.2.x. If you don't know how to do it, look :doc:`"Install from PyPI" </quickstart>`.
 
 
 Migrate
