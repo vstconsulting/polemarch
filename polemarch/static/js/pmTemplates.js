@@ -1343,7 +1343,6 @@ function OneTemplate_group_callback(fieldObj, newValue)
         obj.override_opt = {
             dynamic_properties:{
                 list_obj:projPath + "/group/",
-                // list_obj:projPath + "/inventory/{inventory_id}/group/",
                 value_field:'id',
                 view_field:'name',
             }
@@ -1354,6 +1353,27 @@ function OneTemplate_group_callback(fieldObj, newValue)
         obj.type = "null"
     }
     return obj
+}
+
+function OneTemplate_group_autocomplete_callback(fieldObj, newValue)
+{
+    let newVal = newValue.field.getValue()
+    debugger;
+    if(false)
+    {
+        let obj = {
+        type:"autocomplete"
+        }
+        obj_list = "/inventory/{pk}/all_group/".format({'pk': newVal})
+        obj.override_opt = {
+            dynamic_properties:{
+                list_obj:projPath + obj_list,
+                value_field:'id',
+                view_field:'name',
+            }
+        };
+        return obj
+    }
 }
 
 function OneTemplate_module_callback(fieldObj, newValue)
@@ -1401,23 +1421,6 @@ function OneTemplate_playbook_callback(fieldObj, newValue)
     return obj
 }
 
-function OneTemplate_inventory_callback(fieldObj, newValue)
-{
-    let obj = {
-        type:"autocomplete"
-    }
-
-    obj.override_opt = {
-        dynamic_properties:{
-            list_obj:projPath + "/inventory/",
-            value_field:'id',
-            view_field:'name',
-        }
-    };
-
-    return obj;
-}
-
 tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
     let properties = obj.definition.properties;
 
@@ -1431,21 +1434,33 @@ tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
         title: 'Inventory',
         required: true,
         type: 'number',
-        format: 'dynamic',
-        parent_field: 'kind',
+        format: 'autocomplete',
         dynamic_properties: {
-            __func__callback: 'OneTemplate_inventory_callback',
+            list_obj:[projPath + "/inventory/"],
+            value_field:'id',
+            view_field:'name',
         }
     }
+    // properties.group = {
+    //     name: 'group',
+    //     title: 'Group',
+    //     type: 'string',
+    //     format: 'dynamic',
+    //     default: 'all',
+    //     parent_field: 'kind',
+    //     dynamic_properties: {
+    //         __func__callback: 'OneTemplate_group_callback',
+    //     }
+    // }
     properties.group = {
         name: 'group',
         title: 'Group',
         type: 'string',
         format: 'dynamic',
         default: 'all',
-        parent_field: 'kind',
+        parent_field: 'inventory',
         dynamic_properties: {
-            __func__callback: 'OneTemplate_group_callback',
+            __func__callback: 'OneTemplate_group_autocomplete_callback',
         }
     }
     properties.module = {
