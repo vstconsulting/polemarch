@@ -237,6 +237,48 @@ gui_project_template_variables = {
 
 gui_project_template_option = {
 
+    load: function(filters)
+    {
+        if(this.api.type == 'page')
+        {
+            let def = new $.Deferred();
+
+            $.when(gui_page_object.load.apply(this, arguments)).done(d => {
+                this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+                $.when(this.parent_template.load(this.url_vars['api_template_id'])).done((d1) => {
+
+                    let template_data = this.parent_template.model.data;
+                    prepareOptionFields(template_data, this.api.schema.edit);
+                    prepareOptionFields(template_data, this.api.schema.get);
+                    def.resolve(d1);
+                })
+            })
+
+            return def.promise();
+        }
+        else
+        {
+            return gui_list_object.load.apply(this, arguments)
+        }
+
+    },
+
+    renderAsNewPage : function (render_options = {})
+    {
+        let def = new $.Deferred();
+
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+        $.when(this.parent_template.load(this.url_vars['api_template_id'])).done((d1) =>{
+
+            let template_data = this.parent_template.model.data;
+            prepareOptionFields(template_data, this.api.schema.new);
+
+            def.resolve(gui_list_object.renderAsNewPage.apply(this, arguments));
+        })
+
+        return def.promise();
+    },
+
     apiGetDataForQuery : function (query, option)
     {
         if(option)
@@ -260,6 +302,11 @@ gui_project_template_option = {
                 for(let i in gui_project_template_option_Schema)
                 {
                     res.data[i] = val[i]
+
+                    if(i == 'name' && val[i] == undefined)
+                    {
+                        res.data[i] = option;
+                    }
                 }
 
                 /*res.data = {
@@ -277,7 +324,7 @@ gui_project_template_option = {
 
                 if(query.data.name)
                 {
-                    query.data.name = query.data.name.replace(/[\s\/]+/g,'_');
+                    query.data.name = query.data.name.replace(/[\s\/\-]+/g,'_');
                 }
 
                 if(option != query.data.name)
@@ -293,7 +340,7 @@ gui_project_template_option = {
 
                 if(template_data.options[query.data.name].name)
                 {
-                    template_data.options[query.data.name].name.replace(/[\s\/]+/g,'_');
+                    template_data.options[query.data.name].name.replace(/[\s\/\-]+/g,'_');
                 }
 
                 return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
@@ -336,7 +383,7 @@ gui_project_template_option = {
                 let template_data = this.parent_template.model.data
                 if(query.data.name)
                 {
-                    query.data.name = query.data.name.replace(/[\s\/]+/g,'_');
+                    query.data.name = query.data.name.replace(/[\s\/\-]+/g,'_');
                 }
                 if(template_data.options[query.data.name])
                 {
@@ -601,11 +648,11 @@ gui_project_template_option_Schema = {
         "definition": {},
         "name": "group",
         "parent_name_format": "option_group",
-        format:"autocomplete",
-        dynamic_properties:{
-            list_obj:projPath + "/group/",
-            value_field:'name',
-            view_field:'name',
+        "format":"autocomplete",
+        "dynamic_properties":{
+            "list_obj":projPath + "/group/",
+            "value_field":'name',
+            "view_field":'name',
         },
     },
     "module": {
@@ -616,11 +663,11 @@ gui_project_template_option_Schema = {
         "gui_links": [],
         "definition": {},
         "name": "module",
-        format:"autocomplete",
-        dynamic_properties:{
-            list_obj:projPath + "/module/",
-            value_field:'path',
-            view_field:'path',
+        "format":"autocomplete",
+        "dynamic_properties":{
+            "list_obj":projPath + "/module/",
+            "value_field":'path',
+            "view_field":'path',
         },
         "parent_name_format": "option_module"
     },
@@ -633,6 +680,22 @@ gui_project_template_option_Schema = {
         "definition": {},
         "name": "args",
         "parent_name_format": "option_args"
+    },
+    "playbook": {
+        "title": "Playbook",
+        "type": "string",
+        "maxLength": 512,
+        "minLength": 1,
+        "gui_links": [],
+        "definition": {},
+        "name": "playbook",
+        "format":"autocomplete",
+        "dynamic_properties":{
+            "list_obj":projPath + "/playbook/",
+            "value_field":'name',
+            "view_field":'name',
+        },
+        "parent_name_format": "option_playbook"
     },
     "notes": {
         "title": "Notes",
@@ -1568,4 +1631,30 @@ guiElements.template_options = function(opt = {})
 {
     this.name = 'template_data'
     guiElements.base.apply(this, arguments)
+}
+
+/*
+ * Function deletes fields, that are not needed for option of this template's type.
+ * For example, it deletes 'module', 'args', 'group' fields from task template's option schema.
+ * @param {template_data} -  object -  template data (values of template's fields);
+ * @param {schema_name} - string -  name of option schema.
+ */
+function prepareOptionFields(template_data, schema)
+{
+    if(template_data.kind.toLowerCase() == 'task')
+    {
+        schema.fields['module'].hidden = true;
+        schema.fields['args'].hidden = true;
+        schema.fields['group'].hidden = true;
+
+        schema.fields['playbook'].hidden = false;
+    }
+    else
+    {
+        schema.fields['module'].hidden = false;
+        schema.fields['args'].hidden = false;
+        schema.fields['group'].hidden = false;
+
+        schema.fields['playbook'].hidden = true;
+    }
 }

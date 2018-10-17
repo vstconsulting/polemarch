@@ -44,13 +44,13 @@ to maintain reliability of your admin-panel and 4 servers with workers to
 prevent denial for service because of overloading. Then briefly (it is mostly
 example than general howto) you must do such steps:
 
-1. Install Polemarch from PyPI at every server with worker and web-server.
+#. Install Polemarch from PyPI at every server with worker and web-server.
 
    .. sourcecode:: bash
 
         pip install polemarch
 
-2. Setup DB-server. MySQL for example. For all nodes edit :ref:`database`
+#. Setup DB-server. MySQL for example. For all nodes edit :ref:`database`
    and provide credential for you database. Like this:
 
    .. sourcecode:: ini
@@ -63,7 +63,7 @@ example than general howto) you must do such steps:
       host = 127.0.0.1
       port = 3306
 
-3. Setup cache-server. Redis, for example. Specify his credentials in
+#. Setup cache-server. Redis, for example. Specify his credentials in
    :ref:`locks` and :ref:`cache` for all nodes. Like this:
 
    .. sourcecode:: ini
@@ -76,7 +76,7 @@ example than general howto) you must do such steps:
       backend = django_redis.cache.RedisCache
       location = redis://redis-server:6379/2
 
-4. Setup some network filesystem. NFS, for example. Mount it in the same directory
+#. Setup some network filesystem. NFS, for example. Mount it in the same directory
    of all worker-intended nodes. Write this directory in :ref:`main`.
    Example:
 
@@ -85,39 +85,61 @@ example than general howto) you must do such steps:
       [main]
       projects_dir = /mnt/mynfs
 
-5. Setup some http-balancer. HAProxy, for example. Point it to web-intended
+#. Setup some http-balancer. HAProxy, for example. Point it to web-intended
    nodes.
 
-6. Prepare default database structure (tables and so on) in your MySQL
-   database. Polemarch can do it for you with this command:
+#. Prepare default database structure (tables and so on) in your MySQL
+   database. Polemarch can do it for you with following command:
 
    .. sourcecode:: bash
 
       sudo -u polemarch /opt/bin/polemarchctl migrate
 
-7. Run and enable ``polemarchweb`` service on web-intended nodes. Disable
-   ``polemarchworker`` service:
+#. Create polemarch systemd service:
 
-   .. sourcecode:: bash
+   #. Firtsly, create a file ``/etc/systemd/system/polemarch.service``:
 
-      # start web-server
-      sudo systemctl enable polemarchweb.service
-      sudo service polemarchweb start
-      # disable worker
-      sudo systemctl disable polemarchworker.service
-      sudo service polemarchworker stop
+       .. sourcecode:: ini
 
-8. Run and enable ``polemarchworker`` service on every worker-intended nodes.
-   Disable ``polemarchweb`` service:
+           [Unit]
+           Description=Polemarch Service HTTP Server
+           After=network.target remote-fs.target nss-lookup.target redis.service
 
-   .. sourcecode:: bash
+           [Service]
+           Type=forking
+           ExecStart=/opt/polemarch3/bin/polemarchctl webserver
+           ExecReload=/opt/polemarch3/bin/polemarchctl webserver reload=/var/run/polemarch/web.pid
+           ExecStop=/opt/polemarch3/bin/polemarchctl webserver stop=/var/run/polemarch/web.pid
+           PIDFile=/var/run/polemarch/web.pid
+           User=polemarch
+           Group=polemarch
+           KillSignal=SIGCONT
+           Restart=always
 
-      # start worker
-      sudo systemctl enable polemarchworker.service
-      sudo service polemarchworker start
-      # disable web-server
-      sudo systemctl disable polemarchweb.service
-      sudo service polemarchweb stop
+           [Install]
+            WantedBy=multi-user.target
+
+       Notice, that user and group 'polemarch' should exist in your system.
+       If they don't exist, create them.
+
+   #. Reload systemctl daemon:
+
+       .. sourcecode:: bash
+
+           systemctl daemon-reload
+
+   #. Add polemarch.service to autoload:
+
+       .. sourcecode:: bash
+
+           systemctl enable polemarch.service
+
+
+   #. Start polemarch.service:
+
+       .. sourcecode:: bash
+
+           systemctl start polemarch.service
 
 That's it.
 
