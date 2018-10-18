@@ -1399,44 +1399,45 @@ function OneTemplate_args_callback(fieldObj, newValue)
 function OneTemplate_group_callback(fieldObj, newValue)
 {
     let obj = {
-        type:"autocomplete"
+        type: 'autocomplete'
     }
-    if(newValue.value.toLowerCase() == "module")
-    {
-        obj.override_opt = {
-            dynamic_properties:{
-                list_obj:projPath + "/group/",
-                value_field:'id',
-                view_field:'name',
-            }
-        };
-    }
-    else
-    {
-        obj.type = "null"
-    }
-    return obj
-}
-
-function OneTemplate_group_autocomplete_callback(fieldObj, newValue)
-{
-    let newVal = newValue.field.getValue()
     debugger;
-    if(false)
+    if (newValue.opt.title.toLowerCase() == 'type')
     {
-        let obj = {
-        type:"autocomplete"
+        if(newValue.value.toLowerCase() == "module")
+        {
+            obj.override_opt = {
+                hidden: false
+            }
+        } else {
+            obj.override_opt = {
+                hidden: true
+            }
         }
-        obj_list = "/inventory/{pk}/all_group/".format({'pk': newVal})
+    } else {
+        let list_obj = []
+
+        new_value = newValue.value
+        if(newValue.value)
+        {
+            let inventory_path = '/inventory/{inventory_id}'
+            list_obj.push(projPath + inventory_path + '/all_groups/')
+            list_obj.push(projPath + inventory_path + '/all_hosts/')
+        } else {
+            list_obj.push(projPath + '/group/')
+            list_obj.push(projPath + '/host/')
+        }
         obj.override_opt = {
+            hidden: fieldObj.realElement.opt.hidden,
             dynamic_properties:{
-                list_obj:projPath + obj_list,
+                list_obj: list_obj,
                 value_field:'id',
                 view_field:'name',
+                inventory_id: new_value
             }
-        };
-        return obj
+        }
     }
+    return obj;
 }
 
 function OneTemplate_module_callback(fieldObj, newValue)
@@ -1497,33 +1498,26 @@ tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
         title: 'Inventory',
         required: true,
         type: 'number',
-        format: 'autocomplete',
+        format: 'select2',
         dynamic_properties: {
-            list_obj:[projPath + "/inventory/"],
+            list_obj:projPath + "/inventory/",
             value_field:'id',
-            view_field:'name',
+            view_field:'name'
         }
     }
-    // properties.group = {
-    //     name: 'group',
-    //     title: 'Group',
-    //     type: 'string',
-    //     format: 'dynamic',
-    //     default: 'all',
-    //     parent_field: 'kind',
-    //     dynamic_properties: {
-    //         __func__callback: 'OneTemplate_group_callback',
-    //     }
-    // }
     properties.group = {
         name: 'group',
         title: 'Group',
         type: 'string',
         format: 'dynamic',
+        hidden: true,
         default: 'all',
-        parent_field: 'inventory',
+        parent_field: ['inventory', 'kind'],
         dynamic_properties: {
-            __func__callback: 'OneTemplate_group_autocomplete_callback',
+            __func__callback: 'OneTemplate_group_callback',
+            value_field:'id',
+            view_field:'name',
+            list_obj: [projPath + '/group/', projPath + '/host/']
         }
     }
     properties.module = {
