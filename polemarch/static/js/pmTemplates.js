@@ -1470,8 +1470,8 @@ function OneTemplate_playbook_callback(fieldObj, newValue)
         obj.override_opt = {
             dynamic_properties:{
                 list_obj:projPath + "/playbook/",
-                value_field:'id',
-                view_field:'name',
+                value_field:'playbook',
+                view_field:'playbook',
             }
         };
         obj.required = true;

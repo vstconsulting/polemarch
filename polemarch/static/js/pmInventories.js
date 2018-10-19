@@ -2280,13 +2280,15 @@ function inventory_hybrid_autocomplete_getValue()
         return value_field_value;
     }
 
-    if(view_field_value.substr(0,2) == prefix)
+    if(view_field_value[view_field_value.length-1] == ",")
     {
         return view_field_value;
     }
-    else
+    else if(view_field_value.substr(0,2) == prefix)
     {
-        return prefix + view_field_value;
+        return view_field_value;
     }
+
+    return prefix + view_field_value;
 }
   
