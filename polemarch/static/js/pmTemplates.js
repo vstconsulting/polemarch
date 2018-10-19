@@ -1399,24 +1399,43 @@ function OneTemplate_args_callback(fieldObj, newValue)
 function OneTemplate_group_callback(fieldObj, newValue)
 {
     let obj = {
-        type:"autocomplete"
+        type: 'autocomplete'
     }
-    if(newValue.value.toLowerCase() == "module")
+    if (newValue.opt.title.toLowerCase() == 'type')
     {
+        if(newValue.value.toLowerCase() == "module")
+        {
+            obj.override_opt = {
+                hidden: false
+            }
+        } else {
+            obj.override_opt = {
+                hidden: true
+            }
+        }
+    } else if(Number(newValue.value) != NaN) {
+        let list_obj = []
+        let new_value = newValue.value
+        let inventory_path = '/inventory/{inventory_id}'
+
+        list_obj.push(projPath + inventory_path + '/all_groups/')
+        list_obj.push(projPath + inventory_path + '/all_hosts/')
+
+        let additional_props = {
+            api_inventory_id: new_value
+        }
+
         obj.override_opt = {
+            hidden: fieldObj.realElement.opt.hidden,
             dynamic_properties:{
-                list_obj:projPath + "/group/",
-                // list_obj:projPath + "/inventory/{inventory_id}/group/",
+                list_obj: list_obj,
                 value_field:'id',
                 view_field:'name',
+                url_vars: additional_props
             }
-        };
+        }
     }
-    else
-    {
-        obj.type = "null"
-    }
-    return obj
+    return obj;
 }
 
 function OneTemplate_module_callback(fieldObj, newValue)
@@ -1451,8 +1470,8 @@ function OneTemplate_playbook_callback(fieldObj, newValue)
         obj.override_opt = {
             dynamic_properties:{
                 list_obj:projPath + "/playbook/",
-                value_field:'id',
-                view_field:'name',
+                value_field:'playbook',
+                view_field:'playbook',
             }
         };
         obj.required = true;
@@ -1462,23 +1481,6 @@ function OneTemplate_playbook_callback(fieldObj, newValue)
         obj.type = "null"
     }
     return obj
-}
-
-function OneTemplate_inventory_callback(fieldObj, newValue)
-{
-    let obj = {
-        type:"autocomplete"
-    }
-
-    obj.override_opt = {
-        dynamic_properties:{
-            list_obj:projPath + "/inventory/",
-            value_field:'id',
-            view_field:'name',
-        }
-    };
-
-    return obj;
 }
 
 tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
@@ -1493,22 +1495,29 @@ tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
         name: 'inventory',
         title: 'Inventory',
         required: true,
-        type: 'number',
-        format: 'dynamic',
-        parent_field: 'kind',
+        type: 'string',
+        format: 'hybrid_autocomplete',
         dynamic_properties: {
-            __func__callback: 'OneTemplate_inventory_callback',
-        }
+            list_obj:projPath + "/inventory/",
+            value_field:'id',
+            view_field:'name',
+        },
+        __func__custom_getValue: 'inventory_hybrid_autocomplete_getValue',
+
     }
     properties.group = {
         name: 'group',
         title: 'Group',
         type: 'string',
         format: 'dynamic',
+        hidden: true,
         default: 'all',
-        parent_field: 'kind',
+        parent_field: ['inventory', 'kind'],
         dynamic_properties: {
             __func__callback: 'OneTemplate_group_callback',
+            value_field:'id',
+            view_field:'name',
+            list_obj: []
         }
     }
     properties.module = {
@@ -1643,3 +1652,4 @@ function prepareOptionFields(template_data, schema)
         schema.fields['playbook'].hidden = true;
     }
 }
+
