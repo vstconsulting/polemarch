@@ -138,14 +138,7 @@ gui_history = {
             }
         }).promise()
     },
-
-
-    stopUpdates : function()
-    {
-        clearTimeout(this.model.loadNewLines_timeoutId)
-        this.model.loadNewLines_timeoutId = undefined;
-    },
-
+ 
     /**
      * Подсветка синтаксиса
      * @link https://habrahabr.ru/post/43030/
@@ -188,8 +181,9 @@ gui_history = {
     bindStdoutUpdates : function(item_id)
     {
         var thisObj = this;
-        tabSignal.once("spajs.open", function(){
-            thisObj.stopUpdates()
+        tabSignal.once("spajs.open", () => { 
+            clearTimeout(this.model.loadNewLines_timeoutId)
+            this.model.loadNewLines_timeoutId = undefined;
         })
 
         $.when(this.loadNewLines(item_id, 0)).always(function()
