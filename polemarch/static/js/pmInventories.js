@@ -2265,4 +2265,28 @@ tabSignal.connect("openapi.factory.inventory", function(data)
 //    return true;
 //}
 //
+
+/*
+ * Function for getting value from inventory hybrid_autocomplete.
+ */
+function inventory_hybrid_autocomplete_getValue()
+{
+    let prefix = './';
+    let view_field_value = $("#" + this.element_id).val();
+    let value_field_value = $("#" + this.element_id).attr('value');
+
+    if(value_field_value)
+    {
+        return value_field_value;
+    }
+
+    if(view_field_value.substr(0,2) == prefix)
+    {
+        return view_field_value;
+    }
+    else
+    {
+        return prefix + view_field_value;
+    }
+}
   

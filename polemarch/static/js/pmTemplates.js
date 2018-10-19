@@ -1413,7 +1413,7 @@ function OneTemplate_group_callback(fieldObj, newValue)
                 hidden: true
             }
         }
-    } else if(typeof newValue.value == 'number') {
+    } else if(Number(newValue.value) != NaN) {
         let list_obj = []
         let new_value = newValue.value
         let inventory_path = '/inventory/{inventory_id}'
@@ -1495,13 +1495,15 @@ tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
         name: 'inventory',
         title: 'Inventory',
         required: true,
-        type: 'number',
-        format: 'select2',
+        type: 'string',
+        format: 'hybrid_autocomplete',
         dynamic_properties: {
             list_obj:projPath + "/inventory/",
             value_field:'id',
-            view_field:'name'
-        }
+            view_field:'name',
+        },
+        __func__custom_getValue: 'inventory_hybrid_autocomplete_getValue',
+
     }
     properties.group = {
         name: 'group',
@@ -1650,3 +1652,4 @@ function prepareOptionFields(template_data, schema)
         schema.fields['playbook'].hidden = true;
     }
 }
+
