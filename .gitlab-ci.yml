@@ -8,15 +8,6 @@ variables:
   RESTORE_CACHE_ATTEMPTS: 3
   DJANGO_LOG_LEVEL: 'ERROR'
   TOX_ARGS: "--workdir /cache/.tox_polemarch_${CI_BUILD_REF_NAME}"
-#  PUBLISH_REMOTE_NAME: "${CI_JOB_NAME}_public_${CI_COMMIT_TAG}"
-#  PUBLISH_REMOTE_USER: ""
-#  PUBLISH_REMOTE_TOKEN: ""
-#  PUBLISH_REMOTE_AUTH: "${PUBLISH_REMOTE_USER}:${PUBLISH_REMOTE_TOKEN}@"
-#  PUBLISH_REMOTE_SERVER: "gitlab.com"
-#  PUBLISH_REMOTE_PROJECT: "vstconsulting/polemarch"
-#  PUBLISH_REMOTE_PROJECT_SUFFIX: ".git"
-#  PUBLISH_REMOTE_URL_SCHEMA: "https://"
-#  PUBLISH_REMOTE_URI: "${PUBLISH_REMOTE_URL_SCHEMA}${PUBLISH_REMOTE_AUTH}${PUBLISH_REMOTE_SERVER}/${PUBLISH_REMOTE_PROJECT}${PUBLISH_REMOTE_PROJECT_SUFFIX}"
 
 stages:
   - code_standarts
@@ -39,37 +30,32 @@ stages:
   except:
     - GUI
     - tags
+    - issue_building
   retry: 2
 
-#.pack_tamplate: &packing-test
-#  stage: packaging-test
-#  image: onegreyonewhite/tox:tox
-#  variables:
-#    MYSQL_ROOT_PASSWORD: 'polemarch'
-#    MYSQL_DATABASE: 'polemarch'
-#    MYSQL_USER: 'polemarch'
-#    MYSQL_PASSWORD: 'polemarch'
-#    RABBITMQ_DEFAULT_USER: 'polemarch'
-#    RABBITMQ_DEFAULT_PASS: 'polemarch'
-#    RABBITMQ_DEFAULT_VHOST: 'polemarch'
-#  services:
-#    - name: 'mysql:latest'
-#      alias: 'db-server'
-#    - name: 'memcached'
-#      alias: 'cache-server'
-#    - name: 'memcached'
-#      alias: 'locks-server'
-#    - name: 'rabbitmq:latest'
-#      alias: 'rabbitmq-server'
-#  artifacts:
-#    name: "package($CI_BUILD_NAME)"
-#    expire_in: 1 hour
-#    paths:
-#    - dist/
-#  allow_failure: false
-#  only:
-#    - master
-#  retry: 2
+.pack_tamplate: &packing-test
+  stage: packaging-test
+  image: onegreyonewhite/tox:tox
+  variables:
+    MYSQL_ROOT_PASSWORD: 'polemarch'
+    MYSQL_DATABASE: 'polemarch'
+    MYSQL_USER: 'polemarch'
+    MYSQL_PASSWORD: 'polemarch'
+  services:
+    - name: 'mariadb:latest'
+      alias: 'db-server'
+    - name: 'redis'
+      alias: 'redis-server'
+  artifacts:
+    name: "package($CI_BUILD_NAME)"
+    expire_in: 1 hour
+    paths:
+    - dist/
+  allow_failure: false
+  only:
+    - master
+    - issue_building
+  retry: 2
 
 .publish_template: &publishing
   stage: publish
@@ -96,6 +82,9 @@ code_style:
     - /^.{0,}issue_.*$/
     - developer
     - master
+  except:
+    - tags
+    - issue_building
   retry: 2
 
 py27-install:
@@ -110,41 +99,30 @@ py36-install:
 
 ####################################################
 # DEPRECATED
-#default_rpm_tests:
-#  <<: *packing-test
-#  script:
-#   - cat /etc/hosts
-#   - tox -e rpm RELEASE=${CI_BUILD_ID}
-#   - sudo yum install dist/*.rpm -y -q
-#   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
-#   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
-#   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
-#   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
-#
-#default_oracle_tests:
-#  <<: *packing-test
-#  image: onegreyonewhite/tox:oracle
-#  script:
-#   - cat /etc/hosts
-#   - tox -e rpm RELEASE=${CI_BUILD_ID}
-#   - sudo yum install dist/*.rpm -y -q
-#   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
-#   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
-#   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
-#   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
-#
-#default_deb_tests:
-#  <<: *packing-test
-#  image: onegreyonewhite/tox:ubuntu
-#  script:
-#   - cat /etc/hosts
-#   - tox -e deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
-#   - echo "echo 'hello'" > /bin/systemctl
-#   - sudo apt install ./dist/*.deb -y -q
-#   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
-#   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
-#   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
-#   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
+default_rpm_tests:
+  <<: *packing-test
+  script:
+   - cat /etc/hosts
+   - tox ${TOX_ARGS} -e rpm RELEASE=${CI_BUILD_ID}
+   - sudo yum install dist/*.rpm -y -q
+   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
+   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
+   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
+   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests --failfast
+
+default_deb_tests:
+  <<: *packing-test
+  image: onegreyonewhite/tox:ubuntu
+  script:
+   - cat /etc/hosts
+   - tox ${TOX_ARGS} -e deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate INSTALL_PY=python3
+   - echo "echo 'hello'" > /bin/systemctl
+   - sudo apt update
+   - sudo apt install ./dist/*.deb -y -q
+   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
+   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
+   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
+   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests --failfast
 
 # Realese
 ###########################################
@@ -166,7 +144,6 @@ release_pypi:
   before_script:
   - pip install vstcompile[doc]
   script:
-#   - make compile
    - make test ENVS=build
   allow_failure: true
   artifacts:
@@ -183,32 +160,30 @@ publish_pypi:
   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
 
 # DEPRECATED
-#release_rpm:
-#  stage: release
-#  only:
-#   - tags
-#  script:
-##   - make rpm
-#   - make test ENVS=rpm
-#  allow_failure: false
-#  artifacts:
-#    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
-#    paths:
-#    - dist/
-#
-#release_deb:
-#  stage: release
-#  only:
-#   - tags
-#  image: onegreyonewhite/tox:ubuntu
-#  script:
-#   # - make deb RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
-#   - make test ENVS=deb
-#  allow_failure: false
-#  artifacts:
-#    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
-#    paths:
-#    - dist/
+release_rpm:
+  stage: release
+  only:
+   - tags
+  script:
+   - make test ENVS=rpm
+  allow_failure: false
+  artifacts:
+    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
+    paths:
+    - dist/
+
+release_deb:
+  stage: release
+  only:
+   - tags
+  image: onegreyonewhite/tox:ubuntu
+  script:
+   - make test ENVS=deb
+  allow_failure: false
+  artifacts:
+    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
+    paths:
+    - dist/
 
 # DEPRECATED
 #publish_gitlab:

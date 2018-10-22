@@ -1010,7 +1010,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             if 'inventory' not in result.get('subitem', result['item']):
                 self.assertEqual(result['status'], 204, result)
             else:
-                self.assertEqual(result['status'], 400)
+                self.assertEqual(result['status'], 400, result)
         self.assertEqual(results[-2]['status'], 204)
         self.assertEqual(results[-1]['status'], 204)
         self.assertTrue(not self.get_model_filter('Inventory', pk=inv_id).exists())
