@@ -31,6 +31,7 @@ DEFAULT_PREFIX = /opt
 INSTALL_PREFIX = $(shell if [[ ! -z "${prefix}" ]]; then echo -n $(prefix); else echo -n $(DEFAULT_PREFIX); fi)
 INSTALL_DIR = $(INSTALL_PREFIX)/${NAME}
 INSTALL_BINDIR = $(INSTALL_DIR)/bin
+INSTALL_PY = $(PY)
 REQUIREMENTS = -r requirements.txt -r requirements-doc.txt
 TMPDIR := $(shell mktemp -d)
 RPM_BUILD = /tmp/rpmbuild_$(NAME)_$(VER)_$(RELEASE)
@@ -98,7 +99,7 @@ compile: build-clean print_vars
 
 prebuild: print_vars
 	# Create virtualenv
-	$(PY) -m virtualenv --no-site-packages $(PREBUILD_DIR)
+	$(PY) -m virtualenv -p $(INSTALL_PY) --no-site-packages $(PREBUILD_DIR)
 	# Install required packages
 	$(PREBUILD_BINDIR)/pip install -U pip
 	$(PREBUILD_BINDIR)/pip install -U dist/$(NAME)-$(VER).tar.gz $(REQUIREMENTS)
@@ -115,12 +116,13 @@ prebuild: print_vars
 	# Install settings
 	-install -Dm 755 $(NAME)/$(MAIN_APP)/settings.ini $(BUILD_DIR)/etc/$(USER)/settings.ini.template
 	# Install systemd services
-	-install -Dm 755 initbin/$(NAME)web.service  $(BUILD_DIR)/etc/systemd/system/$(NAME)web.service
-	-install -Dm 755 initbin/$(NAME)worker.service  $(BUILD_DIR)/etc/systemd/system/$(NAME)worker.service
+	-install -Dm 755 initbin/$(NAME)web.service  $(BUILD_DIR)/etc/systemd/system/$(NAME).service
 	# Install tmpdirs config
 	-install -Dm 755 initbin/$(NAMEBASE).conf  $(BUILD_DIR)/etc/tmpfiles.d/$(NAMEBASE).conf
 	# Create tmpdirs
-	-mkdir -p $(BUILD_DIR)/var/{log,run,lock}/$(NAMEBASE)
+	-mkdir -p $(BUILD_DIR)/var/log/$(NAMEBASE)
+	-mkdir -p $(BUILD_DIR)/var/run/$(NAMEBASE)
+	-mkdir -p $(BUILD_DIR)/var/lock/$(NAMEBASE)
 
 localinstall: print_vars
 	$(PY) -m virtualenv --no-site-packages $(INSTALL_DIR)
