@@ -137,7 +137,9 @@ class OApiTestCase(BaseTestCase):
             types=dict(
                 ansible_become='boolean',
                 ansible_ssh_private_key_file='secretfile',
-                ansible_ssh_pass='password'
+                ansible_ssh_pass='password',
+                ansible_port='integer',
+                ansible_become_pass='password',
             )
         )
 

@@ -2291,4 +2291,25 @@ function inventory_hybrid_autocomplete_getValue()
 
     return prefix + view_field_value;
 }
+
+function InventoryVariable_value_callback(fieldObj, newValue)
+{
+    if(newValue.value == 'ansible_port')
+    {
+        fieldObj.opt.min = 1
+        fieldObj.opt.max = 65535
+    }
+    else
+    {
+        delete fieldObj.opt.min
+        delete fieldObj.opt.max
+    }
+}
+
+tabSignal.connect("openapi.schema.definition.InventoryVariable", function (obj) {
+    let props = obj.definition.properties;
+    props['value'].dynamic_properties = {
+        __func__callback: 'InventoryVariable_value_callback',
+    }
+})
   
