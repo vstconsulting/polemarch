@@ -143,7 +143,7 @@ function OnePeriodictask_template_opt_callback (fieldObj, newValue)
 function OnePeriodictask_inventory_callback (fieldObj, newValue)
 {  
     let obj = {
-        type:"select2"
+        type:"hybrid_autocomplete"
     }
     if(newValue.value != "TEMPLATE")
     {
@@ -177,7 +177,7 @@ tabSignal.connect("openapi.schema.definition.OnePeriodictask", function(data)
     data.definition.properties.template_opt.dynamic_properties = {}
     data.definition.properties.template_opt.dynamic_properties.__func__callback = "OnePeriodictask_template_opt_callback"
 
-    data.definition.properties.inventory.type = "number"
+    data.definition.properties.inventory.type = "string"
     data.definition.properties.inventory.required = false
     data.definition.properties.inventory.dynamic_properties = {}
     data.definition.properties.inventory.dynamic_properties.__func__callback = "OnePeriodictask_inventory_callback"
