@@ -6,7 +6,7 @@ tabSignal.connect("openapi.schema", function(data)
 
 tabSignal.connect("openapi.schema", function(data)
 {  
-    // Добавление линков в схему ссылок
+    // Adding links to the link scheme
     window.guiSchema.path["/group/{pk}/group/{group_id}/"].links['__link__group'] = "/group/{pk}/"
     window.guiSchema.path["/group/{pk}/group/"].sublinks_l2['__link__group'] = "/group/{pk}/"
 
@@ -18,6 +18,12 @@ tabSignal.connect("openapi.schema", function(data)
     
     window.guiSchema.path["/inventory/{pk}/group/{group_id}/"].links['__link__host'] = "/host/{pk}/"
     window.guiSchema.path["/inventory/{pk}/group/"].sublinks_l2['__link__host'] = "/host/{pk}/" 
+    
+    window.guiSchema.path["/project/{pk}/inventory/{inventory_id}/group/{group_id}/"].links['__link__group'] = "/group/{pk}/"
+    window.guiSchema.path["/project/{pk}/inventory/{inventory_id}/group/"].sublinks_l2['__link__group'] = "/group/{pk}/" 
+    
+    window.guiSchema.path["/project/{pk}/inventory/{inventory_id}/group/{group_id}/"].links['__link__host'] = "/host/{pk}/"
+    window.guiSchema.path["/project/{pk}/inventory/{inventory_id}/group/"].sublinks_l2['__link__host'] = "/host/{pk}/"  
 })
 
 tabSignal.connect("guiList.renderLine.group", function(obj){
