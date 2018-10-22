@@ -1561,6 +1561,11 @@ tabSignal.connect("openapi.schema",  function(obj)
     let template = obj.schema.path['/project/{pk}/template/{template_id}/']
     template.links['options'] = obj.schema.path['/project/{pk}/template/{template_id}/option/'];
     template.links['variables'] = obj.schema.path['/project/{pk}/template/{template_id}/variables/'];
+
+    let template_list = obj.schema.path['/project/{pk}/template/'];
+    template_list.schema['list'].fields['data'].hidden = true;
+    template_list.schema['list'].fields['options'].hidden = true;
+    template_list.schema['list'].fields['options_list'].title = 'Options';
 });
 
 function TemplateVariable_key_onInit(opt = {}, value, parent_object)
