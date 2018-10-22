@@ -67,6 +67,13 @@ class MultiTypeField(serializers.CharField):
         )
 
 
+class InventoryDependEnumField(vst_fields.DependEnumField):
+    def to_representation(self, value):
+        if isinstance(value, models.Inventory):
+            value = value.id  # nocv
+        return super(InventoryDependEnumField, self).to_representation(value)
+
+
 def with_signals(func):
     '''
     Decorator for send api_pre_save and api_post_save signals from serializers.
@@ -571,7 +578,7 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
         }
     )
 
-    inventory = vst_fields.DependEnumField(
+    inventory = InventoryDependEnumField(
         allow_blank=True, required=False, field='kind', types={
             'PLAYBOOK': 'select2',
             'MODULE': 'select2',
