@@ -411,6 +411,7 @@ class InventoryVariableSerializer(VariableSerializer):
             'ansible_ssh_private_key_file': 'secretfile',
             'ansible_become': 'boolean',
             'ansible_port': 'integer',
+            'ansible_become_pass': 'password',
         }
     )
 
