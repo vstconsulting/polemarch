@@ -242,7 +242,7 @@ class PeriodicTask(AbstractModel):
     def inventory(self, inventory):
         if isinstance(inventory, Inventory):
             self._inventory = inventory  # nocv
-        elif isinstance(inventory, (six.string_types, six.text_type)):
+        elif isinstance(inventory, (six.string_types, six.text_type, int)):
             try:
                 self._inventory = self.project.inventories.get(pk=int(inventory))
             except (ValueError, Inventory.DoesNotExist):
@@ -353,6 +353,8 @@ class HistoryQuerySet(BQuerySet):
         )
         if isinstance(inventory, (six.string_types, six.text_type)):
             history_kwargs['inventory'] = None
+        elif isinstance(inventory, int):
+            history_kwargs['inventory'] = project.inventories.get(pk=inventory)
         return self.create(status="DELAY", **history_kwargs), extra
 
 

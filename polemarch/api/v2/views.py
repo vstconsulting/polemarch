@@ -42,7 +42,7 @@ class OwnedView(base.ModelViewSetSet, base.CopyMixin):
     POST_WHITE_LIST = []
 
     @deco.action(methods=["post"], detail=True, serializer_class=sers.SetOwnerSerializer)
-    def set_owner(self, request, pk=None):
+    def set_owner(self, request, **kwargs):
         # pylint: disable=unused-argument
         '''
         Change instance owner.

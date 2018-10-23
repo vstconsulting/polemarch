@@ -20,6 +20,15 @@ gui_history = {
                 filters:"limit="+opt.limit+"&offset="+opt.offset
             }
              
+        if(opt.before !== undefined)
+        {
+            query.filters += "&before="+opt.before;
+        }
+        else if(!opt.after !== undefined)
+        {
+            query.filters += "&after="+opt.after;
+        }
+         
         let def = new $.Deferred();
         $.when(api.query(query)).done(function(data)
         {
@@ -74,7 +83,8 @@ gui_history = {
     {
         jQuery('#history-stdout').scrollTop(9999999);
     },
-
+    
+    linePerPage:30,
     loadNewLines : function(item_id, last_stdout_maxline)
     {
         var thisObj = this;
@@ -88,7 +98,7 @@ gui_history = {
         {
             last_stdout_maxline = 0;
         }
-
+        
         return $.when(this.load(item_id), this.loadLines(item_id, {after:last_stdout_maxline, limit:30})).always(function()
         { 
             var addData = false;
@@ -213,7 +223,7 @@ gui_history = {
                     }
 
                     thisObj.inLoadTopData = true;
-                    $.when(thisObj.loadLines(item_id, {before:stdout_minline, limit:thisObj.model.linePerPage})).always(function()
+                    $.when(thisObj.loadLines(item_id, {before:stdout_minline, limit:thisObj.linePerPage})).always(function()
                     {
                         var history_stdout = $("#history-stdout");
                         if(!history_stdout || !history_stdout.length)
@@ -221,7 +231,7 @@ gui_history = {
                             return;
                         }
 
-                        for(var i = stdout_minline-1; i > stdout_minline - thisObj.model.linePerPage; i = i -1)
+                        for(var i = stdout_minline-1; i > stdout_minline - thisObj.linePerPage; i = i -1)
                         {
                             if(thisObj.model.lines_data.stdout[i] != undefined)
                             {

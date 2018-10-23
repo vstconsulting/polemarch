@@ -1348,17 +1348,26 @@ class OApiTestCase(BaseTestCase):
             )
         if kwargs:
 
-            objKeys = obj.keys()
+            objKeys = list(obj.keys())
             objName = objname + ':' + obj.pop('title', '')
-            try:
-                objKeys.remove('title')
-            except:
-                pass
+            exclude_fields = ['title', 'x-nullable']
+            if 'minimum' not in kwargs.keys():
+                exclude_fields.append('minimum')
+            if 'maximum' not in kwargs.keys():
+                exclude_fields.append('maximum')
+            for key in exclude_fields:
+                objKeys.remove(key) if key in objKeys else None
 
             keys_in_kwargs = all(key in kwargs for key in objKeys)
             keys_in_obj = all(key in obj for key in kwargs.keys())
-            self.assertTrue(keys_in_kwargs, 'kwargs doesn\'t have enough keys')
-            self.assertTrue(keys_in_obj, 'object doesn\'t have enough keys')
+            err_kw = (
+                'kwargs doesn\'t have enough keys\nobj={}\nkwargs={}\nobjKeys={}'
+            ).format(obj, kwargs.keys(), objKeys)
+            err_obj = (
+                'object doesn\'t have enough keys\nobj={}\nkwargs={}\nobjKeys={}'
+            ).format(obj, kwargs.keys(), objKeys)
+            self.assertTrue(keys_in_kwargs, err_kw)
+            self.assertTrue(keys_in_obj, err_obj)
 
             if keys_in_kwargs and keys_in_obj:
                 for key in objKeys:
