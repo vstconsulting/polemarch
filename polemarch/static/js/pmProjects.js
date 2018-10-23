@@ -36,6 +36,7 @@ tabSignal.connect("openapi.schema.definition.AnsibleModule", function(obj) {
     properties.inventory = {
         name: 'inventory',
         title: 'Inventory',
+        description: 'specify inventory host path or comma separated host list. --inventory-file is deprecated',
         type: 'string',
         format: 'hybrid_autocomplete',
         dynamic_properties: {
@@ -49,6 +50,41 @@ tabSignal.connect("openapi.schema.definition.AnsibleModule", function(obj) {
     properties.group = {
         name: 'group',
         title: 'Group',
+        type: 'string',
+        format: 'dynamic',
+        default: 'all',
+        parent_field: ['inventory'],
+        dynamic_properties: {
+            __func__callback: 'execute_module_group_callback',
+            value_field:'id',
+            view_field:'name',
+            list_obj: []
+        }
+    }
+})
+
+tabSignal.connect("openapi.schema.definition.AnsiblePlaybook", function(obj) {
+    let properties = obj.definition.properties;
+
+    properties.inventory = {
+        name: 'inventory',
+        title: 'Inventory',
+        description: 'specify inventory host path or comma separated host list. --inventory-file is deprecated',
+        type: 'string',
+        format: 'hybrid_autocomplete',
+        dynamic_properties: {
+            list_obj:projPath + "/inventory/",
+            value_field:'id',
+            view_field:'name',
+        },
+        __func__custom_getValue: 'inventory_hybrid_autocomplete_getValue',
+
+    }
+
+    properties.limit = {
+        name: 'limit',
+        title: 'Limit',
+        description: "further limit selected hosts to an additional pattern",
         type: 'string',
         format: 'dynamic',
         default: 'all',
