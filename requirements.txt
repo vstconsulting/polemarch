@@ -1,5 +1,5 @@
 # Main
-vstutils[rpc,ldap,doc,prod]==1.2.0.dev14
+vstutils[rpc,ldap,doc,prod]==1.2.0.dev17
 pyyaml==3.12
 docutils==0.14
 markdown2==2.3.5
@@ -14,6 +14,5 @@ gitpython==2.1.10
 requests==2.19.1
 
 # Ansible required packages
-polemarch-ansible==1.0.5
+polemarch-ansible==1.0.6
 pywinrm[kerberos]==0.3.0
-github3.py==1.0.0a4

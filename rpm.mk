@@ -44,8 +44,7 @@ $(INSTALL_DIR)
 /var/log/%{namebase}
 /var/run/%{namebase}
 /var/lock/%{namebase}
-%attr(755,root,root) /etc/systemd/system/%{shortname}web.service
-%attr(755,root,root) /etc/systemd/system/%{shortname}worker.service
+%attr(755,root,root) /etc/systemd/system/%{shortname}.service
 %attr(755,root,root) /etc/tmpfiles.d/%{namebase}.conf
 
 %pre
@@ -61,15 +60,12 @@ cd -
 %post
 su - %{user} -c "/opt/%{name}/bin/%{shortname}ctl migrate"
 /usr/bin/systemctl daemon-reload
-/usr/bin/systemctl enable %{shortname}web.service
-/usr/bin/systemctl enable %{shortname}worker.service
+/usr/bin/systemctl enable %{shortname}.service
 
 %preun
-/usr/bin/systemctl disable %{shortname}web.service > /dev/null 2>&1
-/usr/bin/systemctl disable %{shortname}worker.service > /dev/null 2>&1
+/usr/bin/systemctl disable %{shortname}.service > /dev/null 2>&1
 if [ "$$1" = "0" ]; then
-	service %{shortname}web stop >/dev/null 2>&1
-	service %{shortname}worker stop >/dev/null 2>&1
+	service %{shortname} stop >/dev/null 2>&1
 fi
 
 %prep

@@ -242,7 +242,7 @@ class PeriodicTask(AbstractModel):
     def inventory(self, inventory):
         if isinstance(inventory, Inventory):
             self._inventory = inventory  # nocv
-        elif isinstance(inventory, (six.string_types, six.text_type)):
+        elif isinstance(inventory, (six.string_types, six.text_type, int)):
             try:
                 self._inventory = self.project.inventories.get(pk=int(inventory))
             except (ValueError, Inventory.DoesNotExist):

@@ -229,9 +229,9 @@ def check_if_inventory_linked(instance, action, **kwargs):
         return
     removing_inventories = instance.inventories.filter(pk__in=kwargs['pk_set'])
     check_id = removing_inventories.values_list('id', flat=True)
-    linked_templates = Template.objects.filter(inventory__iregex=r'^[0-9]$').annotate(
-        inventory__id=Cast('inventory', IntegerField())
-    ).filter(inventory__id__in=check_id)
+    linked_templates = Template.objects.filter(inventory__iregex=r'^[0-9]{1,128}$').\
+        annotate(inventory__id=Cast('inventory', IntegerField())).\
+        filter(inventory__id__in=check_id)
     linked_periodic_tasks = PeriodicTask.objects.filter(_inventory__in=check_id)
     if linked_periodic_tasks.exists() or linked_templates.exists():
         raise_linked_error(

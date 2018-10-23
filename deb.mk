@@ -91,8 +91,7 @@ chown -R $(USER):$(USER) /var/lock/$(NAMEBASE)
 # sudo -H -u $(USER) /opt/$(NAME)/bin/polemarchctl migrate
 su - $(USER) -c "/opt/$(NAME)/bin/$(PROJECT_CTL) migrate"
 systemctl daemon-reload || true
-systemctl enable $(NAME)web.service || true
-systemctl enable $(NAME)worker.service || true
+systemctl enable $(NAME).service || true
 endef
 export DEBIAN_POSTINST
 
@@ -101,10 +100,8 @@ define DEBIAN_PRERM
 case "$$1" in
   remove)
     # deactivating services
-    systemctl disable $(NAME)web.service > /dev/null 2>&1
-    systemctl disable $(NAME)worker.service > /dev/null 2>&1
-    service $(NAME)web stop >/dev/null 2>&1
-    service $(NAME)worker stop >/dev/null 2>&1
+    systemctl disable $(NAME).service > /dev/null 2>&1
+    service $(NAME) stop >/dev/null 2>&1
   ;;
 esac
 # cleaning after yourself
