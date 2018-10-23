@@ -1406,35 +1406,51 @@ function OneTemplate_group_callback(fieldObj, newValue)
         if(newValue.value.toLowerCase() == "module")
         {
             obj.override_opt = {
-                hidden: false
+                hidden: false,
+                required: false,
             }
         } else {
             obj.override_opt = {
-                hidden: true
-            }
-        }
-    } else if(Number(newValue.value) != NaN) {
-        let list_obj = []
-        let new_value = newValue.value
-        let inventory_path = '/inventory/{inventory_id}'
-
-        list_obj.push(projPath + inventory_path + '/all_groups/')
-        list_obj.push(projPath + inventory_path + '/all_hosts/')
-
-        let additional_props = {
-            api_inventory_id: new_value
-        }
-
-        obj.override_opt = {
-            hidden: fieldObj.realElement.opt.hidden,
-            dynamic_properties:{
-                list_obj: list_obj,
-                value_field:'id',
-                view_field:'name',
-                url_vars: additional_props
+                hidden: true,
+                required: false,
             }
         }
     }
+    else
+    {
+        if(!isNaN(Number(newValue.value)))
+        {
+            let list_obj = []
+            let new_value = newValue.value
+            let inventory_path = '/inventory/{inventory_id}'
+
+            list_obj.push(projPath + inventory_path + '/all_groups/')
+            list_obj.push(projPath + inventory_path + '/all_hosts/')
+
+            let additional_props = {
+                api_inventory_id: new_value
+            }
+
+            obj.override_opt = {
+                hidden: fieldObj.realElement.opt.hidden,
+                required: true,
+                dynamic_properties:{
+                    list_obj: list_obj,
+                    value_field:'id',
+                    view_field:'name',
+                    url_vars: additional_props
+                }
+            }
+        }
+        else
+        {
+            obj.override_opt = {
+                hidden: fieldObj.realElement.opt.hidden,
+                required: true,
+            }
+        }
+    }
+
     return obj;
 }
 
