@@ -606,6 +606,13 @@ gui_project_template_option_variables = {
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
 
             $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{
+
+                // if branch for correct redirect after new option's variable creation
+                if(query.method == 'post' && query.data.key)
+                {
+                    d.data.id = '@' + query.data.key;
+                }
+
                 def.resolve(d)
             }).fail((e) =>{
                 def.reject(e);
