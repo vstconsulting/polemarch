@@ -399,7 +399,7 @@ gui_project_template_option = {
     },
 
     apiQuery : function (query)
-    { 
+    {
         let option;
         if(query.data_type[query.data_type.length-1] != 'option' && query.data_type.length == 6)
         {
@@ -1479,7 +1479,7 @@ function OneTemplate_module_callback(fieldObj, newValue)
 function OneTemplate_playbook_callback(fieldObj, newValue)
 {
     let obj = {
-        type:"select2"
+        type:"autocomplete"
     }
     if(newValue.value.toLowerCase() == "task")
     {
