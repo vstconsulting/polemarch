@@ -157,7 +157,7 @@ tabSignal.connect("openapi.schema.definition.PeriodicTaskVariable", function(dat
 })
 
 function OnePeriodictask_mode_callback (fieldObj, newValue)
-{ 
+{
     let obj = {
         type:"autocomplete"
     }
@@ -167,7 +167,7 @@ function OnePeriodictask_mode_callback (fieldObj, newValue)
             dynamic_properties:{
                 list_obj:projPath + "/playbook/",
                 value_field:'playbook',
-                view_field:'name',
+                view_field:'playbook',
             }
         };
     }
@@ -190,11 +190,11 @@ function OnePeriodictask_mode_callback (fieldObj, newValue)
 }
 
 function OnePeriodictask_template_callback (fieldObj, newValue)
-{  
+{
     let obj = {
         type:"hidden"
     }
-    
+
     if(newValue.value == "TEMPLATE")
     {
         obj.type = "select2"
@@ -205,8 +205,8 @@ function OnePeriodictask_template_callback (fieldObj, newValue)
                 view_field:'name',
             }
         };
-    } 
-    
+    }
+
     return obj
 }
 
@@ -215,9 +215,9 @@ function OnePeriodictask_template_opt_callback (fieldObj, newValue)
     let obj = {
         type:"hidden"
     }
-   
+
     if(newValue.value)
-    { 
+    {
         obj.type = "autocomplete"
         obj.override_opt = {
             dynamic_properties:{
@@ -255,10 +255,10 @@ function OnePeriodictask_inventory_callback (fieldObj, newValue)
     }
     return obj
 }
- 
- 
+
+
 function signal_gui_schema_name_periodic_task(data){
-    
+
     data.value.fields.mode.type = "dynamic"
     data.value.fields.mode.dynamic_properties = {}
     data.value.fields.mode.required = false
@@ -269,20 +269,20 @@ function signal_gui_schema_name_periodic_task(data){
     data.value.fields.template_opt.additionalProperties.field = "template"
     data.value.fields.template_opt.dynamic_properties = {}
     data.value.fields.template_opt.dynamic_properties.__func__callback = "OnePeriodictask_template_opt_callback"
-    
+
     data.value.fields.inventory.type = "dynamic"
     data.value.fields.inventory.required = false
     data.value.fields.inventory.dynamic_properties = {}
     data.value.fields.inventory.dynamic_properties.__func__callback = "OnePeriodictask_inventory_callback"
-     
+
     data.value.fields.template.format = "dynamic"
     data.value.fields.template.parent_field = "kind"
     data.value.fields.template.required = false
     data.value.fields.template.dynamic_properties = {}
-    data.value.fields.template.dynamic_properties.__func__callback = "OnePeriodictask_template_callback" 
+    data.value.fields.template.dynamic_properties.__func__callback = "OnePeriodictask_template_callback"
 }
- 
-tabSignal.connect("gui.schema.name.periodic_task.edit", signal_gui_schema_name_periodic_task) 
+
+tabSignal.connect("gui.schema.name.periodic_task.edit", signal_gui_schema_name_periodic_task)
 tabSignal.connect("gui.schema.name.periodic_task.new", signal_gui_schema_name_periodic_task)
 
 
