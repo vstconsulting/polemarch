@@ -18,7 +18,7 @@ function PeriodicTaskVariable_key_onInit(opt = {}, value, parent_object)
 
         let new_dynamic_properties = {
             list_obj: list_obj,
-            value_field:'id',
+            value_field:'name',
             view_field:'name',
             url_vars: additional_props
         }
@@ -157,7 +157,7 @@ tabSignal.connect("openapi.schema.definition.PeriodicTaskVariable", function(dat
 })
 
 function OnePeriodictask_mode_callback (fieldObj, newValue)
-{
+{ 
     let obj = {
         type:"autocomplete"
     }
@@ -166,7 +166,7 @@ function OnePeriodictask_mode_callback (fieldObj, newValue)
         obj.override_opt = {
             dynamic_properties:{
                 list_obj:projPath + "/playbook/",
-                value_field:'id',
+                value_field:'playbook',
                 view_field:'name',
             }
         };
@@ -176,26 +176,28 @@ function OnePeriodictask_mode_callback (fieldObj, newValue)
         obj.override_opt = {
             dynamic_properties:{
                 list_obj:projPath + "/module/",
-                value_field:'id',
-                view_field:'name',
+                value_field:'name',
+                view_field:'path',
             }
         };
 
     }
     else
     {
-        obj.type = "null"
+        obj.type = "hidden"
     }
     return obj
 }
 
 function OnePeriodictask_template_callback (fieldObj, newValue)
-{
+{  
     let obj = {
-        type:"select2"
+        type:"hidden"
     }
+    
     if(newValue.value == "TEMPLATE")
     {
+        obj.type = "select2"
         obj.override_opt = {
             dynamic_properties:{
                 list_obj:projPath + "/template/",
@@ -203,25 +205,29 @@ function OnePeriodictask_template_callback (fieldObj, newValue)
                 view_field:'name',
             }
         };
-    }
-    else
-    {
-        obj.type = "null"
-    }
+    } 
+    
     return obj
 }
 
 function OnePeriodictask_template_opt_callback (fieldObj, newValue)
 {
     let obj = {
-        type:"null"
+        type:"hidden"
     }
-
-    if(newValue.value && newValue.value.options_list)
-    {
-        obj.type = "enum"
+   
+    if(newValue.value)
+    { 
+        obj.type = "autocomplete"
         obj.override_opt = {
-            enum:newValue.value.options_list
+            dynamic_properties:{
+                list_obj:projPath + "/template/{template_id}/option/",
+                value_field:'name',
+                view_field:'name',
+                url_vars:{
+                    api_template_id:newValue.value
+                }
+            }
         };
     }
 
@@ -245,31 +251,40 @@ function OnePeriodictask_inventory_callback (fieldObj, newValue)
     }
     else
     {
-        obj.type = "null"
+        obj.type = "hidden"
     }
     return obj
 }
+ 
+ 
+function signal_gui_schema_name_periodic_task(data){
+    
+    data.value.fields.mode.type = "dynamic"
+    data.value.fields.mode.dynamic_properties = {}
+    data.value.fields.mode.required = false
+    data.value.fields.mode.dynamic_properties.__func__callback = "OnePeriodictask_mode_callback"
 
-tabSignal.connect("openapi.schema.definition.OnePeriodictask", function(data)
-{
-    data.definition.properties.mode.dynamic_properties = {}
-    data.definition.properties.mode.required = false
-    data.definition.properties.mode.dynamic_properties.__func__callback = "OnePeriodictask_mode_callback"
+    data.value.fields.template_opt.type = "dynamic"
+    data.value.fields.template_opt.required = false
+    data.value.fields.template_opt.additionalProperties.field = "template"
+    data.value.fields.template_opt.dynamic_properties = {}
+    data.value.fields.template_opt.dynamic_properties.__func__callback = "OnePeriodictask_template_opt_callback"
+    
+    data.value.fields.inventory.type = "dynamic"
+    data.value.fields.inventory.required = false
+    data.value.fields.inventory.dynamic_properties = {}
+    data.value.fields.inventory.dynamic_properties.__func__callback = "OnePeriodictask_inventory_callback"
+     
+    data.value.fields.template.format = "dynamic"
+    data.value.fields.template.parent_field = "kind"
+    data.value.fields.template.required = false
+    data.value.fields.template.dynamic_properties = {}
+    data.value.fields.template.dynamic_properties.__func__callback = "OnePeriodictask_template_callback" 
+}
+ 
+tabSignal.connect("gui.schema.name.periodic_task.edit", signal_gui_schema_name_periodic_task) 
+tabSignal.connect("gui.schema.name.periodic_task.new", signal_gui_schema_name_periodic_task)
 
-    data.definition.properties.template.type = "number"
-    data.definition.properties.template.required = false
-    data.definition.properties.template.dynamic_properties = {}
-    data.definition.properties.template.dynamic_properties.__func__callback = "OnePeriodictask_template_callback"
-
-    data.definition.properties.template_opt.required = false
-    data.definition.properties.template_opt.dynamic_properties = {}
-    data.definition.properties.template_opt.dynamic_properties.__func__callback = "OnePeriodictask_template_opt_callback"
-
-    data.definition.properties.inventory.type = "string"
-    data.definition.properties.inventory.required = false
-    data.definition.properties.inventory.dynamic_properties = {}
-    data.definition.properties.inventory.dynamic_properties.__func__callback = "OnePeriodictask_inventory_callback"
-})
 
 tabSignal.connect("guiList.renderLine.periodic_task", function(obj)
 {

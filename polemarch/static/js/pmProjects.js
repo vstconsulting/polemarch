@@ -20,7 +20,7 @@ function execute_module_group_callback(fieldObj, newValue)
         obj.override_opt = {
             dynamic_properties:{
                 list_obj: list_obj,
-                value_field:'id',
+                value_field:'name',
                 view_field:'name',
                 url_vars: additional_props
             }
@@ -56,7 +56,7 @@ tabSignal.connect("openapi.schema.definition.AnsibleModule", function(obj) {
         parent_field: ['inventory'],
         dynamic_properties: {
             __func__callback: 'execute_module_group_callback',
-            value_field:'id',
+            value_field:'name',
             view_field:'name',
             list_obj: []
         }
@@ -91,7 +91,7 @@ tabSignal.connect("openapi.schema.definition.AnsiblePlaybook", function(obj) {
         parent_field: ['inventory'],
         dynamic_properties: {
             __func__callback: 'execute_module_group_callback',
-            value_field:'id',
+            value_field:'name',
             view_field:'name',
             list_obj: []
         }
