@@ -195,8 +195,8 @@ gui_project_template_variables = {
 
     delete: function()
     {
-        let url_info = spajs.urlInfo.data.reg;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+        let url_info = this.url_vars;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
 
         let def = new $.Deferred();
 
@@ -213,8 +213,8 @@ gui_project_template_variables = {
 
     deleteArray : function (ids)
     {
-        let url_info = spajs.urlInfo.data.reg;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+        let url_info = this.url_vars;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
 
         let def = new $.Deferred();
 
@@ -407,7 +407,7 @@ gui_project_template_option = {
         }
         let def = new $.Deferred();
 
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars)
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
 
             $.when(this.apiGetDataForQuery(query, option)).done((d) =>{
@@ -425,8 +425,8 @@ gui_project_template_option = {
 
     delete: function()
     {
-        let url_info = spajs.urlInfo.data.reg;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+        let url_info = this.url_vars;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
 
         let def = new $.Deferred();
 
@@ -443,8 +443,8 @@ gui_project_template_option = {
 
     deleteArray : function (ids)
     {
-        let url_info = spajs.urlInfo.data.reg;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+        let url_info = this.url_vars;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
 
         let def = new $.Deferred();
 
@@ -570,7 +570,7 @@ gui_project_template_option_variables = {
         }
         let def = new $.Deferred();
 
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars)
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
 
             $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{
@@ -588,8 +588,8 @@ gui_project_template_option_variables = {
 
     delete: function()
     {
-        let url_info = spajs.urlInfo.data.reg;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+        let url_info = this.url_vars;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
 
         let def = new $.Deferred();
 
@@ -606,8 +606,8 @@ gui_project_template_option_variables = {
 
     deleteArray : function (ids)
     {
-        let url_info = spajs.urlInfo.data.reg;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+        let url_info = this.url_vars;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
 
         let def = new $.Deferred();
 
@@ -666,7 +666,7 @@ gui_project_template_option_Schema = {
         "format":"autocomplete",
         "dynamic_properties":{
             "list_obj":projPath + "/module/",
-            "value_field":'path',
+            "value_field":'name',
             "view_field":'path',
         },
         "parent_name_format": "option_module"
@@ -692,8 +692,8 @@ gui_project_template_option_Schema = {
         "format":"autocomplete",
         "dynamic_properties":{
             "list_obj":projPath + "/playbook/",
-            "value_field":'name',
-            "view_field":'name',
+            "value_field":'playbook',
+            "view_field":'playbook',
         },
         "parent_name_format": "option_playbook"
     },
@@ -1406,35 +1406,51 @@ function OneTemplate_group_callback(fieldObj, newValue)
         if(newValue.value.toLowerCase() == "module")
         {
             obj.override_opt = {
-                hidden: false
+                hidden: false,
+                required: false,
             }
         } else {
             obj.override_opt = {
-                hidden: true
-            }
-        }
-    } else if(Number(newValue.value) != NaN) {
-        let list_obj = []
-        let new_value = newValue.value
-        let inventory_path = '/inventory/{inventory_id}'
-
-        list_obj.push(projPath + inventory_path + '/all_groups/')
-        list_obj.push(projPath + inventory_path + '/all_hosts/')
-
-        let additional_props = {
-            api_inventory_id: new_value
-        }
-
-        obj.override_opt = {
-            hidden: fieldObj.realElement.opt.hidden,
-            dynamic_properties:{
-                list_obj: list_obj,
-                value_field:'id',
-                view_field:'name',
-                url_vars: additional_props
+                hidden: true,
+                required: false,
             }
         }
     }
+    else
+    {
+        if(!isNaN(Number(newValue.value)))
+        {
+            let list_obj = []
+            let new_value = newValue.value
+            let inventory_path = '/inventory/{inventory_id}'
+
+            list_obj.push(projPath + inventory_path + '/all_groups/')
+            list_obj.push(projPath + inventory_path + '/all_hosts/')
+
+            let additional_props = {
+                api_inventory_id: new_value
+            }
+
+            obj.override_opt = {
+                hidden: fieldObj.realElement.opt.hidden,
+                required: true,
+                dynamic_properties:{
+                    list_obj: list_obj,
+                    value_field:'name',
+                    view_field:'name',
+                    url_vars: additional_props
+                }
+            }
+        }
+        else
+        {
+            obj.override_opt = {
+                hidden: fieldObj.realElement.opt.hidden,
+                required: true,
+            }
+        }
+    }
+
     return obj;
 }
 
@@ -1448,7 +1464,7 @@ function OneTemplate_module_callback(fieldObj, newValue)
         obj.override_opt = {
             dynamic_properties:{
                 list_obj:projPath + "/module/",
-                value_field:'path',
+                value_field:'name',
                 view_field:'path',
             },
         };
@@ -1463,7 +1479,7 @@ function OneTemplate_module_callback(fieldObj, newValue)
 function OneTemplate_playbook_callback(fieldObj, newValue)
 {
     let obj = {
-        type:"select2"
+        type:"autocomplete"
     }
     if(newValue.value.toLowerCase() == "task")
     {
@@ -1515,7 +1531,7 @@ tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
         parent_field: ['inventory', 'kind'],
         dynamic_properties: {
             __func__callback: 'OneTemplate_group_callback',
-            value_field:'id',
+            value_field:'name',
             view_field:'name',
             list_obj: []
         }
