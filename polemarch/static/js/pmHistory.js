@@ -371,9 +371,9 @@ function addSettingsToHistoryListsFields(obj)
     let properties = obj.definition.properties;
     properties['options'].hidden = true;
     properties['initiator_type'].hidden = true;
-    properties['start_time'].value = format_history_time;
-    properties['stop_time'].value = format_history_time;
-    properties['executor'].value = format_executor;
+    properties['start_time'].__func__value = 'format_history_time';
+    properties['stop_time'].__func__value = 'format_history_time';
+    properties['executor'].__func__value = 'format_executor';
 }
 
 function addSettingsToOneHistoryFields(obj)
