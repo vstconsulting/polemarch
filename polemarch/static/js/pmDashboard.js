@@ -1054,28 +1054,11 @@ guiDashboardWidget = {
  * @type Object
  */
 
-/*
-var pmwTasksTemplatesWidget = inheritance(guiDashboardWidget);
-pmwTasksTemplatesWidget.render = function()
-{
-    var div_id="#pmwTasksTemplatesWidget";
-    pmTasksTemplates.showTaskWidget($(div_id));
-    return "";
-}
-
-var pmwModulesTemplatesWidget = inheritance(guiDashboardWidget);
-pmwModulesTemplatesWidget.render = function()
-{
-    var div_id="#pmwModulesTemplatesWidget";
-    pmTasksTemplates.showModuleWidget($(div_id));
-    return "";
-}*/
-
 var pmwAnsibleModuleWidget = inheritance(guiDashboardWidget);
 pmwAnsibleModuleWidget.render = function()
 {
     var div_id="#pmwAnsibleModuleWidget";
-    pmAnsibleModule.fastCommandWidget($(div_id));
+    //pmAnsibleModule.fastCommandWidget($(div_id));
     return "";
 }
 
