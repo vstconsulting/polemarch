@@ -115,7 +115,12 @@ class AnsibleCommand(PMObject):
             if isinstance(inventory, (six.string_types, six.text_type)):
                 self.raw, self.keys = self.get_from_file(inventory)
             else:
-                self.raw, self.keys = inventory.get_inventory()
+                self.raw, self.keys = self.get_from_int(inventory)
+
+        def get_from_int(self, inventory):
+            if isinstance(inventory, int):
+                inventory = Inventory.objects.get(pk=inventory)  # nocv
+            return inventory.get_inventory()
 
         def get_from_file(self, inventory):
             self._file = "{}/{}".format(self.cwd, inventory)
