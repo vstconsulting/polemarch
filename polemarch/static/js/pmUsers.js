@@ -15,6 +15,25 @@ tabSignal.connect("openapi.completed", function()
         user_settings.schema.get.fields[name].format = 'inner_api_object';
         user_settings.schema.get.fields[name].readOnly = false;
     })
+
+    user_settings.schema.post = {
+        fields: user_settings.schema.get,
+        operationId: 'user_settings_edit',
+        query_type: 'post',
+    }
+
+    user_settings.method.post = 'post';
+
 })
 
 tabSignal.connect("openapi.schema.definition.ChangePassword", addSettingsToChangePassword);
+
+gui_user_settings = {
+    update: function()
+    {
+        let base_update = gui_page_object.update.apply(this, arguments);
+        return $.when(base_update).done(data => {
+            guiDashboard.setUserSettingsFromApiAnswer(data.data)
+        })
+    }
+}

@@ -52,14 +52,14 @@ guiDashboard.model.widgets = [
 guiDashboard.model.defaultWidgets = [
     [
         /**/{
-            name:'pmwTemplatesCounter',
-            title:'Templates Counter',
-            sort:1,
-            active:true,
-            opt:{},
-            type:1,
-            collapse:false,
-        },
+        name:'pmwTemplatesCounter',
+        title:'Templates Counter',
+        sort:1,
+        active:true,
+        opt:{},
+        type:1,
+        collapse:false,
+    },
         {
             name:'pmwProjectsCounter',
             title:'Projects Counter',
@@ -367,44 +367,52 @@ guiDashboard.getUserDashboardSettingsFromAPI = function()
     {
         let query = {
             method: "get",
-            data_type: ["user", userId, "settings"],  
+            data_type: ["user", userId, "settings"],
         }
 
         let def = new $.Deferred();
         $.when(api.query(query, true)).done(function(answer)
-        { 
+        {
             let data = answer.data
-            if ($.isEmptyObject(data.widgetSettings))
-            {
-                guiDashboard.cloneDefaultWidgetsTotally();
-            }
-            else
-            {
-                guiDashboard.clonetWidgetsSettingsFromApiAndVerify(data.widgetSettings);
-                guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
-            }
-
-            if ($.isEmptyObject(data.chartLineSettings))
-            {
-                guiDashboard.cloneChartLineSettingsTotally();
-            }
-            else
-            {
-                guiDashboard.cloneChartLineSettingsFromApi(data.chartLineSettings);
-            }
-            
+            guiDashboard.setUserSettingsFromApiAnswer(data);
             def.resolve()
-        }).fail(e => { 
+        }).fail(e => {
             console.warn(e)
             webGui.showErrors(e)
             def.reject()
         })
-       
+
         return def.promise()
     }
     else
     {
         return false;
+    }
+}
+
+/*
+* Function sets users settings from API to guiDashboard object.
+* @param - object - data - data from API
+* */
+guiDashboard.setUserSettingsFromApiAnswer = function(data)
+{
+    if ($.isEmptyObject(data.widgetSettings))
+    {
+        guiDashboard.cloneDefaultWidgetsTotally();
+    }
+    else
+    {
+        guiDashboard.clonetWidgetsSettingsFromApiAndVerify(data.widgetSettings);
+        guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
+    }
+
+    if ($.isEmptyObject(data.chartLineSettings))
+    {
+        guiDashboard.cloneChartLineSettingsTotally();
+    }
+    else
+    {
+        guiDashboard.cloneChartLineSettingsFromApi(data.chartLineSettings);
     }
 }
 
@@ -427,20 +435,20 @@ guiDashboard.putUserDashboardSettingsToAPI = function()
     }
 
     let query = {
-         method: "post",
-         data_type: ["user", userId, "settings"],
-         data:{widgetSettings:widgetSettings, chartLineSettings:chartLineSettings}
-     }
+        method: "post",
+        data_type: ["user", userId, "settings"],
+        data:{widgetSettings:widgetSettings, chartLineSettings:chartLineSettings}
+    }
 
-     let def = new $.Deferred();
+    let def = new $.Deferred();
 
-     $.when(api.query(query, true)).fail(e => {
-         console.warn(e)
-         webGui.showErrors(e)
-         def.reject()
-     })
+    $.when(api.query(query, true)).fail(e => {
+        console.warn(e)
+        webGui.showErrors(e)
+        def.reject()
+    })
 
-     return def.promise()  
+    return def.promise()
 }
 
 /**
@@ -645,7 +653,7 @@ guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
 guiDashboard.loadStats=function()
 {
     var thisObj = this;
-    
+
     /*var limit=1;
     return spajs.ajax.Call({
         url: hostname + "/api/v2/stats/?last="+guiDashboard.statsDataLastQuery,
@@ -662,20 +670,20 @@ guiDashboard.loadStats=function()
             webGui.showErrors(e)
         }
     });*/
-   
+
     let query = {
-            type: "get",
-            item: "stats", 
-            filter:"last="+guiDashboard.statsDataLastQuery
-        }
+        type: "get",
+        item: "stats",
+        filter:"last="+guiDashboard.statsDataLastQuery
+    }
 
     let def = new $.Deferred();
     $.when(api.query(query, true)).done(function(answer)
-    { 
-        thisObj.statsData=answer.data; 
+    {
+        thisObj.statsData=answer.data;
         def.resolve()
-    }).fail(function(e){ 
-        
+    }).fail(function(e){
+
         def.reject(e)
     })
 
@@ -779,7 +787,7 @@ guiDashboard.toggleSortable = function(thisButton)
         }
     }
 }
-  
+
 tabSignal.connect('guiLocalSettings.hideMenu', function(){
 
     setTimeout(function(){
@@ -1034,7 +1042,7 @@ guiDashboardWidget = {
         test:1
     },
     render:function(){
-        
+
     },
     init:function(opt){
         mergeDeep(this.model, opt)
@@ -1065,7 +1073,7 @@ pmwModulesTemplatesWidget.render = function()
 
 var pmwAnsibleModuleWidget = inheritance(guiDashboardWidget);
 pmwAnsibleModuleWidget.render = function()
-{ 
+{
     var div_id="#pmwAnsibleModuleWidget";
     pmAnsibleModule.fastCommandWidget($(div_id));
     return "";
@@ -1073,7 +1081,7 @@ pmwAnsibleModuleWidget.render = function()
 
 var pmwChartWidget=inheritance(guiDashboardWidget);
 pmwChartWidget.render = function()
-{ 
+{
     var div_id="#pmwChartWidget";
     var html=spajs.just.render('pmwChartWidget');
     $(div_id).html(html);
@@ -1092,7 +1100,7 @@ pmwItemsCounter.model.count = '-';
 pmwItemsCounter.model.nameInStats = "";
 
 pmwItemsCounter.render = function()
-{ 
+{
     var html = spajs.just.render('pmwItemsCounter', {model:this.model});
     return window.JUST.onInsert(html, function(){});
 }
