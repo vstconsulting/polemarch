@@ -437,6 +437,12 @@ gui_project_template_option = {
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
 
             $.when(this.apiGetDataForQuery(query, option)).done((d) =>{
+
+                // if branch for correct redirect after new option creation
+                if(query.method == 'post' && query.data.name)
+                {
+                    d.data.id = '@' + query.data.name;
+                }
                 def.resolve(d)
             }).fail((e) =>{
                 def.reject(e);
@@ -600,6 +606,13 @@ gui_project_template_option_variables = {
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
 
             $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{
+
+                // if branch for correct redirect after new option's variable creation
+                if(query.method == 'post' && query.data.key)
+                {
+                    d.data.id = '@' + query.data.key;
+                }
+
                 def.resolve(d)
             }).fail((e) =>{
                 def.reject(e);
@@ -658,6 +671,7 @@ gui_project_template_option_Schema = {
     "name": {
         "title": "Name",
         "type": "string",
+        "required": true,
         "maxLength": 512,
         "minLength": 1,
         "gui_links": [],
@@ -1703,6 +1717,25 @@ function prepareOptionFields(template_data, schema)
         schema.fields['group'].hidden = false;
 
         schema.fields['playbook'].hidden = true;
+
+        if(template_data.data && template_data.data.inventory && !isNaN(template_data.data.inventory))
+        {
+            let inventory_path = '/inventory/{inventory_id}'
+
+            let list_obj = [
+                projPath + inventory_path + '/all_groups/',
+                projPath + inventory_path + '/all_hosts/',
+            ]
+
+            let additional_props = {
+                api_inventory_id: template_data.data.inventory
+            }
+
+            schema.fields['group'].dynamic_properties.list_obj = list_obj;
+            schema.fields['group'].dynamic_properties.url_vars = additional_props;
+        }
+
+
     }
 }
 
