@@ -3,6 +3,11 @@ gui_project_template = {
     getValue : function (hideReadOnly)
     {
         let arr_data_fields = [];
+        let delete_data_fields = [];
+
+        let common_fields = ['inventory'];
+        let module_fields = ['module', 'args', 'group'];
+        let playbook_fields = ['playbook'];
 
         let template_data = gui_base_object.getValue.apply(this, arguments);
         let data_field = {};
@@ -14,13 +19,18 @@ gui_project_template = {
 
         if(template_data.kind.toLowerCase() == 'module')
         {
-            arr_data_fields = ['module', 'args', 'inventory', 'group', 'vars'];
+            arr_data_fields = module_fields;
+            delete_data_fields = playbook_fields;
         }
         else
         {
-            arr_data_fields = ['playbook', 'inventory', 'vars'];
+            arr_data_fields = playbook_fields;
+            delete_data_fields = module_fields;
         }
 
+        arr_data_fields = arr_data_fields.concat(common_fields);
+
+        // filters fields for this current kind
         arr_data_fields.forEach(function(value)
         {
             if(template_data[value])
@@ -31,14 +41,30 @@ gui_project_template = {
             else
             {
                 data_field[value] = "";
-
-                if(value == 'vars')
-                {
-                    data_field[value] = {};
-                }
             }
-
         })
+
+        if(!data_field.vars)
+        {
+            data_field.vars = {};
+        }
+
+        // deletes fields from opposite kind and determine existence of changes
+        let kind_was_changed = false;
+        delete_data_fields.forEach(function(value)
+        {
+            if(data_field[value])
+            {
+                delete data_field[value];
+                kind_was_changed = true;
+            }
+        });
+
+        // if kind was changed, we delete all previous vars
+        if(kind_was_changed)
+        {
+            data_field['vars'] = {};
+        }
 
         template_data.data = JSON.stringify(data_field);
 
@@ -1390,7 +1416,7 @@ function OneTemplate_args_callback(fieldObj, newValue)
     }
     else
     {
-        obj.type = "null";
+        obj.type = "hidden";
     }
     return obj
 
@@ -1471,7 +1497,7 @@ function OneTemplate_module_callback(fieldObj, newValue)
     }
     else
     {
-        obj.type = "null"
+        obj.type = "hidden"
     }
     return obj
 }
@@ -1494,7 +1520,7 @@ function OneTemplate_playbook_callback(fieldObj, newValue)
     }
     else
     {
-        obj.type = "null"
+        obj.type = "hidden"
     }
     return obj
 }
@@ -1527,6 +1553,7 @@ tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
         type: 'string',
         format: 'dynamic',
         hidden: true,
+        required: true,
         default: 'all',
         parent_field: ['inventory', 'kind'],
         dynamic_properties: {
@@ -1582,6 +1609,11 @@ tabSignal.connect("openapi.schema",  function(obj)
     template_list.schema['list'].fields['data'].hidden = true;
     template_list.schema['list'].fields['options'].hidden = true;
     template_list.schema['list'].fields['options_list'].title = 'Options';
+});
+
+tabSignal.connect('openapi.completed', function(obj)
+{
+    window.guiSchema.path['/project/{pk}/template/{template_id}/'].schema.edit.fields.kind.on_change_calls = [questionChangeKindOrNot];
 });
 
 function TemplateVariable_key_onInit(opt = {}, value, parent_object)
@@ -1672,5 +1704,32 @@ function prepareOptionFields(template_data, schema)
 
         schema.fields['playbook'].hidden = true;
     }
+}
+
+/*
+* Function makes question for user, if he/she changed kind of template.
+* @param object - args - object with field, value and its options
+* */
+function questionChangeKindOrNot(args) {
+    var answer;
+    var question = "Change of template's type will <b> delete </b> all existing <b> 'variables' </b> during saving. Do you really want to do it?";
+    var answer_buttons = ["Yes", "No"];
+
+    if(args.value && args.value != args.field.value)
+    {
+        return $.when(guiPopUp.question(question, answer_buttons)).done(data => {
+            answer = data;
+
+            if($.inArray(answer, answer_buttons) != -1)
+            {
+                if(answer == answer_buttons[1])
+                {
+                    $('#' + args.field.element_id).val(args.field.value).trigger('change');
+                }
+            }
+        });
+    }
+
+    return false;
 }
 
