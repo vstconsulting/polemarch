@@ -163,6 +163,7 @@
     overflow: auto;
     max-height: calc(100vh - 338px);
     min-height: 400px;
+    line-height: 8px;
     background: #000;
 }
 
