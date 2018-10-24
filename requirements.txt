@@ -1,17 +1,17 @@
 # Main
-vstutils[rpc,ldap,doc,prod]==1.2.0.dev17
+vstutils[rpc,ldap,doc,prod]==1.2.0.dev20
 pyyaml==3.12
 docutils==0.14
-markdown2==2.3.5
+markdown2==2.3.6
 
 # API
 jsonfield==2.0.2
 
 # Repo types
-gitpython==2.1.10
+gitpython==2.1.11
 
 # Hooks
-requests==2.19.1
+requests==2.20.0
 
 # Ansible required packages
 polemarch-ansible==1.0.6

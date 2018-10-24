@@ -24,7 +24,7 @@ info:
   x-versions:
     application: 0.2.0
     library: 0.2.0
-    vstutils: 1.2.0.dev15
+    vstutils: 1.2.0.dev20
     django: 1.11.15
     ansible: 2.6.4
   version: v2
@@ -11779,6 +11779,8 @@ definitions:
             ansible_ssh_pass: password
             ansible_ssh_private_key_file: secretfile
             ansible_become: boolean
+            ansible_port: integer
+            ansible_become_pass: password
   Host:
     type: object
     properties:
