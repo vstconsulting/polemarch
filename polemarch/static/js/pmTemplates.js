@@ -1497,7 +1497,7 @@ function OneTemplate_group_callback(fieldObj, newValue)
 function OneTemplate_module_callback(fieldObj, newValue)
 {
     let obj = {
-        type:"select2"
+        type:"autocomplete"
     }
     if(newValue.value.toLowerCase() == "module")
     {
