@@ -390,77 +390,209 @@ As you can see on history page, our 'test-periodic-task' executes every 10 secon
 as we set it during periodic task creation.
 
 
-.. Inventory
-    ---------
+Inventory
+---------
 
-    If you don't want to use 'inventory' as just list of hosts separated by ",",
-    or do not have invenotry file in you GIT project ("./inventory", for example),
-    you need to create it in Polemarch.
+If you don't want to use 'inventory' as just list of hosts separated by ",",
+or do not have inventory file in you GIT project ("./inventory", for example),
+you need to create it in Polemarch.
 
-    By inventory’s creation, in this case, we understand creation of inventory,
-    which includes at least one group, which, in it’s turn, includes at least one host.
-    In other words, beside inventory user should create host and group.
+By inventory’s creation, in this case, we understand creation of inventory,
+which includes at least one group, which, in it’s turn, includes at least one host.
+In other words, beside inventory user should create host and group.
 
-    To understand it better let’s look at next images, which will explain you how to create
-    inventory. Here you can see the form for inventory creation.
+To understand it better let’s look at next images, which will explain you how to create
+inventory. Here you can see the form for inventory creation.
 
-    .. image:: gui_screenshots/create_inventory.png
+.. image:: gui_screenshots/create_inventory.png
 
-    As you can see, there are only 2 fields on this page:
+As you can see, there are only 2 fields on this page:
 
-    * **name** - name of inventory.
+* **name** - name of inventory.
 
-    * **notes** - not required field for some user’s notes, for example,
-      for what purpose this inventory was created or something like this.
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this inventory was created or something like this.
 
-    Also there is only one button there:
+Also there is only one button there:
 
-    * **create** - |create_button_def| inventory.
+* **create** - |create_button_def| inventory.
 
-    After inventory creation you will see the next page:
+After inventory creation you will see the next page:
 
-    .. image:: gui_screenshots/test_inventory.png
+.. image:: gui_screenshots/test_inventory.png
 
-    As you can see there are 2 new fields on this page:
+As you can see there are 2 new fields on this page:
 
-    * **id** - |id_field_def|
+* **id** - |id_field_def|
 
-    * **owner** - |owner_field_def| inventory.
+* **owner** - |owner_field_def| inventory.
 
-    Also there are some new buttons here:
+Also there are some new buttons here:
 
-    Sublist buttons:
+Sublist buttons:
 
-    * **all groups** - this button opens inventory's all groups list
-      (list of groups, which includes also groups that are nested into inventory groups).
-    * **all hosts** - this button opens inventory's all hosts list.
-      (list of hosts, which includes also hosts that are nested into inventory groups).
-    * **group** - this button opens inventory's group list.
-    * **host** - this button opens inventory's host list.
-    * **variables** - this button opens inventory's variables list.
+* **all groups** - this button opens inventory's all groups list
+  (list of groups, which includes also groups that are nested into inventory groups).
+* **all hosts** - this button opens inventory's all hosts list.
+  (list of hosts, which includes also hosts that are nested into inventory groups).
+* **group** - this button opens inventory's group list.
+* **host** - this button opens inventory's host list.
+* **variables** - this button opens inventory's variables list.
 
-    Action buttons:
+Action buttons:
 
-    * **save** - |save_button_def|
-    * **copy** - |copy_button_def|
-    * **set owner** - |set_owner_button_def|
-    * **remove** - |remove_button_def| inventory.
+* **save** - |save_button_def|
+* **copy** - |copy_button_def|
+* **set owner** - |set_owner_button_def|
+* **remove** - |remove_button_def| inventory.
 
-    Let’s look how you can create a group for this inventory.
-    To do it, let’s click on ‘Group’ button.
+Let’s look how you can create a group for this inventory.
+To do it, let’s click on "group" button.
 
 
-    Group
-    -----
+Group
+-----
 
-    .. image:: gui_screenshots/test_inventory_group.png
+.. image:: gui_screenshots/test_inventory_group.png
 
-    As you can see, there are no groups in the inventory's group list now.
+As you can see, there are no groups in the inventory's group list now.
 
-    There are 2 buttons here:
+There are 2 buttons here:
 
-    * **create** - |create_button_def| group.
-    * **add** - this button opens the all group list from database.
+* **create** - |create_button_def| group.
+* **add** - this button opens the all group list from database,
+from which you can choose group for this inventory.
+
+We need to create group. To do it click on "create" button.
+
+.. image:: gui_screenshots/create_group.png
+
+As you can see, the form of new group creation consist of following fields:
+
+* **name** - name of your group.
+
+* **contains groups** - boolean field, it means ability of group to contain child groups.
+
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this group was created or something like this.
+
+After group creation you will see the next page:
+
+.. image:: gui_screenshots/test_group.png
+
+As you can see there are 2 new fields on this page:
+
+* **id** - |id_field_def|
+
+* **owner** - |owner_field_def| group.
+
+Also there are some new buttons here:
+
+Sublist buttons:
+
+* **host** - this button opens group's host list.
+* **variables** - this button opens group's variables list.
+
+Action buttons:
+
+* **save** - |save_button_def|
+* **copy** - |copy_button_def|
+* **set owner** - |set_owner_button_def|
+* **remove** - |remove_button_def| group.
+
+Let’s look how you can create a host for this group.
+To do it, let’s click on "host" button.
+
+
+Host
+----
+
+.. image:: gui_screenshots/test_inventory_group_host.png
+
+As you can see, there are no hosts in the group's host list now.
+
+There are 2 buttons here:
+
+* **create** - |create_button_def| host.
+* **add** - this button opens the all host list from database,
+from which you can choose host for this group.
+
+We need to create host. To do it click on "create" button.
+
+.. image:: gui_screenshots/create_host.png
+
+As you can see, the form of new host creation consist of following fields:
+
+* **name** - name of your host.
+
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this host was created or something like this.
+
+* **type** - type of host (RANGE, HOST).
+  * RANGE -  range of IPs or hosts.
+  * HOST - single host.
+
+After host creation you will see the next page:
+
+.. image:: gui_screenshots/test_host.png
+
+As you can see there are 2 new fields on this page:
+
+* **id** - |id_field_def|
+
+* **owner** - |owner_field_def| host.
+
+Also there are some new buttons here:
+
+Sublist buttons:
+
+* **variables** - this button opens host's variables list.
+
+Action buttons:
+
+* **save** - |save_button_def|
+* **copy** - |copy_button_def|
+* **set owner** - |set_owner_button_def|
+* **remove** - |remove_button_def| host.
+
+Let’s look how you can create a variables for host, group and inventory.
+
+
+Variables for inventory, group, host
+------------------------------------
+
+The process of variable creation for inventory is the same as for group or host.
+So, let's look it at the example of variable creation for host.
+
+.. image:: gui_screenshots/test_host.png
+
+To do it click on the "variables" button on the host page:
+
+.. image:: gui_screenshots/test_host_variables.png
+
+As you can see, there are no variables in the host's variables list now.
+
+There is only 1 button here:
+
+* **create** - |create_button_def| variable.
+
+To create variable click on "create" button:
+
+.. image:: gui_screenshots/test_host_variables_1.png
+
+As you can see, the form of new host variable creation consist of following fields:
+
+* **key** - key of variable.
+
+* **value** - value of variable.
+
+After variable creation you will see the next page:
+
+.. image:: gui_screenshots/test_host_variables_2.png
+
+As you can see there is only 1 new field on this page:
+
+* **id** - |id_field_def|
 
 
 Hooks
