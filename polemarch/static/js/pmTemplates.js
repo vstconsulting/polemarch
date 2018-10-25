@@ -335,12 +335,6 @@ gui_project_template_option = {
                     }
                 }
 
-                /*res.data = {
-                    "id": option,
-                    "name": val.name || option,
-                    "notes": val.notes
-                }*/
-
                 return res;
             }
 
@@ -364,10 +358,7 @@ gui_project_template_option = {
                     template_data.options[query.data.name][field] = query.data[field];
                 }
 
-                if(template_data.options[query.data.name].name)
-                {
-                    template_data.options[query.data.name].name.replace(/[\s\/\-]+/g,'_');
-                }
+                delete template_data.options[query.data.name].name
 
                 return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
             }
@@ -736,15 +727,6 @@ gui_project_template_option_Schema = {
             "view_field":'playbook',
         },
         "parent_name_format": "option_playbook"
-    },
-    "notes": {
-        "title": "Notes",
-        "type": "string",
-        "format": "textarea",
-        "gui_links": [],
-        "definition": {},
-        "name": "notes",
-        "parent_name_format": "option_notes"
     },
 }
 
@@ -1766,3 +1748,18 @@ function questionChangeKindOrNot(args) {
     return false;
 }
 
+tabSignal.connect('openapi.schema', function(obj){
+    let path = obj.schema.path[projPath + '/template/{template_id}/execute/']
+    let options_field = path.schema.exec.fields.option
+    debugger;
+    options_field.format = 'select2'
+    options_field.dynamic_properties = {
+            list_obj:projPath + "/template/{template_id}/option/",
+            value_field:'name',
+            view_field:'name',
+            default_value:{
+                id: '',
+                text: 'None'
+            }
+        }
+})
