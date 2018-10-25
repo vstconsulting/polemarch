@@ -24,6 +24,10 @@ tabSignal.connect("openapi.completed", function()
 
     user_settings.method.post = 'post';
 
+    let user = guiSchema.path['/user/'];
+    user.schema.new.fields['password'].format = "password";
+    user.schema.new.fields['password2'].format = "password";
+
 })
 
 tabSignal.connect("openapi.schema.definition.ChangePassword", addSettingsToChangePassword);
