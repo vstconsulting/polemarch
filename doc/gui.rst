@@ -397,6 +397,9 @@ If you don't want to use 'inventory' as just list of hosts separated by ",",
 or do not have inventory file in you GIT project ("./inventory", for example),
 you need to create it in Polemarch.
 
+ATTENTION! Do not forget to add you inventory to project after it's creation.
+To do it click on "inventory" button on project page.
+
 By inventory’s creation, in this case, we understand creation of inventory,
 which includes at least one group, which, in it’s turn, includes at least one host.
 In other words, beside inventory user should create host and group.
