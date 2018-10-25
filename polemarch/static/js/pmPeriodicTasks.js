@@ -192,12 +192,12 @@ function OnePeriodictask_mode_callback (fieldObj, newValue)
 function OnePeriodictask_template_callback (fieldObj, newValue)
 {
     let obj = {
-        type:"hidden"
+        type:"null"
     }
 
     if(newValue.value == "TEMPLATE")
     {
-        $(".sublink-btn-variables").removeClass('hidden-true').addClass('hidden-false')
+        $(".sublink-btn-variables").addClass('hidden-true').removeClass('hidden-false')
         obj.type = "select2"
         obj.override_opt = {
             dynamic_properties:{
@@ -208,8 +208,8 @@ function OnePeriodictask_template_callback (fieldObj, newValue)
         };
     }
     else
-    { 
-        $(".sublink-btn-variables").addClass('hidden-true').removeClass('hidden-false')
+    {
+        $(".sublink-btn-variables").removeClass('hidden-true').addClass('hidden-false')
     }
 
     return obj
@@ -220,7 +220,7 @@ function OnePeriodictask_template_opt_callback (fieldObj, newValue)
     let obj = {
         type:"hidden"
     }
-
+    
     if(newValue.value)
     {
         obj.type = "autocomplete"
