@@ -349,12 +349,6 @@ gui_project_template_option = {
                         }
                     }
 
-                    /*res.data = {
-                        "id": option,
-                        "name": val.name || option,
-                        "notes": val.notes
-                    }*/
-
                     return res;
                 }
 
@@ -378,7 +372,7 @@ gui_project_template_option = {
                         template_data.options[query.data.name][field] = query.data[field];
                     }
 
-                    delete template_data.options[query.data.name].name
+                delete template_data.options[query.data.name].name
 
                     return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
                 }
@@ -1787,3 +1781,18 @@ function questionChangeKindOrNot(args) {
     return false;
 }
 
+tabSignal.connect('openapi.schema', function(obj){
+    let path = obj.schema.path[projPath + '/template/{template_id}/execute/']
+    let options_field = path.schema.exec.fields.option
+    debugger;
+    options_field.format = 'select2'
+    options_field.dynamic_properties = {
+            list_obj:projPath + "/template/{template_id}/option/",
+            value_field:'name',
+            view_field:'name',
+            default_value:{
+                id: '',
+                text: 'None'
+            }
+        }
+})
