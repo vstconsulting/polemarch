@@ -102,95 +102,105 @@ gui_project_template_variables = {
 
     apiGetDataForQuery : function (query, variable)
     {
-        if(variable)
-        {
-            if(query.method == "get")
+        try{
+            if(variable)
             {
-                let res =  {
-                    "status": 200,
-                    "item": "variables",
-                    "type": "mod",
-                    "data": {},
-                    "subitem": [
-                        "1",
-                        "template"
-                    ]
-                }
-
-                let val = this.parent_template.model.data.data['vars'];
-                res.data = {
-                    "key": variable,
-                    "value": val[variable],
-                }
-
-                return res;
-            }
-
-            if(query.method == "put")
-            {
-                let template_data = this.parent_template.model.data
-
-                let vars = template_data.data['vars'];
-
-                if(!vars)
+                if(query.method == "get")
                 {
-                    vars = {};
+                    let res =  {
+                        "status": 200,
+                        "item": "variables",
+                        "type": "mod",
+                        "data": {},
+                        "subitem": [
+                            "1",
+                            "template"
+                        ]
+                    }
+
+                    let val = this.parent_template.model.data.data['vars'];
+                    res.data = {
+                        "key": variable,
+                        "value": val[variable],
+                    }
+
+                    return res;
                 }
 
-                vars[query.data.key] = query.data.value;
-
-                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
-            }
-        }
-        else
-        {
-            if(query.method == "get")
-            {
-                let res =  {
-                    "status": 200,
-                    "item": "variables",
-                    "type": "mod",
-                    "data": {
-                        "count": 1,
-                        "next": null,
-                        "previous": null,
-                        "results": [ ]
-                    },
-                    "subitem": [
-                        "1",
-                        "template"
-                    ]
-                }
-
-                let vars = this.parent_template.model.data.data['vars'];
-                for(let i in vars)
+                if(query.method == "put")
                 {
-                    let val = vars[i]
-                    res.data.results.push({
-                        "id": i,
-                        "key": i,
-                        "value": vars[i],
-                    })
-                }
-                res.data.count = res.data.results.length
-                return res;
-            }
+                    let template_data = this.parent_template.model.data
 
-            if(query.method == "post")
+                    let vars = template_data.data['vars'];
+
+                    if(!vars)
+                    {
+                        vars = {};
+                    }
+
+                    vars[query.data.key] = query.data.value;
+
+                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                }
+            }
+            else
             {
-                let template_data = this.parent_template.model.data
-
-                let vars = template_data.data['vars'];
-
-                if(!vars)
+                if(query.method == "get")
                 {
-                    vars = {};
+                    let res =  {
+                        "status": 200,
+                        "item": "variables",
+                        "type": "mod",
+                        "data": {
+                            "count": 1,
+                            "next": null,
+                            "previous": null,
+                            "results": [ ]
+                        },
+                        "subitem": [
+                            "1",
+                            "template"
+                        ]
+                    }
+
+                    let vars = this.parent_template.model.data.data['vars'];
+                    for(let i in vars)
+                    {
+                        let val = vars[i]
+                        res.data.results.push({
+                            "id": i,
+                            "key": i,
+                            "value": vars[i],
+                        })
+                    }
+                    res.data.count = res.data.results.length
+                    return res;
                 }
 
-                vars[query.data.key] = query.data.value;
+                if(query.method == "post")
+                {
+                    let template_data = this.parent_template.model.data
 
-                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                    let vars = template_data.data['vars'];
+
+                    if(!vars)
+                    {
+                        vars = {};
+                    }
+
+                    vars[query.data.key] = query.data.value;
+
+                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                }
             }
+        }catch (exception) {
+            var def = new $.Deferred();
+            debugger;
+            def.reject({
+                status:404,
+                data:{detail:"Option not found"}
+            })
+            return def.promise()
         }
     },
 
@@ -278,6 +288,8 @@ gui_project_template_option = {
                     prepareOptionFields(template_data, this.api.schema.get);
                     def.resolve(d1);
                 })
+            }).fail((e) =>{
+                def.reject(e);
             })
 
             return def.promise();
@@ -307,120 +319,128 @@ gui_project_template_option = {
 
     apiGetDataForQuery : function (query, option)
     {
-        if(option)
-        {
-            if(query.method == "get")
+        try{
+
+            if(option)
             {
-                let res =  {
-                    "status": 200,
-                    "item": "option",
-                    "type": "mod",
-                    "data": {},
-                    "subitem": [
-                        "1",
-                        "template"
-                    ]
-                }
-
-                let val = this.parent_template.model.data.options[option];
-
-                res.data = { }
-                for(let i in gui_project_template_option_Schema)
+                if(query.method == "get")
                 {
-                    res.data[i] = val[i]
-
-                    if(i == 'name' && val[i] == undefined)
-                    {
-                        res.data[i] = option;
+                    let res =  {
+                        "status": 200,
+                        "item": "option",
+                        "type": "mod",
+                        "data": {},
+                        "subitem": [
+                            "1",
+                            "template"
+                        ]
                     }
+
+                    let val = this.parent_template.model.data.options[option];
+
+                    res.data = { }
+                    for(let i in gui_project_template_option_Schema)
+                    {
+                        res.data[i] = val[i]
+
+                        if(i == 'name' && val[i] == undefined)
+                        {
+                            res.data[i] = option;
+                        }
+                    }
+
+                    /*res.data = {
+                        "id": option,
+                        "name": val.name || option,
+                        "notes": val.notes
+                    }*/
+
+                    return res;
                 }
 
-                /*res.data = {
-                    "id": option,
-                    "name": val.name || option,
-                    "notes": val.notes
-                }*/
+                if(query.method == "put")
+                {
+                    let template_data = this.parent_template.model.data
 
-                return res;
+                    if(query.data.name)
+                    {
+                        query.data.name = query.data.name.replace(/[\s\/\-]+/g,'_');
+                    }
+
+                    if(option != query.data.name)
+                    {
+                        template_data.options[query.data.name] = template_data.options[option];
+                        delete template_data.options[option];
+                    }
+
+                    for(let field in query.data)
+                    {
+                        template_data.options[query.data.name][field] = query.data[field];
+                    }
+
+                    delete template_data.options[query.data.name].name
+
+                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                }
             }
-
-            if(query.method == "put")
+            else
             {
-                let template_data = this.parent_template.model.data
-
-                if(query.data.name)
+                if(query.method == "get")
                 {
-                    query.data.name = query.data.name.replace(/[\s\/\-]+/g,'_');
+                    let res =  {
+                        "status": 200,
+                        "item": "option",
+                        "type": "mod",
+                        "data": {
+                            "count": 1,
+                            "next": null,
+                            "previous": null,
+                            "results": [ ]
+                        },
+                        "subitem": [
+                            "1",
+                            "template"
+                        ]
+                    }
+
+                    for(let i in this.parent_template.model.data.options)
+                    {
+                        let val = this.parent_template.model.data.options[i]
+                        res.data.results.push({
+                            "id": i,
+                            "name": val.name || i,
+                        })
+                    }
+                    res.data.count = res.data.results.length
+                    return res;
                 }
 
-                if(option != query.data.name)
+                if(query.method == "post")
                 {
-                    template_data.options[query.data.name] = template_data.options[option];
-                    delete template_data.options[option];
-                }
+                    let template_data = this.parent_template.model.data
+                    if(query.data.name)
+                    {
+                        query.data.name = query.data.name.replace(/[\s\/\-]+/g,'_');
+                    }
+                    if(template_data.options[query.data.name])
+                    {
+                        guiPopUp.error('Option with "' + query.data.name + '" name exists already');
+                        return undefined;
+                    }
 
-                for(let field in query.data)
-                {
-                    template_data.options[query.data.name][field] = query.data[field];
-                }
+                    template_data.options[query.data.name] = query.data
 
-                if(template_data.options[query.data.name].name)
-                {
-                    template_data.options[query.data.name].name.replace(/[\s\/\-]+/g,'_');
+                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
                 }
-
-                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
             }
-        }
-        else
-        {
-            if(query.method == "get")
-            {
-                let res =  {
-                    "status": 200,
-                    "item": "option",
-                    "type": "mod",
-                    "data": {
-                        "count": 1,
-                        "next": null,
-                        "previous": null,
-                        "results": [ ]
-                    },
-                    "subitem": [
-                        "1",
-                        "template"
-                    ]
-                }
+        }catch (exception) {
+            var def = new $.Deferred();
 
-                for(let i in this.parent_template.model.data.options)
-                {
-                    let val = this.parent_template.model.data.options[i]
-                    res.data.results.push({
-                        "id": i,
-                        "name": val.name || i,
-                    })
-                }
-                res.data.count = res.data.results.length
-                return res;
-            }
-
-            if(query.method == "post")
-            {
-                let template_data = this.parent_template.model.data
-                if(query.data.name)
-                {
-                    query.data.name = query.data.name.replace(/[\s\/\-]+/g,'_');
-                }
-                if(template_data.options[query.data.name])
-                {
-                    guiPopUp.error('Option with "' + query.data.name + '" name exists already');
-                    return undefined;
-                }
-
-                template_data.options[query.data.name] = query.data
-
-                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
-            }
+            def.reject({
+                status:404,
+                data:{detail:"Option not found"}
+            })
+            return def.promise()
         }
     },
 
@@ -501,95 +521,105 @@ gui_project_template_option_variables = {
 
     apiGetDataForQuery : function (query, variable)
     {
-        if(variable)
-        {
-            if(query.method == "get")
+        try{
+            if(variable)
             {
-                let res =  {
-                    "status": 200,
-                    "item": "option",
-                    "type": "mod",
-                    "data": {},
-                    "subitem": [
-                        "1",
-                        "template"
-                    ]
-                }
-
-                let val = this.parent_template.model.data.options[query.data_type[5]];
-                res.data = {
-                    "key": variable,
-                    "value": val.vars[variable],
-                }
-
-                return res;
-            }
-
-            if(query.method == "put")
-            {
-                let template_data = this.parent_template.model.data
-
-                let option_data = template_data.options[query.data_type[5]];
-
-                if(!option_data.vars)
+                if(query.method == "get")
                 {
-                    option_data.vars = {};
+                    let res =  {
+                        "status": 200,
+                        "item": "option",
+                        "type": "mod",
+                        "data": {},
+                        "subitem": [
+                            "1",
+                            "template"
+                        ]
+                    }
+
+                    let val = this.parent_template.model.data.options[query.data_type[5]];
+                    res.data = {
+                        "key": variable,
+                        "value": val.vars[variable],
+                    }
+
+                    return res;
                 }
 
-                option_data.vars[query.data.key] = query.data.value;
-
-                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
-            }
-        }
-        else
-        {
-            if(query.method == "get")
-            {
-                let res =  {
-                    "status": 200,
-                    "item": "option",
-                    "type": "mod",
-                    "data": {
-                        "count": 1,
-                        "next": null,
-                        "previous": null,
-                        "results": [ ]
-                    },
-                    "subitem": [
-                        "1",
-                        "template"
-                    ]
-                }
-
-                let option_data = this.parent_template.model.data.options[query.data_type[5]];
-                for(let i in option_data.vars)
+                if(query.method == "put")
                 {
-                    let val = option_data.vars[i]
-                    res.data.results.push({
-                        "id": i,
-                        "key": i,
-                        "value": option_data.vars[i],
-                    })
-                }
-                res.data.count = res.data.results.length
-                return res;
-            }
+                    let template_data = this.parent_template.model.data
 
-            if(query.method == "post")
+                    let option_data = template_data.options[query.data_type[5]];
+
+                    if(!option_data.vars)
+                    {
+                        option_data.vars = {};
+                    }
+
+                    option_data.vars[query.data.key] = query.data.value;
+
+                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                }
+            }
+            else
             {
-                let template_data = this.parent_template.model.data
-
-                let option_data = template_data.options[query.data_type[5]];
-
-                if(!option_data.vars)
+                if(query.method == "get")
                 {
-                    option_data.vars = {};
+                    let res =  {
+                        "status": 200,
+                        "item": "option",
+                        "type": "mod",
+                        "data": {
+                            "count": 1,
+                            "next": null,
+                            "previous": null,
+                            "results": [ ]
+                        },
+                        "subitem": [
+                            "1",
+                            "template"
+                        ]
+                    }
+
+                    let option_data = this.parent_template.model.data.options[query.data_type[5]];
+                    for(let i in option_data.vars)
+                    {
+                        let val = option_data.vars[i]
+                        res.data.results.push({
+                            "id": i,
+                            "key": i,
+                            "value": option_data.vars[i],
+                        })
+                    }
+                    res.data.count = res.data.results.length
+                    return res;
                 }
 
-                option_data.vars[query.data.key] = query.data.value;
+                if(query.method == "post")
+                {
+                    let template_data = this.parent_template.model.data
 
-                return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                    let option_data = template_data.options[query.data_type[5]];
+
+                    if(!option_data.vars)
+                    {
+                        option_data.vars = {};
+                    }
+
+                    option_data.vars[query.data.key] = query.data.value;
+
+                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                }
             }
+        }catch (exception) {
+            var def = new $.Deferred();
+            debugger;
+            def.reject({
+                status:404,
+                data:{detail:"Option not found"}
+            })
+            return def.promise()
         }
     },
 
@@ -736,15 +766,6 @@ gui_project_template_option_Schema = {
             "view_field":'playbook',
         },
         "parent_name_format": "option_playbook"
-    },
-    "notes": {
-        "title": "Notes",
-        "type": "string",
-        "format": "textarea",
-        "gui_links": [],
-        "definition": {},
-        "name": "notes",
-        "parent_name_format": "option_notes"
     },
 }
 
