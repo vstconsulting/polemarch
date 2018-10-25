@@ -1784,7 +1784,7 @@ function questionChangeKindOrNot(args) {
 tabSignal.connect('openapi.schema', function(obj){
     let path = obj.schema.path[projPath + '/template/{template_id}/execute/']
     let options_field = path.schema.exec.fields.option
-    debugger;
+
     options_field.format = 'select2'
     options_field.dynamic_properties = {
             list_obj:projPath + "/template/{template_id}/option/",
