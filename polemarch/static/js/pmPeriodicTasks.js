@@ -197,7 +197,7 @@ function OnePeriodictask_template_callback (fieldObj, newValue)
 
     if(newValue.value == "TEMPLATE")
     {
-        $(".sublink-btn-variables").removeClass('hidden-true').addClass('hidden-false')
+        $(".sublink-btn-variables").addClass('hidden-true').removeClass('hidden-false')
         obj.type = "select2"
         obj.override_opt = {
             dynamic_properties:{
@@ -209,7 +209,7 @@ function OnePeriodictask_template_callback (fieldObj, newValue)
     }
     else
     {
-        $(".sublink-btn-variables").addClass('hidden-true').removeClass('hidden-false')
+        $(".sublink-btn-variables").removeClass('hidden-true').addClass('hidden-false')
     }
 
     return obj

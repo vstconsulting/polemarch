@@ -1648,9 +1648,9 @@ tabSignal.connect('openapi.completed', function(obj)
 function TemplateVariable_key_onInit(opt = {}, value, parent_object)
 {
     let thisObj = this;
-    let template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
+    let template = new guiObjectFactory("/project/{pk}/template/{template_id}/", parent_object.url_vars);
 
-    $.when(template.load(parent_object.url_vars.api_periodic_task_id)).done(function(){
+    $.when(template.load()).done(function(){
         let fields = {}
         if(template.model.data.kind.toLowerCase() == "task")
         {
@@ -1784,7 +1784,6 @@ function questionChangeKindOrNot(args) {
 tabSignal.connect('openapi.schema', function(obj){
     let path = obj.schema.path[projPath + '/template/{template_id}/execute/']
     let options_field = path.schema.exec.fields.option
-
     options_field.format = 'select2'
     options_field.dynamic_properties = {
             list_obj:projPath + "/template/{template_id}/option/",
