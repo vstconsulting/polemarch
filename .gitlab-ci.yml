@@ -28,9 +28,12 @@ stages:
    - make test ENVS=$TOX_ENVS
    - make build-clean
   except:
-    - GUI
-    - tags
-    - issue_building
+    refs:
+      - GUI
+      - tags
+      - issue_building
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /Merge branch/
   only:
     changes:
       - polemarch/api/*
@@ -90,8 +93,11 @@ code_style:
   script:
    - make test ENVS=flake,pylint
   except:
-    - tags
-    - issue_building
+    refs:
+      - tags
+      - issue_building
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /Merge branch/
   only:
     refs:
       - /^.{0,}issue_.*$/
