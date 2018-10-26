@@ -2,15 +2,15 @@
 Welcome to Polemarch's documentation!
 =====================================
 
-**Polemarch** is service for orchestration infrastructure by ansible.
-Simply WEB gui for orchestration infrastructure by ansible playbooks.
+**Polemarch** is a service for infrastructure orchestration based on ansible.
+Simple WEB gui for infrastructure orchestration using ansible playbooks.
 
 You could find latest releases
 `there <https://github.com/vstconsulting/polemarch/releases>`_.
-Source code you could find in `official repository
+Also you could find source code in `official repository
 <https://gitlab.com/vstconsulting/polemarch/>`_.
 
-Contact to us on `any questions
+Contact us on `any questions
 <https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about>`_
 or `report bugs
 <https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in>`_.
@@ -21,9 +21,8 @@ or `report bugs
    :caption: Contents:
 
    quickstart
-   pipinstall
    config
    gui
-   restapi
+   api
    contribute
    cla

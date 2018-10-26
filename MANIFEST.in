@@ -4,7 +4,8 @@ include polemarch/main/settings.ini
 include polemarch/main/tests/exemplary_complex_inventory
 include polemarch/main/tests/facts_stdout
 include polemarch/main/tests/stdout.txt
-include polemarch/main/tests/test_repo.tar
+include polemarch/main/tests/raw_stdout.txt
+include polemarch/main/tests/test_repo.tar.gz
 include requirements.txt
 include requirements-git.txt
 include requirements-test.txt

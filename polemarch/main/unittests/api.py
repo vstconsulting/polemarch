@@ -1,10 +1,4 @@
 from ..tests._base import BaseTestCase
-from ...api.v1.serializers import ModelRelatedField
-
-
-class ModelRelatedFieldTestCase(BaseTestCase):
-    def test_modelrelatedfield(self):
-        ModelRelatedField(model=self.get_model_class('Host'))
 
 
 class UsersTestCase(BaseTestCase):

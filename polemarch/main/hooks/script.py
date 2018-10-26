@@ -12,7 +12,7 @@ logger = logging.getLogger("polemarch")
 
 class Backend(BaseHook):
 
-    def _execute(self, script, when, file):
+    def execute(self, script, when, file):
         try:
             work_dir = self.conf['HOOKS_DIR']
             script = '{}/{}'.format(work_dir, script)
@@ -38,9 +38,5 @@ class Backend(BaseHook):
                 errors["recipients"] = "Recipients must be in hooks dir."
         return errors
 
-    def send(self, message, when):
-        super(Backend, self).send(message, when)
-        return "\n".join([
-            self._execute(r, when, json.dumps(message))
-            for r in self.conf['recipients'] if r
-        ])
+    def modify_message(self, message):
+        return json.dumps(super(Backend, self).modify_message(message))

@@ -45,5 +45,10 @@
         {
             hideLoadingProgress();
         })
+        
+        tabSignal.connect("resource.loaded", function()
+        {
+            hideLoadingProgress();
+        })
     </script>
 {% endblock %}

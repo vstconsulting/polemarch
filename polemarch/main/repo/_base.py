@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import logging
+import traceback
 
 from six.moves.urllib.request import urlretrieve
 from django.db import transaction
@@ -24,12 +25,19 @@ class _Base(object):
         self.proj.set_status(status)
 
     def _set_tasks_list(self, playbooks_names):
-        self.proj.tasks.all().delete()
-        for playbook in playbooks_names:
-            name = playbook.split(".yml")[0]
-            self.proj.tasks.create(
-                name=name, playbook=playbook, hidden=self.proj.hidden
-            )
+        # pylint: disable=invalid-name
+        project = self.proj
+        project.playbook.all().delete()
+        PlaybookModel = self.proj.playbook.model
+        hidden = project.hidden
+        split = str.split
+        playbook_objects = (
+            PlaybookModel(
+                name=split(str(p), ".yml")[0], playbook=p,
+                hidden=hidden, project=project
+            ) for p in playbooks_names
+        )
+        PlaybookModel.objects.bulk_create(playbook_objects) if playbook_objects else None
 
     def _update_tasks(self, files):
         reg = re.compile(self.regex)
@@ -51,6 +59,7 @@ class _Base(object):
                 self._set_status("OK")
                 self._update_tasks(self._get_files(result[0]))
         except Exception as err:
+            logger.info(traceback.format_exc())
             logger.error("Project[{}] sync error:\n{}".format(self.proj, err))
             self._set_status("ERROR")
             raise
@@ -119,6 +128,8 @@ class _Base(object):
 
 class _ArchiveRepo(_Base):
     def make_clone(self, options):
+        if os.path.exists(self.path):
+            shutil.rmtree(self.path)
         os.mkdir(self.path)
         archive = self._download(self.proj.repository, options)
         self._extract(archive, self.path, options)

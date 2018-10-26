@@ -1,67 +1,173 @@
-
-Installation and quick start
+Installation
 ============================
 
-Red Hat/CentOS installation
----------------------------
+Install from PyPI
+-----------------
 
-1. Download rpm from latest `release <https://github.com/vstconsulting/polemarch/releases>`_.
 
-2. Install it with command
+#. Install dependencies:
+
+   Required packages on Ubuntu/Debian:
+
+   * pip (```python-pip```)
+
+   * virtualenv (```python-virtualenv```)
+
+   * python-dev (```python-dev```)
+
+   * GCC (```gcc```)
+
+   * FFI library (```libffi-dev```)
+
+   * Headers and development libraries for MIT Kerberos (```libkrb5-dev```)
+
+   * ffi (```libffi6```)
+
+   * ssl (```libssl-dev```)
+
+   * YAML (```libyaml-dev```)
+
+   * SASL (```libsasl2-dev```)
+
+   * LDAP (```libldap2-dev```)
+
+   * python 2.7 (```libpython2.7```)
+
+   * SSHPass(```sshpass```) to get working ssh password auth during playbook execution
+
+   * GIT (```git```) to get working git import
+
+
+   Required packages on Red Hat/CentOS :
+
+   * python (```python```)
+
+   * OpenSSL (```openssl-devel```)
+
+   * YAML (```libyaml-devel```)
+
+   * virtualenv (```python-virtualenv```)
+
+   * Kerberos (```krb5-devel```)
+
+   * Libs for Kerberos (```krb5-libs```)
+
+   * Open LDAP (```openldap-devel```)
+
+   * GIT (```git```) to get working git import
+
+
+#. Create virtualenv and activate it**:
 
    .. sourcecode:: bash
 
-      sudo yum localinstall polemarch-X.X.X-X.x86_64.rpm.
+       virualenv polemarch
+       cd polemarch
+       source bin/activate
 
-3. Run services with commands
-
-   .. sourcecode:: bash
-
-      sudo service polemarchweb start
-      sudo service polemarchworker start
-
-That's it. Polemarch web panel on 8080 port. Default administrative account is
-admin/admin.
-
-Note: If you using authentication by password at some of your machines
-managed by Polemarch, you also must install ``sshpass`` package because it
-required for ansible to autheticate via ssh by password. It available in
-EPEL for Red Hat/CentOS. Also you can use specify ``connection`` command line
-argument during playbook run as ``paramiko``. When ansible uses paramiko to
-make ssh connection, ``sshpass`` not necessary.
-
-Ubuntu/Debian installation
---------------------------
-
-1. Download deb from latest `release <https://github.com/vstconsulting/polemarch/releases>`_.
-
-2. Install it with command
+#. Install Polemarch:
 
    .. sourcecode:: bash
 
-      sudo dpkg -i polemarch_X.X.X-X_amd64.deb || sudo apt-get install -f
+        pip install polemarch
 
-3. Run services with commands
+#. Edit config file:
+
+   #. Open `/etc/polemarch/settings.ini`, if it does not exist, create it. Polemarch uses config from this directory.
+
+   #.  The default database is SQLite3, but MySQL is recommended. Settings needed for correct work database:
+
+       .. code-block:: ini
+
+           [database]
+           engine = django.db.backends.mysql
+           name = db_name
+           user = db_user
+           password = db_password
+           host = db_host
+           port = db_port
+
+   #. The default cache system is file based cache, but RedisCache is recommended. Settings needed for correct RedisCache work:
+
+      .. code-block:: ini
+
+           [cache]
+           backend = django_redis.cache.RedisCache
+           location = redis://redis-server:6379/1
+
+           [locks]
+           backend = django_redis.cache.RedisCache
+           location = redis://redis-server:6379/2
+
+   #. The default celery broker is file Celery broker, but Redis is recommended. Settings needed for correct Redis work:
+
+      .. code-block:: ini
+
+           [rpc]
+           connection = redis://redis-server:6379/3
+           heartbeat = 5
+           concurrency = 8
+           enable_worker = true
+
+   #. For running Polemarch with worker, you need to create follow sections:
+
+      .. code-block:: ini
+
+           [uwsgi]
+           processes = 4
+           threads = 4
+           harakiri = 120
+           vacuum = True
+
+           [worker]
+           pidfile = /tmp/pm_worker.pid
+           logfile = /dev/null
+
+#. Make migrations:
 
    .. sourcecode:: bash
 
-      sudo service polemarchweb start
-      sudo service polemarchworker start
+        polemarchctl migrate
 
-That's it. Polemarch web panel on 8080 port. Default administrative account is
-admin/admin.
+#. Start Polemarch:
+
+   .. sourcecode:: bash
+
+       polemarchctl webserver
+
+Polemarch starts with web interface on port 8080.
+
+If you need to restart Polemarch use following command:
+
+    .. sourcecode:: bash
+
+           polemarchctl webserver reload=/var/run/polemarch/web.pid
+
+If you use another directory for storing Polemarch pid file, use path to this file
+instead of default ``/var/run/polemarch/web.pid``.
+
+
+If you need to stop Polemarch use following command:
+
+    .. sourcecode:: bash
+
+           polemarchctl webserver stop=/var/run/polemarch/web.pid
+
+If you use another directory for storing Polemarch pid file, use path to this file
+instead of default ``/var/run/polemarch/web.pid``.
+
 
 Quickstart
 ----------
 
 After you install Polemarch by instructions above you can use it without any
-further configurations. Interface is pretty intuitive and common for any web
+further configuration. Interface is pretty intuitive and common for any web
 application.
 
 Default installation is suitable for most simple and common cases, but
 Polemarch is highly configurable system. If you need something more advanced
 (scalability, dedicated DB, custom cache, logging or directories) you can
-always configure Polemarch like said in :doc:`Configuration manual </config>`.
+always configure Polemarch like it is said in :doc:`Configuration manual </config>`.
 
 
 Backup
@@ -120,14 +226,23 @@ Uploading of backup in PostgreSQL:
 Update
 ------
 
-Before updating any type of package strongly recommended to stop all services and create backup for safe.
+Before updating of package of any type it is strongly recommended to stop all services and create backup for safety.
+
+Update to 0.2.x
+---------------
+
+1. Firstly, we strongly recommend you to create a database backup and to stop all Polemarch services for safety.
+
+2. Secondly, if you are updating from 0.1.x to 0.2.x, you need to update you current 0.1.x version to 0.1.13 version.
+
+3. Then update 0.1.13 version to 0.2.x. If you don't know how to do it, look :doc:`"Install from PyPI" </quickstart>`.
 
 
 Migrate
 -------
 
 Migrations are Django’s way of propagating changes you make to your models (adding a field, deleting a model, etc.)
-into your database schema. They’re designed to be mostly automatic, but you’ll need to know when to make migrations,
+into your database schema. They’re designed to be mostly automatic, but you need to know when to make migrations,
 when to run them, and the common problems you might run into.
 
 To run a ``migrate`` command you should run follow code:
@@ -147,7 +262,7 @@ To create a superuser account use the follow command:
 
    sudo -u polemarch /opt/polemarch/bin/polemarchctl createsuperuser
 
-This command will promt for all required user's options.
+This command prompts for all required user's options.
 
 Change password
 ---------------
@@ -160,5 +275,5 @@ To change password use the follow command:
 
 It prompts you to enter a new password twice for the given user.
 If the entries are identical, this immediately becomes the new password.
-If you do not supply a user, the command will attempt to change the password whose username matches
+If you do not supply a user, the command will attempt to change the password of user whose username matches
 the current user.

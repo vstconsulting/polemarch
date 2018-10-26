@@ -1,35 +1,8 @@
- 
 if(window.moment && window.moment.tz)
 { 
     window.moment.tz.setDefault(window.timeZone);
 }
  
-var guiLocalSettings = {
-    __settings:{},
-    get:function(name){
-        return this.__settings[name];
-    },
-    set:function(name, value){
-        this.__settings[name] = value;
-        window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings)
-        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
-    }
-}
-
-
-if(window.localStorage['guiLocalSettings'])
-{
-    try{
-        guiLocalSettings.__settings = window.localStorage['guiLocalSettings'];
-        guiLocalSettings.__settings = JSON.parse(guiLocalSettings.__settings)
-
-    }catch (e)
-    {
-
-    }
-}
-
-
 if(guiLocalSettings.get('hideMenu'))
 {
     if(window.innerWidth>767){
@@ -37,61 +10,51 @@ if(guiLocalSettings.get('hideMenu'))
     }
 }
 
-
 function setActiveMenuLiBase()
 {
-    if(/\?projects/.test(window.location.href) || /\?project/.test(window.location.href) ||
-        /\?new-project/.test(window.location.href))
+    if(/\#project/.test(window.location.href))
     {
-        $("#menu-projects").addClass("pm-treeview-active active active-li active-bold");
-        $("#menu-projects-projects").addClass("active-bold");
-        $("#menu-projects").removeClass("pm-treeview");
+        $("#Projects").addClass("active active-li active-bold");
     }
-    else if(/\?templates/.test(window.location.href) ||
-        /\?template/.test(window.location.href))
+    else if(/\#host/.test(window.location.href))
     {
-        $("#menu-projects").addClass("pm-treeview-active active active-li");
-        $("#menu-projects-templates").addClass("active-bold");
-        $("#menu-projects").removeClass("pm-treeview");
-    }
-    else if(/\?hosts/.test(window.location.href) || /\?host/.test(window.location.href) ||
-        /\?new-host/.test(window.location.href))
-    {
-        $("#menu-inventories").addClass("pm-treeview-active active active-li");
+        $("#menu-inventories").addClass("menu-treeview-active active active-li");
         $("#menu-inventories-hosts").addClass("active-bold");
-        $("#menu-inventories").removeClass("pm-treeview");
+        $("#menu-inventories").removeClass("menu-treeview");
     }
-    else if(/\?new-group/.test(window.location.href) || /\?groups/.test(window.location.href) ||
-        /\?group/.test(window.location.href))
+    else if(/\#group/.test(window.location.href))
     {
-        $("#menu-inventories").addClass("pm-treeview-active active active-li");
+        $("#menu-inventories").addClass("menu-treeview-active active active-li");
         $("#menu-inventories-groups").addClass("active-bold");
-        $("#menu-inventories").removeClass("pm-treeview");
+        $("#menu-inventories").removeClass("menu-treeview");
     }
-    else if(/\?inventories/.test(window.location.href) || /\?inventory/.test(window.location.href) ||
-        /\?new-inventory/.test(window.location.href))
+    else if(/\#inventory/.test(window.location.href))
     {
-        $("#menu-inventories").addClass("pm-treeview-active active active-li active-bold");
+        $("#menu-inventories").addClass("menu-treeview-active active active-li active-bold");
         $("#menu-inventories-inventories").addClass("active-bold");
-        $("#menu-inventories").removeClass("pm-treeview");
+        $("#menu-inventories").removeClass("menu-treeview");
     }
-    else if(/\?history/.test(window.location.href)){
+    else if(/\#history/.test(window.location.href)){
 
-        $("#menu-history").addClass("active active-li active-bold");
+        $("#History").addClass("active active-li active-bold");
     }
-    else if(/\?hooks/.test(window.location.href) || /\?hook/.test(window.location.href) ||
-        /\?new-hook/.test(window.location.href))
+    else if(/\#hook/.test(window.location.href))
     {
-        $("#menu-system").addClass("pm-treeview-active active active-li");
+        $("#menu-system").addClass("menu-treeview-active active active-li");
         $("#menu-system-hooks").addClass("active-bold");
-        $("#menu-system").removeClass("pm-treeview");
+        $("#menu-system").removeClass("menu-treeview");
     }
-    else if(/\?users/.test(window.location.href) || /\?user/.test(window.location.href) ||
-        /\?new-user/.test(window.location.href) || /\?profile/.test(window.location.href))
+    else if(/\#team/.test(window.location.href))
     {
-        $("#menu-system").addClass("pm-treeview-active active active-li");
+        $("#menu-system").addClass("menu-treeview-active active active-li");
+        $("#menu-system-teams").addClass("active-bold");
+        $("#menu-system").removeClass("menu-treeview");
+    }
+    else if(/\#user/.test(window.location.href) || /\#profile/.test(window.location.href))
+    {
+        $("#menu-system").addClass("menu-treeview-active active active-li");
         $("#menu-system-users").addClass("active-bold");
-        $("#menu-system").removeClass("pm-treeview");
+        $("#menu-system").removeClass("menu-treeview");
     }
     else
     {
@@ -99,13 +62,14 @@ function setActiveMenuLiBase()
     }
 }
 
+
 function setActiveMenuLi()
 {
-    if($('li').is('.pm-treeview-active'))
+    if($('li').is('.menu-treeview-active'))
     {
-        var t=$(".pm-treeview-active");
-        $(t).addClass("pm-treeview");
-        $(t).removeClass("pm-treeview-active");
+        var t=$(".menu-treeview-active");
+        $(t).addClass("menu-treeview");
+        $(t).removeClass("menu-treeview-active");
     }
 
     if($('li').is('.active-li'))
@@ -124,6 +88,8 @@ function setActiveMenuLi()
     return setActiveMenuLiBase();
 }
 
+tabSignal.connect("spajs.open", setActiveMenuLi);
+
 /*
  * Функция добавляет элементу меню (при наведении на него)
  * css-класс hover-li, который добавляет необходимые стили.
@@ -134,11 +100,11 @@ function setActiveMenuLi()
 $(".sidebar-menu > li").mouseenter(function () {
     var thisEl = this;
     setTimeout(function () {
-        var pmTreeviewMenues = $(".pm-treeview-menu");
+        var menuTreeviewMenues = $(".menu-treeview-menu");
         var bool = false;
-        for(var i=0; i<pmTreeviewMenues.length; i++)
+        for(var i=0; i<menuTreeviewMenues.length; i++)
         {
-            if($(pmTreeviewMenues[i]).is(':hover'))
+            if($(menuTreeviewMenues[i]).is(':hover'))
             {
                 bool = true;
             }
@@ -171,3 +137,6 @@ tabSignal.connect("loading.completed", function()
 
 //remove this string, when android app code be ready and after that check correct work on PC
 setActiveMenuLiBase();
+
+// Добавляем файл тестов к списку файлов для тестов гуя
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmUnitTest.js')

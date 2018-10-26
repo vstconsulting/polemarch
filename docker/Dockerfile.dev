@@ -1,19 +1,19 @@
-FROM onegreyonewhite/tox:centos
+FROM onegreyonewhite/tox:python
 
 MAINTAINER sergey.k@vstconsulting.net
 
-# Build and install rpm
-RUN curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh | tee /usr/bin/wait-for-it.sh && \
-    chmod +x /usr/bin/wait-for-it.sh
-RUN mkdir /tmp/polemarch
+RUN mkdir /tmp/polemarch && \
+    virtualenv /opt/polemarch
 ADD . /tmp/polemarch/
-RUN cd /tmp/polemarch && make rpm
-RUN yum install /tmp/polemarch/dist/*.rpm -y
-RUN cp -vf /tmp/polemarch/test_settings.ini /etc/polemarch/settings.ini
-
+RUN cd /tmp/polemarch && \
+    tox -e build && \
+    /opt/polemarch/bin/pip install /tmp/polemarch/dist/*.tar.gz && \
+    rm -rf /tmp/polemarch/dist /tmp/polemarch/.tox && \
+    mkdir -p /etc/polemarch/ && \
+    cp -vf /tmp/polemarch/test_settings.ini /etc/polemarch/settings.ini
 
 # Run options
 ENV DJANGO_DEBUG=true
 EXPOSE 8080
 
-ENTRYPOINT sudo -u polemarch /opt/polemarch/bin/uwsgi /opt/polemarch/lib/python2.7/site-packages/polemarch/web.ini
+ENTRYPOINT /opt/polemarch/bin/polemarchctl webserver

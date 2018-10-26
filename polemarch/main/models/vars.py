@@ -1,13 +1,11 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
-import json
 import logging
 import uuid
 
+from functools import reduce
 from collections import OrderedDict
-from six import string_types, text_type
-from django.db import transaction
 from django.db.models import Case, When, Value
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
@@ -18,12 +16,71 @@ from .base import ACLModel, BQuerySet, BModel, models
 logger = logging.getLogger("polemarch")
 
 
+def update_boolean(items, item):
+    value = items.get(item, None)
+    if value is None:
+        pass
+    if value == 'True':
+        items[item] = True
+    elif value == 'False':
+        items[item] = False
+    return items
+
+
+class VariablesQuerySet(BQuerySet):
+    use_for_related_fields = True
+
+    def sort_by_key(self):
+        args, kwargs = [], dict()
+        keys = self.model.variables_keys
+        index = keys.index
+        for key in keys:
+            args.append(When(key=key, then=Value(index(key))))
+        args.append(When(key__startswith="ansible_", then=Value(99)))
+        kwargs['default'] = 100
+        kwargs['output_field'] = models.IntegerField()
+        return self.annotate(sort_idx=Case(*args, **kwargs)).order_by("sort_idx", "key")
+
+    def cleared(self):
+        return super(VariablesQuerySet, self).cleared().sort_by_key()
+
+
 class Variable(BModel):
+    objects = VariablesQuerySet.as_manager()
     content_type   = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id      = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     key            = models.CharField(max_length=128)
     value          = models.CharField(max_length=2*1024, null=True)
+
+    variables_keys = [
+        "ansible_host",
+        'ansible_port',
+        'ansible_user',
+        'ansible_connection',
+
+        'ansible_ssh_pass',
+        'ansible_ssh_private_key_file',
+        'ansible_ssh_common_args',
+        'ansible_sftp_extra_args',
+        'ansible_scp_extra_args',
+        'ansible_ssh_extra_args',
+        'ansible_ssh_executable',
+        'ansible_ssh_pipelining',
+
+        'ansible_become',
+        'ansible_become_method',
+        'ansible_become_user',
+        'ansible_become_pass',
+        'ansible_become_exe',
+        'ansible_become_flags',
+
+        'ansible_shell_type',
+        'ansible_python_interpreter',
+        'ansible_ruby_interpreter',
+        'ansible_perl_interpreter',
+        'ansible_shell_executable',
+    ]
 
     def __unicode__(self):  # pragma: no cover
         return "{}={}".format(self.key, self.value)
@@ -31,15 +88,6 @@ class Variable(BModel):
 
 class AbstractVarsQuerySet(BQuerySet):
     use_for_related_fields = True
-
-    @transaction.atomic
-    def create(self, **kwargs):
-        variables = kwargs.pop("vars", {})
-        obj = super(AbstractVarsQuerySet, self).create(**kwargs)
-        if isinstance(variables, (string_types, text_type)):
-            variables = json.loads(variables)
-        obj.vars = variables
-        return obj
 
     def var_filter(self, **kwargs):
         qs = self
@@ -74,40 +122,14 @@ class AbstractModel(ACLModel):
         # pylint: disable=unused-argument
         return OrderedDict(id=self.id, name=self.name)
 
-    @transaction.atomic()
-    def set_vars(self, variables):
-        encr = "[~~ENCRYPTED~~]"
-        encrypted_vars = {k: v for k, v in variables.items() if v == encr}
-        other_vars = {k: v for k, v in variables.items() if v != encr}
-        self.variables.exclude(key__in=encrypted_vars.keys()).delete()
-        for key, value in other_vars.items():
-            self.variables.create(key=key, value=value)
-
     def vars_string(self, variables, separator=" "):
-        return separator.join([
-            "{}={}".format(key, value) for key, value in variables.items()
-        ])
+        return separator.join(
+            map(lambda kv: "{}={}".format(kv[0], kv[1]), variables.items())
+        )
 
     def get_vars(self):
-        qs = self.variables.annotate(
-            name_sorter=Case(
-                When(key="ansible_host", then=Value(0)),
-                When(key="ansible_port", then=Value(1)),
-                When(key="ansible_user", then=Value(2)),
-                When(key="ansible_ssh_pass", then=Value(3)),
-                When(key="ansible_ssh_private_key_file", then=Value(4)),
-                When(key__startswith="ansible_", then=Value(5)),
-                default=100,
-                output_field=models.IntegerField(),
-            ),
-        ).order_by("name_sorter", "key")
-        vars_dict = OrderedDict(qs.values_list('key', 'value'))
-        for bool_var in self.BOOLEAN_VARS:
-            value = vars_dict.get(bool_var, None)
-            if value is None:
-                continue
-            vars_dict[bool_var] = True if value == "True" else False
-        return vars_dict
+        qs = self.variables.all().sort_by_key().values_list('key', 'value')
+        return reduce(update_boolean, self.BOOLEAN_VARS, OrderedDict(qs))
 
     def get_generated_vars(self):
         tmp = None
@@ -121,14 +143,6 @@ class AbstractModel(ACLModel):
     @property
     def vars(self):
         return self.get_vars()
-
-    @vars.setter
-    def vars(self, value):
-        self.set_vars(value)
-
-    @vars.deleter
-    def vars(self):
-        self.variables.all().delete()  # nocv
 
     @property
     def have_vars(self):

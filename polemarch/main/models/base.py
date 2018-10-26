@@ -21,19 +21,20 @@ class BQuerySet(_BQSet):
         return wrapper
 
     def __getattribute__(self, item):
-        model = super(BQuerySet, self).__getattribute__("model")
-        if model and model.acl_handler and item in model.acl_handler.qs_methods:  # noce
-            return self.__decorator(getattr(model.acl_handler, "qs_{}".format(item)))
-        return super(BQuerySet, self).__getattribute__(item)
+        try:
+            return super(BQuerySet, self).__getattribute__(item)
+        except:
+            model = super(BQuerySet, self).__getattribute__("model")
+            if model and item in model.acl_handler.qs_methods:  # noce
+                return self.__decorator(getattr(model.acl_handler, "qs_{}".format(item)))
+            raise
 
     def create(self, **kwargs):
-        return self.model.acl_handler.qs_create(
-            super(BQuerySet, self).create, **kwargs
-        )
+        return self.model.acl_handler.qs_create(super(BQuerySet, self).create, **kwargs)
 
-    def user_filter(self, user, only_leads=False):
+    def user_filter(self, user, *args, **kwargs):
         # pylint: disable=unused-argument
-        return self.model.acl_handler.user_filter(self, user, only_leads=False)
+        return self.model.acl_handler.user_filter(self, user, *args, **kwargs)
 
 
 class Manager(_BManager.from_queryset(BQuerySet)):
@@ -59,8 +60,8 @@ class BaseModel(_BM):
 
     @classproperty
     def acl_handler(self):
-        classObj = self.__class__
         if isinstance(self, BaseModel):
+            classObj = self.__class__
             return classObj.get_acl(classObj, self)
         return self.get_acl(self)
 

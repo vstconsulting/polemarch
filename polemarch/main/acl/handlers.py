@@ -8,11 +8,18 @@ class Default(object):
         self.instance = instance
         self.model = model
 
-    def set_owner(self, user):  # nocv
-        pass
+    def set_owner(self, user):
+        '''
+        Set object owner.
 
-    def owned_by(self, user):  # nocv
-        return True
+        :param user:
+        :return:
+        '''
+        self.instance.owner = user
+        self.instance.save()
+
+    def owned_by(self, user):
+        return user.is_staff or (getattr(self.instance, 'owner', None) == user)
 
     def manageable_by(self, user):  # nocv
         return True
@@ -23,7 +30,7 @@ class Default(object):
     def viewable_by(self, user):
         return True
 
-    def user_filter(self, qs, user, only_leads=False):
+    def user_filter(self, qs, user, role=None):
         return qs
 
     def qs_create(self, original_method, **kwargs):

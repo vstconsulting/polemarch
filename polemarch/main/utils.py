@@ -5,25 +5,21 @@ import logging
 from subprocess import CalledProcessError, Popen, PIPE, STDOUT
 from threading import Thread
 
+import sys
 import os
 import re
+import json
+import time
 from os.path import dirname
-from collections import OrderedDict
 try:
-    from Queue import Queue, Empty
+    from Queue import Queue
 except ImportError:  # nocv
-    from queue import Queue, Empty
+    from queue import Queue
 
 try:
-    from yaml import CLoader as Loader, load
+    from yaml import CLoader as Loader, CDumper as Dumper, load, dump
 except ImportError:  # nocv
-    from yaml import Loader, load
-from django.core.cache import caches, InvalidCacheBackendError
-from django.core.validators import ValidationError
-from ansible import modules as ansible_modules, __version__ as ansible_version
-from ansible.cli.adhoc import AdHocCLI
-from ansible.cli.playbook import PlaybookCLI
-from vstutils.utils import import_class
+    from yaml import Loader, Dumper, load, dump
 
 from . import __file__ as file
 
@@ -41,7 +37,25 @@ def project_path():
     return dirname(dirname(file))  # nocv
 
 
-class CmdExecutor(object):
+class PMObject(object):
+
+    def pm_ansible(self, *args):
+        # pylint: disable=access-member-before-definition
+        if hasattr(self, '__pm_ansible__'):
+            return list(self.__pm_ansible__) + list(args)
+        self.__pm_ansible__ = self.get_django_settings('EXECUTOR')
+        return self.pm_ansible(*args)
+
+    def get_django_settings(self, name, default=None):
+        # pylint: disable=access-member-before-definition
+        if hasattr(self, '__django_settings__'):
+            return getattr(self.__django_settings__, name, default)
+        from django.conf import settings
+        self.__django_settings__ = settings
+        return self.get_django_settings(name)
+
+
+class CmdExecutor(PMObject):
     # pylint: disable=no-member
     '''
     Command executor with realtime output write
@@ -49,8 +63,15 @@ class CmdExecutor(object):
     CANCEL_PREFIX = "CANCEL_EXECUTE_"
     newlines = ['\n', '\r\n', '\r']
 
-    def __init__(self):
+    def __init__(self, stdout=PIPE, stderr=STDOUT):
+        '''
+
+        :type stdout: BinaryIO,int
+        :type stderr: BinaryIO,int
+        '''
         self.output = ''
+        self._stdout = stdout
+        self._stderr = stderr if stderr != STDOUT else self._stdout
 
     def write_output(self, line):
         '''
@@ -62,26 +83,39 @@ class CmdExecutor(object):
         self.output += str(line)
 
     def _enqueue_output(self, out, queue):
-        line = out.readline()
-        while len(line):
-            queue.put(line)
+        try:
             line = out.readline()
-        out.close()
+            while len(line):
+                queue.put_nowait(line)
+                line = out.readline()
+        finally:
+            out.close()
+
+    def working_handler(self, proc):
+        # pylint: disable=unused-argument
+        '''
+        Additional handler for executions.
+
+        :type proc: subprocess.Popen
+        '''
 
     def _unbuffered(self, proc, stream='stdout'):
         stream = getattr(proc, stream)
-        q = Queue()
-        t = Thread(target=self._enqueue_output, args=(stream, q))
+        queue = Queue()
+        t = Thread(target=self._enqueue_output, args=(stream, queue))
         t.start()
-        timeout = 0
-        retry = {"r": True}  # one try after proc end to get rest of out
-        while timeout == 0 or proc.poll() is None or retry.pop("r", False):
-            try:
-                line = q.get(timeout=timeout).rstrip()
-                timeout = 0
-            except Empty:
-                line = None
-                timeout = 1
+        empty_counter = 1
+        while not (stream.closed and queue.empty()):
+            if queue.empty():
+                empty_counter += 1
+                if not empty_counter % 100:
+                    self.working_handler(proc)
+                elif not empty_counter % 10 ^ 6:
+                    time.sleep(0.001)
+                continue  # nocv
+            empty_counter = 0
+            self.working_handler(proc)
+            line = queue.get_nowait().rstrip()
             yield line
 
     def line_handler(self, proc, line):
@@ -101,14 +135,16 @@ class CmdExecutor(object):
         :rtype: str
         '''
         self.output = ""
-        proc = Popen(cmd, stdout=PIPE, stderr=STDOUT,
-                     universal_newlines=True, cwd=cwd)
+        proc = Popen(
+            cmd, stdout=self._stdout, stderr=self._stderr,
+            bufsize=0, universal_newlines=True, cwd=cwd
+        )
         for line in self._unbuffered(proc):
             if self.line_handler(proc, line):
-                break
-        retcode = proc.poll()
-        if retcode:
-            raise CalledProcessError(retcode, cmd, output=self.output)
+                break  # nocv
+        return_code = proc.poll()
+        if return_code:
+            raise CalledProcessError(return_code, cmd, output=self.output)
         return self.output
 
 
@@ -153,7 +189,7 @@ class task(object):
         return wrapper
 
 
-class BaseTask(object):
+class BaseTask(PMObject):
     '''
     BaseTask class for all tasks.
     '''
@@ -174,30 +210,79 @@ class BaseTask(object):
         return self.run()
 
     def run(self):  # pragma: no cover
-        ''' Method with task logic. '''
         # pylint: disable=notimplemented-raised,
+        ''' Method with task logic. '''
         raise NotImplemented
 
 
-class AnsibleArgumentsReference(object):
-    # Type conversion for GUI fields
-    _GUI_TYPES_CONVERSION = {
-        "string": "text",
-        "int": "integer",
-        None: "boolean",
-        "choice": "text",
-    }
-    # Types with different conversion to fields
-    _GUI_TYPES_CONVERSION_DIFFERENT = {
-        "private-key": "keyfile",
-        "key-file": "keyfile",
-    }
-    # Args for using in code, but hidden for users
-    _HIDDEN_ARGS = ['group']
+class AnsibleCache(PMObject):
+    def __init__(self, prefix, timeout=86400*7):
+        from django.core.cache import caches, InvalidCacheBackendError
+        self.prefix = prefix
+        self.timeout = timeout
+        try:
+            self.cache = caches["ansible"]
+        except InvalidCacheBackendError:
+            self.cache = caches["default"]
+
+    @property
+    def key(self):
+        return 'ansible-{}'.format(self.prefix)
+
+    def set(self, value):
+        self.cache.set(self.key, dump(value, Dumper=Dumper), self.timeout)
+
+    def get(self):
+        cache = self.cache.get(self.key)
+        return load(cache, Loader=Loader) if cache else None
+
+    def clear(self):
+        self.set(None)
+
+
+class PMAnsible(PMObject):
+    # Json regex
+    _regex = re.compile(r"([\{\[][^\w\d\.].*[\}\]]$)", re.MULTILINE)
+    ref_name = 'object'
+
+    def get_ansible_cache(self):
+        return AnsibleCache(self.get_ref(cache=True))
+
+    def _get_only_json(self, output):
+        return json.loads(self._regex.findall(output)[0])
+
+    def get_ref(self, cache=False):
+        ref = self.ref_name
+        if cache:
+            ref += '-python{}'.format(sys.version_info[0])
+        return ref
+
+    def get_args(self):
+        return self.pm_ansible(self.get_ref())
+
+    def get_data(self):
+        cache = self.get_ansible_cache()
+        result = cache.get()
+        if result is None:
+            with open(os.devnull, 'wb') as DEVNULL:
+                cmd = CmdExecutor(stderr=DEVNULL)
+                cmd_command = self.get_args()
+                cmd.execute(cmd_command, '/tmp/')
+            result = self._get_only_json(cmd.output)
+            cache.set(result)
+        return result
+
+    def clear_cache(self):
+        self.get_ansible_cache().clear()
+
+
+class AnsibleArgumentsReference(PMAnsible):
+    ref_name = 'reference'
     # Excluded args from user calls
     _EXCLUDE_ARGS = [
         # Excluded because we use this differently in code
-        'verbose', 'inventory-file', 'inventory', 'module-name',
+        # 'verbose', 'inventory-file', 'inventory', 'module-name',
+        'inventory-file', 'module-name',
         # Excluded because now we could not send any to worker proccess
         'ask-sudo-pass', 'ask-su-pass', 'ask-pass',
         'ask-vault-pass', 'ask-become-pass',
@@ -206,42 +291,14 @@ class AnsibleArgumentsReference(object):
     def __init__(self):
         self.raw_dict = self._extract_from_cli()
 
-    @property
-    def clis(self):
-        '''
-        Ansible cli objects
-
-        :return: dict with cli objects
-        '''
-        return {
-            "module": AdHocCLI(args=["", "all"]),
-            "playbook": PlaybookCLI(args=["", "none.yml"])
-        }
-
-    def _cli_to_gui_type(self, argument, type_name):
-        if argument in self._GUI_TYPES_CONVERSION_DIFFERENT:
-            return self._GUI_TYPES_CONVERSION_DIFFERENT[argument]
-        if argument is not None and argument.endswith("-file"):
-            return "textfile"
-        return self._GUI_TYPES_CONVERSION[type_name]
-
-    def _as_gui_dict_command(self, args):
-        cmd_result = {}
-        for arg, info in args.items():
-            if arg in self._HIDDEN_ARGS:
-                continue
-            cmd_result[arg] = dict(
-                type=self._cli_to_gui_type(arg, info['type']),
-                shortopts=info['shortopts'], help=info['help']
-            )
-        return cmd_result
-
     def is_valid_value(self, command, argument, value):
-        mtype = self.raw_dict[command][argument]["type"]
+        argument = argument.replace('_', '-')
+        argument_data = self.raw_dict[command][argument]
+        mtype = argument_data["type"]
         if mtype == 'int':
             int(value)
-        elif mtype is None and value not in [None, ""]:
-            raise AssertionError("This argument shouldn't have value")
+        elif mtype is not None and value is None:  # nocv
+            raise AssertionError("This argument should have value")
         return True
 
     def validate_args(self, command, args):
@@ -249,38 +306,17 @@ class AnsibleArgumentsReference(object):
             for argument, value in args.items():
                 self.is_valid_value(command, argument, value)
         except (KeyError, ValueError, AssertionError) as e:
+            from django.core.validators import ValidationError
             raise ValidationError({
                 command: "Incorrect argument: {}.".format(str(e)),
                 'argument': argument
             })
 
-    def as_gui_dict(self, wanted=""):
-        result = {}
-        for cmd, args in self.raw_dict.items():
-            if wanted == "" or cmd == wanted:
-                result[cmd] = self._as_gui_dict_command(args)
-        return result
-
-    def __parse_option(self, option):
-        # pylint: disable=protected-access,
-        cli_result = dict()
-        for name in option._long_opts:
-            name = name[2:]
-            if name in self._EXCLUDE_ARGS:
-                continue
-            shortopts = [opt[1:] for opt in option._short_opts]
-            cli_result[name] = dict(
-                type=option.type, help=option.help, shortopts=shortopts
-            )
-        return cli_result
-
-    def __parse_cli(self, cli):
-        # pylint: disable=protected-access,
-        cli.parse()
-        cli_result = {}
-        for option in cli.parser._get_all_options():
-            cli_result.update(self.__parse_option(option))
-        return cli_result
+    def get_args(self):
+        cmd = super(AnsibleArgumentsReference, self).get_args()
+        for cmd_name in self._EXCLUDE_ARGS:
+            cmd += ['--exclude', cmd_name]
+        return cmd
 
     def _extract_from_cli(self):
         '''
@@ -290,117 +326,43 @@ class AnsibleArgumentsReference(object):
         :rtype: dict
         '''
         # pylint: disable=protected-access,
-        result = {
-            name: self.__parse_cli(cli) for name, cli in self.clis.items()
-        }
+        data = self.get_data()
+        self.version = data['version']
+        result = data['keywords'].copy()
         result['module']['group'] = {"type": "string", "help": ""}
         result['periodic_playbook'] = result['playbook']
         result['periodic_module'] = result['module']
         return result
 
 
-class Modules(object):
-    mod = ansible_modules
+class AnsibleModules(PMAnsible):
+    ref_name = 'modules'
 
-    def __init__(self):
-        self.clean()
+    def __init__(self, detailed=False):
+        super(AnsibleModules, self).__init__()
+        self.detailed = detailed
+        self.key = None
 
-    @property
-    def mod_path(self):
-        return self.mod.__path__[0] + "/"
+    def get_args(self):  # nocv
+        cmd = super(AnsibleModules, self).get_args()
+        if self.detailed:
+            cmd += ['--detail']
+        if self.key:
+            cmd += ['--get', self.key]
+        return cmd
 
-    def _get_mod_list(self):
-        # TODO: add cache between queries
-        return self._modules_list
-
-    def clean(self):
-        self._modules_list = list()
-        self._key_filter = None
-
-    def _get_mods(self, files):
-        return [
-            f[:-3] for f in files
-            if f[-3:] == ".py" and f[:-3] != "__init__" and "_" not in f[:2]
-        ]
-
-    def _get_info(self, key):  # nocv
-        return key
-
-    def _setup_key(self, key, files, search=None):
-        _modules_list = list()
-        _mods = self._get_mods(files)
-        if _mods:
-            for _mod in _mods:
-                _mod_key = "{}.{}".format(key, _mod)
-                if search is None or search.search(_mod_key):
-                    info = self._get_info(_mod_key)
-                    if info is not None:
-                        _modules_list.append(info)
-        return _modules_list
-
-    def _filter(self, query):
-        if self._key_filter == query:
-            return self._get_mod_list()
-        self.clean()
-        self._key_filter = query
-        search = re.compile(query, re.IGNORECASE) if query else None
-        for path, sub_dirs, files in os.walk(self.mod_path):
-            if "__pycache__" in sub_dirs:
-                sub_dirs.remove("__pycache__")  # nocv
-            key = path.replace(self.mod_path, "").replace("/", ".")
-            self._modules_list += self._setup_key(key, files, search)
-        return self._get_mod_list()
+    def get_ref(self, cache=False):
+        ref = super(AnsibleModules, self).get_ref(cache)
+        if cache and self.key:
+            ref += '-{}'.format(self.key)
+        if cache and self.detailed:
+            ref += '-detailed'
+        return ref
 
     def all(self):
+        self.key = None
         return self.get()
 
     def get(self, key=""):
-        return self._filter(key)
-
-
-class AnsibleModules(Modules):
-    mod = ansible_modules
-
-    default_fields = [
-        'module',
-        'short_description',
-    ]
-
-    try:
-        cache = caches["ansible"]
-    except InvalidCacheBackendError:
-        cache = caches["default"]
-
-    def __init__(self, detailed=False, fields=None):
-        super(AnsibleModules, self).__init__()
-        self.detailed = detailed
-        fields = fields.split(',') if fields else self.default_fields
-        self.fields = [field.strip() for field in fields if field.strip()]
-
-    def _get_mod_info(self, key, sub):
-        try:
-            path = "{}.{}.{}".format(self.mod.__name__, key, sub)
-            return import_class(path)
-        except BaseException as exception_object:
-            return exception_object
-
-    def __get_detail_info_from_cache(self, key, data):
-        cache_key = "cache_ansible_{}_{}".format(ansible_version, key)
-        doc_data = self.cache.get(cache_key, None)
-        if doc_data is None:  # nocv
-            doc_data = load(data, Loader=Loader)
-            self.cache.set(cache_key, doc_data, 86400*7)
-        return doc_data
-
-    def _get_info(self, key):
-        data = self._get_mod_info(key, "DOCUMENTATION")
-        if isinstance(data, BaseException) or data is None:
-            return None
-        if not self.detailed:
-            return key
-        result = OrderedDict(path=key)
-        doc_data = self.__get_detail_info_from_cache(key, data)
-        result["data"] = OrderedDict()
-        for field in self.fields:
-            result["data"][field] = doc_data.get(field, None)
-        return result
+        self.key = key
+        return self.get_data()

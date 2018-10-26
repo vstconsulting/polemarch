@@ -1,7 +1,7 @@
 version: '3'
 services:
   db-server:
-    image: mysql:latest
+    image: mariadb:latest
     environment:
     - MYSQL_DATABASE=polemarch
     - MYSQL_ROOT_PASSWORD=polemarch
@@ -10,14 +10,10 @@ services:
     - MYSQL_HOST=%
     volumes:
       - "db_data:/var/lib/mysql"
-  memcache-server:
-    image: memcached
-  rabbitmq-server:
-    image: rabbitmq:latest
-    environment:
-    - RABBITMQ_DEFAULT_USER=polemarch
-    - RABBITMQ_DEFAULT_PASS=polemarch
-    - RABBITMQ_DEFAULT_VHOST=polemarch
+  redis-server:
+    image: redis:latest
+    volumes:
+      - "redis_data:/data"
   polemarch:
     build:
       context: .
@@ -26,22 +22,17 @@ services:
     command: |
       /bin/bash -c "
         set -e
-        curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh | tee ./wait-for-it.sh
-        chmod +x wait-for-it.sh
-        ./wait-for-it.sh db-server:3306 -s -t 30
-        ./wait-for-it.sh rabbitmq-server:5672 -s -t 30
-        mkdir -p /var/run/polemarch
-        chown polemarch:polemarch /projects /var/run/polemarch
-        sudo -u polemarch /opt/polemarch/bin/polemarchctl migrate
-        sudo -u polemarch /opt/polemarch/bin/uwsgi /opt/polemarch/lib/python2.7/site-packages/polemarch/web.ini
+        /usr/bin/wait-for-it.sh db-server:3306 -s -t 120
+        /usr/bin/wait-for-it.sh redis-server:6379 -s -t 120
+        mkdir -p /var/run/polemarch /var/log/polemarch
         cat /etc/polemarch/settings.ini
+        /opt/polemarch/bin/polemarchctl migrate
+        /opt/polemarch/bin/polemarchctl webserver
         /bin/bash || exit 0
       "
     external_links:
       - db-server
-      - cache-server:memcache-server
-      - locks-server:memcache-server
-      - rabbitmq-server
+      - redis-server
     volumes:
       - "project_data:/projects"
     ports:
@@ -50,3 +41,4 @@ services:
 volumes:
   project_data:
   db_data:
+  redis_data:

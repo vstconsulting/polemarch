@@ -1,4 +1,9 @@
 [run]
+source = polemarch
+parallel = True
+concurrency =
+    thread
+    multiprocessing
 omit =
     .tox/*
     */main/management/daemon.py
@@ -15,9 +20,14 @@ omit =
     polemarch/wapp.py
     polemarch/main/management/commands/webserver.py
     polemarch/main/tests/repos.py
+    polemarch/main/tests/tasks.py
+    polemarch/main/tests/project.py
+    polemarch/main/tests/ansible.py
+    polemarch/api/v1/*
     *celery_beat_scheduler.py
 
 [report]
+show_missing = True
 exclude_lines =
     pragma: no cover
     nocv

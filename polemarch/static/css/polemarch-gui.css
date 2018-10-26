@@ -23,32 +23,110 @@
 }
 
 
-.history-status{
-    font-weight: bold;
-    vertical-align: middle;
+@media (min-width: 1200px) {
+    .readme_content img {
+        max-width: 60%;
+        width: auto;
+    }
 }
 
-.history-status-OFFLINE{
+.td_history_start_time, .td_history_stop_time,
+.td_project-history_start_time, .td_project-history_stop_time{
+    width:150px;
+}
+
+.td_history_status,
+.td_project-history_status {
+    font-weight: bold;
+    vertical-align: middle;
+    text-align: center;
+    max-width: 110px;
+}
+
+@media (max-width: 1200px) {
+    .td_history_stop_time,
+    .td_project-history_stop_time {
+        display: none;
+    }
+}
+
+@media (max-width: 1100px) {
+    .td_history_mode,
+    .td_project-history_mode {
+        display: none;
+    }
+}
+
+@media (max-width: 1050px) {
+    .td_history_initiator,
+    .td_project-history_initiator,
+    .td_project-history_revision {
+        display: none;
+    }
+}
+
+@media (max-width: 1000px) {
+    .td_history_inventory,
+    .td_project-history_inventory {
+        display: none;
+    }
+}
+
+@media (max-width: 850px) {
+    .td_history_executor,
+    .td_project-history_executor {
+        display: none;
+    }
+}
+
+@media (max-width: 660px) {
+    .td_history_project,
+    .td_project-history_project {
+        display: none;
+    }
+}
+
+@media (max-width: 550px) {
+    .td_history_kind,
+    .td_project-history_kind {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .td_history_start_time,
+    .td_project-history_start_time {
+        width: 70px;
+    }
+}
+
+.tr_status_OFFLINE .td_history_status,
+.tr_status_OFFLINE .td_project-history_status {
     color: #9e9e9e;
 }
 
-.history-status-INTERRUPTED{
+.tr_status_INTERRUPTED .td_history_status,
+.tr_status_INTERRUPTED .td_project-history_status {
     color: #9b97e4;
 }
 
-.history-status-RUN{
+.tr_status_RUN .td_history_status,
+.tr_status_RUN .td_project-history_status {
     color: #0085ff;
 }
 
-.history-status-ERROR{
+.tr_status_ERROR .td_history_status,
+.tr_status_ERROR .td_project-history_status {
 
 }
 
-.history-status-DELAY{
+.tr_status_DELAY .td_history_status,
+.tr_status_DELAY .td_project-history_status {
     color: #808419;
 }
 
-.history-status-OK{
+.tr_status_OK .td_history_status,
+.tr_status_OK .td_project-history_status {
     color: #276900;
 }
 
@@ -85,7 +163,8 @@
     overflow: auto;
     max-height: calc(100vh - 338px);
     min-height: 400px;
-    background: #fff;
+    line-height: 8px;
+    background: #000;
 }
 
 @media (min-width: 767px) {
@@ -144,7 +223,13 @@
     display: block;
     width:160px;
 }
-
-*::-webkit-scrollbar {
-    width: 0px;
+  
+#menu-system-hooks {
+    display: none;
 }
+
+#RealBody.is_superuser #menu-system-hooks,
+#RealBody.is_staff #menu-system-hooks {
+    display: block;
+}
+

@@ -6,16 +6,8 @@ variables:
   GET_SOURCES_ATTEMPTS: 3
   ARTIFACT_DOWNLOAD_ATTEMPTS: 3
   RESTORE_CACHE_ATTEMPTS: 3
-  DJANGO_LOG_LEVEL: 'CRITICAL'
-  PUBLISH_REMOTE_NAME: "${CI_JOB_NAME}_public_${CI_COMMIT_TAG}"
-  PUBLISH_REMOTE_USER: ""
-  PUBLISH_REMOTE_TOKEN: ""
-  PUBLISH_REMOTE_AUTH: "${PUBLISH_REMOTE_USER}:${PUBLISH_REMOTE_TOKEN}@"
-  PUBLISH_REMOTE_SERVER: "gitlab.com"
-  PUBLISH_REMOTE_PROJECT: "vstconsulting/polemarch"
-  PUBLISH_REMOTE_PROJECT_SUFFIX: ".git"
-  PUBLISH_REMOTE_URL_SCHEMA: "https://"
-  PUBLISH_REMOTE_URI: "${PUBLISH_REMOTE_URL_SCHEMA}${PUBLISH_REMOTE_AUTH}${PUBLISH_REMOTE_SERVER}/${PUBLISH_REMOTE_PROJECT}${PUBLISH_REMOTE_PROJECT_SUFFIX}"
+  DJANGO_LOG_LEVEL: 'ERROR'
+  TOX_ARGS: "--workdir /cache/.tox_polemarch_${CI_BUILD_REF_NAME}"
 
 stages:
   - code_standarts
@@ -35,16 +27,24 @@ stages:
   script:
    - make test ENVS=$TOX_ENVS
    - make build-clean
-   - coverage html
-  artifacts:
-    name: "coverage_branch(${CI_BUILD_REF_NAME})_${CI_BUILD_ID}"
-    expire_in: 1 hour
-    paths:
-    - htmlcov/
-    - dist/
   except:
-    - GUI
-    - tags
+    refs:
+      - GUI
+      - tags
+      - issue_building
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /Merge branch/
+  only:
+    changes:
+      - polemarch/api/*
+      - polemarch/main/*
+      - tests.py
+      - setup.py
+      - setup.cfg
+      - MANIFEST.in
+      - requirements*
+      - tox.ini
+      - .giltab-ci.yml
   retry: 2
 
 .pack_tamplate: &packing-test
@@ -55,18 +55,11 @@ stages:
     MYSQL_DATABASE: 'polemarch'
     MYSQL_USER: 'polemarch'
     MYSQL_PASSWORD: 'polemarch'
-    RABBITMQ_DEFAULT_USER: 'polemarch'
-    RABBITMQ_DEFAULT_PASS: 'polemarch'
-    RABBITMQ_DEFAULT_VHOST: 'polemarch'
   services:
-    - name: 'mysql:latest'
+    - name: 'mariadb:latest'
       alias: 'db-server'
-    - name: 'memcached'
-      alias: 'cache-server'
-    - name: 'memcached'
-      alias: 'locks-server'
-    - name: 'rabbitmq:latest'
-      alias: 'rabbitmq-server'
+    - name: 'redis'
+      alias: 'redis-server'
   artifacts:
     name: "package($CI_BUILD_NAME)"
     expire_in: 1 hour
@@ -75,6 +68,7 @@ stages:
   allow_failure: false
   only:
     - master
+    - issue_building
   retry: 2
 
 .publish_template: &publishing
@@ -94,68 +88,116 @@ stages:
 code_style:
   stage: code_standarts
   image: onegreyonewhite/tox:tox
+  variables:
+    TOX_ARGS: "--workdir /cache/.tox_polemarch_code"
   script:
    - make test ENVS=flake,pylint
+  except:
+    refs:
+      - tags
+      - issue_building
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /Merge branch/
   only:
-    - /^.{0,}issue_.*$/
-    - developer
-    - master
+    refs:
+      - /^.{0,}issue_.*$/
+      - developer
+      - master
+    changes:
+      - polemarch/api/*
+      - polemarch/main/*
+      - tests.py
+      - requirements*
+      - tox.ini
+      - .giltab-ci.yml
+      - .pep8
+      - .pylintrc
   retry: 2
 
-py27-django111-install:
+py27-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
-py36-django111-install:
+py36-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
+####################################################
+# DEPRECATED
 default_rpm_tests:
   <<: *packing-test
   script:
    - cat /etc/hosts
-   - tox -e rpm RELEASE=${CI_BUILD_ID}
+   - tox ${TOX_ARGS} -e rpm RELEASE=${CI_BUILD_ID}
    - sudo yum install dist/*.rpm -y -q
    - sudo cat test_settings.ini > /etc/polemarch/settings.ini
    - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
    - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
-   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
-
-default_oracle_tests:
-  <<: *packing-test
-  image: onegreyonewhite/tox:oracle
-  script:
-   - cat /etc/hosts
-   - tox -e rpm RELEASE=${CI_BUILD_ID}
-   - sudo yum install dist/*.rpm -y -q
-   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
-   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
-   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
-   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
+   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests --failfast
 
 default_deb_tests:
   <<: *packing-test
   image: onegreyonewhite/tox:ubuntu
   script:
    - cat /etc/hosts
-   - tox -e deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
+   - tox ${TOX_ARGS} -e deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate INSTALL_PY=python3
    - echo "echo 'hello'" > /bin/systemctl
+   - sudo apt update
    - sudo apt install ./dist/*.deb -y -q
    - sudo cat test_settings.ini > /etc/polemarch/settings.ini
    - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
    - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
-   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests
+   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests --failfast
 
 # Realese
 ###########################################
+pages:
+  stage: release
+  script:
+    - make test ENVS=builddoc
+    - mv doc/_build/html public
+  artifacts:
+    paths:
+    - public
+  only:
+    refs:
+      - developer
+    changes:
+      - doc/*
+
+release_pypi:
+  stage: release
+  only:
+   - tags
+  before_script:
+  - pip install vstcompile[doc]
+  script:
+   - make test ENVS=build
+  allow_failure: true
+  artifacts:
+    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
+    paths:
+    - dist/
+
+publish_pypi:
+  stage: publish
+  image: onegreyonewhite/tox:ubuntu
+  only:
+    refs:
+      - tags
+    variables:
+      - $PYPI_UPLOAD_PASSWORD
+  script:
+  - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
+
+# DEPRECATED
 release_rpm:
   stage: release
   only:
    - tags
   script:
-#   - make rpm
    - make test ENVS=rpm
   allow_failure: false
   artifacts:
@@ -169,7 +211,6 @@ release_deb:
    - tags
   image: onegreyonewhite/tox:ubuntu
   script:
-   # - make deb RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
    - make test ENVS=deb
   allow_failure: false
   artifacts:
@@ -177,40 +218,18 @@ release_deb:
     paths:
     - dist/
 
-release_pypi:
-  stage: release
-  only:
-   - tags
-  before_script:
-  - pip install vstcompile[doc]
-  script:
-#   - make compile
-   - make test ENVS=build
-  allow_failure: true
-  artifacts:
-    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
-    paths:
-    - dist/
-
-publish_pypi:
-  stage: publish
-  image: onegreyonewhite/tox:ubuntu
-  only:
-   - tags
-  script:
-  - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
-
-publish_gitlab:
-  <<: *publishing
-  variables:
-    PUBLISH_REMOTE_USER: "gitlab-ci-token"
-    PUBLISH_REMOTE_TOKEN: "${GITLAB_TOKEN}"
-
-publish_release:
-  <<: *publishing
-  variables:
-    PUBLISH_REMOTE_USER: "${GITHUB_USER}"
-    PUBLISH_REMOTE_TOKEN: "${GITHUB_TOKEN}"
-    PUBLISH_REMOTE_SERVER: 'github.com'
-  after_script:
-  - make test ENVS=release
+# DEPRECATED
+#publish_gitlab:
+#  <<: *publishing
+#  variables:
+#    PUBLISH_REMOTE_USER: "gitlab-ci-token"
+#    PUBLISH_REMOTE_TOKEN: "${GITLAB_TOKEN}"
+#
+#publish_release:
+#  <<: *publishing
+#  variables:
+#    PUBLISH_REMOTE_USER: "${GITHUB_USER}"
+#    PUBLISH_REMOTE_TOKEN: "${GITHUB_TOKEN}"
+#    PUBLISH_REMOTE_SERVER: 'github.com'
+#  after_script:
+#  - make test ENVS=release

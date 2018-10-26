@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import logging
 
-from django.db import transaction
 from django.db.models import Q
 from vstutils.utils import get_render
 
@@ -11,7 +10,7 @@ from .base import models
 from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
 from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex
-from ..validators import validate_hostname, RegexValidator
+from ..validators import RegexValidator
 
 logger = logging.getLogger("polemarch")
 
@@ -49,27 +48,16 @@ class Host(AbstractModel):
 
     types = ["HOST", "RANGE"]
 
+    range_validator = RegexValidator(
+        regex=r'^[a-zA-Z0-9\-\._\[\]\:]*$',
+        message='Name must be Alphanumeric'
+    )
+
     class Meta:
         default_related_name = "hosts"
 
     def __unicode__(self):
         return "{}".format(self.name)  # nocv
-
-    @transaction.atomic()
-    def set_vars(self, variables):
-        # Moved it from triggers because in trigger variables are always empty.
-        # They saved later of trigger execution.
-        if variables.get("ansible_host", False):
-            validate_hostname(variables.get("ansible_host"))
-        elif self.type == "HOST":
-            validate_hostname(self.name)
-        elif self.type == "RANGE":
-            validate_name = RegexValidator(
-                regex=r'^[a-zA-Z0-9\-\._\[\]\:]*$',
-                message='Name must be Alphanumeric'
-            )
-            validate_name(self.name)
-        return super(Host, self).set_vars(variables)
 
     def toString(self, var_sep=" "):
         hvars, key = self.get_generated_vars()
@@ -139,13 +127,21 @@ class Inventory(AbstractModel):
 
     @property
     def groups_list(self):
-        groups_list = self.groups.filter(children=False) | \
-                      self.groups.filter(children=True).get_subgroups()
+        '''
+        :return:GroupQuerySet: Mixed queryset with all groups
+        '''
+        groups_list = (
+            self.groups.filter(children=False) |
+            self.groups.filter(children=True).get_subgroups()
+        )
         groups_list = groups_list.distinct().prefetch_related("variables", "hosts")
         return groups_list.order_by("-children", "id")
 
     @property
     def hosts_list(self):
+        '''
+        :return:HostQuerySet: Mixed queryset with all hosts
+        '''
         return self.hosts.all().order_by("name")
 
     def get_inventory(self):
@@ -162,6 +158,10 @@ class Inventory(AbstractModel):
             )
         )
         return inv, keys
+
+    @property
+    def all_groups(self):
+        return self.groups_list
 
     @property
     def all_hosts(self):

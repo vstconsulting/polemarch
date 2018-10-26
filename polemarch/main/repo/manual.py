@@ -9,8 +9,7 @@ class Manual(_Base):
             os.mkdir(self.path)
         except OSError as oserror:
             if oserror.errno == os.errno.EEXIST:
-                self.delete()
-                return self.make_clone(options)
+                return None, None
             raise  # nocv
         return None, None
 

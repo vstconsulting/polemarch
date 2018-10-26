@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import logging
+import collections
 import uuid
 from vstutils.utils import raise_context, ModelHandlers
 from .base import BModel, BQuerySet, models
@@ -9,17 +10,17 @@ logger = logging.getLogger('polemarch')
 
 
 class HookHandlers(ModelHandlers):
-    when_types_names = dict(
-        on_execution="Before start task",
-        after_execution="After end task",
-        on_user_add="When new user register",
-        on_user_upd="When user update data",
-        on_user_del="When user was removed",
-        on_object_add="When new Polemarch object was added",
-        on_object_upd="When Polemarch object was updated",
-        on_object_del="When Polemarch object was removed",
-    )
-    when_types = when_types_names.keys()
+    when_types_names = collections.OrderedDict((
+        ('on_execution', "Before start task"),
+        ('after_execution', "After end task"),
+        ('on_user_add', "When new user register"),
+        ('on_user_upd', "When user update data"),
+        ('on_user_del', "When user was removed"),
+        ('on_object_add', "When new Polemarch object was added"),
+        ('on_object_upd', "When Polemarch object was updated"),
+        ('on_object_del', "When Polemarch object was removed"),
+    ))
+    when_types = tuple(when_types_names.keys())
 
     def get_handler(self, obj):
         return self[obj.type](obj, self.when_types, **self.opts(obj.type))
@@ -53,7 +54,7 @@ class Hook(BModel):
     type       = models.CharField(max_length=32, null=False)
     when       = models.CharField(max_length=32, null=True, default=None)
     enable     = models.BooleanField(default=True)
-    recipients = models.CharField(max_length=20000)
+    recipients = models.CharField(max_length=16383)
 
     @property
     def reps(self):

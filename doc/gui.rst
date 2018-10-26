@@ -8,7 +8,7 @@ In this section of our documentation we will tell you about Polemarch GUI's oppo
 
 Let's begin with Dashboard page:
 
-.. image:: gui_png/dashboard.png
+.. image:: gui_screenshots/dashboard.png
 
 As you can see, Polemarch GUI provides user with 2 menus:
 
@@ -31,143 +31,14 @@ Polemarch opens modal window, where user can activate or collapse some widgets.
 Before you start
 ----------------
 
-Before you can do any job with Polemarch you should create at least one
-inventory with your servers enumeration(groups and hosts) and at least one project, because all
+Before you can do any job with Polemarch you should create at least one project, because all
 Polemarch's functions are linked to the project.
 
-Inventories
------------
-
-.. image:: gui_png/inventories.png
-
-There are 2 ways of inventory's creation:
-
-* the first one is to create inventory manually. To do it user should click on "Create" button.
-
-* the second one is to import inventory from text file. To do it user should click on "Import from file" button.
-
-By inventory's creation, in this case, we understand creation of inventory, which includes at least one group,
-which, in it's turn, includes at least one host. In other words, beside inventory user should create host and group.
-
-To understand it better let's look at next images, which will explain you how to create inventory manually.
-Here you can see the form for manual creation of inventory.
-
-.. image:: gui_png/create-new-inventory.png
-
-As you can see, this form is rather simple. There are only 2 sections with several fields to input.
-
-Section "New inventory":
-
-* **name** - name of your inventory.
-
-* **notes** - not required field for some user’s notes, for example,
-  for what purpose this inventory was created or something like this.
-
-Section "Adding new variable":
-
-* **name** - name of ansible variable. This field has autocomplete, so you can just start typing
-  the variable name and Polemarch will suggest you appropriate name values.
-
-* **value** - value of ansible variable.
-
-After inventory creation you will see the next page:
-
-.. image:: gui_png/test-inventory.png
-
-There are some new buttons here:
-
-* **save** - this button saves all changes you have made on this page.
-* **history** - this button opens history list of inventory executions.
-* **groups** - this button opens subgroups list of this inventory.
-* **hosts** - this button opens subhosts list of this inventory.
-
-Let's look how you can create a group for this inventory.
-To do it, let's click on 'Groups' button.
-
-Groups
-------
-
-.. image:: gui_png/test-inventory-group-list.png
-
-As you can see, on this page you can either create new group or just add existing one.
-
-Let's click on 'Create' button.
-
-.. image:: gui_png/create-new-group.png
-
-Section "New group":
-
-* **name** - name of your group.
-
-* **children** - if this field is true, group can consist of other croups only.
-  Otherwise, this group can consist of hosts only.
-
-* **notes** - not required field for some user’s notes, for example,
-  for what purpose this group was created or something like this.
-
-Section "Adding new variable":
-
-* **name** - name of ansible variable. This field has autocomplete, so you can just start typing
-  the variable name and Polemarch will suggest you appropriate name values.
-
-* **value** - value of ansible variable.
-
-After group creation you will see the next page:
-
-.. image:: gui_png/test-group.png
-.. image:: gui_png/test-group2.png
-
-As you can see, there are 2 new buttons here:
-
-* **hosts** - this button opens subhosts list of this group.
-* **remove from parent group** - this button removes our new host from current
-  group's hosts  list, but does not delete it from system.
-
-Also new "Variables" section has appeared.
-"Variables" section has a list of variables that user have chosen during group creation.
-
-Let's look how you can create a host for this group.
-
-Hosts
------
-
-.. image:: gui_png/test-group-hosts-list.png
-
-As you can see, on this page you can either create new host or just add existing one.
-
-Let's click on 'Create' button.
-
-.. image:: gui_png/create-new-host.png
-
-Section "New host":
-
-* **name** - name of your host.
-  Name can be either human-readable(example.com) or hostname/IP (192.168.0.12) or range of them(19[2:7].168.0.12).
-
-* **notes** - not required field for some user’s notes, for example,
-  for what purpose this host was created or something like this.
-
-Section "Adding new variable":
-
-* **name** - name of ansible variable. This field has autocomplete, so you can just start typing
-  the variable name and Polemarch will suggest you appropriate name values.
-
-* **value** - value of ansible variable.
-
-After host creation you will see the next page:
-
-.. image:: gui_png/test-host.png
-
-As you can see, new button 'Remove from parent group' has appeared.
-This button removes our new host from current group's hosts  list, but does not
-delete it from system.
-
-Also new "Variables" section has appeared and it has a list of variables that user have chosen during host creation.
 
 Projects
 --------
 
-Futher to start your work with Polemarch you should create project.
+So, to start your work with Polemarch you should create project.
 
 There are 3 project types in Polemarch:
 
@@ -184,416 +55,664 @@ There are 3 project types in Polemarch:
 
 Let's look at the example of GIT project's creation:
 
-.. image:: gui_png/create-new-git-project.png
+.. image:: gui_screenshots/create_project.png
 
-As you can see, the form of new GIT project creation consist of 5 fields:
+As you can see, the form of new project creation consist of 5 fields:
 
 * **name** - name of your project.
 
-* **repository type**  - type of project repository (GIT, TAR, MANUAL).
+* **repo type** - type of project repository (GIT, TAR, MANUAL).
 
-* **repository URL** - URL to your repository.
+* **repo URL** - URL to your repository.
 
-* **repository password** - repository password if it exist.
+* **repo auth type** - type of authentication (NONE, KEY, PASSWORD).
 
-* **branch** - branch of your GIT project, to what your Polemarch project will be synced.
-  If you stay it empty, Polemarch will sync to "master" branch.
+* **repo auth data** - key or password value.
 
-* **update before execution** - if true, project will be updated before each task
-  execution from this project.
+After project creation you will the next page:
+
+.. image:: gui_screenshots/test_project_1.png
+.. image:: gui_screenshots/test_project_2.png
+
+As you can see there are some new fields on this page:
+
+* **id** - |id_field_def|
+
+* **status** - Polemarch project status.
+  Possible values are:
+
+  * NEW - newly created project,
+  * WAIT_SYNC - repository synchronization has been scheduled, but has not started to perform yet,
+  * SYNC - synchronization is in progress,
+  * ERROR - synchronization failed,
+  * OK - project is synchronized.
+
+* **revision** - GIT project revision.
+
+* **branch** - branch of your GIT project, to what your Polemarch project was synced.
+
+* **owner** - |owner_field_def| project.
 
 * **notes** - not required field for some user’s notes, for example,
   for what purpose this project was created or something like this.
 
-After project creation you will the next page:
+* **information** - if project has “readme.md” or “readme.rst” file in it’s project directory,
+  Polemarch will add content of this file to this field.
 
-.. image:: gui_png/test-project.png
-.. image:: gui_png/test-project2.png
+.. |id_field_def| replace:: the unique key of object in database.
+.. |owner_field_def| replace:: user, who owns this
 
-As you can see at image above for GIT project
-it is possible to choose a branch to what user want to sync. In this example user will sync
-his GIT project from 'master' branch to 'other' branch during next synchronization. 'Arrow' icon in the branch input field
-shows us, that project will be sync from one branch to another. If there is no 'arrow' icon, it means,
-that next time project will be sync to the same branch as you can see it in 'Branch' input field.
+Also there are some new buttons:
 
-Also there are 2 new fields:
+Sublist buttons:
 
-* **revision** - GIT project revision.
+* **group** - this button opens project's group list.
+* **history** - this button opens project executions' history list.
+* **host** - this button opens project's host list.
+* **inventory** - this button opens project's inventory list.
+* **module** - this button opens project's module list.
+* **periodic task** - this button opens project's periodic task list.
+* **playbook** - this button opens project's playbook list.
+* **template** - this button opens project's template list.
+* **variables** - this button opens project's variables list.
 
-* **status** - Polemarch project status.
-  Possible values are: NEW - newly created project,
-  WAIT_SYNC - repository synchronization has been scheduled, but has not started to perform yet,
-  SYNC - synchronization is in progress,
-  ERROR - synchronization failed,
-  OK - project is synchronized.
+Action buttons:
 
-There is new section on this page:
-
-* **reame.md** - if project has “readme.md” or “readme.rst” file in it’s project directory,
-  Polemarch will add content of this file to this section.
-
-Also there are several buttons on this page:
-
-* **save** - this button saves all changes you have made on this page.
-
+* **save** - |save_button_def|
+* **copy** - |copy_button_def|
+* **execute module** - this button opens "execute module" action page.
+* **execute playbook** - this button opens "execute plabook" action page.
+* **set owner** - |set_owner_button_def|
 * **sync** - this button syncs your Polemarch project with GIT repository.
+* **remove** - |remove_button_def| project.
 
-* **run playbook** - this button opens a "Run plabook" page.
+.. |create_button_def| replace:: this button creates new
+.. |save_button_def| replace:: this button saves all changes you have made on this page.
+.. |copy_button_def| replace:: this button opens "copy" action page.
+.. |set_owner_button_def| replace:: this button opens "set owner" action page.
+.. |remove_button_def| replace:: this button deletes
 
-* **run module** - this button opens a "Run module" page.
-
-* **periodic tasks** - this button opens a page with list of periodic tasks of this project.
-
-* **history** - this button opens a page with list of history records of this project.
-
-* **import templates** - this button imports a text file with task/module template for this project from your computer.
-
-* **remove** - this button deletes this project.
 
 If you update something in your GIT repository, don't forget to run sync in
 Polemarch for pulling your changes.
 
-After your project's status has changed into "OK" you can confidently start working with Polemarch.
+As you can see, now project's status is "NEW", so we need to click on "sync" button
+to get all needed data from your GIT project.
 
-Execution of modules
---------------------
+.. image:: gui_screenshots/test_project_3.png
 
-Ok, we made all preparations and ready to do some real work. Let's start by
-executing some command on your servers:
+After your project's status has been changed into "OK" you can confidently start working with Polemarch.
 
-.. image:: gui_png/execute-ansible-module.png
 
-Here you can see 2 sections: "Execute ansible module" and "Adding new argument".
+Module execution
+---------------
 
-"Execute ansible module" consist of next fields:
+The simplest way to start using Polemarch is to execute module.
+To make this action click on 'execute module' button on project page.
 
-* **inventory source** - source of inventory. It can be either "From database" or "From file in project dir".
+.. image:: gui_screenshots/execute_module_1.png
 
-* **inventory from project / inventory file** - name of inventory.
+As you can see, there are 2 fields on this page:
 
-* **group** - name of group to which this module will be executed.
+* **module** - autocomplete field with the list of project's modules.
+* **add field** - select field, that provides user with new variables field for module execution.
 
-* **module** - name of ansible module. This field has autocomplete, so you can just start typing
-  the ansible module name and Polemarch will suggest you appropriate name values.
+Also there is only one button on this page:
 
-* **args** - arguments for ansible module.
+* **exec** - |exec_button_def|
 
-Section "Adding new argument":
+.. |exec_button_def| replace:: this button starts action execution.
 
-* **name** - name of ansible variable.
+For example, let's execute module **shell** on **localhost** with argument **uptime**.
+To do it we need to add next fields:
 
-* **value** - value of ansible variable.
+* **inventory** - it can be inventory from database or just list of hosts, that are separated by ",".
+* **group** - to which hosts from inventory execute this module.
+* **connection** - type of connection.
+* **args** - list of arguments for current module.
 
-After you completed all necessary fields you should click on "Execute" button to run this ansible module.
-After this you will see the next page:
+After all fields have been filled, our page started look like:
 
-.. image:: gui_png/module-shell-1.png
-.. image:: gui_png/module-shell-2.png
+.. image:: gui_screenshots/execute_module_2.png
 
-As you can see there are 3 sections on this page: "Inventory", "stdout", "Task".
+So, let's execute our first task on Polemarch! To do it click on "exec" button.
 
-"Inventory" section includes  ansible inventory in text format.
+When status of your module execution changes to "OK" you will see the next page:
 
-"stdout" section includes  what ansible has written to stdout and stderr during execution.
-With "Clear" button you can delete this output.
+.. image:: gui_screenshots/execute_module_3.png
+.. image:: gui_screenshots/execute_module_4.png
+.. image:: gui_screenshots/execute_module_5.png
 
-"Task" sections consist of next fields:
 
-* **status** - status of task. It indicates different results of execution and can be
-  DELAY (scheduled for run), OK (successful run), INTERRUPTED (interrupted by user), RUN (currently running),
-  OFFLINE (can’t connect to node), ERROR (failure).
+Template
+--------
 
-* **module** - name of executed module.
+In previous abstract to execute module we needed to fill several fields.
+To do it before every module/playbook is rather inconvenient.
+In this case Polemarch templates save our time and nerves.
+Polemarch template is an object, that saves all options that user used during task execution.
 
-* **start time** - time, when task execution was started.
+For example, let's create tast template (template that uses playbooks).
+To do it click on "template" button on project page.
 
-* **stop time** - time, when task execution was finished.
+.. image:: gui_screenshots/create_template.png
 
-* **execution time** - amount of time the execution took.
+As you can see, there are no templates in the project's template list now.
 
-* **initiator** - name of object, who executed this task.
+There is only one button here:
 
-* **executor** - name of user, who executed this task.
+* **create** - |create_button_def| template.
 
-* **revision** - project revision.
+To create template click on "create" button on this page.
 
-* **inventory** - name of inventory.
+.. image:: gui_screenshots/create_template_2.png
 
-* **args** - list of args, which were used during task execution.
+As you can see, there are several fields on this page:
 
-
-Execution of playbooks
-----------------------
-
-Also you can run any of playbooks in your project.
-
-Polemarch will scan project dir root for any .yml file and provide possibility
-to run them. So place available playbook targets at root of your GIT repository
-or tar-archive or folder with your project files.
-
-Be aware that your project must have "OK" status, because your
-playbooks won't work until Polemarch done synchronization with repository.
-If you made everything right, project playbooks will be shown in suggestions
-in playbook execution page.
-
-Let's look at the example of running some playbook, which Polemarch imported from GIT repository
-of our project:
-
-.. image:: gui_png/execute-playbook.png
-
-Here you can see 2 sections: "Run playbook" and "Adding new argument".
-
-"Run playbook" consist of next fields:
-
-* **playbook** - name of playbook. This field has autocomplete with playbook names from your GIT/TAR/MANUAL project.
-
-* **inventory source** - source of inventory. It can be either "From database" or "From file in project dir".
-
-* **inventory from project / inventory file** - name of inventory.
-
-* **group** - name of group to which this module will be executed.
-
-Section "Adding new argument":
-
-* **name** - name of ansible variable.
-
-* **value** - value of ansible variable.
-
-After you completed all necessary fields you should click on "Execute" button to run this playbook.
-After this you will see the next page:
-
-.. image:: gui_png/playbook-executed-1.png
-.. image:: gui_png/playbook-executed-2.png
-
-As you can see there are 3 sections on this page: "Inventory", "stdout", "Task".
-
-"Inventory" section includes  ansible inventory in text format.
-
-"stdout" section includes  what ansible has written to stdout and stderr during execution.
-With "Clear" button you can delete this output.
-
-"Task" sections consist of next fields:
-
-* **status** - status of task. It indicates different results of execution and can be
-  DELAY (scheduled for run), OK (successful run), INTERRUPTED (interrupted by user), RUN (currently running),
-  OFFLINE (can’t connect to node), ERROR (failure).
-
-* **playbook** - name of executed playbook.
-
-* **start time** - time, when task execution was started.
-
-* **stop time** - time, when task execution was finished.
-
-* **execution time** - amount of time the execution took.
-
-* **initiator** - name of object, who executed this task.
-
-* **executor** - name of user, who executed this task.
-
-* **revision** - project revision.
-
-* **inventory** - name of inventory.
-
-* **args** - list of args, which were used during task execution.
-
-Templates
----------
-
-If you have many arguments, which you pass to Ansible at every task run (like
-extra-vars, forks number and so on), you can create template for such action
-to minimize hand work. Polemarch provides user with 2 kinds of templates:
-task template(template for playbook execution) and module template(template for module execution).
-Both of this template kinds are similar, that's why we will look at the example of module template creation only.
-
-.. image:: gui_png/create-module-template.png
-
-This page has 2 sections: "Run module template" and "Adding new argument".
-
-"Run module template" section consist of next fields:
-
-* **template name** - name of template.
-
-* **project** - name of project, for which this template will be available.
-
-* **inventory source** - source of inventory. It can be either "From database" or "From file in project dir".
-
-* **inventory from project / inventory file** - name of inventory.
-
-* **group** - name of group to which this module will be executed.
-
-* **module** - name of ansible module. This field has autocomplete, so you can just start typing
-  the ansible module name and Polemarch will suggest you appropriate name values.
-
-* **args** - arguments for ansible module.
+* **name** - name of template.
 
 * **notes** - not required field for some user’s notes, for example,
   for what purpose this template was created or something like this.
 
-Section "Adding new argument":
+* **type** - type of template (MODULE or TASK).
 
-* **name** - name of ansible variable.
+* **inventory** - it can be inventory from database or just list of hosts, that are separated by ",".
 
-* **value** - value of ansible variable.
+* **playbook** - name of playbook, which template will use during execution.
 
-After you completed all necessary fields you should click on "Create" button to save this template.
-After this you will see the next page:
+After all fields have been filled, our page started look like:
 
-.. image:: gui_png/module-template-page.png
+.. image:: gui_screenshots/create_template_3.png
 
-As you can see, this page has the same sections as the previous page.
+After template creation you will see the next page:
 
-But also there are some new buttons here:
+.. image:: gui_screenshots/create_template_4.png
 
-* **save** - this button saves all changes you have made on this page.
+As you can see there is only one new fields on this page:
 
-* **save and execute** - this button saves all changes you have made on this page and executes this template.
+* **id** - |id_field_def|
 
-* **options** - this button opens the page with this template options list.
+Also there are several buttons here:
 
-* **periodic tasks** - this button opens the page with the list of periodic tasks based on this template.
+Sublist buttons:
 
-* **history** - this button opens history list of template executions.
+* **option** - this button opens template's option list.
+* **variables** - this button opens project's variables list.
 
-* **copy** - this button creates a copy of this template.
+Action buttons:
 
-* **remove** - this button deletes this template.
+* **save** - |save_button_def|
+* **execute** - this button opens "execute template" action page.
+* **remove** - |remove_button_def| template.
 
-Options
--------
+Before template execution we need to create variable "connection=local",
+because we use "localhost" as inventory.
 
-Sometimes your need to keep some similar templates, which are different by only several parameters.
-In this case template options will be extremly useful for you. In every template you can create
-a lot of options which can modify this template by some parameters. Let's look at the example:
+To do it, click on "variables" button.
 
-.. image:: gui_png/empty-options-list.png
+.. image:: gui_screenshots/create_template_variable.png
 
-As you can see, now there are no options for this template. Let's create the first one.
+As you can see, there are no variables in the template's variables list now.
 
-.. image:: gui_png/create-new-option.png
+There is only one button here:
 
-As you can see there are 2 section on this page: "New option" and "Adding new argument".
+* **create** - |create_button_def| variable.
 
-"New option" section consist of next fields:
+To create variable click on "create" button on this page.
 
-* **name** - name of option.
+.. image:: gui_screenshots/create_template_variable_2.png
 
-* **group** - name of group to which this template will be executed, if this option be selected for execution.
+As you can see, there are only 2 fields on this page:
 
-* **module** - name of ansible module  which will be executed, if this option be selected for execution.
-  This field has autocomplete, so you can just start typing
-  the ansible module name and Polemarch will suggest you appropriate name values.
+* **key** - key of variable.
 
-* **args** - ansible module arguments, which will be used, if this option be selected for execution.
+* **value** - value of variable.
 
-Section "Adding new argument":
+There is only one button here:
 
-* **name** - name of ansible variable.
+* **create** - |create_button_def| variable.
 
-* **value** - value of ansible variable.
+To save our variable click on "create" button.
 
-After you completed all necessary fields you should click on "Create" button to save this template option.
-After this you will see the next page:
+Now we are ready to execute our template. To do it come back to template page:
 
-.. image:: gui_png/option-page.png
+.. image:: gui_screenshots/create_template_4.png
 
-There is new section "Additional arguments", that includes list of arguments, which will be added
-to template during execution.
+And click on "execute" button.
 
-Buttons on this page:
+.. image:: gui_screenshots/execute_template_1.png
 
-* **save** - this button saves all changes you have made on this page.
+As you can see, there is only 1 field on this page:
 
-* **save and execute** - this button saves all changes you have made on this page and executes template with this option.
+* **option** - autocomplete field with the list of template's options.
 
-* **remove** - this button deletes this template option.
+Also there is only one button on this page:
 
-Also you can backup/share your templates using export mechanism:
+* **exec** - |exec_button_def|
 
-.. image:: gui_png/export-template.png
+We do not have any template's options in our system, so just click on "exec" button.
+
+When status of your template execution changes to "OK" you will see the next page:
+
+.. image:: gui_screenshots/execute_template_2.png
+.. image:: gui_screenshots/execute_template_3.png
+.. image:: gui_screenshots/execute_template_4.png
+
 
 Periodic tasks
 --------------
 
-If you want to run some actions by schedule without any control from
-you, it is possible with Polemarch. You can create periodic tasks, which runs
-every X seconds (interval based):
+Now let's imagine, that you need to execute some task (module/playbook/template)
+with some interval or on the first day of month, for example, and you do not want
+to execute it everytime by yourself.
 
-.. image:: gui_png/create-periodic.png
+In this case, Polemarch has such useful object type, as periodic task.
 
-As you can see there are 2 sections on this page: "New task" and "Adding new argument".
+Periodic task - is a module/playbook/template execution
+which Polemarch makes by himself with some interval.
 
-"New task" section consist of next fields:
+Let's create periodic task, based on our "test-task-template".
+To do it open project page:
 
-* **name** - name of periodic task.
+.. image:: gui_screenshots/test_project_3.png
 
-* **save in history** - if value is true, the fact of task execution will be saved in history records.
-  Otherwise, no history records about this periodic task execution will be saved.
+And click on "periodic task" button:
 
-* **kind** - kind of task: module or playbook.
+.. image:: gui_screenshots/periodic_task_empty_list.png
 
-* **playbook** - name of playbook. This field is available for kind=playbook only.
+As you can see, there are no periodic tasks in the project's periodic task list now.
 
-* **module** - name of ansible module. This field has autocomplete, so you can just start typing
-  the ansible module name and Polemarch will suggest you appropriate name values.
-  This field is available for kind=module only.
+There is only one button here:
 
-* **template from project** - name of template from this project. This field has autocomplete, so you can just start typing
-  the template name and Polemarch will suggest you appropriate name values. Also it is possible to choose template with some option.
-  Options' name will be shown in square brackets, for example, "template_name [template_option_name]".
-  This field is available for kind=template only.
+* **create** - |create_button_def| periodic task.
 
-* **group** - name of group to which this periodic task will be executed.
+To create periodic task click on "create" button on this page.
 
-* **args** - arguments for ansible module. This field is available for kind=module only.
+.. image:: gui_screenshots/create_periodic_task_1.png
 
-* **inventory source** - source of inventory. It can be either "From database" or "From file in project dir".
+As you can see, the form of new periodic task creation consist of following fields:
 
-* **inventory from project / inventory file** - name of inventory.
+* **name** - name of your periodic task.
 
-* **type** - type of schedule. It can be either "Interval schedule" or "Cron style schedule".
+* **task type** - type of periodic task (PLAYBOOK, MODULE, TEMPLATE).
 
-* **interval schedule / cron style schedule** - value for schedule.
+* **mode** - name of module or playbook (for periodic tasks with PLAYBOOK/MODULE type only).
+
+* **inventory** - it can be inventory from database or just list of hosts, that are separated by ","
+  (for periodic tasks with PLAYBOOK/MODULE type only).
+
+* **template** - name of template (for periodic tasks with TEMPLATE type only).
+
+* **template opt** - name of template's option (for periodic tasks with TEMPLATE type only).
+
+* **save result** - boolean field, it means to save or not to save results of periodic tasks execution in history.
+
+* **enable** - - boolean field, it means to activate or deactivate periodic task.
+
+* **interval type** - type of execution interval (CRONTAB, INTERVAL).
+
+* **schedule** - value of execution interval.
+  If "interval type" = INTERVAL, value of this field means amount of seconds.
+  If "interval type" = CRONTAB, value of this field means CRONTAB interval.
 
 * **notes** - not required field for some user’s notes, for example,
   for what purpose this periodic task was created or something like this.
 
-Section "Adding new argument":
+After all fields have been filled, our page started look like:
 
-* **name** - name of ansible variable.
+.. image:: gui_screenshots/create_periodic_task_2.png
 
-* **value** - value of ansible variable.
+After periodic task creation you will see the next page:
 
-After you completed all necessary fields you should click on "Save task" button to save this periodic task.
-After this you will see the next page:
+.. image:: gui_screenshots/test_periodic_task.png
 
-.. image:: gui_png/test-periodic.png
+As you can see there is only one new fields on this page:
 
-This page has the same sections as the previous one, but there is a new field:
+* **id** - |id_field_def|
 
-* **enabled** - if the value is true, this periodic task will be available and will be working.
+Also there are several buttons here:
 
-Buttons on this page:
+Sublist buttons:
 
-* **save** - this button saves all changes you have made on this page.
+* **variables** - this button opens periodic task's variables list.
 
-* **execute** - this button executes this periodic task.
+Action buttons:
 
-* **copy** - this button creates a copy of this periodic task.
+* **save** - |save_button_def|
+* **execute** - this button opens "execute periodic task" action page.
+* **remove** - |remove_button_def| periodic task.
 
-* **remove** - this button deletes this periodic task.
+Let's start our periodic task execution. To do it click on "execute" button.
 
-Also you can create periodic tasks with more advancing scheduling options
-(days of week, hours, month and so on) by using cron-style periodic tasks:
+.. image:: gui_screenshots/periodic_task_execution_history.png
 
-.. image:: gui_png/cron-schedule.png
+As you can see on history page, our 'test-periodic-task' executes every 10 seconds,
+as we set it during periodic task creation.
 
-As you can see this task will be executed at 9 o'clock each day of each month.
 
-Search
-------
-Almost everywhere in Polemarch you can filter your data. Let see for example
-how to filter your execution history records to find result of needed action:
+Inventory
+---------
 
-.. image:: gui_png/search0.png
+If you don't want to use 'inventory' as just list of hosts separated by ",",
+or do not have inventory file in you GIT project ("./inventory", for example),
+you need to create it in Polemarch.
 
-.. image:: gui_png/search.png
+ATTENTION! Do not forget to add you inventory to project after it's creation.
+To do it click on "inventory" button on project page.
+
+By inventory’s creation, in this case, we understand creation of inventory,
+which includes at least one group, which, in it’s turn, includes at least one host.
+In other words, beside inventory user should create host and group.
+
+To understand it better let’s look at next images, which will explain you how to create
+inventory. Here you can see the form for inventory creation.
+
+.. image:: gui_screenshots/create_inventory.png
+
+As you can see, there are only 2 fields on this page:
+
+* **name** - name of inventory.
+
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this inventory was created or something like this.
+
+Also there is only one button there:
+
+* **create** - |create_button_def| inventory.
+
+After inventory creation you will see the next page:
+
+.. image:: gui_screenshots/test_inventory.png
+
+As you can see there are 2 new fields on this page:
+
+* **id** - |id_field_def|
+
+* **owner** - |owner_field_def| inventory.
+
+Also there are some new buttons here:
+
+Sublist buttons:
+
+* **all groups** - this button opens inventory's all groups list
+  (list of groups, which includes also groups that are nested into inventory groups).
+* **all hosts** - this button opens inventory's all hosts list.
+  (list of hosts, which includes also hosts that are nested into inventory groups).
+* **group** - this button opens inventory's group list.
+* **host** - this button opens inventory's host list.
+* **variables** - this button opens inventory's variables list.
+
+Action buttons:
+
+* **save** - |save_button_def|
+* **copy** - |copy_button_def|
+* **set owner** - |set_owner_button_def|
+* **remove** - |remove_button_def| inventory.
+
+Let’s look how you can create a group for this inventory.
+To do it, let’s click on "group" button.
+
+
+Group
+-----
+
+.. image:: gui_screenshots/test_inventory_group.png
+
+As you can see, there are no groups in the inventory's group list now.
+
+There are 2 buttons here:
+
+* **create** - |create_button_def| group.
+* **add** - this button opens the all group list from database,
+from which you can choose group for this inventory.
+
+We need to create group. To do it click on "create" button.
+
+.. image:: gui_screenshots/create_group.png
+
+As you can see, the form of new group creation consist of following fields:
+
+* **name** - name of your group.
+
+* **contains groups** - boolean field, it means ability of group to contain child groups.
+
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this group was created or something like this.
+
+After group creation you will see the next page:
+
+.. image:: gui_screenshots/test_group.png
+
+As you can see there are 2 new fields on this page:
+
+* **id** - |id_field_def|
+
+* **owner** - |owner_field_def| group.
+
+Also there are some new buttons here:
+
+Sublist buttons:
+
+* **host** - this button opens group's host list.
+* **variables** - this button opens group's variables list.
+
+Action buttons:
+
+* **save** - |save_button_def|
+* **copy** - |copy_button_def|
+* **set owner** - |set_owner_button_def|
+* **remove** - |remove_button_def| group.
+
+Let’s look how you can create a host for this group.
+To do it, let’s click on "host" button.
+
+
+Host
+----
+
+.. image:: gui_screenshots/test_inventory_group_host.png
+
+As you can see, there are no hosts in the group's host list now.
+
+There are 2 buttons here:
+
+* **create** - |create_button_def| host.
+* **add** - this button opens the all host list from database,
+from which you can choose host for this group.
+
+We need to create host. To do it click on "create" button.
+
+.. image:: gui_screenshots/create_host.png
+
+As you can see, the form of new host creation consist of following fields:
+
+* **name** - name of your host.
+
+* **notes** - not required field for some user’s notes, for example,
+  for what purpose this host was created or something like this.
+
+* **type** - type of host (RANGE, HOST).
+  * RANGE -  range of IPs or hosts.
+  * HOST - single host.
+
+After host creation you will see the next page:
+
+.. image:: gui_screenshots/test_host.png
+
+As you can see there are 2 new fields on this page:
+
+* **id** - |id_field_def|
+
+* **owner** - |owner_field_def| host.
+
+Also there are some new buttons here:
+
+Sublist buttons:
+
+* **variables** - this button opens host's variables list.
+
+Action buttons:
+
+* **save** - |save_button_def|
+* **copy** - |copy_button_def|
+* **set owner** - |set_owner_button_def|
+* **remove** - |remove_button_def| host.
+
+Let’s look how you can create a variables for host, group and inventory.
+
+
+Variables for inventory, group, host
+------------------------------------
+
+The process of variable creation for inventory is the same as for group or host.
+So, let's look it at the example of variable creation for host.
+
+.. image:: gui_screenshots/test_host.png
+
+To do it click on the "variables" button on the host page:
+
+.. image:: gui_screenshots/test_host_variables.png
+
+As you can see, there are no variables in the host's variables list now.
+
+There is only 1 button here:
+
+* **create** - |create_button_def| variable.
+
+To create variable click on "create" button:
+
+.. image:: gui_screenshots/test_host_variables_1.png
+
+As you can see, the form of new host variable creation consist of following fields:
+
+* **key** - key of variable.
+
+* **value** - value of variable.
+
+After variable creation you will see the next page:
+
+.. image:: gui_screenshots/test_host_variables_2.png
+
+As you can see there is only 1 new field on this page:
+
+* **id** - |id_field_def|
+
+
+Hooks
+-----
+
+Polemarch has his own system of hooks.
+Polemarch hooks are synchronous and you can appoint them on different events
+like “after end task”, “before start task” and so on.
+
+WARNING: You should be accurate with hooks appointment,
+because the more hooks you have, the more time they need for execution and,
+finally, the more time Ansible needs for task execution.
+
+.. image:: gui_screenshots/hooks_empty_list.png
+
+As you can see, there are no hooks in the system now.
+
+There is only one button here:
+
+* **create** - |create_button_def| hook.
+
+To create hook click on "create" button.
+
+.. image:: gui_screenshots/create_hook.png
+
+As you can see, the form of new hook creation consist of following fields:
+
+* **name** - name of your hook.
+
+* **type** - type of hook (HTTP, SCRIPT).
+  * If type is "HTTP", Polemarch will send "POST" request with JSON to all recipients.
+  * If type is "SCRIPT", Polemarch will execute script.
+
+* **when** - event on each Polemarch have to execute hook.
+
+* **enable** - boolean field, it means to activate or to deactivate hook.
+
+* **recipients** - list of recipients, separated by " | ".
+  For example, "ex1.com | ex2.com | ex3.com".
+
+
+Users
+-----
+
+Polemarch provides you with several types of user:
+
+* superuser;
+* staff.
+
+If you need to create a superuser, you need to do it with terminal command.
+Look for more information here :doc:`"Create superuser" </quickstart>`.
+
+If you need to create user with "staff" rights you can do it with Polemarch GUI:
+
+.. image:: gui_screenshots/user_list.png
+
+To create new user click on "create" button.
+
+.. image:: gui_screenshots/create_user.png
+
+As you can see, the form of new user creation consist of following fields:
+
+* **username** - name of new user.
+
+* **is active** - boolean field, it means to activate or to deactivate user.
+
+* **first name** - first name of user.
+
+* **last name** - last name of user.
+
+* **email** - email of user.
+
+* **password** - password of user.
+
+* **repeat password** - password of user.
+
+After user creation you will see next page:
+
+.. image:: gui_screenshots/test_user.png
+
+As you can see there is only one new fields on this page:
+
+* **id** - |id_field_def|
+
+Also there are several buttons here:
+
+Sublist buttons:
+
+* **settings** - this button opens dashboard settings of current user.
+
+Action buttons:
+
+* **save** - |save_button_def|
+* **copy** - |copy_button_def|
+* **change password** - this button opens "change password" action page.
+* **remove** - |remove_button_def| periodic task.
+
+
+Let's look on user settings page:
+
+.. image:: gui_screenshots/user_settings.png
+
+This page has fields for managing dashboard chart line settings
+and for managing dashboard settings.
+
+Let's look on "change password" action page.
+
+.. image:: gui_screenshots/change_password.png
+
+As you can see, the form of "change password" action consist of following fields:
+
+* **old password** - current password of user.
+
+* **new password** - new password of user.
+
+* **confirm new password** - new password of user.
+
+There is only one button here:
+
+* **exec** - |exec_button_def|

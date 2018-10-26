@@ -1,21 +1,18 @@
 # Main
-vstutils[rpc,ldap,doc,coreapi,prod]==1.1.7
-pyyaml
+vstutils[rpc,ldap,doc,prod]==1.2.0
+pyyaml==3.12
 docutils==0.14
-markdown2==2.3.5
+markdown2==2.3.6
 
 # API
 jsonfield==2.0.2
-uWSGI==2.0.17
 
 # Repo types
-gitpython==2.1.10
+gitpython==2.1.11
 
 # Hooks
-requests==2.19.1
+requests==2.20.0
 
 # Ansible required packages
-ansible>=2.1, <=2.5.4
-paramiko<=2.4.0
+polemarch-ansible==1.0.6
 pywinrm[kerberos]==0.3.0
-github3.py==1.0.0a4
