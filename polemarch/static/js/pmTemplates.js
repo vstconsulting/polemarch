@@ -100,6 +100,16 @@ gui_project_template = {
 
 gui_project_template_variables = {
 
+    createAndGoEdit: function()
+    {
+        var def = this.create();
+        $.when(def).done((newObj) => {
+            vstGO(this.url_vars.baseURL("@"+newObj.data.key));
+        })
+
+        return def;
+    },
+
     apiGetDataForQuery : function (query, variable)
     {
         try{
@@ -140,7 +150,21 @@ gui_project_template_variables = {
 
                     vars[query.data.key] = query.data.value;
 
-                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                    //return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                    var def = new $.Deferred();
+                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
+                        def.resolve({
+                            "status":200,
+                            "item":"project",
+                            "type":"mod",
+                            //"additional_info":{"url":"/api/v2/project/2/template/8/"},
+                            "data":query.data,
+                            "subitem":["2","template","8"]
+                        })
+                    }).fail((e) =>{
+                        def.reject(e)
+                    })
+                    return  def.promise()
                 }
             }
             else
@@ -190,7 +214,20 @@ gui_project_template_variables = {
 
                     vars[query.data.key] = query.data.value;
 
-                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                    var def = new $.Deferred();
+                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
+                        def.resolve({
+                            "status":200,
+                            "item":"project",
+                            "type":"mod",
+                            //"additional_info":{"url":"/api/v2/project/2/template/8/"},
+                            "data":query.data,
+                            "subitem":["2","template","8"]
+                        })
+                    }).fail((e) =>{
+                        def.reject(e)
+                    })
+                    return  def.promise()
                 }
             }
         }catch (exception) {
