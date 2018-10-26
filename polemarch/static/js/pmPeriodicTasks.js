@@ -223,7 +223,7 @@ function OnePeriodictask_template_opt_callback (fieldObj, newValue)
     
     if(newValue.value)
     {
-        obj.type = "autocomplete"
+        obj.type = "select2"
         obj.override_opt = {
             dynamic_properties:{
                 list_obj:projPath + "/template/{template_id}/option/",
