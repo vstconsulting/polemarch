@@ -150,16 +150,13 @@ gui_project_template_variables = {
 
                     vars[query.data.key] = query.data.value;
 
-                    //return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
                     var def = new $.Deferred();
                     $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
                         def.resolve({
                             "status":200,
                             "item":"project",
                             "type":"mod",
-                            //"additional_info":{"url":"/api/v2/project/2/template/8/"},
                             "data":query.data,
-                            "subitem":["2","template","8"]
                         })
                     }).fail((e) =>{
                         def.reject(e)
@@ -220,9 +217,7 @@ gui_project_template_variables = {
                             "status":200,
                             "item":"project",
                             "type":"mod",
-                            //"additional_info":{"url":"/api/v2/project/2/template/8/"},
                             "data":query.data,
-                            "subitem":["2","template","8"]
                         })
                     }).fail((e) =>{
                         def.reject(e)
@@ -232,7 +227,6 @@ gui_project_template_variables = {
             }
         }catch (exception) {
             var def = new $.Deferred();
-            debugger;
             def.reject({
                 status:404,
                 data:{detail:"Option not found"}
@@ -409,9 +403,20 @@ gui_project_template_option = {
                         template_data.options[query.data.name][field] = query.data[field];
                     }
 
-                delete template_data.options[query.data.name].name
+                    delete template_data.options[query.data.name].name
 
-                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                    var def = new $.Deferred();
+                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
+                        def.resolve({
+                            "status":200,
+                            "item":"project",
+                            "type":"mod",
+                            "data":query.data,
+                        })
+                    }).fail((e) =>{
+                        def.reject(e)
+                    })
+                    return  def.promise()
                 }
             }
             else
@@ -459,9 +464,21 @@ gui_project_template_option = {
                         return undefined;
                     }
 
-                    template_data.options[query.data.name] = query.data
+                    template_data.options[query.data.name] = $.extend(true, {}, query.data)
+                    delete template_data.options[query.data.name].name
 
-                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                    var def = new $.Deferred();
+                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
+                        def.resolve({
+                            "status":200,
+                            "item":"project",
+                            "type":"mod",
+                            "data":query.data,
+                        })
+                    }).fail((e) =>{
+                        def.reject(e)
+                    })
+                    return  def.promise()
                 }
             }
         }catch (exception) {
@@ -590,7 +607,18 @@ gui_project_template_option_variables = {
 
                     option_data.vars[query.data.key] = query.data.value;
 
-                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                    var def = new $.Deferred();
+                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
+                        def.resolve({
+                            "status":200,
+                            "item":"project",
+                            "type":"mod",
+                            "data":query.data,
+                        })
+                    }).fail((e) =>{
+                        def.reject(e)
+                    })
+                    return  def.promise()
                 }
             }
             else
@@ -640,12 +668,22 @@ gui_project_template_option_variables = {
 
                     option_data.vars[query.data.key] = query.data.value;
 
-                    return this.parent_template.sendToApi("patch", undefined, undefined, template_data)
+                    var def = new $.Deferred();
+                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
+                        def.resolve({
+                            "status":200,
+                            "item":"project",
+                            "type":"mod",
+                            "data":query.data,
+                        })
+                    }).fail((e) =>{
+                        def.reject(e)
+                    })
+                    return  def.promise()
                 }
             }
         }catch (exception) {
             var def = new $.Deferred();
-            debugger;
             def.reject({
                 status:404,
                 data:{detail:"Option not found"}
@@ -906,7 +944,7 @@ let api_error_responses = {
 }
 
 tabSignal.connect("openapi.schema", function(obj) {
-    // Модификация схемы до сохранения в кеш.
+    // Modify schema before save in cache
     obj.schema.path["/project/{pk}/template/{template_id}/variables/"] = {
         "level": 6,
         "path": "/project/{pk}/template/{template_id}/variables/",
@@ -1060,11 +1098,6 @@ tabSignal.connect("openapi.schema", function(obj) {
                             ],
                             "type": "object",
                             "properties": {
-                                // "id": {
-                                //     "title": "Id",
-                                //     "type": "string",
-                                //     "readOnly": true
-                                // },
                                 "key": {
                                     "title": "Key",
                                     "type": "dynamic",
@@ -1307,7 +1340,6 @@ tabSignal.connect("openapi.schema", function(obj) {
             "put": "",
             "post": "new",
             "delete": "",
-            // "new": "post"
         },
         "buttons": [],
         "short_name": "project/template/option/variables",
