@@ -164,8 +164,6 @@ pages:
   only:
     refs:
       - developer
-    changes:
-      - doc/*
 
 release_pypi:
   stage: release
