@@ -120,8 +120,14 @@ Install from PyPI
            vacuum = True
 
            [worker]
-           pidfile = /tmp/pm_worker.pid
-           logfile = /dev/null
+           logfile = /tmp/{PROG_NAME}_worker.log  # output will be /tmp/polemarch_worker.log
+           pidfile = /tmp/{PROG_NAME}_worker.pid  # output will be /tmp/polemarch_worker.pid
+           loglevel = INFO
+
+      Also if you need to set your own path for logfile or pidfile,
+      different from the path from example, you can do it, but make sure,
+      that user, which starts Polemarch has write-permissions for these directory and file.
+
 
 #. Make migrations:
 
