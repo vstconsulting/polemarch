@@ -182,9 +182,12 @@ class _SignalSerializer(serializers.ModelSerializer):
 class _WithPermissionsSerializer(_SignalSerializer):
     perms_msg = "You do not have permission to perform this action."
 
-    def create(self, validated_data):
-        validated_data["owner"] = self.current_user()
-        return super(_WithPermissionsSerializer, self).create(validated_data)
+    def is_valid(self, *args, **kwargs):
+        result = super(_WithPermissionsSerializer, self).is_valid(*args, **kwargs)
+        self.validated_data['owner'] = self.validated_data.get(
+            'owner', self.current_user()
+        )
+        return result
 
     def current_user(self):
         return self.context['request'].user
