@@ -300,6 +300,11 @@ gui_project_template_variables = {
 
         return def.promise();
     },
+
+    search: function(filters)
+    {
+        return customTemplateInnerObjectsSearch.apply(this, arguments);
+    },
 }
 
 gui_project_template_option = {
@@ -563,6 +568,11 @@ gui_project_template_option = {
 
         return def.promise();
     },
+
+    search: function(filters)
+    {
+        return customTemplateInnerObjectsSearch.apply(this, arguments);
+    },
 }
 
 gui_project_template_option_variables = {
@@ -763,6 +773,11 @@ gui_project_template_option_variables = {
         })
 
         return def.promise();
+    },
+
+    search: function(filters)
+    {
+        return customTemplateInnerObjectsSearch.apply(this, arguments);
     },
 }
 
@@ -973,7 +988,22 @@ tabSignal.connect("openapi.schema", function(obj) {
         "schema": {
             "list": {
                 "fields": gui_project_template_option_variables_fields_Schema,
-                "filters": { },
+                "filters": {
+                    0: {
+                        "name": "key",
+                        "in": "query",
+                        "description": "A key name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    1: {
+                        "name": "value",
+                        "in": "query",
+                        "description": "A value of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                },
                 "query_type": "get",
                 "operationId": "project_template_variables_list",
                 "responses": {
@@ -1177,7 +1207,15 @@ tabSignal.connect("openapi.schema", function(obj) {
                         "parent_name_format": "option_name"
                     },
                 },
-                "filters": {},
+                "filters": {
+                    0: {
+                        "name": "name",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                },
                 "query_type": "get",
                 "operationId": "project_template_option_list",
                 "responses": {
@@ -1355,7 +1393,22 @@ tabSignal.connect("openapi.schema", function(obj) {
         "schema": {
             "list": {
                 "fields": gui_project_template_option_variables_fields_Schema,
-                "filters": { },
+                "filters": {
+                    0: {
+                        "name": "key",
+                        "in": "query",
+                        "description": "A key name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    1: {
+                        "name": "value",
+                        "in": "query",
+                        "description": "A value of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                },
                 "query_type": "get",
                 "operationId": "project_template_option_variables_list",
                 "responses": {
@@ -1850,17 +1903,44 @@ function questionChangeKindOrNot(args) {
     return false;
 }
 
+/**
+ * Function for search in list of template variables, in list of template options
+ * and in list of option variables.
+ * @param {string} filters - search filters
+ */
+function customTemplateInnerObjectsSearch(filters)
+{
+    let def = new $.Deferred();
+
+    $.when(gui_list_object.load.apply(this, arguments)).done(data => {
+
+        this.model.data = data.data;
+
+        if(!$.isEmptyObject(filters.search_query))
+        {
+            this.model.data.results = searchObjectsInListByJs(filters, this.model.data.results);
+            this.model.data.count = this.model.data.results.length;
+        }
+        def.resolve();
+    }).fail(e => {
+        def.reject(e);
+    });
+
+    return def.promise();
+}
+
+
 tabSignal.connect('openapi.schema', function(obj){
     let path = obj.schema.path[projPath + '/template/{template_id}/execute/']
     let options_field = path.schema.exec.fields.option
     options_field.format = 'select2'
     options_field.dynamic_properties = {
-            list_obj:projPath + "/template/{template_id}/option/",
-            value_field:'name',
-            view_field:'name',
-            default_value:{
-                id: '',
-                text: 'None'
-            }
+        list_obj:projPath + "/template/{template_id}/option/",
+        value_field:'name',
+        view_field:'name',
+        default_value:{
+            id: '',
+            text: 'None'
         }
+    }
 })
