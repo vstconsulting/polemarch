@@ -84,7 +84,7 @@ gui_history = {
         jQuery('#history-stdout').scrollTop(9999999);
     },
     
-    linePerPage:30,
+    linePerPage:1000,
     loadNewLines : function(item_id, last_stdout_maxline)
     {
         var thisObj = this;
@@ -99,7 +99,7 @@ gui_history = {
             last_stdout_maxline = 0;
         }
         
-        return $.when(this.load(item_id), this.loadLines(item_id, {after:last_stdout_maxline, limit:30})).always(function()
+        return $.when(this.load(item_id), this.loadLines(item_id, {after:last_stdout_maxline, limit:this.linePerPage})).always(function()
         { 
             var addData = false;
             var history_stdout = $("#history-stdout");
