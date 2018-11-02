@@ -439,6 +439,13 @@ class InventoryViewSet(_GroupMixin):
     filter_class = filters.InventoryFilter
     copy_related = ['hosts', 'groups']
 
+    @deco.action(methods=["post"], detail=no)
+    def import_inventory(self, request, **kwargs):
+        serializer = sers.InventoryImportSerializer(data=request.data)
+        serializer.is_valid(True)
+        serializer.save()
+        return base.Response(serializer.data, status.HTTP_201_CREATED).resp
+
 
 class __PlaybookViewSet(base.ReadOnlyModelViewSet):
     '''
