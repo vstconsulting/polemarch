@@ -56,6 +56,9 @@ Red Hat/CentOS installation
 That's it. Polemarch web panel on 8080 port. Default administrative account is
 admin/admin.
 
+If you have any problems with `.deb` package, you can install it from PyPi:
+https://polemarch.readthedocs.io/en/stable/quickstart.html#install-from-pypi
+
 Note: If you using authentication by password at some of your machines
 managed by Polemarch, you also must install ``sshpass`` package because it
 required for ansible to autheticate via ssh by password. It available in
@@ -92,6 +95,9 @@ need to install it for your distro:
 
 That's it. Polemarch web panel on 8080 port. Default administrative account is
 admin/admin.
+
+If you have any problems with `.deb` package, you can install it from PyPi:
+https://polemarch.readthedocs.io/en/stable/quickstart.html#install-from-pypi
 
 Quickstart
 ----------
