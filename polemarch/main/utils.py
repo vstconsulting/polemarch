@@ -9,7 +9,6 @@ import sys
 import os
 import re
 import json
-import time
 from os.path import dirname
 try:
     from Queue import Queue
