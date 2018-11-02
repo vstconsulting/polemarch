@@ -265,6 +265,7 @@ class WidgetSettingsSerializer(vst_serializers.JsonObjectSerializer):
 
 
 class UserSettingsSerializer(vst_serializers.JsonObjectSerializer):
+    autoupdateInterval = serializers.IntegerField(default=15000)
     chartLineSettings = ChartLineSettingsSerializer()
     widgetSettings = WidgetSettingsSerializer()
 
