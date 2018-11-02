@@ -19,7 +19,10 @@ try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
 except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
+
 from vstutils.utils import raise_context
+from vstutils.utils import tmp_file_context
+
 from . import __file__ as file
 
 
@@ -207,7 +210,7 @@ class BaseTask(PMObject):
     def run(self):  # pragma: no cover
         # pylint: disable=notimplemented-raised,
         ''' Method with task logic. '''
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class AnsibleCache(PMObject):
@@ -361,3 +364,17 @@ class AnsibleModules(PMAnsible):
     def get(self, key=""):
         self.key = key
         return self.get_data()
+
+
+class AnsibleInventoryParser(PMAnsible):
+    ref_name = 'inventory_parser'
+
+    def get_args(self):
+        args = super(AnsibleInventoryParser, self).get_args()
+        args += [self.path]
+        return args
+
+    def get_inventory_data(self, raw_data):
+        with tmp_file_context(data=raw_data) as tmp_file:
+            self.path = tmp_file.name
+            return self.get_data()
