@@ -144,7 +144,7 @@ gui_history = {
             {
                 thisObj.loadNewLines_timeoutId = setTimeout(function(){
                     thisObj.loadNewLines(item_id)
-                }, 5001)
+                }, guiLocalSettings.get('page_update_interval'))
             }
         }).promise()
     },

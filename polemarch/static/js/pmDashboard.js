@@ -193,6 +193,8 @@ guiDashboard.model.defaultChartLineSettings = [
     }
 ]
 
+guiDashboard.model.autoupdateInterval = 15000;
+
 /**
  * Функция полностью копирует настройки для линий графика.
  * Подразумевается, что данная функция вызывается, когда пришел из API пустой JSON.
@@ -355,11 +357,11 @@ guiDashboard.getNewWidgetSettings = function(localObj)
 }
 
 /**
- *Функция заправшивает у API пользовательские настройки Dashboard'a
- *(настройки виджетов, настройки линий графика).
+ *Функция заправшивает у API пользовательские настройки
+ *(настройки виджетов, настройки линий графика, интервал автообновлений).
  *Если они есть(пришел не пустой объект), то данные настройки добавляются в guiDashboard.model.
  */
-guiDashboard.getUserDashboardSettingsFromAPI = function()
+guiDashboard.getUserSettingsFromAPI = function()
 {
     var userId=window.my_user_id;
     if(guiDashboard.checkNecessityToLoadDashboardSettingsFromApi(guiDashboard.model.defaultWidgets[0], guiDashboard.model.widgets[0]) ||
@@ -414,6 +416,26 @@ guiDashboard.setUserSettingsFromApiAnswer = function(data)
     {
         guiDashboard.cloneChartLineSettingsFromApi(data.chartLineSettings);
     }
+
+    if(data.autoupdateInterval)
+    {
+        guiDashboard.cloneAutoupdateIntervalFromApi(data.autoupdateInterval);
+    }
+    else
+    {
+        guiDashboard.cloneDefaultAutoupdateInterval()
+    }
+}
+
+guiDashboard.cloneAutoupdateIntervalFromApi = function(interval)
+{
+    guiDashboard.model.autoupdateInterval = interval;
+    guiLocalSettings.set('page_update_interval', guiDashboard.model.autoupdateInterval)
+}
+
+guiDashboard.cloneDefaultAutoupdateInterval = function()
+{
+    guiLocalSettings.setIfNotExists('page_update_interval', guiDashboard.model.autoupdateInterval)
 }
 
 /**
@@ -927,7 +949,7 @@ guiDashboard.open  = function(holder, menuInfo, data)
     setActiveMenuLi();
     var thisObj = this;
 
-    return $.when(guiDashboard.getUserDashboardSettingsFromAPI()).always(function()
+    return $.when(guiDashboard.getUserSettingsFromAPI()).always(function()
     {
         // Инициализация всех виджетов на странице
         for(var i in guiDashboard.model.widgets)
@@ -1147,3 +1169,7 @@ var pmwUsersCounter = inheritance(pmwItemsCounter);
 //pmwUsersCounter.model.countObject = pmUsers;
 pmwUsersCounter.model.nameInStats = "users";
 pmwUsersCounter.model.path = "user";
+
+tabSignal.connect("loading.completed", function(){
+    guiDashboard.getUserSettingsFromAPI();
+})
