@@ -20,7 +20,7 @@ try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
 except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
-
+from vstutils.utils import raise_context
 from . import __file__ as file
 
 
@@ -104,24 +104,19 @@ class CmdExecutor(PMObject):
         queue = Queue()
         t = Thread(target=self._enqueue_output, args=(stream, queue))
         t.start()
-        empty_counter = 1
-        while not (stream.closed and queue.empty()):
-            if queue.empty():
-                empty_counter += 1
-                if not empty_counter % 100:
-                    self.working_handler(proc)
-                elif not empty_counter % 10 ^ 6:
-                    time.sleep(0.001)
-                continue  # nocv
-            empty_counter = 0
-            self.working_handler(proc)
-            line = queue.get_nowait().rstrip()
-            yield line
+        while True:
+            try:
+                self.working_handler(proc)
+                yield queue.get(timeout=0.001).rstrip()
+            except:
+                if queue.empty() and stream.closed:
+                    break
 
     def line_handler(self, proc, line):
         # pylint: disable=unused-argument
         if line is not None:
-            self.write_output(line)
+            with raise_context():
+                self.write_output(line)
 
     def execute(self, cmd, cwd):
         '''
@@ -144,6 +139,7 @@ class CmdExecutor(PMObject):
                 break  # nocv
         return_code = proc.poll()
         if return_code:
+            logger.error(self.output)
             raise CalledProcessError(return_code, cmd, output=self.output)
         return self.output
 
