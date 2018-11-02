@@ -1921,7 +1921,7 @@ function customTemplateInnerObjectsSearch(filters)
             this.model.data.results = searchObjectsInListByJs(filters, this.model.data.results);
             this.model.data.count = this.model.data.results.length;
         }
-        def.resolve();
+        def.resolve({data:this.model.data});
     }).fail(e => {
         def.reject(e);
     });
