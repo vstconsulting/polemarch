@@ -427,12 +427,19 @@ guiDashboard.setUserSettingsFromApiAnswer = function(data)
     }
 }
 
+/*
+ * Function saves autoupdate interval from API into guiDashboard and into local storage.
+ * @param (number) - interval - autoupdate interval
+ */
 guiDashboard.cloneAutoupdateIntervalFromApi = function(interval)
 {
     guiDashboard.model.autoupdateInterval = interval;
     guiLocalSettings.set('page_update_interval', guiDashboard.model.autoupdateInterval)
 }
 
+/*
+ * Function sets default autoupdate interval.
+ */
 guiDashboard.cloneDefaultAutoupdateInterval = function()
 {
     guiLocalSettings.setIfNotExists('page_update_interval', guiDashboard.model.autoupdateInterval)
