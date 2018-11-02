@@ -9,7 +9,7 @@ window.qunitTestsArray['guiPaths.profile/settings'] = {
 
         guiTests.hasAddButton(0, path)
 
-       $(".btn_save").trigger('click')
+        $(".btn_save").trigger('click')
 
     }
 }
