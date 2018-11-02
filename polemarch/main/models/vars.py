@@ -6,6 +6,7 @@ import uuid
 
 from functools import reduce
 from collections import OrderedDict
+from django.db import transaction
 from django.db.models import Case, When, Value
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
@@ -122,6 +123,15 @@ class AbstractModel(ACLModel):
         # pylint: disable=unused-argument
         return OrderedDict(id=self.id, name=self.name)
 
+    @transaction.atomic()
+    def set_vars(self, variables):
+        encr = "[~~ENCRYPTED~~]"
+        encrypted_vars = {k: v for k, v in variables.items() if v == encr}
+        other_vars = {k: v for k, v in variables.items() if v != encr}
+        self.variables.exclude(key__in=encrypted_vars.keys()).delete()
+        for key, value in other_vars.items():
+            self.variables.create(key=key, value=value)
+
     def vars_string(self, variables, separator=" "):
         return separator.join(
             map(lambda kv: "{}={}".format(kv[0], kv[1]), variables.items())
@@ -143,6 +153,10 @@ class AbstractModel(ACLModel):
     @property
     def vars(self):
         return self.get_vars()
+
+    @vars.setter
+    def vars(self, value):
+        self.set_vars(value)
 
     @property
     def have_vars(self):

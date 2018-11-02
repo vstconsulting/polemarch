@@ -9,7 +9,6 @@ import sys
 import os
 import re
 import json
-import time
 from os.path import dirname
 try:
     from Queue import Queue
@@ -20,6 +19,9 @@ try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
 except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
+
+from vstutils.utils import raise_context
+from vstutils.utils import tmp_file_context
 
 from . import __file__ as file
 
@@ -104,24 +106,19 @@ class CmdExecutor(PMObject):
         queue = Queue()
         t = Thread(target=self._enqueue_output, args=(stream, queue))
         t.start()
-        empty_counter = 1
-        while not (stream.closed and queue.empty()):
-            if queue.empty():
-                empty_counter += 1
-                if not empty_counter % 100:
-                    self.working_handler(proc)
-                elif not empty_counter % 10 ^ 6:
-                    time.sleep(0.001)
-                continue  # nocv
-            empty_counter = 0
-            self.working_handler(proc)
-            line = queue.get_nowait().rstrip()
-            yield line
+        while True:
+            try:
+                self.working_handler(proc)
+                yield queue.get(timeout=0.001).rstrip()
+            except:
+                if queue.empty() and stream.closed:
+                    break
 
     def line_handler(self, proc, line):
         # pylint: disable=unused-argument
         if line is not None:
-            self.write_output(line)
+            with raise_context():
+                self.write_output(line)
 
     def execute(self, cmd, cwd):
         '''
@@ -144,6 +141,7 @@ class CmdExecutor(PMObject):
                 break  # nocv
         return_code = proc.poll()
         if return_code:
+            logger.error(self.output)
             raise CalledProcessError(return_code, cmd, output=self.output)
         return self.output
 
@@ -212,7 +210,7 @@ class BaseTask(PMObject):
     def run(self):  # pragma: no cover
         # pylint: disable=notimplemented-raised,
         ''' Method with task logic. '''
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class AnsibleCache(PMObject):
@@ -366,3 +364,17 @@ class AnsibleModules(PMAnsible):
     def get(self, key=""):
         self.key = key
         return self.get_data()
+
+
+class AnsibleInventoryParser(PMAnsible):
+    ref_name = 'inventory_parser'
+
+    def get_args(self):
+        args = super(AnsibleInventoryParser, self).get_args()
+        args += [self.path]
+        return args
+
+    def get_inventory_data(self, raw_data):
+        with tmp_file_context(data=raw_data) as tmp_file:
+            self.path = tmp_file.name
+            return self.get_data()

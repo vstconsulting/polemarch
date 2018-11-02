@@ -1,4 +1,4 @@
 [flake8]
-ignore = E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741,E402
+ignore = E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741,E402,W504,W503,W605
 exclude = ./polemarch/*/migrations/*,./polemarch/main/settings*.py,.tox/*,./etc/*,./*/__init__.py,*__main.py,./t_openstack.py,./polemarch/projects/*
 max-line-length=90

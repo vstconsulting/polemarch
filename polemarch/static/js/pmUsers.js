@@ -15,6 +15,11 @@ tabSignal.connect("openapi.completed", function()
         user_settings.schema.get.fields[name].format = 'inner_api_object';
         user_settings.schema.get.fields[name].readOnly = false;
     })
+    user_settings.schema.get.fields['autoupdateInterval'].readOnly = false;
+    user_settings.schema.get.fields['autoupdateInterval'].min = 1;
+    user_settings.schema.get.fields['autoupdateInterval'].default = guiDashboard.model.autoupdateInterval / 1000;
+    user_settings.schema.get.fields['autoupdateInterval'].title = 'Data autoupdate interval';
+    user_settings.schema.get.fields['autoupdateInterval'].format = 'time_interval';
 
     user_settings.schema.post = {
         fields: user_settings.schema.get,

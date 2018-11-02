@@ -11,7 +11,7 @@ from rest_framework.exceptions import PermissionDenied
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
 from vstutils.api.serializers import DataSerializer, EmptySerializer
 from vstutils.api.base import Response
-from ...main.utils import AnsibleArgumentsReference
+from ...main.utils import AnsibleArgumentsReference, AnsibleInventoryParser
 
 from ...main.models import Inventory
 from ...main import models
@@ -182,9 +182,12 @@ class _SignalSerializer(serializers.ModelSerializer):
 class _WithPermissionsSerializer(_SignalSerializer):
     perms_msg = "You do not have permission to perform this action."
 
-    def create(self, validated_data):
-        validated_data["owner"] = self.current_user()
-        return super(_WithPermissionsSerializer, self).create(validated_data)
+    def is_valid(self, *args, **kwargs):
+        result = super(_WithPermissionsSerializer, self).is_valid(*args, **kwargs)
+        self.validated_data['owner'] = self.validated_data.get(
+            'owner', self.current_user()
+        )
+        return result
 
     def current_user(self):
         return self.context['request'].user
@@ -262,6 +265,7 @@ class WidgetSettingsSerializer(vst_serializers.JsonObjectSerializer):
 
 
 class UserSettingsSerializer(vst_serializers.JsonObjectSerializer):
+    autoupdateInterval = serializers.IntegerField(default=15000)
     chartLineSettings = ChartLineSettingsSerializer()
     widgetSettings = WidgetSettingsSerializer()
 
@@ -1052,3 +1056,46 @@ class DashboardStatisticSerializer(DataSerializer):
     teams = serializers.IntegerField()
     users = serializers.IntegerField()
     jobs = DashboardJobsSerializer()
+
+
+class InventoryImportSerializer(DataSerializer):
+    inventory_id = vst_fields.RedirectIntegerField(default=None, allow_null=True)
+    name = serializers.CharField(required=True)
+    raw_data = serializers.CharField()
+
+    @transaction.atomic()
+    def create(self, validated_data):
+        parser = AnsibleInventoryParser()
+        inv_json = parser.get_inventory_data(validated_data['raw_data'])
+
+        inventory = Inventory.objects.create(name=validated_data['name'])
+        created_hosts, created_groups = dict(), dict()
+
+        for host in inv_json['hosts']:
+            inv_host = inventory.hosts.create(name=host['name'])
+            inv_host.vars = host['vars']
+            created_hosts[inv_host.name] = inv_host
+
+        for group in inv_json['groups']:
+            children = False if len(group['groups']) == 0 else True
+            inv_group = inventory.groups.create(name=group['name'], children=children)
+            inv_group.vars = group['vars']
+            created_groups[inv_group.name] = inv_group
+
+        for group in inv_json['groups']:
+            inv_group = created_groups[group['name']]
+            g_subs = list()
+            if inv_group.children:
+                for name in group['groups']:
+                    g_subs.append(created_groups[name])
+                inv_group.groups.add(*g_subs)
+            else:
+                for name in group['hosts']:
+                    g_subs.append(created_hosts[name])
+                inv_group.hosts.add(*g_subs)
+
+        return dict(
+            inventory_id=inventory.id,
+            name=inventory.name,
+            raw_data=validated_data['raw_data']
+        )
