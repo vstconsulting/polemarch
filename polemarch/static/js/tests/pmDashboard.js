@@ -4,5 +4,9 @@ window.qunitTestsArray['pmDashboard'] = {
     {
         // Проверка того что страница открывается
         guiTests.openPage("")
+
+        guiTests.wait(300);
+
+
     }
 }
