@@ -83,11 +83,12 @@ class _Base(object):
         :param feature: feature name
         :param data: all data from file
         '''
+        rewrite = data.get('templates_rewrite', False)
         data = data[feature]
         qs_existed = self.proj.template.filter(name__in=data.keys())
         existed = qs_existed.values_list('name', flat=True)
         for template_name, template_data in data.items():
-            if template_name in existed:
+            if not rewrite and template_name in existed:
                 self.message('Template[{}] already in project.'.format(template_name))
                 continue
             self.__create_template(template_name, template_data)
@@ -106,6 +107,8 @@ class _Base(object):
         :rtype: dict
         """
         for feature in data.keys():
+            if feature in ['templates_rewrite']:
+                continue
             self.message('Set settings from ".polemarch.yaml" - {}.'.format(feature))
             feature_name = 'pm_handle_{}'.format(feature)
             getattr(self, feature_name, self.pm_handle_unknown)(feature, data)
