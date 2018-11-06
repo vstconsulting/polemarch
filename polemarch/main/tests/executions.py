@@ -22,6 +22,42 @@ test_playbook_content = '''
       ping:
 '''
 
+test_yaml_templates = {
+    'test module': {
+        "notes": "Module test template.",
+        "kind": "Module",
+        "data": {
+            "group": "all",
+            "vars": {},
+            "args": "",
+            "module": "ping",
+            "inventory": 'localhost,'
+        },
+        "options": {
+            "uptime": {
+                "args": "uptime",
+                "module": "shell"
+            },
+        }
+    },
+    'test playbook': {
+        "notes": "Playbook test template.",
+        "kind": "Task",
+        "data": {
+            "vars": {
+                "become": True
+            },
+            "playbook": "main.yml",
+            "inventory": 'localhost,'
+        },
+        "options": {
+            "update": {
+                "playbook": "other.yml"
+            }
+        }
+    }
+}
+
 
 class Object(object):
     pass
@@ -470,8 +506,14 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 'project', project_data['id'], {},
                 method='get', filters='key=repo_sync_on_run'
             ),
+            self.get_mod_bulk('project', project_data['id'], {}, 'template', 'get'),
         ])
         self.assertTrue(results[1]['data']['results'][0]['value'])
+        self.assertEqual(results[2]['data']['count'], 2)
+        for template in results[2]['data']['results']:
+            origin_template_data = test_yaml_templates[template['name']]
+            for option in origin_template_data['options'].keys():
+                self.assertIn(option, template['options_list'])
         return dict(playbook_count=len(self.revisions), execute=True)
 
     def make_test_templates(self, project_data):
@@ -863,6 +905,8 @@ class ProjectTestCase(BaseExecutionsTestCase):
         pm_yaml = dict()
         # sync_on_run
         pm_yaml['sync_on_run'] = True
+        # templates
+        pm_yaml['templates'] = test_yaml_templates
         # Prepare repo
         self.repo_dir = tempfile.mkdtemp()
         self.generate_playbook(self.repo_dir, ['main.yml'])
@@ -873,8 +917,9 @@ class ProjectTestCase(BaseExecutionsTestCase):
         first_revision = repo.head.object.hexsha
         repo.create_head('new_branch')
         pm_yaml['sync_on_run'] = False
+        self.generate_playbook(self.repo_dir, ['.polemarch.yaml'], data=dump(pm_yaml))
         self.generate_playbook(self.repo_dir, ['other.yml'])
-        repo.index.add(["other.yml"])
+        repo.index.add(["other.yml", ".polemarch.yaml"])
         repo.index.commit("no message 2")
         second_revision = repo.head.object.hexsha
 

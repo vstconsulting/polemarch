@@ -30,7 +30,92 @@ class _Base(object):
     def _set_status(self, status):
         self.proj.set_status(status)
 
+    @raise_context()
+    def _load_yaml(self):
+        '''
+        Loading `.polemarch.yaml` data.
+
+        :return: Data from `.polemarch.yaml` file.
+        :type ret: dict
+        '''
+        yaml_path = '{}/.polemarch.yaml'.format(self.path)
+        if not (os.path.exists(yaml_path) and os.path.isfile(yaml_path)):
+            return
+        with open(yaml_path, 'r') as fd:
+            return yaml_load(fd.read(), Loader=YamlLoader)
+
+    def message(self, message, level='debug'):
+        getattr(logger, level.lower(), logger.debug)(
+            'Syncing project [{}] - {}'.format(self.proj.id, message)
+        )
+
+    def pm_handle_sync_on_run(self, feature, data):
+        '''
+        Set sync_on_run if it is setted in `.polemarch.yaml`.
+
+        :param feature: feature name
+        :param data: all data from file
+        '''
+        value = str(data[feature])
+        _, created = self.proj.variables.update_or_create(
+            key='repo_sync_on_run', defaults=dict(value=value)
+        )
+        self.message(
+            '{} repo_sync_on_run to {}'.format('Set' if created else 'Update', value)
+        )
+
+    @raise_context()
+    def __create_template(self, template_name, template_data):
+        '''
+        Creates one template from `.polemarch.yaml`.
+
+        :param template_name: Template name
+        :param template_data: Template data
+        :return: created Template object
+        '''
+        self.message('Loading template[{}] into the project.'.format(template_name))
+        return self.proj.template.create(name=template_name, **template_data)
+
+    def pm_handle_templates(self, feature, data):
+        '''
+        Get and create (if is not existed) templates from `.polemarch.yaml`.
+
+        :param feature: feature name
+        :param data: all data from file
+        '''
+        data = data[feature]
+        qs_existed = self.proj.template.filter(name__in=data.keys())
+        existed = qs_existed.values_list('name', flat=True)
+        for template_name, template_data in data.items():
+            if template_name in existed:
+                self.message('Template[{}] already in project.'.format(template_name))
+                continue
+            self.__create_template(template_name, template_data)
+
+    def pm_handle_unknown(self, feature, data):  # nocv
+        '''
+        Logging unknowing data from `.polemarch.yaml`.
+        '''
+        self.message('{} - this feature is not realised yet.'.format(feature), 'info')
+        logger.debug(str(data))
+
+    def _handle_yaml(self, data):
+        """
+        Loads and returns data from `.polemarch.yaml` file
+
+        :rtype: dict
+        """
+        for feature in data.keys():
+            self.message('Set settings from ".polemarch.yaml" - {}.'.format(feature))
+            feature_name = 'pm_handle_{}'.format(feature)
+            getattr(self, feature_name, self.pm_handle_unknown)(feature, data)
+
     def _set_tasks_list(self, playbooks_names):
+        """
+        Updates playbooks in project.
+
+        :rtype: None
+        """
         # pylint: disable=invalid-name
         project = self.proj
         project.playbook.all().delete()
@@ -46,25 +131,24 @@ class _Base(object):
         PlaybookModel.objects.bulk_create(playbook_objects) if playbook_objects else None
 
     def _update_tasks(self, files):
+        '''
+        Find and update playbooks in project.
+        :param files: list of filenames.
+        :type files: list, tuple
+        :rtype: None
+        '''
         reg = re.compile(self.regex)
         playbooks = filter(reg.match, files)
         self._set_tasks_list(playbooks)
 
-    @raise_context()
-    def _load_yaml(self):
-        yaml_path = '{}/.polemarch.yaml'.format(self.path)
-        if not (os.path.exists(yaml_path) and os.path.isfile(yaml_path)):
-            return
-        with open(yaml_path, 'r') as fd:
-            return yaml_load(fd.read(), Loader=YamlLoader)
-
-    def _handle_yaml(self, data):
-        if 'sync_on_run' in data:
-            self.proj.variables.create(
-                key='repo_sync_on_run', value=str(data['sync_on_run'])
-            )
-
     def _get_files(self, repo=None):
+        '''
+        Get all files, where playbooks should be.
+        :param repo: Repo object
+        :type repo: object, None
+        :return: list of files in dir
+        :rtype: list
+        '''
         # pylint: disable=unused-argument
         return os.listdir(self.path)
 
@@ -72,6 +156,12 @@ class _Base(object):
         return operation(kwargs)
 
     def _make_operations(self, operation):
+        '''
+        Handle VCS operations and sync data from project.
+
+        :param operation: function that should be hdandled.
+        :return: tuple with repo-object and fetch-results
+        '''
         self._set_status("SYNC")
         try:
             with transaction.atomic():
@@ -80,8 +170,8 @@ class _Base(object):
                 self._update_tasks(self._get_files(result[0]))
                 self._handle_yaml(self._load_yaml() or dict())
         except Exception as err:
-            logger.info(traceback.format_exc())
-            logger.error("Project[{}] sync error:\n{}".format(self.proj, err))
+            logger.debug(traceback.format_exc())
+            self.message('Sync error: {}'.format(err), 'error')
             self._set_status("ERROR")
             raise
         else:
@@ -111,6 +201,11 @@ class _Base(object):
         return "NO VCS"
 
     def delete(self):
+        '''
+        Handler, which removes project data directory.
+
+        :return: user message
+        '''
         if os.path.exists(self.path):
             if os.path.isfile(self.path):
                 os.remove(self.path)  # nocv
