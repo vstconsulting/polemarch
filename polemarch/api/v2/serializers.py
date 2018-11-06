@@ -410,6 +410,8 @@ class VariableSerializer(_SignalSerializer):
         result = super(VariableSerializer, self).to_representation(instance)
         if instance.key in getattr(instance.content_object, 'HIDDEN_VARS', []):
             result['value'] = "[~~ENCRYPTED~~]"
+        elif instance.key in getattr(instance.content_object, 'BOOLEAN_VARS', []):
+            result['value'] = True if instance.value == 'True' else False
         return result
 
 

@@ -6,6 +6,7 @@ import six
 import git
 from datetime import timedelta
 from django.utils.timezone import now
+from yaml import load, dump, Dumper, Loader
 from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
 
@@ -302,7 +303,9 @@ class BaseExecutionsTestCase(BaseTestCase):
         self.assertEqual(results[0]['data']['status'], 'NEW')
         self.assertEqual(results[1]['data']['count'], len(obj.vars))
         for value in results[1]['data']['results']:
-            self.assertIn(value['value'], [obj.vars[value['key']], '[~~ENCRYPTED~~]'])
+            self.assertIn(
+                value['value'], [obj.vars[value['key']], '[~~ENCRYPTED~~]'], value
+            )
 
     def project_workflow(self, repo_type, **kwargs):
         execute = kwargs.pop('execute', False)
@@ -326,6 +329,19 @@ class BaseExecutionsTestCase(BaseTestCase):
         return "{}/{}".format(path, name)
 
     def generate_playbook(self, path, name='test', count=1, data=test_playbook_content):
+        '''
+        Generate playbooks in project path
+
+        :param path: path, where playbook will appear
+        :type path: str,unicode
+        :param name: filename pattern or list of names for playbooks
+        :type name: str,unicode,list,tuple
+        :param count: count files for pattern
+        :type count: int
+        :param data: playbook data
+        :type data: str,bytes,unicode
+        :return:
+        '''
         files = []
         if isinstance(name, (list, tuple)):
             _files = name[:count or len(name)]
@@ -448,13 +464,14 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(project_data['revision'], self.revisions[0])
         self.assertEqual(project_data['branch'], 'new_branch')
         new_branch_var['value'] = 'master'
-        self.make_bulk([
-            self.get_mod_bulk('project', project_data['id'], new_branch_var)
+        results = self.make_bulk([
+            self.get_mod_bulk('project', project_data['id'], new_branch_var),
+            self.get_mod_bulk(
+                'project', project_data['id'], {},
+                method='get', filters='key=repo_sync_on_run'
+            ),
         ])
-        repo_autosync_var = dict(key='repo_sync_on_run', value='True')
-        self.make_bulk([
-            self.get_mod_bulk('project', project_data['id'], repo_autosync_var)
-        ])
+        self.assertTrue(results[1]['data']['results'][0]['value'])
         return dict(playbook_count=len(self.revisions), execute=True)
 
     def make_test_templates(self, project_data):
@@ -842,14 +859,20 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 self.assertEqual(results[-1]['data']['results'][-2]['status'], 'ERROR')
 
     def test_project_git(self):
+        # Prepare .polemarch.yaml
+        pm_yaml = dict()
+        # sync_on_run
+        pm_yaml['sync_on_run'] = True
         # Prepare repo
         self.repo_dir = tempfile.mkdtemp()
         self.generate_playbook(self.repo_dir, ['main.yml'])
+        self.generate_playbook(self.repo_dir, ['.polemarch.yaml'], data=dump(pm_yaml))
         repo = git.Repo.init(self.repo_dir)
-        repo.index.add(["main.yml"])
+        repo.index.add(["main.yml", ".polemarch.yaml"])
         repo.index.commit("no message")
         first_revision = repo.head.object.hexsha
         repo.create_head('new_branch')
+        pm_yaml['sync_on_run'] = False
         self.generate_playbook(self.repo_dir, ['other.yml'])
         repo.index.add(["other.yml"])
         repo.index.commit("no message 2")

@@ -9,6 +9,12 @@ import traceback
 
 from six.moves.urllib.request import urlretrieve
 from django.db import transaction
+from vstutils.utils import raise_context
+from yaml import load as yaml_load
+try:
+    from yaml import CLoader as YamlLoader
+except ImportError:  # nocv
+    from yaml import Loader as YamlLoader
 
 logger = logging.getLogger("polemarch")
 
@@ -44,6 +50,20 @@ class _Base(object):
         playbooks = filter(reg.match, files)
         self._set_tasks_list(playbooks)
 
+    @raise_context()
+    def _load_yaml(self):
+        yaml_path = '{}/.polemarch.yaml'.format(self.path)
+        if not (os.path.exists(yaml_path) and os.path.isfile(yaml_path)):
+            return
+        with open(yaml_path, 'r') as fd:
+            return yaml_load(fd.read(), Loader=YamlLoader)
+
+    def _handle_yaml(self, data):
+        if 'sync_on_run' in data:
+            self.proj.variables.create(
+                key='repo_sync_on_run', value=str(data['sync_on_run'])
+            )
+
     def _get_files(self, repo=None):
         # pylint: disable=unused-argument
         return os.listdir(self.path)
@@ -58,6 +78,7 @@ class _Base(object):
                 result = self._operate(operation)
                 self._set_status("OK")
                 self._update_tasks(self._get_files(result[0]))
+                self._handle_yaml(self._load_yaml() or dict())
         except Exception as err:
             logger.info(traceback.format_exc())
             logger.error("Project[{}] sync error:\n{}".format(self.proj, err))
