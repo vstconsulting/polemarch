@@ -36,15 +36,14 @@
                 <div class="box-header with-border">
                     stdout<br>
                     <div class="box-tools pull-right">
-
-                            <~ guiObj.model.data.status>
-                                <% if(guiObj.model.data.status != 'RUN' && guiObj.model.data.status != 'DELAY'){ %>
+                            <~ guiObj.model.data >
+                                <% if(!(guiObj.model.data.status == 'RUN' || guiObj.model.data.status == 'DELAY')) { %>
 
                                         <button type="button"
                                                 class="btn btn-default"
                                                 id="clear_output"
                                                 style="margin-right:5px; padding: 3px 9px;"
-                                                <%= justOn('click', emptyAction(guiObj.api.actions['clear'], guiObj), 'clear_output') %>
+                                                <%= justOn('click', () =>{clearHistoryStdOut(guiObj.api.actions['clear'], guiObj)}, 'clear_output') %>
                                         >
 
 
