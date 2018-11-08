@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import os
 import logging
+import traceback
 import uuid
 import six
 from docutils.core import publish_parts as rst_gen
@@ -10,7 +11,7 @@ from markdown2 import Markdown
 from django.conf import settings
 from django.db.models import Q
 from django.core.validators import ValidationError
-from vstutils.utils import ModelHandlers
+from vstutils.utils import ModelHandlers, raise_context
 from yaml import load
 try:
     from yaml import CLoader as Loader
@@ -22,7 +23,7 @@ from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
 from .base import ManyToManyFieldACL, BQuerySet, BModel
 from .hooks import Hook
-from ..utils import AnsibleModules
+from ..utils import AnsibleModules, SubCacheInterface
 
 
 logger = logging.getLogger("polemarch")
@@ -98,6 +99,14 @@ class Project(AbstractModel):
         'template_option': None
     }
 
+    PM_YAML_FORMATS = {
+        'unknown': str,
+        'string': str,
+        'integer': int,
+        'float': float,
+        'boolean': bool,
+    }
+
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
 
@@ -127,6 +136,66 @@ class Project(AbstractModel):
             return self.variables.get(key="repo_type").value
         except self.variables.model.DoesNotExist:  # nocv
             return 'MANUAL'
+
+    def get_yaml_subcache(self, suffix=''):
+        return SubCacheInterface(''.join(['project', str(self.id), suffix]))
+
+    def __parse_yaml_view(self, data):
+        valid_formats = self.PM_YAML_FORMATS
+        parsed_data = dict(fields=dict(), playbooks=dict())
+        # Parse fields
+        for fieldname, field_data in data['fields'].items():
+            parsed_data['fields'][fieldname] = dict(
+                title=field_data.get('title', fieldname.upper()),
+                help=field_data.get('help', ''),
+            )
+            field_format = field_data.get('format', 'string')
+            if field_format not in valid_formats.keys():
+                field_format = 'unknown'
+            parsed_data['fields'][fieldname]['format'] = field_format
+            default_value = valid_formats[field_format](field_data.get('default', ''))
+            parsed_data['fields'][fieldname]['default'] = default_value
+            enum = field_data.get('enum', None)
+            if enum and isinstance(enum, (list, tuple)):
+                enum = list(map(valid_formats[field_format], enum))
+                parsed_data['fields'][fieldname]['enum'] = enum
+        # Parse playbooks for execution
+        for playbook, pb_data in data['playbooks'].items():
+            parsed_data['playbooks'][playbook] = dict(
+                title=pb_data.get('title', playbook.replace('.yml', '')),
+                help=pb_data.get('help', ''),
+            )
+        return parsed_data
+
+    def get_yaml(self):
+        yaml_path = '/'.join([self.path, '.polemarch.yaml']).replace('//', '/')
+        if not (os.path.exists(yaml_path) and os.path.isfile(yaml_path)):
+            return
+        cache = self.get_yaml_subcache()
+        cache_data = cache.get() or None
+        if cache_data:
+            return cache_data
+        try:
+            with open(yaml_path, 'r') as fd:
+                data = load(fd.read(), Loader=Loader)
+            cache.set(data)
+            return data
+        except:  # nocv
+            logger.debug(traceback.format_exc())
+            return cache_data
+
+    @property
+    @raise_context()
+    def execute_view_data(self):
+        cached_view_data = self.get_yaml_subcache('view').get()
+        if cached_view_data:
+            return cached_view_data
+        yaml_data = self.get_yaml() or {}
+        view_data = yaml_data.get('view', None)
+        if view_data:
+            view_data = self.__parse_yaml_view(view_data)
+        self.get_yaml_subcache('view').set(view_data)
+        return view_data
 
     def check_path(self, inventory):
         if not isinstance(inventory, (six.string_types, six.text_type)):
