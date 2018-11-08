@@ -274,6 +274,13 @@ class InventoriesTestCase(InvBaseTestCase):
                 'all_groups',
                 method='get'
             ),
+            self.get_mod_bulk(
+                'inventory',
+                '<0[data][id]>',
+                {},
+                'variables',
+                method='get'
+            ),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(
@@ -288,7 +295,13 @@ class InventoriesTestCase(InvBaseTestCase):
             results[2]['data']['count'],
             len(valid_inventory['groups'])
         )
+        self.assertEqual(
+            results[3]['data']['count'],
+            len(valid_inventory['vars'])
+        )
         for host in results[1]['data']['results']:
             self.assertIn(host['name'], valid_inventory['hosts'].keys())
         for group in results[2]['data']['results']:
             self.assertIn(group['name'], valid_inventory['groups'].keys())
+        for variable in results[3]['data']['results']:
+            self.assertIn(variable['key'], valid_inventory['vars'].keys())

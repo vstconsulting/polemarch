@@ -14,5 +14,5 @@ gitpython==2.1.11
 requests==2.20.0
 
 # Ansible required packages
-polemarch-ansible>=1.0.7,<1.1.0
+polemarch-ansible>=1.0.12
 pywinrm[kerberos]==0.3.0
