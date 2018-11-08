@@ -148,3 +148,55 @@ window.qunitTestsArray['guiPaths.project'] = {
         guiTests.deleteObject(test_name)
     }
 }
+
+
+
+window.qunitTestsArray['guiElements.form'] = {
+    test:function()
+    {
+        syncQUnit.addTest('guiElements.form', function ( assert )
+        {
+            let done = assert.async();
+            $("body").append("<div id='guiElementsTestForm'></div>")
+
+
+            let formData = {
+                args:[
+                    {
+                        name:'Name',
+                        title:'Name',
+                        default:'Name',
+                        format:'Name',
+                        help:'Name',
+                        enum:'Name',
+                    },
+                    {
+                        name:'Name',
+                        title:'Name',
+                        default:'Name',
+                        format:'Name',
+                        help:'Name',
+                        enum:'Name',
+                    },
+                    {
+                        name:'Name',
+                        title:'Name',
+                        default:'Name',
+                        format:'Name',
+                        help:'Name',
+                        enum:'Name',
+                    },
+                ]
+            }
+
+            let element = new guiElements.form(undefined, formData);
+
+            $("#guiElementsTestForm").insertTpl(element.render())
+
+            assert.ok(true, 'guiElements.form');
+
+            $("#guiElementsTestForm").remove();
+            testdone(done)
+        });
+    }
+}

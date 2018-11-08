@@ -97,3 +97,14 @@ tabSignal.connect("openapi.schema.definition.AnsiblePlaybook", function(obj) {
         }
     }
 })
+
+
+
+
+guiElements.form = function(opt = {}, value, parent_object)
+{
+    this.name = 'string'
+    guiElements.base.apply(this, arguments)
+
+
+}
