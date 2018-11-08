@@ -438,6 +438,9 @@ class InventoryViewSet(_GroupMixin):
     serializer_class_one = sers.OneInventorySerializer
     filter_class = filters.InventoryFilter
     copy_related = ['hosts', 'groups']
+    action_serializers = {
+        'import_inventory': sers.InventoryImportSerializer
+    }
 
     @deco.action(methods=["post"], detail=no)
     def import_inventory(self, request, **kwargs):

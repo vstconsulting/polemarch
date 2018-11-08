@@ -1069,6 +1069,7 @@ class InventoryImportSerializer(DataSerializer):
         inv_json = parser.get_inventory_data(validated_data['raw_data'])
 
         inventory = Inventory.objects.create(name=validated_data['name'])
+        inventory.vars = inv_json['vars']
         created_hosts, created_groups = dict(), dict()
 
         for host in inv_json['hosts']:

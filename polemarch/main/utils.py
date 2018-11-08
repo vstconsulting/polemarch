@@ -369,6 +369,12 @@ class AnsibleModules(PMAnsible):
 class AnsibleInventoryParser(PMAnsible):
     ref_name = 'inventory_parser'
 
+    def get_ansible_cache(self):
+        cache = super(AnsibleInventoryParser, self).get_ansible_cache()
+        cache.get = lambda: None
+        cache.set = lambda value: None
+        return cache
+
     def get_args(self):
         args = super(AnsibleInventoryParser, self).get_args()
         args += [self.path]

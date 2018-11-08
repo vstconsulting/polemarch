@@ -18,6 +18,9 @@ test-host-2
 
 [parent-group:children]
 child-group
+
+[all:vars]
+ansible_connection=ssh
 '''
 valid_inventory = {
     'groups': {
@@ -61,7 +64,9 @@ valid_inventory = {
             'vars': {}
         }
     },
-
+    'vars': {
+        'ansible_connection': 'ssh',
+    },
 }
 
 
@@ -101,3 +106,10 @@ class AnsibleTestCase(TestCase):
             )
             for key, value in valid_inventory['hosts'][record['name']]['vars'].items():
                 self.assertEqual(record['vars'][key], value)
+
+        self.assertEqual(
+            list(valid_inventory['vars'].keys()),
+            list(inv_json['vars'].keys())
+        )
+        for key, value in valid_inventory['vars'].items():
+            self.assertEqual(inv_json['vars'][key], value)
