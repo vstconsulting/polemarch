@@ -871,6 +871,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     owner = UserSerializer(read_only=True)
     notes = vst_fields.TextareaField(required=False, allow_blank=True)
     readme_content = vst_fields.HtmlField(read_only=True, label='Information')
+    execute_view_data = vst_serializers.DataSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = models.Project
@@ -882,7 +883,8 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'branch',
                   'owner',
                   'notes',
-                  'readme_content',)
+                  'readme_content',
+                  'execute_view_data',)
 
     @transaction.atomic()
     def sync(self):

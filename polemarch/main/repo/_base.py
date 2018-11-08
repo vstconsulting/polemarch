@@ -38,11 +38,8 @@ class _Base(object):
         :return: Data from `.polemarch.yaml` file.
         :type ret: dict
         '''
-        yaml_path = '{}/.polemarch.yaml'.format(self.path)
-        if not (os.path.exists(yaml_path) and os.path.isfile(yaml_path)):
-            return
-        with open(yaml_path, 'r') as fd:
-            return yaml_load(fd.read(), Loader=YamlLoader)
+        self.proj.get_yaml_subcache().clear()
+        return self.proj.get_yaml()
 
     def message(self, message, level='debug'):
         getattr(logger, level.lower(), logger.debug)(
@@ -93,6 +90,16 @@ class _Base(object):
                 continue
             self.__create_template(template_name, template_data)
 
+    def pm_handle_view(self, feature, data):
+        '''
+        Clear view data from cache
+
+        :param feature: feature name
+        :param data: all data from file
+        '''
+        self.proj.get_yaml_subcache('view').clear()
+        self.message(self.proj.execute_view_data, 'debug')
+
     def pm_handle_unknown(self, feature, data):  # nocv
         '''
         Logging unknowing data from `.polemarch.yaml`.
@@ -107,7 +114,7 @@ class _Base(object):
         :rtype: dict
         """
         for feature in data.keys():
-            if feature in ['templates_rewrite']:
+            if feature in ['templates_rewrite',]:
                 continue
             self.message('Set settings from ".polemarch.yaml" - {}.'.format(feature))
             feature_name = 'pm_handle_{}'.format(feature)
