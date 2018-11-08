@@ -1,6 +1,6 @@
 # Main
-vstutils[rpc,ldap,doc,prod]==1.2.0
-pyyaml==3.12
+vstutils[rpc,ldap,doc,prod]==1.2.1
+pyyaml==3.13
 docutils==0.14
 markdown2==2.3.6
 
@@ -14,5 +14,5 @@ gitpython==2.1.11
 requests==2.20.0
 
 # Ansible required packages
-polemarch-ansible==1.0.6
+polemarch-ansible>=1.0.7,<1.1.0
 pywinrm[kerberos]==0.3.0
