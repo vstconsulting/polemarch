@@ -213,19 +213,21 @@ class BaseTask(PMObject):
         raise NotImplementedError
 
 
-class AnsibleCache(PMObject):
+class SubCacheInterface(PMObject):
+    cache_name = "subcache"
+
     def __init__(self, prefix, timeout=86400*7):
         from django.core.cache import caches, InvalidCacheBackendError
         self.prefix = prefix
         self.timeout = timeout
         try:
-            self.cache = caches["ansible"]
+            self.cache = caches[self.cache_name]
         except InvalidCacheBackendError:
             self.cache = caches["default"]
 
     @property
     def key(self):
-        return 'ansible-{}'.format(self.prefix)
+        return '{}-{}'.format(self.cache_name, self.prefix)
 
     def set(self, value):
         self.cache.set(self.key, dump(value, Dumper=Dumper), self.timeout)
@@ -236,6 +238,10 @@ class AnsibleCache(PMObject):
 
     def clear(self):
         self.set(None)
+
+
+class AnsibleCache(SubCacheInterface):
+    cache_name = "ansible"
 
 
 class PMAnsible(PMObject):
@@ -368,6 +374,12 @@ class AnsibleModules(PMAnsible):
 
 class AnsibleInventoryParser(PMAnsible):
     ref_name = 'inventory_parser'
+
+    def get_ansible_cache(self):
+        cache = super(AnsibleInventoryParser, self).get_ansible_cache()
+        cache.get = lambda: None
+        cache.set = lambda value: None
+        return cache
 
     def get_args(self):
         args = super(AnsibleInventoryParser, self).get_args()

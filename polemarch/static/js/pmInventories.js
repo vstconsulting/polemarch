@@ -45,3 +45,12 @@ tabSignal.connect("openapi.schema.definition.InventoryVariable", function (obj) 
         __func__callback: 'InventoryVariable_value_callback',
     }
 })
+
+tabSignal.connect("openapi.schema.definition.InventoryImport", function (obj) {
+    let props = obj.definition.properties;
+    props['inventory_id'].hidden = true;
+
+    props['raw_data'].format = 'file';
+    props['raw_data'].title = 'Inventory file';
+
+})

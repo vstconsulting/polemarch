@@ -6,6 +6,7 @@ import six
 import git
 from datetime import timedelta
 from django.utils.timezone import now
+from yaml import load, dump, Dumper, Loader
 from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
 
@@ -20,6 +21,90 @@ test_playbook_content = '''
     - name: Some local task
       ping:
 '''
+
+test_yaml_templates = {
+    'test module': {
+        "notes": "Module test template.",
+        "kind": "Module",
+        "data": {
+            "group": "all",
+            "vars": {},
+            "args": "",
+            "module": "ping",
+            "inventory": 'localhost,'
+        },
+        "options": {
+            "uptime": {
+                "args": "uptime",
+                "module": "shell"
+            },
+        }
+    },
+    'test playbook': {
+        "notes": "Playbook test template.",
+        "kind": "Task",
+        "data": {
+            "vars": {
+                "become": True
+            },
+            "playbook": "main.yml",
+            "inventory": 'localhost,'
+        },
+        "options": {
+            "update": {
+                "playbook": "other.yml"
+            }
+        }
+    }
+}
+
+test_yaml_view = {
+    'fields': {
+        'string': {
+            'title': 'Field string',
+            'default': 0,
+            'format': 'string',
+            'help': 'Some help text'
+        },
+        'integer': {
+            'title': 'Field integer',
+            'default': 0,
+            'format': 'integer',
+            'help': 'Some help text'
+        },
+        'float': {
+            'title': 'Field float',
+            'default': 0,
+            'format': 'float',
+            'help': 'Some help text'
+        },
+        'boolean': {
+            'title': 'Field boolean',
+            'default': 0,
+            'format': 'boolean',
+            'help': 'Some help text'
+        },
+        'enum_string': {
+            'title': 'Field enum_string',
+            'default': 0,
+            'format': 'string',
+            'help': 'Some help text',
+            'enum': list(range(10))
+        },
+        'unknown': {
+            'title': 'Field unknown',
+            'default': 0,
+            'format': 'invalid_or_unknown',
+            'help': 'Some help text'
+        },
+    },
+    'playbooks': {
+        'main.yml': {
+            'title': 'Execute title',
+            'help': 'Some help text'
+        }
+    }
+}
 
 
 class Object(object):
@@ -302,7 +387,9 @@ class BaseExecutionsTestCase(BaseTestCase):
         self.assertEqual(results[0]['data']['status'], 'NEW')
         self.assertEqual(results[1]['data']['count'], len(obj.vars))
         for value in results[1]['data']['results']:
-            self.assertIn(value['value'], [obj.vars[value['key']], '[~~ENCRYPTED~~]'])
+            self.assertIn(
+                value['value'], [obj.vars[value['key']], '[~~ENCRYPTED~~]'], value
+            )
 
     def project_workflow(self, repo_type, **kwargs):
         execute = kwargs.pop('execute', False)
@@ -326,6 +413,19 @@ class BaseExecutionsTestCase(BaseTestCase):
         return "{}/{}".format(path, name)
 
     def generate_playbook(self, path, name='test', count=1, data=test_playbook_content):
+        '''
+        Generate playbooks in project path
+
+        :param path: path, where playbook will appear
+        :type path: str,unicode
+        :param name: filename pattern or list of names for playbooks
+        :type name: str,unicode,list,tuple
+        :param count: count files for pattern
+        :type count: int
+        :param data: playbook data
+        :type data: str,bytes,unicode
+        :return:
+        '''
         files = []
         if isinstance(name, (list, tuple)):
             _files = name[:count or len(name)]
@@ -438,23 +538,61 @@ class ProjectTestCase(BaseExecutionsTestCase):
         return dict(playbook_count=len(files), execute=True)
 
     def wip_git(self, project_data):
+        # Check brunch and revision
         self.assertEqual(project_data['revision'], self.revisions[-1])
         self.assertEqual(project_data['branch'], 'master')
+        # Update branch
         new_branch_var = dict(key='repo_branch', value='new_branch')
         self.make_bulk([
             self.get_mod_bulk('project', project_data['id'], new_branch_var)
         ])
         project_data = self.sync_project(project_data['id'])
+        # Check updated brunch and revision
         self.assertEqual(project_data['revision'], self.revisions[0])
         self.assertEqual(project_data['branch'], 'new_branch')
+        # Return old branch
         new_branch_var['value'] = 'master'
-        self.make_bulk([
-            self.get_mod_bulk('project', project_data['id'], new_branch_var)
+        results = self.make_bulk([
+            self.get_mod_bulk('project', project_data['id'], new_branch_var),
+            self.get_mod_bulk(
+                'project', project_data['id'], {},
+                method='get', filters='key=repo_sync_on_run'
+            ),
+            self.get_mod_bulk('project', project_data['id'], {}, 'template', 'get'),
         ])
-        repo_autosync_var = dict(key='repo_sync_on_run', value='True')
-        self.make_bulk([
-            self.get_mod_bulk('project', project_data['id'], repo_autosync_var)
-        ])
+        # Check synced templates
+        self.assertTrue(results[1]['data']['results'][0]['value'])
+        self.assertEqual(results[2]['data']['count'], 2)
+        for template in results[2]['data']['results']:
+            origin_template_data = test_yaml_templates[template['name']]
+            for option in origin_template_data['options'].keys():
+                self.assertIn(option, template['options_list'])
+        # Check extra execute-view data in project
+        extra_view_data = project_data['execute_view_data']
+        for field_name in test_yaml_view['fields']:
+            self.assertIn(field_name, extra_view_data['fields'].keys())
+            field = extra_view_data['fields'][field_name]
+            for required_field in ['title', 'default', 'format', 'help']:
+                self.assertIn(required_field, field.keys())
+            self.assertEqual(field_name.split('_')[-1], field['format'], field)
+            default_type = (six.string_types, six.text_type)
+            if field['format'] == 'boolean':
+                default_type = bool
+            elif field['format'] == 'integer':
+                default_type = int
+            elif field['format'] == 'float':
+                default_type = float
+            self.assertTrue(isinstance(field['default'], default_type), field)
+            if field_name == 'enum_string':
+                self.assertIn('enum', field.keys())
+                self.assertTrue(isinstance(field['enum'], (list, tuple)))
+                for value in field['enum']:
+                    self.assertTrue(isinstance(value, default_type))
+        for playbook_name in test_yaml_view['playbooks']:
+            self.assertIn(playbook_name, extra_view_data['playbooks'].keys())
+            playbook = extra_view_data['playbooks'][playbook_name]
+            for required_field in ['title', 'help']:
+                self.assertIn(required_field, playbook.keys())
         return dict(playbook_count=len(self.revisions), execute=True)
 
     def make_test_templates(self, project_data):
@@ -842,16 +980,28 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 self.assertEqual(results[-1]['data']['results'][-2]['status'], 'ERROR')
 
     def test_project_git(self):
+        # Prepare .polemarch.yaml
+        pm_yaml = dict()
+        # sync_on_run
+        pm_yaml['sync_on_run'] = True
+        # templates
+        pm_yaml['templates'] = test_yaml_templates
+        pm_yaml['templates_rewrite'] = False
+        # fast task widget
+        pm_yaml['view'] = test_yaml_view
         # Prepare repo
         self.repo_dir = tempfile.mkdtemp()
         self.generate_playbook(self.repo_dir, ['main.yml'])
+        self.generate_playbook(self.repo_dir, ['.polemarch.yaml'], data=dump(pm_yaml))
         repo = git.Repo.init(self.repo_dir)
-        repo.index.add(["main.yml"])
+        repo.index.add(["main.yml", ".polemarch.yaml"])
         repo.index.commit("no message")
         first_revision = repo.head.object.hexsha
         repo.create_head('new_branch')
+        pm_yaml['sync_on_run'] = False
+        self.generate_playbook(self.repo_dir, ['.polemarch.yaml'], data=dump(pm_yaml))
         self.generate_playbook(self.repo_dir, ['other.yml'])
-        repo.index.add(["other.yml"])
+        repo.index.add(["other.yml", ".polemarch.yaml"])
         repo.index.commit("no message 2")
         second_revision = repo.head.object.hexsha
 

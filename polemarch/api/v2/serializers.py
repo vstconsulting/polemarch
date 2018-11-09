@@ -410,6 +410,8 @@ class VariableSerializer(_SignalSerializer):
         result = super(VariableSerializer, self).to_representation(instance)
         if instance.key in getattr(instance.content_object, 'HIDDEN_VARS', []):
             result['value'] = "[~~ENCRYPTED~~]"
+        elif instance.key in getattr(instance.content_object, 'BOOLEAN_VARS', []):
+            result['value'] = True if instance.value == 'True' else False
         return result
 
 
@@ -869,6 +871,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
     owner = UserSerializer(read_only=True)
     notes = vst_fields.TextareaField(required=False, allow_blank=True)
     readme_content = vst_fields.HtmlField(read_only=True, label='Information')
+    execute_view_data = vst_serializers.DataSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = models.Project
@@ -880,7 +883,8 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'branch',
                   'owner',
                   'notes',
-                  'readme_content',)
+                  'readme_content',
+                  'execute_view_data',)
 
     @transaction.atomic()
     def sync(self):
@@ -1069,6 +1073,7 @@ class InventoryImportSerializer(DataSerializer):
         inv_json = parser.get_inventory_data(validated_data['raw_data'])
 
         inventory = Inventory.objects.create(name=validated_data['name'])
+        inventory.vars = inv_json['vars']
         created_hosts, created_groups = dict(), dict()
 
         for host in inv_json['hosts']:
