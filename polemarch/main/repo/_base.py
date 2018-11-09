@@ -20,6 +20,8 @@ logger = logging.getLogger("polemarch")
 
 
 class _Base(object):
+    __slots__ = 'options', 'proj', 'path'
+
     regex = r"(^[\w\d\.\-_]{1,})\.yml"
 
     def __init__(self, project, **options):

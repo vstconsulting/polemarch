@@ -17,6 +17,8 @@ class _VCS(_Base):  # nocv
 
 
 class Git(_VCS):
+    __slots__ = 'env', '_fetch_map'
+
     _fetch_statuses = [
         "NEW_TAG", "NEW_HEAD", "HEAD_UPTODATE",
         "TAG_UPDATE", "REJECTED", "FORCED_UPDATE",

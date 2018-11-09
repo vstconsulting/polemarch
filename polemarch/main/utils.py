@@ -40,6 +40,7 @@ def project_path():
 
 
 class PMObject(object):
+    __slots__ = '__pm_ansible__', '__django_settings__'
 
     def pm_ansible(self, *args):
         # pylint: disable=access-member-before-definition
@@ -62,6 +63,8 @@ class CmdExecutor(PMObject):
     '''
     Command executor with realtime output write
     '''
+    __slots__ = 'output', '_stdout', '_stderr'
+
     CANCEL_PREFIX = "CANCEL_EXECUTE_"
     newlines = ['\n', '\r\n', '\r']
 
@@ -165,6 +168,8 @@ class task(object):
                     def run(self):
                         return "Result of task"
     '''
+    __slots__ = 'app', 'args', 'kwargs'
+
     def __init__(self, app, *args, **kwargs):
         '''
         :param app: -- CeleryApp object
@@ -191,6 +196,8 @@ class BaseTask(PMObject):
     '''
     BaseTask class for all tasks.
     '''
+    __slots__ = 'app', 'args', 'kwargs', 'task_class'
+
     def __init__(self, app, *args, **kwargs):
         '''
         :param app: -- CeleryApp object
@@ -214,6 +221,7 @@ class BaseTask(PMObject):
 
 
 class SubCacheInterface(PMObject):
+    __slots__ = 'prefix', 'timeout', 'cache'
     cache_name = "subcache"
 
     def __init__(self, prefix, timeout=86400*7):
@@ -245,6 +253,7 @@ class AnsibleCache(SubCacheInterface):
 
 
 class PMAnsible(PMObject):
+    __slots__ = ()
     # Json regex
     _regex = re.compile(r"([\{\[][^\w\d\.].*[\}\]]$)", re.MULTILINE)
     ref_name = 'object'
@@ -281,6 +290,8 @@ class PMAnsible(PMObject):
 
 
 class AnsibleArgumentsReference(PMAnsible):
+    __slots__ = 'raw_dict', 'version'
+
     ref_name = 'reference'
     # Excluded args from user calls
     _EXCLUDE_ARGS = [
@@ -306,6 +317,7 @@ class AnsibleArgumentsReference(PMAnsible):
         return True
 
     def validate_args(self, command, args):
+        argument = None
         try:
             for argument, value in args.items():
                 self.is_valid_value(command, argument, value)
@@ -340,6 +352,7 @@ class AnsibleArgumentsReference(PMAnsible):
 
 
 class AnsibleModules(PMAnsible):
+    __slots__ = 'detailed', 'key'
     ref_name = 'modules'
 
     def __init__(self, detailed=False):
@@ -373,6 +386,7 @@ class AnsibleModules(PMAnsible):
 
 
 class AnsibleInventoryParser(PMAnsible):
+    __slots__ = 'path',
     ref_name = 'inventory_parser'
 
     def get_ansible_cache(self):

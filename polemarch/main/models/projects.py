@@ -53,6 +53,7 @@ class Project(AbstractModel):
         pass
 
     class ReadMe(object):
+        __slots__ = 'path', 'ext', 'content', 'file_name'
 
         def __init__(self, project):
             self.path = project.path
