@@ -6,7 +6,7 @@ import six
 import git
 from datetime import timedelta
 from django.utils.timezone import now
-from yaml import load, dump, Dumper, Loader
+from yaml import dump
 from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
 
