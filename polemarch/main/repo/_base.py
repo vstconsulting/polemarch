@@ -10,11 +10,6 @@ import traceback
 from six.moves.urllib.request import urlretrieve
 from django.db import transaction
 from vstutils.utils import raise_context
-from yaml import load as yaml_load
-try:
-    from yaml import CLoader as YamlLoader
-except ImportError:  # nocv
-    from yaml import Loader as YamlLoader
 
 logger = logging.getLogger("polemarch")
 
@@ -99,6 +94,7 @@ class _Base(object):
         :param feature: feature name
         :param data: all data from file
         '''
+        # pylint: disable=unused-argument
         self.proj.get_yaml_subcache('view').clear()
         self.message(self.proj.execute_view_data, 'debug')
 
@@ -116,7 +112,7 @@ class _Base(object):
         :rtype: dict
         """
         for feature in data.keys():
-            if feature in ['templates_rewrite',]:
+            if feature in ['templates_rewrite', ]:
                 continue
             self.message('Set settings from ".polemarch.yaml" - {}.'.format(feature))
             feature_name = 'pm_handle_{}'.format(feature)
