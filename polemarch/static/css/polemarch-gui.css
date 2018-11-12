@@ -60,6 +60,7 @@
 @media (max-width: 1050px) {
     .td_history_initiator,
     .td_project-history_initiator,
+    .td_history_revision,
     .td_project-history_revision {
         display: none;
     }
