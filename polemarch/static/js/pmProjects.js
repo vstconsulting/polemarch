@@ -99,6 +99,11 @@ tabSignal.connect("openapi.schema.definition.AnsiblePlaybook", function(obj) {
 })
 
 
+tabSignal.connect("openapi.schema", function(data)
+{
+    window.guiSchema.path["/project/{pk}/"].schema.edit.fields.execute_view_data.format = 'null'
+})
+
 
 gui_project = {
 
@@ -113,24 +118,6 @@ gui_project = {
     {
         var def = new $.Deferred();
 
-        spajs.ajax.Call({
-            url: hostname + "/api/"+api_version+"/project/"+this.url_vars.api_pk+"/execute_playbook/",
-            type: "POST",
-            contentType:'application/json',
-            data:JSON.stringify(data),
-            success: (data) =>
-            {
-                vstGO(['project', this.url_vars.api_pk, 'history', data.history_id])
-                def.resolve(data)
-            },
-            error:function(e)
-            {
-                def.reject(e)
-            }
-        });
-
-        /*
-         * code for new bulk querys
         let q = {
             data_type:["project", this.url_vars.api_pk, "execute_playbook"],
             data:data,
@@ -145,7 +132,7 @@ gui_project = {
             this.showErrors(e, q.method)
             def.reject(e)
         })
-        def.reject()*/
+        def.reject()
 
         return def.promise();
     },
@@ -235,11 +222,15 @@ guiElements.form = function(opt = {}, value, parent_object)
             for(let i in value.form)
             {
                 let field = value.form[i]
-                if(!field.name)
+                field.name = i
+
+                if(field.enum)
                 {
-                    field.name = i
+                    field.format = "enum"
                 }
+
                 let type = getFieldType(field)
+ 
                 realElements[i] = new guiElements[type]($.extend(true, {}, field), field.value);
             }
         }

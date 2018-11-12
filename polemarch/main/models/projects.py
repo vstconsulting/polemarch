@@ -177,6 +177,7 @@ class Project(AbstractModel):
         if cache_data:
             return cache_data
         try:
+            cache.clear()
             with open(yaml_path, 'r') as fd:
                 data = load(fd.read(), Loader=Loader)
             cache.set(data)
