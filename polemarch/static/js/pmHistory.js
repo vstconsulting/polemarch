@@ -309,6 +309,16 @@ function format_executor(opt)
     return 'system';
 }
 
+function format_revision(opt)
+{
+    if(opt.value)
+    {
+        return opt.value.substr(0, 8);
+    }
+
+    return "";
+}
+
 function get_prefetch_history_executor_path(data_obj)
 {
     return "/user/"
@@ -405,6 +415,10 @@ function addSettingsToHistoryListsFields(obj)
     properties['start_time'].__func__value = 'format_history_time';
     properties['stop_time'].__func__value = 'format_history_time';
     properties['executor'].__func__value = 'format_executor';
+    if(properties['revision'])
+    {
+        properties['revision'].__func__value = 'format_revision';
+    }
 }
 
 function addSettingsToOneHistoryFields(obj)
