@@ -285,6 +285,8 @@ function signal_gui_schema_name_periodic_task(data){
     data.value.fields.template.required = false
     data.value.fields.template.dynamic_properties = {}
     data.value.fields.template.dynamic_properties.__func__callback = "OnePeriodictask_template_callback"
+
+    data.value.fields.schedule.dynamic_properties.types["INTERVAL"] = "uptime";
 }
 
 tabSignal.connect("gui.schema.name.periodic_task.edit", signal_gui_schema_name_periodic_task)
