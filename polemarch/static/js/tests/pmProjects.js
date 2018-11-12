@@ -156,40 +156,90 @@ window.qunitTestsArray['guiElements.form'] = {
     {
         syncQUnit.addTest('guiElements.form', function ( assert )
         {
+            let element;
+            let formData;
             let done = assert.async();
             $("body").append("<div id='guiElementsTestForm'></div>")
 
 
-            let formData = {
-                args:[
-                    {
-                        name:'Name',
-                        title:'Name',
-                        default:'Name',
-                        format:'Name',
-                        help:'Name',
-                        enum:'Name',
-                    },
-                    {
-                        name:'Name',
-                        title:'Name',
-                        default:'Name',
-                        format:'Name',
-                        help:'Name',
-                        enum:'Name',
-                    },
-                    {
-                        name:'Name',
-                        title:'Name',
-                        default:'Name',
-                        format:'Name',
-                        help:'Name',
-                        enum:'Name',
-                    },
+            formData = {
+                title:"Deploy",
+                form:[
+                        {
+                            name:'inventory',
+                            title:'inventory',
+                            default:'',
+                            format:'hybrid_autocomplete',
+                            dynamic_properties:{
+                                list_obj: "/project/{pk}/inventory/",
+                                value_field: "id",
+                                view_field: "name",
+                            }
+                        },
+                        {
+                            name:'user',
+                            title:'User',
+                            description: "connect as this user (default=None)",
+                            format:'string',
+                            type: "string",
+                        },
+                        {
+                            name:'key_file',
+                            title:'Key file',
+                            description: "use this file to authenticate the connection",
+                            default:'',
+                            format:'secretfile',
+                            type: "string",
+                            dynamic_properties:{
+                                list_obj: "/project/{pk}/inventory/",
+                                value_field: "id",
+                                view_field: "name",
+                            }
+                        },
+                        {
+                            name:"extra_vars",
+                            title:"Extra vars",
+                            format:'form',
+                            form:[
+                                    {
+                                        name:'varName',
+                                        title:'Name',
+                                        default:'Name',
+                                        format:'string',
+                                        help:'Name',
+                                    },
+                                    {
+                                        name:'varTask',
+                                        title:'Name',
+                                        default:'Name',
+                                        format:'enum',
+                                        help:'Name',
+                                        enum:['A', 'B', 'C'],
+                                    },
+                                    {
+                                        name:'varVersion',
+                                        title:'Name',
+                                        default:'Name',
+                                        format:'boolean',
+                                        help:'Name',
+                                    },
+                                    {
+                                        name:'RunBtn',
+                                        title:'abc.yaml',
+                                        value:'abc.yaml',
+                                        format:'button',
+                                        text:'Run abc.yaml',
+                                        onclick:function(){
+                                            alert("ABC");
+                                        },
+                                        class:'gui-test-form'
+                                    },
+                            ]
+                        }
                 ]
             }
 
-            let element = new guiElements.form(undefined, formData);
+            element = new guiElements.form(undefined, formData);
 
             $("#guiElementsTestForm").insertTpl(element.render())
 
