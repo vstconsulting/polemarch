@@ -913,8 +913,8 @@ class ProjectTestCase(BaseExecutionsTestCase):
 
         self.assertEqual(
             get_bulk_readme()['readme_content'],
-            "<h1>test README.md</h1>\n\n<p><strong>bold</strong>" +
-            " \n <em>italic</em> </p>\n"
+            '<h1 id="test-readmemd">test README.md</h1>\n\n<p><strong>bold</strong>' +
+            ' \n <em>italic</em> </p>\n'
         )
         with open(project.path+"/readme.rst", "w") as f:
             f.write("test README.rst \n **bold** \n *italic* \n")
