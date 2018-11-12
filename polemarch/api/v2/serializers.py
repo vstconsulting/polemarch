@@ -96,7 +96,7 @@ def with_signals(func):
 
 # Serializers
 class ActionResponseSerializer(DataSerializer, EmptySerializer):
-    detail = serializers.CharField()
+    detail = vst_fields.VSTCharField()
 
 
 class ExecuteResponseSerializer(ActionResponseSerializer):
@@ -216,8 +216,8 @@ class OneUserSerializer(UserSerializer):
 
 
 class CreateUserSerializer(OneUserSerializer):
-    password = serializers.CharField(write_only=True)
-    password2 = serializers.CharField(write_only=True, label='Repeat password')
+    password = vst_fields.VSTCharField(write_only=True)
+    password2 = vst_fields.VSTCharField(write_only=True, label='Repeat password')
 
     class Meta(OneUserSerializer.Meta):
         fields = list(OneUserSerializer.Meta.fields) + ['password', 'password2']
@@ -515,7 +515,7 @@ class PlaybookSerializer(_WithVariablesSerializer):
 
 
 class OnePlaybookSerializer(PlaybookSerializer):
-    playbook = serializers.CharField(read_only=True)
+    playbook = vst_fields.VSTCharField(read_only=True)
 
     class Meta:
         model = models.Task
@@ -724,7 +724,7 @@ class OneTemplateSerializer(TemplateSerializer):
 
 
 class TemplateExecSerializer(DataSerializer):
-    option = serializers.CharField(
+    option = vst_fields.VSTCharField(
         help_text='Option name from template options.',
         min_length=0, allow_blank=True,
         required=False
@@ -803,9 +803,9 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
     types = list_to_choices(models.Project.repo_handlers.keys())
     auth_types = list_to_choices(['NONE', 'KEY', 'PASSWORD'])
 
-    status = serializers.CharField(read_only=True)
+    status = vst_fields.VSTCharField(read_only=True)
     type = serializers.ChoiceField(choices=types, default='MANUAL', label='Repo type')
-    repository = serializers.CharField(default='MANUAL', label='Repo url')
+    repository = vst_fields.VSTCharField(default='MANUAL', label='Repo url')
     repo_auth = serializers.ChoiceField(choices=auth_types,
                                         default='NONE',
                                         label='Repo auth type',
@@ -850,8 +850,8 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
 
 
 class ProjectSerializer(_InventoryOperations):
-    status = serializers.CharField(read_only=True)
-    type   = serializers.CharField(read_only=True)
+    status = vst_fields.VSTCharField(read_only=True)
+    type   = vst_fields.VSTCharField(read_only=True)
 
     class Meta:
         model = models.Project
@@ -867,7 +867,7 @@ class ProjectSerializer(_InventoryOperations):
 
 
 class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
-    repository  = serializers.CharField(default='MANUAL')
+    repository  = vst_fields.VSTCharField(default='MANUAL')
     owner = UserSerializer(read_only=True)
     notes = vst_fields.TextareaField(required=False, allow_blank=True)
     readme_content = vst_fields.HtmlField(read_only=True, label='Information')
@@ -973,7 +973,7 @@ def generate_fileds(ansible_type):
         elif ref_type == 'int':
             field = serializers.IntegerField
         elif ref_type == 'string' or 'choice':
-            field = serializers.CharField
+            field = vst_fields.VSTCharField
             kwargs['allow_blank'] = True
 
         if ref == 'verbose':
@@ -1068,7 +1068,7 @@ class DashboardStatisticSerializer(DataSerializer):
 class InventoryImportSerializer(DataSerializer):
     inventory_id = vst_fields.RedirectIntegerField(default=None, allow_null=True)
     name = serializers.CharField(required=True)
-    raw_data = serializers.CharField()
+    raw_data = vst_fields.VSTCharField()
 
     @transaction.atomic()
     def create(self, validated_data):

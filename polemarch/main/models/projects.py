@@ -68,7 +68,7 @@ class Project(AbstractModel):
             return rst_gen(file.read(), writer_name='html')['html_body']
 
         def _make_md(self, file):
-            return Markdown(extras=['tables']).convert(file.read())
+            return Markdown(extras=['tables', 'header-ids']).convert(file.read())
 
         def set_readme(self):
             if not os.path.exists(self.path):
