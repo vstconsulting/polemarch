@@ -143,6 +143,81 @@ to get all needed data from your GIT project.
 
 After your project's status has been changed into "OK" you can confidently start working with Polemarch.
 
+polemarch.yaml
+--------------
+
+polemarch.yaml is a file for...
+
+Structure of polemarch.yaml consists of next fields:
+
+Example of polemarch.yaml structure:
+
+.. sourcecode:: yaml
+
+    sync_on_run: true
+    templates:
+        - test-module:
+             notes: Module test template
+             kind: Module,
+             data:
+                - group: all
+                - vars: {}
+                - args: ''
+                - module: ping
+                - inventory: localhost,
+             options:
+                - uptime: {args: uptime, module: shell}
+        - test playbook:
+            notes: Playbook test template
+            kind: Task
+            data:
+                - vars: {become: true}
+                - playbook: main.yml
+                - inventory: localhost,
+            options:
+                - update: {playbook: other.yml}
+    templates_rewrite: false
+    view:
+        fields:
+            - string:
+                title: Field string
+                default: 0
+                format: string
+                help: Some help text
+            - integer:
+                title: Field integer
+                default: 0
+                format: integer
+                help: Some help text
+            - float:
+                title: Field float
+                default: 0
+                format: float
+                help: Some help text
+            - boolean:
+                title: Field boolean
+                default: 0
+                format: boolean
+                help: Some help text
+            - enum_string:
+                title: Field enum_string
+                default: 0
+                format: string
+                help: Some help text
+                enum: ['Choice1', 'Choice2', 'Choice3']
+            - unknown:
+                title: Field unknown
+                default: 0
+                format: invalid_or_unknown
+                help: Some help text
+        playbooks:
+            - main.yml:
+                title: Execute title
+                help: Some help text
+
+
+
+
 
 Module execution
 ---------------
