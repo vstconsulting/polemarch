@@ -672,8 +672,8 @@ Structure of ``.polemarch.yaml`` consists of next fields:
   * **fields** - dictionary, it consists of objects, that describe fields properties:
 
     * **title**: title of field, that Polemarch will show in web-form.
-    * **default**: default value of field.
-    * **format**: format of field. For today next field formats are available: string, integer, float, boolean, enum, invalid_or_unknown.
+    * **default**: default value of field. Default: '' - for strings, 0 - for numbers.
+    * **format**: format of field. For today next field formats are available: string, integer, float, boolean. Default: string.
     * **help**: some help text for this field.
 
   * **playbooks** - dictionary, it consists of objects, that describes playbook properties:
