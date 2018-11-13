@@ -71,13 +71,6 @@ stages:
     - issue_building
   retry: 2
 
-.publish_template: &publishing
-  stage: publish
-  image: onegreyonewhite/tox:ubuntu
-  allow_failure: true
-  only:
-   - tags
-
 
 # Branch tests
 ###########################################
@@ -164,9 +157,10 @@ pages:
 release_pypi:
   stage: release
   only:
-   - tags
-  before_script:
-  - pip install vstcompile[doc]
+    refs:
+    - tags
+    variables:
+    - $PYPI_UPLOAD_PASSWORD
   script:
    - make test ENVS=build
   allow_failure: true
@@ -190,7 +184,10 @@ publish_pypi:
 release_rpm:
   stage: release
   only:
-   - tags
+    refs:
+    - tags
+    variables:
+    - $PYPI_UPLOAD_PASSWORD
   script:
    - make test ENVS=rpm
   allow_failure: false
@@ -199,20 +196,31 @@ release_rpm:
     paths:
     - dist/
 
+# DEPRECATED
 release_deb:
   stage: release
   only:
-   - tags
+    refs:
+    - tags
+    variables:
+    - $PYPI_UPLOAD_PASSWORD
   image: onegreyonewhite/tox:ubuntu
   script:
    - make test ENVS=deb
   allow_failure: false
   artifacts:
-    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
+    name: "release-deb-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
     paths:
     - dist/
 
 publish_release:
-  <<: *publishing
+  stage: publish
+  image: onegreyonewhite/tox:ubuntu
+  allow_failure: true
+  only:
+    refs:
+    - tags
+    variables:
+    - $PYPI_UPLOAD_PASSWORD
   script:
   - make test ENVS=release

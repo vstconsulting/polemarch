@@ -1,0 +1,88 @@
+
+
+<!-- guiElements.json -->
+<script type="text/x-just" data-just="guiElements.form">
+    <!-- guiElements.form -->
+
+    <%[ wrapper_classes %>
+       col-lg-12 col-xs-12 col-sm-12 col-md-12
+    <%] %>
+
+    <%[ title %>
+        <% if(value.title){ %><h2><%- opt.title || capitalizeString(opt.name) %></h2><% } %>
+    <%] %>
+
+    <%[ main_input %>
+        <div class="form_content">
+            <~ guiElement.realElements>
+                <div id="gui<%- guiElement.element_id %>" class="row">
+                    <% if(Object.keys(guiElement.realElements).length > 0) { %>
+                        <% for(var i in guiElement.realElements) { %>
+                            <%= guiElement.realElements[i].render() %>
+                        <% } %>
+                    <% } else { %>
+                        <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                            <input type="text" class="form-control" readonly disabled  value="This form is empty">
+                        </div>
+                    <% } %>
+                </div>
+            <~>
+        </div>
+    <%] %>
+
+    <%[ readonly_input %>
+        <%* main_input %>
+    <%] %>
+
+    <%! guiElements.base %>
+</script>
+
+
+
+<script type="text/x-just" data-just="project_one">
+    <!-- project_one -->
+
+    <% if(guiObj.hasForm()){ %>
+        <%[ main_content_row %>
+
+            <section class="col-lg-12">
+
+                <div class="box box-info collapsed-box">
+                    <div class="box-header with-border collapsed-box">
+                        Project settings<br>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse" ><i class="fa fa-plus"></i> </button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <%* fields_block %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Run playbook form<br>
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i> </button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <%= guiObj.renderForm() %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        <%] %>
+    <% } %>
+    <!-- /items_new_page -->
+
+    <%! entity_one %>
+</script>

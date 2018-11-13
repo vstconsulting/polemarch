@@ -56,10 +56,13 @@ class DummyHistory(object):
 
 
 class Executor(CmdExecutor):
+    __slots__ = 'history', 'counter', 'exchanger'
+
     def __init__(self, history):
         super(Executor, self).__init__()
         self.history = history
         self.counter = 0
+        self.exchanger = KVExchanger(self.CANCEL_PREFIX + str(self.history.id))
 
     @property
     def output(self):
@@ -84,7 +87,6 @@ class Executor(CmdExecutor):
     def execute(self, cmd, cwd):
         pm_ansible_path = ' '.join(self.pm_ansible())
         self.history.raw_args = " ".join(cmd).replace(pm_ansible_path, '').lstrip()
-        self.exchanger = KVExchanger(self.CANCEL_PREFIX + str(self.history.id))
         return super(Executor, self).execute(cmd, cwd)
 
 

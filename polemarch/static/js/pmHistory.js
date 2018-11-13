@@ -1,6 +1,6 @@
 
 gui_history = {
-    
+
     loadLines : function(item_id, opt)
     {
         var thisObj = this;
@@ -13,13 +13,13 @@ gui_history = {
         {
             opt.offset = 0;
         }
- 
+
         let query = {
-                method: "get",
-                data_type: ["history", item_id, "lines"], 
-                filters:"limit="+opt.limit+"&offset="+opt.offset
-            }
-             
+            method: "get",
+            data_type: ["history", item_id, "lines"],
+            filters:"limit="+opt.limit+"&offset="+opt.offset
+        }
+
         if(opt.before !== undefined)
         {
             query.filters += "&before="+opt.before;
@@ -28,7 +28,7 @@ gui_history = {
         {
             query.filters += "&after="+opt.after;
         }
-         
+
         let def = new $.Deferred();
         $.when(api.query(query)).done(function(data)
         {
@@ -44,7 +44,7 @@ gui_history = {
                 thisObj.model.lines_data.stdout_maxline = 0
                 thisObj.model.lines_data.stdout_minline = 999999999
             }
-            
+
             thisObj.model.lines_data.stdout_count = data.count;
             for(var i in data.results)
             {
@@ -75,7 +75,7 @@ gui_history = {
             webGui.showErrors(e)
             def.reject(e)
         })
-  
+
         return def.promise();
     },
 
@@ -83,7 +83,7 @@ gui_history = {
     {
         jQuery('#history-stdout').scrollTop(9999999);
     },
-    
+
     linePerPage:1000,
     loadNewLines : function(item_id, last_stdout_maxline)
     {
@@ -98,9 +98,9 @@ gui_history = {
         {
             last_stdout_maxline = 0;
         }
-        
+
         return $.when(this.load(item_id), this.loadLines(item_id, {after:last_stdout_maxline, limit:this.linePerPage})).always(function()
-        { 
+        {
             var addData = false;
             var history_stdout = $("#history-stdout");
             if(!history_stdout || !history_stdout.length)
@@ -148,7 +148,7 @@ gui_history = {
             }
         }).promise()
     },
- 
+
     /**
      * Подсветка синтаксиса
      * @link https://habrahabr.ru/post/43030/
@@ -191,7 +191,7 @@ gui_history = {
     bindStdoutUpdates : function(item_id)
     {
         var thisObj = this;
-        tabSignal.once("spajs.open", () => { 
+        tabSignal.once("spajs.open", () => {
             clearTimeout(this.model.loadNewLines_timeoutId)
             this.model.loadNewLines_timeoutId = undefined;
         })
@@ -248,16 +248,47 @@ gui_history = {
                 }
             });
         });
-    } 
+    },
+
+    onUpdateFromServer : function ()
+    {
+        if(this.model.data.status == 'DELAY' || this.model.data.status == 'RUN')
+        {
+            if(this.api.actions['cancel'])
+            {
+                this.api.actions['cancel'].hidden = false;
+                $('.btn_cancel').addClass('hidden-false').removeClass('hidden-true');
+            }
+        }
+        else
+        {
+            if(this.api.actions['cancel'])
+            {
+                this.api.actions['cancel'].hidden = true;
+                $('.btn_cancel').addClass('hidden-true').removeClass('hidden-false');
+            }
+        }
+
+        if(this.model.data.status == 'OK' && this.model.data.kind == 'MODULE' && this.model.data.mode == "setup")
+        {
+            this.api.sublinks['facts'].hidden = false;
+            $('.sublink-btn-facts').addClass('hidden-false').removeClass('hidden-true');
+        }
+        else
+        {
+            this.api.sublinks['facts'].hidden = true
+            $('.sublink-btn-facts').addClass('hidden-true').removeClass('hidden-false');
+        }
+    },
 }
 
 gui_project_history = gui_history
 
-tabSignal.connect("guiList.renderPage.history", function(params){ 
+tabSignal.connect("guiList.renderPage.history", function(params){
     params.guiObj.bindStdoutUpdates(params.guiObj.model.data.id);
-});  
-     
-     
+});
+
+
 function format_history_time(opt)
 {
     if(opt.value)
@@ -276,6 +307,16 @@ function format_executor(opt)
     }
 
     return 'system';
+}
+
+function format_revision(opt)
+{
+    if(opt.value)
+    {
+        return opt.value.substr(0, 8);
+    }
+
+    return "";
 }
 
 function get_prefetch_history_executor_path(data_obj)
@@ -319,7 +360,7 @@ function get_prefetch_history_initiator_path_2(data_obj)
 
 function addHistoryPrefetchBase(obj){
     let properties = obj.definition.properties
- 
+
     if(properties['executor'])
     {
         properties['executor']['prefetch'] = {
@@ -374,6 +415,10 @@ function addSettingsToHistoryListsFields(obj)
     properties['start_time'].__func__value = 'format_history_time';
     properties['stop_time'].__func__value = 'format_history_time';
     properties['executor'].__func__value = 'format_executor';
+    if(properties['revision'])
+    {
+        properties['revision'].__func__value = 'format_revision';
+    }
 }
 
 function addSettingsToOneHistoryFields(obj)
@@ -393,15 +438,15 @@ tabSignal.connect("openapi.schema.definition.OneHistory", addSettingsToOneHistor
 //tabSignal.connect("openapi.schema.definition.History", hideFields);
 
 function hideFields(obj){
-     
+
     let properties = obj.definition.properties;
-     
+
     if(properties['options']) properties['options'].type = 'hidden';
     if(properties['raw_args']) properties['raw_args'].type = 'hidden';
     if(properties['raw_stdout']) properties['raw_stdout'].type = 'hidden';
     if(properties['raw_inventory']) properties['raw_inventory'].type = 'hidden';
     if(properties['initiator_type']) properties['initiator_type'].type = 'hidden';
-    
+
 }
 
 tabSignal.connect("openapi.schema.definition.ProjectHistory", hideFields);
@@ -410,46 +455,41 @@ tabSignal.connect("openapi.schema.definition.OneHistory", hideFields);
 
 
 tabSignal.connect("guiList.renderLine.history", function(obj){
-     
-    if(obj.dataLine.line.status != 'RUN' && obj.dataLine.line.status != 'DELAY')
+
+    if(!(obj.dataLine.line.status == 'RUN' || obj.dataLine.line.status == 'DELAY'))
     {
+        if(obj.dataLine.sublinks_l2['cancel'])
+        {
+            obj.dataLine.sublinks_l2['cancel'].hidden = true
+        }
+
         if(obj.dataLine.sublinks_l2['clear'])
         {
             obj.dataLine.sublinks_l2['clear'].hidden = false
-        } 
+        }
     }
     else
-    { 
+    {
+        if(obj.dataLine.sublinks_l2['cancel'])
+        {
+            obj.dataLine.sublinks_l2['cancel'].hidden = false
+        }
+
         if(obj.dataLine.sublinks_l2['clear'])
         {
             obj.dataLine.sublinks_l2['clear'].hidden = true
         }
     }
-     
-    if(obj.dataLine.line.status == 'RUN' && obj.dataLine.line.status == 'DELAY')
-    {
-        if(obj.dataLine.sublinks_l2['cancel'])
-        {
-            obj.dataLine.sublinks_l2['cancel'].hidden = false
-        } 
-    }
-    else
-    { 
-        if(obj.dataLine.sublinks_l2['cancel'])
-        {
-            obj.dataLine.sublinks_l2['cancel'].hidden = true
-        }
-    }
-    
+
     if(obj.dataLine.line.status == 'OK' && obj.dataLine.line.kind == 'MODULE' && obj.dataLine.line.mode == "setup")
     {
         if(obj.dataLine.sublinks_l2['facts'])
         {
             obj.dataLine.sublinks_l2['facts'].hidden = false
-        } 
+        }
     }
     else
-    { 
+    {
         if(obj.dataLine.sublinks_l2['facts'])
         {
             obj.dataLine.sublinks_l2['facts'].hidden = true
@@ -458,49 +498,49 @@ tabSignal.connect("guiList.renderLine.history", function(obj){
 })
 
 tabSignal.connect("guiList.renderPage.history", function(obj){
-   
-    if(obj.data.status != 'RUN' && obj.data.status != 'DELAY')
-    {
-        if(obj.options.actions['clear'])
-        {
-            obj.options.actions['clear'].hidden = false
-        } 
-    }
-    else
-    {
-        if(obj.options.actions['clear'])
-        {
-            obj.options.actions['clear'].hidden = true
-        } 
-    }
-     
+
     if(obj.data.status == 'OK' && obj.data.kind == 'MODULE' && obj.data.mode == "setup")
     {
         if(obj.options.links['facts'])
         {
             obj.options.links['facts'].hidden = false
-        } 
+        }
     }
     else
-    { 
+    {
         if(obj.options.links['facts'])
         {
             obj.options.links['facts'].hidden = true
         }
     }
-    
+
+    obj.options.actions['clear'].hidden = true
+
     if(obj.data.status == 'DELAY' || obj.data.status == 'RUN')
     {
-        if(obj.options.links['cancel'])
+        if(obj.options.actions['cancel'])
         {
-            obj.options.links['cancel'].hidden = false
-        } 
+            obj.options.actions['cancel'].hidden = false
+        }
     }
     else
-    { 
-        if(obj.options.links['cancel'])
+    {
+        if(obj.options.actions['cancel'])
         {
-            obj.options.links['cancel'].hidden = true
+            obj.options.actions['cancel'].hidden = true
         }
     }
 })
+
+/**
+ * Function calls action, that cleans history Stdout.
+ * @param action_info(object) - action object
+ * @param obj(object) - object of history detail page
+ */
+function clearHistoryStdOut(action_info, obj)
+{
+    return $.when(emptyAction(action_info, obj)()).done(d => {
+        $('#history-stdout').html(d.data.detail);
+    })
+}
+

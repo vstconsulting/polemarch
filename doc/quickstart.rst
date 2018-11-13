@@ -31,8 +31,6 @@ Install from PyPI
 
    * LDAP (```libldap2-dev```)
 
-   * python 2.7 (```libpython2.7```)
-
    * SSHPass(```sshpass```) to get working ssh password auth during playbook execution
 
    * GIT (```git```) to get working git import

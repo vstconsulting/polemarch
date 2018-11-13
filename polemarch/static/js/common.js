@@ -1,8 +1,8 @@
 if(window.moment && window.moment.tz)
-{ 
+{
     window.moment.tz.setDefault(window.timeZone);
 }
- 
+
 if(guiLocalSettings.get('hideMenu'))
 {
     if(window.innerWidth>767){
@@ -12,45 +12,45 @@ if(guiLocalSettings.get('hideMenu'))
 
 function setActiveMenuLiBase()
 {
-    if(/\#project/.test(window.location.href))
+    if(/\#\/project/.test(window.location.href))
     {
         $("#Projects").addClass("active active-li active-bold");
     }
-    else if(/\#host/.test(window.location.href))
+    else if(/\#\/host/.test(window.location.href))
     {
         $("#menu-inventories").addClass("menu-treeview-active active active-li");
         $("#menu-inventories-hosts").addClass("active-bold");
         $("#menu-inventories").removeClass("menu-treeview");
     }
-    else if(/\#group/.test(window.location.href))
+    else if(/\#\/group/.test(window.location.href))
     {
         $("#menu-inventories").addClass("menu-treeview-active active active-li");
         $("#menu-inventories-groups").addClass("active-bold");
         $("#menu-inventories").removeClass("menu-treeview");
     }
-    else if(/\#inventory/.test(window.location.href))
+    else if(/\#\/inventory/.test(window.location.href))
     {
         $("#menu-inventories").addClass("menu-treeview-active active active-li active-bold");
         $("#menu-inventories-inventories").addClass("active-bold");
         $("#menu-inventories").removeClass("menu-treeview");
     }
-    else if(/\#history/.test(window.location.href)){
+    else if(/\#\/history/.test(window.location.href)){
 
         $("#History").addClass("active active-li active-bold");
     }
-    else if(/\#hook/.test(window.location.href))
+    else if(/\#\/hook/.test(window.location.href))
     {
         $("#menu-system").addClass("menu-treeview-active active active-li");
         $("#menu-system-hooks").addClass("active-bold");
         $("#menu-system").removeClass("menu-treeview");
     }
-    else if(/\#team/.test(window.location.href))
+    else if(/\#\/team/.test(window.location.href))
     {
         $("#menu-system").addClass("menu-treeview-active active active-li");
         $("#menu-system-teams").addClass("active-bold");
         $("#menu-system").removeClass("menu-treeview");
     }
-    else if(/\#user/.test(window.location.href) || /\#profile/.test(window.location.href))
+    else if(/\#\/user/.test(window.location.href) || /\#profile/.test(window.location.href))
     {
         $("#menu-system").addClass("menu-treeview-active active active-li");
         $("#menu-system-users").addClass("active-bold");
@@ -139,4 +139,13 @@ tabSignal.connect("loading.completed", function()
 setActiveMenuLiBase();
 
 // Добавляем файл тестов к списку файлов для тестов гуя
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmUnitTest.js')
+/**/
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmHook.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmHosts.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmUsers.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmGroups.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmHistory.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmDashboard.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmInventories.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmProjects.js')
+
