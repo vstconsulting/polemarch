@@ -1,2 +1,2 @@
 # Docs
-vstutils[doc]==1.2.1
+vstutils[doc]==1.2.2

@@ -63,7 +63,7 @@ def raise_linked_error(exception_class=ValidationError, **kwargs):
 #####################################
 @receiver(signals.post_save, sender=Variable)
 def remove_existed(instance, **kwargs):
-    if 'loaddata' in sys.argv:  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     Variable.objects.filter(
         object_id=instance.object_id,
@@ -73,8 +73,8 @@ def remove_existed(instance, **kwargs):
 
 
 @receiver(signals.pre_save, sender=Variable)
-def check_variables_values(instance, *args, **kw):
-    if 'loaddata' in sys.argv:  # nocv
+def check_variables_values(instance, *args, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     content_object = instance.content_object
     if isinstance(content_object, PeriodicTask):
@@ -87,6 +87,8 @@ def check_variables_values(instance, *args, **kw):
 
 @receiver(signals.pre_save, sender=Group)
 def validate_group_name(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     validate_name = RegexValidator(
         regex=r'^[a-zA-Z0-9\-\._]*$',
         message='Name must be Alphanumeric'
@@ -95,7 +97,9 @@ def validate_group_name(instance, **kwargs):
 
 
 @receiver(signals.m2m_changed, sender=Group.parents.through)
-def check_circular_deps(instance, action, pk_set, *args, **kw):
+def check_circular_deps(instance, action, pk_set, *args, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     if (action in ["pre_add", "post_add"]) and ('loaddata' not in sys.argv):
         if instance.id in pk_set:
             raise instance.CiclicDependencyError("The group can not refer to itself.")
@@ -107,6 +111,8 @@ def check_circular_deps(instance, action, pk_set, *args, **kw):
 
 @receiver(signals.pre_save, sender=PeriodicTask)
 def validate_types(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     if (instance.kind not in instance.kinds) or (instance.type not in instance.types):
         # Deprecated, because moved to serializers
         raise UnknownTypeException(instance.kind, "Unknown kind {}.")  # nocv
@@ -114,6 +120,8 @@ def validate_types(instance, **kwargs):
 
 @receiver(signals.pre_save, sender=PeriodicTask)
 def validate_crontab(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     try:
         instance.get_schedule()
     except ValueError as ex:
@@ -123,6 +131,8 @@ def validate_crontab(instance, **kwargs):
 
 @receiver(signals.pre_save, sender=Host)
 def validate_type_and_name(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     if instance.type not in instance.types:  # nocv
         # Deprecated, because moved to serializers
         raise UnknownTypeException(instance.type)
@@ -134,6 +144,8 @@ def validate_type_and_name(instance, **kwargs):
 
 @receiver(signals.pre_save, sender=Template)
 def validate_template_keys(instance, **kwargs):  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     # Deprecated, because moved to serializers
     if instance.kind not in instance.template_fields.keys():
         raise UnknownTypeException(instance.kind)
@@ -149,6 +161,8 @@ def validate_template_keys(instance, **kwargs):  # nocv
 
 @receiver(signals.pre_save, sender=Template)
 def validate_template_executes(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     if instance.kind in ["Host", "Group"]:
         return  # nocv
     errors = {}
@@ -160,6 +174,8 @@ def validate_template_executes(instance, **kwargs):
 
 @receiver(signals.pre_save, sender=Template)
 def validate_template_args(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     if instance.kind in ["Host", "Group"]:
         return  # nocv
     command = "playbook"
@@ -181,6 +197,8 @@ def clean_dirs(instance, **kwargs):
 
 @receiver(signals.post_save, sender=PeriodicTask)
 def save_to_beat(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     task = settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"]
     manager = django_celery_beat.models.PeriodicTask.objects
     delete_from_beat(instance)
@@ -206,6 +224,8 @@ def save_to_beat(instance, **kwargs):
 
 @receiver(signals.post_delete, sender=PeriodicTask)
 def delete_from_beat(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     manager = django_celery_beat.models.PeriodicTask.objects
     celery_tasks = manager.filter(name=str(instance.id))
     for task in celery_tasks:
@@ -225,6 +245,8 @@ def delete_from_beat(instance, **kwargs):
 
 @receiver(signals.m2m_changed, sender=Project.inventories.through)
 def check_if_inventory_linked(instance, action, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     if action != "pre_remove":
         return
     removing_inventories = instance.inventories.filter(pk__in=kwargs['pk_set'])
@@ -245,6 +267,8 @@ def check_if_inventory_linked(instance, action, **kwargs):
 @receiver(signals.pre_delete, sender=Inventory)
 def check_if_inventory_linked_project(instance, **kwargs):
     # pylint: disable=invalid-name
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     if instance.projects.exists():
         raise_linked_error(
             linked_projects=list(instance.projects.values_list('id', flat=True))
@@ -253,6 +277,8 @@ def check_if_inventory_linked_project(instance, **kwargs):
 
 @receiver(signals.pre_save, sender=Hook)
 def check_hook(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     errors = instance.handlers.validate(instance)
     if errors:
         raise ValidationError(errors)
@@ -261,6 +287,8 @@ def check_hook(instance, **kwargs):
 @receiver([signals.post_save, signals.post_delete], sender=BaseUser,
           dispatch_uid='user_add_hook')
 def user_add_hook(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     created = kwargs.get('created', None)
     when = None
     if created is None:
@@ -280,6 +308,8 @@ def user_add_hook(instance, **kwargs):
 @receiver([signals.post_save, signals.post_delete], sender=Group)
 @receiver([signals.post_save, signals.post_delete], sender=Host)
 def polemarch_hook(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     created = kwargs.get('created', None)
     when = "on_object_add"
     if isinstance(instance, Variable):
@@ -296,9 +326,13 @@ def polemarch_hook(instance, **kwargs):
 
 @receiver(signals.post_save, sender=BaseUser)
 def create_settings_for_user(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     UserSettings.objects.get_or_create(user=instance)
 
 
 @receiver(signals.pre_save, sender=Template)
 def update_ptasks_with_templates(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
     instance.periodic_task.all().update(project=instance.project)
