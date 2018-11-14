@@ -123,7 +123,9 @@ class GithubRelease(Command):
             publish=self.publish, name=self.release, dry_run=self.dry_run
         )
         if self.assets:
-            self._gh_kwargs['asset_pattern'] = self.assets.format(release=self.release)
+            assets = self.assets.format(release=self.release)
+            assets = list(filter(bool, assets.split('\n')))
+            self._gh_kwargs['asset_pattern'] = assets
         if self.body:
             self._gh_kwargs['body'] = self.body
 
