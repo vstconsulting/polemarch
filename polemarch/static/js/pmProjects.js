@@ -213,6 +213,17 @@ guiElements.form = function(opt = {}, value, parent_object)
     guiElements.base.apply(this, arguments)
 
     this.realElements = {};
+
+    this.prepareFieldOptions = function(field)
+    {
+        if(field.enum)
+        {
+            field.format = "enum"
+        }
+
+        return field
+    }
+
     this.setValue = function(value)
     {
         this.value = value
@@ -224,11 +235,7 @@ guiElements.form = function(opt = {}, value, parent_object)
                 let field = value.form[i]
                 field.name = i
 
-                if(field.enum)
-                {
-                    field.format = "enum"
-                }
-
+                field = this.prepareFieldOptions(field)
                 let type = getFieldType(field)
  
                 realElements[i] = new guiElements[type]($.extend(true, {}, field), field.value);
