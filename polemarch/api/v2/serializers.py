@@ -184,9 +184,10 @@ class _WithPermissionsSerializer(_SignalSerializer):
 
     def is_valid(self, *args, **kwargs):
         result = super(_WithPermissionsSerializer, self).is_valid(*args, **kwargs)
-        self.validated_data['owner'] = self.validated_data.get(
-            'owner', self.current_user()
-        )
+        if not hasattr(self, 'instance'):
+            self.validated_data['owner'] = self.validated_data.get(
+                'owner', self.current_user()
+            )
         return result
 
     def current_user(self):
