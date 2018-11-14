@@ -12,6 +12,7 @@ window.qunitTestsArray['guiPaths.hook'] = {
                 {
                     is_valid:true,
                     data:{
+                        type : {value:"HTTP"},
                         recipients:{
                             value:rundomString(6)
                         }
