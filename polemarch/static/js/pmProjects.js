@@ -284,3 +284,11 @@ guiElements.form = function(opt = {}, value, parent_object)
         return this.reductionToType(valueObj);
     }
 }
+
+tabSignal.connect("openapi.schema.schema", function(obj)
+{
+    if (obj.path == '/project/{pk}/module/{module_id}/')
+    {
+        obj.value.fields.data.format = 'json'
+    }
+})
