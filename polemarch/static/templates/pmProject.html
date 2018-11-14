@@ -86,3 +86,34 @@
 
     <%! entity_one %>
 </script>
+
+<!-- guiElements.ansible_json -->
+<script type="text/x-just" data-just="guiElements.ansible_json">
+    <!-- guiElements.ansible_json -->
+    <% if(Object.keys(guiElement.realElements).length > 0) { %>
+        <%[ wrapper_classes %>
+           col-lg-12 col-xs-12 col-sm-12 col-md-12
+        <%] %>
+    <% } %>
+    <%[ main_input %>
+        <~ guiElement.realElements>
+            <div id="gui<%- guiElement.element_id %>" class="row">
+                <% if(Object.keys(guiElement.realElements).length > 0) { %>
+                    <% for(var i in guiElement.realElements) { %>
+                        <%= guiElement.realElements[i].render() %>
+                    <% } %>
+                <% } else { %>
+                    <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                        <input type="text" class="form-control" readonly disabled  value="This field is empty">
+                    </div>
+                <% } %>
+            </div>
+        <~>
+    <%] %>
+
+    <%[ readonly_input %>
+        <%* main_input %>
+    <%] %>
+
+    <%! guiElements.base %>
+</script>

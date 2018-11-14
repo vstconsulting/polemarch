@@ -285,10 +285,90 @@ guiElements.form = function(opt = {}, value, parent_object)
     }
 }
 
+guiElements.ansible_json = function(opt = {}, value)
+{
+    /*
+     * This field is only for 1-level json-objects.
+     */
+
+    this.name = 'ansible_json'
+    guiElements.base.apply(this, arguments)
+
+    this.realElements = {};
+    this.setValue = function(value)
+    {
+        this.value = value
+        let realElements = {};
+        if(value)
+        {
+            for(let field in value)
+            {
+                let options = {
+                    readOnly: opt.readOnly || false,
+                    title: field,
+                }
+
+                let type = 'string';
+
+                if (Array.isArray(value[field]))
+                {
+                	type = 'textarea';
+                }
+                else if(typeof value[field] == 'boolean')
+                {
+                    type = 'boolean';
+                }
+                else if(typeof value[field] == 'object')
+                {
+                	type = 'ansible_json';
+                }
+
+                realElements[field] = new guiElements[type]($.extend({}, options), value[field]);
+            }
+        }
+
+        this.realElements = realElements
+
+    }
+    this.setValue(value)
+
+    this.insertTestValue = function(value)
+    {
+        this.setValue(value);
+        return value;
+    }
+
+    this.getValue = function()
+    {
+        let valueObj = {};
+        debugger;
+        for(let element_name in this.realElements)
+        {
+            let element = this.realElements[element_name];
+            valueObj[element_name] = element.getValue();
+        }
+
+        return this.reductionToType(valueObj);
+    }
+
+    this.getValidValue = function()
+    {
+        let valueObj = {};
+        debugger;
+        for(let element_name in this.realElements)
+        {
+            let element = this.realElements[element_name];
+            valueObj[element_name] = element.getValidValue();
+        }
+
+        return valueObj;
+    }
+}
+
 tabSignal.connect("openapi.schema.schema", function(obj)
 {
     if (obj.path == '/project/{pk}/module/{module_id}/')
     {
-        obj.value.fields.data.format = 'json'
+        obj.value.fields.data.format = 'ansible_json'
     }
 })
