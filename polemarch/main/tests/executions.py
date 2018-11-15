@@ -11,6 +11,36 @@ from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
 
 
+test_ansible_cfg = '''
+[defaults]
+library = lib:lib2
+'''
+
+test_module_content = '''
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+ANSIBLE_METADATA = {'metadata_version': '1.1',
+                    'status': ['stableinterface'],
+                    'supported_by': 'core'}
+
+DOCUMENTATION = """
+---
+module: test_module
+short_description: Test module
+description:
+  - Test module for check functionality.
+version_added: "0.0.2"
+options:
+  name:
+    description:
+      - Test description.
+author: "Sergey Klyuykov"
+notes:
+   - Test module
+"""
+'''
+
 test_playbook_content = '''
 ---
 - hosts: all
@@ -593,6 +623,16 @@ class ProjectTestCase(BaseExecutionsTestCase):
             playbook = extra_view_data['playbooks'][playbook_name]
             for required_field in ['title', 'help']:
                 self.assertIn(required_field, playbook.keys())
+        # Check ansible.cfg
+        proj = self.get_model_filter('Project', pk=project_data['id']).get()
+        proj_config = getattr(proj, 'config', None)
+        self.assertTrue(proj_config is not None)
+        # Check modules
+        proj_modules = proj.module.filter(path__startswith='polemarch.project.')
+        self.assertEqual(proj_modules.count(), 1)
+        proj_module = proj_modules.first()
+        self.assertEqual(proj_module.name, 'test_module')
+        self.assertEqual(proj_module.data['short_description'], 'Test module')
         return dict(playbook_count=len(self.revisions), execute=True)
 
     def make_test_templates(self, project_data):
@@ -993,8 +1033,15 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.repo_dir = tempfile.mkdtemp()
         self.generate_playbook(self.repo_dir, ['main.yml'])
         self.generate_playbook(self.repo_dir, ['.polemarch.yaml'], data=dump(pm_yaml))
+        self.generate_playbook(self.repo_dir, ['ansible.cfg'], data=test_ansible_cfg)
+        lib_dir = self.repo_dir + '/lib'
+        if not os.path.exists(lib_dir):
+            os.makedirs(lib_dir)
+            self.generate_playbook(lib_dir, ['test_module.py'], data=test_module_content)
         repo = git.Repo.init(self.repo_dir)
-        repo.index.add(["main.yml", ".polemarch.yaml"])
+        repo.index.add([
+            "main.yml", ".polemarch.yaml", "ansible.cfg", lib_dir + '/test_module.py'
+        ])
         repo.index.commit("no message")
         first_revision = repo.head.object.hexsha
         repo.create_head('new_branch')

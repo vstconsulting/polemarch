@@ -10,6 +10,7 @@ import traceback
 from six.moves.urllib.request import urlretrieve
 from django.db import transaction
 from vstutils.utils import raise_context
+from ..utils import AnsibleModules
 
 logger = logging.getLogger("polemarch")
 
@@ -138,6 +139,32 @@ class _Base(object):
         )
         PlaybookModel.objects.bulk_create(playbook_objects) if playbook_objects else None
 
+    def __get_project_modules(self, module_path):
+        if not (os.path.exists(module_path) and os.path.isdir(module_path)):
+            return []
+        modules = AnsibleModules(detailed=False, paths=[module_path])
+        modules.clear_cache()
+        modules_list = modules.all()
+        modules_list.sort()
+        return modules_list
+
+    @raise_context()
+    def _set_project_modules(self):
+        '''
+        Update project modules
+        '''
+        project = self.proj
+        project.get_ansible_config_parser().clear_cache()
+        project.modules.all().delete()
+        ModuleModel = self.proj.modules.model
+        modules= []
+        for module_path in project.config.get('DEFAULT_MODULE_PATH', []):
+            if project.path in module_path:
+                modules += self.__get_project_modules(module_path)
+        ModuleModel.objects.bulk_create([
+            ModuleModel(path=path, project=project) for path in modules
+        ])
+
     def _update_tasks(self, files):
         '''
         Find and update playbooks in project.
@@ -176,6 +203,7 @@ class _Base(object):
                 result = self._operate(operation)
                 self._set_status("OK")
                 self._update_tasks(self._get_files(result[0]))
+                self._set_project_modules()
                 self._handle_yaml(self._load_yaml() or dict())
         except Exception as err:
             logger.debug(traceback.format_exc())
