@@ -2,7 +2,7 @@
 <!-- Шаблон виджета -->
 <script type="text/x-just" data-just="pmwItemsCounter">
     <div class="col-lg-2 col-sm-4 col-xs-6 dnd-block" id="pmw<%- model.nameInStats %>Counter">
-        <div class="small-box bg-aqua cursor-move1">
+        <div class="small-card bg-aqua cursor-move1">
             <div class="inner">
                 <h3><%= model.justText('count') %>&nbsp;</h3>
                 <p style="text-transform: capitalize"><%- model.nameInStats %></p>
@@ -11,9 +11,9 @@
                 <i class="glyphicon glyphicon-cog"></i>
             </div>
             <% if(model.path){ %>
-                <a href="<%- vstMakeLocalUrl([model.path]) %>" onclick="return vstGO(this.href);" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                <a href="<%- vstMakeLocalUrl([model.path]) %>" onclick="return vstGO(this.href);" class="small-card-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
             <% }else{ %>
-                <i  class="small-box-footer" >&nbsp;</i>
+                <i  class="small-card-footer" >&nbsp;</i>
             <% } %>
         </div>
     </div>
@@ -22,21 +22,21 @@
 <!--Шаблон графика -->
 <script type="text/x-just" data-just="pmwChartWidget">
     <div class="col-lg-12 col-xs-12">
-        <div class="box box-info
+        <div class="card card-info
         <% for(var j in guiDashboard.model.widgets[0]){  %>
             <% if(guiDashboard.model.widgets[0][j].name == 'pmwChartWidget' && guiDashboard.model.widgets[0][j].collapse) { %>
               collapsed-box
             <% } %>
         <% } %>
         ">
-        <div class="box-header ui-sortable-handle cursor-move1">
+        <div class="card-header ui-sortable-handle cursor-move1">
         <!--
         <i class="fa fa-th"></i>
-        <h3 class="box-title">Tasks history</h3>
+        <h3 class="card-title">Tasks history</h3>
     -->
     Tasks history
 
-    <!--<div class="box-tools pull-right"> -->
+    <!--<div class="card-tools pull-right"> -->
     <div class="pull-right">
         <button type="button" class="btn btn-sm w-btn" data-widget="collapse" id="collapse-chart" onclick="guiDashboard.setNewWidgetCollapseValue(this)">
             <i
@@ -77,10 +77,10 @@
 
 
     </div>
-    <div class="box-body border-radius-none">
+    <div class="card-body border-radius-none">
         <div id="c3-history-chart"></div>
         </div>
-        <!-- /.box-body -->
+        <!-- /.card-body -->
         </div>
         </div>
 </script>
@@ -142,14 +142,14 @@
 <!-- Шаблон настройки виджетов из профайла -->
 <script type="text/x-just" data-just="WidgetsSettingsFromProfile">
     <section class="col-lg-12">
-        <div class="box box-info collapsed-box">
-            <div class="box-header with-border">
+        <div class="card card-info collapsed-box">
+            <div class="card-header with-border">
                 Dashboard widgets options<br>
-                <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                <div class="card-tools pull-right">
+                    <button type="button" class="btn btn-card-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
                 </div>
             </div>
-            <div class="box-body">
+            <div class="card-body">
                 <table class="table table-bordered" id="modal-table">
                     <tbody>
                         <tr>
@@ -185,7 +185,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="box-footer">
+            <div class="card-footer">
                 <div class="row">
                     <div class="form-group col-lg-1">
                         <span class="btn btn-primary" onclick="spajs.showLoader(guiDashboard.saveWigdetsOptionsFromProfile());  return false;">Save</span>

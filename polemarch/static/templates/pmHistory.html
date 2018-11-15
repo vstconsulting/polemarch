@@ -9,19 +9,19 @@
 
         <div class="history-mode">
         <section class="col-lg-8 history-LeftInfo">
-            <div class="box box-info collapsed-box">
-                <div class="box-header with-border collapsed-box">
+            <div class="card card-info collapsed-box">
+                <div class="card-header with-border collapsed-box">
                     Inventory<br>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
+                    <div class="card-tools pull-right">
+                        <button type="button" class="btn btn-card-tool btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
                             <i class="glyphicon glyphicon-resize-full"></i>
                             <i class="glyphicon glyphicon-resize-small"></i>
                         </button>
 
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                        <button type="button" class="btn btn-card-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
                     </div>
                 </div>
-                <div class="box-body">
+                <div class="card-body">
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <pre
@@ -32,10 +32,10 @@
                 </div>
             </div>
 
-            <div class="box box-info">
-                <div class="box-header with-border">
+            <div class="card card-info">
+                <div class="card-header with-border">
                     stdout<br>
-                    <div class="box-tools pull-right">
+                    <div class="card-tools pull-right">
                             <~ guiObj.model.data >
                                 <% if(!(guiObj.model.data.status == 'RUN' || guiObj.model.data.status == 'DELAY')) { %>
 
@@ -54,15 +54,15 @@
                                 <% } %>
                             <~>
 
-                        <button type="button" class="btn btn-box-tool btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
+                        <button type="button" class="btn btn-card-tool btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
                             <i class="glyphicon glyphicon-resize-full"></i>
                             <i class="glyphicon glyphicon-resize-small"></i>
                         </button>
 
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse" ><i class="fa fa-minus"></i> </button>
+                        <button type="button" class="btn btn-card-tool" data-widget="collapse" ><i class="fa fa-minus"></i> </button>
                     </div>
                 </div>
-                <div class="box-body">
+                <div class="card-body">
                     <div class="row">
                         <div class="form-group col-lg-12">
                             <label class="control-label" >stdout
@@ -80,14 +80,14 @@
         </section>
 
         <section class="col-lg-4 history-RightInfo col12-mode">
-            <div class="box box-info">
-                <div class="box-header with-border">
+            <div class="card card-info">
+                <div class="card-header with-border">
                     Task<br>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" onclick="$('.history-mode').toggleClass('history-fullsize');" ><i class="glyphicon glyphicon-resize-small"></i> </button>
+                    <div class="card-tools pull-right">
+                        <button type="button" class="btn btn-card-tool" onclick="$('.history-mode').toggleClass('history-fullsize');" ><i class="glyphicon glyphicon-resize-small"></i> </button>
                     </div>
                 </div>
-                <div class="box-body">
+                <div class="card-body">
                     <div class="row">
                         <%* fields_block %>
                     </div>
