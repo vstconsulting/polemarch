@@ -985,9 +985,6 @@ def generate_fileds(ansible_type):
             kwargs['autocomplete'] = 'Inventory'
             field = vst_fields.AutoCompletionField
 
-        if ref == 'extra_vars':
-            kwargs['trim_whitespace'] = False
-
         if field is None:  # nocv
             continue
 

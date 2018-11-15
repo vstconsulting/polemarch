@@ -69,7 +69,7 @@ As you can see, the form of new project creation consist of 5 fields:
 
 * **repo auth data** - key or password value.
 
-After project creation you will the next page:
+After project creation you will see the next page:
 
 .. image:: gui_screenshots/test_project_1.png
 .. image:: gui_screenshots/test_project_2.png
@@ -597,6 +597,186 @@ As you can see there is only 1 new field on this page:
 
 * **id** - |id_field_def|
 
+
+Import inventory
+----------------
+
+If you have some inventory file and you want to add objects from it to Polemarch
+you can do it in rather simple, convenient and quick way: let us introduce you
+very useful action - "Import inventory".
+
+For example, let's use next inventory file:
+
+.. sourcecode:: ini
+
+    [imported-test-group]
+    imported-test-host ansible_host=10.10.10.17
+
+    [imported-test-group:vars]
+    ansible_user=ubuntu
+    ansible_ssh_private_key_file=example_key
+
+To import inventory you should open inventory list page:
+
+.. image:: gui_screenshots/import_inventory.png
+
+And click on "Import inventory" button. Then you will see the next page:
+
+.. image:: gui_screenshots/import_inventory_2.png
+
+As you can see, the form of "Import inventory" action consist of 2 fields:
+
+* **name** - name of your inventory.
+* **inventory file** - value of your inventory file.
+
+After filling of all fields you should click on "Exec" button and then you will see
+page of your imported inventory:
+
+.. image:: gui_screenshots/import_inventory_3.png
+
+This inventory includes "imported-test-group" from imported inventory file:
+
+.. image:: gui_screenshots/import_inventory_4.png
+
+And "imported-test-group" includes "imported-test-host" from imported inventory file:
+
+.. image:: gui_screenshots/import_inventory_5.png
+
+"imported-test-host" includes variable "ansible-host" from imported inventory file:
+
+.. image:: gui_screenshots/import_inventory_6.png
+
+
+.polemarch.yaml
+---------------
+
+``.polemarch.yaml`` is a file for a quick deployment of Polemarch project.
+By quick deployment of Polemarch project we mean automatic creation of some templates
+for this project (during project sync) and using of additional interface for quick task execution.
+
+``.polemarch.yaml`` is not required file for Polemarch work,
+but if you want to use features of ``.polemarch.yaml``, you have to store it in
+the base directory of (GIT, MANUAL, TAR) project.
+
+Structure of ``.polemarch.yaml`` consists of next fields:
+
+* **sync_on_run** - boolean, it means to get or not to get settings from ``.polemarch.yaml``
+  during each project sync.
+* **templates** - dictionary, consists of template objects
+  (their structure is similar to template's API structure except the 'name' field).
+* **templates_rewrite** - boolean, it means to rewrite or not to rewrite templates in project
+  with names equal to templates' names from ``.polemarch.yaml``.
+* **view** - dictionary, it is a description of web-form, that will be generated from ``.polemarch.yaml``.
+  It consists of:
+
+  * **fields** - dictionary, it consists of objects, that describe fields properties:
+
+    * **title**: title of field, that Polemarch will show in web-form.
+    * **default**: default value of field. Default: '' - for strings, 0 - for numbers.
+    * **format**: format of field. For today next field formats are available: string, integer, float, boolean. Default: string.
+    * **help**: some help text for this field.
+
+  * **playbooks** - dictionary, it consists of objects, that describes playbook properties:
+
+    * **title**: title of playbook, that Polemarch will use during playbook execution.
+    * **help**: some help text for this playbook.
+
+Example of ``.polemarch.yaml``:
+
+.. sourcecode:: yaml
+
+    ---
+    sync_on_run: true
+    templates:
+        test-module:
+            notes: Module test template
+            kind: Module
+            data:
+                group: all
+                vars: {}
+                args: ''
+                module: ping
+                inventory: localhost,
+            options:
+                uptime:
+                    args: uptime
+                    module: shell
+        test playbook:
+            notes: Playbook test template
+            kind: Task
+            data:
+                vars: {"become": true}
+                playbook: main.yml
+                inventory: localhost,
+            options:
+                update: {"playbook": "other.yml"}
+    templates_rewrite: true
+    view:
+        fields:
+            string:
+                title: Field string
+                default: 0
+                format: string
+                help: Some help text
+            integer:
+                title: Field integer
+                default: 0
+                format: integer
+                help: Some help text
+            float:
+                title: Field float
+                default: 0
+                format: float
+                help: Some help text
+            boolean:
+                title: Field boolean
+                default: 0
+                format: boolean
+                help: Some help text
+            enum_string:
+                title: Field enum_string
+                default: 0
+                format: string
+                help: Some help text
+                enum: ['Choice1', 'Choice2', 'Choice3']
+            unknown:
+                title: Field unknown
+                default: 0
+                format: invalid_or_unknown
+                help: Some help text
+        playbooks:
+            main.yml:
+                title: Execute title
+                help: Some help text
+
+
+In GUI process of working with ``.polemarch.yaml`` will be the following:
+
+Firstly, you need to create a project with ``.polemarch.yaml``
+(or to add ``.polemarch.yaml`` to existing project).
+For example, let's create new GIT project, that has in its base directory ``.polemarch.yaml`` file
+from the example above:
+
+.. image:: gui_screenshots/create_project_with_polemarch_yaml.png
+
+In the field 'repo url' you should insert url of project that has in its base directory
+``.polemarch.yaml`` file.
+
+After project creation you will see the ordinary project page:
+
+.. image:: gui_screenshots/create_project_with_polemarch_yaml_2.png
+
+Then you need to click on "sync" button. After project synchronization you will see the next page:
+
+.. image:: gui_screenshots/create_project_with_polemarch_yaml_3.png
+.. image:: gui_screenshots/create_project_with_polemarch_yaml_4.png
+
+As you can see, all fields that we mentioned in the exmaple ``.polemarch.yaml`` were added
+to this web-form.
+
+Also templates from ``.polemarch.yaml`` were added to just created Polemarch project.
+
+.. image:: gui_screenshots/create_project_with_polemarch_yaml_5.png
 
 Hooks
 -----
