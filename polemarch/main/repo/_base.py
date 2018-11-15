@@ -153,16 +153,17 @@ class _Base(object):
         '''
         Update project modules
         '''
+        # pylint: disable=invalid-name
         project = self.proj
         project.get_ansible_config_parser().clear_cache()
         project.modules.all().delete()
-        ModuleModel = self.proj.modules.model
-        modules= []
+        ModuleClass = self.proj.modules.model
+        modules = []
         for module_path in project.config.get('DEFAULT_MODULE_PATH', []):
             if project.path in module_path:
                 modules += self.__get_project_modules(module_path)
-        ModuleModel.objects.bulk_create([
-            ModuleModel(path=path, project=project) for path in modules
+        ModuleClass.objects.bulk_create([
+            ModuleClass(path=path, project=project) for path in modules
         ])
 
     def _update_tasks(self, files):

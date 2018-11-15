@@ -36,6 +36,7 @@ class ProjectQuerySet(AbstractVarsQuerySet):
 
 
 class Project(AbstractModel):
+    # pylint: disable=too-many-public-methods
     PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
     objects       = ProjectQuerySet.as_manager()
     repo_handlers = objects._queryset_class.repo_handlers
