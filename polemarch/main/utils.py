@@ -91,7 +91,7 @@ class CmdExecutor(PMObject):
         try:
             line = out.readline()
             while len(line):
-                queue.put_nowait(line)
+                queue.put(line)
                 line = out.readline()
         finally:
             out.close()
