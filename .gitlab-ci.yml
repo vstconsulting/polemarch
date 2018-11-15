@@ -222,5 +222,9 @@ publish_release:
     - tags
     variables:
     - $PYPI_UPLOAD_PASSWORD
+  before_script:
+  - git config --global user.name "${GITLAB_USER_NAME}"
+  - git config --global user.email "${GITLAB_USER_EMAIL}"
+  - git push https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/vstconsulting/polemarch.git "${CI_COMMIT_TAG}"
   script:
   - make test ENVS=release
