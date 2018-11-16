@@ -335,6 +335,7 @@ class ProjectHistorySerializer(HistorySerializer):
 
 
 class OneHistorySerializer(_SignalSerializer):
+    status = serializers.ChoiceField(choices=models.History.statuses, required=False)
     raw_stdout = serializers.SerializerMethodField(read_only=True)
     execution_time = vst_fields.UptimeField()
 
