@@ -183,11 +183,11 @@ class OApiTestCase(BaseTestCase):
         history = definitions['History']
         objName = 'History'
 
-        self.check_fields(objName, history['required'], 'status', 'mode')
+        self.check_fields(objName, history['required'], 'mode')
         self.check_fields(objName, history['properties']['id'], **id_value)
         self.check_fields(
             objName, history['properties']['status'],
-            type='string', maxLength=50, minLength=1
+            type='string', enum=self.get_model_class('History').statuses
         )
         self.check_fields(objName, history['properties']['executor'], type='integer')
         self.check_fields(objName, history['properties']['project'], type='integer')
@@ -342,7 +342,7 @@ class OApiTestCase(BaseTestCase):
         )
         self.check_fields(
             objName, project['properties']['status'],
-            type='string', readOnly=True, minLength=1
+            type='string', readOnly=True, enum=self.get_model_class('Project').STATUSES
         )
         del project
 
@@ -394,7 +394,7 @@ class OApiTestCase(BaseTestCase):
         )
         self.check_fields(
             objName, oneProject['properties']['status'],
-            type='string', readOnly=True, minLength=1
+            type='string', readOnly=True, enum=self.get_model_class('Project').STATUSES
         )
         self.check_fields(
             objName, oneProject['properties']['revision'],
@@ -760,11 +760,11 @@ class OApiTestCase(BaseTestCase):
         projectHistory = definitions['ProjectHistory']
         objName = 'ProjectHistory'
 
-        self.check_fields(objName, projectHistory['required'], 'status', 'mode')
+        self.check_fields(objName, projectHistory['required'], 'mode')
         self.check_fields(objName, projectHistory['properties']['id'], **id_value)
         self.check_fields(
             objName, projectHistory['properties']['status'],
-            type='string', minLength=1, maxLength=50
+            type='string', enum=self.get_model_class('History').statuses
         )
         self.check_fields(
             objName, projectHistory['properties']['revision'],
