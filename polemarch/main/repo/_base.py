@@ -39,6 +39,12 @@ class _Base(object):
         self.proj.get_yaml_subcache().clear()
         return self.proj.get_yaml()
 
+    def _path_exists(self, path):
+        return os.path.exists(path)
+
+    def _dir_exists(self, path_dir):
+        return self._path_exists(path_dir) and os.path.isdir(path_dir)
+
     def message(self, message, level='debug'):
         getattr(logger, level.lower(), logger.debug)(
             'Syncing project [{}] - {}'.format(self.proj.id, message)
@@ -140,9 +146,10 @@ class _Base(object):
         PlaybookModel.objects.bulk_create(playbook_objects) if playbook_objects else None
 
     def __get_project_modules(self, module_path):
-        if not (os.path.exists(module_path) and os.path.isdir(module_path)):
+        valid_paths = tuple(filter(self._dir_exists, module_path))
+        if not valid_paths:
             return []
-        modules = AnsibleModules(detailed=False, paths=[module_path])
+        modules = AnsibleModules(detailed=False, paths=valid_paths)
         modules.clear_cache()
         modules_list = modules.all()
         modules_list.sort()
@@ -158,10 +165,9 @@ class _Base(object):
         project.get_ansible_config_parser().clear_cache()
         project.modules.all().delete()
         ModuleClass = self.proj.modules.model
-        modules = []
-        for module_path in project.config.get('DEFAULT_MODULE_PATH', []):
-            if project.path in module_path:
-                modules += self.__get_project_modules(module_path)
+        paths = project.config.get('DEFAULT_MODULE_PATH', [])
+        paths = filter(lambda mp: project.path in mp, paths)
+        modules = self.__get_project_modules(paths)
         ModuleClass.objects.bulk_create([
             ModuleClass(path=path, project=project) for path in modules
         ])
