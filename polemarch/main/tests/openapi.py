@@ -220,12 +220,12 @@ class OApiTestCase(BaseTestCase):
         objName = 'OneHistory'
 
         self.check_fields(
-            objName, oneHistory['required'], 'status', 'mode', 'execution_time'
+            objName, oneHistory['required'], 'mode', 'execution_time'
         )
         self.check_fields(objName, oneHistory['properties']['id'], **id_value)
         self.check_fields(
             objName, oneHistory['properties']['status'],
-            type='string', maxLength=50, minLength=1
+            type='string', enum=self.get_model_class('History').statuses
         )
         self.check_fields(objName, oneHistory['properties']['executor'], type='integer')
         self.check_fields(objName, oneHistory['properties']['project'], type='integer')
