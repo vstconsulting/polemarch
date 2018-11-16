@@ -34,17 +34,9 @@ stages:
       - issue_building
     variables:
       - $CI_COMMIT_MESSAGE =~ /Merge branch/
-  only:
     changes:
-      - polemarch/api/*
-      - polemarch/main/*
-      - tests.py
-      - setup.py
-      - setup.cfg
-      - MANIFEST.in
-      - requirements*
-      - tox.ini
-      - .giltab-ci.yml
+      - polemarch/static/*
+      - polemarch/templates/*
   retry: 2
 
 .pack_tamplate: &packing-test
@@ -87,20 +79,9 @@ code_style:
       - issue_building
     variables:
       - $CI_COMMIT_MESSAGE =~ /Merge branch/
-  only:
-    refs:
-      - /^.{0,}issue_.*$/
-      - developer
-      - master
     changes:
-      - polemarch/api/*
-      - polemarch/main/*
-      - tests.py
-      - requirements*
-      - tox.ini
-      - .giltab-ci.yml
-      - .pep8
-      - .pylintrc
+      - polemarch/static/*
+      - polemarch/templates/*
   retry: 2
 
 py27-install:

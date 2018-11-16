@@ -91,7 +91,7 @@ class CmdExecutor(PMObject):
         try:
             line = out.readline()
             while len(line):
-                queue.put_nowait(line)
+                queue.put(line)
                 line = out.readline()
         finally:
             out.close()
@@ -253,13 +253,19 @@ class AnsibleCache(SubCacheInterface):
 
 
 class PMAnsible(PMObject):
-    __slots__ = ()
+    __slots__ = 'execute_path', 'cache',
     # Json regex
     _regex = re.compile(r"([\{\[][^\w\d\.].*[\}\]]$)", re.MULTILINE)
     ref_name = 'object'
+    cache_timeout = 86400*7
+
+    def __init__(self, execute_path='/tmp/'):
+        self.execute_path = execute_path
 
     def get_ansible_cache(self):
-        return AnsibleCache(self.get_ref(cache=True))
+        if not hasattr(self, 'cache'):
+            self.cache = AnsibleCache(self.get_ref(cache=True), self.cache_timeout)
+        return self.cache
 
     def _get_only_json(self, output):
         return json.loads(self._regex.findall(output)[0])
@@ -280,7 +286,7 @@ class PMAnsible(PMObject):
             with open(os.devnull, 'wb') as DEVNULL:
                 cmd = CmdExecutor(stderr=DEVNULL)
                 cmd_command = self.get_args()
-                cmd.execute(cmd_command, '/tmp/')
+                cmd.execute(cmd_command, self.execute_path)
             result = self._get_only_json(cmd.output)
             cache.set(result)
         return result
@@ -304,6 +310,7 @@ class AnsibleArgumentsReference(PMAnsible):
     ]
 
     def __init__(self):
+        super(AnsibleArgumentsReference, self).__init__()
         self.raw_dict = self._extract_from_cli()
 
     def is_valid_value(self, command, argument, value):
@@ -352,13 +359,14 @@ class AnsibleArgumentsReference(PMAnsible):
 
 
 class AnsibleModules(PMAnsible):
-    __slots__ = 'detailed', 'key'
+    __slots__ = 'detailed', 'key', 'module_paths'
     ref_name = 'modules'
 
-    def __init__(self, detailed=False):
+    def __init__(self, detailed=False, paths=None):
         super(AnsibleModules, self).__init__()
         self.detailed = detailed
         self.key = None
+        self.module_paths = paths
 
     def get_args(self):  # nocv
         cmd = super(AnsibleModules, self).get_args()
@@ -366,6 +374,9 @@ class AnsibleModules(PMAnsible):
             cmd += ['--detail']
         if self.key:
             cmd += ['--get', self.key]
+        if isinstance(self.module_paths, (tuple, list)):
+            for path in self.module_paths:
+                cmd += ['--path', path]
         return cmd
 
     def get_ref(self, cache=False):
@@ -404,3 +415,7 @@ class AnsibleInventoryParser(PMAnsible):
         with tmp_file_context(data=raw_data) as tmp_file:
             self.path = tmp_file.name
             return self.get_data()
+
+
+class AnsibleConfigParser(PMAnsible):
+    ref_name = 'config'
