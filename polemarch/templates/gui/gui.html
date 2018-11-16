@@ -16,6 +16,7 @@
 {% block common_sciprt %}
 <script type="text/javascript">
 window.resourceList = window.resourceList.concat([
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmElements.html?v={{gui_version}}"},
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmProject.html?v={{gui_version}}"},
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmHistory.html?v={{gui_version}}"},
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmUsers.html?v={{gui_version}}"},
@@ -30,6 +31,7 @@ window.resourceList = window.resourceList.concat([
 
     { prioritet:160, type:'js', name: "{% static 'js/common.js' %}?v={{gui_version}}"},
     { prioritet:160, type:'js', name: "{% static 'js/hardcoder.js' %}?v={{gui_version}}"},
+    { prioritet:183, type:'js', name: "{% static 'js/pmElements.js' %}?v={{gui_version}}"},
     { prioritet:183, type:'js', name: "{% static 'js/pmUsers.js' %}?v={{gui_version}}"},
     { prioritet:184, type:'js', name: "{% static 'js/pmGroups.js' %}?v={{gui_version}}"},
     { prioritet:185, type:'js', name: "{% static 'js/pmInventories.js' %}?v={{gui_version}}"},
