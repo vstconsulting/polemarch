@@ -37,6 +37,7 @@ stages:
     changes:
       - polemarch/static/*
       - polemarch/templates/*
+      - polemarch/main/settings.ini
   retry: 2
 
 .pack_tamplate: &packing-test
@@ -82,6 +83,7 @@ code_style:
     changes:
       - polemarch/static/*
       - polemarch/templates/*
+      - polemarch/main/settings.ini
   retry: 2
 
 py27-install:
