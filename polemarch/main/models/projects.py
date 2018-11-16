@@ -109,6 +109,14 @@ class Project(AbstractModel):
         'boolean': bool,
     }
 
+    STATUSES = [
+        'NEW',
+        'WAIT_SYNC',
+        'SYNC',
+        'ERROR',
+        'OK',
+    ]
+
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
 

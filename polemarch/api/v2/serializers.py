@@ -296,6 +296,8 @@ class OneTeamSerializer(TeamSerializer):
 
 
 class HistorySerializer(_SignalSerializer):
+    status = serializers.ChoiceField(choices=models.History.statuses, required=False)
+
     class Meta:
         model = models.History
         fields = (
@@ -851,7 +853,7 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
 
 
 class ProjectSerializer(_InventoryOperations):
-    status = vst_fields.VSTCharField(read_only=True)
+    status = serializers.ChoiceField(read_only=True, choices=models.Project.STATUSES)
     type   = vst_fields.VSTCharField(read_only=True)
 
     class Meta:

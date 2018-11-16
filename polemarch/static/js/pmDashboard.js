@@ -170,7 +170,7 @@ guiDashboard.model.defaultChartLineSettings = [
     {
         name: "error",
         title: "ERROR",
-        color: "#333333",
+        color: "#dc3545",
         active: true
     },
     {
@@ -683,23 +683,6 @@ guiDashboard.loadStats=function()
 {
     var thisObj = this;
 
-    /*var limit=1;
-    return spajs.ajax.Call({
-        url: hostname + "/api/v2/stats/?last="+guiDashboard.statsDataLastQuery,
-        type: "GET",
-        contentType: 'application/json',
-        data: "limit=" + encodeURIComponent(limit)+"&rand="+Math.random(),
-        success: function (data)
-        {
-            thisObj.statsData=data;
-        },
-        error: function (e)
-        {
-            console.warn(e)
-            webGui.showErrors(e)
-        }
-    });*/
-
     let query = {
         type: "get",
         item: "stats",
@@ -827,14 +810,6 @@ tabSignal.connect('guiLocalSettings.hideMenu', function(){
         }
     }, 200)
 })
-
-/*
-tabSignal.connect('hideLoadingProgress', function(){
-    if(spajs.currentOpenMenu && spajs.currentOpenMenu.id == 'home')
-    {
-        guiDashboard.updateData()
-    }
-})*/
 
 guiDashboard.updateData = function()
 {
@@ -999,11 +974,11 @@ guiDashboard.open  = function(holder, menuInfo, data)
                 ],
                 type: 'area',
                 types: {
-                    OK: 'line',
-                    ERROR: 'line',
-                    INTERRUPTED: 'line',
-                    DELAY: 'line',
-                    OFFLINE: 'line'
+                    OK: 'area',
+                    ERROR: 'area',
+                    INTERRUPTED: 'area',
+                    DELAY: 'area',
+                    OFFLINE: 'area'
                 },
             },
             axis: {

@@ -101,33 +101,33 @@
     }
 }
 
-.tr_status_OFFLINE .td_history_status,
-.tr_status_OFFLINE .td_project-history_status {
+.tr_status_offline .td_history_status,
+.tr_status_offline .td_project-history_status {
     color: #9e9e9e;
 }
 
-.tr_status_INTERRUPTED .td_history_status,
-.tr_status_INTERRUPTED .td_project-history_status {
+.tr_status_interrupted .td_history_status,
+.tr_status_interrupted .td_project-history_status {
     color: #9b97e4;
 }
 
-.tr_status_RUN .td_history_status,
-.tr_status_RUN .td_project-history_status {
+.tr_status_run .td_history_status,
+.tr_status_run .td_project-history_status {
     color: #0085ff;
 }
 
-.tr_status_ERROR .td_history_status,
-.tr_status_ERROR .td_project-history_status {
-
+.tr_status_error .td_history_status,
+.tr_status_error .td_project-history_status {
+    color: #dc3545;
 }
 
-.tr_status_DELAY .td_history_status,
-.tr_status_DELAY .td_project-history_status {
+.tr_status_delay .td_history_status,
+.tr_status_delay .td_project-history_status {
     color: #808419;
 }
 
-.tr_status_OK .td_history_status,
-.tr_status_OK .td_project-history_status {
+.tr_status_ok .td_history_status,
+.tr_status_ok .td_project-history_status {
     color: #276900;
 }
 
@@ -137,19 +137,47 @@
     vertical-align: middle;
 }
 
-.project-status-SYNC{
-    color: #f40;
+.tr_status_sync .td_project_status {
+    color: darkorange;
 }
 
-.project-status-WAIT_SYNC{
+.tr_status_wait_sync .td_project_status {
     color: #0085ff;
 }
 
-.project-status-OK{
+.tr_status_new .td_project_status {
+    color: #8c8c8c;
+}
+
+.tr_status_error .td_project_status {
+    color: red;
+}
+
+.tr_status_ok .td_project_status {
     color: #276900;
 }
 
+.td_project_status {
+    display: none;
+    width: 15%;
+}
 
+.td_project_type {
+    display: none;
+    width: 18%;
+}
+
+@media (min-width: 767px) {
+    .td_project_type {
+        display: table-cell;
+    }
+}
+
+@media (min-width: 600px) {
+    .td_project_status {
+        display: table-cell;
+    }
+}
 
 .stdout-line .S{color:red}/* Строки красные */
 .stdout-line .func{color:blue}/* Юзер-функции синие */
