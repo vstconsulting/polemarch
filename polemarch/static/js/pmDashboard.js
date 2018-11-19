@@ -471,7 +471,9 @@ guiDashboard.putUserDashboardSettingsToAPI = function()
 
     let def = new $.Deferred();
 
-    $.when(api.query(query, true)).fail(e => {
+    $.when(api.query(query, true)).done(d => {
+        def.resolve();
+    }).fail(e => {
         console.warn(e)
         webGui.showErrors(e)
         def.reject()
@@ -588,11 +590,9 @@ guiDashboard.saveWigdetsOptions = function()
 guiDashboard.saveWigdetsOptionsFromModal = function()
 {
     return $.when(guiDashboard.saveWigdetsOptions()).done(function(){
-        return $.when(hidemodal(), guiDashboard.HideAfterSaveModalWindow()).done(function(){
+            guiModal.modalClose();
             return spajs.openURL("/");
-        }).promise();
     }).promise();
-
 }
 
 /**
@@ -617,31 +617,6 @@ guiDashboard.saveChartLineSettings = function()
     guiDashboard.putUserDashboardSettingsToAPI();
 }
 
-/**
- *Функция, сохраняющая настройки линий графика, внесенных в форму настроек виджетов Dashboard'a,
- *из секции на странице профиля пользователя.
- */
-guiDashboard.saveChartLineSettingsFromProfile = function()
-{
-    return $.when(guiDashboard.saveChartLineSettings()).done(function(){
-        return guiPopUp.success("Dashboard chart lines settings were successfully saved");
-    }).fail(function(){
-        return guiPopUp.error("Dashboard chart lines settings were not saved");
-    }).promise();
-}
-
-/**
- *Функция, сохраняющая все настройки, касающиеся Dashboard'a, со страницы профиля пользователя.
- */
-guiDashboard.saveAllDashboardSettingsFromProfile = function(){
-    guiDashboard.getOptionsFromTable("modal-table",guiDashboard.model.widgets[0]);
-    guiDashboard.getOptionsFromTable("chart_line_settings_table", guiDashboard.model.ChartLineSettings);
-    return $.when(guiDashboard.putUserDashboardSettingsToAPI()).done(function(){
-        return guiPopUp.success("Dashboard settings were successfully saved");
-    }).fail(function(){
-        return guiPopUp.error("Dashboard settings were not saved");
-    }).promise();
-}
 
 /**
  * Функция, которая формирует массив данных для кривых графика по отдельному статусу
@@ -731,40 +706,6 @@ guiDashboard.updateStatsDataLast=function(thisEl)
     guiDashboard.updateData();
 }
 
-/**
- * Ниже представлены 3 функции для работы с модальным окном - Set widget options
- * guiDashboard.showModalWindow - открывает модальное окно, предварительно обновляя данные
- * guiDashboard.HideAfterSaveModalWindow - скрывает модальное окно
- * guiDashboard.renderModalWindow - отрисовывает модальное окно
- */
-guiDashboard.showModalWindow = function()
-{
-    if($('div').is('#modal-widgets-settings'))
-    {
-        guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
-        $('#modal-widgets-settings').empty();
-        $('#modal-widgets-settings').html(guiDashboard.renderModalWindow());
-        $("#modal-widgets-settings").modal('show');
-    }
-}
-
-guiDashboard.HideAfterSaveModalWindow = function()
-{
-    if($('div').is('#modal-widgets-settings'))
-    {
-        return $("#modal-widgets-settings").modal('hide');
-    }
-
-}
-
-guiDashboard.renderModalWindow = function()
-{
-    var html=spajs.just.render('modalWidgetsSettings');
-    return html;
-}
-
-
-
 guiDashboard.stopUpdates = function()
 {
     clearTimeout(this.model.updateTimeoutId)
@@ -772,7 +713,7 @@ guiDashboard.stopUpdates = function()
 }
 
 /**
- * Для перетаскивания виджетов и изменения их порядка
+ * Turn on/off drag-and-drop property of Dashboard widgets.
  */
 guiDashboard.toggleSortable = function(thisButton)
 {
@@ -1155,3 +1096,14 @@ pmwUsersCounter.model.path = "user";
 tabSignal.connect("loading.completed", function(){
     guiDashboard.getUserSettingsFromAPI();
 })
+
+guiDashboard.showWidgetSettingsModal = function ()
+{
+    let opt = {
+        title: 'Widget settings',
+    };
+
+    let html = spajs.just.render('widget_settings_modal');
+    guiModal.setModalHTML(html, opt);
+    guiModal.modalOpen();
+}

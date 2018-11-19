@@ -232,6 +232,8 @@
     min-height: 400px;
     line-height: 1;
     background: #000;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 @media (min-width: 767px) {
@@ -249,21 +251,21 @@
     display: none;
 }
 
-.history-mode .history-LeftInfo .btn-history-resize .glyphicon-resize-full{
+.history-mode .history-LeftInfo .btn-history-resize .fa-expand{
     display: block;
 }
 
-.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .glyphicon-resize-full{
+.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .fa-expand{
     display: none;
 }
 
 
 
-.history-mode .history-LeftInfo .btn-history-resize .glyphicon-resize-small{
+.history-mode .history-LeftInfo .btn-history-resize .fa-compress{
     display: none;
 }
 
-.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .glyphicon-resize-small{
+.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .fa-compress{
     display: block;
 }
 
