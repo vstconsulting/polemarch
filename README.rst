@@ -1,6 +1,14 @@
 Polemarch
 =========
 
+.. image:: https://gitlab.com/vstconsulting/polemarch/badges/master/pipeline.svg
+   :target: https://gitlab.com/vstconsulting/polemarch/commits/master
+   :alt: Tests status
+
+.. image:: https://gitlab.com/vstconsulting/polemarch/badges/master/coverage.svg
+   :target: https://gitlab.com/vstconsulting/polemarch/pipelines
+   :alt: Code coverage
+
 .. image:: https://readthedocs.org/projects/polemarch/badge/?version=stable
    :target: http://polemarch.readthedocs.io/en/stable/?badge=stable
    :alt: Documentation Status
