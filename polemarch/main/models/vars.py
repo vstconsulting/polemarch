@@ -51,7 +51,7 @@ class Variable(BModel):
     content_type   = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id      = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
-    key            = models.CharField(max_length=128)
+    key            = models.CharField(max_length=512)
     value          = models.CharField(max_length=2*1024, null=True)
 
     variables_keys = [

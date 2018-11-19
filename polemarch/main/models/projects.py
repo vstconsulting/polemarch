@@ -313,7 +313,7 @@ class Task(BModel):
     objects     = TaskFilterQuerySet.as_manager()
     project     = models.ForeignKey(Project, on_delete=models.CASCADE,
                                     related_query_name="playbook")
-    name        = models.CharField(max_length=256, default=uuid.uuid1)
+    name        = models.CharField(max_length=251, default=uuid.uuid1)
     playbook    = models.CharField(max_length=256)
 
     class Meta:
