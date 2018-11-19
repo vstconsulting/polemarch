@@ -51,10 +51,10 @@ class Hook(BModel):
     objects = HooksQuerySet.as_manager()
     handlers = HookHandlers("HOOKS", "'type' needed!")
     name       = models.CharField(max_length=512, default=uuid.uuid1)
-    type       = models.CharField(max_length=32, null=False)
-    when       = models.CharField(max_length=32, null=True, default=None)
-    enable     = models.BooleanField(default=True)
-    recipients = models.CharField(max_length=16383)
+    type       = models.CharField(max_length=32, null=False, db_index=True)
+    when       = models.CharField(max_length=32, null=True, default=None, db_index=True)
+    enable     = models.BooleanField(default=True, db_index=True)
+    recipients = models.TextField()
 
     @property
     def reps(self):

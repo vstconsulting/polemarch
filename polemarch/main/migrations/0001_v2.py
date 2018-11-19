@@ -455,11 +455,13 @@ class Migration(migrations.Migration):
             name='template',
             index_together=set([('id', 'name', 'kind', 'inventory', 'project')]),
         ),
-        migrations.AlterIndexTogether(
-            name='historylines',
-            index_together=set(
-                [('history', 'line_number'), ('history',), ('line_number',)]),
-        ),
+        # Fix bug with Django migrations
+        # Please, remove indexes manually.
+        # migrations.AlterIndexTogether(
+        #     name='historylines',
+        #     index_together=set(
+        #         [('history', 'line_number'), ('history',), ('line_number',)]),
+        # ),
         migrations.AlterIndexTogether(
             name='history',
             index_together=set([('id', 'project', 'mode', 'status', 'inventory',
