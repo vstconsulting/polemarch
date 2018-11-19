@@ -28,7 +28,7 @@ guiDashboard.statsDataMomentType='day';
 
 
 /**
- * Двумерный массив с описанием списка отображаемых виджетов в каждой строке
+ * Two-dimensional array with structure of Dashboard widgets.
  *
  * @example
  * [
@@ -46,8 +46,8 @@ guiDashboard.model.widgets = [
     ],
 ]
 
-/*
-*Двумерный массив, хранящий в себе настройки виджетов по умолчанию.
+/**
+ * Two-dimensional array with default structure of Dashboard widgets.
  */
 guiDashboard.model.defaultWidgets = [
     [
@@ -144,15 +144,15 @@ guiDashboard.model.defaultWidgets = [
     ],
 ]
 
-/*
- * Массив, хранящий в себе настройки линий графика на странице Dashboard'а.
+/**
+ * Array with Dashboard's Chart line settings.
  */
 guiDashboard.model.ChartLineSettings = [
 
 ]
 
-/*
- * Массив, хранящий в себе настройки по умолчанию линий графика на странице Dashboard'а.
+/**
+ * Array with default Dashboard's Chart line settings.
  */
 guiDashboard.model.defaultChartLineSettings = [
     {
@@ -196,8 +196,8 @@ guiDashboard.model.defaultChartLineSettings = [
 guiDashboard.model.autoupdateInterval = 15000;
 
 /**
- * Функция полностью копирует настройки для линий графика.
- * Подразумевается, что данная функция вызывается, когда пришел из API пустой JSON.
+ * Function copies all properties of default chart line settings.
+ * This function is supposed to be called when empty JSON was received from API.
  */
 guiDashboard.cloneChartLineSettingsTotally = function(){
     guiDashboard.model.ChartLineSettings = JSON.parse(JSON.stringify(guiDashboard.model.defaultChartLineSettings));
@@ -205,8 +205,8 @@ guiDashboard.cloneChartLineSettingsTotally = function(){
 }
 
 /**
- * Функция обновляет часть настроек линий графика, данные по которым пришли из API.
- * Подразумевается, что данная функция вызывается, когда пришел из API непустой JSON.
+ * Function updates properties of chart line settings, info about which was received from API.
+ * This function is supposed to be called when not empty JSON was received from API.
  */
 guiDashboard.cloneChartLineSettingsFromApi = function(data){
     guiDashboard.model.ChartLineSettings = JSON.parse(JSON.stringify(guiDashboard.model.defaultChartLineSettings));
@@ -230,8 +230,8 @@ guiDashboard.cloneChartLineSettingsFromApi = function(data){
 }
 
 /**
- * Функция полностью копирует настройки по умолчанию для виджетов.
- * Подразумевается, что данная функция вызывается, когда пришел из API пустой JSON.
+ * Function copies all properties of default widget settings.
+ * This function is supposed to be called when empty JSON was received from API.
  */
 guiDashboard.cloneDefaultWidgetsTotally = function(){
     for(var i in guiDashboard.model.defaultWidgets[0])
@@ -247,10 +247,10 @@ guiDashboard.cloneDefaultWidgetsTotally = function(){
 }
 
 /**
- * Функция копирует "статичные" настройки по умолчанию для виджетов.
- * Под "статичными" понимается name, title, opt, type.
- * Данные настройки не меняются в ходе работы пользователя с интерфейсом.
- * Подразумевается, что данная функция вызывается, когда пришел из API непустой JSON.
+ * Function copies all properties of default 'static' widget settings.
+ * 'Static' settings - settings, that don't change during user work with GUI.
+ * For example, name, title, opt, type.
+ * This function is supposed to be called when not empty JSON was received from API.
  */
 guiDashboard.cloneDefaultWidgetsStaticSettingsOnly = function(){
     for(var i in guiDashboard.model.defaultWidgets[0])
@@ -265,11 +265,8 @@ guiDashboard.cloneDefaultWidgetsStaticSettingsOnly = function(){
 }
 
 /**
- * Функция добавляет виджету оставшиеся(не "статичные") настройки.
- * Функция проверяет есть ли соответсвуют ли пришедшие настройки для виджетов из API тем,
- * что хранятся в массиве с настройками по умолчанию.
- * Если данное свойство соответсвует, то его значение присваивается настройкам виджета.
- * В противном случае ему присваивается настройка по умолчанию.
+ * Function adds not static properties to widget.
+ * Function sets value from API if it is, otherwise, it sets default value.
  */
 guiDashboard.clonetWidgetsSettingsFromApiAndVerify = function(data){
     guiDashboard.cloneDefaultWidgetsStaticSettingsOnly();
@@ -296,14 +293,11 @@ guiDashboard.clonetWidgetsSettingsFromApiAndVerify = function(data){
 }
 
 /**
- * Функция проверяет необходимо ли посылать запрос к API для загрузки
- * пользовательских настроек Dashboard'a (настройки виджетов, настройки линий графика).
- * Например, если в модели отсутствует какой-либо виджет,
- * либо у виджета отсутсвует какое-нибудь свойство,
- * то запрос к API будет отправлен.
- * @param {Object} defaultObj - объект с настройками по умолчанию
- * @param {Object} currentObj - объект с текущими настройками
- *
+ * Function checks Necessity to send API request for loading of user's dashboard settings.
+ * For example, if some property is missed in current widget object
+ * or even if widget is missed, request will be sent.
+ * @param {Object} defaultObj - object with default settings.
+ * @param {Object} currentObj - object with current settings.
  */
 guiDashboard.checkNecessityToLoadDashboardSettingsFromApi = function(defaultObj, currentObj)
 {
@@ -331,21 +325,20 @@ guiDashboard.checkNecessityToLoadDashboardSettingsFromApi = function(defaultObj,
 
     if(bool1 || bool2)
     {
-        //нужно послать запрос к api
+        // request will be sent
         return true;
     }
     else
     {
-        //не нужно посылать запрос к api
+        // request will not be sent
         return false;
     }
 }
 
 /**
- *Функция создает объект, в который вносит актуальные настройки виджета,
- *на основе изменений, внесенных в guiDashboard.model.widgets[0][i].
- *localObj- guiDashboard.model.widgets[0][i]
- * @type Object
+ * Function creates object with current widget settings,
+ * based on changes in guiDashboard.model.widgets[0][i].
+ * @param localObj(Object) - guiDashboard.model.widgets[0][i].
  */
 guiDashboard.getNewWidgetSettings = function(localObj)
 {
@@ -357,9 +350,9 @@ guiDashboard.getNewWidgetSettings = function(localObj)
 }
 
 /**
- *Функция заправшивает у API пользовательские настройки
- *(настройки виджетов, настройки линий графика, интервал автообновлений).
- *Если они есть(пришел не пустой объект), то данные настройки добавляются в guiDashboard.model.
+ * Function sends request to API for getting user's settings
+ * (dashboard settings, chartline settings, autoupdate interval).
+ * If request answer is not empty, API settings will be added to Dashboard model.
  */
 guiDashboard.getUserSettingsFromAPI = function()
 {
@@ -446,8 +439,8 @@ guiDashboard.cloneDefaultAutoupdateInterval = function()
 }
 
 /**
- *Функция сохраняет в API пользовательские настройки Dashboard'a
- *(настройки виджетов, настройки линий графика).
+ * Function sends request to API for putting user's settings
+ * (dashboard settings, chartline settings, autoupdate interval).
  */
 guiDashboard.putUserDashboardSettingsToAPI = function()
 {
@@ -466,7 +459,11 @@ guiDashboard.putUserDashboardSettingsToAPI = function()
     let query = {
         method: "post",
         data_type: ["user", userId, "settings"],
-        data:{widgetSettings:widgetSettings, chartLineSettings:chartLineSettings}
+        data:{
+            autoupdateInterval: guiDashboard.model.autoupdateInterval,
+            widgetSettings:widgetSettings,
+            chartLineSettings:chartLineSettings,
+        }
     }
 
     let def = new $.Deferred();
@@ -483,7 +480,7 @@ guiDashboard.putUserDashboardSettingsToAPI = function()
 }
 
 /**
- *Функция, сортирующая массив объектов.
+ * Function sorts widgets array.
  */
 guiDashboard.sortCountWidget=function(Obj1, Obj2)
 {
@@ -491,7 +488,7 @@ guiDashboard.sortCountWidget=function(Obj1, Obj2)
 }
 
 /**
- *Функция, меняющая свойство виджета active на false.
+ * Function toggles 'active' widget property to false.
  */
 guiDashboard.setNewWidgetActiveValue = function(thisButton)
 {
@@ -507,7 +504,7 @@ guiDashboard.setNewWidgetActiveValue = function(thisButton)
 }
 
 /**
- *Функция, меняющая свойство виджета collapse на противоположное (true-false).
+ * Function toggles 'collapse' widget property to opposite (true/false).
  */
 guiDashboard.setNewWidgetCollapseValue = function(thisButton)
 {
@@ -518,7 +515,7 @@ guiDashboard.setNewWidgetCollapseValue = function(thisButton)
         {
             guiDashboard.model.widgets[0][i].collapse=!guiDashboard.model.widgets[0][i].collapse;
 
-            //скрываем селект с выбором периода на виджете-графике при его сворачивании
+            // hides select with period value on chart widget during its collapsing
             if(widgetName=="pmwChartWidget")
             {
                 if(guiDashboard.model.widgets[0][i].collapse==false)
@@ -536,8 +533,7 @@ guiDashboard.setNewWidgetCollapseValue = function(thisButton)
 }
 
 /**
- *Функция, сохраняющая настройки виджетов/линий графика,
- *внесенные в таблицу редактирования настроек Dashboard'a.
+ * Function gets dashboard settings from table in modal.
  */
 guiDashboard.getOptionsFromTable = function(table_id, guiDashboard_obj)
 {
@@ -575,7 +571,7 @@ guiDashboard.getOptionsFromTable = function(table_id, guiDashboard_obj)
 }
 
 /**
- *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a.
+ * Function gets dashboard settings from modal and send them to API.
  */
 guiDashboard.saveWigdetsOptions = function()
 {
@@ -584,8 +580,7 @@ guiDashboard.saveWigdetsOptions = function()
 }
 
 /**
- *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a,
- *из модального окна на странице Dashboard'a.
+ * Function saves dashboard settings from modal.
  */
 guiDashboard.saveWigdetsOptionsFromModal = function()
 {
@@ -596,30 +591,7 @@ guiDashboard.saveWigdetsOptionsFromModal = function()
 }
 
 /**
- *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a,
- *из секции на странице профиля пользователя.
- */
-guiDashboard.saveWigdetsOptionsFromProfile = function()
-{
-    return $.when(guiDashboard.saveWigdetsOptions()).done(function(){
-        return guiPopUp.success("Dashboard widget options were successfully saved");
-    }).fail(function(){
-        return guiPopUp.error("Dashboard widget options were not saved");
-    }).promise();
-}
-
-/**
- *Функция, сохраняющая настройки линий графика Dashboard'a.
- */
-guiDashboard.saveChartLineSettings = function()
-{
-    guiDashboard.getOptionsFromTable("chart_line_settings_table", guiDashboard.model.ChartLineSettings);
-    guiDashboard.putUserDashboardSettingsToAPI();
-}
-
-
-/**
- * Функция, которая формирует массив данных для кривых графика по отдельному статусу
+ * Function generates array with data for chart lines.
  */
 guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
 {
@@ -650,9 +622,7 @@ guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
 }
 
 /**
- * Функция, отправляющая запрос /api/v2/stats/,
- * который дает нам информацию для виджетов класса pmwItemsCounter,
- * а также для графика на странице Dashboard.
+ * Function sends API request (/api/v2/stats/).
  */
 guiDashboard.loadStats=function()
 {
@@ -674,12 +644,12 @@ guiDashboard.loadStats=function()
         def.reject(e)
     })
 
-    return def.promise();  /**/
+    return def.promise();
 }
 
 /**
- *Функция вызывается, когда происходит изменение периода на графике(пользователь выбрал другой option в select).
- *Функция обновляет значения переменных, которые в дальнейшем используются для запроса к api/v2/stats и отрисовки графика.
+ * Function is supposed to be called when period value was changed on Chart widget.
+ * Function updates values of variables that are used for API request (api/v2/stats) and for chart rendering.
  */
 guiDashboard.updateStatsDataLast=function(thisEl)
 {
@@ -703,6 +673,7 @@ guiDashboard.updateStatsDataLast=function(thisEl)
             break;
     }
     guiDashboard.statsDataLastQuery=+newLast;
+    guiLocalSettings.set('chart_period', +newLast);
     guiDashboard.updateData();
 }
 
@@ -754,7 +725,6 @@ tabSignal.connect('guiLocalSettings.hideMenu', function(){
 
 guiDashboard.updateData = function()
 {
-    var thisObj = this
     if(this.model.updateTimeoutId)
     {
         clearTimeout(this.model.updateTimeoutId)
@@ -763,7 +733,7 @@ guiDashboard.updateData = function()
 
     $.when(guiDashboard.loadStats()).done(function()
     {
-        //обновляем счетчики для виджетов
+        // updates counters of widgets
         pmwHostsCounter.updateCount();
         pmwTemplatesCounter.updateCount();
         pmwGroupsCounter.updateCount();
@@ -771,8 +741,8 @@ guiDashboard.updateData = function()
         pmwInventoriesCounter.updateCount();
         pmwUsersCounter.updateCount();
 
-        //строим график
-        //определяем текущий месяц и год
+        // renders chart
+        // defines current months and year
         var monthNum=moment().format("MM");
         var yearNum=moment().format("YYYY");
         var dayNum=moment().format("DD");
@@ -791,32 +761,32 @@ guiDashboard.updateData = function()
                 break;
         }
 
-        //задаем стартовую дату для графика.
-        //guiDashboard.statsDataLast - количество периодов назад
-        //guiDashboard.statsDataMomentType - тип периода - месяц/год
+        // sets start date for chart
+        // guiDashboard.statsDataLast - amount of previous periods (periods to reduce)
+        // guiDashboard.statsDataMomentType - period type - month/year
         var startTime =+ moment(startTimeOrg).subtract(guiDashboard.statsDataLast-1, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
 
         tasks_data = {};
         tasks_data_t = [];
 
-        //формируем в цикле временные отрезки для графика относительно стартовой даты
+        // forms chart time intervals based on start date
         for(var i = 0; i< guiDashboard.statsDataLast; i++)
         {
-            //идем на период вперед
+            // period up
             var time=+moment(startTime).add(i, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
             tasks_data[time] = 0;
             tasks_data_t.push(time);
         }
 
-        //массив для линий графика, которые необходимо отобразить на странице
+        // array for chartlines, that are needed to render
         var linesForChartArr = [];
-        //объект, хранящий в себе цвета этих линий
+        // object, that is storing line colors
         var colorPaternForLines = {};
         for(var i in guiDashboard.model.ChartLineSettings)
         {
             var lineChart = guiDashboard.model.ChartLineSettings[i];
 
-            //формируем массив значений для кривой all tasks
+            // forms array with values for 'all tasks' line
             if(lineChart.name == 'all_tasks')
             {
                 for (var i in guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType]) {
@@ -843,7 +813,7 @@ guiDashboard.updateData = function()
                 }
             }
 
-            //формируем массив значений для кривой каждого статуса
+            // forms array with values for others line
             if(lineChart.name != 'all_tasks' && lineChart.active == true)
             {
                 var chart_tasks_data_var = guiDashboard.getDataForStatusChart(tasks_data, tasks_data_t, lineChart.title);
@@ -852,7 +822,7 @@ guiDashboard.updateData = function()
             }
         }
 
-        //загружаем график, перечисляем массивы данных для графика и необходимые цвета для графиков
+        // renders chart
         guiDashboard.model.historyChart.load({
             columns: linesForChartArr,
             colors: colorPaternForLines
@@ -874,7 +844,7 @@ guiDashboard.open  = function(holder, menuInfo, data)
 
     return $.when(guiDashboard.getUserSettingsFromAPI()).always(function()
     {
-        // Инициализация всех виджетов на странице
+        // inits all widgets
         for(var i in guiDashboard.model.widgets)
         {
             for(var j in guiDashboard.model.widgets[i])
@@ -936,10 +906,11 @@ guiDashboard.open  = function(holder, menuInfo, data)
         });
         if($('select').is('#chart-period'))
         {
-            $('#chart-period').val(guiDashboard.statsDataLastQuery).change();
+            let chart_period = guiLocalSettings.get('chart_period') || guiDashboard.statsDataLastQuery;
+            $('#chart-period').val(chart_period).change();
         }
 
-        //drag and drop для виджетов
+        //drag and drop for widgets
         if($('div').is('#dnd-container'))
         {
             widget_sort = Sortable.create(document.getElementById("dnd-container"), {
@@ -949,9 +920,8 @@ guiDashboard.open  = function(holder, menuInfo, data)
                 disabled: true,
                 onUpdate: function (evt)
                 {
-                    // console.log("onUpdate[1]", evt);
                     var item = evt.item; // the current dragged HTMLElement
-                    //запоминаем новый порядок сортировки
+                    // saves new sorting order
                     var divArr=$('.dnd-block');
                     var idArr=[];
                     for (var i=0; i<divArr.length; i++)
@@ -978,7 +948,7 @@ guiDashboard.open  = function(holder, menuInfo, data)
 }
 
 /**
- * Базовый класс виджета
+ * Base widget class
  * @type Object
  */
 guiDashboardWidget = {
@@ -995,7 +965,7 @@ guiDashboardWidget = {
 }
 
 /**
- * Создание классов для виджетов: tasks history, run shell command, template tasks, template module
+ * Creating classes for tasks history, run shell command, template tasks, template module
  * @type Object
  */
 
@@ -1018,7 +988,7 @@ pmwChartWidget.render = function()
 
 
 /**
- * Базовый класс виджета показывающего количество элементов
+ * Base class for counter widget
  * @type Object
  */
 var pmwItemsCounter = inheritance(guiDashboardWidget);
@@ -1040,7 +1010,7 @@ pmwItemsCounter.updateCount = function()
 }
 
 /**
- * Класс виджета показывающий количество хостов
+ * Class for hosts counter widget
  * @type Object
  */
 var pmwHostsCounter = inheritance(pmwItemsCounter);
@@ -1049,7 +1019,7 @@ pmwHostsCounter.model.nameInStats = "hosts";
 pmwHostsCounter.model.path = "host";
 
 /**
- * Класс виджета показывающий количество шаблонов
+ * Class for templates counter widget
  * @type Object
  */
 var pmwTemplatesCounter = inheritance(pmwItemsCounter);
@@ -1058,7 +1028,7 @@ pmwTemplatesCounter.model.nameInStats = "templates";
 pmwTemplatesCounter.model.path = "";
 
 /**
- * Класс виджета показывающий количество групп
+ * Class for group counter widget
  * @type Object
  */
 var pmwGroupsCounter = inheritance(pmwItemsCounter);
@@ -1067,7 +1037,7 @@ pmwGroupsCounter.model.nameInStats = "groups";
 pmwGroupsCounter.model.path = "group";
 
 /**
- * Класс виджета показывающий количество проектов
+ * Class for projects counter widget
  * @type Object
  */
 var pmwProjectsCounter = inheritance(pmwItemsCounter);
@@ -1076,7 +1046,7 @@ pmwProjectsCounter.model.nameInStats = "projects";
 pmwProjectsCounter.model.path = "project";
 
 /**
- * Класс виджета показывающий количество инвенториев
+ * Class for inventories counter widget
  * @type Object
  */
 var pmwInventoriesCounter = inheritance(pmwItemsCounter);
@@ -1085,7 +1055,7 @@ pmwInventoriesCounter.model.nameInStats = "inventories";
 pmwInventoriesCounter.model.path = "inventory";
 
 /**
- * Класс виджета показывающий количество пользователей
+ * Class for users counter widget
  * @type Object
  */
 var pmwUsersCounter = inheritance(pmwItemsCounter);
