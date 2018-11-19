@@ -14,72 +14,72 @@ function setActiveMenuLiBase()
 {
     if(/\#\/project/.test(window.location.href))
     {
-        $("#Projects").addClass("active active-li active-bold");
+        $("#Projects a").addClass("active active-li active-bold");
     }
     else if(/\#\/host/.test(window.location.href))
     {
-        $("#menu-inventories").addClass("menu-treeview-active active active-li");
-        $("#menu-inventories-hosts").addClass("active-bold");
-        $("#menu-inventories").removeClass("menu-treeview");
+        $("#menu-inventories a").addClass("menu-treeview-active active active-li");
+        $("#menu-inventories-hosts a").addClass("active-bold");
+        $("#menu-inventories a").removeClass("menu-treeview");
     }
     else if(/\#\/group/.test(window.location.href))
     {
-        $("#menu-inventories").addClass("menu-treeview-active active active-li");
-        $("#menu-inventories-groups").addClass("active-bold");
-        $("#menu-inventories").removeClass("menu-treeview");
+        $("#menu-inventories a").addClass("menu-treeview-active active active-li");
+        $("#menu-inventories-groups a").addClass("active-bold");
+        $("#menu-inventories a").removeClass("menu-treeview");
     }
     else if(/\#\/inventory/.test(window.location.href))
     {
-        $("#menu-inventories").addClass("menu-treeview-active active active-li active-bold");
-        $("#menu-inventories-inventories").addClass("active-bold");
-        $("#menu-inventories").removeClass("menu-treeview");
+        $("#menu-inventories a").addClass("menu-treeview-active active active-li active-bold");
+        $("#menu-inventories-inventories a").addClass("active-bold");
+        $("#menu-inventories a").removeClass("menu-treeview");
     }
     else if(/\#\/history/.test(window.location.href)){
 
-        $("#History").addClass("active active-li active-bold");
+        $("#History a").addClass("active active-li active-bold");
     }
     else if(/\#\/hook/.test(window.location.href))
     {
-        $("#menu-system").addClass("menu-treeview-active active active-li");
-        $("#menu-system-hooks").addClass("active-bold");
-        $("#menu-system").removeClass("menu-treeview");
+        $("#menu-system a").addClass("menu-treeview-active active active-li");
+        $("#menu-system-hooks a").addClass("active-bold");
+        $("#menu-system a").removeClass("menu-treeview");
     }
     else if(/\#\/team/.test(window.location.href))
     {
-        $("#menu-system").addClass("menu-treeview-active active active-li");
-        $("#menu-system-teams").addClass("active-bold");
-        $("#menu-system").removeClass("menu-treeview");
+        $("#menu-system a").addClass("menu-treeview-active active active-li");
+        $("#menu-system-teams a").addClass("active-bold");
+        $("#menu-system a").removeClass("menu-treeview");
     }
-    else if(/\#\/user/.test(window.location.href) || /\#profile/.test(window.location.href))
+    else if(/\#\/user/.test(window.location.href) || /\#\/profile/.test(window.location.href))
     {
-        $("#menu-system").addClass("menu-treeview-active active active-li");
-        $("#menu-system-users").addClass("active-bold");
-        $("#menu-system").removeClass("menu-treeview");
+        $("#menu-system a").addClass("menu-treeview-active active active-li");
+        $("#menu-system-users a").addClass("active-bold");
+        $("#menu-system a").removeClass("menu-treeview");
     }
     else
     {
-        $("#menu-home").addClass("active active-li active-bold");
+        $("#menu-home a").addClass("active active-li active-bold");
     }
 }
 
 
 function setActiveMenuLi()
 {
-    if($('li').is('.menu-treeview-active'))
+    if($('li a').is('.menu-treeview-active'))
     {
         var t=$(".menu-treeview-active");
         $(t).addClass("menu-treeview");
         $(t).removeClass("menu-treeview-active");
     }
 
-    if($('li').is('.active-li'))
+    if($('li a').is('.active-li'))
     {
         var t=$(".active-li");
         $(t).removeClass("active");
         $(t).removeClass("active-li");
     }
 
-    if($('li').is('.active-bold'))
+    if($('li a').is('.active-bold'))
     {
         var g=$(".active-bold");
         $(g).removeClass("active-bold");
