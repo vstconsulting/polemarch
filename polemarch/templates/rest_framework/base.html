@@ -2,13 +2,10 @@
 {% load request_static %}
 
 {% block logo %}
-    <a href="/" class="logo app-logo">
-        <!-- mini logo for sidebar mini 50x50 pixels -->
-        <!-- <span class="logo-mini"><b>P</b></span> -->
-        <span class="logo-mini"><span class="bg-logo-min" style="margin-left: 4px;"></span></span>
-        <!-- logo for regular state and mobile devices -->
-        <!-- <span class="logo-lg"><b>P</b>olemarch</span> -->
-        <span class="logo-lg logo-span"><span class="bg-logo-min"></span> <span class="bg-logo"></span></span>
+    <!-- Logo -->
+    <a href="/" class="brand-link logo app-logo">
+        <img src="/static/img/logo/logo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+        <span class="brand-text font-weight-light">{{ project_gui_name }}</span>
     </a>
 {% endblock %}
 
