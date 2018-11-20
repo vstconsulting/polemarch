@@ -6,95 +6,96 @@
     <!-- history_one -->
 
     <%[ main_content_row %>
+        <div class="container-fluid">
+            <div class="history-mode row">
+            <section class="col history-LeftInfo">
+                <div class="card card-info collapsed-card">
+                    <div class="card-header with-border collapsed-card">
+                        Inventory<br>
+                        <div class="card-tools pull-right">
+                            <button type="button" class="btn btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
+                                <i class="fa fa-expand"></i>
+                                <i class="fa fa-compress"></i>
+                            </button>
 
-        <div class="history-mode">
-        <section class="col-lg-8 history-LeftInfo">
-            <div class="card card-info collapsed-box">
-                <div class="card-header with-border collapsed-box">
-                    Inventory<br>
-                    <div class="card-tools pull-right">
-                        <button type="button" class="btn btn-card-tool btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
-                            <i class="glyphicon glyphicon-resize-full"></i>
-                            <i class="glyphicon glyphicon-resize-small"></i>
-                        </button>
-
-                        <button type="button" class="btn btn-card-tool" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                            <button type="button" class="btn" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                        </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="form-group col-lg-12">
-                            <pre
-                            id="raw_inventory-pre"
-                            style="overflow: auto; max-height: 600px;" ><%= guiObj.model.data.justText('raw_inventory') %></pre>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <pre
+                                id="raw_inventory-pre"
+                                style="overflow: auto; max-height: 600px;" ><%= guiObj.model.data.justText('raw_inventory') %></pre>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="card card-info">
-                <div class="card-header with-border">
-                    stdout<br>
-                    <div class="card-tools pull-right">
-                            <~ guiObj.model.data >
-                                <% if(!(guiObj.model.data.status == 'RUN' || guiObj.model.data.status == 'DELAY')) { %>
+                <div class="card card-info">
+                    <div class="card-header with-border">
+                        stdout<br>
+                        <div class="card-tools pull-right">
+                                <~ guiObj.model.data >
+                                    <% if(!(guiObj.model.data.status == 'RUN' || guiObj.model.data.status == 'DELAY')) { %>
 
-                                        <button type="button"
-                                                class="btn btn-default"
-                                                id="clear_output"
-                                                style="margin-right:5px; padding: 3px 9px;"
-                                                <%= justOn('click', () =>{clearHistoryStdOut(guiObj.api.actions['clear'], guiObj)}, 'clear_output') %>
-                                        >
-
+                                            <button type="button"
+                                                    class="btn btn-default"
+                                                    id="clear_output"
+                                                    style="margin-right:5px; padding: 3px 9px;"
+                                                    <%= justOn('click', () =>{clearHistoryStdOut(guiObj.api.actions['clear'], guiObj)}, 'clear_output') %>
+                                            >
 
 
-                                            <span class="fa fa-trash" style="font-size:20px;"></span> <span class="hidden-sm hidden-xs" ></span>
-                                        </button>
 
-                                <% } %>
-                            <~>
+                                                <span class="fa fa-trash" style="font-size:20px;"></span> <span class="hidden-sm hidden-xs" ></span>
+                                            </button>
 
-                        <button type="button" class="btn btn-card-tool btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
-                            <i class="glyphicon glyphicon-resize-full"></i>
-                            <i class="glyphicon glyphicon-resize-small"></i>
-                        </button>
+                                    <% } %>
+                                <~>
 
-                        <button type="button" class="btn btn-card-tool" data-widget="collapse" ><i class="fa fa-minus"></i> </button>
+                            <button type="button" class="btn btn-card-tool btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
+                                <i class="fa fa-expand"></i>
+                                <i class="fa fa-compress"></i>
+                            </button>
+
+                            <button type="button" class="btn btn-card-tool" data-widget="collapse" ><i class="fa fa-minus"></i> </button>
+                        </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="form-group col-lg-12">
-                            <label class="control-label" >stdout
-                                (<a href="<%- guiObj.model.data.raw_stdout %>"
-                                        target="_blank"
-                                        download="stdout-<%- guiObj.model.data.mode %>-<%- guiObj.model.data.start_time %>.log"
-                                        >Full raw stdout</a>)</label>
-                            <pre
-                                class="history-stdout"
-                                id="history-stdout"></pre>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <label class="control-label" >stdout
+                                    (<a href="<%- guiObj.model.data.raw_stdout %>"
+                                            target="_blank"
+                                            download="stdout-<%- guiObj.model.data.mode %>-<%- guiObj.model.data.start_time %>.log"
+                                            >Full raw stdout</a>)</label>
+                                <pre
+                                    class="history-stdout"
+                                    id="history-stdout"></pre>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section class="col-lg-4 history-RightInfo col12-mode">
-            <div class="card card-info">
-                <div class="card-header with-border">
-                    Task<br>
-                    <div class="card-tools pull-right">
-                        <button type="button" class="btn btn-card-tool" onclick="$('.history-mode').toggleClass('history-fullsize');" ><i class="glyphicon glyphicon-resize-small"></i> </button>
+            <section class="col-xl-4 col-lg-12 history-RightInfo col12-mode">
+                <div class="card card-info">
+                    <div class="card-header with-border">
+                        Task<br>
+                        <div class="card-tools pull-right">
+                            <button type="button" class="btn btn-card-tool" onclick="$('.history-mode').toggleClass('history-fullsize');" ><i class="fa fa-compress"></i> </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <%* fields_block %>
+                        </div>
+
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <%* fields_block %>
-                    </div>
-
-                </div>
-            </div>
-        </section>
+            </section>
+        </div>
     </div>
 
     <%] %>

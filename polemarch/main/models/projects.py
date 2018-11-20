@@ -23,7 +23,7 @@ from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
 from .base import ManyToManyFieldACL, BQuerySet, BModel
 from .hooks import Hook
-from ..utils import AnsibleModules, SubCacheInterface
+from ..utils import AnsibleModules, AnsibleConfigParser, SubCacheInterface
 
 
 logger = logging.getLogger("polemarch")
@@ -36,6 +36,7 @@ class ProjectQuerySet(AbstractVarsQuerySet):
 
 
 class Project(AbstractModel):
+    # pylint: disable=too-many-public-methods
     PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
     objects       = ProjectQuerySet.as_manager()
     repo_handlers = objects._queryset_class.repo_handlers
@@ -108,6 +109,14 @@ class Project(AbstractModel):
         'boolean': bool,
     }
 
+    STATUSES = [
+        'NEW',
+        'WAIT_SYNC',
+        'SYNC',
+        'ERROR',
+        'OK',
+    ]
+
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
 
@@ -137,6 +146,15 @@ class Project(AbstractModel):
             return self.variables.get(key="repo_type").value
         except self.variables.model.DoesNotExist:  # nocv
             return 'MANUAL'
+
+    @property
+    def config(self):
+        return self.get_ansible_config_parser().get_data()
+
+    def get_ansible_config_parser(self):
+        if not hasattr(self, 'config_parser'):
+            self.config_parser = AnsibleConfigParser(self.path)
+        return self.config_parser
 
     def get_yaml_subcache(self, suffix=''):
         return SubCacheInterface(''.join(['project', str(self.id), suffix]))
@@ -332,7 +350,11 @@ class Module(BModel):
         return load(data, Loader=Loader) if data and data != '{}' else {}
 
     def _get_module_data_from_cli(self):
-        modules = AnsibleModules(detailed=True)
+        path = None
+        if self.project:
+            path = self.project.config.get('DEFAULT_MODULE_PATH', [])
+            path = list(filter(lambda p: self.project.path in p, path))
+        modules = AnsibleModules(detailed=True, paths=path)
         module_list = modules.get(self.path)
         module = module_list[0] if module_list else None
         if module:

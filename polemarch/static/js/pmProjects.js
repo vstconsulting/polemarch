@@ -167,38 +167,38 @@ gui_project = {
         let formData = {
             title:"Deploy",
             form:{
-                    'inventory' : {
-                        title:'inventory',
-                        required:true,
-                        format:'hybrid_autocomplete',
-                        dynamic_properties:{
-                            list_obj: "/project/{pk}/inventory/",
-                            value_field: "id",
-                            view_field: "name",
-                        }
-                    },
-                    user:{
-                        title:'User',
-                        description: "connect as this user (default=None)",
-                        format:'string',
-                        type: "string",
-                    },
-                    key_file: {
-                        title:'Key file',
-                        description: "use this file to authenticate the connection",
-                        format:'secretfile',
-                        type: "string",
-                        dynamic_properties:{
-                            list_obj: "/project/{pk}/inventory/",
-                            value_field: "id",
-                            view_field: "name",
-                        }
-                    },
-                    extra_vars: {
-                        title:"Execute parametrs",
-                        format:'form',
-                        form:extra_fields
+                'inventory' : {
+                    title:'inventory',
+                    required:true,
+                    format:'hybrid_autocomplete',
+                    dynamic_properties:{
+                        list_obj: "/project/{pk}/inventory/",
+                        value_field: "id",
+                        view_field: "name",
                     }
+                },
+                user:{
+                    title:'User',
+                    description: "connect as this user (default=None)",
+                    format:'string',
+                    type: "string",
+                },
+                key_file: {
+                    title:'Key file',
+                    description: "use this file to authenticate the connection",
+                    format:'secretfile',
+                    type: "string",
+                    dynamic_properties:{
+                        list_obj: "/project/{pk}/inventory/",
+                        value_field: "id",
+                        view_field: "name",
+                    }
+                },
+                extra_vars: {
+                    title:"Execute parametrs",
+                    format:'form',
+                    form:extra_fields
+                }
             }
         }
 
@@ -206,3 +206,12 @@ gui_project = {
         return this.polemarchYamlForm.render();
     },
 }
+
+tabSignal.connect("openapi.schema.schema", function(obj)
+{
+    if (obj.path == '/project/{pk}/module/{module_id}/')
+    {
+        obj.value.fields.data.format = 'ansible_json'
+        obj.value.fields.data.hide_title = true;
+    }
+})

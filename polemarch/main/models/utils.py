@@ -315,10 +315,5 @@ class AnsibleModule(AnsibleCommand):
         super(AnsibleModule, self).__init__(*pargs, **kwargs)
         self.ansible_ref['module-name'] = {'type': 'string'}
 
-    def get_inventory_arg(self, target, extra_args):
-        if self.inventory_object is not None and not self.inventory_object.is_file:
-            return [self.inventory_object.file]
-        return super(AnsibleModule, self).get_inventory_arg(target, extra_args)
-
     def execute(self, group, *args, **extra_args):
         return super(AnsibleModule, self).execute(group, *args, **extra_args)

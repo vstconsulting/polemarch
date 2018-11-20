@@ -91,11 +91,8 @@ function setActiveMenuLi()
 tabSignal.connect("spajs.open", setActiveMenuLi);
 
 /*
- * Функция добавляет элементу меню (при наведении на него)
- * css-класс hover-li, который добавляет необходимые стили.
- * Добавление класса происходит не сразу, а после небольшой паузы.
- * Это необходимо для того, чтобы выпавшее подменю быстро не пропадало
- * при попытке навести курсор на него.
+ * Function adds to the menu element (on hover) CSS-class 'hover-li',
+ * that adds necessary styles.
  */
 $(".sidebar-menu > li").mouseenter(function () {
     var thisEl = this;
@@ -119,8 +116,7 @@ $(".sidebar-menu > li").mouseenter(function () {
 })
 
 /*
- * Два обработчика событий, удаляющих класс hover-li у элементов меню, после того
- * как с меню убрали курсор.
+ * 2 handlers, that removes CSS-class 'hover-li' from menu elements, after losing focus on them.
  */
 $(".content-wrapper").hover(function () {
     $(".hover-li").removeClass("hover-li");
@@ -138,8 +134,9 @@ tabSignal.connect("loading.completed", function()
 //remove this string, when android app code be ready and after that check correct work on PC
 setActiveMenuLiBase();
 
-// Добавляем файл тестов к списку файлов для тестов гуя
+// Add tests files to the common list of GUI tests
 /**/
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmElements.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmHook.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmHosts.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmUsers.js')

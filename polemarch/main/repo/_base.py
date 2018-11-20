@@ -10,6 +10,7 @@ import traceback
 from six.moves.urllib.request import urlretrieve
 from django.db import transaction
 from vstutils.utils import raise_context
+from ..utils import AnsibleModules
 
 logger = logging.getLogger("polemarch")
 
@@ -37,6 +38,12 @@ class _Base(object):
         '''
         self.proj.get_yaml_subcache().clear()
         return self.proj.get_yaml()
+
+    def _path_exists(self, path):
+        return os.path.exists(path)
+
+    def _dir_exists(self, path_dir):
+        return self._path_exists(path_dir) and os.path.isdir(path_dir)
 
     def message(self, message, level='debug'):
         getattr(logger, level.lower(), logger.debug)(
@@ -138,6 +145,33 @@ class _Base(object):
         )
         PlaybookModel.objects.bulk_create(playbook_objects) if playbook_objects else None
 
+    def __get_project_modules(self, module_path):
+        valid_paths = tuple(filter(self._dir_exists, module_path))
+        if not valid_paths:
+            return []
+        modules = AnsibleModules(detailed=False, paths=valid_paths)
+        modules.clear_cache()
+        modules_list = modules.all()
+        modules_list.sort()
+        return modules_list
+
+    @raise_context()
+    def _set_project_modules(self):
+        '''
+        Update project modules
+        '''
+        # pylint: disable=invalid-name
+        project = self.proj
+        project.get_ansible_config_parser().clear_cache()
+        project.modules.all().delete()
+        ModuleClass = self.proj.modules.model
+        paths = project.config.get('DEFAULT_MODULE_PATH', [])
+        paths = filter(lambda mp: project.path in mp, paths)
+        modules = self.__get_project_modules(paths)
+        ModuleClass.objects.bulk_create([
+            ModuleClass(path=path, project=project) for path in modules
+        ])
+
     def _update_tasks(self, files):
         '''
         Find and update playbooks in project.
@@ -176,6 +210,7 @@ class _Base(object):
                 result = self._operate(operation)
                 self._set_status("OK")
                 self._update_tasks(self._get_files(result[0]))
+                self._set_project_modules()
                 self._handle_yaml(self._load_yaml() or dict())
         except Exception as err:
             logger.debug(traceback.format_exc())
