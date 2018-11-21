@@ -6,7 +6,8 @@ import json
 
 from django.contrib.auth.models import Group as BaseGroup
 from django.contrib.auth.models import User as BaseUser
-from .base import settings, models, BModel, ACLModel, BQuerySet
+from django.contrib.auth import get_user_model
+from .base import models, BModel, ACLModel, BQuerySet
 
 
 logger = logging.getLogger("polemarch")
@@ -15,7 +16,7 @@ logger = logging.getLogger("polemarch")
 class ACLPermission(BModel):
     role    = models.CharField(max_length=10)
     uagroup = models.ForeignKey('main.UserGroup', on_delete=None, blank=True, null=True)
-    user    = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=None,
+    user    = models.ForeignKey(get_user_model(), on_delete=None,
                                 blank=True, null=True)
 
     @property

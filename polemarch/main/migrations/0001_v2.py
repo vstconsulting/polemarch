@@ -155,7 +155,7 @@ class Migration(migrations.Migration):
                 ('type', models.CharField(max_length=32)),
                 ('when', models.CharField(default=None, max_length=32, null=True)),
                 ('enable', models.BooleanField(default=True)),
-                ('recipients', models.CharField(max_length=16383)),
+                ('recipients', models.CharField(max_length=4096)),
             ],
             options={
                 'abstract': False,
@@ -455,11 +455,13 @@ class Migration(migrations.Migration):
             name='template',
             index_together=set([('id', 'name', 'kind', 'inventory', 'project')]),
         ),
-        migrations.AlterIndexTogether(
-            name='historylines',
-            index_together=set(
-                [('history', 'line_number'), ('history',), ('line_number',)]),
-        ),
+        # Fix bug with Django migrations
+        # Please, remove indexes manually.
+        # migrations.AlterIndexTogether(
+        #     name='historylines',
+        #     index_together=set(
+        #         [('history', 'line_number'), ('history',), ('line_number',)]),
+        # ),
         migrations.AlterIndexTogether(
             name='history',
             index_together=set([('id', 'project', 'mode', 'status', 'inventory',
