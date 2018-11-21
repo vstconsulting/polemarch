@@ -32,12 +32,15 @@ stages:
       - GUI
       - tags
       - issue_building
-    variables:
-      - $CI_COMMIT_MESSAGE =~ /Merge branch/
     changes:
       - polemarch/static/*
       - polemarch/templates/*
       - polemarch/main/settings.ini
+      - initbin/*
+      - docker/*
+      - doc/*
+      - README.rst
+      - LICENSE
   retry: 2
 
 .pack_tamplate: &packing-test
@@ -78,12 +81,15 @@ code_style:
     refs:
       - tags
       - issue_building
-    variables:
-      - $CI_COMMIT_MESSAGE =~ /Merge branch/
     changes:
       - polemarch/static/*
       - polemarch/templates/*
       - polemarch/main/settings.ini
+      - initbin/*
+      - docker/*
+      - doc/*
+      - README.rst
+      - LICENSE
   retry: 2
 
 py27-install:

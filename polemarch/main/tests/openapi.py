@@ -310,7 +310,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, hook['properties']['enable'], type='boolean')
         self.check_fields(
             objName, hook['properties']['recipients'],
-            type='string', maxLength=16383, minLength=1
+            type='string', minLength=1
         )
         del hook
 
@@ -963,7 +963,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, periodicTaskVariable['properties']['id'], **id_value)
         self.check_fields(
             objName, periodicTaskVariable['properties']['key'],
-            type='string', minLength=1, maxLength=128
+            type='string', minLength=1, maxLength=512
         )
         self.check_fields(
             objName, periodicTaskVariable['properties']['value'],
@@ -978,7 +978,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, playbook['properties']['id'], **id_value)
         self.check_fields(
             objName, playbook['properties']['name'],
-            type='string', maxLength=256, minLength=1
+            type='string', maxLength=251, minLength=1
         )
         self.check_fields(
             objName, playbook['properties']['playbook'],
@@ -992,7 +992,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, onePlaybook['properties']['id'], **id_value)
         self.check_fields(
             objName, onePlaybook['properties']['name'],
-            type='string', maxLength=256, minLength=1
+            type='string', maxLength=251, minLength=1
         )
         self.check_fields(
             objName, onePlaybook['properties']['playbook'],

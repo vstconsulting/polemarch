@@ -169,7 +169,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="card-footer" style="background-color: #fff;">
+                <div class="card-footer">
                     <div class="pull-right">
                         <button type="button" class="btn btn-default" onclick="guiModal.modalClose()">Cancel</button>
                         <button type="button" class="btn btn-primary" onclick="spajs.showLoader(guiDashboard.saveWigdetsOptionsFromModal());  return false;">Save</button>
@@ -181,7 +181,7 @@
 
 <!-- dashboard page -->
 <script type="text/x-just" data-just="pmDashboard">
-    
+
     <%[ buttons_row %>
         <div class="row">
             <button class="btn btn-default" onclick="guiDashboard.showWidgetSettingsModal();" style="margin-left: 10px; margin-top:-7px;">
@@ -191,12 +191,12 @@
                <i class="fa fa-lock"></i>
             </button>
         </div>
- 
+
         <%* buttons %>
     <%] %>
 
     <%[ main_content_row %>
-        
+
             <div class="container-fluid">
                 <!-- render widgets -->
                 <% for(var i in guiDashboard.model.widgets){ %>
