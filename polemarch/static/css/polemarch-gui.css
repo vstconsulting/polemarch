@@ -305,3 +305,10 @@
     display: block;
 }
 
+@media (max-width: 452px) {
+    #period-list {
+        width: 100%!important;
+        margin-top: 10px;        
+    }
+
+}
