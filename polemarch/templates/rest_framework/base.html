@@ -29,6 +29,8 @@
             { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js' %}?v={{gui_version}}"},
             { prioritet:5, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/slimScroll/jquery.slimscroll.min.js' %}?v={{gui_version}}"},
+            { prioritet:6, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
+            { prioritet:7, type:'js', name: "{% static 'js/guiCustomizer.js' %}?v={{gui_version}}"},
 
             { prioritet:8, type:'js', name: "{% static 'AdminLTE-3.0.0/min/js/adminlte.min.js' %}?v={{gui_version}}"},
 
@@ -55,10 +57,17 @@
         {
             hideLoadingProgress();
         })
-        
+
         tabSignal.connect("resource.loaded", function()
         {
             hideLoadingProgress();
         })
+
+        tabSignal.connect("webGui.start", function()
+        {
+            guiCustomizer.setSkin(guiLocalSettings.get('skin'))
+            guiCustomizer.render();
+        })
+
     </script>
 {% endblock %}

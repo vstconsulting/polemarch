@@ -133,37 +133,37 @@
 .tr_status_offline .td_history_status,
 .tr_status_offline .td_project-history_status,
 .field_status_offline {
-    color: #9e9e9e;
+    color: #var(--history-status-offline);
 }
 
 .tr_status_interrupted .td_history_status,
 .tr_status_interrupted .td_project-history_status,
 .field_status_interrupted {
-    color: #9b97e4;
+    color: var(--history-status-interrupted);
 }
 
 .tr_status_run .td_history_status,
 .tr_status_run .td_project-history_status,
 .field_status_run {
-    color: #0085ff;
+    color: var(--history-status-run);
 }
 
 .tr_status_error .td_history_status,
 .tr_status_error .td_project-history_status,
 .field_status_error {
-    color: #dc3545;
+    color: var(--history-status-error);
 }
 
 .tr_status_delay .td_history_status,
 .tr_status_delay .td_project-history_status,
 .field_status_delay {
-    color: #808419;
+    color: var(--history-status-delay);
 }
 
 .tr_status_ok .td_history_status,
 .tr_status_ok .td_project-history_status,
 .field_status_ok {
-    color: #276900;
+    color: var(--history-status-ok);
 }
 
 .project-status{
@@ -175,27 +175,27 @@
 
 .tr_status_sync .td_project_status,
 .field_status_sync {
-    color: darkorange;
+    color: var(--project-status-sync);
 }
 
 .tr_status_wait_sync .td_project_status,
 .field_status_wait_sync {
-    color: #0085ff;
+    color: var(--project-status-wait-sync);
 }
 
 .tr_status_new .td_project_status,
 .field_status_new {
-    color: #8c8c8c;
+    color: var(--project-status-new);
 }
 
 .tr_status_error .td_project_status,
 .field_status_error {
-    color: red;
+    color: var(--project-status-error);
 }
 
 .tr_status_ok .td_project_status,
 .field_status_ok {
-    color: #276900;
+    color: var(--project-status-ok);
 }
 
 .td_project_status {
