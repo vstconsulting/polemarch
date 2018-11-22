@@ -35,7 +35,7 @@
                 Tasks history
 
                 <div class="pull-right">
-                    <button type="button" class="btn btn-primary btn-sm" data-widget="collapse" id="collapse-chart" onclick="guiDashboard.setNewWidgetCollapseValue(this)">
+                    <button type="button" class="btn btn-sm btn-light btn-icon" data-widget="collapse" id="collapse-chart" onclick="guiDashboard.setNewWidgetCollapseValue(this)">
                         <i
                             <% for(var j in guiDashboard.model.widgets[0]){  %>
                                 <% if(guiDashboard.model.widgets[0][j].name == 'pmwChartWidget' && guiDashboard.model.widgets[0][j].collapse==true) { %>
@@ -47,7 +47,7 @@
                             <% } %>
                         ></i>
                     </button>
-                    <button type="button" class="btn btn-primary btn-sm" data-widget="remove"  onclick="guiDashboard.setNewWidgetActiveValue(this)">
+                    <button type="button" class="btn btn-sm btn-light btn-icon" data-widget="remove"  onclick="guiDashboard.setNewWidgetActiveValue(this)">
                         <i class="fa fa-times"></i>
                     </button>
                 </div>
@@ -59,8 +59,9 @@
                         <% } %>
                     <% } %>
                 ">
-                    <label  style="float:left; margin-right:10px; line-height:26px;">Period</label>
-                    <select id="chart-period" class="form-control" style="max-width:145px; height:26px; line-height:26px; padding:3px 12px; display:inline-block; float:left;" onchange="guiDashboard.updateStatsDataLast(this)">
+                  <div class="chart-period-select-wrapper">
+                    <label style="float:left; margin-right:10px; line-height:26px;">Period</label>
+                    <select id="chart-period" class="form-control" style="max-width:145px; height:30px; line-height:30px; padding:3px 12px; display:inline-block; float:left;" onchange="guiDashboard.updateStatsDataLast(this)">
                         <option value="1095">last 3 years</option>
                         <option value="365">last year</option>
                         <option value="90">last 3 months</option>
@@ -69,6 +70,7 @@
                         <option value="7">last week</option>
                         <option value="3">last 3 days</option>
                     </select>
+                  </div>
                 </div>
             </div>
             <div class="card-body border-radius-none">
