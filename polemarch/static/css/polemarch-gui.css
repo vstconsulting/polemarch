@@ -32,29 +32,29 @@
 
 .td_history_start_time, .td_history_stop_time,
 .td_project-history_start_time, .td_project-history_stop_time{
-    width:150px;
+    width:160px;
 }
 
 .td_history_status,
 .td_project-history_status{
-    width: 120px;
+    width: 125px;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
     .td_history_stop_time,
     .td_project-history_stop_time {
         display: none;
     }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1300px) {
     .td_history_kind,
     .td_project-history_kind {
         display: none;
     }
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1200px) {
     .td_history_initiator,
     .td_project-history_initiator,
     .td_history_revision,
@@ -63,14 +63,14 @@
     }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
     .td_history_inventory,
     .td_project-history_inventory {
         display: none;
     }
 }
 
-@media (max-width: 850px) {
+@media (max-width: 1000px) {
     .td_history_executor,
     .td_project-history_executor,
     .td_hook_recipients {
@@ -78,7 +78,7 @@
     }
 }
 
-@media (max-width: 660px) {
+@media (max-width: 780px) {
     .td_history_project,
     .td_project-history_project,
     .td_hook_when {
@@ -86,17 +86,21 @@
     }
 }
 
+@media (max-width: 700px) {
+    .td_history_start_time,
+    .td_project-history_start_time {
+        width: 100px;
+    }
+}
+
 @media (max-width: 600px) {
     .td_history_start_time,
     .td_project-history_start_time {
-        width: 90px;
+        display: none;
     }
 }
 
 @media (max-width: 480px) {
-    .td_history_start_time,
-    .td_project-history_start_time,
-
     .td_user_is_active,
 
     .td_hook_type,
@@ -115,10 +119,9 @@
     .td_project-inventory-group-host_type{
         display: none;
     }
-
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
     .column_history_actions,
     .column_project-history_actions,
     .td_hook_enable {
@@ -302,3 +305,10 @@
     display: block;
 }
 
+@media (max-width: 452px) {
+    #period-list {
+        width: 100%!important;
+        margin-top: 10px;        
+    }
+
+}
