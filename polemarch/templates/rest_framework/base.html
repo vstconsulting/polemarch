@@ -13,6 +13,11 @@
 {% block bootstrap_theme %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static_path "css/polemarch-gui.css" %}"/>
+    <style>
+        .hidden-in-api {
+            display: none;
+        }
+    </style>
 {% endblock %}
 
 {% block resource_list %}
