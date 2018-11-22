@@ -15,6 +15,19 @@ Contact us on `any questions
 or `report bugs
 <https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in>`_.
 
+We also help you via:
+
+|twitter|
+`Twitter
+<https://twitter.com/polemarchio>`_ - we post information about new releases and new features
+
+|slack|
+`Slack
+<https://polemarch-users.slack.com/>`_ - support channel
+
+|stack-overflow|
+`Stack Overflow
+<https://stackoverflow.com/questions/tagged/polemarch>`_ - tag for questions about our application on Stack Overflow
 
 .. toctree::
    :maxdepth: 2
