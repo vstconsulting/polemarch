@@ -20,7 +20,7 @@ Polemarch
 Simply WEB gui for orchestration infrastructure by ansible playbooks.
 
 Official site:
-https://gitlab.com/vstconsulting/polemarch
+http://about.polemarch.org
 
 For any questions you could use issues tracker:
 https://gitlab.com/vstconsulting/polemarch/issues
