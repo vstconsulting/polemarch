@@ -131,8 +131,10 @@ Install from PyPI
            log_file = /var/log/{PROG_NAME}_web.log
 
            [worker]
-           logfile = /var/log/{PROG_NAME}_worker.log  # output will be /run/polemarch_worker.log
-           pidfile = /run/{PROG_NAME}_worker.pid  # output will be /run/polemarch_worker.pid
+           # output will be /run/polemarch_worker.log
+           logfile = /var/log/{PROG_NAME}_worker.log
+           # output will be /run/polemarch_worker.pid
+           pidfile = /run/{PROG_NAME}_worker.pid
            loglevel = INFO
 
       Also if you need to set your own path for logfile or pidfile,
