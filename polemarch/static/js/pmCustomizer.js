@@ -222,7 +222,7 @@ tabSignal.connect('guiSkin.dark.init', function(obj)
         title:'History status offline',
         format:'color',
         type: "string",
-        default:"#c",
+        default:"#cccccc",
         priority: 45,
         value:obj.guiSkin.value.history_status_offline,
         onchange:() => {
