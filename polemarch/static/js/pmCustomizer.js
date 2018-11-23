@@ -86,7 +86,7 @@ tabSignal.connect('guiSkin.default.init', function(obj)
         title:'Project status new',
         format:'color',
         type: "string",
-        default:"#8c8c8c",
+        default:"#bf71b7",
         priority: 47,
         value:obj.guiSkin.value.project_status_new,
         onchange:() => {

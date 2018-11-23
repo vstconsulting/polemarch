@@ -51,15 +51,15 @@ guiDashboard.model.widgets = [
  */
 guiDashboard.model.defaultWidgets = [
     [
-        /**/{
-        name:'pmwTemplatesCounter',
-        title:'Templates Counter',
-        sort:1,
-        active:true,
-        opt:{},
-        type:1,
-        collapse:false,
-    },
+        {
+            name:'pmwTemplatesCounter',
+            title:'Templates Counter',
+            sort:1,
+            active:true,
+            opt:{},
+            type:1,
+            collapse:false,
+        },
         {
             name:'pmwProjectsCounter',
             title:'Projects Counter',

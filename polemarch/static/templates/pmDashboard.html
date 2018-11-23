@@ -93,7 +93,7 @@
 
 <!--template progress bars for chart -->
 <script type="text/x-just" data-just="chart_progress_bars">
-    <h5 class="text-center" style="margin-top:25px;">Goal completion</h5>
+    <h5 class="text-center" style="margin-top:25px;">Statistic</h5>
     <% for(let i in opt.settings) { %>
         <% let line = opt.settings[i] %>
         <% if(line.name != 'all_tasks' && line.active) { %>
@@ -186,10 +186,10 @@
 
     <%[ buttons_row %>
         <div class="row">
-            <button class="btn btn-default" onclick="guiDashboard.showWidgetSettingsModal();" style="margin-left: 10px; margin-top:-7px;">
+            <button class="btn btn-default btn-showWidgetSettings" onclick="guiDashboard.showWidgetSettingsModal();" style="margin-left: 10px; margin-top:-7px;">
                <i class="fa fa-cog"></i>
             </button>
-            <button class="btn btn-default" onclick="guiDashboard.toggleSortable(this);" style="margin-left: 5px; margin-top:-7px;">
+            <button class="btn btn-default btn-toggleSortable" onclick="guiDashboard.toggleSortable(this);" style="margin-left: 5px; margin-top:-7px;">
                <i class="fa fa-lock"></i>
             </button>
         </div>
