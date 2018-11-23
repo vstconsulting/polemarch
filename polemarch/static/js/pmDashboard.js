@@ -201,6 +201,8 @@ guiDashboard.model.defaultChartLineSettings = [
 
 guiDashboard.model.autoupdateInterval = 15000;
 
+guiDashboard.model.skinsSettings = {};
+
 /**
  * Function copies all properties of default chart line settings.
  * This function is supposed to be called when empty JSON was received from API.
@@ -424,6 +426,22 @@ guiDashboard.setUserSettingsFromApiAnswer = function(data)
     {
         guiDashboard.cloneDefaultAutoupdateInterval()
     }
+
+    if(data.skinsSettings)
+    {
+        guiDashboard.cloneDataSkinsFromApi(data.skinsSettings);
+    }
+    else
+    {
+        let skin = guiCustomizer.getSkin();
+        if(skin)
+        {
+            skin.setValue(guiDashboard.model.skinsSettings);
+            skin.saveSettings();
+        }
+
+        // guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
+    }
 }
 
 /*
@@ -442,6 +460,15 @@ guiDashboard.cloneAutoupdateIntervalFromApi = function(interval)
 guiDashboard.cloneDefaultAutoupdateInterval = function()
 {
     guiLocalSettings.setIfNotExists('page_update_interval', guiDashboard.model.autoupdateInterval)
+}
+
+
+guiDashboard.cloneDataSkinsFromApi = function(skins)
+{
+    guiDashboard.model.skinsSettings = $.extend(true, {}, skins);
+
+    guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
+
 }
 
 /**
@@ -469,6 +496,7 @@ guiDashboard.putUserDashboardSettingsToAPI = function()
             autoupdateInterval: guiDashboard.model.autoupdateInterval,
             widgetSettings:widgetSettings,
             chartLineSettings:chartLineSettings,
+            skinsSettings: guiDashboard.model.skinsSettings,
         }
     }
 
@@ -1101,3 +1129,16 @@ guiDashboard.showWidgetSettingsModal = function ()
     guiModal.setModalHTML(html, opt);
     guiModal.modalOpen();
 }
+
+tabSignal.connect("guiSkins.save", function(obj)
+{
+    guiDashboard.model.skinsSettings[obj.skin.name] = obj.skin.value;
+    guiDashboard.putUserDashboardSettingsToAPI();
+})
+
+tabSignal.connect("guiSkins.deleteSettings", function(obj)
+{
+     delete guiDashboard.model.skinsSettings[obj.skin.name];
+     guiDashboard.putUserDashboardSettingsToAPI();
+
+});
