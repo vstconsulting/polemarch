@@ -1115,7 +1115,7 @@ var pmwUsersCounter = inheritance(pmwItemsCounter);
 pmwUsersCounter.model.nameInStats = "users";
 pmwUsersCounter.model.path = "user";
 
-tabSignal.connect("loading.completed", function(){
+tabSignal.connect("webGui.start", function(){
     guiDashboard.getUserSettingsFromAPI();
 })
 
