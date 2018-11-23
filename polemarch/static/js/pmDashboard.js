@@ -878,30 +878,34 @@ guiDashboard.updateData = function()
         // renders chart
         let ctx = document.getElementById("chart_js_canvas");
 
-        try
+        if(ctx && ctx.getContext)
         {
             ctx = ctx.getContext('2d');
-            guiDashboard.model.historyChart.destroy();
-        }
-        catch{}
 
-        guiDashboard.model.historyChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: chart_data_obj.datasets,
-                labels: chart_data_obj.labels,
-            },
-
-            options:{
-                maintainAspectRatio: false,
-                legend: {
-                    labels: {
-                        fontColor: guiCustomizer.skin.value.chart_legend_text_color,
-                    },
-                },
+            try
+            {
+                guiDashboard.model.historyChart.destroy();
             }
+            catch(e){}
 
-        });
+            guiDashboard.model.historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: chart_data_obj.datasets,
+                    labels: chart_data_obj.labels,
+                },
+
+                options:{
+                    maintainAspectRatio: false,
+                    legend: {
+                        labels: {
+                            fontColor: guiCustomizer.skin.value.chart_legend_text_color,
+                        },
+                    },
+                }
+
+            });
+        }
 
         guiDashboard.renderChartProgressBars();
     });
@@ -1138,7 +1142,7 @@ tabSignal.connect("guiSkins.save", function(obj)
 
 tabSignal.connect("guiSkins.deleteSettings", function(obj)
 {
-     delete guiDashboard.model.skinsSettings[obj.skin.name];
-     guiDashboard.putUserDashboardSettingsToAPI();
+    delete guiDashboard.model.skinsSettings[obj.skin.name];
+    guiDashboard.putUserDashboardSettingsToAPI();
 
 });
