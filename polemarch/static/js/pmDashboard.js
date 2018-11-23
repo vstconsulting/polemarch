@@ -805,7 +805,7 @@ guiDashboard.updateData = function()
                     time = moment(time).tz(window.timeZone).format(date_format);
                     if(tasks_data[time] !== undefined)
                     {
-                         tasks_data[time] = val.all;
+                        tasks_data[time] = val.all;
                     }
                 }
 
@@ -863,8 +863,14 @@ guiDashboard.updateData = function()
                 datasets: chart_data_obj.datasets,
                 labels: chart_data_obj.labels,
             },
+
             options:{
                 maintainAspectRatio: false,
+                legend: {
+                    labels: {
+                        fontColor: guiCustomizer.skin.value.chart_legend_text_color,
+                    },
+                },
             }
 
         });

@@ -29,8 +29,29 @@
             { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js' %}?v={{gui_version}}"},
             { prioritet:5, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/slimScroll/jquery.slimscroll.min.js' %}?v={{gui_version}}"},
+            { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
+            { prioritet:6, type:'js', name: "{% static 'js/guiCustomizer.js' %}?v={{gui_version}}"},
+            { prioritet:7, type:'js', name: "{% static 'js/pmCustomizer.js' %}?v={{gui_version}}"},
+             { prioritet:6, type:'js', name: "{% static 'js/libs/just.js' %}?v={{gui_version}}"},
+            { prioritet:7, type:'js', name: "{% static 'js/libs/just-watch.js' %}?v={{gui_version}}"},
+            { prioritet:110, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiCustomizer.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiElements.html' %}?v={{gui_version}}"},
+             { prioritet:110, type:'js', name: "{% static 'js/libs/autocomplete.js' %}?v={{gui_version}}"},
+            { prioritet:110, type:'js', name: "{% static 'plugins/select2/select2.full.min.js' %}?v={{gui_version}}"},
+            { prioritet:99, type:'css', name: "{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}"},
+            { prioritet:10.1, type:'js', name: "{% static 'js/guiPopUp.js' %}?v={{gui_version}}"},
+             { prioritet:10.2, type:'js', name: "{% static 'js/guiModal.js' %}?v={{gui_version}}"},
+               { prioritet:102, type:'css', name: "{% static 'css/iziToast.min.css' %}?v={{gui_version}}"},
+            { prioritet:102, type:'css', name: "{% static 'css/iziModal.min.css' %}?v={{gui_version}}"},
+             { prioritet:4, type:'js', name: "{% static 'js/libs/iziToast.min.js' %}?v={{gui_version}}"},
+            { prioritet:4, type:'js', name: "{% static 'js/libs/iziModal.min.js' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/errorPage.html' %}?v={{gui_version}}"},
 
             { prioritet:8, type:'js', name: "{% static 'AdminLTE-3.0.0/min/js/adminlte.min.js' %}?v={{gui_version}}"},
+
+             { prioritet:11.0, type:'js', name: "{% static 'js/guiElements.js' %}?v={{gui_version}}"},
+            { prioritet:11.7, type:'js', name: "{% static 'js/guiForWeb.js' %}?v={{gui_version}}"},
 
             // { prioritet:8, type:'js', name: "{% static 'js/app.js' %}?v={{gui_version}}"},
             // { prioritet:102, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
@@ -55,10 +76,19 @@
         {
             hideLoadingProgress();
         })
-        
+
         tabSignal.connect("resource.loaded", function()
         {
             hideLoadingProgress();
+            tabSignal.emit("loading.completed");
+
         })
+
+        tabSignal.connect("webGui.start", function()
+        {
+            guiCustomizer.setSkin(guiLocalSettings.get('skin'))
+            guiCustomizer.render();
+        })
+
     </script>
 {% endblock %}
