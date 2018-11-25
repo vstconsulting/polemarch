@@ -22,7 +22,6 @@ import sys
 sys.path.insert(0, os.path.abspath('../'))
 import vstutils
 import polemarch
-import sphinx_fontawesome
 
 # -- General configuration ------------------------------------------------
 
@@ -33,7 +32,7 @@ import sphinx_fontawesome
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinxcontrib.httpdomain', 'sphinxcontrib.openapi', 'sphinx_fontawesome']
+extensions = ['sphinxcontrib.httpdomain', 'sphinxcontrib.openapi']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
