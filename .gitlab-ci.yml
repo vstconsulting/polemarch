@@ -195,7 +195,7 @@ release_deb:
     - $PYPI_UPLOAD_PASSWORD
   image: onegreyonewhite/tox:ubuntu
   script:
-   - make test ENVS=deb
+   - make test ENVS=deb INSTALL_PY=python3
   allow_failure: false
   artifacts:
     name: "release-deb-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
