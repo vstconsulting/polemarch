@@ -878,7 +878,7 @@ gui_project_template_option_variables_fields_Schema = {
         "parent_field":"key"
     }
 }
-
+ 
 let api_error_responses = {
     "400": {
         "description": "Validation error or some data error.",

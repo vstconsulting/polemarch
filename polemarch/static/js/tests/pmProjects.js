@@ -36,6 +36,10 @@ window.qunitTestsArray['guiPaths.project'] = {
 
         guiTests.updateObject(test_name, {notes:{value:rundomString(6)}}, true)
 
+
+        // ////////////////////////////////////////////////
+        //  Тест project/{pk}/template/***
+        // ////////////////////////////////////////////////
         guiTests.openPage(test_name, env, (env) =>{ return vstMakeLocalApiUrl("project/{pk}/template/new", {api_pk:env.objectId}) })
 
         // Проверка того что страница с флагом api_obj.canCreate == true открывается
@@ -54,7 +58,7 @@ window.qunitTestsArray['guiPaths.project'] = {
             // Создали объект с набором случайных данных
             $.when(window.curentPageObject.createAndGoEdit()).done(() => {
 
-                guiTests.compareValues(assert, test_name, fieldsData, values)
+                guiTests.compareValues(assert, 'project/{pk}/trigger/new', fieldsData, values)
 
                 env.template_id = window.curentPageObject.model.data.id;
 
@@ -64,7 +68,7 @@ window.qunitTestsArray['guiPaths.project'] = {
 
                 testdone(done)
             }).fail((err) => {
-                assert.ok(false, 'guiPaths["'+test_name+'new"] create new template fail');
+                assert.ok(false, 'guiPaths["project/{pk}/trigger/new"] create new template fail');
                 testdone(done)
             })
         })
@@ -140,6 +144,7 @@ window.qunitTestsArray['guiPaths.project'] = {
 
         guiTests.deleteObject(test_name)
 
+        // Удалить проект
         test_name = "project/{pk}"
         guiTests.openPage(test_name, env, (env) =>{
             return vstMakeLocalApiUrl("project/{pk}", {api_pk:env.objectId, api_template_id:env.template_id})
