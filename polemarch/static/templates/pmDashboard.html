@@ -1,5 +1,5 @@
 
-<!-- Шаблон виджета -->
+<!-- widget template -->
 <script type="text/x-just" data-just="pmwItemsCounter">
     <!--<div class="col-lg-2 col-sm-4 col-xs-6 dnd-block" id="pmw<%- model.nameInStats %>Counter">-->
     <div class="col-lg-2 col-6 dnd-block" id="pmw<%- model.nameInStats %>Counter">
@@ -20,7 +20,7 @@
     </div>
 </script>
 
-<!--Шаблон графика -->
+<!-- chart template widget -->
 <script type="text/x-just" data-just="pmwChartWidget">
     <div>
         <div class="card card-info
@@ -35,7 +35,7 @@
                 Tasks history
 
                 <div class="pull-right">
-                    <button type="button" class="btn btn-primary btn-sm" data-widget="collapse" id="collapse-chart" onclick="guiDashboard.setNewWidgetCollapseValue(this)">
+                    <button type="button" class="btn btn-sm btn-light btn-icon" data-widget="collapse" id="collapse-chart" onclick="guiDashboard.setNewWidgetCollapseValue(this)">
                         <i
                             <% for(var j in guiDashboard.model.widgets[0]){  %>
                                 <% if(guiDashboard.model.widgets[0][j].name == 'pmwChartWidget' && guiDashboard.model.widgets[0][j].collapse==true) { %>
@@ -47,7 +47,7 @@
                             <% } %>
                         ></i>
                     </button>
-                    <button type="button" class="btn btn-primary btn-sm" data-widget="remove"  onclick="guiDashboard.setNewWidgetActiveValue(this)">
+                    <button type="button" class="btn btn-sm btn-light btn-icon" data-widget="remove"  onclick="guiDashboard.setNewWidgetActiveValue(this)">
                         <i class="fa fa-times"></i>
                     </button>
                 </div>
@@ -59,8 +59,9 @@
                         <% } %>
                     <% } %>
                 ">
-                    <label  style="float:left; margin-right:10px; line-height:26px;">Period</label>
-                    <select id="chart-period" class="form-control" style="max-width:145px; height:26px; line-height:26px; padding:3px 12px; display:inline-block; float:left;" onchange="guiDashboard.updateStatsDataLast(this)">
+                  <div class="chart-period-select-wrapper">
+                    <label style="float:left; margin-right:10px; line-height:26px;">Period</label>
+                    <select id="chart-period" class="form-control" style="max-width:145px; height:30px; line-height:30px; padding:3px 12px; display:inline-block; float:left;" onchange="guiDashboard.updateStatsDataLast(this)">
                         <option value="1095">last 3 years</option>
                         <option value="365">last year</option>
                         <option value="90">last 3 months</option>
@@ -69,13 +70,60 @@
                         <option value="7">last week</option>
                         <option value="3">last 3 days</option>
                     </select>
+                  </div>
                 </div>
             </div>
             <div class="card-body border-radius-none">
-                <div id="c3-history-chart"></div>
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div style="position: relative; margin: auto; height: 300px; width: 100%; overflow:hidden;">
+                          <canvas id="chart_js_canvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                       <div style="width=100%;" class="text-data" id="chart_progress_bars">
+
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+</script>
+
+<!--template progress bars for chart -->
+<script type="text/x-just" data-just="chart_progress_bars">
+    <h5 class="text-center" style="margin-top:25px;">Statistic</h5>
+    <% for(let i in opt.settings) { %>
+        <% let line = opt.settings[i] %>
+        <% if(line.name != 'all_tasks' && line.active) { %>
+            <% let bool = false %>
+            <% let all = 0 %>
+            <% for(let j in opt.stats_data.jobs.year) { %>
+                <% let stats = opt.stats_data.jobs.year[j] %>
+                <% all = stats.all %>
+                <% if(stats.status.toLowerCase() == line.name) { %>
+                    <% bool = true %>
+                    <div class="progress-group">
+                        <%- line.name %>
+                        <span class="float-right"><b> <%- stats.sum %> </b>/ <%- stats.all %> </span>
+                         <div class="progress progress-sm">
+                            <div class="progress-bar" style="width: <%- stats.sum / stats.all * 100 %>%; background-color: <%- line.color %>!important;"></div>
+                         </div>
+                    </div>
+                 <% } %>
+            <% } %>
+            <% if(!bool) { %>
+               <div class="progress-group">
+                    <%- line.name %>
+                    <span class="float-right"><b> 0 </b>/ <%- all %> </span>
+                     <div class="progress progress-sm">
+                        <div class="progress-bar" style="width: 0%; background-color: <%- line.color %>!important;"></div>
+                     </div>
+                </div>
+            <% } %>
+        <% } %>
+    <% } %>
 </script>
 
 <!-- template of widget_settings_modal -->
@@ -133,15 +181,15 @@
     </section>
 </script>
 
-<!-- Страница dashboard -->
+<!-- dashboard page -->
 <script type="text/x-just" data-just="pmDashboard">
 
     <%[ buttons_row %>
         <div class="row">
-            <button class="btn btn-default" onclick="guiDashboard.showWidgetSettingsModal();" style="margin-left: 10px; margin-top:-7px;">
+            <button class="btn btn-default btn-showWidgetSettings" onclick="guiDashboard.showWidgetSettingsModal();" style="margin-left: 10px; margin-top:-7px;">
                <i class="fa fa-cog"></i>
             </button>
-            <button class="btn btn-default" onclick="guiDashboard.toggleSortable(this);" style="margin-left: 5px; margin-top:-7px;">
+            <button class="btn btn-default btn-toggleSortable" onclick="guiDashboard.toggleSortable(this);" style="margin-left: 5px; margin-top:-7px;">
                <i class="fa fa-lock"></i>
             </button>
         </div>
@@ -152,7 +200,7 @@
     <%[ main_content_row %>
 
             <div class="container-fluid">
-                <!-- Вывод списка виджетов -->
+                <!-- render widgets -->
                 <% for(var i in guiDashboard.model.widgets){ %>
                     <div class="row" id="dnd-container">
 

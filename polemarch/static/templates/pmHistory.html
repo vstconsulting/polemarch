@@ -13,12 +13,12 @@
                     <div class="card-header with-border collapsed-card">
                         Inventory<br>
                         <div class="card-tools pull-right">
-                            <button type="button" class="btn btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
+                            <button type="button" class="btn btn-history-resize btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize');" >
                                 <i class="fa fa-expand"></i>
                                 <i class="fa fa-compress"></i>
                             </button>
 
-                            <button type="button" class="btn" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+                            <button type="button" class="btn btn-light btn-sm btn-light btn-icon" data-widget="collapse"><i class="fa fa-plus"></i> </button>
                         </div>
                     </div>
                     <div class="card-body">
@@ -40,9 +40,9 @@
                                     <% if(!(guiObj.model.data.status == 'RUN' || guiObj.model.data.status == 'DELAY')) { %>
 
                                             <button type="button"
-                                                    class="btn btn-default"
+                                                    class="btn btn-light btn-sm btn-light btn-icon"
                                                     id="clear_output"
-                                                    style="margin-right:5px; padding: 3px 9px;"
+                                                    style="margin-right:5px;"
                                                     <%= justOn('click', () =>{clearHistoryStdOut(guiObj.api.actions['clear'], guiObj)}, 'clear_output') %>
                                             >
 
@@ -54,12 +54,12 @@
                                     <% } %>
                                 <~>
 
-                            <button type="button" class="btn btn-card-tool btn-history-resize" onclick="$('.history-mode').toggleClass('history-fullsize');" >
+                            <button type="button" class="btn btn-card-tool btn-history-resize btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize');" >
                                 <i class="fa fa-expand"></i>
                                 <i class="fa fa-compress"></i>
                             </button>
 
-                            <button type="button" class="btn btn-card-tool" data-widget="collapse" ><i class="fa fa-minus"></i> </button>
+                            <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon" data-widget="collapse" ><i class="fa fa-minus"></i> </button>
                         </div>
                     </div>
                     <div class="card-body">
@@ -84,7 +84,7 @@
                     <div class="card-header with-border">
                         Task<br>
                         <div class="card-tools pull-right">
-                            <button type="button" class="btn btn-card-tool" onclick="$('.history-mode').toggleClass('history-fullsize');" ><i class="fa fa-compress"></i> </button>
+                            <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize');" ><i class="fa fa-compress"></i> </button>
                         </div>
                     </div>
                     <div class="card-body">

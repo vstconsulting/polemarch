@@ -87,12 +87,12 @@ PROJECT_GUI_MENU = [
             {
                 'name': 'Users',
                 'url': '/user',
-                'span_class': 'glyphicon glyphicon-user',
+                'span_class': 'fa fa-user',
             },
             {
                 'name': 'Hooks',
                 'url': '/hook',
-                'span_class': 'glyphicon glyphicon-console'
+                'span_class': 'fa fa-plug'
             },
         ]
     },

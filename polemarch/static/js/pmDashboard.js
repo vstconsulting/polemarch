@@ -51,15 +51,15 @@ guiDashboard.model.widgets = [
  */
 guiDashboard.model.defaultWidgets = [
     [
-        /**/{
-        name:'pmwTemplatesCounter',
-        title:'Templates Counter',
-        sort:1,
-        active:true,
-        opt:{},
-        type:1,
-        collapse:false,
-    },
+        {
+            name:'pmwTemplatesCounter',
+            title:'Templates Counter',
+            sort:1,
+            active:true,
+            opt:{},
+            type:1,
+            collapse:false,
+        },
         {
             name:'pmwProjectsCounter',
             title:'Projects Counter',
@@ -159,41 +159,49 @@ guiDashboard.model.defaultChartLineSettings = [
         name: "all_tasks",
         title: "All tasks",
         color: "#1f77b4",
+        bg_color:"rgba(31, 119, 180, 0.3)",
         active: true
     },
     {
         name: "ok",
         title: "OK",
         color: "#276900",
+        bg_color:"rgba(39, 105, 0, 0.3)",
         active: true
     },
     {
         name: "error",
         title: "ERROR",
         color: "#dc3545",
+        bg_color:"rgba(220, 53, 69, 0.3)",
         active: true
     },
     {
         name: "interrupted",
         title: "INTERRUPTED",
         color: "#9b97e4",
+        bg_color:"rgba(155, 151, 228, 0.3)",
         active: true
     },
     {
         name: "delay",
         title: "DELAY",
         color: "#808419",
+        bg_color:"rgba(128, 132, 25, 0.3)",
         active: true
     },
     {
         name: "offline",
         title: "OFFLINE",
         color: "#9e9e9e",
+        bg_color:"rgba(158, 158, 158, 0.3)",
         active: true
     }
 ]
 
 guiDashboard.model.autoupdateInterval = 15000;
+
+guiDashboard.model.skinsSettings = {};
 
 /**
  * Function copies all properties of default chart line settings.
@@ -418,6 +426,22 @@ guiDashboard.setUserSettingsFromApiAnswer = function(data)
     {
         guiDashboard.cloneDefaultAutoupdateInterval()
     }
+
+    if(data.skinsSettings)
+    {
+        guiDashboard.cloneDataSkinsFromApi(data.skinsSettings);
+    }
+    else
+    {
+        let skin = guiCustomizer.getSkin();
+        if(skin)
+        {
+            skin.setValue(guiDashboard.model.skinsSettings);
+            skin.saveSettings();
+        }
+
+        // guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
+    }
 }
 
 /*
@@ -436,6 +460,15 @@ guiDashboard.cloneAutoupdateIntervalFromApi = function(interval)
 guiDashboard.cloneDefaultAutoupdateInterval = function()
 {
     guiLocalSettings.setIfNotExists('page_update_interval', guiDashboard.model.autoupdateInterval)
+}
+
+
+guiDashboard.cloneDataSkinsFromApi = function(skins)
+{
+    guiDashboard.model.skinsSettings = $.extend(true, {}, skins);
+
+    guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
+
 }
 
 /**
@@ -463,6 +496,7 @@ guiDashboard.putUserDashboardSettingsToAPI = function()
             autoupdateInterval: guiDashboard.model.autoupdateInterval,
             widgetSettings:widgetSettings,
             chartLineSettings:chartLineSettings,
+            skinsSettings: guiDashboard.model.skinsSettings,
         }
     }
 
@@ -585,16 +619,17 @@ guiDashboard.saveWigdetsOptions = function()
 guiDashboard.saveWigdetsOptionsFromModal = function()
 {
     return $.when(guiDashboard.saveWigdetsOptions()).done(function(){
-            guiModal.modalClose();
-            return spajs.openURL("/");
+        guiModal.modalClose();
+        return spajs.openURL("/");
     }).promise();
 }
 
 /**
  * Function generates array with data for chart lines.
  */
-guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
+guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status, date_format)
 {
+
     for(var i in tasks_data) {
         tasks_data[i]=0;
     }
@@ -603,14 +638,14 @@ guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
     {
         var val = guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType][i];
         var time =+ moment(val[guiDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
+        time = moment(time).tz(window.timeZone).format(date_format);
 
         if(val.status==status){
             tasks_data[time] = val.sum;
-            tasks_data_t.push(time)
         }
     }
 
-    var chart_tasks_data1 = [status];
+    var chart_tasks_data1 = [];
 
     for(var j in tasks_data_t)
     {
@@ -631,7 +666,7 @@ guiDashboard.loadStats=function()
     let query = {
         type: "get",
         item: "stats",
-        filter:"last="+guiDashboard.statsDataLastQuery
+        filters:"last="+guiDashboard.statsDataLastQuery,
     }
 
     let def = new $.Deferred();
@@ -765,15 +800,17 @@ guiDashboard.updateData = function()
         // guiDashboard.statsDataLast - amount of previous periods (periods to reduce)
         // guiDashboard.statsDataMomentType - period type - month/year
         var startTime =+ moment(startTimeOrg).subtract(guiDashboard.statsDataLast-1, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
+        var date_format = 'DD.MM.YY';
 
         tasks_data = {};
         tasks_data_t = [];
 
         // forms chart time intervals based on start date
-        for(var i = 0; i< guiDashboard.statsDataLast; i++)
+        for(var i = -1; i< guiDashboard.statsDataLast; i++)
         {
             // period up
             var time=+moment(startTime).add(i, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
+            time = moment(time).tz(window.timeZone).format(date_format);
             tasks_data[time] = 0;
             tasks_data_t.push(time);
         }
@@ -782,6 +819,7 @@ guiDashboard.updateData = function()
         var linesForChartArr = [];
         // object, that is storing line colors
         var colorPaternForLines = {};
+        let chart_data_obj = {datasets:[], labels:[]};
         for(var i in guiDashboard.model.ChartLineSettings)
         {
             var lineChart = guiDashboard.model.ChartLineSettings[i];
@@ -792,41 +830,84 @@ guiDashboard.updateData = function()
                 for (var i in guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType]) {
                     var val = guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType][i];
                     var time = +moment(val[guiDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
-                    if (!tasks_data[time]) {
+                    time = moment(time).tz(window.timeZone).format(date_format);
+                    if(tasks_data[time] !== undefined)
+                    {
                         tasks_data[time] = val.all;
-                        tasks_data_t.push(time)
                     }
                 }
-                chart_tasks_start_x = ['time'];
-                chart_tasks_data = [lineChart.title];
+
+                let chart_tasks_data = [];
                 for (var j in tasks_data_t) {
                     var time = tasks_data_t[j]
-                    chart_tasks_start_x.push(time / 1);
                     chart_tasks_data.push(tasks_data[time] / 1);
+                    chart_data_obj.labels.push(time);
                 }
 
-                linesForChartArr.push(chart_tasks_start_x);
                 if(lineChart.active == true)
                 {
                     linesForChartArr.push(chart_tasks_data);
                     colorPaternForLines[lineChart.title]=lineChart.color;
+
+                    chart_data_obj.datasets.push({
+                        label: 'All tasks',
+                        data: chart_tasks_data,
+                        borderColor: lineChart.color,
+                        backgroundColor: lineChart.bg_color,
+                    })
                 }
             }
 
             // forms array with values for others line
             if(lineChart.name != 'all_tasks' && lineChart.active == true)
             {
-                var chart_tasks_data_var = guiDashboard.getDataForStatusChart(tasks_data, tasks_data_t, lineChart.title);
+                var chart_tasks_data_var = guiDashboard.getDataForStatusChart(tasks_data, tasks_data_t, lineChart.title, date_format);
                 linesForChartArr.push(chart_tasks_data_var);
                 colorPaternForLines[lineChart.title]=lineChart.color;
+
+
+                chart_data_obj.datasets.push({
+                    label: lineChart.title,
+                    data: chart_tasks_data_var,
+                    borderColor: lineChart.color,
+                    backgroundColor: lineChart.bg_color,
+                })
             }
         }
 
         // renders chart
-        guiDashboard.model.historyChart.load({
-            columns: linesForChartArr,
-            colors: colorPaternForLines
-        });
+        let ctx = document.getElementById("chart_js_canvas");
+
+        if(ctx && ctx.getContext)
+        {
+            ctx = ctx.getContext('2d');
+
+            try
+            {
+                guiDashboard.model.historyChart.destroy();
+            }
+            catch(e){}
+
+            guiDashboard.model.historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: chart_data_obj.datasets,
+                    labels: chart_data_obj.labels,
+                },
+
+                options:{
+                    maintainAspectRatio: false,
+                    legend: {
+                        labels: {
+                            fontColor: guiCustomizer.skin.value.chart_legend_text_color,
+                        },
+                    },
+                }
+
+            });
+        }
+
+        guiDashboard.renderChartProgressBars();
     });
 
     this.model.updateTimeoutId = setTimeout(function(){
@@ -834,8 +915,17 @@ guiDashboard.updateData = function()
     }, 1000*30)
 }
 
+guiDashboard.renderChartProgressBars = function()
+{
+    let opt = {
+        settings: guiDashboard.model.ChartLineSettings,
+        stats_data: guiDashboard.statsData,
+    }
 
+    let html = spajs.just.render('chart_progress_bars', {opt: opt});
 
+    $("#chart_progress_bars").html(html);
+};
 
 guiDashboard.open  = function(holder, menuInfo, data)
 {
@@ -870,40 +960,6 @@ guiDashboard.open  = function(holder, menuInfo, data)
         pmwAnsibleModuleWidget.render();
         pmwChartWidget.render();
 
-        guiDashboard.model.historyChart = c3.generate({
-            bindto: '#c3-history-chart',
-            data: {
-                x: 'time',
-                columns: [
-                    ['time'],
-                    ['All tasks'],
-                    ['OK'],
-                    ['ERROR'],
-                    ['INTERRUPTED'],
-                    ['DELAY'],
-                    ['OFFLINE']
-                ],
-                type: 'area',
-                types: {
-                    OK: 'area',
-                    ERROR: 'area',
-                    INTERRUPTED: 'area',
-                    DELAY: 'area',
-                    OFFLINE: 'area'
-                },
-            },
-            axis: {
-                x: {
-                    type: 'timeseries',
-                    tick: {
-                        format: '%Y-%m-%d'
-                    }
-                }
-            },
-            color: {
-                pattern: ['#1f77b4',  '#276900', '#333333', '#9b97e4', '#808419', '#9e9e9e', '#d62728',  '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
-            }
-        });
         if($('select').is('#chart-period'))
         {
             let chart_period = guiLocalSettings.get('chart_period') || guiDashboard.statsDataLastQuery;
@@ -1063,7 +1119,7 @@ var pmwUsersCounter = inheritance(pmwItemsCounter);
 pmwUsersCounter.model.nameInStats = "users";
 pmwUsersCounter.model.path = "user";
 
-tabSignal.connect("loading.completed", function(){
+tabSignal.connect("webGui.start", function(){
     guiDashboard.getUserSettingsFromAPI();
 })
 
@@ -1077,3 +1133,16 @@ guiDashboard.showWidgetSettingsModal = function ()
     guiModal.setModalHTML(html, opt);
     guiModal.modalOpen();
 }
+
+tabSignal.connect("guiSkins.save", function(obj)
+{
+    guiDashboard.model.skinsSettings[obj.skin.name] = obj.skin.value;
+    guiDashboard.putUserDashboardSettingsToAPI();
+})
+
+tabSignal.connect("guiSkins.deleteSettings", function(obj)
+{
+    delete guiDashboard.model.skinsSettings[obj.skin.name];
+    guiDashboard.putUserDashboardSettingsToAPI();
+
+});

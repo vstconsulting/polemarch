@@ -3,7 +3,7 @@ Source: $(NAME)
 Section: unknown
 Priority: optional
 Maintainer: $(VENDOR)
-Build-Depends: debhelper (>= 9), python-virtualenv, python-pip, python-dev, gcc, libffi-dev, libssl-dev, libyaml-dev, libkrb5-dev, libssl-dev, libsasl2-dev, libldap2-dev
+Build-Depends: debhelper (>= 9), python3-virtualenv, python3-pip, python3-dev, gcc, libffi-dev, libssl-dev, libyaml-dev, libkrb5-dev, libssl-dev, libsasl2-dev, libldap2-dev
 Standards-Version: 3.9.5
 Homepage: https://gitlab.com/vstconsulting/polemarch
 Vcs-Git: git@gitlab.com:vstconsulting/polemarch.git
@@ -11,7 +11,7 @@ Vcs-Browser: https://gitlab.com/vstconsulting/polemarch.git
 
 Package: $(NAME)
 Architecture: amd64
-Depends: $${shlibs:Depends}, $${misc:Depends}, python-virtualenv, libffi6, libssl-dev, sshpass, libpython2.7, git, libyaml-dev, libkrb5-dev, libssl-dev, libsasl2-dev, libldap2-dev
+Depends: $${shlibs:Depends}, $${misc:Depends}, python3-virtualenv, libffi6, libssl-dev, sshpass, libpython3.5, git, libyaml-dev, libkrb5-dev, libssl-dev, libsasl2-dev, libldap2-dev
 Description: $(SUMMARY)
 $(DESCRIPTION)
 endef
