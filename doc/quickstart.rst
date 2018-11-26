@@ -140,6 +140,8 @@ Install from PyPI
       Also if you need to set your own path for logfile or pidfile,
       different from the path from example, you can do it, but make sure,
       that user, which starts Polemarch has write-permissions for these directory and file.
+      If you run it as root, we recommend to add in ```[uwsig]``` params ```uid``` and ```gid```
+      (`read more <https://uwsgi-docs.readthedocs.io/en/latest/Namespaces.html#the-old-way-the-namespace-option>`_).
 
 
 #. Make migrations:

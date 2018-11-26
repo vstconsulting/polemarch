@@ -106,7 +106,7 @@ prebuild: print_vars
 	$(PREBUILD_BINDIR)/pip install -U -r requirements-git.txt
 	# RECORD files are used by wheels for checksum. They contain path names which
 	# match the buildroot and must be removed or the package will fail to build.
-	find $(PREBUILD_DIR) -name "RECORD" -exec rm -rf {} \;
+	# find $(PREBUILD_DIR) -name "RECORD" -exec rm -rf {} \;
 	# Change the virtualenv path to the target installation direcotry.
 	$(RELOCATE_BIN) --source=$(PREBUILD_DIR) --destination=$(INSTALL_DIR)
 	# Remove sources for Clang
