@@ -105,19 +105,19 @@ guiDashboard.model.defaultWidgets = [
             type:1,
             collapse:false,
         },
-        {
-            name:'pmwAnsibleModuleWidget',
-            title:'Run shell command',
-            sort:7,
-            active:true,
-            opt:{},
-            type:0,
-            collapse:false,
-        },
+        // {
+        //     name:'pmwAnsibleModuleWidget',
+        //     title:'Run shell command',
+        //     sort:7,
+        //     active:true,
+        //     opt:{},
+        //     type:0,
+        //     collapse:false,
+        // },
         {
             name:'pmwChartWidget',
             title:'Tasks history',
-            sort:8,
+            sort:7,
             active:true,
             opt:{},
             type:0,
@@ -433,14 +433,7 @@ guiDashboard.setUserSettingsFromApiAnswer = function(data)
     }
     else
     {
-        let skin = guiCustomizer.getSkin();
-        if(skin)
-        {
-            skin.setValue(guiDashboard.model.skinsSettings);
-            skin.saveSettings();
-        }
-
-        // guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
+        guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
     }
 }
 
