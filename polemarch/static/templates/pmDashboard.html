@@ -108,7 +108,7 @@
                         <%- line.name %>
                         <span class="float-right"><b> <%- stats.sum %> </b>/ <%- stats.all %> </span>
                          <div class="progress progress-sm">
-                            <div class="progress-bar" style="width: <%- stats.sum / stats.all * 100 %>%; background-color: <%- line.color %>!important;"></div>
+                            <div class="progress-bar" style="width: <%- stats.sum / stats.all * 100 %>%; background-color: <%- guiDashboard.getChartLineColor(line) %>!important;"></div>
                          </div>
                     </div>
                  <% } %>
@@ -118,7 +118,7 @@
                     <%- line.name %>
                     <span class="float-right"><b> 0 </b>/ <%- all %> </span>
                      <div class="progress progress-sm">
-                        <div class="progress-bar" style="width: 0%; background-color: <%- line.color %>!important;"></div>
+                        <div class="progress-bar" style="width: 0%; background-color: <%- guiDashboard.getChartLineColor(line) %>!important;"></div>
                      </div>
                 </div>
             <% } %>

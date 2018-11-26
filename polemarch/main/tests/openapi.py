@@ -1252,7 +1252,7 @@ class OApiTestCase(BaseTestCase):
 
         widgetList = ['pmwUsersCounter', 'pmwProjectsCounter', 'pmwTemplatesCounter',
                       'pmwInventoriesCounter', 'pmwGroupsCounter', 'pmwHostsCounter',
-                      'pmwChartWidget', 'pmwAnsibleModuleWidget']
+                      'pmwChartWidget']
         self.check_fields(objName, widgetSettings['required'], *widgetList)
         ref = '#/definitions/CounterWidgetSetting'
         self.check_fields(
@@ -1274,10 +1274,6 @@ class OApiTestCase(BaseTestCase):
         ref = '#/definitions/WidgetSetting'
         self.check_fields(
             objName, widgetSettings['properties']['pmwChartWidget'], **{'$ref': ref}
-        )
-        self.check_fields(
-            objName, widgetSettings['properties']['pmwAnsibleModuleWidget'],
-            **{'$ref': ref}
         )
         del widgetSettings
 

@@ -44,5 +44,14 @@ gui_user_settings = {
         return $.when(base_update).done(data => {
             guiDashboard.setUserSettingsFromApiAnswer(data.data)
         })
-    }
+    },
+
+    getDataFromForm: function()
+    {
+        let base_data_from_form = gui_base_object.getDataFromForm.apply(this, arguments);
+
+        base_data_from_form['skinsSettings'] = $.extend(true, {}, guiDashboard.model.skinsSettings);
+
+        return base_data_from_form;
+    },
 }
