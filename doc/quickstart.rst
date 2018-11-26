@@ -96,6 +96,12 @@ Install from PyPI
            create database db_name default CHARACTER set utf8   default COLLATE utf8_general_ci;
            grant all on db_name.* to 'db_user'@'localhost' identified by 'db_password';
 
+   #. Then, if you use MariaDB and you have set timezone different from "UTC" you should run next command:
+
+       .. sourcecode:: bash
+
+           mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p mysql
+
    #. The default cache system is file based cache, but RedisCache is recommended. Settings needed for correct RedisCache work:
 
       .. code-block:: ini

@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='periodictask',
             name='inventory_file',
-            field=models.CharField(blank=True, db_index=True, max_length=2048, null=True),
+            field=models.CharField(blank=True, max_length=2048, null=True),
         ),
         migrations.AlterField(
             model_name='periodictask',
@@ -75,6 +75,10 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterIndexTogether(
             name='historylines',
+            index_together=set([]),
+        ),
+        migrations.AlterIndexTogether(
+            name='template',
             index_together=set([]),
         ),
     ]

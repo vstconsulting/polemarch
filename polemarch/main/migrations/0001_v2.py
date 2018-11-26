@@ -451,10 +451,10 @@ class Migration(migrations.Migration):
                                     on_delete=django.db.models.deletion.CASCADE,
                                     to=settings.AUTH_USER_MODEL),
         ),
-        migrations.AlterIndexTogether(
-            name='template',
-            index_together=set([('id', 'name', 'kind', 'inventory', 'project')]),
-        ),
+        # migrations.AlterIndexTogether(
+        #     name='template',
+        #     index_together=set([('id', 'name', 'kind', 'inventory', 'project')]),
+        # ),
         # Fix bug with Django migrations
         # Please, remove indexes manually.
         # migrations.AlterIndexTogether(
@@ -462,12 +462,12 @@ class Migration(migrations.Migration):
         #     index_together=set(
         #         [('history', 'line_number'), ('history',), ('line_number',)]),
         # ),
-        migrations.AlterIndexTogether(
-            name='history',
-            index_together=set([('id', 'project', 'mode', 'status', 'inventory',
-                                 'start_time', 'stop_time', 'initiator',
-                                 'initiator_type')]),
-        ),
+        # migrations.AlterIndexTogether(
+        #     name='history',
+        #     index_together=set([('id', 'project', 'mode', 'status', 'inventory',
+        #                          'start_time', 'stop_time', 'initiator',
+        #                          'initiator_type')]),
+        # ),
         migrations.AlterIndexTogether(
             name='group',
             index_together=set([('children', 'id'), ('children',)]),

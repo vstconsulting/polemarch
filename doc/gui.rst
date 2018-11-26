@@ -72,7 +72,6 @@ As you can see, the form of new project creation consist of 5 fields:
 After project creation you will see the next page:
 
 .. image:: gui_screenshots/test_project_1.png
-.. image:: gui_screenshots/test_project_2.png
 
 As you can see there are some new fields on this page:
 
@@ -139,6 +138,7 @@ Polemarch for pulling your changes.
 As you can see, now project's status is "NEW", so we need to click on "sync" button
 to get all needed data from your GIT project.
 
+.. image:: gui_screenshots/test_project_2.png
 .. image:: gui_screenshots/test_project_3.png
 
 After your project's status has been changed into "OK" you can confidently start working with Polemarch.
@@ -181,7 +181,6 @@ When status of your module execution changes to "OK" you will see the next page:
 
 .. image:: gui_screenshots/execute_module_3.png
 .. image:: gui_screenshots/execute_module_4.png
-.. image:: gui_screenshots/execute_module_5.png
 
 
 Template
@@ -296,7 +295,6 @@ When status of your template execution changes to "OK" you will see the next pag
 
 .. image:: gui_screenshots/execute_template_2.png
 .. image:: gui_screenshots/execute_template_3.png
-.. image:: gui_screenshots/execute_template_4.png
 
 
 Periodic tasks
@@ -371,10 +369,6 @@ As you can see there is only one new fields on this page:
 * **id** - |id_field_def|
 
 Also there are several buttons here:
-
-Sublist buttons:
-
-* **variables** - this button opens periodic task's variables list.
 
 Action buttons:
 
