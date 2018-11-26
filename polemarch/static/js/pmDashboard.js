@@ -770,136 +770,9 @@ guiDashboard.updateData = function()
         pmwUsersCounter.updateCount();
 
         // renders chart
-        // defines current months and year
-        var monthNum=moment().format("MM");
-        var yearNum=moment().format("YYYY");
-        var dayNum=moment().format("DD");
-        var hourNum=",T00:00:00";
-        var startTimeOrg="";
+        guiDashboard.renderChart();
 
-        switch (guiDashboard.statsDataMomentType) {
-            case "year":
-                startTimeOrg=yearNum+"-01-01"+hourNum;
-                break;
-            case "month":
-                startTimeOrg=yearNum+"-"+monthNum+"-01"+hourNum;
-                break;
-            case "day":
-                startTimeOrg=yearNum+"-"+monthNum+"-"+dayNum+hourNum;
-                break;
-        }
-
-        // sets start date for chart
-        // guiDashboard.statsDataLast - amount of previous periods (periods to reduce)
-        // guiDashboard.statsDataMomentType - period type - month/year
-        var startTime =+ moment(startTimeOrg).subtract(guiDashboard.statsDataLast-1, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
-        var date_format = 'DD.MM.YY';
-
-        tasks_data = {};
-        tasks_data_t = [];
-
-        // forms chart time intervals based on start date
-        for(var i = -1; i< guiDashboard.statsDataLast; i++)
-        {
-            // period up
-            var time=+moment(startTime).add(i, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
-            time = moment(time).tz(window.timeZone).format(date_format);
-            tasks_data[time] = 0;
-            tasks_data_t.push(time);
-        }
-
-        // array for chartlines, that are needed to render
-        var linesForChartArr = [];
-        // object, that is storing line colors
-        var colorPaternForLines = {};
-        let chart_data_obj = {datasets:[], labels:[]};
-        for(var i in guiDashboard.model.ChartLineSettings)
-        {
-            var lineChart = guiDashboard.model.ChartLineSettings[i];
-
-            // forms array with values for 'all tasks' line
-            if(lineChart.name == 'all_tasks')
-            {
-                for (var i in guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType]) {
-                    var val = guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType][i];
-                    var time = +moment(val[guiDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
-                    time = moment(time).tz(window.timeZone).format(date_format);
-                    if(tasks_data[time] !== undefined)
-                    {
-                        tasks_data[time] = val.all;
-                    }
-                }
-
-                let chart_tasks_data = [];
-                for (var j in tasks_data_t) {
-                    var time = tasks_data_t[j]
-                    chart_tasks_data.push(tasks_data[time] / 1);
-                    chart_data_obj.labels.push(time);
-                }
-
-                if(lineChart.active == true)
-                {
-                    linesForChartArr.push(chart_tasks_data);
-                    colorPaternForLines[lineChart.title]=lineChart.color;
-
-                    chart_data_obj.datasets.push({
-                        label: 'All tasks',
-                        data: chart_tasks_data,
-                        borderColor: lineChart.color,
-                        backgroundColor: lineChart.bg_color,
-                    })
-                }
-            }
-
-            // forms array with values for others line
-            if(lineChart.name != 'all_tasks' && lineChart.active == true)
-            {
-                var chart_tasks_data_var = guiDashboard.getDataForStatusChart(tasks_data, tasks_data_t, lineChart.title, date_format);
-                linesForChartArr.push(chart_tasks_data_var);
-                colorPaternForLines[lineChart.title]=lineChart.color;
-
-
-                chart_data_obj.datasets.push({
-                    label: lineChart.title,
-                    data: chart_tasks_data_var,
-                    borderColor: lineChart.color,
-                    backgroundColor: lineChart.bg_color,
-                })
-            }
-        }
-
-        // renders chart
-        let ctx = document.getElementById("chart_js_canvas");
-
-        if(ctx && ctx.getContext)
-        {
-            ctx = ctx.getContext('2d');
-
-            try
-            {
-                guiDashboard.model.historyChart.destroy();
-            }
-            catch(e){}
-
-            guiDashboard.model.historyChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    datasets: chart_data_obj.datasets,
-                    labels: chart_data_obj.labels,
-                },
-
-                options:{
-                    maintainAspectRatio: false,
-                    legend: {
-                        labels: {
-                            fontColor: guiCustomizer.skin.value.chart_legend_text_color,
-                        },
-                    },
-                }
-
-            });
-        }
-
+        // renders Statistic bars on chart
         guiDashboard.renderChartProgressBars();
     });
 
@@ -908,16 +781,230 @@ guiDashboard.updateData = function()
     }, 1000*30)
 }
 
-guiDashboard.renderChartProgressBars = function()
+/**
+ * Function gets Start time for chart.
+ * start time - time in milliseconds, from which chart will be representing data.
+ */
+guiDashboard.getChartStartTime = function()
 {
-    let opt = {
-        settings: guiDashboard.model.ChartLineSettings,
-        stats_data: guiDashboard.statsData,
+    // defines current months and year
+    let monthNum=moment().format("MM");
+    let yearNum=moment().format("YYYY");
+    let dayNum=moment().format("DD");
+    let hourNum=",T00:00:00";
+    let startTimeOrg="";
+
+    switch (guiDashboard.statsDataMomentType) {
+        case "year":
+            startTimeOrg=yearNum+"-01-01"+hourNum;
+            break;
+        case "month":
+            startTimeOrg=yearNum+"-"+monthNum+"-01"+hourNum;
+            break;
+        case "day":
+            startTimeOrg=yearNum+"-"+monthNum+"-"+dayNum+hourNum;
+            break;
     }
 
-    let html = spajs.just.render('chart_progress_bars', {opt: opt});
+    // guiDashboard.statsDataLast - amount of previous periods (periods to reduce)
+    // guiDashboard.statsDataMomentType - period type - month/year
+    let startTime =+ moment(startTimeOrg).subtract(guiDashboard.statsDataLast-1, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
 
-    $("#chart_progress_bars").html(html);
+    return startTime;
+}
+
+/**
+ * Function gets data for Chart.
+ * @param startTime(number) - start time in milliseconds, from which chart will be representing data.
+ * @param date_format(string) - format of time labels for x axes on chart.
+ */
+guiDashboard.getChartData = function(startTime, date_format)
+{
+    let tasks_data = {};
+    let tasks_data_t = [];
+
+    // forms chart time intervals based on start date
+    for(let i = -1; i< guiDashboard.statsDataLast; i++)
+    {
+        // period up
+        let time =+ moment(startTime).add(i, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
+        time = moment(time).tz(window.timeZone).format(date_format);
+        tasks_data[time] = 0;
+        tasks_data_t.push(time);
+    }
+
+    // object for chart settings
+    let chart_data_obj = {datasets:[], labels:[]};
+    for(let i in guiDashboard.model.ChartLineSettings)
+    {
+        let lineChart = guiDashboard.model.ChartLineSettings[i];
+
+        // forms array with values for 'all tasks' line
+        if(lineChart.name == 'all_tasks')
+        {
+            for (let i in guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType]) {
+                let val = guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType][i];
+                let time = +moment(val[guiDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
+                time = moment(time).tz(window.timeZone).format(date_format);
+                if(tasks_data[time] !== undefined)
+                {
+                    tasks_data[time] = val.all;
+                }
+            }
+
+            let chart_tasks_data = [];
+            for (let j in tasks_data_t) {
+                let time = tasks_data_t[j]
+                chart_tasks_data.push(tasks_data[time] / 1);
+                chart_data_obj.labels.push(time);
+            }
+
+            if(lineChart.active == true)
+            {
+
+                chart_data_obj.datasets.push({
+                    label: 'All tasks',
+                    data: chart_tasks_data,
+                    borderColor: lineChart.color,
+                    backgroundColor: lineChart.bg_color,
+                })
+            }
+        }
+
+        // forms array with values for others line
+        if(lineChart.name != 'all_tasks' && lineChart.active == true)
+        {
+            let chart_tasks_data_var = guiDashboard.getDataForStatusChart(tasks_data, tasks_data_t, lineChart.title, date_format);
+
+            chart_data_obj.datasets.push({
+                label: lineChart.title,
+                data: chart_tasks_data_var,
+                borderColor: guiDashboard.getChartLineColor(lineChart),
+                backgroundColor: guiDashboard.getChartLineColor(lineChart, true),
+            })
+        }
+    }
+
+    return chart_data_obj;
+}
+
+/**
+ * Function gets colors for chartLines.
+ * @param lineChart(object) - object with chartLine settings
+ * @param bg(boolean) - if true, function returns color for line's background,
+ * otherwise, it returns color for line's border.
+ */
+guiDashboard.getChartLineColor = function(lineChart, bg)
+{
+    let alpha = 1;
+    let prop = 'color';
+    if(bg)
+    {
+        alpha = 0.3;
+        prop = 'bg_color';
+    }
+
+    if(guiCustomizer.skin.value['history_status_' + lineChart.name])
+    {
+        if(guiCustomizer.skin.value['history_status_' + lineChart.name][0] == "#")
+        {
+            return hexToRgbA(guiCustomizer.skin.value['history_status_' + lineChart.name], alpha);
+        }
+
+        return guiCustomizer.skin.value['history_status_' + lineChart.name]
+
+    }
+
+    return lineChart[prop];
+}
+
+/**
+ * Function renders Dashboard chart
+ */
+guiDashboard.renderChart = function ()
+{
+    let ctx = document.getElementById("chart_js_canvas");
+
+    if(ctx && ctx.getContext)
+    {
+        ctx = ctx.getContext('2d');
+
+        // defines current months and year
+        let startTime = guiDashboard.getChartStartTime();
+
+        let date_format = 'DD.MM.YY';
+
+        // gets data for chart
+        let chart_data_obj = guiDashboard.getChartData(startTime, date_format);
+
+        try
+        {
+            guiDashboard.model.historyChart.destroy();
+        }
+        catch(e){}
+
+        // renders chart
+        guiDashboard.model.historyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: chart_data_obj.datasets,
+                labels: chart_data_obj.labels,
+            },
+
+            options:{
+                maintainAspectRatio: false,
+                legend: {
+                    labels: {
+                        fontColor: guiCustomizer.skin.value.chart_legend_text_color,
+                    },
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero:true,
+                            fontColor: guiCustomizer.skin.value.chart_axes_text_color,
+
+                        },
+                        gridLines: {
+                            color: guiCustomizer.skin.value.chart_axes_lines_color,
+                        }
+                    }],
+                    xAxes: [{
+                        ticks: {
+                            fontColor: guiCustomizer.skin.value.chart_axes_text_color,
+
+                        },
+                        gridLines: {
+                            color: guiCustomizer.skin.value.chart_axes_lines_color,
+                        }
+                    }]
+                }
+
+            }
+
+        });
+    }
+
+}
+
+/**
+ * Function renders progress bars with statistic near the chart.
+ */
+guiDashboard.renderChartProgressBars = function()
+{
+    let el = $("#chart_progress_bars");
+    if(el.length != 0)
+    {
+
+        let opt = {
+            settings: guiDashboard.model.ChartLineSettings,
+            stats_data: guiDashboard.statsData,
+        }
+
+        let html = spajs.just.render('chart_progress_bars', {opt: opt});
+
+        $("#chart_progress_bars").html(html);
+    }
 };
 
 guiDashboard.open  = function(holder, menuInfo, data)
@@ -1138,4 +1225,9 @@ tabSignal.connect("guiSkins.deleteSettings", function(obj)
     delete guiDashboard.model.skinsSettings[obj.skin.name];
     guiDashboard.putUserDashboardSettingsToAPI();
 
+});
+
+tabSignal.connect("guiSkin.changed", function(obj){
+    guiDashboard.renderChart();
+    guiDashboard.renderChartProgressBars();
 });
