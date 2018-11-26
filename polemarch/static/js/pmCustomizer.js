@@ -158,6 +158,32 @@ tabSignal.connect('guiSkin.default.init', function(obj)
             obj.guiSkin.applySettings()
         },
     };
+
+    form['chart_axes_text_color'] = {
+        color_var:"--chart-axes-text-color",
+        title:'Chart legend text color',
+        format:'color',
+        type: "string",
+        default:"#666666",
+        priority: 53,
+        value:obj.guiSkin.value.chart_axes_text_color,
+        onchange:() => {
+            obj.guiSkin.applySettings()
+        },
+    };
+
+    form['chart_axes_lines_color'] = {
+        color_var:"--chart-axes-lines-color",
+        title:'Chart axes lines color',
+        format:'color',
+        type: "string",
+        default:"#efefef",
+        priority: 54,
+        value:obj.guiSkin.value.chart_axes_lines_color,
+        onchange:() => {
+            obj.guiSkin.applySettings()
+        },
+    };
 });
 
 
@@ -317,6 +343,32 @@ tabSignal.connect('guiSkin.dark.init', function(obj)
         default:"#cccccc",
         priority: 52,
         value:obj.guiSkin.value.chart_legend_text_color,
+        onchange:() => {
+            obj.guiSkin.applySettings()
+        },
+    };
+
+     form['chart_axes_text_color'] = {
+        color_var:"--chart-axes-text-color",
+        title:'Chart axes lines color',
+        format:'color',
+        type: "string",
+        default:"#cccccc",
+        priority: 53,
+        value:obj.guiSkin.value.chart_axes_text_color,
+        onchange:() => {
+            obj.guiSkin.applySettings()
+        },
+    };
+
+    form['chart_axes_lines_color'] = {
+        color_var:"--chart-axes-lines-color",
+        title:'Chart axes lines color',
+        format:'color',
+        type: "string",
+        default:"#bababa",
+        priority: 54,
+        value:obj.guiSkin.value.chart_axes_lines_color,
         onchange:() => {
             obj.guiSkin.applySettings()
         },

@@ -144,6 +144,8 @@ body {
     --project-status-sync: #ff8c00;
 
     --chart-legend-text-color: #666666;
+    --chart-axes-text-color: #666666;
+    --chart-axes-lines-color: efefef;
 }
 
 
@@ -162,6 +164,8 @@ body {
     --project-status-sync: #FF9600;
 
     --chart-legend-text-color: #cccccc;
+    --chart-axes-text-color: #cccccc;
+    --chart-axes-lines-color: #bababa;
 }
 
 
