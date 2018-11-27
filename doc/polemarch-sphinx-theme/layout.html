@@ -1,10 +1,23 @@
 {% extends "vst-sphinx-theme/layout.html" %}
 
 {% block logo %}
-    <a href="/" class="logo">
-                <!-- mini logo for sidebar mini 50x50 pixel -->
-                <span class="logo-mini"><span class="bg-logo-min-doc" style="margin-left: 4px;"></span></span>
-                <!-- logo for regular state and mobile devices -->
-                <span class="logo-lg logo-span-doc"><span class="bg-logo-min-doc"></span> <span class="bg-logo-doc"></span></span>
+    <!-- Logo -->
+    <a href="/" class="brand-link logo app-logo">
+        <img src="_static/img/logo/logo.png" class="brand-image img-circle elevation-3" style="opacity: .8">
+        <span class="brand-text font-weight-light">{{ project }}</span>
     </a>
+{% endblock %}
+
+{% block additional_information %}
+<a href="https://twitter.com/polemarchio">
+   <span class="fa fa-twitter-square"></span>
+</a>
+<span>|</span>
+<a href="https://polemarch-users.slack.com/">
+   <span class="fa fa-slack"></span>
+</a>
+<span>|</span>
+<a href="https://stackoverflow.com/questions/tagged/polemarch">
+    <span class="fa fa-stack-overflow"></span>
+</a>
 {% endblock %}

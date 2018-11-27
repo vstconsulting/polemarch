@@ -10,6 +10,7 @@ tabSignal.connect("openapi.completed", function()
 {
     let user_settings = guiSchema.path['/user/{pk}/settings/'];
     user_settings.canEdit = true;
+    user_settings.canEditInView = true;
     user_settings.methodEdit = 'post';
     ['chartLineSettings', 'widgetSettings'].forEach(function (name) {
         user_settings.schema.get.fields[name].format = 'inner_api_object';
@@ -21,13 +22,13 @@ tabSignal.connect("openapi.completed", function()
     user_settings.schema.get.fields['autoupdateInterval'].title = 'Data autoupdate interval';
     user_settings.schema.get.fields['autoupdateInterval'].format = 'time_interval';
 
-    user_settings.schema.post = {
-        fields: user_settings.schema.get,
+    user_settings.schema.edit = {
+        fields: $.extend(true, {}, user_settings.schema.get.fields),
         operationId: 'user_settings_edit',
         query_type: 'post',
     }
 
-    user_settings.method.post = 'post';
+    user_settings.method.post = 'edit';
 
     let user = guiSchema.path['/user/'];
     user.schema.new.fields['password'].format = "password";
@@ -44,5 +45,14 @@ gui_user_settings = {
         return $.when(base_update).done(data => {
             guiDashboard.setUserSettingsFromApiAnswer(data.data)
         })
-    }
+    },
+
+    getDataFromForm: function()
+    {
+        let base_data_from_form = gui_base_object.getDataFromForm.apply(this, arguments);
+
+        base_data_from_form['skinsSettings'] = $.extend(true, {}, guiDashboard.model.skinsSettings);
+
+        return base_data_from_form;
+    },
 }

@@ -262,7 +262,6 @@ class WidgetSettingsSerializer(vst_serializers.JsonObjectSerializer):
     pmwGroupsCounter = CounterWidgetSettingSerializer()
     pmwHostsCounter = CounterWidgetSettingSerializer()
     pmwChartWidget = WidgetSettingSerializer()
-    pmwAnsibleModuleWidget = WidgetSettingSerializer()
 
 
 class UserSettingsSerializer(vst_serializers.JsonObjectSerializer):

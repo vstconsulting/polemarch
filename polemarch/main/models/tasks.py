@@ -42,9 +42,6 @@ class Template(ACLModel):
 
     class Meta:
         default_related_name = 'template'
-        index_together = [
-            ["id", "name", "kind", "inventory", "project"]
-        ]
 
     template_fields = OrderedDict()
     template_fields["Task"] = ["playbook", "vars", "inventory"]
@@ -198,8 +195,7 @@ class PeriodicTask(AbstractModel):
     _inventory     = models.ForeignKey(Inventory, on_delete=models.CASCADE,
                                        related_query_name="periodic_task",
                                        null=True, blank=True)
-    inventory_file = models.CharField(max_length=2*1024,
-                                      null=True, blank=True, db_index=True)
+    inventory_file = models.CharField(max_length=2*1024, null=True, blank=True)
     schedule       = models.CharField(max_length=768)
     type           = models.CharField(max_length=10)
     save_result    = models.BooleanField(default=True)
