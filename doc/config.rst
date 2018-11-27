@@ -338,6 +338,7 @@ session_timeout, static_files_url or pagination limit.
 
 * **session_timeout** - Session life-cycle time. Default: 2w (two weeks).
 * **rest_page_limit** - Default limit of objects in API list. Default: 1000.
+* **public_openapi** - Allow to have access to OpenAPI schema from public. Default: ``false``.
 
 
 .. _git:
