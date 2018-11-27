@@ -33,6 +33,7 @@ window.qunitTestsArray['guiPaths.project'] = {
         guiTests.hasCreateButton(false, test_name)
         guiTests.hasAddButton(false, test_name)
 
+        guiTests.clickAndWaitRedirect(".btn-edit-one-entity")
 
         guiTests.updateObject(test_name, {notes:{value:rundomString(6)}}, true)
 
@@ -56,19 +57,19 @@ window.qunitTestsArray['guiPaths.project'] = {
             let values = guiTests.setValues(assert, fieldsData)
 
             // Создали объект с набором случайных данных
-            $.when(window.curentPageObject.createAndGoEdit()).done(() => {
+            $.when(window.curentPageObject.createAndGoEdit()).done(() => { 
+                $.when(guiTests.actionAndWaitRedirect('project/{pk}/template/new', assert, () => { $(".btn-edit-one-entity").trigger('click') })).done(() => {
 
-                guiTests.compareValues(assert, 'project/{pk}/trigger/new', fieldsData, values)
-
-                env.template_id = window.curentPageObject.model.data.id;
-
-                assert.ok(true, 'guiPaths["project/{pk}/template/new"] create new template ok');
-
-                // @todo добавить проверку того что поля правильно меняются от значений других полей
-
-                testdone(done)
+                    guiTests.compareValues(assert, 'project/{pk}/template/new', fieldsData, values)
+                    env.template_id = window.curentPageObject.model.data.id;
+                    assert.ok(true, 'guiPaths["project/{pk}/template/new"] create new template ok');
+                    testdone(done)
+                }).fail((err) => {
+                    assert.ok(false, 'guiPaths["project/{pk}/template/new"] create new template fail');
+                    testdone(done)
+                })
             }).fail((err) => {
-                assert.ok(false, 'guiPaths["project/{pk}/trigger/new"] create new template fail');
+                assert.ok(false, 'guiPaths["project/{pk}/template/new"] create new template fail');
                 testdone(done)
             })
         })
@@ -96,6 +97,9 @@ window.qunitTestsArray['guiPaths.project'] = {
         guiTests.setValuesAndCreate(test_name, option_data, (data) =>{}, true)
 
         test_name = "project/{pk}/template/{template_id}/option/@testUptime"
+        guiTests.openPage(test_name, env, (env) =>{ return vstMakeLocalApiUrl("project/{pk}/template/{template_id}/option/@testUptime/edit", {api_pk:env.objectId, api_template_id:env.template_id}) })
+
+        test_name = "project/{pk}/template/{template_id}/option/@testUptime/edit"
         guiTests.updateObject("project/{pk}/template/{template_id}/option/@testUptime", {args:{value:"uptime"}}, true);
 
 

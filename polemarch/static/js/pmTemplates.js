@@ -17,7 +17,7 @@ gui_project_template = {
             data_field = JSON.parse(template_data.data);
         }
 
-        if(template_data.kind.toLowerCase() == 'module')
+        if(template_data.kind && template_data.kind.toLowerCase() == 'module')
         {
             arr_data_fields = module_fields;
             delete_data_fields = playbook_fields;
@@ -878,7 +878,7 @@ gui_project_template_option_variables_fields_Schema = {
         "parent_field":"key"
     }
 }
- 
+
 let api_error_responses = {
     "400": {
         "description": "Validation error or some data error.",
@@ -987,7 +987,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "canCreate": true,
         "schema": {
             "list": {
-                "fields": gui_project_template_option_variables_fields_Schema,
+                "fields": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                 "filters": {
                     0: {
                         "name": "key",
@@ -1014,7 +1014,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "properties": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
@@ -1026,7 +1026,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                 }
             },
             "new": {
-                "fields": gui_project_template_option_variables_fields_Schema,
+                "fields": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                 "query_type": "post",
                 "operationId": "project_template_variables_add",
                 "responses": {
@@ -1037,7 +1037,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "properties": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
@@ -1092,7 +1092,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "canEdit": true,
         "schema": {
             "get": {
-                "fields": gui_project_template_option_variables_fields_Schema,
+                "fields": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                 "filters": {},
                 "query_type": "get",
                 "operationId": "project_template_variables_get",
@@ -1104,7 +1104,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "properties": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
@@ -1116,7 +1116,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                 }
             },
             "edit": {
-                "fields": gui_project_template_option_variables_fields_Schema,
+                "fields": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                 "query_type": "patch",
                 "operationId": "project_template_variables_edit",
                 "responses": {
@@ -1247,7 +1247,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                 }
             },
             "new": {
-                "fields": gui_project_template_option_Schema,
+                "fields": $.extend(true, {}, gui_project_template_option_Schema),
                 "query_type": "post",
                 "operationId": "project_template_option_add",
                 "responses": {
@@ -1255,7 +1255,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                         "description": "Action accepted.",
                         "schema": {
                             "type": "object",
-                            "properties": gui_project_template_option_Schema,
+                            "properties": $.extend(true, {}, gui_project_template_option_Schema),
                             "definition_name": "OneOption",
                             "definition_ref": "#/definitions/OneOption"
                         }
@@ -1311,7 +1311,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "canEdit": true,
         "schema": {
             "get": {
-                "fields": gui_project_template_option_Schema,
+                "fields": $.extend(true, {}, gui_project_template_option_Schema),
                 "filters": {},
                 "query_type": "get",
                 "operationId": "project_template_option_get",
@@ -1320,7 +1320,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                         "description": "Action accepted.",
                         "schema": {
                             "type": "object",
-                            "properties": gui_project_template_option_Schema,
+                            "properties": $.extend(true, {}, gui_project_template_option_Schema),
                             "definition_name": "OneOption",
                             "definition_ref": "#/definitions/OneOption"
                         }
@@ -1332,7 +1332,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                 }
             },
             "edit": {
-                "fields": gui_project_template_option_Schema,
+                "fields": $.extend(true, {}, gui_project_template_option_Schema),
                 "query_type": "patch",
                 "operationId": "project_template_option_edit",
                 "responses": {
@@ -1340,7 +1340,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                         "description": "Action accepted.",
                         "schema": {
                             "type": "object",
-                            "properties": gui_project_template_option_Schema,
+                            "properties": $.extend(true, {}, gui_project_template_option_Schema),
                             "definition_name": "OneOption",
                             "definition_ref": "#/definitions/OneOption"
                         }
@@ -1392,7 +1392,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "canCreate": true,
         "schema": {
             "list": {
-                "fields": gui_project_template_option_variables_fields_Schema,
+                "fields": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                 "filters": {
                     0: {
                         "name": "key",
@@ -1419,7 +1419,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "properties": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
@@ -1431,7 +1431,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                 }
             },
             "new": {
-                "fields": gui_project_template_option_variables_fields_Schema,
+                "fields": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                 "query_type": "post",
                 "operationId": "project_template_option_variables_add",
                 "responses": {
@@ -1442,7 +1442,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "properties": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
@@ -1497,7 +1497,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "canEdit": true,
         "schema": {
             "get": {
-                "fields": gui_project_template_option_variables_fields_Schema,
+                "fields": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                 "filters": {},
                 "query_type": "get",
                 "operationId": "project_template_option_variables_get",
@@ -1509,7 +1509,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "properties": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
@@ -1521,7 +1521,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                 }
             },
             "edit": {
-                "fields": gui_project_template_option_variables_fields_Schema,
+                "fields": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                 "query_type": "patch",
                 "operationId": "project_template_option_variables_edit",
                 "responses": {
@@ -1532,7 +1532,7 @@ tabSignal.connect("openapi.schema", function(obj) {
                                 "key"
                             ],
                             "type": "object",
-                            "properties": gui_project_template_option_variables_fields_Schema,
+                            "properties": $.extend(true, {}, gui_project_template_option_variables_fields_Schema),
                             "definition_name": "TemplateVariable",
                             "definition_ref": "#/definitions/TemplateVariable"
                         }
