@@ -102,6 +102,7 @@ tabSignal.connect("openapi.schema.definition.AnsiblePlaybook", function(obj) {
 tabSignal.connect("openapi.schema", function(data)
 {
     window.guiSchema.path["/project/{pk}/"].schema.edit.fields.execute_view_data.format = 'null'
+    window.guiSchema.path["/project/{pk}/"].schema.get.fields.execute_view_data.format = 'null'
 })
 
 

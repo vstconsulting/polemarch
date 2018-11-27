@@ -19,6 +19,6 @@ window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmUsers.js
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmGroups.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmHistory.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmDashboard.js')
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmInventories.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmInventories.js')*/
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmProjects.js')
 
