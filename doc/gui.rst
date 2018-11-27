@@ -103,7 +103,7 @@ As you can see there are some new fields on this page:
 
 Also there are some new buttons:
 
-Sublist buttons:
+Sublinks buttons:
 
 * **group** - this button opens project's group list.
 * **history** - this button opens project executions' history list.
@@ -155,7 +155,7 @@ To make this action click on 'execute module' button on project page.
 As you can see, there are 2 fields on this page:
 
 * **module** - autocomplete field with the list of project's modules.
-* **add field** - select field, that provides user with new variables field for module execution.
+* **add field** - select field, that provides user with new variables fields for module execution.
 
 Also there is only one button on this page:
 
@@ -187,7 +187,7 @@ Template
 --------
 
 In previous abstract to execute module we needed to fill several fields.
-To do it before every module/playbook is rather inconvenient.
+To do it before every module/playbook execution is rather inconvenient.
 In this case Polemarch templates save our time and nerves.
 Polemarch template is an object, that saves all options that user used during task execution.
 
@@ -227,13 +227,13 @@ After template creation you will see the next page:
 
 .. image:: gui_screenshots/create_template_4.png
 
-As you can see there is only one new fields on this page:
+As you can see there is only one new field on this page:
 
 * **id** - |id_field_def|
 
 Also there are several buttons here:
 
-Sublist buttons:
+Sublinks buttons:
 
 * **option** - this button opens template's option list.
 * **variables** - this button opens project's variables list.
@@ -312,7 +312,7 @@ which Polemarch makes by himself with some interval.
 Let's create periodic task, based on our "test-task-template".
 To do it open project page:
 
-.. image:: gui_screenshots/test_project_3.png
+.. image:: gui_screenshots/test_project_2.png
 
 And click on "periodic task" button:
 
@@ -426,7 +426,7 @@ As you can see there are 2 new fields on this page:
 
 Also there are some new buttons here:
 
-Sublist buttons:
+Sublinks buttons:
 
 * **all groups** - this button opens inventory's all groups list
   (list of groups, which includes also groups that are nested into inventory groups).
@@ -458,7 +458,7 @@ There are 2 buttons here:
 
 * **create** - |create_button_def| group.
 * **add** - this button opens the all group list from database,
-from which you can choose group for this inventory.
+  from which you can choose group for this inventory.
 
 We need to create group. To do it click on "create" button.
 
@@ -485,7 +485,7 @@ As you can see there are 2 new fields on this page:
 
 Also there are some new buttons here:
 
-Sublist buttons:
+Sublinks buttons:
 
 * **host** - this button opens group's host list.
 * **variables** - this button opens group's variables list.
@@ -512,7 +512,7 @@ There are 2 buttons here:
 
 * **create** - |create_button_def| host.
 * **add** - this button opens the all host list from database,
-from which you can choose host for this group.
+  from which you can choose host for this group.
 
 We need to create host. To do it click on "create" button.
 
@@ -526,6 +526,7 @@ As you can see, the form of new host creation consist of following fields:
   for what purpose this host was created or something like this.
 
 * **type** - type of host (RANGE, HOST).
+
   * RANGE -  range of IPs or hosts.
   * HOST - single host.
 
@@ -541,7 +542,7 @@ As you can see there are 2 new fields on this page:
 
 Also there are some new buttons here:
 
-Sublist buttons:
+Sublinks buttons:
 
 * **variables** - this button opens host's variables list.
 
@@ -621,7 +622,7 @@ And click on "Import inventory" button. Then you will see the next page:
 As you can see, the form of "Import inventory" action consist of 2 fields:
 
 * **name** - name of your inventory.
-* **inventory file** - value of your inventory file.
+* **inventory file** - content of your inventory file.
 
 After filling of all fields you should click on "Exec" button and then you will see
 page of your imported inventory:
@@ -777,7 +778,7 @@ Hooks
 
 Polemarch has his own system of hooks.
 Polemarch hooks are synchronous and you can appoint them on different events
-like “after end task”, “before start task” and so on.
+like “after task end”, “before task start” and so on.
 
 WARNING: You should be accurate with hooks appointment,
 because the more hooks you have, the more time they need for execution and,
@@ -856,9 +857,9 @@ As you can see there is only one new fields on this page:
 
 Also there are several buttons here:
 
-Sublist buttons:
+Sublinks buttons:
 
-* **settings** - this button opens dashboard settings of current user.
+* **settings** - this button opens interface settings of current user.
 
 Action buttons:
 
